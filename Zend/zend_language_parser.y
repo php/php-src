@@ -35,6 +35,15 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYERROR_VERBOSE
 #define YYSTYPE zend_parser_stack_elem
 
+#define YYLTYPE zend_parser_loc
+#define YYLLOC_DEFAULT(Res, RHS, N) do { \
+	if (N) { \
+		(Res).start_line = YYRHSLOC(RHS, 1).start_line; \
+	} else { \
+		(Res).start_line = YYRHSLOC(RHS, 0).start_line; \
+	} \
+} while (0)
+
 #ifdef _MSC_VER
 #define YYMALLOC malloc
 #define YYFREE free
@@ -252,7 +261,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
 
-%type <num> returns_ref function is_reference is_variadic variable_modifiers
+%type <num> returns_ref is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
@@ -482,9 +491,9 @@ unset_variable:
 ;
 
 function_declaration_statement:
-	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	T_FUNCTION returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, @1.start_line, $4,
 		      zend_ast_get_str($3), $6, NULL, $11, $8); CG(extra_fn_flags) = $9; }
 ;
 
@@ -499,12 +508,10 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL); }
-	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL); }
+		class_modifiers T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, @1.start_line, $6, zend_ast_get_str($3), $4, $5, $8, NULL); }
+	|	T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, @1.start_line, $5, zend_ast_get_str($2), $3, $4, $7, NULL); }
 ;
 
 class_modifiers:
@@ -519,15 +526,13 @@ class_modifier:
 ;
 
 trait_declaration_statement:
-		T_TRAIT { $<num>$ = CG(zend_lineno); }
-		T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL); }
+		T_TRAIT T_STRING backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, @1.start_line, $3, zend_ast_get_str($2), NULL, NULL, $5, NULL); }
 ;
 
 interface_declaration_statement:
-		T_INTERFACE { $<num>$ = CG(zend_lineno); }
-		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL); }
+		T_INTERFACE T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, @1.start_line, $4, zend_ast_get_str($2), NULL, $3, $6, NULL); }
 ;
 
 extends_from:
@@ -722,9 +727,9 @@ class_statement:
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
 			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
-	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
+	|	method_modifiers T_FUNCTION returns_ref identifier backup_doc_comment '(' parameter_list ')'
 		return_type backup_fn_flags method_body backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, @2.start_line, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9); CG(extra_fn_flags) = $10; }
 ;
 
@@ -853,12 +858,11 @@ non_empty_for_exprs:
 ;
 
 anonymous_class:
-        T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
-		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
+        T_CLASS ctor_arguments extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
 			zend_ast *decl = zend_ast_create_decl(
-				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, $<num>2, $6, NULL,
-				$4, $5, $8, NULL);
-			$$ = zend_ast_create(ZEND_AST_NEW, decl, $3);
+				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, @1.start_line, $5, NULL,
+				$3, $4, $7, NULL);
+			$$ = zend_ast_create(ZEND_AST_NEW, decl, $2);
 		}
 ;
 
@@ -982,20 +986,16 @@ expr:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+	|	T_FUNCTION returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, @1.start_line, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
-	|	T_STATIC function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
+	|	T_STATIC T_FUNCTION returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
 		return_type backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, $2, $4,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, @2.start_line, $4,
 			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $6, $8, $12, $9); CG(extra_fn_flags) = $10; }
-;
-
-function:
-	T_FUNCTION { $$ = CG(zend_lineno); }
 ;
 
 backup_doc_comment:
