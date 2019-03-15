@@ -166,11 +166,6 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 		} else if (token_type == T_HALT_COMPILER) {
 			need_tokens = 3;
 		}
-
-		if (CG(increment_lineno)) {
-			CG(zend_lineno)++;
-			CG(increment_lineno) = 0;
-		}
 	}
 
 	zval_ptr_dtor_str(&source_zval);

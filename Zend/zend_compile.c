@@ -1529,12 +1529,6 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem, zend_ast_loc *loc) /* {{{ */
 {
 	zval zv;
-
-	if (CG(increment_lineno)) {
-		CG(zend_lineno)++;
-		CG(increment_lineno) = 0;
-	}
-
 	return lex_scan(&zv, elem, loc);
 }
 /* }}} */
