@@ -113,7 +113,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
+	zend_ast_loc *loc, zend_ast_kind kind, uint32_t flags, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 ) {
 	zend_ast_decl *ast;
@@ -121,7 +121,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast = zend_ast_alloc(sizeof(zend_ast_decl));
 	ast->kind = kind;
 	ast->attr = 0;
-	ast->start_lineno = start_lineno;
+	ast->start_lineno = loc->start_line;
 	ast->end_lineno = CG(zend_lineno);
 	ast->flags = flags;
 	ast->lex_pos = LANG_SCNG(yy_text);

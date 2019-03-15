@@ -270,7 +270,7 @@ ZEND_API zend_ast *zend_ast_create_list(zend_ast_loc *loc, uint32_t init_childre
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op);
 
 ZEND_API zend_ast *zend_ast_create_decl(
-	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
+	zend_ast_loc *loc, zend_ast_kind kind, uint32_t flags, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 );
 
