@@ -200,7 +200,6 @@ typedef struct _zend_ast_loc {
 	uint32_t start_line;
 } zend_ast_loc;
 
-
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_ex(zend_ast_loc *loc, zval *zv, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval(zend_ast_loc *loc, zval *zv);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_str(zend_ast_loc *loc, zend_string *str);
@@ -320,6 +319,12 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	} else {
 		return ast->lineno;
 	}
+}
+
+static inline zend_ast_loc zend_ast_get_loc(zend_ast *ast) {
+	zend_ast_loc loc;
+	loc.start_line = zend_ast_get_lineno(ast);
+	return loc;
 }
 
 static zend_always_inline zend_ast *zend_ast_create_binary_op(zend_ast_loc *loc, uint32_t opcode, zend_ast *op0, zend_ast *op1) {
