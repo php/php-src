@@ -2235,7 +2235,7 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
-	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void)]
+	|	inc aword [r2 + zend_jit_profile_counter_rid * sizeof(void*)]
 	|	// handler = (const void*)ZEND_FUNC_INFO(op_array);
 	|	mov r0, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	// return ((zend_vm_opcode_handler_t)handler)();
@@ -2433,6 +2433,12 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(double_one),
 };
 
+#if ZTS && defined(ZEND_WIN32)
+extern uint32_t _tls_index;
+extern char *_tls_start;
+extern char *_tls_end;
+#endif
+
 static int zend_jit_setup(void)
 {
 	|.if SSE
@@ -2449,15 +2455,53 @@ static int zend_jit_setup(void)
 
 #if ZTS
 # ifdef _WIN64
-	// TODO: ???
 	tsrm_tls_index  = _tls_index * sizeof(void*);
-	// TODO: how to get this magic value?
-	tsrm_tls_offset = 0x110;
+
+	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
+	/* Probably, it might be better solution */
+	do {
+		void ***tls_mem = ((void***)__readgsqword(0x58))[_tls_index];
+		void *val = _tsrm_ls_cache;
+		size_t offset = 0;
+		size_t size = (char*)&_tls_end - (char*)&_tls_start;
+
+		while (offset < size) {
+			if (*tls_mem == val) {
+				tsrm_tls_offset = offset;
+				break;
+			}
+			tls_mem++;
+			offset += sizeof(void*);
+		}
+		if (offset >= size) {
+			// TODO: error message ???
+			return FAILURE;
+		}
+	} while(0);
 # elif ZEND_WIN32
-	// TODO: ???
 	tsrm_tls_index  = _tls_index * sizeof(void*);
-	// TODO: how to get this magic value?
-	tsrm_tls_offset = 0x110;
+
+	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
+	/* Probably, it might be better solution */
+	do {
+		void ***tls_mem = ((void***)__readfsdword(0x2c))[_tls_index];
+		void *val = _tsrm_ls_cache;
+		size_t offset = 0;
+		size_t size = (char*)&_tls_end - (char*)&_tls_start;
+
+		while (offset < size) {
+			if (*tls_mem == val) {
+				tsrm_tls_offset = offset;
+				break;
+			}
+			tls_mem++;
+			offset += sizeof(void*);
+		}
+		if (offset >= size) {
+			// TODO: error message ???
+			return FAILURE;
+		}
+	} while(0);
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
