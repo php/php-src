@@ -21,10 +21,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing rewinddir() : basic functionality ***\n";
 
 // include file.inc for create_files function
-include(dirname(__FILE__) . "/../file/file.inc");
+include(__DIR__ . "/../file/file.inc");
 
-$dir_path1 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir1";
-$dir_path2 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir2";
+$dir_path1 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir1";
+$dir_path2 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir2";
 mkdir($dir_path1);
 mkdir($dir_path2);
 
@@ -66,8 +66,8 @@ delete_files($dir_path2, 1, "私はガラスを食べられますfile", 2);
 ===DONE===
 --CLEAN--
 <?php
-$dir_path1 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir1";
-$dir_path2 = dirname(__FILE__) . "/私はガラスを食べられますrewinddir_basic_dir2";
+$dir_path1 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir1";
+$dir_path2 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir2";
 rmdir($dir_path1);
 rmdir($dir_path2);
 ?>

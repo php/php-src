@@ -9,7 +9,7 @@ GetImageSize() for tiff format with big-endian (aka Motorola, aka MM) ordering
  */
 
 echo "*** Testing getimagesize() : tiff_mm format ***\n";
-var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", $arr));
+var_dump(getimagesize(__DIR__ . "/2x2mm.tif", $arr));
 var_dump($arr);
 
 ?>

@@ -4,8 +4,8 @@ openssl_pkcs7_read() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$infile = file_get_contents(dirname(__FILE__) . "/cert.p7b");
-$certfile = file_get_contents(dirname(__FILE__) . "/cert.crt");
+$infile = file_get_contents(__DIR__ . "/cert.p7b");
+$certfile = file_get_contents(__DIR__ . "/cert.crt");
 $result = [];
 
 var_dump(openssl_pkcs7_read());

@@ -9,9 +9,9 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 /* Renaming a file, link and directory to numeric name */
 echo "\n*** Testing rename() by renaming a file, link and directory to numeric name ***\n";
@@ -37,7 +37,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir($file_path."/12345");
 ?>
 --EXPECT--

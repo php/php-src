@@ -3,7 +3,7 @@ php_strip_whitespace() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/php_strip_whitespace.dat";
+$filename = __DIR__."/php_strip_whitespace.dat";
 
 var_dump(php_strip_whitespace());
 var_dump(php_strip_whitespace($filename));

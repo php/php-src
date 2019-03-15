@@ -9,7 +9,7 @@ Test copy() function: usage variations - existing dir as destination
 
 /* Test copy(): Trying to copy the file to a destination, where destination is an existing dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test copy() function: Trying to create a copy of source file as a dir ***\n";
 $file = $file_path."/copy_variation11.tmp";
@@ -46,8 +46,8 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation11.tmp");
-rmdir(dirname(__FILE__)."/copy_variation11");
+unlink(__DIR__."/copy_variation11.tmp");
+rmdir(__DIR__."/copy_variation11");
 ?>
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of source file as a dir ***

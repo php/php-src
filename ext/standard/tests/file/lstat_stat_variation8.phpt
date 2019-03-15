@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 /* test the effects on stats with creating file/subdir in a dir
@@ -48,7 +48,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation8/lstat_stat_variation8a.tmp");
 rmdir("$file_path/lstat_stat_variation8/lstat_stat_variation8_subdir/");
 rmdir("$file_path/lstat_stat_variation8");

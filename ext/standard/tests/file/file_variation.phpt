@@ -7,12 +7,12 @@ Test file() function : usage variations
  *  Description: Reads entire file into an array
                  Returns the  file in an array
  */
-require(dirname(__FILE__) . '/file.inc');
+require(__DIR__ . '/file.inc');
 
 $data_array = array( "Garbage data", "Gar\nba\nge d\nata", "Gar\n\nbage \n\n data" );
 echo "*** Using various flags values with different data in a file\n";
 $count=1;
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 foreach( $data_array as $data ) {
    echo "--Iteration $count --\n";
    $fh  = fopen($file_path."/file_variation.tmp", "w");
@@ -24,7 +24,7 @@ foreach( $data_array as $data ) {
 }
 
 echo "*** Testing with variation in use_include_path argument ***\n";
-$file_path1 = dirname(__FILE__)."/file_variation";
+$file_path1 = __DIR__."/file_variation";
 mkdir($file_path1);
 ini_set( 'include_path',$file_path.'/file_variation' );
 
@@ -55,7 +55,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_variation.tmp");
 unlink($file_path."/file_variation/file1_variation.tmp");
 unlink($file_path."/file2_variation.tmp");

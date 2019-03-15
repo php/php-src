@@ -2,9 +2,9 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc"))
+if(!file_exists(__DIR__."/../../../../sapi/cli/tests/php_cli_server.inc"))
 	die("skip could not found cli server script");
-$res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
+$res = @include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {
 	die("skip could not open cli server script");
 }
@@ -13,8 +13,8 @@ if(!$res) {
 server
 --FILE--
 <?php
-include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
-php_cli_server_start(file_get_contents(dirname(__FILE__).'/bug64433_srv.inc'));
+include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
+php_cli_server_start(file_get_contents(__DIR__.'/bug64433_srv.inc'));
 
 echo file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php");
 echo "default\n";

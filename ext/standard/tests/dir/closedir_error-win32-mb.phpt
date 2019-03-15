@@ -24,7 +24,7 @@ echo "*** Testing closedir() : error conditions ***\n";
 //Test closedir with one more than the expected number of arguments
 echo "\n-- Testing closedir() function with more than expected no. of arguments --\n";
 
-$dir_path = dirname(__FILE__) . '\私はガラスを食べられますclosedir_error';
+$dir_path = __DIR__ . '\私はガラスを食べられますclosedir_error';
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 
@@ -37,7 +37,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$base_dir = dirname(__FILE__);
+$base_dir = __DIR__;
 $dir_path = $base_dir . '\私はガラスを食べられますclosedir_error';
 rmdir($dir_path);
 ?>

@@ -5,7 +5,7 @@ oci_bind_array_by_name() and invalid values 2
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $drop = "DROP table bind_test";
 $statement = oci_parse($c, $drop);

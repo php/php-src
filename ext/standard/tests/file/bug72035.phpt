@@ -11,7 +11,7 @@ if (!file_exists($cgi)) die('skip CGI binary not found');
 --FILE--
 <?php
 
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . md5(uniqid()) . ".php";
+$fl = __DIR__ . DIRECTORY_SEPARATOR . md5(uniqid()) . ".php";
 $fl = substr($fl, 2);
 
 $cgi = realpath(dirname(PHP_BINARY) . DIRECTORY_SEPARATOR . "php-cgi.exe");

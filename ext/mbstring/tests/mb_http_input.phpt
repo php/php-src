@@ -14,7 +14,7 @@ b=日本語0123456789日本語カタカナひらがな
 <?php
 // TODO: This is not a real test.... Need to change so that it does real testing
 //$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 $ini = ini_get('mbstring.http_input');

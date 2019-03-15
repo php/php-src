@@ -21,7 +21,7 @@ hhx4dbgYKAAA7',
 foreach($streams as $original => $stream)
 {
 	if (is_string($original)) {
-		var_dump(file_get_contents(dirname(__FILE__) . '/' . $original) == file_get_contents($stream));
+		var_dump(file_get_contents(__DIR__ . '/' . $original) == file_get_contents($stream));
 	} else {
 		var_dump(file_get_contents($stream));
 	}

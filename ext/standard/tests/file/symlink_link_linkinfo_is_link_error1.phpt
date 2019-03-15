@@ -25,12 +25,12 @@ if (substr(PHP_OS, 0, 3) == 'SUN') {
 */
 
 // create temp $filename and create link $linkname to it
-$filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link_error1.tmp";
+$filename = __DIR__."/symlink_link_linkinfo_is_link_error1.tmp";
 $fp = fopen($filename, "w");  // create temp file
 fclose($fp);
 
 // linkname used to create soft/hard link
-$linkname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_link_error1.tmp";
+$linkname = __DIR__."/symlink_link_linkinfo_is_link_link_error1.tmp";
 
 echo "*** Testing symlink() for error conditions ***\n";
 //zero arguments
@@ -63,8 +63,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_error1.tmp");
-@unlink(dirname(__FILE__)."/symlink_link_linkinfo_is_link_link_error1.tmp");
+unlink(__DIR__."/symlink_link_linkinfo_is_link_error1.tmp");
+@unlink(__DIR__."/symlink_link_linkinfo_is_link_link_error1.tmp");
 ?>
 --EXPECTF--
 *** Testing symlink() for error conditions ***

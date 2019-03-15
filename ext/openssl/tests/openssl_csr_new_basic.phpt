@@ -10,7 +10,7 @@ var_dump(openssl_csr_new(1,$a));
 var_dump(openssl_csr_new(1,$a,1,1));
 $a = array();
 
-$conf = array('config' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'openssl.cnf');
+$conf = array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf');
 var_dump(openssl_csr_new(array(), $a, $conf, array()));
 
 // this leaks

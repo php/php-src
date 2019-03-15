@@ -3,13 +3,13 @@ PDO_OCI: Attribute: closing a connection in non-autocommit mode commits data
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
+require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 // Check connection can be created with AUTOCOMMIT off
 putenv('PDOTEST_ATTR='.serialize(array(PDO::ATTR_AUTOCOMMIT=>false)));

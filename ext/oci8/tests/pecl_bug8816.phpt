@@ -3,12 +3,12 @@ PECL Bug #8816 (issue in php_oci_statement_fetch with more than one piecewise co
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $create_1 = "CREATE TABLE t1 (id INTEGER, l1 LONG)";
 $create_2 = "CREATE TABLE t2 (id INTEGER, l2 LONG)";

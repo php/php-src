@@ -10,7 +10,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 $int_numbers = array( 0, 1, -1, 2.7, -2.7, 23333333, -23333333, "1234" );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/fprintf_variation_006_64bit.txt';
+$data_file = __DIR__ . '/fprintf_variation_006_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

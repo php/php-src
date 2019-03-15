@@ -9,7 +9,7 @@ include "skipif.inc";
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$argv_fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "argv_test.php";
+$argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
 file_put_contents($argv_fl, "<?php var_dump(\$argv); ?>");
 
 var_dump(`$php -n $argv_fl 多字节字符串 マルチバイト文字列 многобайтоваястрока flerbytesträng`);

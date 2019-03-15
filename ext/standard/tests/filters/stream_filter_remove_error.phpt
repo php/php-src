@@ -13,7 +13,7 @@ if(! in_array( "string.rot13", $filters )) die( "skip rot13 filter not available
  * Alias to functions:
  */
 
-$file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
+$file = __DIR__ . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 touch( $file );
 $fp = fopen( $file, 'w+' );
 $filter = stream_filter_append( $fp, "string.rot13", STREAM_FILTER_WRITE );
@@ -45,7 +45,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
+$file = __DIR__ . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 unlink( $file );
 
 ?>

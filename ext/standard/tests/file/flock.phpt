@@ -3,7 +3,7 @@ flock() tests
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/flock.dat";
+$file = __DIR__."/flock.dat";
 
 var_dump(flock());
 var_dump(flock("", "", $var));
@@ -37,7 +37,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file = dirname(__FILE__)."/flock.dat";
+$file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECTF--

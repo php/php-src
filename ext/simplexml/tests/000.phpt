@@ -5,7 +5,7 @@ SimpleXML: var_dump()
 --FILE--
 <?php
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/000.xml');
+$sxe = simplexml_load_file(__DIR__.'/000.xml');
 
 function test($what)
 {

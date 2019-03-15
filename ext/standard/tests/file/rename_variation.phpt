@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 <?php
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/rename_variation");
 
 /* rename files across directories */

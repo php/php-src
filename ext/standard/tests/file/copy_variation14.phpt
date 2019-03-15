@@ -10,7 +10,7 @@ Test copy() function: usage variations - non existing src/dest
 /* Test copy(): Trying to create a copy of non-existing source in an existing destination
      and an existing source in non-existing destiantion */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test copy() function: Trying to create a copy of non-existing source in existing destination ***";
 $file = $file_path."/copy_variation14.tmp";
@@ -30,7 +30,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation14.tmp");
+unlink(__DIR__."/copy_variation14.tmp");
 ?>
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of non-existing source in existing destination ***

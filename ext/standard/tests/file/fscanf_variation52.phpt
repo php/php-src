@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - empty file
 
 /* Test fscanf() to scan an empty file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): to read an empty file ***\n";
 
@@ -57,7 +57,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation52.tmp";
 if(file_exists($filename)) {
   unlink($filename);

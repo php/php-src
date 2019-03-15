@@ -9,8 +9,8 @@ phar.readonly=0
 --FILE--
 <?php
 Phar::interceptFileFuncs();
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.php';
 $pname = 'phar://' . $fname;
 file_put_contents($fname2, '<?php Phar::unlinkArchive("' . addslashes($fname) . '");');
 file_put_contents($pname . '/foo/hi', '<?php
@@ -26,8 +26,8 @@ include $pname . '/foo/hi';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php'); ?>
 --EXPECTF--
 Warning: readfile(foo/hi): failed to open stream: No such file or directory in phar://%sphar_gobyebye-win32.phar.php/foo/hi on line %d
 

@@ -2,7 +2,7 @@
 Test imap_close() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once (dirname(__FILE__).'/skipif.inc');
+require_once (__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -16,7 +16,7 @@ require_once (dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing imap_close() : error conditions ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Zero arguments
 echo "\n-- Testing imap_close() function with Zero arguments --\n";

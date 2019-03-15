@@ -25,7 +25,7 @@ var_dump(session_module_name(FALSE));
 var_dump(session_module_name("blah"));
 var_dump(session_module_name("foo"));
 
-$path = dirname(__FILE__);
+$path = __DIR__;
 session_save_path($path);
 session_set_save_handler($open_closure, $close_closure, $read_closure, $write_closure, $destroy_closure, $gc_closure);
 

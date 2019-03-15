@@ -122,7 +122,7 @@ function prepareLine($op1, $op2, $cmp, $operator) {
 	return $line;
 }
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 $file = fopen($filename, "w");
 
 fwrite($file, "<?php\n");
@@ -148,7 +148,7 @@ if($c === 0) {
 ===DONE===
 --CLEAN--
 <?php
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
+$fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 @unlink($fl);
 ?>
 --EXPECT--

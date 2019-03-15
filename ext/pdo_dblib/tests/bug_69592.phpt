@@ -3,11 +3,11 @@ PDO_DBLIB: PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS for skip junk resultsets on SET NO
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 $sql = '
     SET NOCOUNT ON

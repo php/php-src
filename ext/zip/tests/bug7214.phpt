@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
  ?>
 --FILE--
 <?php
-$zip = zip_open(dirname(__FILE__)."/binarynull.zip");
+$zip = zip_open(__DIR__."/binarynull.zip");
 if (!is_resource($zip)) die("Failure");
 $entries = 0;
 $entry = zip_read($zip);

@@ -25,7 +25,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
                  Check linkinfo() value with lstat['dev']
 */
 // temp file used
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = $file_path."/symlink_link_linkinfo_is_link_variation9";
 mkdir($dirname);
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation9.tmp";
@@ -91,7 +91,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = $file_path."/symlink_link_linkinfo_is_link_variation9";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation9.tmp";
 unlink($filename);

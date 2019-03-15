@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_buffer() function : basic functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
@@ -10,7 +10,7 @@ Test finfo_buffer() function : basic functionality
  * Alias to functions:
  */
 
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 
 $options = array(
 	FILEINFO_NONE,

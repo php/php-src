@@ -4,7 +4,7 @@ openssl_x509_free() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-var_dump($res = openssl_x509_read("file://" . dirname(__FILE__) . "/cert.crt"));
+var_dump($res = openssl_x509_read("file://" . __DIR__ . "/cert.crt"));
 openssl_x509_free($res);
 var_dump($res);
 openssl_x509_free(false);

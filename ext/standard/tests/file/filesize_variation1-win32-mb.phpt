@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    (and generates an error of level E_WARNING) in case of an error.
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 echo "*** Testing filesize(): usage variations ***\n";

@@ -11,7 +11,7 @@ if (!(isset($matches[0]) && $matches[0] <= 11)) {
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

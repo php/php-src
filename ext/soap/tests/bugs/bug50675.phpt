@@ -37,7 +37,7 @@ $parameters = [
 	'trace' => 1,
 	'exceptions' => 0,
 ];
-$client = new TestSoapClient(dirname(__FILE__) . '/bug50675.wsdl', $parameters);
+$client = new TestSoapClient(__DIR__ . '/bug50675.wsdl', $parameters);
 
 $person = new stdClass();
 $person->name = 'name';

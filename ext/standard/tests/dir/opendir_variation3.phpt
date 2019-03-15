@@ -13,7 +13,7 @@ Test opendir() function : usage variations - open a directory twice
 
 echo "*** Testing opendir() : usage variation ***\n";
 
-$path = dirname(__FILE__) . "/opendir_variation3";
+$path = __DIR__ . "/opendir_variation3";
 mkdir($path);
 
 echo "\n-- Open directory first time: --\n";
@@ -34,7 +34,7 @@ closedir($dh2);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/opendir_variation3";
+$path = __DIR__ . "/opendir_variation3";
 rmdir($path);
 ?>
 --EXPECTF--

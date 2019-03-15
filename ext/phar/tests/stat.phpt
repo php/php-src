@@ -11,9 +11,9 @@ umask(0);
 Phar::interceptFileFuncs();
 var_dump(stat(""));
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $a = new Phar($fname);
 $a['my/index.php'] = '<?php
 echo "stat\n";
@@ -70,7 +70,7 @@ include $fname;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 bool(false)
 stat

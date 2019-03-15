@@ -36,8 +36,8 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.zip');
+	chdir(__DIR__);
+	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
 	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . '/oopsie/there.phpt'))));
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -47,7 +47,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromiterator.phar.zip');
+unlink(__DIR__ . '/buildfromiterator.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

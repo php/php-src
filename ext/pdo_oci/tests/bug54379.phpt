@@ -4,7 +4,7 @@ Bug #54379 (PDO_OCI: UTF-8 output gets truncated)
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci'))
 die('skip not loaded');
-require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
+require __DIR__.'/../../pdo/tests/pdo_test.inc';
 if (!preg_match('/charset=.*utf8/i', getenv('PDOTEST_DSN')))
 die('skip not UTF8 DSN');
 PDOTest::skip();

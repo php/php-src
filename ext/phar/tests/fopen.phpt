@@ -12,7 +12,7 @@ $a = fopen(__FILE__, 'rb'); // this satisfies 1 line of code coverage
 fclose($a);
 $a = fopen(); // this satisfies another line of code coverage
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = fopen("dir/file1.txt", "r");
@@ -34,7 +34,7 @@ include $fname;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 Warning: fopen() expects at least 2 parameters, 0 given in %sfopen.php on line %d
 hihi

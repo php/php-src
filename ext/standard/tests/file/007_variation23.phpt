@@ -20,7 +20,7 @@ Test fopen and fclose() functions - usage variations - "xb" mode
    checking for the warning msg when trying to open an existing file in "xb" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation23.tmp";
 
@@ -40,7 +40,7 @@ $file_handle = fopen($file, "xb");  //Opening the existing data file in 'xb' mod
 echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation23.tmp");
+unlink(__DIR__."/007_variation23.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'xb' mode ***

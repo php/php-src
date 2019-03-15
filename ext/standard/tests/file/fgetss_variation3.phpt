@@ -37,7 +37,7 @@ this text contains some html tags <body> body </body> <br> br </br>
 this is the line with \n character. 
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_variation3.tmp";
+$filename = __DIR__."/fgetss_variation3.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");

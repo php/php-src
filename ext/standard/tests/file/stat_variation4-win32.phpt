@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 /* test the effects on the stats of dir/file for using is_dir() & is_file() on dir/file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -70,7 +70,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation4.tmp");
 rmdir("$file_path/stat_variation4");
 ?>

@@ -13,7 +13,7 @@ Test chdir() function : usage variations - relative paths
 
 echo "*** Testing chdir() : usage variations ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__;
 
 $level2_one_dir_name = "level2_one";
 $level2_one_dir_path = "$base_dir_path/$level2_one_dir_name";
@@ -62,7 +62,7 @@ var_dump(getcwd());
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/level2_one/level2_two");
 rmdir("$file_path/level2_one");
 ?>

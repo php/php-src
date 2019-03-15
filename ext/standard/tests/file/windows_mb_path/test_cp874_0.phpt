@@ -2,7 +2,7 @@
 Thai cp874 basic test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ default_charset=cp874
 #vim: set encoding=cp874
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $names = array( /* cp874 */
 	"à»ç¹á¿éÁ·Õè·´ÊÍº1",
@@ -35,7 +35,7 @@ $names = array( /* cp874 */
 
 $i = 0;
 foreach ($names as $name) {
-	$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . $name . ".txt";
+	$path = __DIR__ . DIRECTORY_SEPARATOR . $name . ".txt";
 
 	file_put_contents($path, "hello" . $i++);
 

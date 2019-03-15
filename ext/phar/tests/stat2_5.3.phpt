@@ -12,9 +12,9 @@ is_file();
 is_link();
 var_dump(is_file(__FILE__));
 
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
-copy(dirname(__FILE__) . '/tar/files/links.tar', $fname2);
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
+copy(__DIR__ . '/tar/files/links.tar', $fname2);
 $a = new PharData($fname2);
 $b = $a->convertToExecutable(Phar::TAR, Phar::NONE, '.phar.tar');
 unset($a);
@@ -36,8 +36,8 @@ include $fname3;
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
 Warning: is_file() expects exactly 1 parameter, 0 given in %sstat2_5.3.php on line %d
 

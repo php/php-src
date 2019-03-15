@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - objects
 
 /* Test fscanf() to scan a file to read objects */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): to read objects from a file ***\n";
 
@@ -60,7 +60,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation54.tmp";
 unlink($filename);
 ?>

@@ -5,7 +5,7 @@ Bind with various unsupported bind types
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // These types are defined in oci8.c
 

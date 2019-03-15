@@ -10,8 +10,8 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.tbz';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.tbz';
 $pname = 'phar://' . $fname;
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
@@ -155,20 +155,20 @@ echo $e->getMessage() . "\n";
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.tar.gz');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

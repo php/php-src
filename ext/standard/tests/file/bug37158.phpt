@@ -13,7 +13,7 @@ class VariableStream {
 
 stream_wrapper_register("var", "VariableStream");
 
-$file = dirname(__FILE__) . '/footest.txt';
+$file = __DIR__ . '/footest.txt';
 $x = str_repeat(1, 8192);
 $fp = fopen($file, 'w');
 for ($i = 0; $i < 5; $i++) {

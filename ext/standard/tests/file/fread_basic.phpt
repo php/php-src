@@ -39,8 +39,8 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
  foreach($file_content_types as $file_content_type) {
    echo "\n-- Testing fread) with file having data of type ". $file_content_type ." --\n";
    /* create files with $file_content_type */
-   create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "fread_basic");
-   $filename = dirname(__FILE__)."/fread_basic1.tmp"; // this is name of the file created by create_files()
+   create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "fread_basic");
+   $filename = __DIR__."/fread_basic1.tmp"; // this is name of the file created by create_files()
 
   /* open the file using $files_modes and perform fread() on it */
    for($inner_loop_counter = 0;

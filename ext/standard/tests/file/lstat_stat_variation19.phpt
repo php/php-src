@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test for stats of dir/file when their names are stored in an array */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -54,7 +54,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation19.tmp");
 rmdir("$file_path/lstat_stat_variation19");
 ?>

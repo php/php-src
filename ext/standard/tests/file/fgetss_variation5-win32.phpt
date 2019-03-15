@@ -39,7 +39,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")  {
 	$string_with_tags = str_replace("\r",'', $string_with_tags);
 }
 
-$filename = dirname(__FILE__)."/fgetss_variation5.tmp";
+$filename = __DIR__."/fgetss_variation5.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");

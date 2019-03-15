@@ -17,7 +17,7 @@ if(substr(PHP_OS, 0, 3) != 'WIN' )
 
 echo "*** Testing popen(): reading from the pipe ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $string = "Sample String";
 $file_handle = popen(" echo $string", "r");

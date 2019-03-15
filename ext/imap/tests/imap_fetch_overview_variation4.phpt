@@ -24,7 +24,7 @@ var_dump(imap_fetch_overview($file_pointer, 1));
 fclose($file_pointer);
 
 echo "\n-- Directory Resource opened with opendir() --\n";
-var_dump($dir_handle = opendir(dirname(__FILE__)));
+var_dump($dir_handle = opendir(__DIR__));
 var_dump(imap_fetch_overview($dir_handle, 1));
 closedir($dir_handle);
 ?>

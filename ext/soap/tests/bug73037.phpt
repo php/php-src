@@ -9,14 +9,14 @@ server
 		echo "skip zlib is required for this test";
 	}
 
-	if (!file_exists(dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+	if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
 		echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
 	}
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
 function get_data($max)
 {
@@ -134,7 +134,7 @@ cleanup:
 ==DONE==
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73037_server.php");
+unlink(__DIR__ . DIRECTORY_SEPARATOR . "bug73037_server.php");
 ?>
 --EXPECT--
 Iteration 0

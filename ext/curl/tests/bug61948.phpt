@@ -5,7 +5,7 @@ Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
 ?>
 --FILE--
 <?php
-  $base_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug61948";
+  $base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
   mkdir($base_dir . DIRECTORY_SEPARATOR . "foo", 0755, true);
 
   ini_set("open_basedir", $base_dir);
@@ -18,7 +18,7 @@ Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
 ?>
 --CLEAN--
 <?php
-	$base_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug61948";
+	$base_dir = __DIR__ . DIRECTORY_SEPARATOR . "bug61948";
 	rmdir("$base_dir/foo");
 	rmdir($base_dir);
 ?>

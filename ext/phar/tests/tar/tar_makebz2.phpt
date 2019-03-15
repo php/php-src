@@ -8,9 +8,9 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/tar_makebz2.phar.tar';
-$fname2 = dirname(__FILE__) . '/tar_makebz2.phar.tar.bz2';
-$fname3 = dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2';
+$fname = __DIR__ . '/tar_makebz2.phar.tar';
+$fname2 = __DIR__ . '/tar_makebz2.phar.tar.bz2';
+$fname3 = __DIR__ . '/tar_makebz2_b.phar.tar.bz2';
 
 $phar = new Phar($fname);
 $phar['test'] = 'hi';
@@ -27,10 +27,10 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_makebz2.phar.bz2');
-@unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar.bz2');
-@unlink(dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2');
+@unlink(__DIR__ . '/tar_makebz2.phar.bz2');
+@unlink(__DIR__ . '/tar_makebz2.phar.tar');
+@unlink(__DIR__ . '/tar_makebz2.phar.tar.bz2');
+@unlink(__DIR__ . '/tar_makebz2_b.phar.tar.bz2');
 ?>
 --EXPECT--
 bool(true)

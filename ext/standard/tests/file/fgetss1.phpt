@@ -4,7 +4,7 @@ more fgetss() tests
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED);
 
-$filename = dirname(__FILE__)."/fgetss1.html";
+$filename = __DIR__."/fgetss1.html";
 
 $array = array(
 	"askasdfasdf<b>aaaaaa\n</b>dddddd",
@@ -34,7 +34,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$filename = dirname(__FILE__)."/fgetss1.html";
+$filename = __DIR__."/fgetss1.html";
 unlink($filename);
 ?>
 --EXPECT--

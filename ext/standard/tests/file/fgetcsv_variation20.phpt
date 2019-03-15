@@ -14,7 +14,7 @@ Test fgetcsv() : usage variations - with default enclosure, line without any csv
 
 echo "*** Testing fgetcsv() : with default enclosure, line without any csv fields ***\n";
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation20.tmp';
+$filename = __DIR__ . '/fgetcsv_variation20.tmp';
 @unlink($filename);
 
 $file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",

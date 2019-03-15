@@ -22,19 +22,19 @@ try {
 	print_exception($e);
 }
 try {
-	$a = new Phar(dirname(__FILE__) . '/files/frontcontroller10.phar');
+	$a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
 } catch (PharException $e) {
 	print_exception($e);
 }
 $a->convertToExecutable(array());
 $a->convertToData(array());
 try {
-	$b = new PharData(dirname(__FILE__) . '/whatever.tar');
+	$b = new PharData(__DIR__ . '/whatever.tar');
 } catch (PharException $e) {
 	print_exception($e);
 }
 try {
-	$c = new PharData(dirname(__FILE__) . '/whatever.zip');
+	$c = new PharData(__DIR__ . '/whatever.zip');
 } catch (PharException $e) {
 	print_exception($e);
 }

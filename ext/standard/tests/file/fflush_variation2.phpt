@@ -13,7 +13,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN')
 
 /* test fflush() with handle to symbollic link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with soft links to files opened in diff modes ***\n";

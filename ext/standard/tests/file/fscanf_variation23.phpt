@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - char formats with arrays
 
 /* Test fscanf() to scan arrays using different char format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different char format types with arrays ***\n";
 
@@ -74,7 +74,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation23.tmp";
 unlink($filename);
 ?>

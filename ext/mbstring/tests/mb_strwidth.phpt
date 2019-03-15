@@ -6,7 +6,7 @@ mb_strwidth()
 <?php
 // TODO: Add more encoding, strings.....
 //$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // EUC-JP

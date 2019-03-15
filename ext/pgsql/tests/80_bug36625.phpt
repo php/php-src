@@ -14,7 +14,7 @@ if (!$dbh) {
 	die ('Could not connect to the server');
 }
 
-$tracefile = dirname(__FILE__) . '/trace.tmp';
+$tracefile = __DIR__ . '/trace.tmp';
 
 @unlink($tracefile);
 var_dump(file_exists($tracefile));
@@ -44,7 +44,7 @@ var_dump(file_exists($tracefile));
 --CLEAN--
 <?php
 
-$tracefile = dirname(__FILE__) . '/trace.tmp';
+$tracefile = __DIR__ . '/trace.tmp';
 
 unlink($tracefile);
 

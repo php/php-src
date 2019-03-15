@@ -3,7 +3,7 @@ fgetss() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fgetss.html";
+$filename = __DIR__."/fgetss.html";
 
 $array = array(
 	"askasdfasdf<b>aaaaaa\n</b>dddddd",

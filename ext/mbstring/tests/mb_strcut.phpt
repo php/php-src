@@ -7,7 +7,7 @@ output_handler=
 --FILE--
 <?php
 // TODO: Add more encodings
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // EUC-JP

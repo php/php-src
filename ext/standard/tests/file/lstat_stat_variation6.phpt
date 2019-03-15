@@ -26,7 +26,7 @@ foreach( $mount_output as $out )  {
 
 /* test the effects of touch() on stats of link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -64,7 +64,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation6.tmp");
 unlink("$file_path/lstat_stat_variation_link6.tmp");
 ?>

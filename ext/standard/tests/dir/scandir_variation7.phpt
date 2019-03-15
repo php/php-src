@@ -6,7 +6,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__) . "/dir_root_check.tmp";
+$filename = __DIR__ . "/dir_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -29,7 +29,7 @@ unlink($filename);
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directory
-$dir_path = dirname(__FILE__) . "/scandir_variation7";
+$dir_path = __DIR__ . "/scandir_variation7";
 mkdir($dir_path);
 
 // different values for directory permissions
@@ -71,7 +71,7 @@ foreach ($permission_values as $perm) {
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/scandir_variation7";
+$dir_path = __DIR__ . "/scandir_variation7";
 rmdir($dir_path);
 ?>
 --EXPECT--

@@ -7,7 +7,7 @@ Timeout within function trowing exception before timeout reached
 --FILE--
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
 

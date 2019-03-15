@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation2';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 
@@ -42,7 +42,7 @@ foreach($entries as $entry) {
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation2';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
 rmdir($path);
 ?>
 --EXPECT--

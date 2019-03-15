@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - file pointer pointing to EOF
 
 /* Test fscanf() to read a file when file pointer is pointing to EOF */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n";
 
@@ -72,7 +72,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation53.tmp";
 if(file_exists($filename)) {
   unlink($filename);

@@ -9,7 +9,7 @@ Test is_file() function: usage variations - diff. path notations (Bug #42027)
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing is_file() with different notations of file names ***\n";
 $dir_name = $file_path."/is_file_variation4";
@@ -47,7 +47,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/is_file_variation4";
 unlink($dir_name."/is_file_variation4.tmp");
 rmdir($dir_name);

@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Testing readlink() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_handle = fopen($file_path."/readlink_variation2.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
@@ -44,7 +44,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/readlink_variation2.tmp");
 ?>
 --EXPECTF--

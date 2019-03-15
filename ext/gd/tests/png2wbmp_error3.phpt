@@ -19,7 +19,7 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-$file = dirname(__FILE__) .'/simpletext.png';
+$file = __DIR__ .'/simpletext.png';
 
 // Save the image as 'simpletext.png'
 imagepng($im, $file);
@@ -45,5 +45,5 @@ Deprecated: Function png2wbmp() is deprecated in %s on line %d
 Warning: png2wbmp(): Unable to open '' for writing in %s on line %d
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) .'/simpletext.png');
+unlink(__DIR__ .'/simpletext.png');
 ?>

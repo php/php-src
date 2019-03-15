@@ -3,7 +3,7 @@ DRCP: oci_connect()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs (Calling PL/SQL from SQL is not supported in TimesTen)
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --INI--
 oci8.connection_class=test
@@ -11,8 +11,8 @@ oci8.old_oci_close_semantics=0
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
-require dirname(__FILE__)."/drcp_functions.inc";
+require __DIR__."/details.inc";
+require __DIR__."/drcp_functions.inc";
 
 // Open a number of connections with oci_connect and oci_pconnect and verify
 // whether we get a used session with DRCP.

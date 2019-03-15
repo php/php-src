@@ -29,7 +29,7 @@ $csv_lists = array (
   array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
 );
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation24.tmp';
+$filename = __DIR__ . '/fgetcsv_variation24.tmp';
 @unlink($filename);
 
 $file_modes = array ("w+", "w+b", "w+t",

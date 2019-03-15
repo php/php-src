@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not on Windows');
 }
 // Skip if being run by root
-$filename = dirname(__FILE__)."/006_root_check.tmp";
+$filename = __DIR__."/006_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -47,23 +47,23 @@ var_dump( fileperms("/no/such/file/dir") );
 echo "\n";
 
 /* With args less than expected */
-$fp = fopen(dirname(__FILE__)."/006_error.tmp", "w");
+$fp = fopen(__DIR__."/006_error.tmp", "w");
 fclose($fp);
-var_dump( chmod(dirname(__FILE__)."/006_error.tmp") );
+var_dump( chmod(__DIR__."/006_error.tmp") );
 var_dump( chmod("nofile") );
 var_dump( chmod() );
 var_dump( fileperms() );
 
 /* With args greater than expected */
-var_dump( chmod(dirname(__FILE__)."/006_error.tmp", 0755, TRUE) );
-var_dump( fileperms(dirname(__FILE__)."/006_error.tmp", 0777) );
+var_dump( chmod(__DIR__."/006_error.tmp", 0755, TRUE) );
+var_dump( fileperms(__DIR__."/006_error.tmp", 0777) );
 var_dump( fileperms("nofile", 0777) );
 
 echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink( dirname(__FILE__)."/006_error.tmp");
+unlink( __DIR__."/006_error.tmp");
 ?>
 --EXPECTF--
 *** Testing error conditions for fileperms(), chmod() ***

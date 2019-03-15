@@ -2,12 +2,12 @@
 DBA FirstKey/NextKey with 2 deletes
 --SKIPIF--
 <?php
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require_once(__DIR__ .'/skipif.inc');
 	die("info $HND handler used");
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) .'/test.inc');
+	require_once(__DIR__ .'/test.inc');
 	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
@@ -34,7 +34,7 @@ DBA FirstKey/NextKey with 2 deletes
 ?>
 --CLEAN--
 <?php
-	require(dirname(__FILE__) .'/clean.inc');
+	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

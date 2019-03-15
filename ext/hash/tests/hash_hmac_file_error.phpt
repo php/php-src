@@ -11,7 +11,7 @@ Hash: hash_hmac_file() function : basic functionality
 
 echo "*** Testing hash() : error conditions ***\n";
 
-$file = dirname(__FILE__) . "hash_file.txt";
+$file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with less than expected no. of arguments --\n";

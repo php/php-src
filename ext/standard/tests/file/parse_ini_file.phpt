@@ -7,7 +7,7 @@ Test parse_ini_file() function
      and returns the settings in it in an associative array.
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $parse_string = <<<EOD
 ; Comment starts with semi-colon(;)
@@ -215,7 +215,7 @@ echo "*** Done **\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/parse.ini");
+unlink(__DIR__."/parse.ini");
 ?>
 --EXPECT--
 *** Test parse_ini_file() function:  with various keys and values given in parse.ini file ***

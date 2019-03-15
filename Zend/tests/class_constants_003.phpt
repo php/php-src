@@ -11,7 +11,7 @@ class test {
 ?>
 DATA;
 
-$filename = dirname(__FILE__)."/cc003.dat";
+$filename = __DIR__."/cc003.dat";
 file_put_contents($filename, $class_data);
 
 function foo($v = test::val) {

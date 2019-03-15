@@ -9,7 +9,7 @@ Test copy() function: usage variations - identical names
 
 /* Test copy(): Try copying source file to desntination file, where destination file name is identical to source name */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test copy(): Trying to create a copy of file with the same source name ***\n";
 $file = $file_path."/copy_variation10.tmp";
@@ -25,7 +25,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation10.tmp");
+unlink(__DIR__."/copy_variation10.tmp");
 ?>
 --EXPECT--
 *** Test copy(): Trying to create a copy of file with the same source name ***

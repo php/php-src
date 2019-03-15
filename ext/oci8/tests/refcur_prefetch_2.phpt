@@ -3,7 +3,7 @@ Prefetch with REF cursor. Test No 2
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
@@ -19,7 +19,7 @@ if (!(isset($matches[0]) &&
 ?>
 --FILE--
 <?php
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 // Creates the necessary package and tables.
 $stmtarray = array(

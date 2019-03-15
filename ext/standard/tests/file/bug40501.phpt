@@ -2,7 +2,7 @@
 Bug #40501 (fgetcsv() can't handle trailing odd number of backslashes)
 --FILE--
 <?php
-$file = dirname(__FILE__).'/bug40501.csv';
+$file = __DIR__.'/bug40501.csv';
 
 $h = fopen($file, 'r');
 $data = fgetcsv($h, NULL, ',', '"', '"');

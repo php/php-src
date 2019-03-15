@@ -5,7 +5,7 @@ Test oci_fetch_all with 0 and -1 skip & maxrows
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
