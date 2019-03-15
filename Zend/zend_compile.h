@@ -125,10 +125,6 @@ typedef union _zend_parser_stack_elem {
 	zend_ulong num;
 } zend_parser_stack_elem;
 
-typedef struct _zend_parser_loc {
-	uint32_t start_line;
-} zend_parser_loc;
-
 void zend_compile_top_stmt(zend_ast *ast);
 void zend_compile_stmt(zend_ast *ast);
 void zend_compile_expr(znode *node, zend_ast *ast);
@@ -849,7 +845,7 @@ ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
-int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem, zend_parser_loc *loc);
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem, zend_ast_loc *loc);
 
 void zend_assert_valid_class_name(const zend_string *const_name);
 
