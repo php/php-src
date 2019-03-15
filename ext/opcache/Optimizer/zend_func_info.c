@@ -875,10 +875,8 @@ static const func_info_t func_infos[] = {
 	F0("mktime",                                MAY_BE_FALSE | MAY_BE_LONG),
 	F0("gmmktime",                              MAY_BE_FALSE | MAY_BE_LONG),
 	F0("checkdate",                             MAY_BE_FALSE | MAY_BE_TRUE),
-#ifdef HAVE_STRFTIME
 	F1("strftime",                              MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gmstrftime",                            MAY_BE_FALSE | MAY_BE_STRING),
-#endif
 	F0("time",                                  MAY_BE_LONG),
 	F1("localtime",                             MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
 	F1("getdate",                               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),

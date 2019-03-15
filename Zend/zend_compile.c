@@ -7583,11 +7583,11 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
 		zend_ast *last = CG(ast);
 
-		while (last->kind == ZEND_AST_STMT_LIST) {
+		while (last && last->kind == ZEND_AST_STMT_LIST) {
 			zend_ast_list *list = zend_ast_get_list(last);
 			last = list->child[list->children-1];
 		}
-		if (last->kind == ZEND_AST_HALT_COMPILER) {
+		if (last && last->kind == ZEND_AST_HALT_COMPILER) {
 			result->op_type = IS_CONST;
 			ZVAL_LONG(&result->u.constant, Z_LVAL_P(zend_ast_get_zval(last->child[0])));
 			zend_string_release_ex(resolved_name, 0);

@@ -86,7 +86,6 @@
 #define HAVE_STRCASECMP 1
 #define HAVE_STRDUP 1
 #define HAVE_STRERROR 1
-#define HAVE_STRSTR 1
 #define HAVE_TEMPNAM 1
 #define HAVE_UTIME 1
 #undef HAVE_DIRENT_H
@@ -105,7 +104,6 @@
 #define HAVE_LIBM 1
 #define HAVE_CUSERID 0
 #undef HAVE_RINT
-#define HAVE_STRFTIME 1
 #define SIZEOF_SHORT 2
 /* int and long are stll 32bit in 64bit compiles */
 #define SIZEOF_INT 4

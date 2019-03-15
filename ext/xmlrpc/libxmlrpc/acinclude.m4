@@ -3,11 +3,7 @@
 AC_DEFUN([XMLRPC_FUNCTION_CHECKS],[
 
 # Standard XMLRPC list
-AC_CHECK_FUNCS( \
- strtoul strtoull snprintf \
- strstr strpbrk strerror\
- memmove)
-
+AC_CHECK_FUNCS(strtoul strtoull)
 ])
 
 AC_DEFUN([XMLRPC_HEADER_CHECKS],[
@@ -22,8 +18,4 @@ AC_CHECK_SIZEOF(char, 1)
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
 AC_CHECK_SIZEOF(long long, 8)
-AC_TYPE_SIZE_T
-AC_TYPE_UID_T
-
-
 ])
