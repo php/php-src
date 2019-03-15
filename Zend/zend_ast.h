@@ -208,6 +208,9 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_ast_loc *l
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_ast_loc *loc, zend_string *name, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast_loc *loc, zend_ast *class_name, zend_ast *name);
 
+struct _znode;
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(zend_ast_loc *loc, struct _znode *node);
+
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \
 	ZEND_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))

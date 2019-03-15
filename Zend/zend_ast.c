@@ -45,13 +45,13 @@ static inline size_t zend_ast_list_size(uint32_t children) {
 	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node) {
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(zend_ast_loc *loc, znode *node) {
 	zend_ast_znode *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_znode));
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
-	ast->lineno = CG(zend_lineno);
+	ast->lineno = loc->start_line;
 	ast->node = *node;
 	return (zend_ast *) ast;
 }

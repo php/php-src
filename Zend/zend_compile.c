@@ -2331,7 +2331,7 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 	znode dummy_node;
 	zend_ast_loc loc = zend_ast_get_loc(var_ast);
 	zend_ast *assign_ast = zend_ast_create(&loc, ZEND_AST_ASSIGN, var_ast,
-		zend_ast_create_znode(value_node));
+		zend_ast_create_znode(&loc, value_node));
 	zend_compile_assign(&dummy_node, assign_ast);
 	zend_do_free(&dummy_node);
 }
@@ -2840,7 +2840,7 @@ static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_no
 {
 	zend_ast_loc loc = zend_ast_get_loc(var_ast);
 	zend_ast *assign_ast = zend_ast_create(&loc, ZEND_AST_ASSIGN_REF, var_ast,
-		zend_ast_create_znode(value_node));
+		zend_ast_create_znode(&loc, value_node));
 	zend_compile_assign_ref(NULL, assign_ast);
 }
 /* }}} */
@@ -4040,7 +4040,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 
 		zend_ast_loc loc = zend_ast_get_loc(var_ast);
 		zend_emit_assign_ref_znode(
-			zend_ast_create(&loc, ZEND_AST_VAR, zend_ast_create_znode(&name_node)),
+			zend_ast_create(&loc, ZEND_AST_VAR, zend_ast_create_znode(&loc, &name_node)),
 			&result
 		);
 	}
