@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
+- Phar:
+  . Fxied bug #77697 (Crash on Big_Endian platform). (Laruence)
+
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
