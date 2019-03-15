@@ -8,7 +8,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
 
@@ -44,8 +44,8 @@ var_dump($phar['b']->isCompressed(Phar::BZ2));
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--
 string(1) "a"

@@ -12,9 +12,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Renames a file or directory
 */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/rename_variation2_dir");
 
 /* Renaming a file and directory to numeric name */
@@ -44,7 +44,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation2_link.tmp");
 unlink($file_path."/rename_variation2.tmp");
 rmdir($file_path."/rename_variation2_dir");

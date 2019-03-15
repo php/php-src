@@ -10,9 +10,9 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/phar_bz2.phar';
+$fname = __DIR__ . '/phar_bz2.phar';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/phar_bz2.2.phar';
+$fname2 = __DIR__ . '/phar_bz2.2.phar';
 $pname2 = 'phar://' . $fname2;
 
 $file = '<?php
@@ -50,8 +50,8 @@ echo $e->getMessage(),"\n";
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/phar_bz2.phar');
-@unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
+@unlink(__DIR__ . '/phar_bz2.phar');
+@unlink(__DIR__ . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
 string(9) "it worked"

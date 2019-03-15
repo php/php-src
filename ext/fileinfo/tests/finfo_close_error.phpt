@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_close() function : error conditions
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : resource finfo_close(resource finfo)
@@ -12,7 +12,7 @@ Test finfo_close() function : error conditions
 
 echo "*** Testing finfo_close() : error conditions ***\n";
 
-$magicFile = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME, $magicFile );
 $fp = fopen( __FILE__, 'r' );
 

@@ -5,7 +5,7 @@ Bind tests with SQLT_AFC
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

@@ -4,12 +4,12 @@ imap_rfc822_parse_headers() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 $z = imap_headerinfo($stream_id, 1);

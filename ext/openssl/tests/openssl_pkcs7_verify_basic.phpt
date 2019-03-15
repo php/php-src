@@ -14,10 +14,10 @@ if ($contentfile === false) {
 	die("failed to get a temporary filename!");
 }
 
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs7_verify__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs7_verify__pkcsfile.tmp";
 
-$infile = dirname(__FILE__) . "/cert.crt";
-$eml = dirname(__FILE__) . "/signed.eml";
+$infile = __DIR__ . "/cert.crt";
+$eml = __DIR__ . "/signed.eml";
 $wrong = "wrong";
 $empty = "";
 $cainfo = array();

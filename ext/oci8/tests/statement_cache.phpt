@@ -3,14 +3,14 @@ statement cache
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
 // Note: with TimesTen, the column will be called "EXP"
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 

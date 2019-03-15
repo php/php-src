@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/phar_commitwrite.phar', 0, 'phar_commitwrite.phar');
+$p = new Phar(__DIR__ . '/phar_commitwrite.phar', 0, 'phar_commitwrite.phar');
 $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump(strlen($p->getStub()));
@@ -25,7 +25,7 @@ var_dump($p->getStub());
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/phar_commitwrite.phar');
+unlink(__DIR__ . '/phar_commitwrite.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

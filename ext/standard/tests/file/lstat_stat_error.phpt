@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 echo "*** Testing lstat() for error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( lstat() );  // args < expected
 var_dump( lstat(__FILE__, 2) );  // args > expected
 var_dump( lstat("$file_path/temp.tmp") ); // non existing file
@@ -27,7 +27,7 @@ var_dump( lstat($arr) ); // array argument
 echo "\n*** Testing stat() for error conditions ***\n";
 var_dump( stat() );  // args < expected
 var_dump( stat(__FILE__, 2) );  // file, args > expected
-var_dump( stat(dirname(__FILE__), 2) );  //dir, args > expected
+var_dump( stat(__DIR__, 2) );  //dir, args > expected
 
 var_dump( stat("$file_path/temp.tmp") ); // non existing file
 var_dump( stat("$file_path/temp/") ); // non existing dir

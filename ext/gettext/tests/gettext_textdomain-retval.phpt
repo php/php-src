@@ -12,7 +12,7 @@ Check if textdomain() returns the new domain
 --FILE--
 <?php
 
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain ("messages", "./locale");
 echo textdomain('test'), "\n";

@@ -2,7 +2,7 @@
 Test fopen() for reading Kartuli UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,7 +16,7 @@ skip_if_no_required_exts();
 #vim: set encoding=utf-8
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ქართველები";
 $prefix = create_data("file_kartuli", $item);

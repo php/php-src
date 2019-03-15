@@ -9,7 +9,7 @@ Test ftruncate() function : error conditions
 
 echo "*** Testing ftruncate() : error conditions ***\n";
 
-$filename = dirname(__FILE__)."/ftruncate_error.tmp";
+$filename = __DIR__."/ftruncate_error.tmp";
 $file_handle = fopen($filename, "w" );
 fwrite($file_handle, "Testing ftruncate error conditions \n");
 fflush($file_handle);
@@ -67,7 +67,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$filename = dirname(__FILE__)."/ftruncate_error.tmp";
+$filename = __DIR__."/ftruncate_error.tmp";
 unlink( $filename );
 ?>
 --EXPECTF--

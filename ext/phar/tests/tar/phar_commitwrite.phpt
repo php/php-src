@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/phar_commitwrite.phar.tar', 0, 'phar_commitwrite.phar');
+$p = new Phar(__DIR__ . '/phar_commitwrite.phar.tar', 0, 'phar_commitwrite.phar');
 $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump($p->getStub());
@@ -26,7 +26,7 @@ var_dump($p->isFileFormat(Phar::TAR));
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/phar_commitwrite.phar.tar');
+unlink(__DIR__ . '/phar_commitwrite.phar.tar');
 ?>
 --EXPECTF--
 string(60) "<?php // tar-based phar archive stub file

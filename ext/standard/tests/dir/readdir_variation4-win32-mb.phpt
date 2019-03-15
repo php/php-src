@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation4/";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation4/";
 mkdir($dir_path);
 
 // heredoc string
@@ -84,7 +84,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation4/";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation4/";
 rmdir($dir_path);
 ?>
 --EXPECTF--

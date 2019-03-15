@@ -31,7 +31,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
+$soap = new LocalSoapClient(__DIR__."/bug36999.wsdl");
 
 function test($num) {
   global $soap;

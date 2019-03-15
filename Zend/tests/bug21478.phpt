@@ -15,7 +15,7 @@ class debugfilter extends php_user_filter {
 
 stream_filter_register("myfilter","debugfilter");
 
-$fp = fopen(dirname(__FILE__)."/test.txt","w");
+$fp = fopen(__DIR__."/test.txt","w");
 stream_filter_append($fp, "myfilter");
 stream_filter_append($fp, "myfilter");
 stream_filter_append($fp, "myfilter");
@@ -24,8 +24,8 @@ print "Done.\n";
 fclose($fp);
 // Uncommenting the following 'print' line causes the segfault to stop occurring
 // print "2\n";
-readfile(dirname(__FILE__)."/test.txt");
-unlink(dirname(__FILE__)."/test.txt");
+readfile(__DIR__."/test.txt");
+unlink(__DIR__."/test.txt");
 ?>
 --EXPECT--
 Done.

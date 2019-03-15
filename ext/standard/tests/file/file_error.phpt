@@ -7,7 +7,7 @@ Test file() function : error conditions
    Description: Reads entire file into an array
                 Returns the  file in an array
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 echo "\n*** Testing error conditions ***";
 $file_handle = fopen($file_path."/file.tmp", "w");
 var_dump( file() );  // Zero No. of args
@@ -25,7 +25,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file.tmp");
 ?>
 --EXPECTF--

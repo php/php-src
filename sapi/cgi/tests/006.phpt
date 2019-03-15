@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__)."/006.test.php";
+$filename = __DIR__."/006.test.php";
 
 $code = '
 <?php

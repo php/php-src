@@ -5,7 +5,7 @@ Bug #75055 Out-Of-Bounds Read in timelib_meridian()
 --FILE--
 <?php
 
-$file_str = dirname(__FILE__) . "/bug75055.wddx";
+$file_str = __DIR__ . "/bug75055.wddx";
 
 $wddx_str = file_get_contents($file_str);
 print strlen($wddx_str) . " bytes read.\n";

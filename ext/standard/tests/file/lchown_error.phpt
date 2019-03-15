@@ -5,7 +5,7 @@ Test lchown() function : error functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
 if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
 // Skip if being run by root
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_readable_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -25,7 +25,7 @@ unlink($filename);
 echo "*** Testing lchown() : error functionality ***\n";
 
 // Set up
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchown.txt';
 touch( $filename );
 $uid = posix_getuid();
 
@@ -51,7 +51,7 @@ var_dump( lchown( $filename, -5 ) );
 --CLEAN--
 <?php
 
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown.txt';
+$filename = __DIR__ . DIRECTORY_SEPARATOR . 'lchown.txt';
 unlink($filename);
 
 ?>

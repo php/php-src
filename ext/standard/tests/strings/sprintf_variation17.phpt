@@ -11,7 +11,7 @@ echo "*** Testing sprintf() : string formats with resource values ***\n";
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // array of resource values
 $resource_values = array (

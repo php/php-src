@@ -20,7 +20,7 @@ ob_start();
 
 echo "*** Testing session_save_path() : variation ***\n";
 
-$directory = dirname(__FILE__);
+$directory = __DIR__;
 var_dump(session_save_path());
 var_dump(session_save_path($directory));
 var_dump(session_save_path());

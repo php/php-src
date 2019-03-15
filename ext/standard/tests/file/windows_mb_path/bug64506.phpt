@@ -2,7 +2,7 @@
 PHP can not read or write file correctly if file name have special char like š
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,9 +16,9 @@ skip_if_no_required_exts();
 #vim: set encoding=UTF-8
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
-$fnw = dirname(__FILE__) . DIRECTORY_SEPARATOR . "š.txt"; // UTF-8
+$fnw = __DIR__ . DIRECTORY_SEPARATOR . "š.txt"; // UTF-8
 
 $f = fopen($fnw, 'w');
 if ($f) {

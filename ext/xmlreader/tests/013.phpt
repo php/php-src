@@ -16,7 +16,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read()) {
 	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
 		$reader->read();
@@ -36,7 +36,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 

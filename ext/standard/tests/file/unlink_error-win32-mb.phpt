@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__).DIRECTORY_SEPARATOR."私はガラスを食べられます";
+$file_path = __DIR__.DIRECTORY_SEPARATOR."私はガラスを食べられます";
 
 @mkdir($file_path);
 
@@ -48,7 +48,7 @@ var_dump( unlink($filename, false) );  // $context as boolean false
 
 
 echo "\n-- Testing unlink() on non-existent file --\n";
-var_dump( unlink(dirname(__FILE__)."/non_existent_file.tmp") );
+var_dump( unlink(__DIR__."/non_existent_file.tmp") );
 
 echo "\n-- Testing unlink() on directory --\n";
 // temp directory used here
@@ -62,9 +62,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/私はガラスを食べられます/unlink_error.tmp");
-rmdir(dirname(__FILE__)."/私はガラスを食べられます/unlink_error");
-rmdir(dirname(__FILE__)."/私はガラスを食べられます");
+unlink(__DIR__."/私はガラスを食べられます/unlink_error.tmp");
+rmdir(__DIR__."/私はガラスを食べられます/unlink_error");
+rmdir(__DIR__."/私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***

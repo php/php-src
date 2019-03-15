@@ -62,7 +62,7 @@ echo "\n*** Testing is_string() on non string values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset vars
 $unset_string1 = "string";

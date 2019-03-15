@@ -9,13 +9,13 @@ phar.readonly=0
 
 Phar::interceptFileFuncs();
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 opendir(array());
 
-mkdir(dirname(__FILE__) . '/poo');
-chdir(dirname(__FILE__));
+mkdir(__DIR__ . '/poo');
+chdir(__DIR__);
 
 $a = opendir('poo');
 
@@ -49,8 +49,8 @@ include $pname . '/foo';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(dirname(__FILE__) . '/poo');
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php rmdir(__DIR__ . '/poo');
 --EXPECTF--
 Warning: opendir() expects parameter 1 to be a valid path, array given in %sopendir_edgecases.php on line %d
 .

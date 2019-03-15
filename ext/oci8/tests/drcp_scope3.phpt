@@ -7,8 +7,8 @@ oci8.old_oci_close_semantics=1
 --FILE--
 <?php
 
-require dirname(__FILE__)."/drcp_functions.inc";
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/drcp_functions.inc";
+require __DIR__."/details.inc";
 
 // The test opens a connection within function1 and updates a table
 // (without committing).  Another connection is opened from function

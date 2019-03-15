@@ -7,7 +7,7 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 $phar = new Phar($fname);
 $phar['a.php'] = '<php echo "this is a\n"; ?>';
@@ -56,7 +56,7 @@ var_dump($phar->getStub());
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 ?>
 --EXPECTF--
 string(51) "<?php echo "Hello World\n"; __HALT_COMPILER(); ?>

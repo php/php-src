@@ -7,7 +7,7 @@ Phar::compressFiles(Phar::GZ) zip format
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $pname = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -37,7 +37,7 @@ var_dump($phar['c']->isCompressed(Phar::GZ));
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
 ?>
 --EXPECT--
 string(1) "a"

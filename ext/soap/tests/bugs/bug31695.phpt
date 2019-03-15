@@ -27,9 +27,9 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug31695.wsdl");
+$client = new LocalSoapClient(__DIR__."/bug31695.wsdl");
 $client->Test("str");
-$client = new LocalSoapClient(dirname(__FILE__)."/bug31695.wsdl", array("location"=>"test://1"));
+$client = new LocalSoapClient(__DIR__."/bug31695.wsdl", array("location"=>"test://1"));
 $client->Test("str");
 $client->__soapCall("Test",
                     array("arg1"),

@@ -10,7 +10,7 @@ error_reporting=2047
 --FILE--
 <?php
 //error_reporting(E_ALL);
-$utf = implode('', file(dirname(__FILE__).'/Quotes.UTF-8'));
+$utf = implode('', file(__DIR__.'/Quotes.UTF-8'));
 
 print(iconv("UTF-8", "ISO-8859-1//TRANSLIT", $utf));
 print(iconv("UTF-8", "ASCII//TRANSLIT", $utf));

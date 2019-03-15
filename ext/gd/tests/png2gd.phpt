@@ -12,7 +12,7 @@ png <--> gd1/gd2 conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "PNG to GD1 conversion: ";
 	echo imagegd(imagecreatefrompng($cwd . "/conv_test.png"), $cwd . "/test_png.gd1") ? 'ok' : 'failed';

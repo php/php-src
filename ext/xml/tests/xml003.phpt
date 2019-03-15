@@ -7,7 +7,7 @@ XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX p
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 class myclass
 {

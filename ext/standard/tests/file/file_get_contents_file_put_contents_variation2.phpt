@@ -12,7 +12,7 @@ Test file_get_contents() and file_put_contents() functions : usage variations - 
  */
 
 /* Testing variation using use_include_path argument */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "*** Testing with variation in use_include_path argument ***\n";
@@ -41,7 +41,7 @@ echo "--- Done ---";
 <?php
 //Deleting the temporary files and directory used in the testcase
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_get_contents_variation2/file_get_contents_variation2.tmp");
 rmdir($file_path."/file_get_contents_variation2");
 ?>

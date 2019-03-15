@@ -3,13 +3,13 @@ Basic XMLType test #2
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (!extension_loaded("simplexml")) die ("skip no simplexml extension");
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

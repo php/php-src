@@ -30,7 +30,7 @@ class LocalSoapClient extends SoapClient {
   }
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
+$client = new LocalSoapClient(__DIR__."/bug30106.wsdl");
 var_dump($client->__getFunctions());
 var_dump($client->__getTypes());
 $x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));

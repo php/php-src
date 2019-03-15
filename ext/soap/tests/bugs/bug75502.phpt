@@ -9,7 +9,7 @@ soap.wsdl_cache=2
 <?php
 /* The important part is that restriction>enumeration is used together with mem cache.
  * Reuse a WSDL file contains this. */
-$client = new SoapClient(dirname(__FILE__)."/bug29236.wsdl");
+$client = new SoapClient(__DIR__."/bug29236.wsdl");
 ?>
 ===DONE===
 --EXPECT--

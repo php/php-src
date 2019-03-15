@@ -2,8 +2,8 @@
 MySQL: PDOStatement->getColumnMeta()
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // Too many differences among MySQL version - run only with a recent one
 $db = MySQLPDOTest::factory();
@@ -15,7 +15,7 @@ if ($version < 51)
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 MySQLPDOTest::createTestTable($db);

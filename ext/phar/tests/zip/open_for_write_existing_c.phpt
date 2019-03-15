@@ -10,7 +10,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -36,7 +36,7 @@ include $alias . '/b/c.php';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 Warning: fopen(phar://%sopen_for_write_existing_c.phar.zip/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_c.php on line %d
 

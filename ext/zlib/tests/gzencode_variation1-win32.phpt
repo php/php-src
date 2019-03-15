@@ -27,7 +27,7 @@ if(!function_exists("gzdecode")) {
 }
 
 
-include(dirname(__FILE__) . '/data.inc');
+include(__DIR__ . '/data.inc');
 
 echo "*** Testing gzencode() : variation ***\n";
 

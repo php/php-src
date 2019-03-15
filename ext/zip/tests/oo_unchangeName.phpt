@@ -6,7 +6,7 @@ PHP TestFest 2017 - Bergfreunde, Florian Engelhardt
 <?php if (!extension_loaded("zip")) print "skip"; ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . '__tmp_oo_unchangeIndex.zip';
 copy($dirname.'test.zip', $file);
 

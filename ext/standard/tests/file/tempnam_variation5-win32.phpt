@@ -15,7 +15,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 /* Passing an existing file as $prefix for tempnam() fn */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
 $dir_name = $file_path."/tempnam_variation6";

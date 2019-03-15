@@ -3,14 +3,14 @@ Bug #42841 (REF CURSOR and oci_new_cursor PHP crash)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --INI--
 oci8.statement_cache_size=20
 --FILE--
 <?php
 
-require dirname(__FILE__).'/details.inc';
+require __DIR__.'/details.inc';
 
 // note a oci_new_connect() occurs lower in the script
 $c = oci_connect($user, $password, $dbase);

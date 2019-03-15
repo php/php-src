@@ -19,7 +19,7 @@ $no_arg_filters = array(
 	"IMG_FILTER_MEAN_REMOVAL"
 );
 
-$SAVE_DIR = dirname(__FILE__);
+$SAVE_DIR = __DIR__;
 $SOURCE_IMG = $SAVE_DIR . "/test.png";
 
 	foreach ($no_arg_filters as $filt) {

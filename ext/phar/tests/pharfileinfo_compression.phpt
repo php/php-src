@@ -8,7 +8,7 @@ Phar: PharFileInfo compression-related methods
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -73,8 +73,8 @@ var_dump($b->decompress());
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
 --EXPECTF--
 Warning: PharFileInfo::isCompressed() expects parameter 1 to be int, array given in %spharfileinfo_compression.php on line 11
 Unknown compression type specified

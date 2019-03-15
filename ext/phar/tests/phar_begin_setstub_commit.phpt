@@ -9,7 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$p = new Phar(dirname(__FILE__) . '/phar_begin_setstub_commit.phar', 0, 'phar_begin_setstub_commit.phar');
+$p = new Phar(__DIR__ . '/phar_begin_setstub_commit.phar', 0, 'phar_begin_setstub_commit.phar');
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
 $p->startBuffering();
@@ -32,7 +32,7 @@ var_dump($p->getStub());
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/phar_begin_setstub_commit.phar');
+unlink(__DIR__ . '/phar_begin_setstub_commit.phar');
 ?>
 --EXPECTF--
 bool(false)

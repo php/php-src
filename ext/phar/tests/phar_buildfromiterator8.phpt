@@ -7,9 +7,9 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator8.phar');
-	$a = $phar->buildFromIterator(new RegexIterator(new DirectoryIterator('.'), '/^\d{0,3}\.phpt\\z|^\.\\z|^\.\.\\z/'), dirname(__FILE__) . DIRECTORY_SEPARATOR);
+	chdir(__DIR__);
+	$phar = new Phar(__DIR__ . '/buildfromiterator8.phar');
+	$a = $phar->buildFromIterator(new RegexIterator(new DirectoryIterator('.'), '/^\d{0,3}\.phpt\\z|^\.\\z|^\.\.\\z/'), __DIR__ . DIRECTORY_SEPARATOR);
 	asort($a);
 	var_dump($a);
 } catch (Exception $e) {
@@ -20,7 +20,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromiterator8.phar');
+unlink(__DIR__ . '/buildfromiterator8.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

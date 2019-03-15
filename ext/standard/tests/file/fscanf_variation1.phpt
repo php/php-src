@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - return type without third argument
 
 /* test fscanf() for its return type */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing fscanf(): for its return type without third argument ***\n";
 
@@ -34,7 +34,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation1.tmp";
 unlink($filename);
 ?>

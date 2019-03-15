@@ -12,7 +12,7 @@ gif --> gd1/gd2 conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "GIF to GD1 conversion: ";
 	echo imagegd(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.gd1") ? 'ok' : 'failed';

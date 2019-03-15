@@ -15,7 +15,7 @@ if(substr(PHP_OS, 0, 3) == 'WIN')
  */
 
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( disk_total_space() ); // Zero Arguments
 
 var_dump( disk_total_space( $file_path, "extra argument") ); // More than valid number of arguments
@@ -32,7 +32,7 @@ echo"\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/disk_total_space.tmp");
 ?>
 --EXPECTF--

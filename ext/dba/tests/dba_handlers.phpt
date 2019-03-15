@@ -3,13 +3,13 @@ DBA Handler Test
 --SKIPIF--
 <?php
 $handler="flatfile";
-require(dirname(__FILE__) .'/skipif.inc');
+require(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
 --FILE--
 <?php
 $handler="flatfile";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 function check($h)
@@ -52,7 +52,7 @@ foreach ($h as $key => $val) {
 ?>
 --CLEAN--
 <?php
-require(dirname(__FILE__) .'/clean.inc');
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile

@@ -6,7 +6,7 @@ Phar: Phar::running()
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -20,7 +20,7 @@ var_dump(Phar::running());
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 Warning: Phar::running() expects parameter 1 to be bool, array given in phar://%sphar_running.phar.php/index.php on line 2
 string(%d) "phar://%sphar_running.phar.php"

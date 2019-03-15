@@ -19,10 +19,10 @@ printf("SCANDIR_SORT_NONE: %d\n", SCANDIR_SORT_NONE);
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include(dirname(__FILE__) . '/../file/file.inc');
+include(__DIR__ . '/../file/file.inc');
 
 // create directory and files
-$dir = dirname(__FILE__) . '/scandir_variation10';
+$dir = __DIR__ . '/scandir_variation10';
 mkdir($dir);
 @create_files($dir, 2);
 
@@ -43,7 +43,7 @@ delete_files($dir, 2);
 ===DONE===
 --CLEAN--
 <?php
-$dir = dirname(__FILE__) . '/scandir_variation10';
+$dir = __DIR__ . '/scandir_variation10';
 rmdir($dir);
 ?>
 --EXPECT--

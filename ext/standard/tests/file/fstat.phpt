@@ -3,7 +3,7 @@ fstat() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fstat.dat";
+$filename = __DIR__."/fstat.dat";
 
 $fp = fopen($filename, "w");
 var_dump(fstat($fp));

@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - unsigned formats with resource
 
 /* Test fscanf() to scan resource type using different unsigned format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different unsigned format types with resource ***\n";
 
@@ -23,7 +23,7 @@ if($file_handle == false)
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // array of resource types
 $resource_types = array (
@@ -69,7 +69,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation41.tmp";
 unlink($filename);
 ?>

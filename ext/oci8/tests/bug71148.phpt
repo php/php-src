@@ -3,12 +3,12 @@ Bug #71448 (Binding reference overwritten on php7)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialize
 

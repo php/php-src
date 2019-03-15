@@ -2,7 +2,7 @@
 Bug #75063 Many filesystem-related functions do not work with multibyte file names, cp1251
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,10 +16,10 @@ default_charset=cp1251
 
 /* This file is in cp1251. */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $dir_basename = "тест";
-$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug75063-cp1251";
+$prefix = __DIR__ . DIRECTORY_SEPARATOR . "bug75063-cp1251";
 $d0 = $prefix . DIRECTORY_SEPARATOR . $dir_basename;
 
 mkdir($prefix);
@@ -55,7 +55,7 @@ chdir($old_cwd);
 
 /* --CLEAN-- section were the right place, but it won't accept default_charset ATM, it seems. */
 $dir_basename = "тест";
-$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug75063-cp1251";
+$prefix = __DIR__ . DIRECTORY_SEPARATOR . "bug75063-cp1251";
 $d0 = $prefix . DIRECTORY_SEPARATOR . $dir_basename;
 
 $obj = scandir($d0);

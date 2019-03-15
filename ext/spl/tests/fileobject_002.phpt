@@ -7,7 +7,7 @@ function test($name)
 {
 	echo "===$name===\n";
 
-	$o = new SplFileObject(dirname(__FILE__) . '/' . $name);
+	$o = new SplFileObject(__DIR__ . '/' . $name);
 
 	var_dump($o->key());
 	while(($c = $o->fgetc()) !== false)

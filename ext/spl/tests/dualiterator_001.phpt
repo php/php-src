@@ -5,7 +5,7 @@ SPL: DualIterator
 
 function spl_examples_autoload($classname)
 {
-	include(dirname(__FILE__) . '/' . strtolower($classname) . '.inc');
+	include(__DIR__ . '/' . strtolower($classname) . '.inc');
 }
 
 spl_autoload_register('spl_examples_autoload');

@@ -2,7 +2,7 @@
 Crash inside stream_get_line(), when length=0
 --FILE--
 <?php
-$path = dirname(__FILE__) . '/test.html';
+$path = __DIR__ . '/test.html';
 
 file_put_contents($path, "foo<br>bar<br>foo");
 $fp = fopen($path, "r");

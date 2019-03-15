@@ -19,8 +19,8 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-$file = dirname(__FILE__) .'/simpletext私はガラスを食べられます.png';
-$file2 = dirname(__FILE__) .'/simpletext私はガラスを食べられます.wbmp';
+$file = __DIR__ .'/simpletext私はガラスを食べられます.png';
+$file2 = __DIR__ .'/simpletext私はガラスを食べられます.wbmp';
 
 // Save the image as 'simpletext.png'
 imagepng($im, $file);
@@ -41,6 +41,6 @@ Deprecated: Function png2wbmp() is deprecated in %s on line %d
 Warning: png2wbmp(): Invalid threshold value '-1' in %s on line %d
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) .'/simpletext私はガラスを食べられます.png');
-unlink(dirname(__FILE__) .'/simpletext私はガラスを食べられます.wbmp');
+unlink(__DIR__ .'/simpletext私はガラスを食べられます.png');
+unlink(__DIR__ .'/simpletext私はガラスを食べられます.wbmp');
 ?>

@@ -19,7 +19,7 @@ chdir($thisTestDir);
 
 $workingDir = "workdir";
 $filename = basename(__FILE__, ".php") . ".tmp";
-$scriptDir = dirname(__FILE__);
+$scriptDir = __DIR__;
 $baseDir = getcwd();
 $secondFile = $baseDir."/dir2/".$filename;
 $firstFile = "../dir1/".$filename;

@@ -5,7 +5,7 @@ fetch after failed oci_execute()
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $sql = "select 2 from nonex_dual";
 $stmt = oci_parse($c, $sql);

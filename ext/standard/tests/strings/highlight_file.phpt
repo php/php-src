@@ -11,7 +11,7 @@ allow_url_fopen=1
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/highlight_file.dat";
+$filename = __DIR__."/highlight_file.dat";
 
 var_dump(highlight_file());
 var_dump(highlight_file($filename));

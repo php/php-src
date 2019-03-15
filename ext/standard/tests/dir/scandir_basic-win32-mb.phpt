@@ -20,10 +20,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing scandir() : basic functionality ***\n";
 
 // include file.inc for create_files function
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
 // set up directory
-$directory = dirname(__FILE__) . '/私はガラスを食べられますscandir_basic';
+$directory = __DIR__ . '/私はガラスを食べられますscandir_basic';
 mkdir($directory);
 create_files($directory, 3, "numeric", 0755, 1, "w", "私はガラスを食べられますfile");
 
@@ -40,7 +40,7 @@ delete_files($directory, 3, "私はガラスを食べられますfile");
 ===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . '/私はガラスを食べられますscandir_basic';
+$directory = __DIR__ . '/私はガラスを食べられますscandir_basic';
 rmdir($directory);
 ?>
 --EXPECT--

@@ -8,14 +8,14 @@ phar.require_hash=1
 --FILE--
 <?php
 
-file_put_contents('phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar/a.php',
+file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar/a.php',
 	'brand new!');
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar/a.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar/a.php';
 ?>
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 Warning: file_put_contents(phar://%screate_new_phar_b.phar.tar/a.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %screate_new_phar_b.php on line %d
 

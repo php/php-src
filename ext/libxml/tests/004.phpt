@@ -20,7 +20,7 @@ $ctxs = array(
 foreach ($ctxs as $ctx) {
 	var_dump(libxml_set_streams_context($ctx));
 	$dom = new DOMDocument();
-	var_dump($dom->load(dirname(__FILE__).'/test.xml'));
+	var_dump($dom->load(__DIR__.'/test.xml'));
 }
 
 echo "Done\n";

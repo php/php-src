@@ -19,9 +19,9 @@ if (!file_exists($php)) {
 
 $php = dirname(getenv('TEST_PHP_EXECUTABLE')) . DIRECTORY_SEPARATOR . "php-win.exe";
 
-$out_fl = dirname(__FILE__) . "\\argv_bug77111.txt";
+$out_fl = __DIR__ . "\\argv_bug77111.txt";
 
-$argv_fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "argv_test.php";
+$argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
 file_put_contents($argv_fl, "<?php file_put_contents('$out_fl', implode(' ', array_slice(\$argv, 1))); ?>");
 
 `$php -n $argv_fl Ästhetik Æstetik Esthétique Estética Эстетика`;
@@ -31,8 +31,8 @@ var_dump(file_get_contents($out_fl));
 ==DONE==
 --CLEAN--
 <?php
-$out_fl = dirname(__FILE__) . "\\argv_bug77111.txt";
-$argv_fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "argv_test.php";
+$out_fl = __DIR__ . "\\argv_bug77111.txt";
+$argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
 unlink($argv_fl);
 unlink($out_fl);
 ?>

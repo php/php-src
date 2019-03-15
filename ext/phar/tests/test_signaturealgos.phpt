@@ -13,19 +13,19 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$a = new Phar(dirname(__FILE__) . '/files/sha1.phar');
+$a = new Phar(__DIR__ . '/files/sha1.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar(dirname(__FILE__) . '/files/sha512.phar');
+$a = new Phar(__DIR__ . '/files/sha512.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar(dirname(__FILE__) . '/files/sha256.phar');
+$a = new Phar(__DIR__ . '/files/sha256.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar(dirname(__FILE__) . '/files/md5.phar');
+$a = new Phar(__DIR__ . '/files/md5.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
-$a = new Phar(dirname(__FILE__) . '/files/openssl.phar');
+$a = new Phar(__DIR__ . '/files/openssl.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
 ?>

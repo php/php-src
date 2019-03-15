@@ -12,7 +12,7 @@ xpm --> gd1/gd2 conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "XPM to GD1 conversion: ";
 	echo imagegd(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.gd1") ? 'ok' : 'failed';

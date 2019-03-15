@@ -6,9 +6,9 @@ Mark Ammann
 --FILE--
 <?php
 
-set_include_path(dirname(dirname(__FILE__)));
+set_include_path(dirname(__DIR__));
 
-$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'fileobject_005.txt';
+$path = __DIR__.DIRECTORY_SEPARATOR.'fileobject_005.txt';
 touch($path);
 
 $fo = new SplFileObject('tests'.DIRECTORY_SEPARATOR.'fileobject_005.txt', 'w+', true);
@@ -28,7 +28,7 @@ var_dump($fo->ftruncate());
 ==DONE==
 --CLEAN--
 <?php
-$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'fileobject_005.txt';
+$path = __DIR__.DIRECTORY_SEPARATOR.'fileobject_005.txt';
 unlink($path);
 ?>
 --EXPECTF--

@@ -3,12 +3,12 @@ Test oci_define_by_name() LOB descriptor
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
 	"drop table phpdefblobtable",
@@ -24,7 +24,7 @@ oci_bind_by_name($stmt,":id",$id);
 oci_bind_by_name($stmt,":fileimage",$fileimage,-1,OCI_B_BLOB);
 $id = 1;
 oci_execute($stmt, OCI_DEFAULT);
-$fileimage->savefile(dirname(__FILE__)."/test.gif");
+$fileimage->savefile(__DIR__."/test.gif");
 $data = $fileimage->load();
 var_dump(md5($data));  // original md5
 oci_commit($c);

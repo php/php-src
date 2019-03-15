@@ -5,7 +5,7 @@ oci_internal_debug()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/details.inc");
+require(__DIR__."/details.inc");
 
 oci_internal_debug(true);
 

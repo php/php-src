@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $f2 = "zlib_wrapper_ftruncate_basic.txt.gz";
 copy($f, $f2);
 

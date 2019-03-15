@@ -3,13 +3,13 @@ DBA CDB handler test (read only)
 --SKIPIF--
 <?php
 	$handler = 'cdb_make';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	echo "database handler: cdb\n";
 	$handler = 'cdb';
-	$db_file = dirname(__FILE__).'/test.cdb';
+	$db_file = __DIR__.'/test.cdb';
 	if (($db_file=dba_open($db_file, "r", $handler))!==FALSE) {
 		// read key sequence
 		$a = dba_firstkey($db_file);

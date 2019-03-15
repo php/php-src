@@ -21,7 +21,7 @@ mkdir($thisTestDir);
 chdir($thisTestDir);
 
 $filename = "readFileVar7.tmp";
-$scriptLocFile = dirname(__FILE__)."/".$filename;
+$scriptLocFile = __DIR__."/".$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);

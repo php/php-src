@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 // This doesn't work for windows, time, atime usage results in very different
 // output to linux. This could be a php.net bug on windows or a windows querk.
-$filename = dirname(__FILE__)."/touch.dat";
+$filename = __DIR__."/touch.dat";
 
 var_dump(touch());
 var_dump(touch($filename));

@@ -2,7 +2,7 @@
 Test imap_bodystruct() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -12,7 +12,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing string imap_bodystruct : basic functionality ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 echo "Create a new mailbox for test and add a multipart msgs\n";
 $imap_stream = setup_test_mailbox("", 1, $mailbox, "multipart");

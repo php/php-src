@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 /* test the effects of writing to a file on the stats of the file */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -50,7 +50,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation2.tmp");
 ?>
 --EXPECT--

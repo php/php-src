@@ -34,7 +34,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   echo "\n-- Testing fgetss() with file opened using $file_modes[$mode_counter] mode --\n";
 
   /* create an empty file and write the strings with tags */
-  $filename = dirname(__FILE__)."/fgetss_basic1.tmp";
+  $filename = __DIR__."/fgetss_basic1.tmp";
   create_file ($filename); //create an empty file
   file_put_contents($filename, $string_with_tags);
   $file_handle = fopen($filename, $file_modes[$mode_counter]);

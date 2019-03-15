@@ -5,7 +5,7 @@ oci_bind_array_by_name() and invalid values 8
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $statement = oci_parse($c, 'SELECT user FROM all_objects');
 

@@ -9,7 +9,7 @@ phar.require_hash=1
 --FILE--
 <?php
 try {
-	$phar = new PharData(dirname(__FILE__) . '/files/Net_URL-1.0.15.tgz');
+	$phar = new PharData(__DIR__ . '/files/Net_URL-1.0.15.tgz');
 	var_dump($phar->getStub());
 } catch (Exception $e) {
 	echo $e->getMessage()."\n";

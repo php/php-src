@@ -5,7 +5,7 @@ Bug #48203 (Crash when CURLOPT_STDERR is set to regular file)
 --FILE--
 <?php
 include 'server.inc';
-$fp = fopen(dirname(__FILE__) . '/bug48203.tmp', 'w');
+$fp = fopen(__DIR__ . '/bug48203.tmp', 'w');
 
 $ch = curl_init();
 
@@ -22,7 +22,7 @@ echo "Ok\n";
 
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug48203.tmp'); ?>
 --EXPECTF--
 Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 %A

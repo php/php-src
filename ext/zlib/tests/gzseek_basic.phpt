@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-$f = dirname(__FILE__)."/004.txt.gz";
+$f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 
 echo "move to the 50th byte\n";

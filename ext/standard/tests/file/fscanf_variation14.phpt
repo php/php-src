@@ -10,7 +10,7 @@ Test fscanf() function: usage variations - string formats with strings
 
 /* Test fscanf() to scan different strings using different string format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Test fscanf(): different string format types with different string ***\n";
 
@@ -104,7 +104,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation14.tmp";
 unlink($filename);
 ?>

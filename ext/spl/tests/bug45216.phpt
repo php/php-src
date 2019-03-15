@@ -5,7 +5,7 @@ Perrick Penet <perrick@noparking.net>
 #testfest phpcampparis 2008-06-07
 --FILE--
 <?php
-$file = dirname(__FILE__) . '/foo.html';
+$file = __DIR__ . '/foo.html';
 file_put_contents($file, 'text 0<div class="tested">text 1</div>');
 $handle = fopen($file, 'r');
 
@@ -15,7 +15,7 @@ var_dump(fgetss($handle));
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/foo.html');
+unlink(__DIR__ . '/foo.html');
 ?>
 --EXPECTF--
 Deprecated: Function fgetss() is deprecated in %s on line %d

@@ -16,7 +16,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . md5(uniqid());
+$fn = __DIR__ . DIRECTORY_SEPARATOR . md5(uniqid());
 file_put_contents($fn, "<?php\nvar_dump(putenv('FOO=啊'));\n//var_dump(`echo %FOO%`);\nvar_dump(getenv('FOO'));");
 
 echo shell_exec("$php -n -f $fn");

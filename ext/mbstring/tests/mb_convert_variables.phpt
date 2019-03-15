@@ -9,7 +9,7 @@ mbstring.language=Japanese
 <?php
 // TODO: Add more tests
 //$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // SJIS string (BASE64 encoded)

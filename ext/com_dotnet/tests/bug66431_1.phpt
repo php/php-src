@@ -15,7 +15,7 @@ try {
 <?php
 
 $text= "Xin chào cộng đồng PHP";
-$fpath = str_replace("/", "\\", dirname(__FILE__) . "/bug66431.docx");
+$fpath = str_replace("/", "\\", __DIR__ . "/bug66431.docx");
 
 com_load_typelib('Word.Application');
 
@@ -49,7 +49,7 @@ if (!$result) {
 --CLEAN--
 <?php
 
-$fpath = str_replace("/", "\\", dirname(__FILE__) . "/bug66431.docx");
+$fpath = str_replace("/", "\\", __DIR__ . "/bug66431.docx");
 
 if (file_exists($fpath)) {
 	unlink($fpath);

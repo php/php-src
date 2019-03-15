@@ -9,7 +9,7 @@ if (!extension_loaded('gd')) die("skip gd extension not available\n");
 ?>
 --FILE--
 <?php
-$filename = dirname(__FILE__) .  '/font.gdf';
+$filename = __DIR__ .  '/font.gdf';
 
 // End of file while reading header
 $bin = "\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00";

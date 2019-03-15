@@ -5,7 +5,7 @@ PECL Bug #6109 (Error messages not kept)
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 

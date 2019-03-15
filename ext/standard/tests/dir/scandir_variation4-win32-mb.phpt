@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include (dirname(__FILE__) . '/../file/file.inc');
+include (__DIR__ . '/../file/file.inc');
 
 $base_dir_path = __DIR__ . '/scandir_variation4-win32-mb';
 @mkdir($base_dir_path);

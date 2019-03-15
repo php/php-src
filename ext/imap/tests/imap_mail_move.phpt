@@ -4,7 +4,7 @@ Test imap_mail_move() incorrect parameters
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -18,7 +18,7 @@ imap_mail_move(false);
 
 
 // more tests
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 
 echo "Test with IMAP server\n";

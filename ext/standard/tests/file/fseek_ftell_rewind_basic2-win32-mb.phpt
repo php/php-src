@@ -31,7 +31,7 @@ $file_content_types = array("text_with_new_line","alphanumeric");
 $whence_set = array(SEEK_SET,SEEK_CUR,SEEK_END);
 $whence_string = array("SEEK_SET", "SEEK_CUR", "SEEK_END");
 
-$filename = dirname(__FILE__)."/fseek_ftell_rewind_basic2私はガラスを食べられます.tmp"; // this is name of the file created by create_files()
+$filename = __DIR__."/fseek_ftell_rewind_basic2私はガラスを食べられます.tmp"; // this is name of the file created by create_files()
 
 foreach($file_content_types as $file_content_type){
   echo "\n-- File having data of type ". $file_content_type ." --\n";

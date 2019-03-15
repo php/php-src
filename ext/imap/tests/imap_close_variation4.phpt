@@ -2,7 +2,7 @@
 Test imap_close() function : usage variations - different ints as $options arg
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 
 echo "*** Testing imap_close() : usage variations ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 $inputs = array (0, 3.2768e4, -32768, PHP_INT_MAX, -PHP_INT_MAX);
 
@@ -61,7 +61,7 @@ foreach($inputs as $input) {
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_close() : usage variations ***

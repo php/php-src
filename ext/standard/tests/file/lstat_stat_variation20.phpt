@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test for stats of link when their names are stored in object and array */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 $fp = fopen("$file_path/lstat_stat_variation20.tmp", "w");  // temp file
@@ -56,7 +56,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation20_link.tmp");
 unlink("$file_path/lstat_stat_variation20.tmp");
 ?>

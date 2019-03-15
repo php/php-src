@@ -2,7 +2,7 @@
 Test mkdir/rmdir cp1256 to UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ internal_encoding=cp1256
 #vim: set encoding=cp1256
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ãÓÇÑ ãÊÚÏÏ ÇáÈÇíÊ ÇÎÊÈÇÑ";
 $prefix = create_data("dir_cp1256", "${item}42", 1256);

@@ -4,7 +4,7 @@ Test exif_read_data on unavailable file
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --FILE--
 <?php
-$infile = dirname(__FILE__).'/bug73115.JPG';
+$infile = __DIR__.'/bug73115.JPG';
 exif_read_data($infile);
 ?>
 ===DONE===

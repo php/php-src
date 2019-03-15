@@ -13,13 +13,13 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $arr = array(__FILE__);
 
 echo "\n*** Testing stat() for error conditions ***\n";
 var_dump( stat() );  // args < expected
 var_dump( stat(__FILE__, 2) );  // file, args > expected
-var_dump( stat(dirname(__FILE__), 2) );  //dir, args > expected
+var_dump( stat(__DIR__, 2) );  //dir, args > expected
 
 var_dump( stat("$file_path/temp.tmp") ); // non existing file
 var_dump( stat("$file_path/temp/") ); // non existing dir

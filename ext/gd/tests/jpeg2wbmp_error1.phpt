@@ -19,8 +19,8 @@ $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 255, 255, 255);
 imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-$file = dirname(__FILE__) .'/simpletext.jpg';
-$file2 = dirname(__FILE__) .'/simpletext.wbmp';
+$file = __DIR__ .'/simpletext.jpg';
+$file2 = __DIR__ .'/simpletext.wbmp';
 
 // Save the image as 'simpletext.jpg'
 imagejpeg($im, $file);
@@ -41,6 +41,6 @@ Deprecated: Function jpeg2wbmp() is deprecated in %s on line %d
 Warning: jpeg2wbmp(): Invalid threshold value '-1' in %s on line %d
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) .'/simpletext.jpg');
-unlink(dirname(__FILE__) .'/simpletext.wbmp');
+unlink(__DIR__ .'/simpletext.jpg');
+unlink(__DIR__ .'/simpletext.wbmp');
 ?>

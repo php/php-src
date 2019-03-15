@@ -11,7 +11,7 @@ Testing floatval() and its alias doubleval() functions : usage variations - diff
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
 fclose($fp);
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 closedir($dfp);
 
 // other types in an array

@@ -3,13 +3,13 @@ DBA lock modifier error message test
 --SKIPIF--
 <?php
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 ?>
 --FILE--
 <?php
 
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 $db_file1 = dba_popen($db_filename, 'n-t', 'flatfile');
@@ -18,7 +18,7 @@ $db_file1 = dba_popen($db_filename, 'n-t', 'flatfile');
 ===DONE===
 --CLEAN--
 <?php
-	require(dirname(__FILE__) .'/clean.inc');
+	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile
