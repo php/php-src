@@ -419,6 +419,7 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 		curl_multi_cleanup(mh->multi);
 		zend_llist_clean(&mh->easyh);
 		if (mh->handlers->server_push) {
+			zval_ptr_dtor(&mh->handlers->server_push->func_name);
 			efree(mh->handlers->server_push);
 		}
 		if (mh->handlers) {
@@ -576,11 +577,6 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 
 			ZVAL_COPY(&mh->handlers->server_push->func_name, zvalue);
 			mh->handlers->server_push->method = PHP_CURL_USER;
-			if (!Z_ISUNDEF(mh->handlers->server_push->func_name)) {
-				zval_ptr_dtor(&mh->handlers->server_push->func_name);
-				mh->handlers->server_push->fci_cache = empty_fcall_info_cache;
-
-			}
 			error = curl_multi_setopt(mh->multi, option, _php_server_push_callback);
 			if (error != CURLM_OK) {
 				return 0;
