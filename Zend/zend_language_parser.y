@@ -51,16 +51,15 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
-%left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
-%left ','
+%precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
-%right T_PRINT
-%right T_YIELD
-%right T_DOUBLE_ARROW
-%right T_YIELD_FROM
-%left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
+%precedence T_PRINT
+%precedence T_YIELD
+%precedence T_DOUBLE_ARROW
+%precedence T_YIELD_FROM
+%precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
@@ -73,17 +72,16 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
-%right '!'
-%nonassoc T_INSTANCEOF
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%precedence '!'
+%precedence T_INSTANCEOF
+%precedence '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
-%right '['
-%nonassoc T_NEW T_CLONE
-%left T_NOELSE
-%left T_ELSEIF
-%left T_ELSE
-%left T_ENDIF
-%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
+%precedence T_NEW T_CLONE
+
+/* Resolve danging else conflict */
+%precedence T_NOELSE
+%precedence T_ELSEIF
+%precedence T_ELSE
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
 %token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
