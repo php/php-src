@@ -94,8 +94,6 @@ typedef struct _zend_ast_znode {
 	znode node;
 } zend_ast_znode;
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
-
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
@@ -732,7 +730,7 @@ void zend_file_context_end(zend_file_context *prev_context);
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
 
-ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
+ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem, zend_ast_loc *loc);
 void startup_scanner(void);
 void shutdown_scanner(void);
 
@@ -845,7 +843,7 @@ ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
-int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem, zend_ast_loc *loc);
 
 void zend_assert_valid_class_name(const zend_string *const_name);
 
