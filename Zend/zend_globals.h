@@ -230,8 +230,9 @@ struct _zend_executor_globals {
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
-#define EG_FLAGS_INITIAL	0x00
-#define EG_FLAGS_IN_SHUTDOWN	0x01
+#define EG_FLAGS_INITIAL				(0)
+#define EG_FLAGS_IN_SHUTDOWN			(1<<0)
+#define EG_FLAGS_OBJECT_STORE_NO_REUSE	(1<<1)
 
 struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;
