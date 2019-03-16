@@ -18,6 +18,8 @@
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to git by Stanislav Malyshev <stas@php.net>
 
+# Go to project root directory.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
 if test "$#" != "1"; then
     echo "Usage: makedist <version>" >&2
@@ -94,7 +96,7 @@ set -x
 # when a user runs buildconf in the distribution.
 rm -f buildmk.stamp
 
-./genfiles
+./scripts/dev/genfiles
 
 # now restore our versions of libtool-generated files
 for i in $LT_TARGETS; do

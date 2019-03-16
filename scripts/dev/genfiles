@@ -45,7 +45,7 @@ RE2C_FLAGS="-i"
 original_path=`pwd`
 
 # Project root directory
-project_root=`CDPATH= cd -- "$(dirname -- "$0")" && pwd -P`
+project_root=`CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P`
 cd $project_root
 
 echo "Generating Zend parser and lexer files"
