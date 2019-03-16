@@ -204,6 +204,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       PHP_CHECK_TYPES, PHP_TM_GMTOFF.
     - new --enable-rtld-now build option allow to switch dlopen behavior
       from RTLD_LAZY to RTLD_NOW
+    - Minimum Bison version is 3.0+ for generating parser files.
 
   c. Windows build system changes
 
