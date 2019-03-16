@@ -1,13 +1,15 @@
 #!/bin/sh
 #
-# A wrapper around the Autoconf tools that generate files for building PHP on
-# *nix systems.
+# A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
 MAKE=${MAKE:-make}
 force=0
 debug=0
 
-eval `grep '^PHP_EXTRA_VERSION=' configure.ac`
+# Go to project root.
+cd $(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+
+eval $(grep '^PHP_EXTRA_VERSION=' configure.ac)
 case "$PHP_EXTRA_VERSION" in
   *-dev)
     dev=1
@@ -17,39 +19,37 @@ case "$PHP_EXTRA_VERSION" in
     ;;
 esac
 
-# Go to the script's directory so buildconf can be run from other locations.
-cd $(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
-
 while test $# -gt 0; do
   if test "$1" = "-h" || test "$1" = "--help"; then
-    echo "PHP buildconf"
-    echo ""
-    echo "A wrapper around the autoconf and autoheader that generate files for"
-    echo "building PHP on *nix systems (configure, main/php_config.h.in,"
-    echo "aclocal.m4...). The configure script is used to customize the PHP"
-    echo "build based on the provided options and system. PHP releases"
-    echo "downloaded from PHP.net already include the configure script so"
-    echo "installing Autoconf and running buildconf is not needed. For the PHP"
-    echo "sources from the Git repository, buildconf is used for generating"
-    echo "a new configure script and required files."
-    echo ""
-    echo "SYNOPSIS:"
-    echo "  buildconf [<options>]"
-    echo ""
-    echo "OPTIONS:"
-    echo "  --force         Clean cache and overwrite configure files."
-    echo "  --debug         Display warnings emitted by Autoconf."
-    echo "  -h, --help      Display this help."
-    echo ""
-    echo "ENVIRONMENT:"
-    echo "  The following optional variables are supported:"
-    echo ""
-    echo "  MAKE            Overrides the path to make tool."
-    echo "                  MAKE=/path/to/make ./buildconf"
-    echo "  PHP_AUTOCONF    Overrides the path to autoconf tool."
-    echo "                  PHP_AUTOCONF=/path/to/autoconf ./buildconf"
-    echo "  PHP_AUTOHEADER  Overrides the path to autoheader tool."
-    echo "                  PHP_AUTOHEADER=/path/to/autoheader ./buildconf"
+    cat << HELP
+PHP buildconf
+
+A wrapper around the autoconf and autoheader that generate files for building
+PHP on *nix systems (configure, main/php_config.h.in, aclocal.m4...). The
+configure script is used to customize the PHP build based on the provided
+options and system. PHP releases downloaded from PHP.net already include the
+configure script so installing Autoconf and running buildconf is not needed. For
+the PHP sources from the Git repository, buildconf is used for generating a new
+configure script and required files.
+
+SYNOPSIS:
+  buildconf [<options>]
+
+OPTIONS:
+  --force         Clean cache and overwrite configure files.
+  --debug         Display warnings emitted by Autoconf.
+  -h, --help      Display this help.
+
+ENVIRONMENT:
+  The following optional variables are supported:
+
+  MAKE            Overrides the path to make tool.
+                  MAKE=/path/to/make ./buildconf
+  PHP_AUTOCONF    Overrides the path to autoconf tool.
+                  PHP_AUTOCONF=/path/to/autoconf ./buildconf
+  PHP_AUTOHEADER  Overrides the path to autoheader tool.
+                  PHP_AUTOHEADER=/path/to/autoheader ./buildconf
+HELP
     exit 0
   fi
 
