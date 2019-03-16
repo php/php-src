@@ -18,10 +18,14 @@
    +----------------------------------------------------------------------+
 */
 
-/* This file prints to stdout the contents of ext/standard/html_tables.h */
-/* put together with glue; have patience */
+/**
+ * This file generates ext/standard/html_tables.h from bundled mappings.
+ *
+ * Required PHP version: PHP 5.6 due to usort returning different set of results
+ * https://bugs.php.net/69158
+ */
 
-$t = <<<CODE
+$content = <<<CODE
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
@@ -121,79 +125,76 @@ typedef struct {
 
 CODE;
 
-echo $t;
-
-$encodings = array(
-    array(
+$encodings = [
+    [
         "ident" => "iso88591",
         "enumid" => 1,
         "name" => "ISO-8859-1",
-        "file" => "mappings/8859-1.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/8859-1.TXT",
+    ],
+    [
         "ident" => "iso88595",
         "enumid" => 5,
         "name" => "ISO-8859-5",
-        "file" => "mappings/8859-5.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/8859-5.TXT",
+    ],
+    [
         "ident" => "iso885915",
         "enumid" => 3,
         "name" => "ISO-8859-15",
-        "file" => "mappings/8859-15.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/8859-15.TXT",
+    ],
+    [
         "ident" => "win1252",
         "enumid" => 2,
         "enumident" => "cp1252",
         "name" => "Windows-1252",
-        "file" => "mappings/CP1252.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP1252.TXT",
+    ],
+    [
         "ident" => "win1251",
         "enumid" => 4,
         "enumident" => "cp1252",
         "name" => "Windows-1251",
-        "file" => "mappings/CP1251.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP1251.TXT",
+    ],
+    [
         "ident" => "koi8r",
         "enumid" => 8,
         "name" => "KOI8-R",
-        "file" => "mappings/KOI8-R.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/KOI8-R.TXT",
+    ],
+    [
         "ident" => "cp866",
         "enumid" => 6,
         "name" => "CP-866",
-        "file" => "mappings/CP866.TXT",
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP866.TXT",
+    ],
+    [
         "ident" => "macroman",
         "enumid" => 7,
         "name" => "MacRoman",
-        "file" => "mappings/ROMAN.TXT",
-    ),
-);
+        "file" => __DIR__."/mappings/ROMAN.TXT",
+    ],
+];
 
-$prevStage2 = array();
+$prevStage2 = [];
 
 foreach ($encodings as $e) {
-    echo
-"/* {{{ Mappings *to* Unicode for {$e['name']} */\n\n";
+    $content .= "/* {{{ Mappings *to* Unicode for {$e['name']} */\n\n";
 
     /* process file */
-    $map = array();
+    $map = [];
     $lines = explode("\n", file_get_contents($e{'file'}));
     foreach ($lines as $l) {
         if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})/i", $l, $matches))
-            $map[] = array($matches[1], $matches[2]);
+            $map[] = [$matches[1], $matches[2]];
     }
 
-    $mappy = array();
+    $mappy = [];
     foreach ($map as $v) { $mappy[hexdec($v[0])] = hexdec($v[1]); }
 
-    $mstable = array("ident" => $e['ident']);
+    $mstable = ["ident" => $e['ident']];
     /* calculate two-stage tables */
     for ($i = 0; $i < 4; $i++) {
         for ($j = 0; $j < 64; $j++) {
@@ -202,42 +203,38 @@ foreach ($encodings as $e) {
         }
     }
 
-    echo
-"/* {{{ Stage 2 tables for {$e['name']} */\n\n";
+    $content .= "/* {{{ Stage 2 tables for {$e['name']} */\n\n";
 
-    $s2tables_idents = array();
+    $s2tables_idents = [];
     for ($i = 0; $i < 4; $i++) {
-        if (($t = array_keys($prevStage2, $mstable[$i])) !== array()) {
+        if (($t = array_keys($prevStage2, $mstable[$i])) !== []) {
             $s2tables_idents[$i] = $encodings[$t[0]/5]["ident"];
             continue;
         }
 
         $s2tables_idents[$i] = $e["ident"];
 
-        echo "static const enc_to_uni_stage2 enc_to_uni_s2_{$e['ident']}_".
+        $content .= "static const enc_to_uni_stage2 enc_to_uni_s2_{$e['ident']}_".
             sprintf("%02X", $i << 6)." = { {\n";
         for ($j = 0; $j < 64; $j++) {
-            if ($j == 0) echo "\t";
-            elseif ($j % 6 == 0) echo "\n\t";
-            else echo " ";
+            if ($j == 0) $content .= "\t";
+            elseif ($j % 6 == 0) $content .= "\n\t";
+            else $content .= " ";
             if ($mstable[$i][$j] !== NULL)
-                echo sprintf("0x%04X,", $mstable[$i][$j]);
+                $content .= sprintf("0x%04X,", $mstable[$i][$j]);
             else
-                echo "0xFFFF,"; /* special value; indicates no mapping */
+                $content .= "0xFFFF,"; /* special value; indicates no mapping */
         }
-        echo "\n} };\n\n";
+        $content .= "\n} };\n\n";
 
         $prevStage2[] = $mstable[$i];
     }
 
-    echo
-"/* end of stage 2 tables for {$e['name']} }}} */\n\n";
+    $content .= "/* end of stage 2 tables for {$e['name']} }}} */\n\n";
 
-    echo
-"/* {{{ Stage 1 table for {$e['name']} */\n";
+    $content .= "/* {{{ Stage 1 table for {$e['name']} */\n";
 
-    echo
-"static const enc_to_uni enc_to_uni_{$e['ident']} = { {
+    $content .= "static const enc_to_uni enc_to_uni_{$e['ident']} = { {
 \t&enc_to_uni_s2_{$s2tables_idents[0]}_00,
 \t&enc_to_uni_s2_{$s2tables_idents[1]}_40,
 \t&enc_to_uni_s2_{$s2tables_idents[2]}_80,
@@ -245,30 +242,28 @@ foreach ($encodings as $e) {
 };
 ";
 
-    echo
-"/* end of stage 1 table for {$e['name']} }}} */\n\n";
+    $content .= "/* end of stage 1 table for {$e['name']} }}} */\n\n";
 }
 
 $maxencnum = max(array_map(function($e) { return $e['enumid']; }, $encodings));
 $a = range(0, $maxencnum);
 foreach ($encodings as $e) { $a[$e['enumid']] = $e['ident']; }
 
-    echo
-"/* {{{ Index of tables for encoding conversion */
+    $content .= "/* {{{ Index of tables for encoding conversion */
 static const enc_to_uni *const enc_to_uni_index[cs_numelems] = {\n";
 
 foreach ($a as $k => $v) {
     if (is_numeric($v))
-        echo "\tNULL,\n";
+        $content .= "\tNULL,\n";
     else
-        echo "\t&enc_to_uni_$v,\n";
+        $content .= "\t&enc_to_uni_$v,\n";
 }
 
-    echo
+    $content .=
 "};
 /* }}} */\n";
 
-$t = <<<CODE
+$content .= <<<CODE
 
 /* Definitions for mappings *from* Unicode */
 
@@ -280,80 +275,76 @@ typedef struct {
 
 CODE;
 
-echo $t;
-
-$encodings = array(
-    array(
+$encodings = [
+    [
         "ident" => "iso885915",
         "name" => "ISO-8859-15",
-        "file" => "mappings/8859-15.TXT",
-        "range" => array(0xA4, 0xBE),
-    ),
-    array(
+        "file" => __DIR__."/mappings/8859-15.TXT",
+        "range" => [0xA4, 0xBE],
+    ],
+    [
         "ident" => "win1252",
         "name" => "Windows-1252",
-        "file" => "mappings/CP1252.TXT",
-        "range" => array(0x80, 0x9F),
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP1252.TXT",
+        "range" => [0x80, 0x9F],
+    ],
+    [
         "ident" => "win1251",
         "name" => "Windows-1251",
-        "file" => "mappings/CP1251.TXT",
-        "range" => array(0x80, 0xFF),
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP1251.TXT",
+        "range" => [0x80, 0xFF],
+    ],
+    [
         "ident" => "koi8r",
         "name" => "KOI8-R",
-        "file" => "mappings/KOI8-R.TXT",
-        "range" => array(0x80, 0xFF),
-    ),
-    array(
+        "file" => __DIR__."/mappings/KOI8-R.TXT",
+        "range" => [0x80, 0xFF],
+    ],
+    [
         "ident" => "cp866",
         "name" => "CP-866",
-        "file" => "mappings/CP866.TXT",
-        "range" => array(0x80, 0xFF),
-    ),
-    array(
+        "file" => __DIR__."/mappings/CP866.TXT",
+        "range" => [0x80, 0xFF],
+    ],
+    [
         "ident" => "macroman",
         "name" => "MacRoman",
-        "file" => "mappings/ROMAN.TXT",
-        "range" => array(0x80, 0xFF),
-    ),
-);
+        "file" => __DIR__."/mappings/ROMAN.TXT",
+        "range" => [0x80, 0xFF],
+    ],
+];
 
 foreach ($encodings as $e) {
-    echo
-"/* {{{ Mappings *from* Unicode for {$e['name']} */\n";
+    $content .= "/* {{{ Mappings *from* Unicode for {$e['name']} */\n";
 
     /* process file */
-    $map = array();
+    $map = [];
     $lines = explode("\n", file_get_contents($e{'file'}));
     foreach ($lines as $l) {
-        if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})\s+#\s*(.*)$/i", $l, $matches))
-            $map[] = array($matches[1], $matches[2], rtrim($matches[3]));
+        if (preg_match("/^0x([0-9A-Z]{2})\t0x([0-9A-Z]{2,})\s+#\s*(.*)$/i", $l, $matches)) {
+            $map[] = [$matches[1], $matches[2], rtrim($matches[3])];
+        }
     }
 
-    $mappy = array();
+    $mappy = [];
     foreach ($map as $v) {
-        if (hexdec($v[0]) >= $e['range'][0] && hexdec($v[0]) <= $e['range'][1])
-            $mappy[hexdec($v[1])] = array(hexdec($v[0]), strtolower($v[2]));
+        if (hexdec($v[0]) >= $e['range'][0] && hexdec($v[0]) <= $e['range'][1]) {
+            $mappy[hexdec($v[1])] = [hexdec($v[0]), strtolower($v[2])];
+        }
     }
     ksort($mappy);
 
-    echo
-"static const uni_to_enc unimap_{$e['ident']}[] = {\n";
+    $content .= "static const uni_to_enc unimap_{$e['ident']}[] = {\n";
 
     foreach ($mappy as $k => $v) {
-        echo "\t{ ", sprintf("0x%04X", $k), ", ", sprintf("0x%02X", $v[0]), " },\t/* ",
-            $v[1], " */\n";
+        $content .= "\t{ ".sprintf("0x%04X", $k).", ".sprintf("0x%02X", $v[0])." },\t/* ".$v[1]." */\n";
     }
-    echo "};\n";
+    $content .= "};\n";
 
-    echo
-"/* {{{ end of mappings *from* Unicode for {$e['name']} */\n\n";
+    $content .= "/* {{{ end of mappings *from* Unicode for {$e['name']} */\n\n";
 }
 
-$data = file_get_contents("ents_html5.txt");
+$data = file_get_contents(__DIR__."/ents_html5.txt");
 $pass2 = false;
 $name = "HTML5";
 $ident = "html5";
@@ -418,81 +409,89 @@ typedef struct {
 
 CODE;
 
-if (!$pass2)
-    echo $t;
+if (!$pass2) {
+    $content .= $t;
+}
 
-$dp = array();
+$dp = [];
 
 foreach (explode("\n", $data) as $l) {
-	if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+) ([a-f0-9]+)/i', $l, $matches)) {
-		//echo sprintf("\t{\"%-21s 1, 0x%05d},\n", $matches[1].",", $matches[2]);
-		$dp[] = array($matches[1], $matches[2], $matches[3]);
-	} else if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+)/i', $l, $matches)) {
-		$dp[] = array($matches[1], $matches[2]);
-	}
+    if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+) ([a-f0-9]+)/i', $l, $matches)) {
+        //$content .= sprintf("\t{\"%-21s 1, 0x%05d},\n", $matches[1].",", $matches[2]);
+        $dp[] = [$matches[1], $matches[2], $matches[3]];
+    } else if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+)/i', $l, $matches)) {
+        $dp[] = [$matches[1], $matches[2]];
+    }
 }
 
 $origdp = $dp;
 
-usort($dp, function($a, $b) { return hexdec($a[1])-hexdec($b[1]); });
+// TODO: On PHP 7 versions this needs to be refactored https://bugs.php.net/69158
+usort($dp, function($a, $b) { return hexdec($a[1]) - hexdec($b[1]); });
 
-$multicp_rows = array();
+$multicp_rows = [];
 foreach ($dp as $el) {
-	if (count($el) == 3) {
-		$multicp_rows[$el[1]] = array();
-	}
+    if (count($el) == 3) {
+        $multicp_rows[$el[1]] = [];
+    }
 }
 
 foreach ($dp as $el) {
-	if (key_exists($el[1], $multicp_rows)) {
-		if (count($el) == 3)
-			$multicp_rows[$el[1]][$el[2]] = $el[0];
-		else
-			$multicp_rows[$el[1]]["default"] = $el[0];
-	}
+    if (key_exists($el[1], $multicp_rows)) {
+        if (count($el) == 3) {
+            $multicp_rows[$el[1]][$el[2]] = $el[0];
+        } else {
+            $multicp_rows[$el[1]]["default"] = $el[0];
+        }
+    }
 }
 
-if ($pass2 < 2)
-    echo "/* {{{ Start of $name multi-stage table for codepoint -> entity */", "\n\n";
-else
-    echo "/* {{{ Start of $name table for codepoint -> entity */", "\n\n";
+if ($pass2 < 2) {
+    $content .= "/* {{{ Start of $name multi-stage table for codepoint -> entity */". "\n\n";
+} else {
+    $content .= "/* {{{ Start of $name table for codepoint -> entity */"."\n\n";
+}
 
-if (empty($multicp_rows))
+if (empty($multicp_rows)) {
     goto skip_multicp;
+}
 
 ksort($multicp_rows);
 foreach ($multicp_rows as &$v) { ksort($v); }
 unset($v);
 
-echo
-"/* {{{ Start of double code point tables for $name */", "\n\n";
+$content .= "/* {{{ Start of double code point tables for $name */"."\n\n";
 
 foreach ($multicp_rows as $k => $v) {
-	echo "static const entity_multicodepoint_row multi_cp_{$ident}_",
-		sprintf("%05s", $k), "[] = {", "\n";
-	if (key_exists("default", $v)) {
-        if ($v['default'] == 'GT') /* hack to make > translate to &gt; not GT; */
+    $content .= "static const entity_multicodepoint_row multi_cp_{$ident}_".
+        sprintf("%05s", $k). "[] = {". "\n";
+    if (key_exists("default", $v)) {
+        /* hack to make > translate to &gt; not GT; */
+        if ($v['default'] == 'GT') {
             $v['default'] = "gt";
-		echo "\t{ {", sprintf("\"%-21s", $v["default"].'",'),
-			"\t", sprintf("%02d", (count($v) - 1)), ",\t\t",
-            sprintf("% 2d", strlen($v["default"])), '} },', "\n";
-	} else {
-		echo "\t{ {", sprintf("%-22s", 'NULL,'),
-			"\t", sprintf("%02d", count($v)), ",\t\t0} },\n";
-	}
-	unset($v["default"]);
-	foreach ($v as $l => $w) {
-		echo "\t{ {", sprintf("\"%-21s", $w.'",'), "\t", sprintf("0x%05s", $l), ",\t",
-            sprintf("% 2d", strlen($w)), '} },', "\n";
-	}
-	echo "};\n";
+        }
+
+        $content .= "\t{ {". sprintf("\"%-21s", $v["default"].'",').
+            "\t". sprintf("%02d", (count($v) - 1)). ",\t\t".
+            sprintf("% 2d", strlen($v["default"])). '} },'. "\n";
+    } else {
+        $content .= "\t{ {". sprintf("%-22s", 'NULL,').
+            "\t". sprintf("%02d", count($v)). ",\t\t0} },\n";
+    }
+    unset($v["default"]);
+    foreach ($v as $l => $w) {
+        $content .= "\t{ {". sprintf("\"%-21s", $w.'",'). "\t". sprintf("0x%05s", $l). ",\t".
+            sprintf("% 2d", strlen($w)). '} },'. "\n";
+    }
+    $content .= "};\n";
 }
-echo "\n/* End of double code point tables }}} */", "\n\n";
+$content .= "\n/* End of double code point tables }}} */". "\n\n";
 
 skip_multicp:
 
-if ($pass2 < 2)
-    echo "/* {{{ Stage 3 Tables for $name */", "\n\n";
+if ($pass2 < 2) {
+    $content .= "/* {{{ Stage 3 Tables for $name */". "\n\n";
+}
 
 $t = <<<CODE
 static const entity_stage3_row empty_stage3_table[] = {
@@ -517,64 +516,72 @@ static const entity_stage3_row empty_stage3_table[] = {
 
 CODE;
 
-if (!$pass2)
-    echo $t;
+if (!$pass2) {
+    $content .= $t;
+}
 
-$mstable = array();
+$mstable = [];
 foreach ($dp as $el) {
-	$s1 = (hexdec($el[1]) & 0xFFF000) >> 12;
-	$s2 = (hexdec($el[1]) & 0xFC0) >> 6;
-	$s3 = hexdec($el[1]) & 0x3F;
-	if (key_exists($el[1], $multicp_rows)) {
-		$mstable[$s1][$s2][$s3] = "";
-	} else {
-		$mstable[$s1][$s2][$s3] = $el[0];
-	}
+    $s1 = (hexdec($el[1]) & 0xFFF000) >> 12;
+    $s2 = (hexdec($el[1]) & 0xFC0) >> 6;
+    $s3 = hexdec($el[1]) & 0x3F;
+    if (key_exists($el[1], $multicp_rows)) {
+        $mstable[$s1][$s2][$s3] = "";
+    } else {
+        $mstable[$s1][$s2][$s3] = $el[0];
+    }
 }
 
 for ($i = 0; $i < 0x1E; $i++) {
-	for ($k = 0; $k < 64; $k++) {
-		$any3 = false;
-		$col3 = array();
-		for ($l = 0; $l < 64; $l++) {
-			if (isset($mstable[$i][$k][$l])) {
-				$any3 = true;
-				$col3[$l] = $mstable[$i][$k][$l];
-			} else {
-				$col3[$l] = null;
-			}
-		}
-		if ($any3) {
-			echo "static const entity_stage3_row stage3_table_{$ident}_",
-				sprintf("%02X%03X", $i, $k << 6), "[] = {\n";
-			foreach ($col3 as $y => $z) {
-				if ($y == 0) echo "\t";
-				elseif ($y % 4 == 0) echo "\n\t";
-				else echo " ";
-				if ($z === NULL)
-					echo "{0, { {NULL, 0} } },";
-                elseif ($z === "QUOT") /* hack to translate " into &quote;, not &QUOT; */
-                    echo "{0, { {\"quot\", 4} } },";
-				elseif ($z !== "")
-					echo "{0, { {\"$z\", ", strlen($z), "} } },";
-				else
-					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
-						($i << 12) | ($k << 6) | $y ), ", 0} } },";
+    for ($k = 0; $k < 64; $k++) {
+        $any3 = false;
+        $col3 = [];
+        for ($l = 0; $l < 64; $l++) {
+            if (isset($mstable[$i][$k][$l])) {
+                $any3 = true;
+                $col3[$l] = $mstable[$i][$k][$l];
+            } else {
+                $col3[$l] = null;
+            }
+        }
+        if ($any3) {
+            $content .= "static const entity_stage3_row stage3_table_{$ident}_".
+                sprintf("%02X%03X", $i, $k << 6). "[] = {\n";
+            foreach ($col3 as $y => $z) {
+                if ($y == 0) {
+                    $content .= "\t";
+                } elseif ($y % 4 == 0) {
+                    $content .= "\n\t";
+                } else {
+                    $content .= " ";
+                }
 
-			}
-			echo "\n};\n\n";
-		}
-	}
+                if ($z === NULL) {
+                    $content .= "{0, { {NULL, 0} } },";
+                } elseif ($z === "QUOT") { /* hack to translate " into &quote;, not &QUOT; */
+                    $content .= "{0, { {\"quot\", 4} } },";
+                } elseif ($z !== "") {
+                    $content .= "{0, { {\"$z\", ". strlen($z). "} } },";
+                } else {
+                    $content .= "{1, { {(void *)". sprintf("multi_cp_{$ident}_%05X",
+                    ($i << 12) | ($k << 6) | $y ). ", 0} } },";
+                }
+
+            }
+            $content .= "\n};\n\n";
+        }
+    }
 }
 
-if ($pass2 < 2)
-    echo "/* end of stage 3 Tables for $name }}} */", "\n\n";
+if ($pass2 < 2) {
+    $content .= "/* end of stage 3 Tables for $name }}} */". "\n\n";
+}
 
-if ($pass2 > 1)
+if ($pass2 > 1) {
     goto hashtables;
+}
 
-echo
-"/* {{{ Stage 2 Tables for $name */", "\n\n";
+$content .= "/* {{{ Stage 2 Tables for $name */". "\n\n";
 
 $t = <<<CODE
 static const entity_stage2_row empty_stage2_table[] = {
@@ -598,50 +605,55 @@ static const entity_stage2_row empty_stage2_table[] = {
 
 CODE;
 
-if (!$pass2)
-    echo $t;
-
-for ($i = 0; $i < 0x1E; $i++) {
-	$any = false;
-	for ($k = 0; $k < 64; $k++) {
-		if (isset($mstable[$i][$k]))
-			$any = true;
-	}
-	if ($any) {
-		echo "static const entity_stage2_row stage2_table_{$ident}_",
-			sprintf("%02X000", $i), "[] = {\n";
-		for ($k = 0; $k < 64; $k++) {
-			if ($k == 0) echo "\t";
-			elseif ($k % 4 == 0) echo "\n\t";
-			else echo " ";
-			if (isset($mstable[$i][$k])) {
-				echo sprintf("stage3_table_{$ident}_%05X", ($i << 12) | ($k << 6)), ",";
-			} else {
-				echo "empty_stage3_table", ",";
-			}
-		}
-		echo "\n};\n\n";
-	}
+if (!$pass2) {
+    $content .= $t;
 }
 
-echo
-"/* end of stage 2 tables for $name }}} */", "\n\n";
-
-echo "static const entity_stage1_row entity_ms_table_{$ident}[] = {\n";
 for ($i = 0; $i < 0x1E; $i++) {
-	if (isset($mstable[$i]))
-		echo "\t", sprintf("stage2_table_{$ident}_%02X000", $i), ",\n";
-	else
-		echo "\tempty_stage2_table,\n";
+    $any = false;
+    for ($k = 0; $k < 64; $k++) {
+        if (isset($mstable[$i][$k])) {
+            $any = true;
+        }
+    }
+    if ($any) {
+        $content .= "static const entity_stage2_row stage2_table_{$ident}_".
+            sprintf("%02X000", $i). "[] = {\n";
+        for ($k = 0; $k < 64; $k++) {
+            if ($k == 0) {
+                $content .= "\t";
+            } elseif ($k % 4 == 0) {
+                $content .= "\n\t";
+            } else {
+                $content .= " ";
+            }
+            if (isset($mstable[$i][$k])) {
+                $content .= sprintf("stage3_table_{$ident}_%05X", ($i << 12) | ($k << 6)). ",";
+            } else {
+                $content .= "empty_stage3_table". ",";
+            }
+        }
+        $content .= "\n};\n\n";
+    }
 }
-echo "};\n\n";
 
-echo
-"/* end of $name multi-stage table for codepoint -> entity }}} */\n\n";
+$content .= "/* end of stage 2 tables for $name }}} */". "\n\n";
+
+$content .= "static const entity_stage1_row entity_ms_table_{$ident}[] = {\n";
+for ($i = 0; $i < 0x1E; $i++) {
+    if (isset($mstable[$i])) {
+        $content .= "\t". sprintf("stage2_table_{$ident}_%02X000", $i). ",\n";
+    } else {
+        $content .= "\tempty_stage2_table,\n";
+    }
+}
+$content .= "};\n\n";
+
+$content .= "/* end of $name multi-stage table for codepoint -> entity }}} */\n\n";
 
 /* commented-out; this enabled binary search, which turned out to be
  * significantly slower than the hash tables for html 5 entities */
-//echo
+//$content .=
 //"/* {{{ HTML 5 tables for entity -> codepoint */", "\n\n";
 
 //$t = <<<CODE
@@ -658,7 +670,7 @@ echo
 //static const entity_cp_map html5_ent_cp_map[] = {
 //
 //CODE;
-//echo $t;
+//$content .= $t;
 //
 //$dp = $origdp;
 //usort($dp, function($a, $b) { $d = strlen($a[0])-strlen($b[0]);
@@ -666,14 +678,14 @@ echo
 //
 //$k = 0;
 //foreach ($dp as $o) {
-//	if ($k == 0) echo "\t";
-//	elseif ($k % 3 == 0) echo "\n\t";
-//	else echo " ";
+//	if ($k == 0) $content .= "\t";
+//	elseif ($k % 3 == 0) $content .= "\n\t";
+//	else $content .= " ";
 //	if (isset($o[2]))
-//		echo sprintf('{"%s", %d, 0x%X, 0x%X},', $o[0], strlen($o[0]),
+//		$content .= sprintf('{"%s", %d, 0x%X, 0x%X},', $o[0], strlen($o[0]),
 //			hexdec($o[1]), hexdec($o[2]));
 //	else
-//		echo sprintf('{"%s", %d, 0x%X, 0},', $o[0], strlen($o[0]),
+//		$content .= sprintf('{"%s", %d, 0x%X, 0},', $o[0], strlen($o[0]),
 //			hexdec($o[1]));
 //
 //	if (isset($o[2])) {
@@ -687,17 +699,16 @@ echo
 //
 //	$k++;
 //}
-//echo "\n};\n\n";
+//$content .= "\n};\n\n";
 //
-//echo "static const size_t html5_ent_cp_map_size = $k;\n\n";
+//$content .= "static const size_t html5_ent_cp_map_size = $k;\n\n";
 //
-//echo
+//$content .=
 //"/* end of HTML 5 tables for entity -> codepoint }}} */\n\n";
 
 hashtables:
 
-echo
-"/* {{{ $name hash table for entity -> codepoint */", "\n\n";
+$content .= "/* {{{ $name hash table for entity -> codepoint */". "\n\n";
 
 $t = <<<CODE
 typedef struct {
@@ -718,97 +729,101 @@ static const entity_cp_map ht_bucket_empty[] = { {NULL, 0, 0, 0} };
 
 CODE;
 
-if (!$pass2)
-    echo $t;
+if (!$pass2) {
+    $content .= $t;
+}
 
 function hashfun($str)
 {
+    $hash = 5381;
+    $nKeyLength = strlen($str);
+    $pos = 0;
 
-	$hash = 5381;
-	$nKeyLength = strlen($str);
-	$pos = 0;
-
-	for (; $nKeyLength > 0; $nKeyLength--) {
-		$hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]))
-				 & 0xFFFFFFFF;
-	}
-	return $hash;
-
+    for (; $nKeyLength > 0; $nKeyLength--) {
+        $hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]))
+                & 0xFFFFFFFF;
+    }
+    return $hash;
 }
 
 $numelems = max(pow(2, ceil(log(1.5*count($origdp))/log(2))),16);
 $mask = $numelems - 1;
-$hashes = array();
+$hashes = [];
 foreach ($origdp as $e) {
-	$hashes[hashfun($e[0]) & $mask][] = $e;
-	if (isset($e[2])) {
-		$entlen = strlen($e[0]) + 2;
-		$utf8len = strlen(
-			mb_convert_encoding("&#x{$e[1]};&#x{$e[2]};", "UTF-8", "HTML-ENTITIES"));
-		if ($utf8len > $entlen*1.2) {
-			die("violated assumption for traverse_for_entities");
-		}
-	}
+    $hashes[hashfun($e[0]) & $mask][] = $e;
+    if (isset($e[2])) {
+        $entlen = strlen($e[0]) + 2;
+        $utf8len = strlen(mb_convert_encoding("&#x{$e[1]};&#x{$e[2]};", "UTF-8", "HTML-ENTITIES"));
+        if ($utf8len > $entlen*1.2) {
+            die("violated assumption for traverse_for_entities");
+        }
+    }
 }
 
 for ($i = 0; $i < $numelems; $i++) {
-	if (empty($hashes[$i]))
-		continue;
-	echo "static const entity_cp_map ht_bucket_{$ident}_", sprintf("%03X", $i) ,"[] = {";
-	foreach ($hashes[$i] as $h) {
-		if (isset($h[2])) {
-			echo sprintf(' {"%s", %d, 0x%05X, 0x%05X},',
-				$h[0], strlen($h[0]), hexdec($h[1]), hexdec($h[2]));
-		} else {
-			echo sprintf(' {"%s", %d, 0x%05X, 0},',
-				$h[0], strlen($h[0]), hexdec($h[1]));
-		}
-	}
-	echo " {NULL, 0, 0, 0} };\n";
-}
-echo "\n";
+    if (empty($hashes[$i])) {
+        continue;
+    }
 
-echo
-"static const entity_cp_map *const ht_buckets_{$ident}[] = {\n";
+    $content .= "static const entity_cp_map ht_bucket_{$ident}_".sprintf("%03X", $i)."[] = {";
+    foreach ($hashes[$i] as $h) {
+        if (isset($h[2])) {
+            $content .= sprintf(' {"%s", %d, 0x%05X, 0x%05X},',
+                $h[0], strlen($h[0]), hexdec($h[1]), hexdec($h[2]));
+        } else {
+            $content .= sprintf(' {"%s", %d, 0x%05X, 0},',
+                $h[0], strlen($h[0]), hexdec($h[1]));
+        }
+    }
+    $content .= " {NULL, 0, 0, 0} };\n";
+}
+$content .= "\n";
+
+$content .= "static const entity_cp_map *const ht_buckets_{$ident}[] = {\n";
 
 for ($i = 0; $i < $numelems; $i++) {
-	if ($i == 0) echo "\t";
-	elseif ($i % 4 == 0) echo "\n\t";
-	else echo " ";
-	if (empty($hashes[$i]))
-		echo "ht_bucket_empty,";
-	else
-		echo "ht_bucket_{$ident}_", sprintf("%03X", $i), ",";
+    if ($i == 0) {
+        $content .= "\t";
+    } elseif ($i % 4 == 0) {
+        $content .= "\n\t";
+    } else {
+        $content .= " ";
+    }
+    if (empty($hashes[$i])) {
+        $content .= "ht_bucket_empty,";
+    } else {
+        $content .= "ht_bucket_{$ident}_". sprintf("%03X", $i). ",";
+    }
 }
-echo "\n};\n\n";
+$content .= "\n};\n\n";
 
-echo
-"static const entity_ht ent_ht_{$ident} = {
-	", sprintf("0x%X", $numelems), ",
+$content .= "static const entity_ht ent_ht_{$ident} = {
+	".sprintf("0x%X", $numelems).",
 	ht_buckets_{$ident}
 };\n\n";
 
-echo
-"/* end of $name hash table for entity -> codepoint }}} */\n\n";
+$content .= "/* end of $name hash table for entity -> codepoint }}} */\n\n";
 
 if (!$pass2) {
-    $data = file_get_contents("ents_html401.txt");
+    $data = file_get_contents(__DIR__."/ents_html401.txt");
     $pass2 = 1;
     $name = "HTML 4.01";
     $ident = "html4";
     goto again;
 } elseif ($pass2 == 1) {
-    $data = file_get_contents("ents_basic.txt");
+    $data = file_get_contents(__DIR__."/ents_basic.txt");
     $pass2 = 2;
     $name = "Basic entities (no apos)";
     $ident = "be_noapos";
     goto again;
 } elseif ($pass2 == 2) {
-    $data = file_get_contents("ents_basic_apos.txt");
+    $data = file_get_contents(__DIR__."/ents_basic_apos.txt");
     $pass2 = 3;
     $name = "Basic entities (with apos)";
     $ident = "be_apos";
     goto again;
 }
 
-echo "#endif /* HTML_TABLES_H */\n";
+$content .= "#endif /* HTML_TABLES_H */\n";
+
+file_put_contents(__DIR__.'/../html_tables.h', $content);
