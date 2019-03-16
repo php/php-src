@@ -41,7 +41,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objec
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_store *objects)
 {
-    EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
+	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
 	if (objects->top > 1) {
 		uint32_t i;
 		for (i = 1; i < objects->top; i++) {
