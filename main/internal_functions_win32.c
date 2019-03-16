@@ -52,9 +52,7 @@
 #if HAVE_CTYPE
 #include "ext/ctype/php_ctype.h"
 #endif
-#if HAVE_DATE
 #include "ext/date/php_date.h"
-#endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
 #endif
@@ -91,9 +89,7 @@
 #include "ext/xml/php_xml.h"
 #endif
 #include "ext/com_dotnet/php_com_dotnet.h"
-#ifdef HAVE_SPL
 #include "ext/spl/php_spl.h"
-#endif
 #if HAVE_XML && HAVE_XMLREADER
 #include "ext/xmlreader/php_xmlreader.h"
 #endif
