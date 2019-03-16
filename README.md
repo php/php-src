@@ -41,7 +41,6 @@ On \*nix systems:
     ./configure
     make
     make test
-    sudo make install
 
 See `./configure -h` and `make -h` for configuration options. For example, the
 `-j` option allows parallel execution of the build recipes where `N` is the
