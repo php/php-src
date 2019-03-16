@@ -140,7 +140,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
-	/* When in shutdown sequesnce - do not reuse previously freed handles, to make sure
+	/* When in shutdown sequence - do not reuse previously freed handles, to make sure
 	 * the dtors for newly created objects are called in zend_objects_store_call_destructors() loop
 	 */
 	if (EG(objects_store).free_list_head != -1 && EXPECTED(!(EG(flags) & EG_FLAGS_IN_SHUTDOWN))) {
