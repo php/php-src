@@ -346,10 +346,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set, 0, 0, 3)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_class_set_quick_print, 0, 0, 1)
-	ZEND_ARG_INFO(0, quick_print)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 struct objid_query {
