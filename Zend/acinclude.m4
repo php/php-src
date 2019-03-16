@@ -3,7 +3,7 @@ dnl This file contains local autoconf functions.
 AC_DEFUN([LIBZEND_BISON_CHECK],[
   # we only support certain bison versions;
   # min: 2.4 (i.e. 204, major * 100 + minor for easier comparison)
-  bison_version_min="204"
+  bison_version_min="300"
   # non-working versions, e.g. "3.0 3.2";
   # remove "none" when introducing the first incompatible bison version an
   # separate any following additions by spaces
