@@ -3,8 +3,6 @@
 # A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
 MAKE=${MAKE:-make}
-PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
-PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
 debug=0
 
