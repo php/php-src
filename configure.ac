@@ -194,17 +194,8 @@ PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs
 PHP_PROG_AWK
-PHP_PROG_BISON
-PHP_PROG_RE2C
-
-dnl Check if bison generated files exist when bison does not..
-case $php_cv_bison_version in
-  ""|invalid[)]
-    if ! test -f "$abs_srcdir/Zend/zend_language_parser.h" || ! test -f "$abs_srcdir/Zend/zend_language_parser.c" ; then
-      AC_MSG_ERROR([bison is required to build PHP/Zend when building a GIT checkout!])
-    fi
-    ;;
-esac
+PHP_PROG_BISON([3.0.0])
+PHP_PROG_RE2C([0.13.4])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto gcc extension with re2c],
