@@ -619,7 +619,6 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 {
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
-	int cwd_skip = 0;
 	char work_path[MAXPATHLEN];
 	char *result;
 #endif
@@ -638,8 +637,6 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			cwd[2] = '\0';
 		}
 #endif
-		cwd_skip = strlen(cwd)+1;
-
 		snprintf(work_path, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, path);
 		path = work_path;
 	}

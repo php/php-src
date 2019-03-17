@@ -15,7 +15,6 @@ char *
 gd_strtok_r (char *s, char *sep, char **state)
 {
   char separators[256];
-  char *start;
   char *result = 0;
   memset (separators, 0, sizeof (separators));
   while (*sep)
@@ -28,7 +27,6 @@ gd_strtok_r (char *s, char *sep, char **state)
       /* Pick up where we left off */
       s = *state;
     }
-  start = s;
   /* 1. EOS */
   if (!(*s))
     {
