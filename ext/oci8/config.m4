@@ -239,10 +239,14 @@ if test "$PHP_OCI8" != "no"; then
   fi
 
   dnl Set some port specific directory components for use later
-  PHP_CHECK_64BIT([
+  AC_CHECK_SIZEOF([long])
+  AC_MSG_CHECKING([if we're on a 64-bit platform])
+  AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
+    AC_MSG_RESULT([no])
     PHP_OCI8_OH_LIBDIR=lib32
     PHP_OCI8_IC_LIBDIR_SUFFIX=""
   ],[
+    AC_MSG_RESULT([yes])
     PHP_OCI8_OH_LIBDIR=lib
     PHP_OCI8_IC_LIBDIR_SUFFIX=64
   ])

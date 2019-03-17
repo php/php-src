@@ -20,10 +20,14 @@ if test $ac_cv_c_bigendian_php = yes; then
   AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define is hash3 algo is available])
   AC_MSG_WARN("Use SHA3 slow implementation on bigendian")
 else
-  PHP_CHECK_64BIT([
+  AC_CHECK_SIZEOF([long])
+  AC_MSG_CHECKING([if we're on a 64-bit platform])
+  AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
+    AC_MSG_RESULT([no])
     SHA3_DIR="sha3/generic32lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
   ],[
+    AC_MSG_RESULT([yes])
     SHA3_DIR="sha3/generic64lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])

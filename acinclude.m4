@@ -1746,25 +1746,6 @@ AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES],[
 ])
 
 dnl
-dnl PHP_CHECK_64BIT([do if 32], [do if 64])
-dnl
-dnl This macro is used to detect if we're at 64-bit platform or not.
-dnl It could be useful for those external libs, that have different precompiled
-dnl versions in different directories.
-dnl
-AC_DEFUN([PHP_CHECK_64BIT],[
-  AC_CHECK_SIZEOF([long])
-  AC_MSG_CHECKING([checking if we're at 64-bit platform])
-  if test "$ac_cv_sizeof_long" = "4" ; then
-    AC_MSG_RESULT([no])
-    $1
-  else
-    AC_MSG_RESULT([yes])
-    $2
-  fi
-])
-
-dnl
 dnl PHP_C_BIGENDIAN
 dnl
 dnl Replacement macro for AC_C_BIGENDIAN

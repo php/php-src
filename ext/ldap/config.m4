@@ -16,9 +16,13 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
   else
 
     dnl Find Oracle Instant Client RPM header location corresponding to the given lib path e.g. for --with-ldap=/usr/lib/oracle/12.1/client64/lib
-    PHP_CHECK_64BIT([
+    AC_CHECK_SIZEOF([long])
+    AC_MSG_CHECKING([if we're at 64-bit platform])
+    AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
+      AC_MSG_RESULT([no])
       PHP_OCI8_IC_LIBDIR_SUFFIX=""
     ],[
+      AC_MSG_RESULT([yes])
       PHP_OCI8_IC_LIBDIR_SUFFIX=64
     ])
 
