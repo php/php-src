@@ -547,6 +547,7 @@ static const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                getStartDate,                NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                getEndDate,                  NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                getDateInterval,             NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DatePeriod,                getRecurrences,              NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -4666,6 +4667,28 @@ PHP_METHOD(DatePeriod, getDateInterval)
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(dpobj->interval);
 	diobj->initialized = 1;
+}
+/* }}} */
+
+/* {{{ proto int DatePeriod::getRecurrences()
+   Get recurrences.
+*/
+PHP_METHOD(DatePeriod, getRecurrences)
+{
+        php_period_obj   *dpobj;
+        php_date_obj     *dateobj;
+
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+        dpobj = Z_PHPPERIOD_P(ZEND_THIS);
+
+        if (0 == dpobj->recurrences - dpobj->include_start_date) {
+                return;
+        }
+
+        RETURN_LONG(dpobj->recurrences - dpobj->include_start_date);
 }
 /* }}} */
 
