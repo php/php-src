@@ -1,4 +1,5 @@
 #! /bin/sh
+#
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
@@ -25,22 +26,32 @@ if test -z "$PHP_AUTOCONF"; then
   PHP_AUTOCONF='autoconf'
 fi
 
-# autoconf 2.68 or newer
+# Get required Autoconf version from the configure.ac
+required_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
+set -f; IFS='.'
+set -- $required_version
+required_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+set +f; unset IFS
+
+# Check autoconf version
 ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
-echo "buildconf: autoconf not found." >&2
-echo "           You need autoconf version 2.68 or newer installed" >&2
-echo "           to build PHP from Git." >&2
-exit 1
+  echo "buildconf: autoconf not found." >&2
+  echo "           You need autoconf version $required_version or newer installed" >&2
+  echo "           to build PHP from Git." >&2
+  exit 1
 fi
+
 IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "68" || test "$1" -lt "2"; then
-echo "buildconf: autoconf version $ac_version found." >&2
-echo "           You need autoconf version 2.68 or newer installed" >&2
-echo "           to build PHP from Git." >&2
-exit 1
+ac_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+
+if test "$ac_version_num" -lt "$required_num"; then
+  echo "buildconf: autoconf version $ac_version found." >&2
+  echo "           You need autoconf version $required_version or newer installed" >&2
+  echo "           to build PHP from Git." >&2
+  exit 1
 else
-echo "buildconf: autoconf version $ac_version (ok)"
+  echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 test -n "$stamp" && touch $stamp
