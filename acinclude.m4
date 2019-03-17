@@ -1820,11 +1820,28 @@ AC_DEFUN([PHP_PROG_AWK], [
 dnl
 dnl PHP_PROG_BISON
 dnl
-dnl Search for bison and check it's version
+dnl Search for bison and check its version
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
   AC_CHECK_PROG(YACC, bison, bison)
-  LIBZEND_BISON_CHECK
+
+  php_bison_check=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison)
+  php_bison_min_version=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison --min-version)
+  php_bison_version=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison --version)
+  php_bison_version_exclude=
+
+  case $php_bison_check in
+    ""|invalid[)]
+      if test -f "$abs_srcdir/Zend/zend_language_parser.h" && test -f "$abs_srcdir/Zend/zend_language_parser.c"; then
+        AC_MSG_WARN([This bison version is not supported for regeneration of the parser files (found: $php_bison_version, min: $php_bison_min_version, excluded: $php_bison_version_exclude).])
+      else
+        AC_MSG_ERROR([bison $php_bison_min_version is required to build parser files when building a GIT checkout (found: $php_bison_version)])
+      fi
+
+      YACC="exit 0;"
+      ;;
+  esac
+
   PHP_SUBST(YACC)
 ])
 
@@ -1835,27 +1852,23 @@ dnl Search for the re2c binary and check the version
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
-  if test -n "$RE2C"; then
-    AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      re2c_vernum=`$RE2C --vernum 2>/dev/null`
-      if test -z "$re2c_vernum" || test "$re2c_vernum" -lt "1304"; then
-        php_cv_re2c_version=invalid
-      else
-        php_cv_re2c_version="`$RE2C --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
-      fi
-    ])
-  fi
-  case $php_cv_re2c_version in
+
+  php_re2c_check=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c)
+  php_re2c_min_version=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c --min-version)
+  php_re2c_version=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c --version)
+
+  case $php_re2c_check in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_WARN([You will need re2c 0.13.4 or later if you want to regenerate PHP lexers.])
+        AC_MSG_WARN([You will need re2c $php_re2c_min_version or later if you want to regenerate PHP lexers.])
       else
-        AC_MSG_ERROR([You will need re2c 0.13.4 or later to generate PHP lexers.])
+        AC_MSG_ERROR([You will need re2c $php_re2c_min_version or later to generate PHP lexers. Current version: $php_re2c_version])
       fi
 
       RE2C="exit 0;"
       ;;
   esac
+
   PHP_SUBST(RE2C)
 ])
 
