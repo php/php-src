@@ -1,4 +1,5 @@
-#! /bin/sh
+#!/bin/sh
+#
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
@@ -15,34 +16,57 @@
 #  | Authors: Stig Bakken <ssb@php.net>                                   |
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
+#
+# Check PHP build system tools such as autoconf and their versions.
+#
+# SYNOPSIS:
+#   buildcheck.sh [stampfile]
+#
+# DESCRIPTION:
+#   Optional stampfile is for Makefile to check build system only once.
+#
+# ENVIRONMENT:
+#   The following optional variables are supported:
+#
+#   PHP_AUTOCONF    Overrides the path to autoconf tool.
+#                   PHP_AUTOCONF=/path/to/autoconf buildcheck.sh
 
 echo "buildconf: checking installation..."
 
 stamp=$1
 
 # Allow the autoconf executable to be overridden by $PHP_AUTOCONF.
-if test -z "$PHP_AUTOCONF"; then
-  PHP_AUTOCONF='autoconf'
+PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
+
+# Go to project root.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)
+
+# Get minimum required autoconf version from the configure.ac file.
+min_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
+
+# Check if autoconf exists.
+ac_version=$($PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//')
+
+if test -z "$ac_version"; then
+  echo "buildconf: autoconf not found." >&2
+  echo "           You need autoconf version $min_version or newer installed" >&2
+  echo "           to build PHP from Git." >&2
+  exit 1
 fi
 
-# autoconf 2.68 or newer
-ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
-if test -z "$ac_version"; then
-echo "buildconf: autoconf not found." >&2
-echo "           You need autoconf version 2.68 or newer installed" >&2
-echo "           to build PHP from Git." >&2
-exit 1
-fi
-IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "68" || test "$1" -lt "2"; then
-echo "buildconf: autoconf version $ac_version found." >&2
-echo "           You need autoconf version 2.68 or newer installed" >&2
-echo "           to build PHP from Git." >&2
-exit 1
+# Check autoconf version.
+set -f; IFS='.'; set -- $ac_version; set +f; IFS=' '
+ac_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+set -f; IFS='.'; set -- $min_version; set +f; IFS=' '
+min_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+
+if test "$ac_version_num" -lt "$min_version_num"; then
+  echo "buildconf: autoconf version $ac_version found." >&2
+  echo "           You need autoconf version $min_version or newer installed" >&2
+  echo "           to build PHP from Git." >&2
+  exit 1
 else
-echo "buildconf: autoconf version $ac_version (ok)"
+  echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 test -n "$stamp" && touch $stamp
-
-exit 0
