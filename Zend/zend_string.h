@@ -79,7 +79,7 @@ END_EXTERN_C()
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
 	GC_SET_REFCOUNT(str, 1); \
 	GC_TYPE_INFO(str) = IS_STRING; \
-	zend_string_forget_hash_val(str); \
+	ZSTR_H(str) = 0; \
 	ZSTR_LEN(str) = _len; \
 } while (0)
 
@@ -101,6 +101,7 @@ static zend_always_inline zend_ulong zend_string_hash_val(zend_string *s)
 static zend_always_inline void zend_string_forget_hash_val(zend_string *s)
 {
 	ZSTR_H(s) = 0;
+	GC_DEL_FLAGS(s, IS_STR_VALID_UTF8);
 }
 
 static zend_always_inline uint32_t zend_string_refcount(const zend_string *s)
@@ -133,7 +134,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 
 	GC_SET_REFCOUNT(ret, 1);
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-	zend_string_forget_hash_val(ret);
+	ZSTR_H(ret) = 0;
 	ZSTR_LEN(ret) = len;
 	return ret;
 }
@@ -144,7 +145,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 
 	GC_SET_REFCOUNT(ret, 1);
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-	zend_string_forget_hash_val(ret);
+	ZSTR_H(ret) = 0;
 	ZSTR_LEN(ret) = (n * m) + l;
 	return ret;
 }
