@@ -1104,7 +1104,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
+	options = (pce->compile_options & PCRE2_UTF) && !(GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)
+		? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -1403,8 +1404,12 @@ error:
 		efree(subpat_names);
 	}
 
-	/* Did we encounter an error? */
 	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
+		/* If there was no error and we're in /u mode, remember that the string is valid UTF-8. */
+		if ((pce->compile_options & PCRE2_UTF) && !ZSTR_IS_INTERNED(subject_str)) {
+			GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
+		}
+
 		RETVAL_LONG(matched);
 	} else {
 		RETVAL_FALSE;
