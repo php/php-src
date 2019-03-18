@@ -3215,6 +3215,10 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 2 + 0x%04X*12 = 0x%04X > 0x%04X", NumDirEntries, 2+NumDirEntries*12, value_len);
 		return FALSE;
 	}
+	if ((dir_start - value_ptr) > value_len - (2+NumDirEntries*12)) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: 0x%04X > 0x%04X", (dir_start - value_ptr) + (2+NumDirEntries*12), value_len);
+		return FALSE;
+	}
 
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
