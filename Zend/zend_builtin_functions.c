@@ -1022,7 +1022,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 			 !zend_check_protected(prop_info->ce, scope)) ||
-			 ((prop_info->flags & ZEND_ACC_PRIVATE) &&
+			((prop_info->flags & ZEND_ACC_PRIVATE) &&
 			  prop_info->ce != scope)) {
 			continue;
 		}
@@ -1997,6 +1997,20 @@ void debug_print_backtrace_args(zval *arg_array) /* {{{ */
 }
 /* }}} */
 
+static inline zend_bool skip_internal_handler(zend_execute_data *skip) /* {{{ */
+{
+	return !(skip->func && ZEND_USER_CODE(skip->func->common.type))
+			&& skip->prev_execute_data
+			&& skip->prev_execute_data->func
+			&& ZEND_USER_CODE(skip->prev_execute_data->func->common.type)
+			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL
+			&& skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL
+			&& skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL
+			&& skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME
+			&& skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL;
+}
+/* {{{ */
+
 /* {{{ proto void debug_print_backtrace([int options[, int limit]]) */
 ZEND_FUNCTION(debug_print_backtrace)
 {
@@ -2035,15 +2049,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 		skip = ptr;
 		/* skip internal handler */
-		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
-			skip->prev_execute_data &&
-			skip->prev_execute_data->func &&
-			ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
-			skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+		if (skip_internal_handler(skip)) {
 			skip = skip->prev_execute_data;
 		}
 
@@ -2244,15 +2250,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		skip = ptr;
 		/* skip internal handler */
-		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
-			skip->prev_execute_data &&
-			skip->prev_execute_data->func &&
-			ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
-			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
-			skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+		if (skip_internal_handler(skip)) {
 			skip = skip->prev_execute_data;
 		}
 
