@@ -35,7 +35,7 @@
 
 # Parser generator
 YACC=${YACC:-bison}
-YACC="$YACC -y -l"
+YACC="$YACC -l"
 
 # Lexer generator
 RE2C=${RE2C:-re2c}
