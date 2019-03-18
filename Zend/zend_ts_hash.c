@@ -264,13 +264,11 @@ ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, co
 	end_read(source);
 }
 
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
 {
 	begin_write(ht);
 	zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
-
-	return SUCCESS;
 }
 
 ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
