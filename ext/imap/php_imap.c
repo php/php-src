@@ -1356,7 +1356,7 @@ PHP_FUNCTION(imap_append)
 		}
 
 		zend_string_free(regex);
-		php_pcre_match_impl(pce, ZSTR_VAL(internal_date), ZSTR_LEN(internal_date), return_value, subpats, global,
+		php_pcre_match_impl(pce, internal_date, return_value, subpats, global,
 			0, Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
