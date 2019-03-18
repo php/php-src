@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Apache2Handler:
   . Fixed bug #77648 (BOM in sapi/apache2handler/php_functions.c). (cmb)
 
+- COM:
+  . Fixed bug #77578 (Crash when php unload). (cmb)
+
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
     (Kevin Adler)
