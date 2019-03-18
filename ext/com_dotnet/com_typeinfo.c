@@ -216,8 +216,8 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 /* Type-library stuff */
 void php_com_typelibrary_dtor(zval *pDest)
 {
-	ITypeLib **Lib = (ITypeLib**)Z_PTR_P(pDest);
-	ITypeLib_Release(*Lib);
+	ITypeLib *Lib = (ITypeLib*)Z_PTR_P(pDest);
+	ITypeLib_Release(Lib);
 }
 
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
