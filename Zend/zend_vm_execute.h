@@ -5894,6 +5894,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CONST & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -7994,6 +8002,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CONST & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -10912,6 +10928,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CONST & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -14393,6 +14417,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+				zval_ptr_dtor_nogc(free_op1);
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -15919,6 +15951,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+				zval_ptr_dtor_nogc(free_op1);
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -17559,6 +17599,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+				zval_ptr_dtor_nogc(free_op1);
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -44717,6 +44765,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CV & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -48827,6 +48883,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CV & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
@@ -54939,6 +55003,14 @@ num_index_prop:
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (IS_CV & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
