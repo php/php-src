@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #77691 (Opcache passes wrong value for inline array push
     assignments). (Nikita)
+  . Fixed bug #77743 (Incorrect pi node insertion for jmpznz with identical
+    successors). (Nikita)
 
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
