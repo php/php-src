@@ -61,6 +61,10 @@ PHP                                                                        NEWS
   . openssl_random_pseudo_bytes() now throws in error conditions.
     (Sammy Kaye Powers)
 
+- PCRE:
+  . Fixed bug #72685 (Repeated UTF-8 validation of same string in UTF-8 mode).
+    (Nikita)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)

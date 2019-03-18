@@ -415,3 +415,8 @@ The following extensions are affected:
     which improves performance of this function if it can be statically
     resolved. In namespaced code, this may require writing \array_key_exists()
     or explicitly importing the function.
+
+- PCRE:
+  . When preg_match() in UTF-8 mode ("u" modifier) is repeatedly called on the
+    same string (but possibly different offsets), it will only be checked for
+    UTF-8 validity once.

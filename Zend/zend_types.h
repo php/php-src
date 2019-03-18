@@ -579,6 +579,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
+#define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
