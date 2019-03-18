@@ -4736,8 +4736,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
 */
 PHP_METHOD(DatePeriod, getRecurrences)
 {
-	php_period_obj   *dpobj;
-	php_date_obj     *dateobj;
+	php_period_obj *dpobj;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
