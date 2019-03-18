@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
@@ -16,6 +16,9 @@
 #  | Authors: Stig Bakken <ssb@php.net>                                   |
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
+#
+# Checks if autoconf is installed and version matches the minimum defined in the
+# configure.ac file.
 
 echo "buildconf: checking installation..."
 
@@ -26,15 +29,14 @@ if test -z "$PHP_AUTOCONF"; then
   PHP_AUTOCONF='autoconf'
 fi
 
-# Get required Autoconf version from the configure.ac
-required_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
-set -f; IFS='.'
-set -- $required_version
-required_num="$(expr ${1} \* 10000 + ${2} \* 100)"
-set +f; unset IFS
+# Go to project root.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)
 
-# Check autoconf version
-ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+# Get required autoconf version from the configure.ac file.
+required_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
+
+# Check if autoconf exists.
+ac_version=$($PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//')
 if test -z "$ac_version"; then
   echo "buildconf: autoconf not found." >&2
   echo "           You need autoconf version $required_version or newer installed" >&2
@@ -42,7 +44,11 @@ if test -z "$ac_version"; then
   exit 1
 fi
 
-IFS=.; set $ac_version; IFS=' '
+# Check autoconf version.
+set -f; IFS='.'; set -- $required_version; set +f; IFS=' '
+required_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+
+set -f; IFS='.'; set -- $ac_version; set +f; IFS=' '
 ac_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
 
 if test "$ac_version_num" -lt "$required_num"; then
