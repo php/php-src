@@ -84,18 +84,5 @@ make RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/phar builddir=ext/phar top
   -f ext/phar/Makefile.frag \
   ext/phar/phar_path_check.c
 
-# Clean debug #line XY info from the bundled lexer files.
-cleanup_files=" \
-  ext/date/lib/parse_date.c \
-  ext/date/lib/parse_iso_intervals.c \
-"
-
-for f in $cleanup_files; do
-  echo "Cleaning file $f"
-  cp $f $f.orig
-  grep -v '^#line ' $f.orig > $f
-  rm -f $f.orig
-done
-
 # Return to the original directory.
 cd $original_path
