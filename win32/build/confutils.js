@@ -3042,7 +3042,7 @@ function toolset_setup_project_tools()
 		ERROR('sed is required')
 	}
 
-	RE2C = PATH_PROG('re2c');
+	var RE2C = PATH_PROG('re2c');
 	if (RE2C) {
 		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
