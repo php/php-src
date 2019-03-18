@@ -298,7 +298,7 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 /* }}} */
 
 zend_module_entry zend_builtin_module = { /* {{{ */
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"Core",
 	builtin_functions,
 	ZEND_MINIT(core),
@@ -933,7 +933,7 @@ ZEND_FUNCTION(get_parent_class)
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
 		ce = Z_OBJ_P(arg)->ce;
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
-	    ce = zend_lookup_class(Z_STR_P(arg));
+		ce = zend_lookup_class(Z_STR_P(arg));
 	}
 
 	if (ce && ce->parent) {
@@ -1021,9 +1021,9 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
-		     !zend_check_protected(prop_info->ce, scope)) ||
-		    ((prop_info->flags & ZEND_ACC_PRIVATE) &&
-		      prop_info->ce != scope)) {
+			 !zend_check_protected(prop_info->ce, scope)) ||
+			 ((prop_info->flags & ZEND_ACC_PRIVATE) &&
+			  prop_info->ce != scope)) {
 			continue;
 		}
 		prop = NULL;
@@ -1189,7 +1189,7 @@ ZEND_FUNCTION(get_class_methods)
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-	    ce = zend_lookup_class(Z_STR_P(klass));
+		ce = zend_lookup_class(Z_STR_P(klass));
 	}
 
 	if (!ce) {
@@ -1203,10 +1203,10 @@ ZEND_FUNCTION(get_class_methods)
 
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (scope &&
-		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
-		       zend_check_protected(mptr->common.scope, scope))
+			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
+			   zend_check_protected(mptr->common.scope, scope))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
-		       scope == mptr->common.scope)))
+			   scope == mptr->common.scope)))
 		) {
 			if (mptr->type == ZEND_USER_FUNCTION &&
 				(!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
@@ -1620,7 +1620,7 @@ ZEND_FUNCTION(restore_exception_handler)
 static void copy_class_or_interface_name(zval *array, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
 	if ((ce->refcount == 1 && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) ||
-	    same_name(key, ce->name)) {
+		same_name(key, ce->name)) {
 		key = ce->name;
 	}
 	add_next_index_str(array, zend_string_copy(key));
@@ -2036,14 +2036,14 @@ ZEND_FUNCTION(debug_print_backtrace)
 		skip = ptr;
 		/* skip internal handler */
 		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
-		    skip->prev_execute_data &&
-		    skip->prev_execute_data->func &&
-		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
-		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+			skip->prev_execute_data &&
+			skip->prev_execute_data->func &&
+			ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
+			skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}
 
@@ -2070,16 +2070,16 @@ ZEND_FUNCTION(debug_print_backtrace)
 			zend_string *zend_function_name;
 
 			func = call->func;
-            if (func->common.scope && func->common.scope->trait_aliases) {
-                zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
-            } else {
-                zend_function_name = func->common.function_name;
-            }
-            if (zend_function_name != NULL) {
-                function_name = ZSTR_VAL(zend_function_name);
-            } else {
-                function_name = NULL;
-            }
+			if (func->common.scope && func->common.scope->trait_aliases) {
+				zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
+			} else {
+				zend_function_name = func->common.function_name;
+			}
+			if (zend_function_name != NULL) {
+				function_name = ZSTR_VAL(zend_function_name);
+			} else {
+				function_name = NULL;
+			}
 		} else {
 			func = NULL;
 			function_name = NULL;
@@ -2171,7 +2171,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 			while (prev) {
 				if (prev_call &&
-				    prev_call->func &&
+					prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type)) {
 					prev = NULL;
 					break;
@@ -2245,14 +2245,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		skip = ptr;
 		/* skip internal handler */
 		if ((!skip->func || !ZEND_USER_CODE(skip->func->common.type)) &&
-		    skip->prev_execute_data &&
-		    skip->prev_execute_data->func &&
-		    ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
-		    skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
-		    skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
+			skip->prev_execute_data &&
+			skip->prev_execute_data->func &&
+			ZEND_USER_CODE(skip->prev_execute_data->func->common.type) &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_ICALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_UCALL &&
+			skip->prev_execute_data->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
+			skip->prev_execute_data->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			skip = skip->prev_execute_data;
 		}
 
@@ -2281,7 +2281,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 			while (prev) {
 				if (prev_call &&
-				    prev_call->func &&
+					prev_call->func &&
 					!ZEND_USER_CODE(prev_call->func->common.type) &&
 					!(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
 					break;
@@ -2305,7 +2305,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (call && call->func) {
 			func = call->func;
 			function_name = (func->common.scope &&
-			                 func->common.scope->trait_aliases) ?
+							 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
 					(object ? object->ce : func->common.scope), func) :
 				func->common.function_name;
