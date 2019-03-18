@@ -600,9 +600,10 @@ html_errors = On
 ; control characters. If your logger accepts everything, then no filtering
 ; is needed at all.
 ; Allowed values are:
-;   ascii (only base ASCII characters)
-;   no_ctrl (all characters except control characters)
+;   ascii (all printable ASCII characters and NL)
+;   no-ctrl (all characters except control characters)
 ;   all (all characters)
+; http://php.net/syslog.filter
 ;syslog.filter = ascii
 
 ;windows.show_crt_warning
