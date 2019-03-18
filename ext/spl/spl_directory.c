@@ -95,6 +95,7 @@ static void spl_filesystem_object_destroy_object(zend_object *object) /* {{{ */
 			} else {
 				php_stream_pclose(intern->u.file.stream);
 			}
+			intern->u.file.stream = NULL;
 		}
 		break;
 	default:
@@ -127,13 +128,11 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
 		}
 		break;
 	case SPL_FS_FILE:
-		if (intern->u.file.stream) {
-			if (intern->u.file.open_mode) {
-				efree(intern->u.file.open_mode);
-			}
-			if (intern->orig_path) {
-				efree(intern->orig_path);
-			}
+		if (intern->u.file.open_mode) {
+			efree(intern->u.file.open_mode);
+		}
+		if (intern->orig_path) {
+			efree(intern->orig_path);
 		}
 		spl_filesystem_file_free_line(intern);
 		break;
