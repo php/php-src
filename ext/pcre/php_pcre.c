@@ -981,14 +981,14 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	}
 
 	pce->refcount++;
-	php_pcre_match_impl(pce, ZSTR_VAL(subject), ZSTR_LEN(subject), return_value, subpats,
+	php_pcre_match_impl(pce, subject, return_value, subpats,
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset);
 	pce->refcount--;
 }
 /* }}} */
 
 /* {{{ php_pcre_match_impl() */
-PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t subject_len, zval *return_value,
+PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset)
 {
 	zval			 result_set,		/* Holds a set of subpatterns after
@@ -1009,6 +1009,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
 	PCRE2_SIZE		 start_offset2;
+
+	char *subject = ZSTR_VAL(subject_str);
+	size_t subject_len = ZSTR_LEN(subject_str);
 
 	ZVAL_UNDEF(&marks);
 

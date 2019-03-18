@@ -2009,7 +2009,7 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_GET_MATCH:
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_match_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &zcount,
+			php_pcre_match_impl(intern->u.regex.pce, subject, &zcount,
 				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0);
 			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
