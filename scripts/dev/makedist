@@ -104,7 +104,6 @@ for i in $LT_TARGETS; do
 done
 
 # removing junk files
-find . -name \*.orig -print0 | xargs -0 rm
 rm -fr autom4te.cache/
 
 # touching everything to be packaged
