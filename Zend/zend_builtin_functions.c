@@ -1317,41 +1317,47 @@ ZEND_FUNCTION(property_exists)
 }
 /* }}} */
 
-/* {{{ proto bool class_exists(string classname [, bool autoload])
-   Checks if the class exists */
-ZEND_FUNCTION(class_exists)
+static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, zend_bool expect) /* {{{ */
 {
-	zend_string *class_name;
-	zend_string *lc_name;
+	zend_string *name;
+	zend_string *lcname;
 	zend_class_entry *ce;
 	zend_bool autoload = 1;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(class_name)
+		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!autoload) {
-		if (ZSTR_VAL(class_name)[0] == '\\') {
+		if (ZSTR_VAL(name)[0] == '\\') {
 			/* Ignore leading "\" */
-			lc_name = zend_string_alloc(ZSTR_LEN(class_name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name) + 1, ZSTR_LEN(class_name) - 1);
+			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
 		} else {
-			lc_name = zend_string_tolower(class_name);
+			lcname = zend_string_tolower(name);
 		}
 
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_release_ex(lc_name, 0);
+		ce = zend_hash_find_ptr(EG(class_table), lcname);
+		zend_string_release_ex(lcname, 0);
 	} else {
-		ce = zend_lookup_class(class_name);
+		ce = zend_lookup_class(name);
 	}
 
  	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) == 0);
+ 		RETURN_BOOL(!(ce->ce_flags & flags) == !expect);
 	} else {
 		RETURN_FALSE;
 	}
+}
+/* {{{ */
+
+/* {{{ proto bool class_exists(string classname [, bool autoload])
+   Checks if the class exists */
+ZEND_FUNCTION(class_exists)
+{
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT, 0);
 }
 /* }}} */
 
@@ -1359,35 +1365,7 @@ ZEND_FUNCTION(class_exists)
    Checks if the class exists */
 ZEND_FUNCTION(interface_exists)
 {
-	zend_string *iface_name, *lc_name;
-	zend_class_entry *ce;
-	zend_bool autoload = 1;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(iface_name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(autoload)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (!autoload) {
-		if (ZSTR_VAL(iface_name)[0] == '\\') {
-			/* Ignore leading "\" */
-			lc_name = zend_string_alloc(ZSTR_LEN(iface_name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(iface_name) + 1, ZSTR_LEN(iface_name) - 1);
-		} else {
-			lc_name = zend_string_tolower(iface_name);
-		}
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_release_ex(lc_name, 0);
-		RETURN_BOOL(ce && ce->ce_flags & ZEND_ACC_INTERFACE);
-	}
-
-	ce = zend_lookup_class(iface_name);
-	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_INTERFACE) > 0);
-	} else {
-		RETURN_FALSE;
-	}
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 1);
 }
 /* }}} */
 
@@ -1395,36 +1373,7 @@ ZEND_FUNCTION(interface_exists)
  Checks if the trait exists */
 ZEND_FUNCTION(trait_exists)
 {
-	zend_string *trait_name, *lc_name;
-	zend_class_entry *ce;
-	zend_bool autoload = 1;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(trait_name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(autoload)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (!autoload) {
-		if (ZSTR_VAL(trait_name)[0] == '\\') {
-			/* Ignore leading "\" */
-			lc_name = zend_string_alloc(ZSTR_LEN(trait_name) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(trait_name) + 1, ZSTR_LEN(trait_name) - 1);
-		} else {
-			lc_name = zend_string_tolower(trait_name);
-		}
-
-		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_release_ex(lc_name, 0);
-	} else {
-		ce = zend_lookup_class(trait_name);
-	}
-
-	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) != 0);
-	} else {
-		RETURN_FALSE;
-	}
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 1);
 }
 /* }}} */
 
@@ -1678,9 +1627,7 @@ static void copy_class_or_interface_name(zval *array, zend_string *key, zend_cla
 }
 /* }}} */
 
-/* {{{ proto array get_declared_traits()
-   Returns an array of all declared traits. */
-ZEND_FUNCTION(get_declared_traits)
+static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags) /* {{{ */
 {
 	zend_string *key;
 	zend_class_entry *ce;
@@ -1693,10 +1640,19 @@ ZEND_FUNCTION(get_declared_traits)
 	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
 		if (key
 		 && ZSTR_VAL(key)[0] != 0
-		 && (ce->ce_flags & ZEND_ACC_TRAIT)) {
+		 && (ce->ce_flags & flags)
+		 && !(ce->ce_flags & skip_flags)) {
 			copy_class_or_interface_name(return_value, key, ce);
 		}
 	} ZEND_HASH_FOREACH_END();
+}
+/* {{{ */
+
+/* {{{ proto array get_declared_traits()
+   Returns an array of all declared traits. */
+ZEND_FUNCTION(get_declared_traits)
+{
+	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 0);
 }
 /* }}} */
 
@@ -1704,22 +1660,7 @@ ZEND_FUNCTION(get_declared_traits)
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	zend_string *key;
-	zend_class_entry *ce;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
-		if (key
-		 && ZSTR_VAL(key)[0] != 0
-		 && !(ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT))
-		 && (ce->ce_flags & ZEND_ACC_LINKED)) {
-			copy_class_or_interface_name(return_value, key, ce);
-		}
-	} ZEND_HASH_FOREACH_END();
+	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
 /* }}} */
 
@@ -1727,21 +1668,7 @@ ZEND_FUNCTION(get_declared_classes)
    Returns an array of all declared interfaces. */
 ZEND_FUNCTION(get_declared_interfaces)
 {
-	zend_string *key;
-	zend_class_entry *ce;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), key, ce) {
-		if (key
-		 && ZSTR_VAL(key)[0] != 0
-		 && (ce->ce_flags & ZEND_ACC_INTERFACE)) {
-			copy_class_or_interface_name(return_value, key, ce);
-		}
-	} ZEND_HASH_FOREACH_END();
+	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 0);
 }
 /* }}} */
 
