@@ -1763,24 +1763,20 @@ PHP_FUNCTION(mb_http_input)
  	if (typ == NULL) {
  		result = MBSTRG(http_input_identify);
  	} else {
+		*typ |= 0x20;
  		switch (*typ) {
-		case 'G':
 		case 'g':
 			result = MBSTRG(http_input_identify_get);
 			break;
-		case 'P':
 		case 'p':
 			result = MBSTRG(http_input_identify_post);
 			break;
-		case 'C':
 		case 'c':
 			result = MBSTRG(http_input_identify_cookie);
 			break;
-		case 'S':
 		case 's':
 			result = MBSTRG(http_input_identify_string);
 			break;
-		case 'I':
 		case 'i':
 			{
 				const mbfl_encoding **entry = MBSTRG(http_input_list);
@@ -1794,7 +1790,6 @@ PHP_FUNCTION(mb_http_input)
 				retname = 0;
 			}
 			break;
-		case 'L':
 		case 'l':
 			{
 				const mbfl_encoding **entry = MBSTRG(http_input_list);
