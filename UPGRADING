@@ -133,6 +133,12 @@ PHP 7.4 UPGRADE NOTES
   . Support for preloading code has been added.
     RFC: https://wiki.php.net/rfc/preload
 
+- PCRE:
+  . The preg_replace_callback() and preg_replace_callback_array() functions now
+    accept an additional $flags argument, with support for the
+    PREG_OFFSET_CAPTURE and PREG_UNMATCHED_AS_NULL flags. This influences the
+    format of the matches array passed to to the callback function.
+
 - PDO_OCI:
   . PDOStatement::getColumnMeta() is now available
 
