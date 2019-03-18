@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #77597 (mysqli_fetch_field hangs scripts). (Nikita)
 
+- Opcache:
+  . Fixed bug #77743 (Incorrect pi node insertion for jmpznz with identical
+    successors). (Nikita)
+
 - Phar:
   . Fxied bug #77697 (Crash on Big_Endian platform). (Laruence)
 
