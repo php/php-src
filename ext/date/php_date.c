@@ -4675,20 +4675,19 @@ PHP_METHOD(DatePeriod, getDateInterval)
 */
 PHP_METHOD(DatePeriod, getRecurrences)
 {
-        php_period_obj   *dpobj;
-        php_date_obj     *dateobj;
+	php_period_obj   *dpobj;
 
-        if (zend_parse_parameters_none() == FAILURE) {
-                return;
-        }
+	if (zend_parse_parameters_none() == FAILURE) {
+			return;
+	}
 
-        dpobj = Z_PHPPERIOD_P(ZEND_THIS);
+	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
-        if (0 == dpobj->recurrences - dpobj->include_start_date) {
-                return;
-        }
+	if (0 == dpobj->recurrences - dpobj->include_start_date) {
+			return;
+	}
 
-        RETURN_LONG(dpobj->recurrences - dpobj->include_start_date);
+	RETURN_LONG(dpobj->recurrences - dpobj->include_start_date);
 }
 /* }}} */
 
