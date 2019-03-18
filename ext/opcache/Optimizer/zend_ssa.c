@@ -54,6 +54,14 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 		return 0;
 	}
 
+	/* Make sure that both sucessors of the from block aren't the same. Pi nodes are associated
+	 * with predecessor blocks, so we can't distinguish which edge the pi belongs to. */
+	from_block = &ssa->cfg.blocks[from];
+	ZEND_ASSERT(from_block->successors_count == 2);
+	if (from_block->successors[0] == from_block->successors[1]) {
+		return 0;
+	}
+
 	to_block = &ssa->cfg.blocks[to];
 	if (to_block->predecessors_count == 1) {
 		/* Always place pi if one predecessor (an if branch) */
@@ -62,8 +70,6 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 
 	/* Check that the other successor of the from block does not dominate all other predecessors.
 	 * If it does, we'd probably end up annihilating a positive+negative pi assertion. */
-	from_block = &ssa->cfg.blocks[from];
-	ZEND_ASSERT(from_block->successors_count == 2);
 	other_successor = from_block->successors[0] == to
 		? from_block->successors[1] : from_block->successors[0];
 	return !dominates_other_predecessors(&ssa->cfg, to_block, other_successor, from);
