@@ -41,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed bug #77743 (Incorrect pi node insertion for jmpznz with identical
     successors). (Nikita)
 
+- phpdbg:
+  . Fixed bug #77767 (phpdbg break cmd aliases listed in help do not match
+    actual aliases). (Miriam Lauter)
+
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
