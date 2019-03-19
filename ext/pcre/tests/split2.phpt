@@ -310,8 +310,5 @@ array(6) {
 Warning: preg_last_error() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 bool(true)
-array(1) {
-  [0]=>
-  string(6) "ab2c3u"
-}
+bool(false)
 bool(true)
