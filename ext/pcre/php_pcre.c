@@ -1290,7 +1290,11 @@ matched:
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								if (unmatched_as_null) {
+								if (offset_capture) {
+									add_offset_pair(
+										&match_sets[i], NULL, 0, PCRE2_UNSET,
+										NULL, unmatched_as_null);
+								} else if (unmatched_as_null) {
 									add_next_index_null(&match_sets[i]);
 								} else {
 									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
