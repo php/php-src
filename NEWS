@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.4
+?? ??? ????, PHP 7.3.5
+
+28 Mar 2019, PHP 7.3.4
 
 - Core:
   . Fixed bug #77738 (Nullptr deref in zend_compile_expr). (Laruence)
