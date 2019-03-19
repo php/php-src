@@ -4292,7 +4292,22 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 	*scope_name = NULL;
 	*lib = NULL;
 	while (*code_pos == '#') {
-		if (strncmp(code_pos, "#define FFI_SCOPE \"", sizeof("#define FFI_SCOPE \"") - 1) == 0) {
+		if (strncmp(code_pos, "#define FFI_SCOPE", sizeof("#define FFI_SCOPE") - 1) == 0
+		 && (code_pos[sizeof("#define FFI_SCOPE") - 1] == ' '
+		  || code_pos[sizeof("#define FFI_SCOPE") - 1] == '\t')) {
+			p = code_pos + sizeof("#define FFI_SCOPE");
+			while (*p == ' ' || *p == '\t') {
+				p++;
+			}
+			if (*p != '"') {
+				if (preload) {
+					zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_SCOPE define", filename);
+				} else {
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_SCOPE define", filename);
+				}
+				return NULL;
+			}
+			p++;
 			if (*scope_name) {
 				if (preload) {
 					zend_error(E_WARNING, "FFI: failed pre-loading '%s', FFI_SCOPE defined twice", filename);
@@ -4301,7 +4316,7 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 				}
 				return NULL;
 			}
-			*scope_name = p = code_pos + sizeof("#define FFI_SCOPE \"") - 1;
+			*scope_name = p;
 			while (1) {
 				if (*p == '\"') {
 					*p = 0;
@@ -4324,7 +4339,22 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 				p++;
 			}
 			code_pos = p;
-		} else if (strncmp(code_pos, "#define FFI_LIB \"", sizeof("#define FFI_LIB \"") - 1) == 0) {
+		} else if (strncmp(code_pos, "#define FFI_LIB", sizeof("#define FFI_LIB") - 1) == 0
+		 && (code_pos[sizeof("#define FFI_LIB") - 1] == ' '
+		  || code_pos[sizeof("#define FFI_LIB") - 1] == '\t')) {
+			p = code_pos + sizeof("#define FFI_LIB");
+			while (*p == ' ' || *p == '\t') {
+				p++;
+			}
+			if (*p != '"') {
+				if (preload) {
+					zend_error(E_WARNING, "FFI: failed pre-loading '%s', bad FFI_LIB define", filename);
+				} else {
+					zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', bad FFI_LIB define", filename);
+				}
+				return NULL;
+			}
+			p++;
 			if (*lib) {
 				if (preload) {
 					zend_error(E_WARNING, "FFI: failed pre-loading '%s', FFI_LIB defined twice", filename);
@@ -4333,7 +4363,7 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 				}
 				return NULL;
 			}
-			*lib = p = code_pos + sizeof("#define FFI_LIB \"") - 1;
+			*lib = p;
 			while (1) {
 				if (*p == '\"') {
 					*p = 0;
