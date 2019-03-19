@@ -1818,24 +1818,43 @@ AC_DEFUN([PHP_PROG_AWK], [
 ])
 
 dnl
-dnl PHP_PROG_BISON
+dnl PHP_PROG_BISON([MAJOR.MINOR.PATCH])
 dnl
 dnl Search for bison and check its version
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
   AC_CHECK_PROG(YACC, bison, bison)
 
-  php_bison_check=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison)
-  php_bison_min_version=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison --min-version)
-  php_bison_version=$(YACC=$YACC SED=$SED $abs_srcdir/build/versions.sh --bison --version)
-  php_bison_version_exclude=
+  php_bison_required=$1
 
-  case $php_bison_check in
+  ac_IFS=$IFS
+  IFS="."
+  set $php_bison_required
+  IFS=$ac_IFS
+  php_bison_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+  if test -n "$YACC"; then
+    AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
+      version_vars=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z)
+      ac_IFS=$IFS
+      IFS=" "
+      set $version_vars
+      IFS=$ac_IFS
+      php_bison_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+      if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
+        php_cv_bison_version=invalid
+      else
+        php_cv_bison_version="[$]1.[$]2.[$]3"
+      fi
+    ])
+  fi
+  case $php_cv_bison_version in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_parser.h" && test -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_WARN([This bison version is not supported for regeneration of the parser files (found: $php_bison_version, min: $php_bison_min_version, excluded: $php_bison_version_exclude).])
+        AC_MSG_WARN([This bison version is not supported for regeneration of the parser files. Required: $php_bison_required).])
       else
-        AC_MSG_ERROR([bison $php_bison_min_version is required to build parser files when building a GIT checkout (found: $php_bison_version)])
+        AC_MSG_ERROR([bison $php_bison_required is required to build parser files when building a GIT checkout (found: $php_cv_bison_version)])
       fi
 
       YACC="exit 0;"
@@ -1846,23 +1865,43 @@ AC_DEFUN([PHP_PROG_BISON], [
 ])
 
 dnl
-dnl PHP_PROG_RE2C
+dnl PHP_PROG_RE2C([MAJOR.MINOR.PATCH])
 dnl
-dnl Search for the re2c binary and check the version
+dnl Search for the re2c binary and check the version.
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
 
-  php_re2c_check=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c)
-  php_re2c_min_version=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c --min-version)
-  php_re2c_version=$(RE2C=$RE2C SED=$SED $abs_srcdir/build/versions.sh --re2c --version)
+  php_re2c_required=$1
 
-  case $php_re2c_check in
+  ac_IFS=$IFS
+  IFS="."
+  set $php_re2c_required
+  IFS=$ac_IFS
+  php_re2c_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+  if test -n "$RE2C"; then
+    AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
+      version_vars=$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)
+      ac_IFS=$IFS
+      IFS="."
+      set $version_vars
+      IFS=$ac_IFS
+      php_re2c_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+      if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
+        php_cv_re2c_version=invalid
+      else
+        php_cv_re2c_version="[$]1.[$]2.[$]3"
+      fi
+    ])
+  fi
+  case $php_cv_re2c_version in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_WARN([You will need re2c $php_re2c_min_version or later if you want to regenerate PHP lexers.])
+        AC_MSG_WARN([You will need re2c $php_re2c_required or later if you want to regenerate PHP lexers.])
       else
-        AC_MSG_ERROR([You will need re2c $php_re2c_min_version or later to generate PHP lexers. Current version: $php_re2c_version])
+        AC_MSG_ERROR([You will need re2c $php_re2c_required or later to generate PHP lexers.])
       fi
 
       RE2C="exit 0;"

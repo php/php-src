@@ -36,6 +36,7 @@
 # Parser generator
 YACC=${YACC:-bison}
 YACC="$YACC -l"
+SED=${SED:-sed}
 
 # Lexer generator
 RE2C=${RE2C:-re2c}
@@ -51,27 +52,59 @@ original_path=`pwd`
 project_root=`CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P`
 cd $project_root
 
-# Check bison version.
-bison_check=$(YACC=$YACC ./build/versions.sh --bison)
-bison_version=$(YACC=$YACC ./build/versions.sh --bison --version)
-bison_min_version=$(YACC=$YACC ./build/versions.sh --bison --min-version)
-case $bison_check in
-  ""|invalid)
-    echo "You will need bison >= $bison_min_version if you want to generate parser files (found $bison_version)." >&2
-    exit 1
-  ;;
-esac
+# Get required bison version from the configure.ac file.
+required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\(.*\)\])/\1/p' configure.ac)
+set -f; IFS='.'; set -- $required_bison_version; set +f; IFS=' '
+required_bison_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
 
-# Check re2c version.
-re2c_check=$(RE2C=$RE2C ./build/versions.sh --re2c)
-re2c_version=$(RE2C=$RE2C ./build/versions.sh --re2c --version)
-re2c_min_version=$(RE2C=$RE2C ./build/versions.sh --re2c --min-version)
-case $re2c_check in
-  ""|invalid)
-    echo "You will need re2c >= $re2c_min_version if you want to generate lexer files (found $re2c_version)." >&2
-    exit 1
-  ;;
-esac
+version_vars=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z)
+set -f; IFS=' '; set -- $version_vars; set +f; IFS=' '
+current_version="${1}.${2}.${3}"
+current_bison_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+
+# Check if bison exists.
+if test -z "$current_version"; then
+  echo "genfiles: bison not found." >&2
+  echo "          You need bison version $required_bison_version or newer installed" >&2
+  echo "          to regenerate parser files." >&2
+  exit 1
+fi
+
+if test "$current_bison_num" -lt "$required_bison_num"; then
+  echo "genfiles: bison version $current_version found." >&2
+  echo "          You need bison version $required_bison_version or newer installed" >&2
+  echo "          to build parser files." >&2
+  exit 1
+else
+  echo "genfiles: bison version $current_version (ok)"
+fi
+
+# Get required re2c version from the configure.ac file.
+required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
+set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
+required_re2c_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+
+version_vars="$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)"
+set -f; IFS='.'; set -- $version_vars; set +f; IFS=' '
+current_version="${1}.${2}.${3}"
+current_re2c_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+
+# Check if bison exists.
+if test -z "$current_version"; then
+  echo "genfiles: re2c not found." >&2
+  echo "          You need re2c version $required_re2c_version or newer installed" >&2
+  echo "          to regenerate lexer files." >&2
+  exit 1
+fi
+
+if test "$current_re2c_num" -lt "$required_re2c_num"; then
+  echo "genfiles: re2c version $current_version found." >&2
+  echo "          You need re2c version $required_re2c_version or newer installed" >&2
+  echo "          to build lexer files." >&2
+  exit 1
+else
+  echo "genfiles: re2c version $current_version (ok)"
+fi
 
 # Check if make exists.
 if ! test -x "$(command -v $MAKE)"; then
