@@ -121,7 +121,11 @@ array (
   ),
   'a' => 
   array (
-    0 => NULL,
+    0 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
     1 => 
     array (
       0 => NULL,
@@ -132,11 +136,19 @@ array (
       0 => '4',
       1 => 3,
     ),
-    3 => NULL,
+    3 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
   ),
   1 => 
   array (
-    0 => NULL,
+    0 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
     1 => 
     array (
       0 => NULL,
@@ -147,29 +159,57 @@ array (
       0 => '4',
       1 => 3,
     ),
-    3 => NULL,
+    3 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
   ),
   'b' => 
   array (
-    0 => NULL,
+    0 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
     1 => 
     array (
       0 => '2',
       1 => 1,
     ),
-    2 => NULL,
-    3 => NULL,
+    2 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
+    3 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
   ),
   2 => 
   array (
-    0 => NULL,
+    0 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
     1 => 
     array (
       0 => '2',
       1 => 1,
     ),
-    2 => NULL,
-    3 => NULL,
+    2 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
+    3 => 
+    array (
+      0 => NULL,
+      1 => -1,
+    ),
   ),
 )
 
