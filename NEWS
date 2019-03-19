@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.18
 
-- interbase:
+- Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
+
+- Standard:
+  . Fixed bug #77680 (recursive mkdir on ftp stream wrapper is incorrect).
+    (Vlad Temian)
 
 04 Apr 2019, PHP 7.2.17
 
