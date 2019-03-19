@@ -1763,8 +1763,8 @@ PHP_FUNCTION(mb_http_input)
  	if (typ == NULL) {
  		result = MBSTRG(http_input_identify);
  	} else {
-		*typ |= 0x20;
- 		switch (*typ) {
+		//Lowercase argument
+ 		switch (*typ | 0x20) {
 		case 'g':
 			result = MBSTRG(http_input_identify_get);
 			break;
