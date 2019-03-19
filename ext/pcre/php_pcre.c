@@ -2500,7 +2500,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 		if (!match_data) {
 			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-			return;
+			zval_ptr_dtor(return_value);
+			RETURN_FALSE;
 		}
 	}
 
@@ -2618,6 +2619,11 @@ error:
 	}
 	if (match_data != mdata) {
 		pcre2_match_data_free(match_data);
+	}
+
+	if (PCRE_G(error_code) != PHP_PCRE_NO_ERROR) {
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
 	}
 
 last:

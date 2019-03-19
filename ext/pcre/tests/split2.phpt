@@ -306,8 +306,5 @@ array(6) {
   }
 }
 bool(true)
-array(1) {
-  [0]=>
-  string(6) "ab2c3u"
-}
+bool(false)
 bool(true)
