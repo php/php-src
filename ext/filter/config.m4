@@ -6,13 +6,6 @@ PHP_ARG_ENABLE([filter],
     [Disable input filter support])],
   [yes])
 
-PHP_ARG_WITH([pcre-dir],
-  [pcre install prefix],
-  [AS_HELP_STRING([--with-pcre-dir],
-    [FILTER: pcre install prefix])],
-  [no],
-  [no])
-
 if test "$PHP_FILTER" != "no"; then
   PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(FILTER_SHARED_LIBADD)
