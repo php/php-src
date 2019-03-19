@@ -1317,7 +1317,7 @@ ZEND_FUNCTION(property_exists)
 }
 /* }}} */
 
-static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, zend_bool expect) /* {{{ */
+static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, int skip_flags) /* {{{ */
 {
 	zend_string *name;
 	zend_string *lcname;
@@ -1346,7 +1346,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, ze
 	}
 
  	if (ce) {
- 		RETURN_BOOL(!(ce->ce_flags & flags) == !expect);
+ 		RETURN_BOOL((flags == 0 || (ce->ce_flags & flags)) && !(ce->ce_flags & skip_flags));
 	} else {
 		RETURN_FALSE;
 	}
@@ -1357,7 +1357,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, ze
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT, 0);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
 /* }}} */
 
@@ -1365,7 +1365,7 @@ ZEND_FUNCTION(class_exists)
    Checks if the class exists */
 ZEND_FUNCTION(interface_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 1);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 0);
 }
 /* }}} */
 
@@ -1373,7 +1373,7 @@ ZEND_FUNCTION(interface_exists)
  Checks if the trait exists */
 ZEND_FUNCTION(trait_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 1);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_TRAIT, 0);
 }
 /* }}} */
 
