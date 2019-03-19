@@ -93,11 +93,13 @@ array(1) {
 }
 string(3) "abc"
 
-array(2) {
+array(3) {
   [0]=>
   string(1) "a"
   [1]=>
   string(1) "a"
+  [2]=>
+  NULL
 }
 array(3) {
   [0]=>
@@ -109,11 +111,13 @@ array(3) {
 }
 string(3) "abc"
 
-array(2) {
+array(3) {
   [0]=>
   string(1) "a"
   [1]=>
   string(1) "a"
+  [2]=>
+  NULL
 }
 array(3) {
   [0]=>

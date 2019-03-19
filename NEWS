@@ -67,9 +67,11 @@ PHP                                                                        NEWS
     (Sammy Kaye Powers)
 
 - PCRE:
+  . Implemented FR #77094 (Support flags in preg_replace_callback). (Nikita)
   . Fixed bug #72685 (Repeated UTF-8 validation of same string in UTF-8 mode).
     (Nikita)
-  . Implemented FR #77094 (Support flags in preg_replace_callback). (Nikita)
+  . Fixed bug #73948 (Preg_match_all should return NULLs on trailing optional
+    capture groups).
 
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,

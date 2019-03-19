@@ -1028,7 +1028,7 @@ static inline void populate_match_value(
 
 static void populate_subpat_array(
 		zval *subpats, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
-		int count, const PCRE2_SPTR mark, zend_long flags) {
+		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
 	zend_bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
 	zend_bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 	zval val;
@@ -1040,6 +1040,11 @@ static void populate_subpat_array(
 								offsets[(i<<1)+1] - offsets[i<<1],
 								offsets[i<<1], subpat_names[i], unmatched_as_null);
 			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_offset_pair(subpats, NULL, 0, PCRE2_UNSET, subpat_names[i], 1);
+				}
+			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
@@ -1050,6 +1055,15 @@ static void populate_subpat_array(
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
 			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					ZVAL_NULL(&val);
+					if (subpat_names[i]) {
+						zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &val);
+					}
+					zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
+				}
+			}
 		}
 	} else {
 		if (offset_capture) {
@@ -1058,11 +1072,21 @@ static void populate_subpat_array(
 								offsets[(i<<1)+1] - offsets[i<<1],
 								offsets[i<<1], NULL, unmatched_as_null);
 			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_offset_pair(subpats, NULL, 0, PCRE2_UNSET, NULL, 1);
+				}
+			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
 					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
+			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_next_index_null(subpats);
+				}
 			}
 		}
 	}
@@ -1306,7 +1330,8 @@ matched:
 						array_init_size(&result_set, count + (mark ? 1 : 0));
 						mark = pcre2_get_mark(match_data);
 						populate_subpat_array(
-							&result_set, subject, offsets, subpat_names, count, mark, flags);
+							&result_set, subject, offsets, subpat_names,
+							num_subpats, count, mark, flags);
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set);
 					}
@@ -1314,7 +1339,7 @@ matched:
 					/* For each subpattern, insert it into the subpatterns array. */
 					mark = pcre2_get_mark(match_data);
 					populate_subpat_array(
-						subpats, subject, offsets, subpat_names, count, mark, flags);
+						subpats, subject, offsets, subpat_names, num_subpats, count, mark, flags);
 					break;
 				}
 			}
@@ -1473,14 +1498,14 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, int count, const PCRE2_SPTR mark, zend_long flags)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
 	zend_string *result_str;
 	zval		 retval;			/* Function return value */
 	zval	     arg;				/* Argument to pass to function */
 
 	array_init_size(&arg, count + (mark ? 1 : 0));
-	populate_subpat_array(&arg, subject, offsets, subpat_names, count, mark, flags);
+	populate_subpat_array(&arg, subject, offsets, subpat_names, num_subpats, count, mark, flags);
 
 	fci->retval = &retval;
 	fci->param_count = 1;
@@ -1878,7 +1903,8 @@ matched:
 			new_len = result_len + offsets[0] - start_offset; /* part before the match */
 
 			/* Use custom function to get replacement string and its length. */
-			eval_result = preg_do_repl_func(fci, fcc, subject, offsets, subpat_names, count,
+			eval_result = preg_do_repl_func(
+				fci, fcc, subject, offsets, subpat_names, num_subpats, count,
 				pcre2_get_mark(match_data), flags);
 
 			ZEND_ASSERT(eval_result);

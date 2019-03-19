@@ -50,6 +50,11 @@ PHP 7.4 UPGRADE NOTES
     function does not throw, so explicitly checking it is not necessary.
     RFC: http://php.net/manual/de/function.openssl-random-pseudo-bytes.php
 
+- PCRE:
+  . When PREG_UNMATCHED_AS_NULL mode is used, trailing unmatched capturing
+    groups will now also be set to null (or [null, -1] if offset capture is
+    enabled). This means that the size of the $matches will always be the same.
+
 - PEAR:
   . Installation of PEAR (including PECL) is no longer enabled by default. It
     can be explicitly enabled using --with-pear. This option is deprecated and
