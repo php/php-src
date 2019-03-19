@@ -41,5 +41,5 @@ array(1) {
   }
 }
 
-Warning: preg_match(): Compilation failed: group name must start with a non-digit at offset %d in %smatch_flags3.php on line %d
+Warning: preg_match(): Compilation failed: %s name must start with a non-digit at offset %d in %smatch_flags3.php on line %d
 bool(false)
