@@ -259,6 +259,8 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
+	ZVAL_UNDEF(&pcre_globals->unmatched_null_pair);
+	ZVAL_UNDEF(&pcre_globals->unmatched_empty_pair);
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	pcre_globals->jit = 1;
 #endif
@@ -459,6 +461,15 @@ static PHP_RINIT_FUNCTION(pcre)
 }
 /* }}} */
 #endif
+
+static PHP_RSHUTDOWN_FUNCTION(pcre)
+{
+	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
+	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
+	ZVAL_UNDEF(&PCRE_G(unmatched_null_pair));
+	ZVAL_UNDEF(&PCRE_G(unmatched_empty_pair));
+	return SUCCESS;
+}
 
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
@@ -937,26 +948,57 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
+static void init_unmatched_null_pair() {
+	zval tmp;
+	zval *pair = &PCRE_G(unmatched_null_pair);
+	array_init_size(pair, 2);
+	ZVAL_NULL(&tmp);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+	ZVAL_LONG(&tmp, -1);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+}
+
+static void init_unmatched_empty_pair() {
+	zval tmp;
+	zval *pair = &PCRE_G(unmatched_empty_pair);
+	array_init_size(pair, 2);
+	ZVAL_EMPTY_STRING(&tmp);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+	ZVAL_LONG(&tmp, -1);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+}
+
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SIZE offset, zend_string *name, uint32_t unmatched_as_null)
 {
 	zval match_pair, tmp;
 
-	array_init_size(&match_pair, 2);
-
 	/* Add (match, offset) to the return value */
 	if (PCRE2_UNSET == offset) {
 		if (unmatched_as_null) {
-			ZVAL_NULL(&tmp);
+			if (Z_ISUNDEF(PCRE_G(unmatched_null_pair))) {
+				init_unmatched_null_pair();
+			}
+			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_null_pair));
 		} else {
-			ZVAL_EMPTY_STRING(&tmp);
+			if (Z_ISUNDEF(PCRE_G(unmatched_empty_pair))) {
+				init_unmatched_empty_pair();
+			}
+			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_empty_pair));
 		}
 	} else {
-		ZVAL_STRINGL(&tmp, str, len);
+		array_init_size(&match_pair, 2);
+		if (len == 0) {
+			ZVAL_EMPTY_STRING(&tmp);
+		} else if (len == 1) {
+			ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR((unsigned char) *str));
+		} else {
+			ZVAL_STRINGL(&tmp, str, len);
+		}
+		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
+		ZVAL_LONG(&tmp, offset);
+		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 	}
-	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
-	ZVAL_LONG(&tmp, offset);
-	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 
 	if (name) {
 		Z_ADDREF(match_pair);
@@ -975,6 +1017,10 @@ static inline void populate_match_value(
 		} else {
 			ZVAL_EMPTY_STRING(val);
 		}
+	} else if (start_offset == end_offset) {
+		ZVAL_EMPTY_STRING(val);
+	} else if (start_offset + 1 == end_offset) {
+		ZVAL_INTERNED_STR(val, ZSTR_CHAR((unsigned char) subject[start_offset]));
 	} else {
 		ZVAL_STRINGL(val, subject + start_offset, end_offset - start_offset);
 	}
@@ -1223,16 +1269,10 @@ matched:
 							}
 						} else {
 							for (i = 0; i < count; i++) {
-								if (PCRE2_UNSET == offsets[i<<1]) {
-									if (unmatched_as_null) {
-										add_next_index_null(&match_sets[i]);
-									} else {
-										add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
-									}
-								} else {
-									add_next_index_stringl(&match_sets[i], subject + offsets[i<<1],
-														   offsets[(i<<1)+1] - offsets[i<<1]);
-								}
+								zval val;
+								populate_match_value(
+									&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
+								zend_hash_next_index_insert_new(Z_ARRVAL(match_sets[i]), &val);
 							}
 						}
 						mark = pcre2_get_mark(match_data);
@@ -2955,7 +2995,7 @@ zend_module_entry pcre_module_entry = {
 #else
 	NULL,
 #endif
-	NULL,
+	PHP_RSHUTDOWN(pcre),
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
 	PHP_MODULE_GLOBALS(pcre),
