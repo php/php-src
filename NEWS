@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #76717 (var_export() does not create a parsable value for
     PHP_INT_MIN). (Nikita)
+  . Fixed bug #77765 (FTP stream wrapper should set the directory as
+    executable). (Vlad Temian)
 
 07 Mar 2019, PHP 7.3.3
 
