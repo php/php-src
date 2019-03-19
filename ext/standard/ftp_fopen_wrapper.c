@@ -1070,6 +1070,9 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 
         /* find a top level directory we need to create */
         while ((p = strrchr(buf, '/'))) {
+            if (p == buf) {
+                break;
+            }
             *p = '\0';
 			php_stream_printf(stream, "CWD %s\r\n", buf);
 			result = GET_FTP_RESULT(stream);
