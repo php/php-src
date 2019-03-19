@@ -47,7 +47,6 @@
 
 struct _pcre_cache_entry {
 	pcre2_code *re;
-	zend_string **subpat_names;
 	uint32_t preg_options;
 	uint32_t capture_count;
 	uint32_t name_count;
