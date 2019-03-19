@@ -6551,7 +6551,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 
 			if (OP1_TYPE & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-				FREE_OP1();
+				FREE_OP2();
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();

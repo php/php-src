@@ -8015,7 +8015,7 @@ num_index_prop:
 
 			if (IS_CONST & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-
+				zval_ptr_dtor_nogc(free_op2);
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();
@@ -14391,7 +14391,7 @@ num_index_prop:
 
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-				zval_ptr_dtor_nogc(free_op1);
+
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();
@@ -15898,7 +15898,7 @@ num_index_prop:
 
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-				zval_ptr_dtor_nogc(free_op1);
+				zval_ptr_dtor_nogc(free_op2);
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();
@@ -17519,7 +17519,7 @@ num_index_prop:
 
 			if ((IS_TMP_VAR|IS_VAR) & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-				zval_ptr_dtor_nogc(free_op1);
+
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();
@@ -47910,7 +47910,7 @@ num_index_prop:
 
 			if (IS_CV & (IS_CONST|IS_CV)) {
 				/* avoid exception check */
-
+				zval_ptr_dtor_nogc(free_op2);
 				ZEND_VM_SMART_BRANCH(result, 0);
 				ZVAL_BOOL(EX_VAR(opline->result.var), result);
 				ZEND_VM_NEXT_OPCODE();
