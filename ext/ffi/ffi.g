@@ -92,7 +92,7 @@ declarations:
 ;
 
 declaration_specifiers(zend_ffi_dcl *dcl):
-	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+	(	?{sym != YY_ID || !(dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS)}
 		(	{if (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) yy_error_sym("unexpected", sym);}
 			"typedef"
 			{dcl->flags |= ZEND_FFI_DCL_TYPEDEF;}
