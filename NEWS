@@ -113,6 +113,6 @@ PHP                                                                        NEWS
     tidy_get_root, and tidy_getopt) (tandre)
 
 - WDDX:
-  . Deprecated the WDDX extension. (cmb)
+  . Deprecated and unbundled the WDDX extension. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

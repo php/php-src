@@ -201,11 +201,6 @@ PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           wddx
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (1999 - 2003)
-MAINTENANCE:         Orphaned
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
                      Rob Richards <rrichards@php.net> (2003 - 2013)
