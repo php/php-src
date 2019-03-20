@@ -52,6 +52,7 @@ struct _pcre_cache_entry {
 	uint32_t name_count;
 	uint32_t compile_options;
 	uint32_t extra_compile_options;
+	uint32_t match_options;
 	uint32_t refcount;
 };
 
@@ -62,7 +63,8 @@ enum {
 	PHP_PCRE_RECURSION_LIMIT_ERROR,
 	PHP_PCRE_BAD_UTF8_ERROR,
 	PHP_PCRE_BAD_UTF8_OFFSET_ERROR,
-	PHP_PCRE_JIT_STACKLIMIT_ERROR
+	PHP_PCRE_JIT_STACKLIMIT_ERROR,
+	PHP_PCRE_PARTIAL_MATCH_ERROR,
 };
 
 
@@ -127,6 +129,10 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 			preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
 			break;
 #endif
+
+		case PCRE2_ERROR_PARTIAL:
+			preg_code = PHP_PCRE_PARTIAL_MATCH_ERROR;
+			break;
 
 		default:
 			if (pcre_code <= PCRE2_ERROR_UTF8_ERR1 && pcre_code >= PCRE2_ERROR_UTF8_ERR21) {
@@ -415,6 +421,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_PARTIAL_MATCH_ERROR", PHP_PCRE_PARTIAL_MATCH_ERROR, CONST_CS | CONST_PERSISTENT);
 	version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", version, CONST_CS | CONST_PERSISTENT);
 	free(version);
@@ -546,12 +553,33 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, ch
 }
 /* }}} */
 
+static zend_always_inline char *go_n_characters_back(
+		char *str_start, char *cur, uint32_t n, zend_bool is_utf8) {
+	if (cur - str_start < n) {
+		return str_start;
+	}
+	if (!is_utf8) {
+		return cur - n;
+	}
+
+	while (cur > str_start && n > 0) {
+		char c = *(--cur);
+		/* Continuation byte */
+		if ((c & 0xC0) == 0x80) {
+			continue;
+		}
+		n--;
+	}
+	return cur;
+}
+
 /* {{{ pcre_get_compiled_regex_cache
  */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
+	uint32_t			 moptions = 0;
 	uint32_t			 extra_coptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
@@ -709,6 +737,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 						coptions |= PCRE2_UCP;
 #endif
 				break;
+			case 'p':	moptions |= PCRE2_PARTIAL_SOFT; break;
+			case 'P':	moptions |= PCRE2_PARTIAL_HARD; break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
 
 			/* Custom preg options */
@@ -737,14 +767,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 	if (poptions & PREG_REPLACE_EVAL) {
 		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		efree(pattern);
-#if HAVE_SETLOCALE
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-#endif
-		return NULL;
+		goto failure;
+	}
+
+	if ((moptions & PCRE2_PARTIAL_SOFT) && (moptions & PCRE2_PARTIAL_HARD)) {
+		php_error_docref(NULL, E_WARNING, "Cannot set both the /p (soft partial match) and /P (hard partial match) modifiers at the same time");
+		goto failure;
 	}
 
 #if HAVE_SETLOCALE
@@ -797,7 +825,16 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit)) {
 		/* Enable PCRE JIT compiler */
-		rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+		uint32_t jit_compile_mode;
+		if (moptions & PCRE2_PARTIAL_SOFT) {
+			jit_compile_mode = PCRE2_JIT_PARTIAL_SOFT;
+		} else if (moptions & PCRE2_PARTIAL_HARD) {
+			jit_compile_mode = PCRE2_JIT_PARTIAL_HARD;
+		} else {
+			jit_compile_mode = PCRE2_JIT_COMPLETE;
+		}
+
+		rc = pcre2_jit_compile(re, jit_compile_mode);
 		if (EXPECTED(rc >= 0)) {
 			size_t jit_size = 0;
 			if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
@@ -827,6 +864,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 	new_entry.extra_compile_options = extra_coptions;
+	new_entry.match_options = moptions;
 	new_entry.refcount = 0;
 
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
@@ -878,6 +916,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	return ret;
+
+failure:
+	pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
+	efree(pattern);
+#if HAVE_SETLOCALE
+	if (key != regex) {
+		zend_string_release_ex(key, 0);
+	}
+#endif
+	return NULL;
+
 }
 /* }}} */
 
@@ -1165,6 +1214,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
+	if (global && (pce->match_options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT))) {
+		php_error_docref(NULL, E_WARNING, "Cannot use partial matching with preg_match_all()");
+		return;
+	}
+
 	subpats_order = global ? PREG_PATTERN_ORDER : 0;
 
 	if (use_flags) {
@@ -1246,14 +1300,16 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	options = (pce->compile_options & PCRE2_UTF) && !(GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)
-		? 0 : PCRE2_NO_UTF_CHECK;
+	options = pce->match_options;
+	if (!(pce->compile_options & PCRE2_UTF) || (GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)) {
+		options |= PCRE2_NO_UTF_CHECK;
+	}
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if ((pce->preg_options & PREG_JIT) && options) {
+	if ((pce->preg_options & PREG_JIT) && (options & PCRE2_NO_UTF_CHECK)) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
-				PCRE2_NO_UTF_CHECK, match_data, mctx);
+				options, match_data, mctx);
 	} else
 #endif
 	count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
@@ -1380,6 +1436,41 @@ matched:
 		} else {
 error:
 			pcre_handle_exec_error(count);
+			if (count == PCRE2_ERROR_PARTIAL) {
+				uint32_t max_lookbehind;
+				const char *lookahead_start;
+				matched++;
+
+				offsets = pcre2_get_ovector_pointer(match_data);
+				ZEND_ASSERT(offsets[0] != PCRE2_UNSET);
+
+				/* Add partially matched string at offset 0. */
+				if (offset_capture) {
+					add_offset_pair(
+						subpats, subject, offsets[0], offsets[1],
+						NULL, /* irrelevant */ 0);
+				} else {
+					add_next_index_stringl(subpats, subject + offsets[0], offsets[1] - offsets[0]);
+				}
+
+				if (pcre2_pattern_info(pce->re, PCRE2_INFO_MAXLOOKBEHIND, &max_lookbehind) < 0) {
+					php_error_docref(NULL, E_WARNING, "pcre2_pattern_info() failed");
+					break;
+				}
+
+				/* Add the whole potentially considered portion at offset 1. */
+				lookahead_start = go_n_characters_back(
+					subject, subject + offsets[0], max_lookbehind,
+					(pce->compile_options & PCRE2_UTF) != 0);
+				if (offset_capture) {
+					add_offset_pair(
+						subpats, subject, lookahead_start - subject, offsets[1],
+						NULL, /* irrelevant */ 0);
+				} else {
+					add_next_index_stringl(
+						subpats, lookahead_start, subject + offsets[1] - lookahead_start);
+				}
+			}
 			break;
 		}
 
@@ -1431,7 +1522,8 @@ error:
 		free_subpats_table(subpat_names, num_subpats);
 	}
 
-	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
+	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR
+			|| PCRE_G(error_code) == PHP_PCRE_PARTIAL_MATCH_ERROR) {
 		/* If there was no error and we're in /u mode, remember that the string is valid UTF-8. */
 		if ((pce->compile_options & PCRE2_UTF) && !ZSTR_IS_INTERNED(subject_str)) {
 			GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
