@@ -1214,8 +1214,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	if (global && (pce->match_options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT))) {
-		php_error_docref(NULL, E_WARNING, "Cannot use partial matching with preg_match_all()");
+	if (global && (pce->match_options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) &&
+			!(flags & PREG_SET_ORDER)) {
+		php_error_docref(NULL, E_WARNING,
+			"Partial matching in preg_match_all() can only be used with PREG_SET_ORDER");
 		return;
 	}
 
@@ -1437,9 +1439,18 @@ matched:
 error:
 			pcre_handle_exec_error(count);
 			if (count == PCRE2_ERROR_PARTIAL) {
+				zval *result_arr;
 				uint32_t max_lookbehind;
 				const char *lookahead_start;
 				matched++;
+
+				if (global) {
+					array_init(&result_set);
+					zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set);
+					result_arr = &result_set;
+				} else {
+					result_arr = subpats;
+				}
 
 				offsets = pcre2_get_ovector_pointer(match_data);
 				ZEND_ASSERT(offsets[0] != PCRE2_UNSET);
@@ -1447,10 +1458,11 @@ error:
 				/* Add partially matched string at offset 0. */
 				if (offset_capture) {
 					add_offset_pair(
-						subpats, subject, offsets[0], offsets[1],
+						result_arr, subject, offsets[0], offsets[1],
 						NULL, /* irrelevant */ 0);
 				} else {
-					add_next_index_stringl(subpats, subject + offsets[0], offsets[1] - offsets[0]);
+					add_next_index_stringl(
+						result_arr, subject + offsets[0], offsets[1] - offsets[0]);
 				}
 
 				if (pcre2_pattern_info(pce->re, PCRE2_INFO_MAXLOOKBEHIND, &max_lookbehind) < 0) {
@@ -1464,11 +1476,11 @@ error:
 					(pce->compile_options & PCRE2_UTF) != 0);
 				if (offset_capture) {
 					add_offset_pair(
-						subpats, subject, lookahead_start - subject, offsets[1],
+						result_arr, subject, lookahead_start - subject, offsets[1],
 						NULL, /* irrelevant */ 0);
 				} else {
 					add_next_index_stringl(
-						subpats, lookahead_start, subject + offsets[1] - lookahead_start);
+						result_arr, lookahead_start, subject + offsets[1] - lookahead_start);
 				}
 			}
 			break;
@@ -1479,6 +1491,7 @@ error:
 		}
 
 		/* Execute the regular expression. */
+		options |= PCRE2_NO_UTF_CHECK;
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((pce->preg_options & PREG_JIT)) {
 			if (PCRE2_UNSET == start_offset2 || start_offset2 > subject_len) {
@@ -1486,11 +1499,11 @@ error:
 				break;
 			}
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
-					PCRE2_NO_UTF_CHECK, match_data, mctx);
+					options, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
-				PCRE2_NO_UTF_CHECK, match_data, mctx);
+				options, match_data, mctx);
 	}
 	if (match_data != mdata) {
 		pcre2_match_data_free(match_data);
