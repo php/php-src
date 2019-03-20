@@ -92,9 +92,6 @@
 #if HAVE_XML
 #include "ext/xml/php_xml.h"
 #endif
-#if HAVE_XML && HAVE_WDDX
-#include "ext/wddx/php_wddx.h"
-#endif
 #include "ext/com_dotnet/php_com_dotnet.h"
 #ifdef HAVE_SPL
 #include "ext/spl/php_spl.h"
@@ -163,9 +160,6 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #endif
 #if HAVE_XML
 	,phpext_xml_ptr
-#endif
-#if HAVE_XML && HAVE_WDDX
-	,phpext_wddx_ptr
 #endif
 #if HAVE_SPL
 	,phpext_spl_ptr
