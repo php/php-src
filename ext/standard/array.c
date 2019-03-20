@@ -1013,6 +1013,7 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 	BG(user_compare_fci_cache) = empty_fcall_info_cache; \
 
 #define PHP_ARRAY_CMP_FUNC_RESTORE() \
+	zend_release_fcall_info_cache(&BG(user_compare_fci_cache)); \
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
@@ -1502,6 +1503,7 @@ PHP_FUNCTION(array_walk)
 	);
 
 	php_array_walk(array, userdata, 0);
+	zend_release_fcall_info_cache(&BG(array_walk_fci_cache));
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -1532,6 +1534,7 @@ PHP_FUNCTION(array_walk_recursive)
 	);
 
 	php_array_walk(array, userdata, 1);
+	zend_release_fcall_info_cache(&BG(array_walk_fci_cache));
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 	RETURN_TRUE;
@@ -6017,6 +6020,7 @@ PHP_FUNCTION(array_reduce)
 
 	if (zend_hash_num_elements(htbl) == 0) {
 		ZVAL_COPY_VALUE(return_value, &result);
+		zend_release_fcall_info_cache(&fci_cache);
 		return;
 	}
 
@@ -6040,6 +6044,7 @@ PHP_FUNCTION(array_reduce)
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	zend_release_fcall_info_cache(&fci_cache);
 	RETVAL_ZVAL(&result, 1, 1);
 }
 /* }}} */
@@ -6069,6 +6074,7 @@ PHP_FUNCTION(array_filter)
 
 	array_init(return_value);
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
+		zend_release_fcall_info_cache(&fci_cache);
 		return;
 	}
 
@@ -6130,6 +6136,8 @@ PHP_FUNCTION(array_filter)
 		}
 		zval_add_ref(operand);
 	} ZEND_HASH_FOREACH_END();
+
+	zend_release_fcall_info_cache(&fci_cache);
 }
 /* }}} */
 
@@ -6167,6 +6175,7 @@ PHP_FUNCTION(array_map)
 		/* Short-circuit: if no callback and only one array, just return it. */
 		if (!ZEND_FCI_INITIALIZED(fci) || !maxlen) {
 			ZVAL_COPY(return_value, &arrays[0]);
+			zend_release_fcall_info_cache(&fci_cache);
 			return;
 		}
 
@@ -6192,6 +6201,8 @@ PHP_FUNCTION(array_map)
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &result);
 			}
 		} ZEND_HASH_FOREACH_END();
+
+		zend_release_fcall_info_cache(&fci_cache);
 	} else {
 		uint32_t *array_pos = (HashPosition *)ecalloc(n_arrays, sizeof(HashPosition));
 
@@ -6284,6 +6295,7 @@ PHP_FUNCTION(array_map)
 			}
 
 			efree(params);
+			zend_release_fcall_info_cache(&fci_cache);
 		}
 		efree(array_pos);
 	}

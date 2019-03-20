@@ -2907,7 +2907,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 }
 /* }}} */
 
-static void free_fcc(zend_fcall_info_cache *fcc) {
+ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	if (fcc->function_handler &&
 		((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
 		 fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
@@ -2918,6 +2918,7 @@ static void free_fcc(zend_fcall_info_cache *fcc) {
 		}
 		zend_free_trampoline(fcc->function_handler);
 	}
+	fcc->function_handler = NULL;
 }
 
 static zend_always_inline int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, int strict_class, char **error) /* {{{ */
@@ -3283,7 +3284,7 @@ again:
 check_func:
 			ret = zend_is_callable_check_func(check_flags, callable, fcc, strict_class, error);
 			if (fcc == &fcc_local) {
-				free_fcc(fcc);
+				zend_release_fcall_info_cache(fcc);
 			}
 			return ret;
 
@@ -3352,7 +3353,7 @@ check_func:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				if (fcc == &fcc_local) {
-					free_fcc(fcc);
+					zend_release_fcall_info_cache(fcc);
 				}
 				return 1;
 			}
@@ -3394,7 +3395,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_nam
 			add_next_index_str(callable, zend_string_copy(fcc.calling_scope->name));
 			add_next_index_str(callable, zend_string_copy(fcc.function_handler->common.function_name));
 		}
-		free_fcc(&fcc);
+		zend_release_fcall_info_cache(&fcc);
 		return 1;
 	}
 	return 0;
