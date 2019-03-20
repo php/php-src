@@ -150,38 +150,38 @@ xmlNode* dom_zvals_to_fragment(dom_object *context, xmlNode *contextNode, zval *
 	}
 
 	for (i = 0; i < nodesc; i++) {
-		switch (Z_TYPE(nodes[i])) {
-			case IS_STRING:
-				newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
+		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+			ce = Z_OBJCE(nodes[i]);
 
+			if (instanceof_function(ce, dom_node_class_entry)) {
+				newNodeObj = Z_DOMOBJ_P(&nodes[i]);
+				newNode = dom_object_get_node(newNodeObj);
+
+				if (newNode->parent != NULL) {
+					xmlUnlinkNode(newNode);
+				}
+
+				newNodeObj->document = context->document;
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
 					return NULL;
 				}
 
-				break;
+				continue;
+			}
+		}
 
-			case IS_OBJECT:
-				ce = Z_OBJCE(nodes[i]);
+		if (Z_TYPE(nodes[i]) != IS_STRING) {
+			convert_to_string_ex(&nodes[i]);
+		}
 
-				if (instanceof_function(ce, dom_node_class_entry)) {
-					newNodeObj = Z_DOMOBJ_P(&nodes[i]);
-					newNode = dom_object_get_node(newNodeObj);
+		newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
 
-					if (newNode->parent != NULL) {
-						xmlUnlinkNode(newNode);
-					}
+		xmlSetTreeDoc(newNode, documentNode);
 
-					newNodeObj->document = context->document;
-					xmlSetTreeDoc(newNode, documentNode);
-
-					if (!xmlAddChild(fragment, newNode)) {
-						return NULL;
-					}
-				}
-
-				break;
+		if (!xmlAddChild(fragment, newNode)) {
+			return NULL;
 		}
 	}
 
