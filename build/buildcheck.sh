@@ -17,8 +17,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# Checks if autoconf is installed and version matches the minimum defined in the
-# configure.ac file.
+# Check if autoconf exists and matches minimum required version in configure.ac.
 
 echo "buildconf: checking installation..."
 
