@@ -6,8 +6,6 @@ if (PHP_MHASH != 'no') {
 	AC_DEFINE('PHP_MHASH_BC', 1);
 }
 
-AC_DEFINE('HAVE_HASH_EXT', 1);
-
 PHP_HASH = 'yes';
 
 EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +

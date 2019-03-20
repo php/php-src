@@ -3615,9 +3615,7 @@ static const zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("standard")
-#if defined(HAVE_HASH) && !defined(COMPILE_DL_HASH)
 	ZEND_MOD_REQUIRED("hash")
-#endif
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
 };
