@@ -2,8 +2,8 @@
 Test var_export() function with integer values
 --SKIPIF--
 <?php
-if (PHP_INT_SIZE < 8) {
-        die("skip 64-bit only");
+if (PHP_INT_SIZE > 4) {
+        die("skip 32-bit only");
 }
 ?>
 --FILE--
@@ -15,7 +15,7 @@ if (PHP_INT_SIZE < 8) {
  */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer values
+// different integer vlaues
 $valid_ints = array(
                 '0' => '0',
                 '1' => '1',
@@ -111,9 +111,9 @@ string(7) "'0Xfff'"
 string(6) "'0XFA'"
 
 -- Iteration: -0x80000000 --
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 -- Iteration: '0x7fffffff' --
 '0x7fffffff'
@@ -136,9 +136,9 @@ string(6) "'0123'"
 string(1) "1"
 
 -- Iteration: -020000000000 --
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 -- Iteration: 017777777777 --
 2147483647
