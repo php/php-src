@@ -131,13 +131,15 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 {
 	int i;
-	xmlNode *documentNode;
+	xmlDoc *documentNode;
 	xmlNode *fragment;
 	xmlNode *newNode;
 	xmlNode *contextNode = dom_object_get_node(context);
+	zend_class_entry *ce;
+	dom_object *newNodeObj;
 
 	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
-		documentNode = contextNode;
+		documentNode = (xmlDoc *) contextNode;
 	} else {
 		documentNode = contextNode->doc;
 	}
@@ -166,6 +168,22 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 				break;
 
 			case IS_OBJECT:
+				ce = Z_OBJCE(nodes[i]);
+
+				if (instanceof_function(ce, dom_node_class_entry)) {
+					newNodeObj = Z_DOMOBJ_P(&nodes[i]);
+					newNode = dom_object_get_node(newNodeObj);
+
+					if (newNode->parent != NULL) {
+						xmlUnlinkNode(newNode);
+					}
+
+					newNodeObj->document = context->document;
+					xmlSetTreeDoc(newNode, documentNode);
+
+					newNode = xmlAddChild(fragment, newNode);
+				}
+
 				break;
 		}
 	}
@@ -183,9 +201,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 		node = newchild;
 		while (node != NULL) {
 			node->parent = contextNode;
-			if (node->doc != documentNode) {
-				xmlSetTreeDoc(node, documentNode);
-			}
+
 			if (node == fragment->last) {
 				break;
 			}

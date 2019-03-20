@@ -19,7 +19,7 @@ $element->append(
   'content'
 );
 
-var_dump($dom->childElementCount);
+var_dump($dom->documentElement->childElementCount);
 print_node($element->childNodes[0]);
 print_node($element->childNodes[1]);
 print_node($element->childNodes[2]);
@@ -28,7 +28,7 @@ int(2)
 Node Name: mark
 Node Type: 1
 Num Children: 0
-Node Content:
+Node Content: 
 
 Node Name: element
 Node Type: 1
