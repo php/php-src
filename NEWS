@@ -25,6 +25,11 @@ PHP                                                                        NEWS
 - FFI:
   . Added FFI extension. (Dmitry)
 
+- Filter:
+  . The filter extension no longer have the --with-pcre-dir on Unix builds, 
+    allowing the extension to be once more compiled as shared using 
+    ./configure. (Kalle)
+
 - FPM:
   . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 

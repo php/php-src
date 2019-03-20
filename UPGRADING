@@ -251,6 +251,10 @@ PHP 7.4 UPGRADE NOTES
   . imagescale() now supports aspect ratio preserving scaling to a fixed height
     by passing -1 as $new_width.
 
+- Filter:
+  . The filter extension no longer exposes --with-pcre-dir for Unix builds and 
+    can now reliably be built as shared when using ./configure once more.
+
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
     part of any PHP build, similar to the date extension.

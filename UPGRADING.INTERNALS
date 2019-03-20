@@ -190,7 +190,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   a. Abstract
     - The hash extension is now always available, meaning the --enable-hash
-	  configure argument has been removed.
+	    configure argument has been removed.
+    - The filter extension no longer exposes the --with-pcre-dir configure 
+      argument and therefore allows shared builds with ./configure for Unix 
+      builds.
 
   b. Unix build system changes
     - configure --help now also outputs --program-suffix and --program-prefix
