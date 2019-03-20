@@ -157,7 +157,7 @@ xmlNode* dom_zvals_to_fragment(dom_object *context, xmlNode *contextNode, zval *
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
-					return;
+					return NULL;
 				}
 
 				break;
@@ -177,7 +177,7 @@ xmlNode* dom_zvals_to_fragment(dom_object *context, xmlNode *contextNode, zval *
 					xmlSetTreeDoc(newNode, documentNode);
 
 					if (!xmlAddChild(fragment, newNode)) {
-						return;
+						return NULL;
 					}
 				}
 
@@ -201,6 +201,37 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 		prevsib->next = newchild;
 		newchild->prev = prevsib;
 		contextNode->last = fragment->last;
+
+		node = newchild;
+		while (node != NULL) {
+			node->parent = contextNode;
+
+			if (node == fragment->last) {
+				break;
+			}
+			node = node->next;
+		}
+
+		fragment->children = NULL;
+		fragment->last = NULL;
+	}
+}
+
+void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
+{
+	xmlNode *contextNode = dom_object_get_node(context);
+	xmlNodePtr newchild, node, prevsib, nextsib;
+	xmlNode *fragment = dom_zvals_to_fragment(context, contextNode, nodes, nodesc);
+
+	newchild = fragment->children;
+	prevsib = NULL;
+	nextsib = contextNode->children;
+
+	if (newchild) {
+		contextNode->children = newchild;
+		newchild->prev = prevsib;
+		fragment->last->next = nextsib;
+		nextsib->prev = fragment->last;
 
 		node = newchild;
 		while (node != NULL) {

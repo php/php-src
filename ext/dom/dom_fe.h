@@ -218,6 +218,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_node);
 PHP_METHOD(domelement, __construct);
 PHP_METHOD(domelement, remove);
 PHP_METHOD(domelement, append);
+PHP_METHOD(domelement, prepend);
 
 /* domtext methods */
 PHP_FUNCTION(dom_text_split_text);

@@ -121,6 +121,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_append, 0, 0, 0)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_prepend, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -152,6 +155,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_ME(domelement, __construct, arginfo_dom_element_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, remove, arginfo_dom_element_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, append, arginfo_dom_element_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, prepend, arginfo_dom_element_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1336,7 +1340,7 @@ PHP_METHOD(domelement, remove)
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 	RETURN_NULL();
 }
-/* }}} end dom_node_remove_child */
+/* }}} end DOMElement::remove */
 
 /* {{{ proto void DOMElement::append();
 URL:
@@ -1358,4 +1362,32 @@ PHP_METHOD(domelement, append)
 
 	dom_parent_node_append(intern, args, argc);
 }
+/* }}} end DOMElement::append */
+
+/* {{{ proto void DOMElement::prepend();
+URL:
+Since:
+*/
+PHP_METHOD(domelement, prepend)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	if (context->children == NULL) {
+		dom_parent_node_append(intern, args, argc);
+	} else {
+		dom_parent_node_prepend(intern, args, argc);
+	}
+}
+/* }}} end DOMElement::prepend */
+
 #endif
