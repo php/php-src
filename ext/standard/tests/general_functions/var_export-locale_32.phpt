@@ -7,8 +7,8 @@ serialize_precision=17
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
         die("skip locale needed for this test is not supported on this platform");
 }
-if (PHP_INT_SIZE < 8) {
-        die("skip 64-bit only");
+if (PHP_INT_SIZE > 4) {
+        die("skip 32-bit only");
 }
 ?>
 --FILE--
@@ -20,7 +20,7 @@ setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","d
 */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer values
+// different integer vlaues
 $valid_ints = array(
                 '0',
                 '1',
@@ -56,7 +56,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid boolean values ***\n";
-// different valid  boolean values
+// different valid  boolean vlaues
 $valid_bool = array(
 		    1,
 		    TRUE,
@@ -80,7 +80,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float values
+// different valid  float vlaues
 $valid_floats = array(
   (float)-2147483649, // float value
   (float)2147483648,  // float value
@@ -279,7 +279,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid null values ***\n";
-// different valid  null values
+// different valid  null vlaues
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;
@@ -386,9 +386,9 @@ string(6) "'0XFA'"
 
 
 Iteration 12
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 
 Iteration 13
@@ -416,9 +416,9 @@ string(1) "1"
 
 
 Iteration 17
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 
 Iteration 18
@@ -917,12 +917,12 @@ string(41) "array (
 *** Output for objects ***
 
 Iteration 1
-(object) array(
-)
-(object) array(
-)
-string(17) "(object) array(
-)"
+stdClass::__set_state(array(
+))
+stdClass::__set_state(array(
+))
+string(31) "stdClass::__set_state(array(
+))"
 
 
 Iteration 2
