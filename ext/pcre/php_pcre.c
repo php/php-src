@@ -261,6 +261,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 	ZVAL_UNDEF(&pcre_globals->unmatched_null_pair);
 	ZVAL_UNDEF(&pcre_globals->unmatched_empty_pair);
+	pcre_globals->callout_fci.size = 0;
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	pcre_globals->jit = 1;
 #endif
@@ -468,6 +469,12 @@ static PHP_RSHUTDOWN_FUNCTION(pcre)
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_null_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_empty_pair));
+	if (ZEND_FCI_INITIALIZED(PCRE_G(callout_fci))) {
+		zval_ptr_dtor(&PCRE_G(callout_fci).function_name);
+		zend_release_fcall_info_cache(&PCRE_G(callout_fcc));
+		PCRE_G(callout_fci).size = 0;
+		pcre2_set_callout(mctx, NULL, NULL);
+	}
 	return SUCCESS;
 }
 
@@ -710,6 +717,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 				break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
+			case 'C':	coptions |= PCRE2_AUTO_CALLOUT; break;
 
 			/* Custom preg options */
 			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
@@ -2939,6 +2947,108 @@ static PHP_FUNCTION(preg_last_error)
 }
 /* }}} */
 
+static int callout_func(pcre2_callout_block *block, void *user_data) {
+	const char *subject = (const char *) block->subject;
+	PCRE2_SIZE *ovector = block->offset_vector;
+	zval info, matches, retval;
+	uint32_t i;
+	(void) user_data;
+
+	array_init(&info);
+	if (block->callout_string) {
+		add_assoc_string(&info, "callout", (char *) block->callout_string);
+	} else {
+		add_assoc_long(&info, "callout", block->callout_number);
+	}
+
+	add_assoc_stringl(&info, "subject", subject, block->subject_length);
+
+	array_init_size(&matches, block->capture_top);
+	add_assoc_zval(&info, "captures", &matches);
+	for (i = 0; i < block->capture_top; i++) {
+		add_offset_pair(
+			&matches, subject, ovector[2*i], ovector[2*i+1], NULL, /* unmatched_as_null */ 1);
+	}
+
+	add_assoc_long(&info, "capture_last", block->capture_last);
+
+	if (block->mark) {
+		add_assoc_string(&info, "mark", (char *) block->mark);
+	}
+
+	add_assoc_long(&info, "start_match", block->start_match);
+	add_assoc_long(&info, "current_position", block->current_position);
+	add_assoc_long(&info, "pattern_position", block->pattern_position);
+	add_assoc_long(&info, "next_item_length", block->next_item_length);
+
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(PCRE_G(callout_fci)));
+	PCRE_G(callout_fci).retval = &retval;
+	PCRE_G(callout_fci).params = &info;
+	PCRE_G(callout_fci).param_count = 1;
+
+	if (zend_call_function(&PCRE_G(callout_fci), &PCRE_G(callout_fcc)) == FAILURE
+			|| Z_TYPE(retval) == IS_UNDEF) {
+		zval_ptr_dtor(&info);
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Failed to call callout function");
+		}
+		return PCRE2_ERROR_CALLOUT;
+	}
+	zval_ptr_dtor(&info);
+
+	if (Z_TYPE(retval) != IS_LONG) {
+		php_error_docref(NULL, E_WARNING, "Callout function must return integer");
+		return PCRE2_ERROR_CALLOUT;
+	}
+
+	if (Z_LVAL(retval) == 0) {
+		/* Proceed matching as usual. */
+		return 0;
+	} else if (Z_LVAL(retval) > 0) {
+		/* Fail at current position. */
+		return 1;
+	} else {
+		/* Fail overall match. */
+		return PCRE2_ERROR_NOMATCH;
+	}
+}
+
+/* {{{ proto callable preg_callout_function(callable $new_function) */
+static PHP_FUNCTION(preg_callout_function)
+{
+	zend_fcall_info fci = {0};
+	zend_fcall_info_cache fcc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|f!", &fci, &fcc) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() == 0) {
+		/* Only return current callout function. */
+		if (ZEND_FCI_INITIALIZED(PCRE_G(callout_fci))) {
+			ZVAL_COPY(return_value, &PCRE_G(callout_fci).function_name);
+		}
+		return;
+	}
+
+	/* Return current callout function and replace it with new one (or none). */
+	if (ZEND_FCI_INITIALIZED(PCRE_G(callout_fci))) {
+		ZVAL_COPY_VALUE(return_value, &PCRE_G(callout_fci).function_name);
+		zend_release_fcall_info_cache(&PCRE_G(callout_fcc));
+	}
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		Z_TRY_ADDREF(fci.function_name);
+		PCRE_G(callout_fci) = fci;
+		PCRE_G(callout_fcc) = fcc;
+
+		pcre2_set_callout(mctx, callout_func, NULL);
+	} else {
+		PCRE_G(callout_fci).size = 0;
+		pcre2_set_callout(mctx, NULL, NULL);
+	}
+}
+/* }}} */
+
 /* {{{ module definition structures */
 
 /* {{{ arginfo */
@@ -3001,6 +3111,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_grep, 0, 0, 2)
     ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_callout_function, 0, 0, 0)
+	ZEND_ARG_INFO(0, new_function)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_preg_last_error, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -3016,6 +3130,7 @@ static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_quote,					arginfo_preg_quote)
 	PHP_FE(preg_grep,					arginfo_preg_grep)
 	PHP_FE(preg_last_error,				arginfo_preg_last_error)
+	PHP_FE(preg_callout_function,		arginfo_preg_callout_function)
 	PHP_FE_END
 };
 
