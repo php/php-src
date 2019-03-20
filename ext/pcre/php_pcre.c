@@ -573,6 +573,14 @@ static zend_always_inline char *go_n_characters_back(
 	return cur;
 }
 
+static inline zend_bool unsupported_partial_match(pcre_cache_entry *pce) {
+	if (pce->match_options & (PCRE2_PARTIAL_HARD|PCRE2_PARTIAL_SOFT)) {
+		php_error_docref(NULL, E_WARNING, "Partial matching is not supported");
+		return 1;
+	}
+	return 0;
+}
+
 /* {{{ pcre_get_compiled_regex_cache
  */
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
@@ -1698,6 +1706,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+	if (unsupported_partial_match(pce)) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		return NULL;
+	}
+
 	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
@@ -1926,6 +1939,11 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	zend_string     *eval_result;		/* Result of custom function */
 	pcre2_match_data *match_data;
 	zend_bool old_mdata_used;
+
+	if (unsupported_partial_match(pce)) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		return NULL;
+	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
@@ -2611,6 +2629,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
 	offset_capture = flags & PREG_SPLIT_OFFSET_CAPTURE;
 
+	if (unsupported_partial_match(pce)) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		RETURN_FALSE;
+	}
+
 	/* Initialize return value */
 	array_init(return_value);
 
@@ -2957,6 +2980,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 										   entries */
 	pcre2_match_data *match_data;
 	invert = flags & PREG_GREP_INVERT ? 1 : 0;
+
+	if (unsupported_partial_match(pce)) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		return;
+	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
