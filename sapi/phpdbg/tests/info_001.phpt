@@ -48,7 +48,8 @@ prompt> ------------------------------------------------
 Function Breakpoints:
 #0		foo
 prompt> [User-defined constants (0)]
-prompt> [Included files: 0]
+prompt> [Included files: 1]
+File: %s/info_001.php
 prompt> [No error found!]
 prompt> [Literal Constants in foo() (2)]
 |-------- C0 -------> [var_dump]

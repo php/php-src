@@ -287,6 +287,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	zend_hash_add_ptr(&PHPDBG_G(file_sources), ret->filename, dataptr);
 	phpdbg_resolve_pending_file_break(ZSTR_VAL(ret->filename));
 
+	if (file->opened_path) {
+		zend_hash_add_empty_element(&EG(included_files), file->opened_path);
+	}
 	fake.opened_path = NULL;
 	zend_destroy_file_handle(&fake);
 	zend_file_handle_dtor(&fake);
@@ -306,6 +309,7 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 		if (file->opened_path) {
 			zend_string_release(file->opened_path);
 			file->opened_path = zend_string_init(filename, strlen(filename), 0);
+			zend_hash_add_empty_element(&EG(included_files), file->opened_path);
 		} else {
 			if (file->free_filename) {
 				efree((char *) file->filename);

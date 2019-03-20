@@ -32,7 +32,7 @@ prompt> Do you really want to clean your current environment? (type y or n): Cle
 Classes    %d
 Functions  %d
 Constants  %d
-Includes   0
+Includes   1
 prompt> [Not running]
 prompt> 1
 [Breakpoint #0 at %s:4, hits: 1]
