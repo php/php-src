@@ -19,10 +19,12 @@ $element->append(
   'content'
 );
 
+var_dump($dom->childElementCount);
 print_node($element->childNodes[0]);
 print_node($element->childNodes[1]);
 print_node($element->childNodes[2]);
 --EXPECT--
+int(2)
 Node Name: mark
 Node Type: 1
 Num Children: 0

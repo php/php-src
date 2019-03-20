@@ -128,4 +128,73 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 }
 /* }}} */
 
+void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
+{
+	int i;
+	xmlNode *documentNode;
+	xmlNode *fragment;
+	xmlNode *newNode;
+	xmlNode *contextNode = dom_object_get_node(context);
+
+	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
+		documentNode = contextNode;
+	} else {
+		documentNode = contextNode->doc;
+	}
+
+	fragment = xmlNewDocFragment(documentNode);
+
+	if (!fragment) {
+		// err?
+		return;
+	}
+
+	for (i = 0; i < nodesc; i++) {
+		switch (Z_TYPE(nodes[i])) {
+			case IS_STRING:
+				newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
+
+				xmlSetTreeDoc(newNode, documentNode);
+
+				newNode = xmlAddChild(fragment, newNode);
+
+				if (!newNode) {
+					php_error_docref(NULL, E_WARNING, "Couldn't append node");
+					return;
+				}
+
+				break;
+
+			case IS_OBJECT:
+				break;
+		}
+	}
+
+	xmlNodePtr newchild, node, prevsib;
+
+	newchild = fragment->children;
+	prevsib = contextNode->last;
+
+	if (newchild) {
+		prevsib->next = newchild;
+		newchild->prev = prevsib;
+		contextNode->last = fragment->last;
+
+		node = newchild;
+		while (node != NULL) {
+			node->parent = contextNode;
+			if (node->doc != documentNode) {
+				xmlSetTreeDoc(node, documentNode);
+			}
+			if (node == fragment->last) {
+				break;
+			}
+			node = node->next;
+		}
+
+		fragment->children = NULL;
+		fragment->last = NULL;
+	}
+}
+
 #endif

@@ -118,6 +118,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_remove, 0, 0, 0)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_append, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -148,6 +151,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, arginfo_dom_element_set_id_attribute_node)
 	PHP_ME(domelement, __construct, arginfo_dom_element_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, remove, arginfo_dom_element_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, append, arginfo_dom_element_append, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1334,4 +1338,24 @@ PHP_METHOD(domelement, remove)
 }
 /* }}} end dom_node_remove_child */
 
+/* {{{ proto void DOMElement::append();
+URL:
+Since:
+*/
+PHP_METHOD(domelement, append)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_append(intern, args, argc);
+}
 #endif
