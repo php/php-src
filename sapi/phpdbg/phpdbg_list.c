@@ -288,6 +288,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_resolve_pending_file_break(ZSTR_VAL(ret->filename));
 
 	fake.opened_path = NULL;
+	zend_destroy_file_handle(&fake);
 	zend_file_handle_dtor(&fake);
 
 	return ret;
@@ -315,6 +316,8 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 	}
 
 	op_array = PHPDBG_G(init_compile_file)(file, type);
+	zend_destroy_file_handle(file);
+	zend_file_handle_dtor(file);
 
 	if (op_array == NULL) {
 		return NULL;
