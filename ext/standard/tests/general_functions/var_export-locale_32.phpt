@@ -7,8 +7,8 @@ serialize_precision=17
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
         die("skip locale needed for this test is not supported on this platform");
 }
-if (PHP_INT_SIZE < 8) {
-        die("skip 64-bit only");
+if (PHP_INT_SIZE > 4) {
+        die("skip 32-bit only");
 }
 ?>
 --FILE--
@@ -386,9 +386,9 @@ string(6) "'0XFA'"
 
 
 Iteration 12
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 
 Iteration 13
@@ -416,9 +416,9 @@ string(1) "1"
 
 
 Iteration 17
--2147483648
--2147483648
-string(11) "-2147483648"
+-2147483647-1
+-2147483647-1
+string(13) "-2147483647-1"
 
 
 Iteration 18
