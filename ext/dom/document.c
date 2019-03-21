@@ -183,6 +183,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_registernodeclass, 0, 0, 2)
 	ZEND_ARG_INFO(0, baseClass)
 	ZEND_ARG_INFO(0, extendedClass)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_append, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_prepend, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -230,6 +236,8 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(relaxNGValidateSource, dom_document_relaxNG_validate_xml, arginfo_dom_document_relaxNG_validate_xml)
 #endif
 	PHP_ME(domdocument, registerNodeClass, arginfo_dom_document_registernodeclass, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, append, arginfo_dom_document_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, prepend, arginfo_dom_document_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -2280,5 +2288,13 @@ PHP_METHOD(domdocument, registerNodeClass)
 	RETURN_FALSE;
 }
 /* }}} */
+
+PHP_METHOD(domdocument, append)
+{
+}
+
+PHP_METHOD(domdocument, prepend)
+{
+}
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

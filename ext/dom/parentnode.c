@@ -24,9 +24,20 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
+
+/* {{{ DOMParentNode methods */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_parentnode_append, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_parentnode_prepend, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
 const zend_function_entry php_dom_parent_node_class_functions[] = { /* {{{ */
+	PHP_ABSTRACT_ME(DOMParentNode, append, arginfo_dom_parentnode_append)
+	PHP_ABSTRACT_ME(DOMParentNode, prepend, arginfo_dom_parentnode_prepend)
 	PHP_FE_END
 };
+/* }}} */
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes

@@ -104,6 +104,8 @@ PHP_METHOD(domimplementation, getFeature);
 /* domdocumentfragment methods */
 PHP_METHOD(domdocumentfragment, __construct);
 PHP_METHOD(domdocumentfragment, appendXML);
+PHP_METHOD(domdocumentfragment, append);
+PHP_METHOD(domdocumentfragment, prepend);
 
 /* domdocument methods */
 PHP_FUNCTION(dom_document_create_element);
@@ -132,6 +134,8 @@ PHP_FUNCTION(dom_document_savexml);
 PHP_FUNCTION(dom_document_validate);
 PHP_FUNCTION(dom_document_xinclude);
 PHP_METHOD(domdocument, registerNodeClass);
+PHP_METHOD(domdocument, append);
+PHP_METHOD(domdocument, prepend);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_METHOD(domdocument, loadHTML);
