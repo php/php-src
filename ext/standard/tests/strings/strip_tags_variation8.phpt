@@ -39,6 +39,7 @@ foreach($quotes as $string_value)
 
 echo "Done";
 --EXPECT--
+Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(33) "hello 	world... strip_tags_test"

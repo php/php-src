@@ -35,6 +35,7 @@ foreach($strings as $value)
 echo "Done";
 ?>
 --EXPECT--
+Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(18) " I am html string "
