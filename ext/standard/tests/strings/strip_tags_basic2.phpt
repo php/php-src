@@ -39,6 +39,7 @@ foreach($allowed_tags_array as $tags)
 echo "Done";
 ?>
 --EXPECT--
+Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 string(33) "<html>helloworldOther text</html>"

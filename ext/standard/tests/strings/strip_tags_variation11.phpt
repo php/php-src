@@ -29,6 +29,7 @@ foreach($string_array as $string)
 echo "Done";
 ?>
 --EXPECT--
+Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : obscure functionality ***
 -- Iteration 1 --
 string(12) "hello  world"
