@@ -148,11 +148,6 @@
 ;   Development Value: 5
 ;   Production Value: 5
 
-; short_open_tag
-;   Default Value: On
-;   Development Value: Off
-;   Production Value: Off
-
 ; variables_order
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
