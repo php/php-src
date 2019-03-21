@@ -143,8 +143,9 @@
 ;   Development Value: 5
 ;   Production Value: 5
 
+; This directive is DEPRECATED.
 ; short_open_tag
-;   Default Value: On
+;   Default Value: Off
 ;   Development Value: Off
 ;   Production Value: Off
 
