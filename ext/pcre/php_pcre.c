@@ -32,6 +32,7 @@
 #define PREG_SET_ORDER				2
 #define PREG_OFFSET_CAPTURE			(1<<8)
 #define PREG_UNMATCHED_AS_NULL		(1<<9)
+#define PREG_LENGTH_CAPTURE			(1<<10)
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -261,6 +262,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 	ZVAL_UNDEF(&pcre_globals->unmatched_null_pair);
 	ZVAL_UNDEF(&pcre_globals->unmatched_empty_pair);
+	ZVAL_UNDEF(&pcre_globals->unmatched_zero_pair);
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	pcre_globals->jit = 1;
 #endif
@@ -402,6 +404,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_LENGTH_CAPTURE", PREG_LENGTH_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -466,8 +469,10 @@ static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
 	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
+	zval_ptr_dtor(&PCRE_G(unmatched_zero_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_null_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_empty_pair));
+	ZVAL_UNDEF(&PCRE_G(unmatched_zero_pair));
 	return SUCCESS;
 }
 
@@ -968,35 +973,51 @@ static void init_unmatched_empty_pair() {
 	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
 }
 
+static void init_unmatched_zero_pair() {
+	zval tmp;
+	zval *pair = &PCRE_G(unmatched_zero_pair);
+	array_init_size(pair, 2);
+	ZVAL_LONG(&tmp, 0);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+	ZVAL_LONG(&tmp, -1);
+	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+}
+
 static zend_always_inline void populate_match_value_str(
-		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset) {
-	if (start_offset == end_offset) {
+		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
+		zend_bool length_capture) {
+	PCRE2_SIZE len = end_offset - start_offset;
+	if (length_capture) {
+		ZVAL_LONG(val, len);
+	} else if (len == 0) {
 		ZVAL_EMPTY_STRING(val);
-	} else if (start_offset + 1 == end_offset) {
+	} else if (len == 1) {
 		ZVAL_INTERNED_STR(val, ZSTR_CHAR((unsigned char) subject[start_offset]));
 	} else {
-		ZVAL_STRINGL(val, subject + start_offset, end_offset - start_offset);
+		ZVAL_STRINGL(val, subject + start_offset, len);
 	}
 }
 
 static inline void populate_match_value(
 		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
-		uint32_t unmatched_as_null) {
+		zend_bool length_capture, zend_bool unmatched_as_null) {
 	if (PCRE2_UNSET == start_offset) {
 		if (unmatched_as_null) {
 			ZVAL_NULL(val);
+		} else if (length_capture) {
+			ZVAL_LONG(val, 0);
 		} else {
 			ZVAL_EMPTY_STRING(val);
 		}
 	} else {
-		populate_match_value_str(val, subject, start_offset, end_offset);
+		populate_match_value_str(val, subject, start_offset, end_offset, length_capture);
 	}
 }
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(
+static void add_offset_pair(
 		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
-		zend_string *name, uint32_t unmatched_as_null)
+		zend_string *name, zend_bool length_capture, zend_bool unmatched_as_null)
 {
 	zval match_pair, tmp;
 
@@ -1007,6 +1028,11 @@ static inline void add_offset_pair(
 				init_unmatched_null_pair();
 			}
 			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_null_pair));
+		} else if (length_capture) {
+			if (Z_ISUNDEF(PCRE_G(unmatched_zero_pair))) {
+				init_unmatched_zero_pair();
+			}
+			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_zero_pair));
 		} else {
 			if (Z_ISUNDEF(PCRE_G(unmatched_empty_pair))) {
 				init_unmatched_empty_pair();
@@ -1015,7 +1041,7 @@ static inline void add_offset_pair(
 		}
 	} else {
 		array_init_size(&match_pair, 2);
-		populate_match_value_str(&tmp, subject, start_offset, end_offset);
+		populate_match_value_str(&tmp, subject, start_offset, end_offset, length_capture);
 		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 		ZVAL_LONG(&tmp, start_offset);
 		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
@@ -1033,6 +1059,7 @@ static void populate_subpat_array(
 		zval *subpats, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
 		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
 	zend_bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
+	zend_bool length_capture = (flags & PREG_LENGTH_CAPTURE) != 0;
 	zend_bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 	zval val;
 	int i;
@@ -1041,17 +1068,17 @@ static void populate_subpat_array(
 			for (i = 0; i < count; i++) {
 				add_offset_pair(
 					subpats, subject, offsets[2*i], offsets[2*i+1],
-					subpat_names[i], unmatched_as_null);
+					subpat_names[i], length_capture, unmatched_as_null);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
-					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, subpat_names[i], 1);
+					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, subpat_names[i], 0, 1);
 				}
 			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
-					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
+					&val, subject, offsets[2*i], offsets[2*i+1], length_capture, unmatched_as_null);
 				if (subpat_names[i]) {
 					Z_TRY_ADDREF(val);
 					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &val);
@@ -1072,17 +1099,18 @@ static void populate_subpat_array(
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
 				add_offset_pair(
-					subpats, subject, offsets[2*i], offsets[2*i+1], NULL, unmatched_as_null);
+					subpats, subject, offsets[2*i], offsets[2*i+1],
+					NULL, length_capture, unmatched_as_null);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
-					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, NULL, 1);
+					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, NULL, 0, 1);
 				}
 			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
-					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
+					&val, subject, offsets[2*i], offsets[2*i+1], length_capture, unmatched_as_null);
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
 			}
 			if (unmatched_as_null) {
@@ -1145,8 +1173,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	zend_string	   **subpat_names;		/* Array for named subpatterns */
 	size_t			 i;
 	uint32_t		 subpats_order;		/* Order of subpattern matches */
-	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
-	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
+	zend_bool		 offset_capture;	/* Capture match offsets: yes/no */
+	zend_bool		 length_capture;	/* Capture lengths instead of strings */
+	zend_bool		 unmatched_as_null;	/* Null non-matches: yes/no */
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
@@ -1168,8 +1197,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	subpats_order = global ? PREG_PATTERN_ORDER : 0;
 
 	if (use_flags) {
-		offset_capture = flags & PREG_OFFSET_CAPTURE;
-		unmatched_as_null = flags & PREG_UNMATCHED_AS_NULL;
+		offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
+		length_capture = (flags & PREG_LENGTH_CAPTURE) != 0;
+		unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 
 		/*
 		 * subpats_order is pre-set to pattern mode so we change it only if
@@ -1185,6 +1215,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	} else {
 		offset_capture = 0;
+		length_capture = 0;
 		unmatched_as_null = 0;
 	}
 
@@ -1292,13 +1323,14 @@ matched:
 							for (i = 0; i < count; i++) {
 								add_offset_pair(
 									&match_sets[i], subject, offsets[2*i], offsets[2*i+1],
-									NULL, unmatched_as_null);
+									NULL, length_capture, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
 								zval val;
 								populate_match_value(
-									&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
+									&val, subject, offsets[2*i], offsets[2*i+1],
+									length_capture, unmatched_as_null);
 								zend_hash_next_index_insert_new(Z_ARRVAL(match_sets[i]), &val);
 							}
 						}
@@ -1320,9 +1352,11 @@ matched:
 								if (offset_capture) {
 									add_offset_pair(
 										&match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
-										NULL, unmatched_as_null);
+										NULL, length_capture, unmatched_as_null);
 								} else if (unmatched_as_null) {
 									add_next_index_null(&match_sets[i]);
+								} else if (length_capture) {
+									add_next_index_long(&match_sets[i], 0);
 								} else {
 									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
 								}
@@ -2569,10 +2603,10 @@ matched:
 					/* Add (match, offset) pair to the return value */
 					add_offset_pair(
 						return_value, subject, last_match_offset, offsets[0],
-						NULL, 0);
+						NULL, 0, 0);
 				} else {
 					/* Add the piece to the return value */
-					populate_match_value_str(&tmp, subject, last_match_offset, offsets[0]);
+					populate_match_value_str(&tmp, subject, last_match_offset, offsets[0], 0);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
 
@@ -2588,9 +2622,9 @@ matched:
 					if (!no_empty || offsets[2*i] != offsets[2*i+1]) {
 						if (offset_capture) {
 							add_offset_pair(
-								return_value, subject, offsets[2*i], offsets[2*i+1], NULL, 0);
+								return_value, subject, offsets[2*i], offsets[2*i+1], NULL, 0, 0);
 						} else {
-							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1]);
+							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1], 0);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 						}
 					}
@@ -2661,13 +2695,13 @@ last:
 	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
+			add_offset_pair(return_value, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0, 0);
 		} else {
 			/* Add the last piece to the return value */
 			if (start_offset == 0) {
 				ZVAL_STR_COPY(&tmp, subject_str);
 			} else {
-				populate_match_value_str(&tmp, subject, start_offset, ZSTR_LEN(subject_str));
+				populate_match_value_str(&tmp, subject, start_offset, ZSTR_LEN(subject_str), 0);
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}

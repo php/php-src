@@ -78,6 +78,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;
 	zval unmatched_empty_pair;
+	zval unmatched_zero_pair;
 ZEND_END_MODULE_GLOBALS(pcre)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre)
