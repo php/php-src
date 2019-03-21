@@ -8,7 +8,7 @@ oci8.connection_class=test
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 // Test will open a connection
 // Close the connection

@@ -37,7 +37,7 @@ echo "\n*** Testing is_array() on non array types ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variables
 $unset_array = array(10);

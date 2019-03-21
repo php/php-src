@@ -3,7 +3,7 @@ Bug #38698 (Bug #38698 for some keys cdbmake creates corrupted db and cdb can't 
 --SKIPIF--
 <?php
 	$handler = 'cdb_make';
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require_once(__DIR__ .'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -12,7 +12,7 @@ function isLittleEndian() {
     return 0x00FF === current(unpack('v', pack('S',0x00FF)));
 }
 
-$db_file = dirname(__FILE__) .'/129php.cdb';
+$db_file = __DIR__ .'/129php.cdb';
 
 if (($db_make=dba_open($db_file, "n", 'cdb_make'))!==FALSE) {
 	if (isLittleEndian() === FALSE) {

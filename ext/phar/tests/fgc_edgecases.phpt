@@ -11,7 +11,7 @@ phar.readonly=0
 
 Phar::interceptFileFuncs();
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 try {
@@ -19,7 +19,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 file_put_contents($fname, "blah\n");
 file_put_contents("foob", "test\n");
 echo file_get_contents($fname);
@@ -31,7 +31,7 @@ echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 file_get_contents("./hi", 0, $context, 0, -1);
 echo file_get_contents("foob");
-set_include_path("' . addslashes(dirname(__FILE__)) . '");
+set_include_path("' . addslashes(__DIR__) . '");
 echo file_get_contents("foob", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
@@ -46,9 +46,9 @@ include $pname . '/foo/hi';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(dirname(__FILE__) . '/poo'); ?>
-<?php unlink(dirname(__FILE__) . '/foob'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php rmdir(__DIR__ . '/poo'); ?>
+<?php unlink(__DIR__ . '/foob'); ?>
 --EXPECTF--
 file_get_contents() expects parameter 1 to be a valid path, array given
 blah

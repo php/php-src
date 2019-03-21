@@ -804,7 +804,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 	if (result < 200 || result > 299) {
 		ssb->sb.st_mode |= S_IFREG;
 	} else {
-		ssb->sb.st_mode |= S_IFDIR;
+		ssb->sb.st_mode |= S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH;
 	}
 
 	php_stream_write_string(stream, "TYPE I\r\n"); /* we need this since some servers refuse to accept SIZE command in ASCII mode */

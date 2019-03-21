@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . '__tmp_oo_delete.zip';
 if (file_exists($file)) {
 	unlink($file);

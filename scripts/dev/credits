@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# Generate credits_*.h headers from the ext/*/CREDITS and sapi/*/CREDITS files.
+
+# Go to project root directory
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+
 awkprog='
 BEGIN { FS = "\n|\r\n|\r"; RS = "" }
 { print "CREDIT_LINE(\""$1"\", \""$2"\");" }'

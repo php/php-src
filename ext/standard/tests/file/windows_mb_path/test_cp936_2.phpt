@@ -2,7 +2,7 @@
 Test fopen() for write cp936 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ default_charset=cp936
 #vim: set encoding=cp936
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "œyÔ‡¶à×Ö¹Â·½"; // cp936 string
 $prefix = create_data("file_cp936", $item . "25", 936);

@@ -5,7 +5,7 @@ openssl_x509_fingerprint() tests
 --FILE--
 <?php
 
-$cert = "file://" . dirname(__FILE__) . "/cert.crt";
+$cert = "file://" . __DIR__ . "/cert.crt";
 
 echo "** Testing default functionality **\n";
 var_dump(openssl_x509_fingerprint($cert));

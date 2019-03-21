@@ -17,7 +17,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 */
 
 echo "*** Test copy() function: destination file names containing whitespaces ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $src_file_name = $file_path."/copy_variation3.tmp";
 $file_handle = fopen($src_file_name, "w");
 fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
@@ -72,7 +72,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/copy_variation3.tmp");
+unlink(__DIR__."/copy_variation3.tmp");
 ?>
 --EXPECTF--
 *** Test copy() function: destination file names containing whitespaces ***

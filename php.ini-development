@@ -585,9 +585,10 @@ html_errors = On
 ; control characters. If your logger accepts everything, then no filtering
 ; is needed at all.
 ; Allowed values are:
-;   ascii (only base ASCII characters)
-;   no_ctrl (all characters except control characters)
+;   ascii (all printable ASCII characters and NL)
+;   no-ctrl (all characters except control characters)
 ;   all (all characters)
+; http://php.net/syslog.filter
 ;syslog.filter = ascii
 
 ;windows.show_crt_warning
@@ -1007,7 +1008,7 @@ cli_server.color = On
 ; the sqlite_dbpage virtual table.
 ; https://www.sqlite.org/c3ref/c_dbconfig_defensive.html
 ; (for older SQLite versions, this flag has no use)
-sqlite3.defensive = 1
+;sqlite3.defensive = 1
 
 [Pcre]
 ; PCRE library backtracking limit.

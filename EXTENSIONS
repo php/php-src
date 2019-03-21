@@ -201,11 +201,6 @@ PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           wddx
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (1999 - 2003)
-MAINTENANCE:         Orphaned
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net> (1999 - 2002)
                      Rob Richards <rrichards@php.net> (2003 - 2013)
@@ -367,6 +362,7 @@ EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org> (1999 - 2004)
                      Ilia Alshanetsky <iliaa@php.net> (2002 - 2010)
                      Pierre-Alain Joye <pajoye@php.net> (2008 - 2010)
+                     Bishop Bettini (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -419,6 +415,7 @@ EXTENSION:           phar
 PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net> (2008 - 2009)
                      Marcus Börger <helly@php.net> (2008 - 2008)
                      Steph Fox <sfox@php.net> (2008 - 2008)
+                     Bishop Bettini (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3

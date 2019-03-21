@@ -3,7 +3,7 @@ Bug #48660 (parse_ini_*(): dollar sign as last character of value fails)
 --FILE--
 <?php
 
-$ini_location = dirname(__FILE__) . '/bug48660.tmp';
+$ini_location = __DIR__ . '/bug48660.tmp';
 
 // Build ini data
 $ini_data = '
@@ -24,7 +24,7 @@ var_dump(parse_ini_file($ini_location, true, INI_SCANNER_NORMAL));
 
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug48660.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug48660.tmp'); ?>
 --EXPECT--
 array(1) {
   ["cases"]=>

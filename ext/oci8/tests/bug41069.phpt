@@ -3,7 +3,7 @@ Bug #41069 (Oracle crash with certain data over a DB-link when prefetch memory l
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (empty($dbase)) die ("skip requires network connection alias for DB link loopback");
 if ($test_drcp) die("skip DRCP does not support shared database links");
 ?>
@@ -12,7 +12,7 @@ oci8.default_prefetch=5
 --FILE--
 	<?php
 
-	require(dirname(__FILE__).'/connect.inc');
+	require(__DIR__.'/connect.inc');
 
 // Initialization
 

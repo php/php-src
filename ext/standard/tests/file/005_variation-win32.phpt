@@ -44,7 +44,7 @@ function stat_fn( $filename ) {
 }
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 // create files
 $file_handle = fopen("$file_path/005_variation1.tmp", "w");
 fclose($file_handle);
@@ -143,7 +143,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/005_variation_softlink.tmp");
 unlink($file_path."/005_variation_hardlink.tmp");
 unlink($file_path."/005_variation1.tmp");

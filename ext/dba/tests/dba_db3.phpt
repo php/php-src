@@ -3,13 +3,13 @@ DBA DB3 handler test
 --SKIPIF--
 <?php
 	$handler = 'db3';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'db3';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+	require_once __DIR__ .'/test.inc';
+	require_once __DIR__ .'/dba_handler.inc';
 ?>
 ===DONE===
 --EXPECT--

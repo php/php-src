@@ -8,7 +8,7 @@ include 'skipif.inc';
 <?php
 
 function checkForClosedFilePointer($host, $curl_option, $description) {
-	$fp = fopen(dirname(__FILE__) . '/bug54798.tmp', 'w+');
+	$fp = fopen(__DIR__ . '/bug54798.tmp', 'w+');
 
 	$ch = curl_init();
 
@@ -51,7 +51,7 @@ foreach($options_to_check as $option) {
 ?>
 ===DONE===
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug54798.tmp'); ?>
 --EXPECTF--
 %AOk for CURLOPT_STDERR
 

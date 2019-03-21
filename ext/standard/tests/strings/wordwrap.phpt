@@ -31,6 +31,6 @@ FALSE === @wordwrap(chr(0), 0, "")
 
 TESTS;
 
-include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+include(__DIR__ . '/../../../../tests/quicktester.inc');
 --EXPECT--
 OK

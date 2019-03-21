@@ -3,11 +3,11 @@ PDO_DBLIB: Emulate how mssql extension names "computed" columns
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 $stmt = $db->prepare("SELECT 1, 2 AS named, 3");
 $stmt->execute();

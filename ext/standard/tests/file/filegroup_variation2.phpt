@@ -10,7 +10,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 /* Testing filegroup() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing Invalid file types ***\n";
 $filenames = array(
@@ -37,7 +37,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/filegroup_variation2.tmp");
 ?>
 --EXPECTF--

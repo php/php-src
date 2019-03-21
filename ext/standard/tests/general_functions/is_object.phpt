@@ -102,7 +102,7 @@ echo "\n*** Testing is_object() on non object types ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset object
 $unset_object = new foo();

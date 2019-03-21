@@ -8,7 +8,7 @@ Description: Reads to EOF on the given file pointer from the current position
   and writes the results to the output buffer.
 */
 
-$file_name = dirname(__FILE__)."/passthru.tmp";
+$file_name = __DIR__."/passthru.tmp";
 $write_handle = fopen($file_name, "w");
 
 $string = "Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^ 
@@ -60,7 +60,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/passthru.tmp");
+unlink(__DIR__."/passthru.tmp");
 ?>
 --EXPECT--
 *** Test basic functionality of fpassthru() function ***

@@ -99,7 +99,7 @@ echo "\n*** Testing end() on resource type ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 //directory type resource
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 //store resources in array
 $resources = array($file_handle, $dir_handle);

@@ -12,10 +12,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Returns canonicalized absolute pathname
 */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing realpath(): usage variations ***\n";
-$name_prefix = dirname(__FILE__);
+$name_prefix = __DIR__;
 $filename = "$name_prefix/realpath_variation/home/tests/realpath_variation.tmp";
 mkdir("$name_prefix/realpath_variation/home/tests/", 0777, true);
 
@@ -69,7 +69,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/realpath_variation";
+$name_prefix = __DIR__."/realpath_variation";
 unlink("$name_prefix/home/tests/realpath_variation.tmp");
 rmdir("$name_prefix/home/tests/");
 rmdir("$name_prefix/home/");

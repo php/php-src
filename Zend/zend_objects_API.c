@@ -41,6 +41,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objec
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_store *objects)
 {
+	EG(flags) |= EG_FLAGS_OBJECT_STORE_NO_REUSE;
 	if (objects->top > 1) {
 		uint32_t i;
 		for (i = 1; i < objects->top; i++) {
@@ -140,10 +141,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
-	/* When in shutdown sequesnce - do not reuse previously freed handles, to make sure
+	/* When in shutdown sequence - do not reuse previously freed handles, to make sure
 	 * the dtors for newly created objects are called in zend_objects_store_call_destructors() loop
 	 */
-	if (EG(objects_store).free_list_head != -1 && EXPECTED(!(EG(flags) & EG_FLAGS_IN_SHUTDOWN))) {
+	if (EG(objects_store).free_list_head != -1 && EXPECTED(!(EG(flags) & EG_FLAGS_OBJECT_STORE_NO_REUSE))) {
 		handle = EG(objects_store).free_list_head;
 		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else if (UNEXPECTED(EG(objects_store).top == EG(objects_store).size)) {

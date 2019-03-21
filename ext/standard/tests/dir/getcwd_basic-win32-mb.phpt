@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing getcwd() : basic functionality ***\n";
 
 //create temporary directory for test, removed in CLEAN section
-$directory = dirname(__FILE__) . "/私はガラスを食べられますgetcwd_basic";
+$directory = __DIR__ . "/私はガラスを食べられますgetcwd_basic";
 mkdir($directory);
 
 var_dump(getcwd());
@@ -30,7 +30,7 @@ var_dump(getcwd());
 ===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . "/私はガラスを食べられますgetcwd_basic";
+$directory = __DIR__ . "/私はガラスを食べられますgetcwd_basic";
 rmdir($directory);
 ?>
 --EXPECTF--

@@ -21,10 +21,10 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../file/file.inc");
+include( __DIR__."/../file/file.inc");
 
 // create the temporary directory
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation6";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation6";
 mkdir($dir_path);
 
 // create files within the temporary directory
@@ -64,7 +64,7 @@ closedir();
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますreaddir_variation6";
+$dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation6";
 rmdir($dir_path);
 ?>
 --EXPECT--

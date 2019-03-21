@@ -1,5 +1,11 @@
 --TEST--
 Test var_export() function with integer values
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE < 8) {
+        die("skip 64-bit only");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])

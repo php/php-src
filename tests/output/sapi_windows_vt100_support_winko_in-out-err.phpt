@@ -18,7 +18,7 @@ if(PHP_OS_FAMILY !== "Windows") {
 STDIN STDOUT STDERR
 --FILE--
 <?php
-require dirname(__FILE__).'/sapi_windows_vt100_support.inc';
+require __DIR__.'/sapi_windows_vt100_support.inc';
 testToStdErr();
 ?>
 --EXPECTF--

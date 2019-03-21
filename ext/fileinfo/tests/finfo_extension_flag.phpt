@@ -8,7 +8,7 @@ if (!class_exists('finfo'))
 <?php
 
 $f = new finfo;
-var_dump($f->file(dirname(__FILE__) . "/resources/test.jpg", FILEINFO_EXTENSION));
+var_dump($f->file(__DIR__ . "/resources/test.jpg", FILEINFO_EXTENSION));
 
 ?>
 ===DONE===

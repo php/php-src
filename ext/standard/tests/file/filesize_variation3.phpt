@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    (and generates an error of level E_WARNING) in case of an error.
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing filesize(): usage variations ***\n";
 $filename =  $file_path."/filesize_variation3.tmp";
@@ -37,7 +37,7 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/filesize_variation3.tmp");
 ?>
 --EXPECTF--

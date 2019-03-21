@@ -7,7 +7,7 @@ libgd #101 (imagecreatefromgd can crash if gdImageCreate fails)
 ?>
 --FILE--
 <?php
-$im = imagecreatefromgd(dirname(__FILE__) . '/libgd00101.gd');
+$im = imagecreatefromgd(__DIR__ . '/libgd00101.gd');
 var_dump($im);
 ?>
 --EXPECTF--

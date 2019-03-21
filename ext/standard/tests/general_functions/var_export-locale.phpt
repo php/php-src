@@ -7,6 +7,9 @@ serialize_precision=17
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
         die("skip locale needed for this test is not supported on this platform");
 }
+if (PHP_INT_SIZE < 8) {
+        die("skip 64-bit only");
+}
 ?>
 --FILE--
 <?php

@@ -151,7 +151,7 @@ foreach ($array_variables as $array_var) {
 
 echo "\n*** Testing unset(), empty() & isset() with resource variables ***\n";
 $fp = fopen(__FILE__, "r");
-$dfp = opendir( dirname(__FILE__) );
+$dfp = opendir( __DIR__ );
 $resources = array (
   $fp,
   $dfp

@@ -5,7 +5,7 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $create_st = array();
 $create_st[] = "drop sequence myseq";

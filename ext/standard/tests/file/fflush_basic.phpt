@@ -13,7 +13,7 @@ second line of string
 third line of string
 EOD;
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fflush_basic.tmp";
 
 // opening a file
@@ -38,7 +38,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fflush_basic.tmp";
 unlink($filename);
 ?>

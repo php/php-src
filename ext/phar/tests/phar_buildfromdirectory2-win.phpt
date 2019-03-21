@@ -11,7 +11,7 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory2.phar');
+	$phar = new Phar(__DIR__ . '/buildfromdirectory2.phar');
 	$phar->buildFromDirectory(1);
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -21,7 +21,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/buildfromdirectory2.phar');
+unlink(__DIR__ . '/buildfromdirectory2.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

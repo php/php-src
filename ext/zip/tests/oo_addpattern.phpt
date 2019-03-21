@@ -38,7 +38,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__) . '/oo_addpattern_dir/';
+$dirname = __DIR__ . '/oo_addpattern_dir/';
 unlink($dirname . 'tmp.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.txt');

@@ -34,7 +34,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$a = new Phar(dirname(__FILE__) . '/files/frontcontroller10.phar');
+	$a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -49,12 +49,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$b = new PharData(dirname(__FILE__) . '/whatever.tar');
+	$b = new PharData(__DIR__ . '/whatever.tar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$c = new PharData(dirname(__FILE__) . '/whatever.zip');
+	$c = new PharData(__DIR__ . '/whatever.zip');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }

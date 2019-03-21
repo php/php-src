@@ -44,7 +44,7 @@ echo "\n*** Testing is_bool() on non null values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // other types in a array
 $not_null_types = array (

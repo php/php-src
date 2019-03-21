@@ -25,7 +25,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
    checking for the file truncation when trying to open an existing file in "wt" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "wt", "007_variation_私はガラスを食べられます", 11, "bytes");
@@ -57,7 +57,7 @@ var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n";
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file = $file_path."/007_variation_私はガラスを食べられます11.tmp";
 unlink($file);
 ?>

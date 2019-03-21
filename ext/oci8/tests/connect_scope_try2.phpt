@@ -7,7 +7,7 @@ oci8.old_oci_close_semantics=1
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Initialization
 

@@ -3,7 +3,7 @@ Set and get connection attributes with scope end.
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
@@ -19,7 +19,7 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 $testuser     = 'testuser_attr_5';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 echo"**Test - Set and get values for the attributes with scope end ************\n";
 

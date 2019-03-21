@@ -13,7 +13,7 @@ echo "*** Testing fgetcsv() : reading from file which is having zero content ***
 
 // try reading from file which is having zero content
 // create the file and then open in read mode and try reading
-$filename = dirname(__FILE__) . '/fgetcsv_variation23.tmp';
+$filename = __DIR__ . '/fgetcsv_variation23.tmp';
 $fp = fopen ($filename, "w");
 fclose($fp);
 $fp = fopen ($filename, "r");

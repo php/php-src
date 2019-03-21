@@ -4,7 +4,7 @@ xmlwriter_set_indent_string passing xmlwriter resource
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
-$temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
+$temp_filename = __DIR__."/xmlwriter_set_indent_string.tmp";
 	$fp = fopen($temp_filename, "w");
 	fwrite ($fp, "Hi");
 	fclose($fp);
@@ -13,7 +13,7 @@ var_dump(xmlwriter_set_indent_string($resource, '  '));
 ?>
 --CLEAN--
 <?php
-$temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
+$temp_filename = __DIR__."/xmlwriter_set_indent_string.tmp";
 unlink($temp_filename);
 ?>
 --CREDITS--

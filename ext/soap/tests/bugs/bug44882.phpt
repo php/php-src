@@ -38,7 +38,7 @@ XML;
 	}
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug44882.wsdl');
+$client = new TestSoapClient(__DIR__.'/bug44882.wsdl');
 print_r($client->GetExpressCheckoutDetails());
 ?>
 --EXPECT--

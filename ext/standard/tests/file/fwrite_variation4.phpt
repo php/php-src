@@ -38,7 +38,7 @@ foreach($file_content_types as $file_content_type) {
   foreach($file_modes as $file_mode) {
     echo "-- Opening file in $file_mode --\n";
 
-    $filename = dirname(__FILE__)."/fwrite_variation4.tmp"; // this is name of the file
+    $filename = __DIR__."/fwrite_variation4.tmp"; // this is name of the file
 
     $file_handle = fopen($filename, $file_mode);
     if(!$file_handle) {

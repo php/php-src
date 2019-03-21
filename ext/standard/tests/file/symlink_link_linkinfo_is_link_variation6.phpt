@@ -7,7 +7,7 @@ if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
 }
 
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/symlink_link_linkinfo_is_link6_check_root.tmp";
+$filename = __DIR__."/symlink_link_linkinfo_is_link6_check_root.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -33,7 +33,7 @@ unlink($filename);
 */
 
 /* Variation 6 : Change permission of directory and try creating links inside that directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Creating links in a directory without permission to allow the operation ***\n";
 // temp file used
@@ -67,7 +67,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation6";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation6.tmp";
 if(file_exists($filename)) {

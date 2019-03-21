@@ -6,7 +6,7 @@ Test 3: Exception Test
 <?php
 
 $dom = new domdocument;
-$dom->load(dirname(__FILE__)."/book.xml");
+$dom->load(__DIR__."/book.xml");
 $rootNode = $dom->documentElement;
 print "--- Catch exception with try/catch\n";
 try {

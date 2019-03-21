@@ -9,7 +9,7 @@ Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2
 // Set up test data in a new file
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1" idx="2">book1</book></books>';
-$filename = dirname(__FILE__) . '/_014.xml';
+$filename = __DIR__ . '/003-get-errors.xml';
 file_put_contents($filename, $xmlstring);
 
 // Load test data into a new XML Reader
@@ -60,7 +60,7 @@ $reader->close();
 ===DONE===
 --CLEAN--
 <?php
-unlink(__DIR__.'/_014.xml');
+unlink(__DIR__.'/003-get-errors.xml');
 ?>
 --EXPECTF--
 book

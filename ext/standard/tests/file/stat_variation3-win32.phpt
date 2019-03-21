@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 /* test the effects of creating & deleting of subdir/file  on the stats of dir/file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -61,7 +61,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/stat_variation3");
 ?>
 --EXPECT--

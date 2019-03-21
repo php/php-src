@@ -16,7 +16,7 @@ echo "*** Testing filegroup(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 var_dump( filegroup(__FILE__) );
 var_dump( filegroup(".") );
 var_dump( filegroup("./..") );
@@ -44,7 +44,7 @@ echo "\n*** Done ***\n";
 --CLEAN--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_name = $file_path."/filegroup_basic.tmp";
 $dir_name  = $file_path."/filegroup_basic";
 unlink($file_name);

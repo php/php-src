@@ -6,7 +6,7 @@ Phar: Phar::isValidPharFilename()
 phar.readonly=1
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 var_dump(Phar::isValidPharFilename('*'));
 var_dump(Phar::isValidPharFilename('*', true));
 var_dump(Phar::isValidPharFilename('*', false));
@@ -26,7 +26,7 @@ var_dump(Phar::isValidPharFilename('boo.phar.tar'));
 var_dump(Phar::isValidPharFilename('boo.phar.tar', true));
 var_dump(Phar::isValidPharFilename('boo.phar.tar', false));
 
-mkdir(dirname(__FILE__) . '/.phar');
+mkdir(__DIR__ . '/.phar');
 
 echo "\n.phar/boo.tar\n";
 var_dump(Phar::isValidPharFilename('.phar/boo.tar'));
@@ -72,7 +72,7 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 ===DONE===
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__) . '/.phar');
+rmdir(__DIR__ . '/.phar');
 --EXPECTF--
 bool(false)
 bool(false)

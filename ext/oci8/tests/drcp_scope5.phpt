@@ -7,8 +7,8 @@ oci8.old_oci_close_semantics=1
 --FILE--
 <?php
 
-require dirname(__FILE__)."/drcp_functions.inc";
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/drcp_functions.inc";
+require __DIR__."/details.inc";
 
 // Similar to drcp_scope3.phpt but does a commit before end of
 // function2, allowing the table to be dropped cleanly at the end.

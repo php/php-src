@@ -7,7 +7,7 @@ phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
@@ -28,7 +28,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
 ?>
 --EXPECTF--
 bool(false)

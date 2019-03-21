@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 $stmtarray = array(
 	"DROP TABLE BUG68298",

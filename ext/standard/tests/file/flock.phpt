@@ -3,7 +3,7 @@ flock() tests
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/flock.dat";
+$file = __DIR__."/flock.dat";
 
 $fp = fopen($file, "w");
 fclose($fp);
@@ -34,7 +34,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file = dirname(__FILE__)."/flock.dat";
+$file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECTF--

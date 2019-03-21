@@ -18,7 +18,7 @@ $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
 if (!$ftp) die("Couldn't connect to the server");
 
-$local_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt";
+$local_file = __DIR__ . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt";
 touch($local_file);
 ftp_nb_get($ftp, $local_file, 'fget_large.txt', FTP_BINARY, 5368709119);
 $fp = fopen($local_file, 'r');
@@ -29,7 +29,7 @@ fclose($fp);
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt");
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt");
 ?>
 --EXPECT--
 string(1) "X"

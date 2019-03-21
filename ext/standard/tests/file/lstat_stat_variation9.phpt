@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gives information about a file
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 /* test the effects on stats by deleting file/subdir from a dir
@@ -54,7 +54,7 @@ echo "\n--- Done ---";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = "$file_path/lstat_stat_variation9";
 rmdir($dirname);
 ?>

@@ -14,7 +14,7 @@ Test scandir() function : usage variations - different file names
 
 echo "*** Testing scandir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/scandir_variation8/";
+$dir_path = __DIR__ . "/scandir_variation8/";
 mkdir($dir_path);
 
 // heredoc string
@@ -68,7 +68,7 @@ foreach ($content as $file_name) {
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/scandir_variation8";
+$dir_path = __DIR__ . "/scandir_variation8";
 rmdir($dir_path);
 ?>
 --EXPECTF--

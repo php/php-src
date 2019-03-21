@@ -15,10 +15,10 @@ Test readdir() function : usage variations - operate on previously opened direct
 echo "*** Testing readdir() : usage variations ***\n";
 
 // include the file.inc for Function: function create_files()
-include( dirname(__FILE__)."/../file/file.inc");
+include( __DIR__."/../file/file.inc");
 
 // create the temporary directory
-$dir_path = dirname(__FILE__) . "/readdir_variation6";
+$dir_path = __DIR__ . "/readdir_variation6";
 mkdir($dir_path);
 
 // create files within the temporary directory
@@ -58,7 +58,7 @@ closedir();
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/readdir_variation6";
+$dir_path = __DIR__ . "/readdir_variation6";
 rmdir($dir_path);
 ?>
 --EXPECT--

@@ -1488,7 +1488,3 @@ zend_module_entry hash_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
-
-#ifdef COMPILE_DL_HASH
-ZEND_GET_MODULE(hash)
-#endif

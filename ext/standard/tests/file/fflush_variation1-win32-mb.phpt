@@ -13,7 +13,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
 
 /* test fflush() with handle to the files opened in different modes */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with various types of files ***\n";

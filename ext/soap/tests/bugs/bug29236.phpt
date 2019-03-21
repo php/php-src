@@ -6,7 +6,7 @@ Bug #29236 (memory error when wsdl-cache is enabled)
 soap.wsdl_cache_enabled=1
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__)."/bug29236.wsdl");
+$client = new SoapClient(__DIR__."/bug29236.wsdl");
 var_dump($client->__getFunctions());
 ?>
 --EXPECT--

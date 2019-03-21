@@ -4,14 +4,14 @@ openssl_pkcs12_export_to_file() error tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 
-$cert_file = dirname(__FILE__) . "/public.crt";
+$cert_file = __DIR__ . "/public.crt";
 $cert = file_get_contents($cert_file);
 $cert_path = "file://" . $cert_file;
-$priv_file = dirname(__FILE__) . "/private.crt";
+$priv_file = __DIR__ . "/private.crt";
 $priv = file_get_contents($priv_file);
-$wrong_priv_file = dirname(__FILE__) . "/private_rsa_1024.key";
+$wrong_priv_file = __DIR__ . "/private_rsa_1024.key";
 $wrong_priv = file_get_contents($wrong_priv_file);
 $pass = 'test';
 
@@ -21,7 +21,7 @@ var_dump(openssl_pkcs12_export_to_file($cert, '.', $priv, $pass));
 ?>
 --CLEAN--
 <?php
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
 	unlink($pkcsfile);
 }

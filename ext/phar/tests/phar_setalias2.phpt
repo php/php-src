@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 
@@ -23,14 +23,14 @@ echo $phar->getAlias() . "\n";
 $phar->setAlias('test');
 echo $phar->getAlias() . "\n";
 $b = $phar;
-$phar = new Phar(dirname(__FILE__) . '/notphar.phar');
+$phar = new Phar(__DIR__ . '/notphar.phar');
 try {
 	$phar->setAlias('test');
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
 try {
-	$b = new Phar(dirname(__FILE__) . '/nope.phar', 0, 'test');
+	$b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
@@ -38,9 +38,9 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
-unlink(dirname(__FILE__) . '/notphar.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
+unlink(__DIR__ . '/notphar.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

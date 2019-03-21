@@ -2,7 +2,7 @@
 Test imap_clearflag_full() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 
 echo "*** Testing imap_clearflag_full() : basic functionality ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
 $imap_stream = setup_test_mailbox("", 10);

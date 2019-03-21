@@ -4,19 +4,19 @@ openssl_pkcs12_export_to_file() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 
-$cert_file = dirname(__FILE__) . "/public.crt";
+$cert_file = __DIR__ . "/public.crt";
 $cert = file_get_contents($cert_file);
 $cert_path = "file://" . $cert_file;
-$priv_file = dirname(__FILE__) . "/private.crt";
+$priv_file = __DIR__ . "/private.crt";
 $priv = file_get_contents($priv_file);
 $priv_path = "file://" . $priv_file;
 $cert_res = openssl_x509_read($cert);
 $priv_res = openssl_pkey_get_private($priv);
 $pass = "test";
 $invalid = "";
-$invalid_path = dirname(__FILE__) . "/invalid_path";
+$invalid_path = __DIR__ . "/invalid_path";
 $opts = [];
 
 var_dump(openssl_pkcs12_export_to_file($cert, $pkcsfile, $priv, $pass));
@@ -34,7 +34,7 @@ var_dump(openssl_pkcs12_export_to_file($priv_res, $pkcsfile, $cert_res, $pass));
 ?>
 --CLEAN--
 <?php
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
+$pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
 	unlink($pkcsfile);
 }

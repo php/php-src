@@ -3,12 +3,12 @@ Bug #72885 flatfile: dba_fetch() fails to read replaced entry
 --SKIPIF--
 <?php
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 
 $db = dba_open($db_filename, 'c', 'flatfile');
 dba_insert('foo', 'bar', $db);
@@ -20,7 +20,7 @@ dba_close($db);
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__) .'/clean.inc');
+require_once(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 bool(true)

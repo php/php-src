@@ -5,7 +5,7 @@ SELECTing NULL values
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 

@@ -7,7 +7,7 @@ if (!extension_loaded('oci8')) die("skip no oci8 extension");
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 $types = array(
     "SQLT_BDOUBLE" => SQLT_BDOUBLE,

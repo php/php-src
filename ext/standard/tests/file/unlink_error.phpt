@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $filename = "$file_path/unlink_error.tmp";  // temp file name used here
 $fp = fopen($filename, "w");  // create file
@@ -35,7 +35,7 @@ var_dump( unlink(false) );  // $filename as boolean false
 var_dump( file_exists(false) );  // confirm file doesnt exist
 
 echo "\n-- Testing unlink() on non-existent file --\n";
-var_dump( unlink(dirname(__FILE__)."/non_existent_file.tmp") );
+var_dump( unlink(__DIR__."/non_existent_file.tmp") );
 
 echo "\n-- Testing unlink() on directory --\n";
 // temp directory used here
@@ -49,8 +49,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/unlink_error.tmp");
-rmdir(dirname(__FILE__)."/unlink_error");
+unlink(__DIR__."/unlink_error.tmp");
+rmdir(__DIR__."/unlink_error");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***

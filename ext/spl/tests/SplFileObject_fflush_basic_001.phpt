@@ -5,7 +5,7 @@ SplFileObject::fflush function - basic test
 /*
  * test a successful flush
 */
-$obj = New SplFileObject(dirname(__FILE__).'/SplFileObject_testinput.csv');
+$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
 var_dump($obj->fflush());
 
 /*

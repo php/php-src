@@ -136,8 +136,6 @@ typedef enum {
 
 #ifdef PHP_WIN32
 # define WIDE_INT		__int64
-#elif SIZEOF_LONG_LONG_INT
-# define WIDE_INT		long long int
 #elif SIZEOF_LONG_LONG
 # define WIDE_INT		long long
 #else

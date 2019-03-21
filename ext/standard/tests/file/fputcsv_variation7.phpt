@@ -30,7 +30,7 @@ $csv_lists = array (
   array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
 
 );
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fputcsv_variation7.tmp";
 
 $file_modes = array ("r+", "r+b", "r+t",
