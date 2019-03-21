@@ -968,13 +968,40 @@ static void init_unmatched_empty_pair() {
 	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
 }
 
+static zend_always_inline void populate_match_value_str(
+		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset) {
+	if (start_offset == end_offset) {
+		ZVAL_EMPTY_STRING(val);
+	} else if (start_offset + 1 == end_offset) {
+		ZVAL_INTERNED_STR(val, ZSTR_CHAR((unsigned char) subject[start_offset]));
+	} else {
+		ZVAL_STRINGL(val, subject + start_offset, end_offset - start_offset);
+	}
+}
+
+static inline void populate_match_value(
+		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
+		uint32_t unmatched_as_null) {
+	if (PCRE2_UNSET == start_offset) {
+		if (unmatched_as_null) {
+			ZVAL_NULL(val);
+		} else {
+			ZVAL_EMPTY_STRING(val);
+		}
+	} else {
+		populate_match_value_str(val, subject, start_offset, end_offset);
+	}
+}
+
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SIZE offset, zend_string *name, uint32_t unmatched_as_null)
+static inline void add_offset_pair(
+		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
+		zend_string *name, uint32_t unmatched_as_null)
 {
 	zval match_pair, tmp;
 
 	/* Add (match, offset) to the return value */
-	if (PCRE2_UNSET == offset) {
+	if (PCRE2_UNSET == start_offset) {
 		if (unmatched_as_null) {
 			if (Z_ISUNDEF(PCRE_G(unmatched_null_pair))) {
 				init_unmatched_null_pair();
@@ -988,15 +1015,9 @@ static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SI
 		}
 	} else {
 		array_init_size(&match_pair, 2);
-		if (len == 0) {
-			ZVAL_EMPTY_STRING(&tmp);
-		} else if (len == 1) {
-			ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR((unsigned char) *str));
-		} else {
-			ZVAL_STRINGL(&tmp, str, len);
-		}
+		populate_match_value_str(&tmp, subject, start_offset, end_offset);
 		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
-		ZVAL_LONG(&tmp, offset);
+		ZVAL_LONG(&tmp, start_offset);
 		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 	}
 
@@ -1008,27 +1029,9 @@ static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SI
 }
 /* }}} */
 
-static inline void populate_match_value(
-		zval *val, char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
-		uint32_t unmatched_as_null) {
-	if (PCRE2_UNSET == start_offset) {
-		if (unmatched_as_null) {
-			ZVAL_NULL(val);
-		} else {
-			ZVAL_EMPTY_STRING(val);
-		}
-	} else if (start_offset == end_offset) {
-		ZVAL_EMPTY_STRING(val);
-	} else if (start_offset + 1 == end_offset) {
-		ZVAL_INTERNED_STR(val, ZSTR_CHAR((unsigned char) subject[start_offset]));
-	} else {
-		ZVAL_STRINGL(val, subject + start_offset, end_offset - start_offset);
-	}
-}
-
 static void populate_subpat_array(
 		zval *subpats, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names,
-		int count, const PCRE2_SPTR mark, zend_long flags) {
+		uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags) {
 	zend_bool offset_capture = (flags & PREG_OFFSET_CAPTURE) != 0;
 	zend_bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 	zval val;
@@ -1036,9 +1039,14 @@ static void populate_subpat_array(
 	if (subpat_names) {
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
-				add_offset_pair(subpats, subject + offsets[i<<1],
-								offsets[(i<<1)+1] - offsets[i<<1],
-								offsets[i<<1], subpat_names[i], unmatched_as_null);
+				add_offset_pair(
+					subpats, subject, offsets[2*i], offsets[2*i+1],
+					subpat_names[i], unmatched_as_null);
+			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, subpat_names[i], 1);
+				}
 			}
 		} else {
 			for (i = 0; i < count; i++) {
@@ -1050,19 +1058,37 @@ static void populate_subpat_array(
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
 			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					ZVAL_NULL(&val);
+					if (subpat_names[i]) {
+						zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &val);
+					}
+					zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
+				}
+			}
 		}
 	} else {
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
-				add_offset_pair(subpats, subject + offsets[i<<1],
-								offsets[(i<<1)+1] - offsets[i<<1],
-								offsets[i<<1], NULL, unmatched_as_null);
+				add_offset_pair(
+					subpats, subject, offsets[2*i], offsets[2*i+1], NULL, unmatched_as_null);
+			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, NULL, 1);
+				}
 			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
 					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
+			}
+			if (unmatched_as_null) {
+				for (i = count; i < num_subpats; i++) {
+					add_next_index_null(subpats);
+				}
 			}
 		}
 	}
@@ -1264,8 +1290,9 @@ matched:
 						/* For each subpattern, insert it into the appropriate array. */
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(&match_sets[i], subject + offsets[i<<1],
-												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL, unmatched_as_null);
+								add_offset_pair(
+									&match_sets[i], subject, offsets[2*i], offsets[2*i+1],
+									NULL, unmatched_as_null);
 							}
 						} else {
 							for (i = 0; i < count; i++) {
@@ -1292,7 +1319,7 @@ matched:
 							for (; i < num_subpats; i++) {
 								if (offset_capture) {
 									add_offset_pair(
-										&match_sets[i], NULL, 0, PCRE2_UNSET,
+										&match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
 										NULL, unmatched_as_null);
 								} else if (unmatched_as_null) {
 									add_next_index_null(&match_sets[i]);
@@ -1306,7 +1333,8 @@ matched:
 						array_init_size(&result_set, count + (mark ? 1 : 0));
 						mark = pcre2_get_mark(match_data);
 						populate_subpat_array(
-							&result_set, subject, offsets, subpat_names, count, mark, flags);
+							&result_set, subject, offsets, subpat_names,
+							num_subpats, count, mark, flags);
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set);
 					}
@@ -1314,7 +1342,7 @@ matched:
 					/* For each subpattern, insert it into the subpatterns array. */
 					mark = pcre2_get_mark(match_data);
 					populate_subpat_array(
-						subpats, subject, offsets, subpat_names, count, mark, flags);
+						subpats, subject, offsets, subpat_names, num_subpats, count, mark, flags);
 					break;
 				}
 			}
@@ -1473,14 +1501,14 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, int count, const PCRE2_SPTR mark, zend_long flags)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, zend_string **subpat_names, uint32_t num_subpats, int count, const PCRE2_SPTR mark, zend_long flags)
 {
 	zend_string *result_str;
 	zval		 retval;			/* Function return value */
 	zval	     arg;				/* Argument to pass to function */
 
 	array_init_size(&arg, count + (mark ? 1 : 0));
-	populate_subpat_array(&arg, subject, offsets, subpat_names, count, mark, flags);
+	populate_subpat_array(&arg, subject, offsets, subpat_names, num_subpats, count, mark, flags);
 
 	fci->retval = &retval;
 	fci->param_count = 1;
@@ -1878,7 +1906,8 @@ matched:
 			new_len = result_len + offsets[0] - start_offset; /* part before the match */
 
 			/* Use custom function to get replacement string and its length. */
-			eval_result = preg_do_repl_func(fci, fcc, subject, offsets, subpat_names, count,
+			eval_result = preg_do_repl_func(
+				fci, fcc, subject, offsets, subpat_names, num_subpats, count,
 				pcre2_get_mark(match_data), flags);
 
 			ZEND_ASSERT(eval_result);
@@ -2464,14 +2493,14 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
-	PCRE2_SIZE		 next_offset;		/* End of the last delimiter match + 1 */
-	char			*last_match;		/* Location of last match */
+	PCRE2_SIZE		 last_match_offset;	/* Location of last match */
 	uint32_t		 no_empty;			/* If NO_EMPTY flag is set */
 	uint32_t		 delim_capture; 	/* If delimiters should be captured */
 	uint32_t		 offset_capture;	/* If offsets should be captured */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	zval			 tmp;
 	pcre2_match_data *match_data;
+	char *subject = ZSTR_VAL(subject_str);
 
 	no_empty = flags & PREG_SPLIT_NO_EMPTY;
 	delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
@@ -2485,10 +2514,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	/* Start at the beginning of the string */
 	start_offset = 0;
-	next_offset = 0;
-	last_match = ZSTR_VAL(subject_str);
+	last_match_offset = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
-
 
 	if (limit_val == -1) {
 		/* pass */
@@ -2513,11 +2540,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
-		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	} else
 #endif
-	count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+	count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 			options, match_data, mctx);
 
 	while (1) {
@@ -2537,14 +2564,15 @@ matched:
 				break;
 			}
 
-			if (!no_empty || &ZSTR_VAL(subject_str)[offsets[0]] != last_match) {
-
+			if (!no_empty || offsets[0] != last_match_offset) {
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, (&ZSTR_VAL(subject_str)[offsets[0]]-last_match), next_offset, NULL, 0);
+					add_offset_pair(
+						return_value, subject, last_match_offset, offsets[0],
+						NULL, 0);
 				} else {
 					/* Add the piece to the return value */
-					ZVAL_STRINGL(&tmp, last_match, &ZSTR_VAL(subject_str)[offsets[0]]-last_match);
+					populate_match_value_str(&tmp, subject, last_match_offset, offsets[0]);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
 
@@ -2553,19 +2581,16 @@ matched:
 					limit_val--;
 			}
 
-			last_match = &ZSTR_VAL(subject_str)[offsets[1]];
-			next_offset = offsets[1];
-
 			if (delim_capture) {
-				size_t i, match_len;
+				size_t i;
 				for (i = 1; i < count; i++) {
-					match_len = offsets[(i<<1)+1] - offsets[i<<1];
 					/* If we have matched a delimiter */
-					if (!no_empty || match_len > 0) {
+					if (!no_empty || offsets[2*i] != offsets[2*i+1]) {
 						if (offset_capture) {
-							add_offset_pair(return_value, &ZSTR_VAL(subject_str)[offsets[i<<1]], match_len, offsets[i<<1], NULL, 0);
+							add_offset_pair(
+								return_value, subject, offsets[2*i], offsets[2*i+1], NULL, 0);
 						} else {
-							ZVAL_STRINGL(&tmp, &ZSTR_VAL(subject_str)[offsets[i<<1]], match_len);
+							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1]);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 						}
 					}
@@ -2573,14 +2598,14 @@ matched:
 			}
 
 			/* Advance to the position right after the last full match */
-			start_offset = offsets[1];
+			start_offset = last_match_offset = offsets[1];
 
 			/* If we have matched an empty string, mimic what Perl's /g options does.
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
-				count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {
 					goto matched;
@@ -2590,7 +2615,7 @@ matched:
 					   the start offset, and continue. Fudge the offset values
 					   to achieve this, unless we're already at the end of the string. */
 					if (start_offset < ZSTR_LEN(subject_str)) {
-						start_offset += calculate_unit_length(pce, ZSTR_VAL(subject_str) + start_offset);
+						start_offset += calculate_unit_length(pce, subject + start_offset);
 					} else {
 						break;
 					}
@@ -2614,11 +2639,11 @@ error:
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (pce->preg_options & PREG_JIT) {
-			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 				PCRE2_NO_UTF_CHECK, match_data, mctx);
 	}
 	if (match_data != mdata) {
@@ -2631,18 +2656,18 @@ error:
 	}
 
 last:
-	start_offset = (last_match - ZSTR_VAL(subject_str)); /* the offset might have been incremented, but without further successful matches */
+	start_offset = last_match_offset; /* the offset might have been incremented, but without further successful matches */
 
 	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, &ZSTR_VAL(subject_str)[start_offset], ZSTR_LEN(subject_str) - start_offset, start_offset, NULL, 0);
+			add_offset_pair(return_value, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
-			if (last_match == ZSTR_VAL(subject_str)) {
+			if (start_offset == 0) {
 				ZVAL_STR_COPY(&tmp, subject_str);
 			} else {
-				ZVAL_STRINGL(&tmp, last_match, ZSTR_VAL(subject_str) + ZSTR_LEN(subject_str) - last_match);
+				populate_match_value_str(&tmp, subject, start_offset, ZSTR_LEN(subject_str));
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
