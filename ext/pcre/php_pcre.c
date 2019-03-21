@@ -2493,7 +2493,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
-	char			*last_match;		/* Location of last match */
+	PCRE2_SIZE		 last_match_offset;	/* Location of last match */
 	uint32_t		 no_empty;			/* If NO_EMPTY flag is set */
 	uint32_t		 delim_capture; 	/* If delimiters should be captured */
 	uint32_t		 offset_capture;	/* If offsets should be captured */
@@ -2514,9 +2514,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	/* Start at the beginning of the string */
 	start_offset = 0;
-	last_match = subject;
+	last_match_offset = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
-
 
 	if (limit_val == -1) {
 		/* pass */
@@ -2565,15 +2564,15 @@ matched:
 				break;
 			}
 
-			if (!no_empty || &subject[offsets[0]] != last_match) {
+			if (!no_empty || offsets[0] != last_match_offset) {
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
 					add_offset_pair(
-						return_value, subject, last_match - subject, offsets[0],
+						return_value, subject, last_match_offset, offsets[0],
 						NULL, 0);
 				} else {
 					/* Add the piece to the return value */
-					ZVAL_STRINGL(&tmp, last_match, &subject[offsets[0]]-last_match);
+					populate_match_value_str(&tmp, subject, last_match_offset, offsets[0]);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
 
@@ -2582,19 +2581,16 @@ matched:
 					limit_val--;
 			}
 
-			last_match = &subject[offsets[1]];
-
 			if (delim_capture) {
-				size_t i, match_len;
+				size_t i;
 				for (i = 1; i < count; i++) {
-					match_len = offsets[2*i+1] - offsets[2*i];
 					/* If we have matched a delimiter */
-					if (!no_empty || match_len > 0) {
+					if (!no_empty || offsets[2*i] != offsets[2*i+1]) {
 						if (offset_capture) {
 							add_offset_pair(
 								return_value, subject, offsets[2*i], offsets[2*i+1], NULL, 0);
 						} else {
-							ZVAL_STRINGL(&tmp, &subject[offsets[2*i]], match_len);
+							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1]);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 						}
 					}
@@ -2602,7 +2598,7 @@ matched:
 			}
 
 			/* Advance to the position right after the last full match */
-			start_offset = offsets[1];
+			start_offset = last_match_offset = offsets[1];
 
 			/* If we have matched an empty string, mimic what Perl's /g options does.
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
@@ -2660,7 +2656,7 @@ error:
 	}
 
 last:
-	start_offset = (last_match - subject); /* the offset might have been incremented, but without further successful matches */
+	start_offset = last_match_offset; /* the offset might have been incremented, but without further successful matches */
 
 	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
@@ -2668,10 +2664,10 @@ last:
 			add_offset_pair(return_value, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
-			if (last_match == subject) {
+			if (start_offset == 0) {
 				ZVAL_STR_COPY(&tmp, subject_str);
 			} else {
-				ZVAL_STRINGL(&tmp, last_match, subject + ZSTR_LEN(subject_str) - last_match);
+				populate_match_value_str(&tmp, subject, start_offset, ZSTR_LEN(subject_str));
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
