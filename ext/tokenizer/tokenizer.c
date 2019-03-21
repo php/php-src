@@ -127,8 +127,8 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	zval source_zval;
 	zend_lex_state original_lex_state;
 	zval token;
+	zend_ast_loc loc;
 	int token_type;
-	int token_line = 1;
 	int need_tokens = -1; /* for __halt_compiler lexing. -1 = disabled */
 
 	ZVAL_STR_COPY(&source_zval, source);
@@ -142,8 +142,8 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	LANG_SCNG(yy_state) = yycINITIAL;
 	array_init(return_value);
 
-	while ((token_type = lex_scan(&token, NULL))) {
-		add_token(return_value, token_type, zendtext, zendleng, token_line);
+	while ((token_type = lex_scan(&token, NULL, &loc))) {
+		add_token(return_value, token_type, zendtext, zendleng, loc.start_line);
 
 		if (Z_TYPE(token) != IS_UNDEF) {
 			zval_ptr_dtor_nogc(&token);
@@ -159,20 +159,13 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 				/* fetch the rest into a T_INLINE_HTML */
 				if (zendcursor != zendlimit) {
 					add_token(return_value, T_INLINE_HTML,
-						zendcursor, zendlimit - zendcursor, token_line);
+						zendcursor, zendlimit - zendcursor, loc.start_line);
 				}
 				break;
 			}
 		} else if (token_type == T_HALT_COMPILER) {
 			need_tokens = 3;
 		}
-
-		if (CG(increment_lineno)) {
-			CG(zend_lineno)++;
-			CG(increment_lineno) = 0;
-		}
-
-		token_line = CG(zend_lineno);
 	}
 
 	zval_ptr_dtor_str(&source_zval);
