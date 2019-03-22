@@ -42,8 +42,7 @@ Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 -- Iteration 1 --
 string(50) "<html> $ -> This represents the dollar sign</html>"
 -- Iteration 2 --
-string(59) "<html>	
- The quick brown fox jumped over the lazy dog</p>"
+string(59) "<html>	 The quick brown fox jumped over the lazy dog</p>"
 -- Iteration 3 --
 string(31) "<a>This is a hyper text tag</a>"
 -- Iteration 4 --
@@ -51,7 +50,6 @@ string(0) ""
 -- Iteration 5 --
 string(26) "<p>This is a paragraph</p>"
 -- Iteration 6 --
-string(62) "<b>This is 	a text in bold letters
-\s\malong with slashes
+string(62) "<b>This is 	a text in bold letters\s\malong with slashes
 </b>"
 Done
