@@ -19,8 +19,6 @@
 #ifndef PHP_PCRE_H
 #define PHP_PCRE_H
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 #if HAVE_BUNDLED_PCRE
 #include "pcre2lib/pcre2.h"
 #else
@@ -82,12 +80,6 @@ ZEND_END_MODULE_GLOBALS(pcre)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre)
 #define PCRE_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcre, v)
-
-#else
-
-#define pcre_module_ptr NULL
-
-#endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
 
 #define phpext_pcre_ptr pcre_module_ptr
 
