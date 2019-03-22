@@ -10,12 +10,12 @@ PHP_ARG_WITH([sqlite3],
 if test $PHP_SQLITE3 != "no"; then
   PHP_SQLITE3_CFLAGS=" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 "
 
-  dnl when running phpize enable_maintainer_zts is not available
-  if test -z "$enable_maintainer_zts"; then
+  dnl when running phpize enable_zts is not available
+  if test -z "$enable_zts"; then
     if test -f "$phpincludedir/main/php_config.h"; then
       ZTS=`grep '#define ZTS' $phpincludedir/main/php_config.h|$SED 's/#define ZTS//'`
       if test "$ZTS" -eq "1"; then
-        enable_maintainer_zts="yes"
+        enable_zts="yes"
       fi
     fi
   fi

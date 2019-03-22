@@ -79,11 +79,11 @@ int main()
 
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
-AC_ARG_ENABLE([maintainer-zts],
-  [AS_HELP_STRING([--enable-maintainer-zts],
-    [Enable thread safety - for code maintainers only!!])],
-  [ZEND_MAINTAINER_ZTS=$enableval],
-  [ZEND_MAINTAINER_ZTS=no])
+AC_ARG_ENABLE([zts],
+  [AS_HELP_STRING([--enable-zts],
+    [Enable thread safety])],
+  [ZEND_ZTS=$enableval],
+  [ZEND_ZTS=no])
 
 AC_ARG_ENABLE([inline-optimization],
   [AS_HELP_STRING([--disable-inline-optimization],
@@ -92,7 +92,7 @@ AC_ARG_ENABLE([inline-optimization],
   [ZEND_INLINE_OPTIMIZATION=yes])
 
 AC_MSG_CHECKING(whether to enable thread-safety)
-AC_MSG_RESULT($ZEND_MAINTAINER_ZTS)
+AC_MSG_RESULT($ZEND_ZTS)
 
 AC_MSG_CHECKING(whether to enable inline optimization for GCC)
 AC_MSG_RESULT($ZEND_INLINE_OPTIMIZATION)
@@ -115,7 +115,7 @@ fi
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
+if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
 fi

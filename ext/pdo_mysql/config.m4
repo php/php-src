@@ -60,7 +60,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       if test "x$SED" = "x"; then
         AC_PATH_PROG(SED, sed)
       fi
-      if test "$enable_maintainer_zts" = "yes"; then
+      if test "$enable_zts" = "yes"; then
         PDO_MYSQL_LIBNAME=mysqlclient_r
         PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs_r | $SED -e "s/'//g"`
       else

@@ -162,8 +162,8 @@ Checklist for submitting your PHP or PECL code patch
  - Rebuild PHP with --enable-debug (which will show some kinds of
    memory errors) and check the PHP and web server error logs after
    running your PHP tests.
- - Rebuild PHP with --enable-maintainer-zts to check your patch
-   compiles on multi-threaded web servers.
+ - Rebuild PHP with --enable-zts to check your patch
+   compiles and operates correctly in a thread safe PHP.
  - Review the patch once more just before submitting it.
 
 
