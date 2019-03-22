@@ -1,10 +1,16 @@
 --TEST--
 ini_get_all() tests
 --INI--
+pcre.jit=1
 pcre.backtrack_limit=1000000
 pcre.recursion_limit=100000
 --SKIPIF--
 <?php if (!extension_loaded("reflection")) die("skip"); ?>
+<?php
+if (ini_get("pcre.jit") === FALSE) {
+	die("skip no jit built");
+}
+?>
 --FILE--
 <?php
 
