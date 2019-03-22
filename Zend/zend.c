@@ -511,17 +511,14 @@ static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path)
 /* }}} */
 
 #ifdef ZTS
-static zend_bool short_tags_default      = 0;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
-# define short_tags_default			0
 # define compiler_options_default	ZEND_COMPILE_DEFAULT
 #endif
 
 static void zend_set_default_compile_time_values(void) /* {{{ */
 {
 	/* default compile-time values */
-	CG(short_tags) = short_tags_default;
 	CG(compiler_options) = compiler_options_default;
 }
 /* }}} */
@@ -1002,7 +999,6 @@ int zend_post_startup(void) /* {{{ */
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
 	global_map_ptr_last = compiler_globals->map_ptr_last;
 
-	short_tags_default = CG(short_tags);
 	compiler_options_default = CG(compiler_options);
 
 	zend_destroy_rsrc_list(&EG(persistent_list));

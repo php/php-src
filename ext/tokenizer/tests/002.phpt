@@ -2,8 +2,6 @@
 token_get_all()
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
---INI--
-short_open_tag=On
 --FILE--
 <?php
 
@@ -22,7 +20,6 @@ foreach ($strings as $s) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 array(49) {
   [0]=>
   array(3) {

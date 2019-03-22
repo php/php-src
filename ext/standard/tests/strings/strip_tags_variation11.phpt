@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : obscure values within attributes
---INI--
-short_open_tag = on
 --FILE--
 <?php
 
@@ -29,7 +27,6 @@ foreach($string_array as $string)
 echo "Done";
 ?>
 --EXPECT--
-Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : obscure functionality ***
 -- Iteration 1 --
 string(12) "hello  world"

@@ -2,8 +2,6 @@
 Test token_get_all() function : usage variations - heredoc string for 'source'
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
---INI--
-short_open_tag=On
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -49,7 +47,6 @@ var_dump( token_get_all($source));
 echo "Done"
 ?>
 --EXPECTF--
-Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing token_get_all() : with heredoc source string ***
 array(103) {
   [0]=>
