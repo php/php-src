@@ -2,6 +2,8 @@
 preg_grep() 2nd test
 --SKIPIF--
 <?php if (!PCRE_JIT_SUPPORT) die("skip no pcre jit support"); ?>
+--INI--
+pcre.jit=1
 --FILE--
 <?php
 
