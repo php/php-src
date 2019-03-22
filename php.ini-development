@@ -174,6 +174,7 @@
 ; http://php.net/engine
 engine = On
 
+; This directive is DEPRECATED.
 ; This directive determines whether or not PHP will recognize code between
 ; <? and ?> tags as PHP source which should be processed as such. It is
 ; generally recommended that <?php and ?> should be used and that this feature
@@ -181,7 +182,7 @@ engine = On
 ; documents, however this remains supported for backward compatibility reasons.
 ; Note that this directive does not control the <?= shorthand tag, which can be
 ; used regardless of this directive.
-; Default Value: On
+; Default Value: Off
 ; Development Value: Off
 ; Production Value: Off
 ; http://php.net/short-open-tag
