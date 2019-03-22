@@ -781,6 +781,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	MYSQLND_PACKET_ROW	*row_packet = result->unbuf->row_packet;
 	const MYSQLND_RES_METADATA * const meta = result->meta;
 	MYSQLND_CONN_DATA * const conn = result->conn;
+	void *checkpoint;
 
 	DBG_ENTER("mysqlnd_result_unbuffered::fetch_row");
 
@@ -799,6 +800,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 	}
 	/* Let the row packet fill our buffer and skip additional mnd_malloc + memcpy */
 	row_packet->skip_extraction = row? FALSE:TRUE;
+
+	checkpoint = result->memory_pool->checkpoint;
+	mysqlnd_mempool_save_state(result->memory_pool);
 
 	/*
 	  If we skip rows (row == NULL) we have to
@@ -824,6 +828,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 															   conn->options->int_and_float_native,
 															   conn->stats);
 			if (PASS != rc) {
+				mysqlnd_mempool_restore_state(result->memory_pool);
+				result->memory_pool->checkpoint = checkpoint;
 				DBG_RETURN(FAIL);
 			}
 			{
@@ -893,6 +899,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		}
 		result->unbuf->m.free_last_data(result->unbuf, conn->stats);
 	}
+
+	mysqlnd_mempool_restore_state(result->memory_pool);
+	result->memory_pool->checkpoint = checkpoint;
 
 	DBG_INF_FMT("ret=%s fetched=%u", ret == PASS? "PASS":"FAIL", *fetched_anything);
 	DBG_RETURN(PASS);
