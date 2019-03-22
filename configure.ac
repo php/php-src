@@ -1000,19 +1000,6 @@ if test "$PHP_LIBGCC" = "yes"; then
   PHP_ADD_LIBRARY(gcc, yes)
 fi
 
-PHP_ARG_ENABLE([short-tags],
-  [whether to enable short tags by default],
-  [AS_HELP_STRING([--disable-short-tags],
-    [Disable the short-form <? start tag by default])],
-  [yes],
-  [no])
-
-if test "$PHP_SHORT_TAGS" = "yes"; then
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "1", [ ])
-else
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "0", [ ])
-fi
-
 PHP_ARG_ENABLE([dmalloc],
   [whether to enable dmalloc],
   [AS_HELP_STRING([--enable-dmalloc],
