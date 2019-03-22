@@ -1294,10 +1294,10 @@ Since:
 */
 PHP_METHOD(domelement, remove)
 {
-	zval *id, *node;
+	zval *id;
 	xmlNodePtr children, child;
-	dom_object *intern, *childobj;
-	int ret, stricterror;
+	dom_object *intern;
+	int stricterror;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {

@@ -2295,6 +2295,19 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(domdocument, append)
 {
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_append(intern, args, argc);
 }
 /* }}} */
 
@@ -2304,6 +2317,24 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(domdocument, prepend)
 {
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	if (context->children == NULL) {
+		dom_parent_node_append(intern, args, argc);
+	} else {
+		dom_parent_node_prepend(intern, args, argc);
+	}
 }
+/* }}} */
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */
