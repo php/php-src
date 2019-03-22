@@ -511,10 +511,10 @@ static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path)
 /* }}} */
 
 #ifdef ZTS
-static zend_bool short_tags_default      = 1;
+static zend_bool short_tags_default      = 0;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
-# define short_tags_default			1
+# define short_tags_default			0
 # define compiler_options_default	ZEND_COMPILE_DEFAULT
 #endif
 
