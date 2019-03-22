@@ -921,19 +921,25 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
-replace:
-				if (flag & HASH_ADD) {
-					return NULL;
-				}
-				if (ht->pDestructor) {
-					ht->pDestructor(&p->val);
-				}
-				ZVAL_COPY_VALUE(&p->val, pData);
-				return &p->val;
+				goto replace;
 			} else { /* we have to keep the order :( */
-				goto convert_to_hash;
+				zend_hash_packed_to_hash(ht);
 			}
 		} else if (EXPECTED(h < ht->nTableSize)) {
+			goto add_to_packed;
+		} else if ((h >> 1) < ht->nTableSize &&
+					(ht->nTableSize >> 1) < ht->nNumOfElements) {
+			zend_hash_packed_grow(ht);
+			goto add_to_packed;
+		} else {
+			if (ht->nNumUsed >= ht->nTableSize) {
+				ht->nTableSize += ht->nTableSize;
+			}
+			zend_hash_packed_to_hash(ht);
+		}
+	} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
+		if (h < ht->nTableSize) {
+			zend_hash_real_init_packed_ex(ht);
 add_to_packed:
 			p = ht->arData + h;
 			/* incremental initialization of empty Buckets */
@@ -948,28 +954,21 @@ add_to_packed:
 			}
 			ht->nNextFreeElement = ht->nNumUsed = h + 1;
 			goto add;
-		} else if ((h >> 1) < ht->nTableSize &&
-		           (ht->nTableSize >> 1) < ht->nNumOfElements) {
-			zend_hash_packed_grow(ht);
-			goto add_to_packed;
-		} else {
-			if (ht->nNumUsed >= ht->nTableSize) {
-				ht->nTableSize += ht->nTableSize;
-			}
-convert_to_hash:
-			zend_hash_packed_to_hash(ht);
-		}
-	} else if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
-		if (h < ht->nTableSize) {
-			zend_hash_real_init_packed_ex(ht);
-			goto add_to_packed;
 		}
 		zend_hash_real_init_mixed(ht);
 	} else {
 		if ((flag & HASH_ADD_NEW) == 0) {
 			p = zend_hash_index_find_bucket(ht, h);
 			if (p) {
-				goto replace;
+replace:
+				if (flag & HASH_ADD) {
+					return NULL;
+				}
+				if (ht->pDestructor) {
+					ht->pDestructor(&p->val);
+				}
+				ZVAL_COPY_VALUE(&p->val, pData);
+				return &p->val;
 			}
 		}
 		ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
