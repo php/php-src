@@ -4147,10 +4147,15 @@ ZEND_METHOD(reflection_class, getMethods)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	zend_function *mptr;
-	zend_long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
+	zend_long filter = 0;
+	zend_bool filter_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		return;
+	}
+
+	if (filter_is_null) {
+		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4323,10 +4328,15 @@ ZEND_METHOD(reflection_class, getProperties)
 	zend_class_entry *ce;
 	zend_string *key;
 	zend_property_info *prop_info;
-	zend_long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
+	zend_long filter = 0;
+	zend_bool filter_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &filter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		return;
+	}
+	
+	if (filter_is_null) {
+		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
