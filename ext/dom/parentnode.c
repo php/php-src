@@ -139,7 +139,7 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 }
 /* }}} */
 
-xmlNode* dom_zvals_to_fragment(dom_object *context, xmlNode *contextNode, zval *nodes, int nodesc)
+xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
 {
 	int i;
 	xmlDoc *documentNode;
@@ -172,7 +172,7 @@ xmlNode* dom_zvals_to_fragment(dom_object *context, xmlNode *contextNode, zval *
 					xmlUnlinkNode(newNode);
 				}
 
-				newNodeObj->document = context->document;
+				newNodeObj->document = document;
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
@@ -203,7 +203,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *contextNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib;
-	xmlNode *fragment = dom_zvals_to_fragment(context, contextNode, nodes, nodesc);
+	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
 
 	newchild = fragment->children;
 	prevsib = contextNode->last;
@@ -232,11 +232,80 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *contextNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib, nextsib;
-	xmlNode *fragment = dom_zvals_to_fragment(context, contextNode, nodes, nodesc);
+	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
 
 	newchild = fragment->children;
 	prevsib = NULL;
 	nextsib = contextNode->children;
+
+	if (newchild) {
+		contextNode->children = newchild;
+		newchild->prev = prevsib;
+		fragment->last->next = nextsib;
+		nextsib->prev = fragment->last;
+
+		node = newchild;
+		while (node != NULL) {
+			node->parent = contextNode;
+
+			if (node == fragment->last) {
+				break;
+			}
+			node = node->next;
+		}
+
+		fragment->children = NULL;
+		fragment->last = NULL;
+	}
+}
+
+void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
+{
+	xmlNode *prevsib = dom_object_get_node(context);
+	xmlNodePtr newchild, node, contextNode;
+	xmlNode *fragment;
+
+	int stricterror = dom_get_strict_error(context->document);
+
+	if (!prevsib->parent) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		return;
+	}
+
+	contextNode = prevsib->parent;
+	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	newchild = fragment->children;
+
+	if (newchild) {
+		prevsib->next = newchild;
+		newchild->prev = prevsib;
+		contextNode->last = fragment->last;
+
+		node = newchild;
+		while (node != NULL) {
+			node->parent = contextNode;
+
+			if (node == fragment->last) {
+				break;
+			}
+			node = node->next;
+		}
+
+		fragment->children = NULL;
+		fragment->last = NULL;
+	}
+}
+
+void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
+{
+	xmlNode *nextsib = dom_object_get_node(context);
+	xmlNodePtr newchild, node, prevsib, contextNode;
+	xmlNode *fragment;
+
+	prevsib = NULL;
+	contextNode = nextsib->parent;
+	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	newchild = fragment->children;
 
 	if (newchild) {
 		contextNode->children = newchild;
