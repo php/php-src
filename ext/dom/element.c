@@ -1342,9 +1342,9 @@ PHP_METHOD(domelement, remove)
 }
 /* }}} end DOMElement::remove */
 
-/* {{{ proto void DOMElement::append();
-URL:
-Since:
+/* {{{ proto void domelement::append(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(domelement, append)
 {
@@ -1364,9 +1364,9 @@ PHP_METHOD(domelement, append)
 }
 /* }}} end DOMElement::append */
 
-/* {{{ proto void DOMElement::prepend();
-URL:
-Since:
+/* {{{ proto void domelement::prepend(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(domelement, prepend)
 {

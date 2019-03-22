@@ -155,11 +155,22 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 }
 /* }}} */
 
+/* {{{ proto void domdocumentfragment::append(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+Since: DOM Living Standard (DOM4)
+*/
 PHP_METHOD(domdocumentfragment, append)
 {
 }
+/* }}} */
 
+/* {{{ proto void domdocumentfragment::prepend(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
 PHP_METHOD(domdocumentfragment, prepend)
 {
 }
+/* }}} */
+
 #endif

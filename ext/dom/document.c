@@ -2289,10 +2289,19 @@ PHP_METHOD(domdocument, registerNodeClass)
 }
 /* }}} */
 
+/* {{{ proto void domdocument::append(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+Since: DOM Living Standard (DOM4)
+*/
 PHP_METHOD(domdocument, append)
 {
 }
+/* }}} */
 
+/* {{{ proto void domdocument::prepend(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
 PHP_METHOD(domdocument, prepend)
 {
 }
