@@ -124,6 +124,12 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_child_node_remove, 0, 0, 0)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_child_node_after, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_child_node_before, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -162,6 +168,8 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 
 const zend_function_entry php_dom_child_node_class_functions[] = { /* {{{ */
 	PHP_ABSTRACT_ME(DOMChildNode, remove, arginfo_dom_child_node_remove)
+	PHP_ABSTRACT_ME(DOMChildNode, after, arginfo_dom_child_node_after)
+	PHP_ABSTRACT_ME(DOMChildNode, before, arginfo_dom_child_node_before)
 	PHP_FE_END
 };
 /* }}} */
