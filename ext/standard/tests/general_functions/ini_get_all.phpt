@@ -1,6 +1,7 @@
 --TEST--
 ini_get_all() tests
 --INI--
+pcre.jit=1
 pcre.backtrack_limit=1000000
 pcre.recursion_limit=100000
 --SKIPIF--
