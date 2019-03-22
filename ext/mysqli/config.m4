@@ -51,7 +51,7 @@ elif test "$PHP_MYSQLI" != "no"; then
   MYSQL_CONFIG=$PHP_MYSQLI
 
   MYSQL_LIB_NAME='mysqlclient'
-  if test "$enable_maintainer_zts" = "yes"; then
+  if test "$enable_zts" = "yes"; then
     MYSQL_LIB_CFG='--libs_r'
     MYSQL_LIB_NAME='mysqlclient_r'
   else
