@@ -51,6 +51,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_data, 0, 0, 3)
 	ZEND_ARG_INFO(0, count)
 	ZEND_ARG_INFO(0, arg)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_remove, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_after, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_before, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -66,6 +75,9 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_dom_characterdata_insert_data)
 	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_dom_characterdata_delete_data)
 	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_dom_characterdata_replace_data)
+	PHP_ME(domcharacterdata, remove, arginfo_dom_characterdata_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, after, arginfo_dom_characterdata_after, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, before, arginfo_dom_characterdata_before, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -389,5 +401,88 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_replace_data */
+
+PHP_METHOD(domcharacterdata, remove)
+{
+	zval *id;
+	xmlNodePtr children, child;
+	dom_object *intern;
+	int stricterror;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+
+	if (dom_node_children_valid(child) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	stricterror = dom_get_strict_error(intern->document);
+
+	if (dom_node_is_read_only(child) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	if (!child->parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	children = child->parent->children;
+	if (!children) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	while (children) {
+		if (children == child) {
+			xmlUnlinkNode(child);
+			RETURN_NULL();
+		}
+		children = children->next;
+	}
+
+	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	RETURN_NULL();
+}
+
+PHP_METHOD(domcharacterdata, after)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+}
+
+PHP_METHOD(domcharacterdata, before)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_before(intern, args, argc);
+}
 
 #endif

@@ -195,6 +195,9 @@ PHP_FUNCTION(dom_characterdata_append_data);
 PHP_FUNCTION(dom_characterdata_insert_data);
 PHP_FUNCTION(dom_characterdata_delete_data);
 PHP_FUNCTION(dom_characterdata_replace_data);
+PHP_METHOD(domcharacterdata, remove);
+PHP_METHOD(domcharacterdata, after);
+PHP_METHOD(domcharacterdata, before);
 
 /* domattr methods */
 PHP_FUNCTION(dom_attr_is_id);

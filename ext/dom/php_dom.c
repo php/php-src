@@ -744,6 +744,8 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_characterdata_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_characterdata_prop_handlers);
 
+	zend_class_implements(dom_characterdata_class_entry, 1, dom_childnode_class_entry);
+
 	REGISTER_DOM_CLASS(ce, "DOMAttr", dom_node_class_entry, php_dom_attr_class_functions, dom_attr_class_entry);
 
 	zend_hash_init(&dom_attr_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
@@ -766,8 +768,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_element_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_element_prop_handlers);
 
-	zend_class_implements(dom_element_class_entry, 1, dom_parentnode_class_entry);
-	zend_class_implements(dom_element_class_entry, 1, dom_childnode_class_entry);
+	zend_class_implements(dom_element_class_entry, 2, dom_parentnode_class_entry, dom_childnode_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMText", dom_characterdata_class_entry, php_dom_text_class_functions, dom_text_class_entry);
 
