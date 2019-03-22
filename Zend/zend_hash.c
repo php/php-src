@@ -670,6 +670,38 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 	return NULL;
 }
 
+static zend_always_inline zval *_zend_hash_update_if_exists(HashTable *ht, Bucket *p, uint32_t flag, zval *pData)
+{
+	zval *data;
+
+	if (flag & HASH_ADD) {
+		if (!(flag & HASH_UPDATE_INDIRECT)) {
+			return NULL;
+		}
+		ZEND_ASSERT(&p->val != pData);
+		data = &p->val;
+		if (Z_TYPE_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+			if (Z_TYPE_P(data) != IS_UNDEF) {
+				return NULL;
+			}
+		} else {
+			return NULL;
+		}
+	} else {
+		ZEND_ASSERT(&p->val != pData);
+		data = &p->val;
+		if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+		}
+	}
+	if (ht->pDestructor) {
+		ht->pDestructor(data);
+	}
+	ZVAL_COPY_VALUE(data, pData);
+	return data;
+}
+
 static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_string *key, zval *pData, uint32_t flag)
 {
 	zend_ulong h;
@@ -701,34 +733,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 		p = zend_hash_find_bucket(ht, key, 0);
 
 		if (p) {
-			zval *data;
-
-			if (flag & HASH_ADD) {
-				if (!(flag & HASH_UPDATE_INDIRECT)) {
-					return NULL;
-				}
-				ZEND_ASSERT(&p->val != pData);
-				data = &p->val;
-				if (Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-					if (Z_TYPE_P(data) != IS_UNDEF) {
-						return NULL;
-					}
-				} else {
-					return NULL;
-				}
-			} else {
-				ZEND_ASSERT(&p->val != pData);
-				data = &p->val;
-				if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-				}
-			}
-			if (ht->pDestructor) {
-				ht->pDestructor(data);
-			}
-			ZVAL_COPY_VALUE(data, pData);
-			return data;
+			return _zend_hash_update_if_exists(ht, p, flag, pData);
 		}
 		if (!ZSTR_IS_INTERNED(key)) {
 			zend_string_addref(key);
@@ -778,34 +783,7 @@ static zend_always_inline zval *_zend_hash_str_add_or_update_i(HashTable *ht, co
 		p = zend_hash_str_find_bucket(ht, str, len, h);
 
 		if (p) {
-			zval *data;
-
-			if (flag & HASH_ADD) {
-				if (!(flag & HASH_UPDATE_INDIRECT)) {
-					return NULL;
-				}
-				ZEND_ASSERT(&p->val != pData);
-				data = &p->val;
-				if (Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-					if (Z_TYPE_P(data) != IS_UNDEF) {
-						return NULL;
-					}
-				} else {
-					return NULL;
-				}
-			} else {
-				ZEND_ASSERT(&p->val != pData);
-				data = &p->val;
-				if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
-				}
-			}
-			if (ht->pDestructor) {
-				ht->pDestructor(data);
-			}
-			ZVAL_COPY_VALUE(data, pData);
-			return data;
+			return _zend_hash_update_if_exists(ht, p, flag, pData);
 		}
 	}
 
