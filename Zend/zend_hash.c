@@ -1142,7 +1142,7 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
+ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 {
 	Bucket *p;
 	uint32_t nIndex, i;
@@ -1154,7 +1154,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 			ht->nNumUsed = 0;
 			HT_HASH_RESET(ht);
 		}
-		return SUCCESS;
+		return;
 	}
 
 	HT_HASH_RESET(ht);
@@ -1225,7 +1225,6 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 			p++;
 		} while (++i < ht->nNumUsed);
 	}
-	return SUCCESS;
 }
 
 static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx, Bucket *p, Bucket *prev)

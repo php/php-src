@@ -306,15 +306,11 @@ ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_rehash(TsHashTable *ht)
+ZEND_API void zend_ts_hash_rehash(TsHashTable *ht)
 {
-	int retval;
-
 	begin_write(ht);
-	retval = zend_hash_rehash(TS_HASH(ht));
+	zend_hash_rehash(TS_HASH(ht));
 	end_write(ht);
-
-	return retval;
 }
 
 ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len)
