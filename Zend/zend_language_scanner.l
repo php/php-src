@@ -1947,19 +1947,6 @@ string:
 	RETURN_TOKEN(T_OPEN_TAG);
 }
 
-
-<INITIAL>"<?" {
-	if (CG(short_tags)) {
-		BEGIN(ST_IN_SCRIPTING);
-		if (PARSER_MODE()) {
-			SKIP_TOKEN(T_OPEN_TAG);
-		}
-		RETURN_TOKEN(T_OPEN_TAG);
-	} else {
-		goto inline_char_handler;
-	}
-}
-
 <INITIAL>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -1977,7 +1964,7 @@ inline_char_handler:
 		}
 
 		if (*YYCURSOR == '?') {
-			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
+			if (!strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
 
 				YYCURSOR--;
 				break;
