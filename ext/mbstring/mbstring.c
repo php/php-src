@@ -60,7 +60,7 @@
 # include "php_onig_compat.h"
 # include <oniguruma.h>
 # undef UChar
-#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+#else
 # include "ext/pcre/php_pcre.h"
 #endif
 
@@ -1043,7 +1043,7 @@ static void _php_mb_free_regex(void *opaque)
 	onig_free((php_mb_regex_t *)opaque);
 }
 /* }}} */
-#elif HAVE_PCRE || HAVE_BUNDLED_PCRE
+#else
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {

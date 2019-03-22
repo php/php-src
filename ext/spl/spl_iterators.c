@@ -1521,7 +1521,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);
 			zend_restore_error_handling(&error_handling);
 			return intern;
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
 			zend_string *regex;
@@ -1551,7 +1550,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			php_pcre_pce_incref(intern->u.regex.pce);
 			break;
 		}
-#endif
 		case DIT_CallbackFilterIterator:
 		case DIT_RecursiveCallbackFilterIterator: {
 			_spl_cbfilter_it_intern *cfi = emalloc(sizeof(*cfi));
@@ -1953,7 +1951,6 @@ SPL_METHOD(ParentIterator, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_ParentIterator, spl_ce_RecursiveIterator, DIT_ParentIterator);
 } /* }}} */
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 /* {{{ proto RegexIterator::__construct(Iterator it, string regex [, int mode [, int flags [, int preg_flags]]])
    Create an RegexIterator from another iterator and a regular expression */
 SPL_METHOD(RegexIterator, __construct)
@@ -2265,8 +2262,6 @@ SPL_METHOD(RecursiveRegexIterator, accept)
 	zend_call_method_with_0_params(ZEND_THIS, spl_ce_RegexIterator, NULL, "accept", return_value);
 }
 
-#endif
-
 /* {{{ spl_dual_it_dtor */
 static void spl_dual_it_dtor(zend_object *_object)
 {
@@ -2304,7 +2299,6 @@ static void spl_dual_it_free_storage(zend_object *_object)
 		zval_ptr_dtor(&object->u.caching.zcache);
 	}
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	if (object->dit_type == DIT_RegexIterator || object->dit_type == DIT_RecursiveRegexIterator) {
 		if (object->u.regex.pce) {
 			php_pcre_pce_decref(object->u.regex.pce);
@@ -2313,7 +2307,6 @@ static void spl_dual_it_free_storage(zend_object *_object)
 			zend_string_release_ex(object->u.regex.regex, 0);
 		}
 	}
-#endif
 
 	if (object->dit_type == DIT_CallbackFilterIterator || object->dit_type == DIT_RecursiveCallbackFilterIterator) {
 		if (object->u.cbfilter) {
@@ -2403,7 +2396,6 @@ static const zend_function_entry spl_funcs_ParentIterator[] = {
 	PHP_FE_END
 };
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, regex)
@@ -2452,7 +2444,6 @@ static const zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
 	SPL_ME(RecursiveRegexIterator,  getChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
-#endif
 
 static inline int spl_limit_it_valid(spl_dual_it_object *intern)
 {
@@ -3741,7 +3732,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_IMPLEMENTS(RecursiveIteratorIterator, OuterIterator);
 
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	REGISTER_SPL_SUB_CLASS_EX(RegexIterator, FilterIterator, spl_dual_it_new, spl_funcs_RegexIterator);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "USE_KEY",     REGIT_USE_KEY);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "INVERT_MATCH",REGIT_INVERTED);
@@ -3753,10 +3743,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_PROPERTY(RegexIterator, "replacement", 0);
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveRegexIterator, RegexIterator, spl_dual_it_new, spl_funcs_RecursiveRegexIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveRegexIterator, RecursiveIterator);
-#else
-	spl_ce_RegexIterator = NULL;
-	spl_ce_RecursiveRegexIterator = NULL;
-#endif
 
 	REGISTER_SPL_STD_CLASS_EX(EmptyIterator, NULL, spl_funcs_EmptyIterator);
 	REGISTER_SPL_ITERATOR(EmptyIterator);

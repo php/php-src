@@ -24,8 +24,6 @@
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 #include "ext/standard/php_string.h"
 
 #define PREG_PATTERN_ORDER			1
@@ -3079,5 +3077,3 @@ PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *pce)
 	assert(NULL != pce);
 	return pce->re;
 }/*}}}*/
-
-#endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
