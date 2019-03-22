@@ -141,8 +141,6 @@ $opt['executables'] = [
     'build/config.sub',
     'build/ltmain.sh',
     'buildconf',
-    'genfiles',
-    'makedist',
 
     // Extensions scripts
     'ext/curl/sync-constants.php',
@@ -177,6 +175,8 @@ $opt['executables'] = [
     'scripts/dev/credits',
     'scripts/dev/find_tested.php',
     'scripts/dev/gen_verify_stub',
+    'scripts/dev/genfiles',
+    'scripts/dev/makedist',
     'scripts/dev/permissions.php',
     'scripts/dev/phpextdist',
     'scripts/dev/search_underscores.php',
