@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.5
 
+- Reflection:
+  . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
+
 28 Mar 2019, PHP 7.3.4
 
 - Core:
