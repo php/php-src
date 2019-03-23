@@ -24,9 +24,7 @@ echo "buildconf: checking installation..."
 stamp=$1
 
 # Allow the autoconf executable to be overridden by $PHP_AUTOCONF.
-if test -z "$PHP_AUTOCONF"; then
-  PHP_AUTOCONF='autoconf'
-fi
+PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 
 # Go to project root.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../" && pwd -P)
@@ -60,5 +58,3 @@ else
 fi
 
 test -n "$stamp" && touch $stamp
-
-exit 0
