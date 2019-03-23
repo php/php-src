@@ -1,10 +1,28 @@
 # Contributing to PHP
 
 Anybody who programs in PHP can be a contributing member of the community that
-develops and deploys it; the task of deploying PHP, documentation and
-associated websites is a never ending one. With every release, or release
-candidate comes a wave of work, which takes a lot of organization and
-co-ordination.
+develops and deploys it; the task of deploying PHP, documentation and associated
+websites is a never ending one. With every release, or release candidate comes a
+wave of work, which takes a lot of organization and co-ordination.
+
+You don't need any special access to download, build, debug and begin submitting
+PHP or PECL code, tests or documentation. Once you've followed this guide and
+had several contributions accepted, commit privileges are often quickly granted.
+
+## Index
+
+* [Pull requests](#pull-requests)
+* [Filing bugs](#filing-bugs)
+* [Feature requests](#feature-requests)
+* [Writing tests](#writing-tests)
+* [Writing documentation](#writing-documentation)
+* [Getting help](#getting-help)
+* [PHP source code directory structure](#php-source-code-directory-structure)
+* [PHP internals](#php-internals)
+* [PECL extensions](#pecl-extensions)
+* [Checklist for submitting contribution](#checklist-for-submitting-contribution)
+* [What happens after submitting contribution?](#what-happens-after-submitting-contribution)
+* [What happens when your contribution is applied?](#what-happens-when-your-contribution-is-applied)
 
 ## Pull requests
 
@@ -13,18 +31,28 @@ implement RFCs. Please be sure to include tests as appropriate!
 
 If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
-[the supported version page](http://php.net/supported-versions.php) are supported).
-For example, at the time of writing, the lowest supported version is PHP 7.2,
-which corresponds to the `PHP-7.2` branch in Git. Please also make sure you add
-a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
+[the supported version page](https://www.php.net/supported-versions.php) are
+supported). For example, at the time of writing, the lowest supported version is
+PHP 7.2, which corresponds to the `PHP-7.2` branch in Git. Please also make sure
+you add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
 
 Pull requests implementing RFCs should be submitted against `master`.
 
-Pull requests should *never* be submitted against `PHP-x.y.z` branches, as
-these are only used for release management.
+Pull requests should *never* be submitted against `PHP-x.y.z` branches, as these
+are only used for release management.
 
-If your pull request exhibits conflicts with the base branch, please resolve them
-by using `git rebase` instead of `git merge`.
+If your pull request exhibits conflicts with the base branch, please resolve
+them by using `git rebase` instead of `git merge`.
+
+Fork the official PHP repository and send a pull request. A notification will be
+sent to the pull request mailing list. Sending a note to PHP Internals list
+(internals@lists.php.net) may help getting more feedback and quicker turnaround.
+You can also add pull requests to [bug reports](https://bugs.php.net/).
+
+Read [Git access page](https://www.php.net/git.php) for help on using Git to get
+and build PHP source code. We recommend to look at our
+[workflow](https://wiki.php.net/vcs/gitworkflow) and our
+[FAQ](https://wiki.php.net/vcs/gitfaq).
 
 ## Filing bugs
 
@@ -37,12 +65,19 @@ Where possible, please include a self-contained reproduction case!
 ## Feature requests
 
 Feature requests are generally submitted in the form of
-[Requests for Comment](https://wiki.php.net/rfc/howto), ideally accompanied by
-[pull requests](#pull-requests). You can find the extremely large list of RFCs
-that have been previously considered on the
+[Requests for Comments (RFC)](https://wiki.php.net/rfc/howto), ideally
+accompanied by [pull requests](#pull-requests). You can find the extremely large
+list of RFCs that have been previously considered on the
 [PHP Wiki](https://wiki.php.net/rfc).
 
-You may want to read
+To create a RFC, discuss it with the extension maintainer, and discuss it on the
+development mailing list internals@lists.php.net. RFC Wiki accounts can be
+requested on https://wiki.php.net/start?do=register. PHP extension maintainers
+can be found in the [EXTENSIONS](/EXTENSIONS) file in the PHP source code
+repository. Mailing list subscription is explained on the
+[mailing lists page](https://www.php.net/mailing-lists.php).
+
+You may also want to read
 [The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/entry/the_mysterious_php_rfc_process)
 for additional notes on the best way to approach submitting an RFC.
 
@@ -51,7 +86,11 @@ for additional notes on the best way to approach submitting an RFC.
 We love getting new tests! PHP is a huge project and improving code coverage is
 a huge win for every PHP user.
 
-[Our QA site includes a page detailing how to write test cases.](http://qa.php.net/write-test.php)
+[Our QA site includes a page detailing how to write test cases.](https://qa.php.net/write-test.php)
+
+Submitting test scripts helps us to understand what functionality has changed.
+It is important for the stability and maintainability of PHP that tests are
+comprehensive.
 
 ## Writing documentation
 
@@ -72,7 +111,8 @@ issues.
 
 Although not a formal channel, you can also find a number of core developers on
 the #php.pecl channel on [EFnet](http://www.efnet.org/). Similarly, many
-documentation writers can be found on #php.doc.
+documentation writers can be found on #php.doc. Windows development IRC channel
+is available at #winphp-dev on FreeNode.
 
 ## PHP source code directory structure
 
@@ -173,3 +213,68 @@ locations.
     └─ ...
  └─ ...
 ```
+
+## PHP internals
+
+For information on PHP internal C functions see
+[References about Maintaining and Extending PHP](https://wiki.php.net/internals/references).
+Various external resources can be found on the web. A standard printed reference
+is the book "Extending and Embedding PHP" by Sara Golemon.
+
+## PECL extensions
+
+If you are fixing broken functionality in a [PECL](https://pecl.php.net)
+extension then create a bug or identify an existing bug at
+[bugs.php.net](https://bugs.php.net). A bug can be used to track the change
+progress and prevent your changes getting lost in the PHP mail archives. Some
+PECL extensions have their own bug tracker locations and different contributing
+procedures.
+
+If your change is large then create a
+[Request for Comments (RFC)](https://wiki.php.net/rfc), discuss it with the
+extension maintainer, and discuss it on the development mailing list
+pecl-dev@lists.php.net depending on the extension. PECL mailing list
+subscription is explained on the
+[PECL support page](https://pecl.php.net/support.php).
+
+Update any open bugs and add a link to the source of your change. Send the patch
+or pointer to the bug to pecl-dev@lists.php.net. Also CC the extension
+maintainer. Explain what has been changed by your patch. Test scripts should be
+included.
+
+## Checklist for submitting contribution
+
+- Read [CODING_STANDARDS](/CODING_STANDARDS) before you start working.
+- Update git source just before running your final `diff` and before testing.
+- Add in-line comments and/or have external documentation ready. Use only
+  `/* */` style comments, not `//`.
+- Create test scripts for use with `make test`.
+- Run `make test` to check your change doesn't break other features.
+- Rebuild PHP with `--enable-debug` which will show some kinds of memory errors
+  and check the PHP and web server error logs after running your PHP tests.
+- Rebuild PHP with `--enable-maintainer-zts` to check your change compiles on
+  multi-threaded web servers.
+- Review the change once more just before submitting it.
+
+## What happens after submitting contribution?
+
+If your change is easy to review and obviously has no side-effects, it might be
+committed relatively quickly.
+
+Because PHP is a volunteer-driven effort more complex changes will require
+patience on your side. If you do not receive feedback in a few days, consider
+bumping. Before doing this think about these questions:
+
+- Did I send the patch to the right mailing list?
+- Did I review the mailing list archives to see if these kind of changes had
+  been discussed before?
+- Did I explain my change clearly?
+- Is my change too hard to review? Because of what factors?
+
+## What happens when your contribution is applied?
+
+Your name will likely be included in the Git commit log. If your change affects
+end users, a brief description and your name might be added to the [NEWS](/NEWS)
+file.
+
+Thank you for contributing to PHP!
