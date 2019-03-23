@@ -1505,7 +1505,7 @@ escape:
 						$rawMessage = $rawMessageBuffers[$i] . $rawMessage;
 						$rawMessageBuffers[$i] = '';
 					}
-					if ($rawMessage[-1] !== "\n") {
+					if (substr($rawMessage, -1) !== "\n") {
 						$rawMessageBuffers[$i] = $rawMessage;
 						continue;
 					}
@@ -1571,7 +1571,7 @@ escape:
 							}
 							break;
 						case "test_result":
-							[$name, $index, $result, $resultText] = [$message["name"], $message["index"], $message["result"], $message["text"]];
+							list($name, $index, $result, $resultText) = [$message["name"], $message["index"], $message["result"], $message["text"]];
 							foreach ($message["PHP_FAILED_TESTS"] as $category => $tests) {
 								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
 							}
