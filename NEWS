@@ -85,7 +85,8 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
-
+  . Fixed bug #76801 (too many open files). (alekitto)
+  
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
