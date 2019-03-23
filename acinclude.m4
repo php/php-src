@@ -1832,12 +1832,11 @@ AC_DEFUN([PHP_PROG_BISON], [
 
   if test -n "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      version_vars=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z)
-      ac_IFS=$IFS; IFS=" "
-      set $version_vars
+      php_cv_bison_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+      ac_IFS=$IFS; IFS="."
+      set $php_cv_bison_version
       IFS=$ac_IFS
-      php_bison_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
-      php_cv_bison_version="[$]1.[$]2.[$]3"
+      php_bison_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
       php_bison_branch="[$]1.[$]2"
     ])
 
@@ -1849,7 +1848,7 @@ AC_DEFUN([PHP_PROG_BISON], [
       ac_IFS=$IFS; IFS="."
       set $php_bison_required_version
       IFS=$ac_IFS
-      php_bison_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+      php_bison_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
 
       if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
         php_bison_version=invalid
@@ -1892,12 +1891,11 @@ AC_DEFUN([PHP_PROG_RE2C],[
 
   if test -n "$RE2C"; then
     AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-      version_vars=$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)
+      php_cv_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
       ac_IFS=$IFS; IFS="."
-      set $version_vars
+      set $php_cv_re2c_version
       IFS=$ac_IFS
-      php_re2c_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
-      php_cv_re2c_version="[$]1.[$]2.[$]3"
+      php_re2c_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
     ])
 
     php_re2c_version=$php_cv_re2c_version
@@ -1908,7 +1906,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
       ac_IFS=$IFS; IFS="."
       set $php_re2c_required_version
       IFS=$ac_IFS
-      php_re2c_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+      php_re2c_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
 
       if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
         php_re2c_version=invalid
