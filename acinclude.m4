@@ -1818,18 +1818,20 @@ AC_DEFUN([PHP_PROG_AWK], [
 ])
 
 dnl
-dnl PHP_PROG_BISON([MAJOR.MINOR.PATCH], [excluded-versions])
+dnl PHP_PROG_BISON([MIN-VERSION], [EXCLUDED-VERSION...])
 dnl
-dnl Search for bison and check its version
+dnl Search for bison and optionally check if version is at least the minimum
+dnl required version MIN-VERSION and doesn't match any of the blank separated
+dnl list of excluded versions EXCLUDED-VERSION (for example "3.0 3.2").
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
   AC_CHECK_PROG(YACC, bison, bison)
 
-  AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-    if test -n "$YACC"; then
-      ifelse($1,,php_bison_required_version='',php_bison_required_version="$1")
-      ifelse($2,,php_bison_excluded_versions='none',php_bison_excluded_versions="$2")
+  ifelse($1,,php_bison_required_version='',php_bison_required_version="$1")
+  ifelse($2,,php_bison_excluded_versions='none',php_bison_excluded_versions="$2")
 
+  if test -n "$YACC"; then
+    AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
       version_vars=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z)
       ac_IFS=$IFS; IFS=" "
       set $version_vars
@@ -1837,35 +1839,37 @@ AC_DEFUN([PHP_PROG_BISON], [
       php_bison_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
       php_cv_bison_version="[$]1.[$]2.[$]3"
       php_bison_branch="[$]1.[$]2"
+    ])
 
-      if test -z "$php_bison_required_version" && test -z "$php_bison_num"; then
-        php_cv_bison_version=invalid
-      elif test -n "$php_bison_required_version"; then
-        ac_IFS=$IFS; IFS="."
-        set $php_bison_required_version
-        IFS=$ac_IFS
-        php_bison_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+    php_bison_version=$php_cv_bison_version
 
-        if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
-          php_cv_bison_version=invalid
-        fi
+    if test -z "$php_bison_required_version" && test -z "$php_bison_num"; then
+      php_bison_version=invalid
+    elif test -n "$php_bison_required_version"; then
+      ac_IFS=$IFS; IFS="."
+      set $php_bison_required_version
+      IFS=$ac_IFS
+      php_bison_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+      if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
+        php_bison_version=invalid
       fi
-
-      for bison_check_version in $php_bison_excluded_versions; do
-        if test "$php_cv_bison_version" = "$bison_check_version" || test "$php_bison_branch" = "$bison_check_version"; then
-          php_cv_bison_version=invalid
-          break
-        fi
-      done
     fi
-  ])
 
-  case $php_cv_bison_version in
+    for bison_check_version in $php_bison_excluded_versions; do
+      if test "$php_cv_bison_version" = "$bison_check_version" || test "$php_bison_branch" = "$bison_check_version"; then
+        php_bison_version=invalid
+        break
+      fi
+    done
+  fi
+
+  case $php_bison_version in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_parser.h" && test -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_WARN([bison $php_bison_required_version or later is required if you want to regenerate PHP parsers (excluded versions: $php_bison_excluded_versions)])
+        AC_MSG_WARN([bison $php_bison_required_version is required if you want to regenerate PHP parsers (excluded versions: $php_bison_excluded_versions)])
       else
-        AC_MSG_ERROR([bison $php_bison_required_version or later is required to generate PHP parsers when building a GIT checkout (excluded versions: $php_bison_excluded_versions).])
+        AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
       YACC="exit 0;"
@@ -1876,45 +1880,48 @@ AC_DEFUN([PHP_PROG_BISON], [
 ])
 
 dnl
-dnl PHP_PROG_RE2C([MAJOR.MINOR.PATCH])
+dnl PHP_PROG_RE2C([MIN-VERSION])
 dnl
-dnl Search for the re2c binary and check the version.
+dnl Search for the re2c and optionally check if version is at least the minimum
+dnl required version MIN-VERSION.
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
 
-  AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
-    if test -n "$RE2C"; then
-      ifelse($1,,php_re2c_required_version='',php_re2c_required_version="$1")
+  ifelse($1,,php_re2c_required_version='',php_re2c_required_version="$1")
 
+  if test -n "$RE2C"; then
+    AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
       version_vars=$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)
       ac_IFS=$IFS; IFS="."
       set $version_vars
       IFS=$ac_IFS
       php_re2c_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
       php_cv_re2c_version="[$]1.[$]2.[$]3"
+    ])
 
-      if test -z "$php_re2c_required_version" && test -z "$php_re2c_num"; then
-        php_cv_re2c_version=invalid
-      elif test -n "$php_re2c_required_version"; then
-        ac_IFS=$IFS; IFS="."
-        set $php_re2c_required_version
-        IFS=$ac_IFS
-        php_re2c_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+    php_re2c_version=$php_cv_re2c_version
 
-        if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
-          php_cv_re2c_version=invalid
-        fi
+    if test -z "$php_re2c_required_version" && test -z "$php_re2c_num"; then
+      php_re2c_version=invalid
+    elif test -n "$php_re2c_required_version"; then
+      ac_IFS=$IFS; IFS="."
+      set $php_re2c_required_version
+      IFS=$ac_IFS
+      php_re2c_required_num=`expr [$]1 \* 10000 + [$]2 \* 100 + [$]3`
+
+      if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
+        php_re2c_version=invalid
       fi
     fi
-  ])
+  fi
 
-  case $php_cv_re2c_version in
+  case $php_re2c_version in
     ""|invalid[)]
       if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_WARN([re2c $php_re2c_required_version or later is required if you want to regenerate PHP lexers.])
+        AC_MSG_WARN([re2c $php_re2c_required_version is required if you want to regenerate PHP lexers.])
       else
-        AC_MSG_ERROR([re2c $php_re2c_required_version or later is required to generate PHP lexers.])
+        AC_MSG_ERROR([re2c $php_re2c_required_version is required to generate PHP lexers.])
       fi
 
       RE2C="exit 0;"
