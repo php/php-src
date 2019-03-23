@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #77773 (Unbuffered queries leak memory - MySQLi / mysqlnd).
     (Nikita)
 
+- phpdbg:
+  . Fixed bug #76801 (too many open files). (alekitto)
+
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
 
