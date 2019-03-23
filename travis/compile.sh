@@ -71,7 +71,6 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test \
