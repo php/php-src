@@ -44,8 +44,8 @@ echo '/*
 
 echo 'void tokenizer_register_constants(INIT_FUNC_ARGS) {' >> $OUTFILE
 $AWK '
-	/^#define T_(NOELSE|ERROR)/ { next }
-	/^#define T_/  { print "	REGISTER_LONG_CONSTANT(\"" $2 "\", " $2 ", CONST_CS | CONST_PERSISTENT);" }
+	/^    T_(NOELSE|ERROR)/ { next }
+	/^    T_/  { print "	REGISTER_LONG_CONSTANT(\"" $1 "\", " $1 ", CONST_CS | CONST_PERSISTENT);" }
 ' < $INFILE >> $OUTFILE
 echo '	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);' >> $OUTFILE
 echo '}' >> $OUTFILE
@@ -58,13 +58,13 @@ char *get_token_type_name(int token_type)
 ' >> $OUTFILE
 
 $AWK '
-	/^#define T_PAAMAYIM_NEKUDOTAYIM/ {
+	/^    T_PAAMAYIM_NEKUDOTAYIM/ {
 		print "		case T_PAAMAYIM_NEKUDOTAYIM: return \"T_DOUBLE_COLON\";"
 		next
 	}
-	/^#define T_(NOELSE|ERROR)/ { next }
-	/^#define T_/ {
-		print "		case " $2 ": return \"" $2 "\";"
+	/^    T_(NOELSE|ERROR)/ { next }
+	/^    T_/ {
+		print "		case " $1 ": return \"" $1 "\";"
 	}
 ' < $INFILE >> $OUTFILE
 
