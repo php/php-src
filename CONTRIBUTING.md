@@ -21,11 +21,11 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [PHP internals](#php-internals)
 * [Submitting patches](#submitting-patches)
   * [PHP documentation patches](#php-documentation-patches)
-  * [PECL extension patches](#pecl-extension-patches)
   * [How to create a patch?](#how-to-create-a-patch)
-  * [Checklist for submitting patch](#checklist-for-submitting-patch)
-  * [What happens after submitting patch](#what-happens-after-submitting-patch)
-  * [What happens when your contribution is applied](#what-happens-when-your-contribution-is-applied)
+* [Checklist for submitting contribution](#checklist-for-submitting-contribution)
+* [PECL extensions](#pecl-extensions)
+* [What happens after submitting contribution?](#what-happens-after-submitting-contribution)
+* [What happens when your contribution is applied?](#what-happens-when-your-contribution-is-applied)
 
 ## Pull requests
 
@@ -41,8 +41,8 @@ you add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
 
 Pull requests implementing RFCs should be submitted against `master`.
 
-Pull requests should *never* be submitted against `PHP-x.y.z` branches, as
-these are only used for release management.
+Pull requests should *never* be submitted against `PHP-x.y.z` branches, as these
+are only used for release management.
 
 If your pull request exhibits conflicts with the base branch, please resolve
 them by using `git rebase` instead of `git merge`.
@@ -50,7 +50,7 @@ them by using `git rebase` instead of `git merge`.
 Fork the official PHP repository and send a pull request. A notification will be
 sent to the pull request mailing list. Sending a note to PHP Internals list
 (internals@lists.php.net) may help getting more feedback and quicker turnaround.
-You can also add pull requests to bug reports at https://bugs.php.net/.
+You can also add pull requests to [bug reports](https://bugs.php.net/).
 
 ## Filing bugs
 
@@ -63,22 +63,21 @@ Where possible, please include a self-contained reproduction case!
 ## Feature requests
 
 Feature requests are generally submitted in the form of
-[Requests for Comment](https://wiki.php.net/rfc/howto), ideally accompanied by
-[pull requests](#pull-requests). You can find the extremely large list of RFCs
-that have been previously considered on the
+[Requests for Comments (RFC)](https://wiki.php.net/rfc/howto), ideally
+accompanied by [pull requests](#pull-requests). You can find the extremely large
+list of RFCs that have been previously considered on the
 [PHP Wiki](https://wiki.php.net/rfc).
 
-You may want to read
+To create a RFC, discuss it with the extension maintainer, and discuss it on the
+development mail list internals@lists.php.net. RFC Wiki accounts can be
+requested on https://wiki.php.net/start?do=register. PHP extension maintainers
+can be found in the [EXTENSIONS](/EXTENSIONS) file in the PHP source code
+repository. Mail list subscription is explained on the
+[mailing lists page](https://php.net/mailing-lists.php).
+
+You may also want to read
 [The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/entry/the_mysterious_php_rfc_process)
 for additional notes on the best way to approach submitting an RFC.
-
-If your change is large then create a Request For Comment (RFC) page on
-https://wiki.php.net/rfc, discuss it with the extension maintainer, and discuss
-it on the development mail list internals@lists.php.net. RFC Wiki accounts can
-be requested on https://wiki.php.net/start?do=register. PHP extension
-maintainers can be found in the [EXTENSIONS](/EXTENSIONS) file in the PHP
-source. Mail list subscription is explained on
-https://php.net/mailing-lists.php.
 
 ## Writing tests
 
@@ -242,46 +241,29 @@ the patch progress and prevent your changes getting lost in the PHP mail
 archives.
 
 If your change is large, then first discuss it with the mail list
-phpdoc@lists.php.net. Subscription is explained on
-https://php.net/mailing-lists.php.
+phpdoc@lists.php.net. Subscription is explained on the
+[mailing lists page](https://php.net/mailing-lists.php).
 
 Attach the patch to the PHP bug and consider sending a notification email about
 the change to phpdoc@lists.php.net. Explain what has been fixed/added/changed by
 your patch.
 
-### PECL extension patches
-
-If you are fixing broken functionality in a [PECL](https://pecl.php.net)
-extension then create a bug or identify an existing bug at https://bugs.php.net/.
-A bug can be used to track the patch progress and prevent your changes getting
-lost in the PHP mail archives. Some PECL extensions have their own bug tracker
-locations.
-
-If your change is large then create a Request For Comment (RFC) page on
-https://wiki.php.net/rfc, discuss it with the extension maintainer, and discuss
-it on the development mail list pecl-dev@lists.php.net. PECL mail list
-subscription is explained on https://pecl.php.net/support.php. RFC Wiki accounts
-can be requested on https://wiki.php.net/start?do=register
-
-Update any open bugs and add a link to the source of your patch. Send the patch
-or pointer to the bug to pecl-dev@lists.php.net. Also CC the extension
-maintainer. Explain what has been changed by your patch. Test scripts should be
-included.
-
 ### How to create a patch?
 
 PHP and most PECL packages use Git for revision control. Read
-https://php.net/git.php for help on using Git to get and build PHP source code.
-We recommend to look at our [workflow](https://wiki.php.net/vcs/gitworkflow) and
-our [FAQ](https://wiki.php.net/vcs/gitfaq).
+[Git access page](https://php.net/git.php) for help on using Git to get and
+build PHP source code. We recommend to look at our
+[workflow](https://wiki.php.net/vcs/gitworkflow) and our
+[FAQ](https://wiki.php.net/vcs/gitfaq).
 
 Generally we ask that bug fix patches work on the current stable PHP development
 branches and on `master`. New PHP features only need to work on `master`.
 
-After modifying the source see https://qa.php.net/write-test.php for how to
-test. Submitting test scripts helps us to understand what functionality has
-changed. It is important for the stability and maintainability of PHP that tests
-are comprehensive.
+After modifying the source see
+[Creating new test files](https://qa.php.net/write-test.php) for how to test.
+Submitting test scripts helps us to understand what functionality has changed.
+It is important for the stability and maintainability of PHP that tests are
+comprehensive.
 
 After testing is finished, create a patch file using the command:
 
@@ -290,38 +272,58 @@ After testing is finished, create a patch file using the command:
 For ease of review and later troubleshooting, submit individual patches for each
 bug or feature.
 
-### Checklist for submitting patch
+## PECL extensions
+
+If you are fixing broken functionality in a [PECL](https://pecl.php.net)
+extension then create a bug or identify an existing bug at
+[bugs.php.net](https://bugs.php.net). A bug can be used to track the change
+progress and prevent your changes getting lost in the PHP mail archives. Some
+PECL extensions have their own bug tracker locations and different contributing
+procedures.
+
+If your change is large then create a
+[Request for Comments (RFC)](https://wiki.php.net/rfc), discuss it with the
+extension maintainer, and discuss it on the development mail list
+pecl-dev@lists.php.net depending on the extension. PECL mail list subscription
+is explained on the [PECL support page](https://pecl.php.net/support.php).
+
+Update any open bugs and add a link to the source of your change. Send the patch
+or pointer to the bug to pecl-dev@lists.php.net. Also CC the extension
+maintainer. Explain what has been changed by your patch. Test scripts should be
+included.
+
+## Checklist for submitting contribution
 
 - Read [CODING_STANDARDS](/CODING_STANDARDS) before you start working.
 - Update git source just before running your final `diff` and before testing.
 - Add in-line comments and/or have external documentation ready. Use only
   `/* */` style comments, not `//`.
 - Create test scripts for use with `make test`.
-- Run `make test` to check your patch doesn't break other features.
+- Run `make test` to check your change doesn't break other features.
 - Rebuild PHP with `--enable-debug` which will show some kinds of memory errors
   and check the PHP and web server error logs after running your PHP tests.
-- Rebuild PHP with `--enable-maintainer-zts` to check your patch compiles on
+- Rebuild PHP with `--enable-maintainer-zts` to check your change compiles on
   multi-threaded web servers.
-- Review the patch once more just before submitting it.
+- Review the change once more just before submitting it.
 
-### What happens after submitting patch?
+## What happens after submitting contribution?
 
-If your patch is easy to review and obviously has no side-effects, it might be
+If your change is easy to review and obviously has no side-effects, it might be
 committed relatively quickly.
 
-Because PHP is a volunteer-driven effort more complex patches will require
+Because PHP is a volunteer-driven effort more complex changes will require
 patience on your side. If you do not receive feedback in a few days, consider
-resubmitting the patch. Before doing this think about these questions:
+bumping. Before doing this think about these questions:
 
 - Did I send the patch to the right mail list?
 - Did I review the mail list archives to see if these kind of changes had been
   discussed before?
-- Did I explain my patch clearly?
-- Is my patch too hard to review? Because of what factors?
+- Did I explain my change clearly?
+- Is my change too hard to review? Because of what factors?
 
-### What happens when your contribution is applied?
+## What happens when your contribution is applied?
 
-Your name will likely be included in the Git commit log. If your patch affects
+Your name will likely be included in the Git commit log. If your change affects
 end users, a brief description and your name might be added to the [NEWS](/NEWS)
 file.
 
