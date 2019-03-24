@@ -29,20 +29,17 @@
 #
 #     YACC    Parser generator program, default bison
 #     RE2C    Lexer generator program, default re2c
+#     SED     Path to sed program, default sed
+#     MAKE    Path to make program, default make
 #
 #   For example:
 #     YACC=/path/to/bison ./genfiles
 
-# Parser generator
 YACC=${YACC:-bison}
 YACC="$YACC -l"
 SED=${SED:-sed}
-
-# Lexer generator
 RE2C=${RE2C:-re2c}
 RE2C_FLAGS="-i"
-
-# Make
 MAKE=${MAKE:-make}
 
 # Current path to return to it later. This enables running script from any path.
@@ -55,12 +52,11 @@ cd $project_root
 # Get required bison version from the configure.ac file.
 required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\(.*\)\])/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_bison_version; set +f; IFS=' '
-required_bison_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+required_bison_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
-version_vars=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z)
-set -f; IFS=' '; set -- $version_vars; set +f; IFS=' '
-current_version="${1}.${2}.${3}"
-current_bison_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+current_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+set -f; IFS='.'; set -- $current_version; set +f; IFS=' '
+current_bison_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
 # Check if bison exists.
 if test -z "$current_version"; then
@@ -82,12 +78,11 @@ fi
 # Get required re2c version from the configure.ac file.
 required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
-required_re2c_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+required_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
-version_vars="$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)"
-set -f; IFS='.'; set -- $version_vars; set +f; IFS=' '
-current_version="${1}.${2}.${3}"
-current_re2c_num="$(expr ${1} \* 10000 + ${2} \* 100 + ${3})"
+current_version="$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)"
+set -f; IFS='.'; set -- $current_version; set +f; IFS=' '
+current_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
 # Check if bison exists.
 if test -z "$current_version"; then
