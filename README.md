@@ -108,3 +108,8 @@ of cores (`N`):
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about
 testing and quality assurance.
+
+## Credits
+
+For the list of people who've put work into PHP, please see the
+[PHP credits page](https://php.net/credits.php).
