@@ -7,7 +7,7 @@ wave of work, which takes a lot of organization and co-ordination.
 
 You don't need any special access to download, build, debug and begin submitting
 PHP or PECL code, tests or documentation. Once you've followed this guide and
-had several patches accepted, commit privileges are often quickly granted.
+had several contributions accepted, commit privileges are often quickly granted.
 
 ## Index
 
@@ -20,6 +20,12 @@ had several patches accepted, commit privileges are often quickly granted.
 * [PHP source code directory structure](#php-source-code-directory-structure)
 * [PHP internals](#php-internals)
 * [Submitting patches](#submitting-patches)
+  * [PHP documentation patches](#php-documentation-patches)
+  * [PECL extension patches](#pecl-extension-patches)
+  * [How to create a patch?](#how-to-create-a-patch)
+  * [Checklist for submitting patch](#checklist-for-submitting-patch)
+  * [What happens after submitting patch](#what-happens-after-submitting-patch)
+  * [What happens when your contribution is applied](#what-happens-when-your-contribution-is-applied)
 
 ## Pull requests
 
@@ -28,7 +34,7 @@ implement RFCs. Please be sure to include tests as appropriate!
 
 If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
-[the supported version page](http://php.net/supported-versions.php) are
+[the supported version page](https://php.net/supported-versions.php) are
 supported). For example, at the time of writing, the lowest supported version is
 PHP 7.2, which corresponds to the `PHP-7.2` branch in Git. Please also make sure
 you add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
@@ -205,10 +211,11 @@ locations.
 
 ## PHP internals
 
-Information on PHP internal C functions is at http://www.php.net/internals,
-though this is considered incomplete. Various external resources can be found on
-the web. A standard printed reference is the book "Extending and Embedding PHP"
-by Sara Golemon.
+For information on PHP internal C functions see
+[PHP at the Core: A Hacker's Guide](https://php.net/internals), though this is
+considered incomplete. Various external resources can be found on the web. A
+standard printed reference is the book "Extending and Embedding PHP" by Sara
+Golemon.
 
 ## Submitting patches
 
@@ -223,22 +230,20 @@ has a file extension of `.txt`. This is because only MIME attachments of type
 `text/*` are accepted.
 
 If you are fixing broken functionality in PHP C source code first create a bug
-or identify an existing bug at https://bugs.php.net/. A bug can be used to track
-the patch progress and prevent your changes getting lost in the PHP mail
-archives.
+or identify an existing bug at [bugs.php.net](https://bugs.php.net). A bug can
+be used to track the patch progress and prevent your changes getting lost in the
+PHP mail archives.
 
 ### PHP documentation patches
 
 If you are fixing incorrect PHP documentation first create a bug or identify an
-existing bug at https://bugs.php.net/. A bug can be used to track the patch
-progress and prevent your changes getting lost in the PHP mail archives.
+existing bug at [bugs.php.net](https://bugs.php.net). A bug can be used to track
+the patch progress and prevent your changes getting lost in the PHP mail
+archives.
 
 If your change is large, then first discuss it with the mail list
 phpdoc@lists.php.net. Subscription is explained on
 https://php.net/mailing-lists.php.
-
-Information on contributing to PHP documentation is at
-http://doc.php.net/tutorial.
 
 Attach the patch to the PHP bug and consider sending a notification email about
 the change to phpdoc@lists.php.net. Explain what has been fixed/added/changed by
@@ -247,7 +252,7 @@ your patch.
 ### PECL extension patches
 
 If you are fixing broken functionality in a [PECL](https://pecl.php.net)
-extension then create a bug or identify an existing bug at http://bugs.php.net/.
+extension then create a bug or identify an existing bug at https://bugs.php.net/.
 A bug can be used to track the patch progress and prevent your changes getting
 lost in the PHP mail archives. Some PECL extensions have their own bug tracker
 locations.
@@ -263,15 +268,15 @@ or pointer to the bug to pecl-dev@lists.php.net. Also CC the extension
 maintainer. Explain what has been changed by your patch. Test scripts should be
 included.
 
-### How to create your PHP, PHP documentation or PECL patch
+### How to create a patch?
 
 PHP and most PECL packages use Git for revision control. Read
 https://php.net/git.php for help on using Git to get and build PHP source code.
-We recommend to look at our workflow on https://wiki.php.net/vcs/gitworkflow and
-our FAQ https://wiki.php.net/vcs/gitfaq.
+We recommend to look at our [workflow](https://wiki.php.net/vcs/gitworkflow) and
+our [FAQ](https://wiki.php.net/vcs/gitfaq).
 
 Generally we ask that bug fix patches work on the current stable PHP development
-branches and on "master". New PHP features only need to work on "master".
+branches and on `master`. New PHP features only need to work on `master`.
 
 After modifying the source see https://qa.php.net/write-test.php for how to
 test. Submitting test scripts helps us to understand what functionality has
@@ -285,21 +290,21 @@ After testing is finished, create a patch file using the command:
 For ease of review and later troubleshooting, submit individual patches for each
 bug or feature.
 
-### Checklist for submitting your PHP or PECL code patch
+### Checklist for submitting patch
 
-- Read CODING_STANDARDS before you start working.
-- Update git source just before running your final 'diff' and before testing.
+- Read [CODING_STANDARDS](/CODING_STANDARDS) before you start working.
+- Update git source just before running your final `diff` and before testing.
 - Add in-line comments and/or have external documentation ready. Use only
   `/* */` style comments, not `//`.
 - Create test scripts for use with `make test`.
 - Run `make test` to check your patch doesn't break other features.
-- Rebuild PHP with --enable-debug (which will show some kinds of memory errors)
+- Rebuild PHP with `--enable-debug` which will show some kinds of memory errors
   and check the PHP and web server error logs after running your PHP tests.
-- Rebuild PHP with --enable-maintainer-zts to check your patch compiles on
+- Rebuild PHP with `--enable-maintainer-zts` to check your patch compiles on
   multi-threaded web servers.
 - Review the patch once more just before submitting it.
 
-### What happens after submitting your PHP, PHP documentation or PECL patch
+### What happens after submitting patch?
 
 If your patch is easy to review and obviously has no side-effects, it might be
 committed relatively quickly.
@@ -314,9 +319,10 @@ resubmitting the patch. Before doing this think about these questions:
 - Did I explain my patch clearly?
 - Is my patch too hard to review? Because of what factors?
 
-### What happens when your PHP or PECL patch is applied
+### What happens when your contribution is applied?
 
 Your name will likely be included in the Git commit log. If your patch affects
-end users, a brief description and your name might be added to the NEWS file.
+end users, a brief description and your name might be added to the [NEWS](/NEWS)
+file.
 
-Thank you for patching PHP!
+Thank you for contributing to PHP!
