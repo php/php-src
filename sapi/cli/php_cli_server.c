@@ -356,7 +356,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	}
 
 	if (!gettimeofday(&tv, NULL)) {
-		zend_string *dt = php_format_date("D, d M Y H:i:s", 1, tv.tv_sec, 1);
+		zend_string *dt = php_format_date("D, d M Y H:i:s", 14, tv.tv_sec, 0);
 		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
 		smart_str_appends_ex(buffer, dt->val, persistent);
 		smart_str_appendl_ex(buffer, " GMT \r\n", 7, persistent);
