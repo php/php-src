@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.18
 
+- CLI:
+  . Fixed bug #77794 (Incorrect Date header format in built-in server).
+    (kelunik)
+
 - Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
