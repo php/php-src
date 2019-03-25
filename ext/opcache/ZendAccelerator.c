@@ -305,7 +305,9 @@ static inline int accel_restart_is_active(void)
 static inline int accel_activate_add(void)
 {
 #ifdef ZEND_WIN32
+	SHM_UNPROTECT();
 	INCREMENT(mem_usage);
+	SHM_PROTECT();
 #else
 	struct flock mem_usage_lock;
 
@@ -327,8 +329,10 @@ static inline void accel_deactivate_sub(void)
 {
 #ifdef ZEND_WIN32
 	if (ZCG(counted)) {
+		SHM_UNPROTECT();
 		DECREMENT(mem_usage);
 		ZCG(counted) = 0;
+		SHM_PROTECT();
 	}
 #else
 	struct flock mem_usage_unlock;
