@@ -347,17 +347,16 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	struct timeval tv = {0};
 
 	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
-		smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
-		smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
+		smart_str_appends_ex(buffer, "Host: ", persistent);
 		smart_str_appends_ex(buffer, val, persistent);
-		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
+		smart_str_appends_ex(buffer, "\r\n", persistent);
 	}
 
 	if (!gettimeofday(&tv, NULL)) {
-		zend_string *dt = php_format_date("r", 1, tv.tv_sec, 1);
-		smart_str_appendl_ex(buffer, "Date: ", 6, persistent);
+		zend_string *dt = php_format_date("D, d M Y H:i:s", sizeof("D, d M Y H:i:s") - 1, tv.tv_sec, 0);
+		smart_str_appends_ex(buffer, "Date: ", persistent);
 		smart_str_appends_ex(buffer, dt->val, persistent);
-		smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
+		smart_str_appends_ex(buffer, " GMT\r\n", persistent);
 		zend_string_release_ex(dt, 0);
 	}
 
