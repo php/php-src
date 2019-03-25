@@ -19,11 +19,8 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Getting help](#getting-help)
 * [PHP source code directory structure](#php-source-code-directory-structure)
 * [PHP internals](#php-internals)
-* [Submitting patches](#submitting-patches)
-  * [PHP documentation patches](#php-documentation-patches)
-  * [How to create a patch?](#how-to-create-a-patch)
-* [Checklist for submitting contribution](#checklist-for-submitting-contribution)
 * [PECL extensions](#pecl-extensions)
+* [Checklist for submitting contribution](#checklist-for-submitting-contribution)
 * [What happens after submitting contribution?](#what-happens-after-submitting-contribution)
 * [What happens when your contribution is applied?](#what-happens-when-your-contribution-is-applied)
 
@@ -51,6 +48,11 @@ Fork the official PHP repository and send a pull request. A notification will be
 sent to the pull request mailing list. Sending a note to PHP Internals list
 (internals@lists.php.net) may help getting more feedback and quicker turnaround.
 You can also add pull requests to [bug reports](https://bugs.php.net/).
+
+Read [Git access page](https://php.net/git.php) for help on using Git to get and
+build PHP source code. We recommend to look at our
+[workflow](https://wiki.php.net/vcs/gitworkflow) and our
+[FAQ](https://wiki.php.net/vcs/gitfaq).
 
 ## Filing bugs
 
@@ -85,6 +87,10 @@ We love getting new tests! PHP is a huge project and improving code coverage is
 a huge win for every PHP user.
 
 [Our QA site includes a page detailing how to write test cases.](https://qa.php.net/write-test.php)
+
+Submitting test scripts helps us to understand what functionality has changed.
+It is important for the stability and maintainability of PHP that tests are
+comprehensive.
 
 ## Writing documentation
 
@@ -214,62 +220,6 @@ For information on PHP internal C functions see
 [References about Maintaining and Extending PHP](https://wiki.php.net/internals/references).
 Various external resources can be found on the web. A standard printed reference
 is the book "Extending and Embedding PHP" by Sara Golemon.
-
-## Submitting patches
-
-GitHub pull requests are the preferred way to propose PHP patch. If you are not
-using GitHub, attach your patch to a PHP bug and consider sending a notification
-email about the change to internals@lists.php.net. If the bug is for an
-extension, also CC the extension maintainer. Explain what has been changed by
-your patch. Test scripts should be included.
-
-Please make the mail subject prefix `[PATCH]`. If attaching a patch, ensure it
-has a file extension of `.txt`. This is because only MIME attachments of type
-`text/*` are accepted.
-
-If you are fixing broken functionality in PHP C source code first create a bug
-or identify an existing bug at [bugs.php.net](https://bugs.php.net). A bug can
-be used to track the patch progress and prevent your changes getting lost in the
-PHP mail archives.
-
-### PHP documentation patches
-
-If you are fixing incorrect PHP documentation first create a bug or identify an
-existing bug at [bugs.php.net](https://bugs.php.net). A bug can be used to track
-the patch progress and prevent your changes getting lost in the PHP mail
-archives.
-
-If your change is large, then first discuss it with the mailing list
-phpdoc@lists.php.net. Subscription is explained on the
-[mailing lists page](https://php.net/mailing-lists.php).
-
-Attach the patch to the PHP bug and consider sending a notification email about
-the change to phpdoc@lists.php.net. Explain what has been fixed/added/changed by
-your patch.
-
-### How to create a patch?
-
-PHP and most PECL packages use Git for revision control. Read
-[Git access page](https://php.net/git.php) for help on using Git to get and
-build PHP source code. We recommend to look at our
-[workflow](https://wiki.php.net/vcs/gitworkflow) and our
-[FAQ](https://wiki.php.net/vcs/gitfaq).
-
-Generally we ask that bug fix patches work on the current stable PHP development
-branches and on `master`. New PHP features only need to work on `master`.
-
-After modifying the source see
-[Creating new test files](https://qa.php.net/write-test.php) for how to test.
-Submitting test scripts helps us to understand what functionality has changed.
-It is important for the stability and maintainability of PHP that tests are
-comprehensive.
-
-After testing is finished, create a patch file using the command:
-
-    git diff > your_patch.txt
-
-For ease of review and later troubleshooting, submit individual patches for each
-bug or feature.
 
 ## PECL extensions
 
