@@ -338,7 +338,7 @@ Forking a new release branch
    Add a commit on master after the branch point clearing the NEWS, UPGRADING
    and UPGRADING.INTERNALS files, updating the version in configure.ac (run
    ./configure to automatically update main/php_versions.h, too) and Zend/zend.h.
-   Also list the new branch in README.GIT-RULES.
+   Also list the new branch in CONTRIBUTING.md.
      Example: http://git.php.net/?p=php-src.git;a=commit;h=a63c99b
    Push the new branch and the commit just added to master.
 

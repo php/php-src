@@ -94,7 +94,6 @@ contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
 - [PHP coding standards](/CODING_STANDARDS)
-- [Git rules](/README.GIT-RULES)
 - [Mailinglist rules](/README.MAILINGLIST_RULES)
 - [PHP release process](/README.RELEASE_PROCESS)
 
