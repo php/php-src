@@ -388,6 +388,10 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
+						// Don't use parallel testing infrastructure if there is only one worker.
+						if ($workers === 1) {
+							$workers = null;
+						}
 						break;
 					case 'r':
 					case 'l':
