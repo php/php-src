@@ -1594,35 +1594,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
-			if (HT_HAS_STATIC_KEYS_ONLY(ht)) {
-				if (HT_IS_WITHOUT_HOLES(ht)) {
-					do {
-						ht->pDestructor(&p->val);
-					} while (++p != end);
-				} else {
-					do {
-						if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-							ht->pDestructor(&p->val);
-						}
-					} while (++p != end);
-				}
-			} else if (HT_IS_WITHOUT_HOLES(ht)) {
-				do {
-					ht->pDestructor(&p->val);
-					if (EXPECTED(p->key)) {
-						zend_string_release(p->key);
-					}
-				} while (++p != end);
-			} else {
-				do {
-					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-						ht->pDestructor(&p->val);
-						if (EXPECTED(p->key)) {
-							zend_string_release(p->key);
-						}
-					}
-				} while (++p != end);
-			}
+			_zend_hash_clean_with_destructor(ht, p, end);
 		} else {
 			if (!HT_HAS_STATIC_KEYS_ONLY(ht)) {
 				if (HT_IS_WITHOUT_HOLES(ht)) {
