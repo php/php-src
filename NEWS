@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.5
 
+- interbase:
+  . Fixed bug #72175 (Impossibility of creating multiple connections to
+    Interbase with php 7.x). (Nikita)
+
 - MySQLi:
   . Fixed bug #77773 (Unbuffered queries leak memory - MySQLi / mysqlnd).
     (Nikita)
