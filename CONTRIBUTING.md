@@ -211,10 +211,9 @@ locations.
 ## PHP internals
 
 For information on PHP internal C functions see
-[PHP at the Core: A Hacker's Guide](https://php.net/internals), though this is
-considered incomplete. Various external resources can be found on the web. A
-standard printed reference is the book "Extending and Embedding PHP" by Sara
-Golemon.
+[References about Maintaining and Extending PHP](https://wiki.php.net/internals/references).
+Various external resources can be found on the web. A standard printed reference
+is the book "Extending and Embedding PHP" by Sara Golemon.
 
 ## Submitting patches
 
