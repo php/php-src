@@ -388,6 +388,10 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
+						// Don't use parallel testing infrastructure if there is only one worker.
+						if ($workers === 1) {
+							$workers = null;
+						}
 						break;
 					case 'r':
 					case 'l':
@@ -1578,7 +1582,7 @@ escape:
 							$test_idx++;
 							clear_show_test();
 							echo $resultText;
-							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
+							show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
 
 							if (!is_array($name) && $result != 'REDIR') {
 								$test_results[$index] = $result;
