@@ -393,6 +393,6 @@ New Release Manager Checklist
 
 4. Request karma for web/qa.git and web/php.git for publishing release announcements.
 
-5. Request moderation access to announce@php.net and primary-qa-tester@lists.php.net lists, to
+5. Request moderation access to php-announce@lists.php.net and primary-qa-tester@lists.php.net lists, to
    be able to moderate your release announcements. All the announcements should be sent from
    the @php.net alias.
