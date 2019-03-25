@@ -1,5 +1,3 @@
-# -*- makefile -*-
-
 peardir=$(PEAR_INSTALLDIR)
 
 # Skip all php.ini files altogether
