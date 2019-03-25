@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.5
 
-- interbase:
+- Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
+
+- Standard:
+  . Fixed bug #77793 (Segmentation fault in extract() when overwriting
+    reference with itself). (Nikita)
 
 28 Mar 2019, PHP 7.3.4
 
