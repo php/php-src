@@ -1578,7 +1578,7 @@ escape:
 							$test_idx++;
 							clear_show_test();
 							echo $resultText;
-							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
+							show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
 
 							if (!is_array($name) && $result != 'REDIR') {
 								$test_results[$index] = $result;
