@@ -1702,10 +1702,8 @@ static int get_sym(void) {
 			sym = skip_WS(sym);
 		} else if (sym == YY_ONE_LINE_COMMENT) {
 			sym = skip_ONE_LINE_COMMENT(sym);
-		} else if (sym == YY_COMMENT) {
-			sym = skip_COMMENT(sym);
 		} else {
-			yy_error_sym("unexpected", sym);
+			sym = skip_COMMENT(sym);
 		}
 	}
 	return sym;
@@ -1756,35 +1754,11 @@ static int check_type_qualifier_list(int sym) {
 
 static int check_type_qualifier(int sym) {
 	if (sym == YY_CONST || sym == YY___CONST || sym == YY___CONST__) {
-		if (sym == YY_CONST) {
-			sym = get_sym();
-		} else if (sym == YY___CONST) {
-			sym = get_sym();
-		} else if (sym == YY___CONST__) {
-			sym = get_sym();
-		} else {
-			return -1;
-		}
+		sym = get_sym();
 	} else if (sym == YY_RESTRICT || sym == YY___RESTICT || sym == YY___RESTRICT__) {
-		if (sym == YY_RESTRICT) {
-			sym = get_sym();
-		} else if (sym == YY___RESTICT) {
-			sym = get_sym();
-		} else if (sym == YY___RESTRICT__) {
-			sym = get_sym();
-		} else {
-			return -1;
-		}
+		sym = get_sym();
 	} else if (sym == YY_VOLATILE || sym == YY___VOLATILE || sym == YY___VOLATILE__) {
-		if (sym == YY_VOLATILE) {
-			sym = get_sym();
-		} else if (sym == YY___VOLATILE) {
-			sym = get_sym();
-		} else if (sym == YY___VOLATILE__) {
-			sym = get_sym();
-		} else {
-			return -1;
-		}
+		sym = get_sym();
 	} else if (sym == YY__ATOMIC) {
 		sym = get_sym();
 	} else {
@@ -1829,17 +1803,7 @@ static int check_type_specifier(int sym) {
 		case YY_COMPLEX:
 		case YY___COMPLEX:
 		case YY___COMPLEX__:
-			if (sym == YY__COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY_COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY___COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY___COMPLEX__) {
-				sym = get_sym();
-			} else {
-				return -1;
-			}
+			sym = get_sym();
 			break;
 		case YY_STRUCT:
 		case YY_UNION:
@@ -2298,13 +2262,11 @@ static int check_nested_abstract_declarator(int sym) {
 					return -1;
 				}
 			}
-		} else if (sym == YY__LBRACK || sym == YY__LPAREN) {
+		} else {
 			sym = check_array_or_function_declarators(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	} else {
 		return -1;
@@ -2451,13 +2413,11 @@ _yy_state_114:
 			if (alt110 == 121) {
 			} else if (alt110 == 119) {
 				sym = get_sym();
-			} else if (alt110 == 120) {
+			} else {
 				sym = check_assignment_expression(sym);
 				if (sym == -1) {
 					return -1;
 				}
-			} else {
-				return -1;
 			}
 		} else {
 			return -1;
@@ -2525,10 +2485,8 @@ _yy_state_124:
 					}
 					sym = get_sym();
 				}
-			} else if (sym == YY__POINT_POINT_POINT) {
-				sym = get_sym();
 			} else {
-				return -1;
+				sym = get_sym();
 			}
 		}
 		if (sym != YY__RPAREN) {
@@ -2574,13 +2532,7 @@ static int check_type_name(int sym) {
 static int check_attributes(int sym) {
 	do {
 		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__) {
-			if (sym == YY___ATTRIBUTE) {
-				sym = get_sym();
-			} else if (sym == YY___ATTRIBUTE__) {
-				sym = get_sym();
-			} else {
-				return -1;
-			}
+			sym = get_sym();
 			if (sym != YY__LPAREN) {
 				return -1;
 			}
@@ -2829,14 +2781,12 @@ static int check_equality_expression(int sym) {
 			if (sym == -1) {
 				return -1;
 			}
-		} else if (sym == YY__BANG_EQUAL) {
+		} else {
 			sym = get_sym();
 			sym = check_relational_expression(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
 	return sym;
@@ -2866,14 +2816,12 @@ static int check_relational_expression(int sym) {
 			if (sym == -1) {
 				return -1;
 			}
-		} else if (sym == YY__GREATER_EQUAL) {
+		} else {
 			sym = get_sym();
 			sym = check_shift_expression(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
 	return sym;
@@ -2891,14 +2839,12 @@ static int check_shift_expression(int sym) {
 			if (sym == -1) {
 				return -1;
 			}
-		} else if (sym == YY__GREATER_GREATER) {
+		} else {
 			sym = get_sym();
 			sym = check_additive_expression(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
 	return sym;
@@ -2916,14 +2862,12 @@ static int check_additive_expression(int sym) {
 			if (sym == -1) {
 				return -1;
 			}
-		} else if (sym == YY__MINUS) {
+		} else {
 			sym = get_sym();
 			sym = check_multiplicative_expression(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
 	return sym;
@@ -2947,14 +2891,12 @@ static int check_multiplicative_expression(int sym) {
 			if (sym == -1) {
 				return -1;
 			}
-		} else if (sym == YY__PERCENT) {
+		} else {
 			sym = get_sym();
 			sym = check_cast_expression(sym);
 			if (sym == -1) {
 				return -1;
 			}
-		} else {
-			return -1;
 		}
 	}
 	return sym;
@@ -3029,11 +2971,9 @@ static int check_unary_expression(int sym) {
 					case YY__PLUS_PLUS:
 						sym = get_sym();
 						break;
-					case YY__MINUS_MINUS:
+					default:
 						sym = get_sym();
 						break;
-					default:
-						return -1;
 				}
 			}
 			break;
@@ -3178,13 +3118,7 @@ static int check_unary_expression(int sym) {
 			break;
 		case YY___ALIGNOF:
 		case YY___ALIGNOF__:
-			if (sym == YY___ALIGNOF) {
-				sym = get_sym();
-			} else if (sym == YY___ALIGNOF__) {
-				sym = get_sym();
-			} else {
-				return -1;
-			}
+			sym = get_sym();
 			if ((sym == YY__LPAREN) && synpred_7(sym)) {
 				sym = get_sym();
 				sym = check_type_name(sym);
@@ -3495,15 +3429,7 @@ static int parse_declaration_specifiers(int sym, zend_ffi_dcl *dcl) {
 			case YY_INLINE:
 			case YY___INLINE:
 			case YY___INLINE__:
-				if (sym == YY_INLINE) {
-					sym = get_sym();
-				} else if (sym == YY___INLINE) {
-					sym = get_sym();
-				} else if (sym == YY___INLINE__) {
-					sym = get_sym();
-				} else {
-					yy_error_sym("unexpected", sym);
-				}
+				sym = get_sym();
 				dcl->flags |= ZEND_FFI_DCL_INLINE;
 				break;
 			case YY__NORETURN:
@@ -3622,38 +3548,14 @@ static int parse_type_qualifier_list(int sym, zend_ffi_dcl *dcl) {
 
 static int parse_type_qualifier(int sym, zend_ffi_dcl *dcl) {
 	if (sym == YY_CONST || sym == YY___CONST || sym == YY___CONST__) {
-		if (sym == YY_CONST) {
-			sym = get_sym();
-		} else if (sym == YY___CONST) {
-			sym = get_sym();
-		} else if (sym == YY___CONST__) {
-			sym = get_sym();
-		} else {
-			yy_error_sym("unexpected", sym);
-		}
+		sym = get_sym();
 		dcl->flags |= ZEND_FFI_DCL_CONST;
 		dcl->attr |= ZEND_FFI_ATTR_CONST;
 	} else if (sym == YY_RESTRICT || sym == YY___RESTICT || sym == YY___RESTRICT__) {
-		if (sym == YY_RESTRICT) {
-			sym = get_sym();
-		} else if (sym == YY___RESTICT) {
-			sym = get_sym();
-		} else if (sym == YY___RESTRICT__) {
-			sym = get_sym();
-		} else {
-			yy_error_sym("unexpected", sym);
-		}
+		sym = get_sym();
 		dcl->flags |= ZEND_FFI_DCL_RESTRICT;
 	} else if (sym == YY_VOLATILE || sym == YY___VOLATILE || sym == YY___VOLATILE__) {
-		if (sym == YY_VOLATILE) {
-			sym = get_sym();
-		} else if (sym == YY___VOLATILE) {
-			sym = get_sym();
-		} else if (sym == YY___VOLATILE__) {
-			sym = get_sym();
-		} else {
-			yy_error_sym("unexpected", sym);
-		}
+		sym = get_sym();
 		dcl->flags |= ZEND_FFI_DCL_VOLATILE;
 	} else if (sym == YY__ATOMIC) {
 		sym = get_sym();
@@ -3728,17 +3630,7 @@ static int parse_type_specifier(int sym, zend_ffi_dcl *dcl) {
 		case YY___COMPLEX:
 		case YY___COMPLEX__:
 			if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("Unexpected '%s'", sym);
-			if (sym == YY__COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY_COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY___COMPLEX) {
-				sym = get_sym();
-			} else if (sym == YY___COMPLEX__) {
-				sym = get_sym();
-			} else {
-				yy_error_sym("unexpected", sym);
-			}
+			sym = get_sym();
 			dcl->flags |= ZEND_FFI_DCL_COMPLEX;
 			break;
 		case YY_STRUCT:
@@ -4103,10 +3995,8 @@ static int parse_nested_abstract_declarator(int sym, zend_ffi_dcl *dcl, const ch
 			if (sym == YY__LBRACK || sym == YY__LPAREN) {
 				sym = parse_array_or_function_declarators(sym, dcl);
 			}
-		} else if (sym == YY__LBRACK || sym == YY__LPAREN) {
-			sym = parse_array_or_function_declarators(sym, dcl);
 		} else {
-			yy_error_sym("unexpected", sym);
+			sym = parse_array_or_function_declarators(sym, dcl);
 		}
 	} else {
 		yy_error_sym("unexpected", sym);
@@ -4245,10 +4135,8 @@ _yy_state_114:
 			} else if (alt110 == 119) {
 				sym = get_sym();
 				attr |= ZEND_FFI_ATTR_VLA;
-			} else if (alt110 == 120) {
-				sym = parse_assignment_expression(sym, &len);
 			} else {
-				yy_error_sym("unexpected", sym);
+				sym = parse_assignment_expression(sym, &len);
 			}
 		} else {
 			yy_error_sym("unexpected", sym);
@@ -4310,11 +4198,9 @@ _yy_state_124:
 					sym = get_sym();
 					attr |= ZEND_FFI_ATTR_VARIADIC;
 				}
-			} else if (sym == YY__POINT_POINT_POINT) {
+			} else {
 				sym = get_sym();
 				attr |= ZEND_FFI_ATTR_VARIADIC;
-			} else {
-				yy_error_sym("unexpected", sym);
 			}
 		}
 		if (sym != YY__RPAREN) {
@@ -4359,13 +4245,7 @@ static int parse_attributes(int sym, zend_ffi_dcl *dcl) {
 	zend_ffi_val val;
 	do {
 		if (sym == YY___ATTRIBUTE || sym == YY___ATTRIBUTE__) {
-			if (sym == YY___ATTRIBUTE) {
-				sym = get_sym();
-			} else if (sym == YY___ATTRIBUTE__) {
-				sym = get_sym();
-			} else {
-				yy_error_sym("unexpected", sym);
-			}
+			sym = get_sym();
 			if (sym != YY__LPAREN) {
 				yy_error_sym("'(' expected, got", sym);
 			}
@@ -4650,12 +4530,10 @@ static int parse_equality_expression(int sym, zend_ffi_val *val) {
 			sym = get_sym();
 			sym = parse_relational_expression(sym, &op2);
 			zend_ffi_expr_is_equal(val, &op2);
-		} else if (sym == YY__BANG_EQUAL) {
+		} else {
 			sym = get_sym();
 			sym = parse_relational_expression(sym, &op2);
 			zend_ffi_expr_is_not_equal(val, &op2);
-		} else {
-			yy_error_sym("unexpected", sym);
 		}
 	}
 	return sym;
@@ -4677,12 +4555,10 @@ static int parse_relational_expression(int sym, zend_ffi_val *val) {
 			sym = get_sym();
 			sym = parse_shift_expression(sym, &op2);
 			zend_ffi_expr_is_less_or_equal(val, &op2);
-		} else if (sym == YY__GREATER_EQUAL) {
+		} else {
 			sym = get_sym();
 			sym = parse_shift_expression(sym, &op2);
 			zend_ffi_expr_is_greater_or_equal(val, &op2);
-		} else {
-			yy_error_sym("unexpected", sym);
 		}
 	}
 	return sym;
@@ -4696,12 +4572,10 @@ static int parse_shift_expression(int sym, zend_ffi_val *val) {
 			sym = get_sym();
 			sym = parse_additive_expression(sym, &op2);
 			zend_ffi_expr_shift_left(val, &op2);
-		} else if (sym == YY__GREATER_GREATER) {
+		} else {
 			sym = get_sym();
 			sym = parse_additive_expression(sym, &op2);
 			zend_ffi_expr_shift_right(val, &op2);
-		} else {
-			yy_error_sym("unexpected", sym);
 		}
 	}
 	return sym;
@@ -4715,12 +4589,10 @@ static int parse_additive_expression(int sym, zend_ffi_val *val) {
 			sym = get_sym();
 			sym = parse_multiplicative_expression(sym, &op2);
 			zend_ffi_expr_add(val, &op2);
-		} else if (sym == YY__MINUS) {
+		} else {
 			sym = get_sym();
 			sym = parse_multiplicative_expression(sym, &op2);
 			zend_ffi_expr_sub(val, &op2);
-		} else {
-			yy_error_sym("unexpected", sym);
 		}
 	}
 	return sym;
@@ -4738,12 +4610,10 @@ static int parse_multiplicative_expression(int sym, zend_ffi_val *val) {
 			sym = get_sym();
 			sym = parse_cast_expression(sym, &op2);
 			zend_ffi_expr_div(val, &op2);
-		} else if (sym == YY__PERCENT) {
+		} else {
 			sym = get_sym();
 			sym = parse_cast_expression(sym, &op2);
 			zend_ffi_expr_mod(val, &op2);
-		} else {
-			yy_error_sym("unexpected", sym);
 		}
 	}
 	return sym;
@@ -4805,11 +4675,9 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 					case YY__PLUS_PLUS:
 						sym = get_sym();
 						break;
-					case YY__MINUS_MINUS:
+					default:
 						sym = get_sym();
 						break;
-					default:
-						yy_error_sym("unexpected", sym);
 				}
 				zend_ffi_val_error(val);
 			}
@@ -4912,13 +4780,7 @@ static int parse_unary_expression(int sym, zend_ffi_val *val) {
 			break;
 		case YY___ALIGNOF:
 		case YY___ALIGNOF__:
-			if (sym == YY___ALIGNOF) {
-				sym = get_sym();
-			} else if (sym == YY___ALIGNOF__) {
-				sym = get_sym();
-			} else {
-				yy_error_sym("unexpected", sym);
-			}
+			sym = get_sym();
 			if ((sym == YY__LPAREN) && synpred_7(sym)) {
 				sym = get_sym();
 				sym = parse_type_name(sym, &dcl);
