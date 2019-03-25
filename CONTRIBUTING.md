@@ -69,10 +69,10 @@ list of RFCs that have been previously considered on the
 [PHP Wiki](https://wiki.php.net/rfc).
 
 To create a RFC, discuss it with the extension maintainer, and discuss it on the
-development mail list internals@lists.php.net. RFC Wiki accounts can be
+development mailing list internals@lists.php.net. RFC Wiki accounts can be
 requested on https://wiki.php.net/start?do=register. PHP extension maintainers
 can be found in the [EXTENSIONS](/EXTENSIONS) file in the PHP source code
-repository. Mail list subscription is explained on the
+repository. Mailing list subscription is explained on the
 [mailing lists page](https://php.net/mailing-lists.php).
 
 You may also want to read
@@ -240,7 +240,7 @@ existing bug at [bugs.php.net](https://bugs.php.net). A bug can be used to track
 the patch progress and prevent your changes getting lost in the PHP mail
 archives.
 
-If your change is large, then first discuss it with the mail list
+If your change is large, then first discuss it with the mailing list
 phpdoc@lists.php.net. Subscription is explained on the
 [mailing lists page](https://php.net/mailing-lists.php).
 
@@ -283,9 +283,10 @@ procedures.
 
 If your change is large then create a
 [Request for Comments (RFC)](https://wiki.php.net/rfc), discuss it with the
-extension maintainer, and discuss it on the development mail list
-pecl-dev@lists.php.net depending on the extension. PECL mail list subscription
-is explained on the [PECL support page](https://pecl.php.net/support.php).
+extension maintainer, and discuss it on the development mailing list
+pecl-dev@lists.php.net depending on the extension. PECL mailing list
+subscription is explained on the
+[PECL support page](https://pecl.php.net/support.php).
 
 Update any open bugs and add a link to the source of your change. Send the patch
 or pointer to the bug to pecl-dev@lists.php.net. Also CC the extension
@@ -315,9 +316,9 @@ Because PHP is a volunteer-driven effort more complex changes will require
 patience on your side. If you do not receive feedback in a few days, consider
 bumping. Before doing this think about these questions:
 
-- Did I send the patch to the right mail list?
-- Did I review the mail list archives to see if these kind of changes had been
-  discussed before?
+- Did I send the patch to the right mailing list?
+- Did I review the mailing list archives to see if these kind of changes had
+  been discussed before?
 - Did I explain my change clearly?
 - Is my change too hard to review? Because of what factors?
 
