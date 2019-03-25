@@ -29,6 +29,8 @@
 
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
+ *
+ * Minimum required PHP version: 7.0.0
  */
 
 /**
@@ -56,11 +58,6 @@ function main()
 		   $user_tests, $valgrind, $sum_results, $shuffle;
 	// Parallel testing
 	global $workers, $workerID;
-
-	// Minimum required PHP version.
-	if (version_compare(phpversion(), '7.0.0', '<=')) {
-		error('At least PHP 7.0.0 is required to execute run-tests.php.');
-	}
 
 	$workerID = 0;
 	if (getenv("TEST_PHP_WORKER")) {
