@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
     (kelunik)
 
+- Date:
+  . Fixed bug #77909 (DatePeriod::__construct() with invalid recurrence count
+    value). (Ignace Nyamagana Butera)
+
 - Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
