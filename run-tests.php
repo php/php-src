@@ -57,6 +57,11 @@ function main()
 	// Parallel testing
 	global $workers, $workerID;
 
+	// Minimum required PHP version.
+	if (version_compare(phpversion(), '7.0.0', '<=')) {
+		error('At least PHP 7.0.0 is required to execute run-tests.php.');
+	}
+
 	$workerID = 0;
 	if (getenv("TEST_PHP_WORKER")) {
 		$workerID = intval(getenv("TEST_PHP_WORKER"));
