@@ -2480,21 +2480,19 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, c
 		if (!renumber) {
 			zend_hash_packed_to_hash(ht);
 		}
-	} else {
-		if (renumber) {
-			void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
-			Bucket *old_buckets = ht->arData;
+	} else if (renumber) {
+		void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
+		Bucket *old_buckets = ht->arData;
 
-			new_data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), (GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
-			HT_FLAGS(ht) |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
-			ht->nTableMask = HT_MIN_MASK;
-			HT_SET_DATA_ADDR(ht, new_data);
-			memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
-			pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
-			HT_HASH_RESET_PACKED(ht);
-		} else {
-			zend_hash_rehash(ht);
-		}
+		new_data = pemalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK), (GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+		HT_FLAGS(ht) |= HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
+		ht->nTableMask = HT_MIN_MASK;
+		HT_SET_DATA_ADDR(ht, new_data);
+		memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
+		pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		HT_HASH_RESET_PACKED(ht);
+	} else {
+		zend_hash_rehash(ht);
 	}
 }
 
@@ -2537,17 +2535,15 @@ static zend_always_inline int zend_hash_compare_impl(HashTable *ht1, HashTable *
 			}
 			pData2 = &p2->val;
 			idx2++;
-		} else {
-			if (p1->key == NULL) { /* numeric index */
-				pData2 = zend_hash_index_find(ht2, p1->h);
-				if (pData2 == NULL) {
-					return 1;
-				}
-			} else { /* string index */
-				pData2 = zend_hash_find(ht2, p1->key);
-				if (pData2 == NULL) {
-					return 1;
-				}
+		} else if (p1->key == NULL) { /* numeric index */
+			pData2 = zend_hash_index_find(ht2, p1->h);
+			if (pData2 == NULL) {
+				return 1;
+			}
+		} else { /* string index */
+			pData2 = zend_hash_find(ht2, p1->key);
+			if (pData2 == NULL) {
+				return 1;
 			}
 		}
 
