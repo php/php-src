@@ -1070,44 +1070,40 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 
         /* find a top level directory we need to create */
         while ((p = strrchr(buf, '/'))) {
-            if (p == buf) {
-                break;
-            }
-            *p = '\0';
-			php_stream_printf(stream, "CWD %s\r\n", buf);
+			*p = '\0';
+			php_stream_printf(stream, "CWD %s\r\n", strlen(buf) ? buf : "/");
 			result = GET_FTP_RESULT(stream);
 			if (result >= 200 && result <= 299) {
 				*p = '/';
 				break;
 			}
-        }
-        if (p == buf) {
-			php_stream_printf(stream, "MKD %s\r\n", resource->path);
-			result = GET_FTP_RESULT(stream);
-        } else {
-			php_stream_printf(stream, "MKD %s\r\n", buf);
-			result = GET_FTP_RESULT(stream);
-			if (result >= 200 && result <= 299) {
-				if (!p) {
-					p = buf;
-				}
-				/* create any needed directories if the creation of the 1st directory worked */
-				while (++p != e) {
-					if (*p == '\0' && *(p + 1) != '\0') {
-						*p = '/';
-						php_stream_printf(stream, "MKD %s\r\n", buf);
-						result = GET_FTP_RESULT(stream);
-						if (result < 200 || result > 299) {
-							if (options & REPORT_ERRORS) {
-								php_error_docref(NULL, E_WARNING, "%s", tmp_line);
-							}
-							break;
+		}
+
+		php_stream_printf(stream, "MKD %s\r\n", strlen(buf) ? buf : "/");
+		result = GET_FTP_RESULT(stream);
+
+		if (result >= 200 && result <= 299) {
+			if (!p) {
+				p = buf;
+			}
+			/* create any needed directories if the creation of the 1st directory worked */
+			while (p != e) {
+				if (*p == '\0' && *(p + 1) != '\0') {
+					*p = '/';
+					php_stream_printf(stream, "MKD %s\r\n", buf);
+					result = GET_FTP_RESULT(stream);
+					if (result < 200 || result > 299) {
+						if (options & REPORT_ERRORS) {
+							php_error_docref(NULL, E_WARNING, "%s", tmp_line);
 						}
+						break;
 					}
 				}
+				++p;
 			}
 		}
-        efree(buf);
+
+		efree(buf);
     }
 
 	php_url_free(resource);
