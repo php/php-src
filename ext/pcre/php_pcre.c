@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
+#include "SAPI.h"
 
 #include "ext/standard/php_string.h"
 
@@ -263,6 +264,10 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->jit = 1;
 #endif
 
+	/* If we're on the CLI SAPI, there will only be one request, so we don't need the
+	 * cache to survive after RSHUTDOWN. */
+	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0;
+
 	php_pcre_init_pcre2(1);
 #if HAVE_SETLOCALE
 	zend_hash_init(&char_tables, 1, NULL, php_pcre_free_char_table, 1);
@@ -462,6 +467,11 @@ static PHP_RINIT_FUNCTION(pcre)
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
+	if (PCRE_G(per_request_cache)) {
+		zend_hash_destroy(&PCRE_G(pcre_cache));
+		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
+	}
+
 	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_null_pair));
@@ -859,21 +869,21 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT) && !PCRE_G(per_request_cache)) {
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
-
 		GC_MAKE_PERSISTENT_LOCAL(str);
 
-#if HAVE_SETLOCALE
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-#endif
 		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), str, &new_entry, sizeof(pcre_cache_entry));
 		zend_string_release(str);
 	} else {
 		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
+
+#if HAVE_SETLOCALE
+	if (key != regex) {
+		zend_string_release_ex(key, 0);
+	}
+#endif
 
 	return ret;
 }
