@@ -23,6 +23,7 @@ had several contributions accepted, commit privileges are often quickly granted.
 * [Checklist for submitting contribution](#checklist-for-submitting-contribution)
 * [What happens after submitting contribution?](#what-happens-after-submitting-contribution)
 * [What happens when your contribution is applied?](#what-happens-when-your-contribution-is-applied)
+* [Git commit rules](#git-commit-rules)
 
 ## Pull requests
 
@@ -276,5 +277,121 @@ bumping. Before doing this think about these questions:
 Your name will likely be included in the Git commit log. If your change affects
 end users, a brief description and your name might be added to the [NEWS](/NEWS)
 file.
+
+## Git commit rules
+
+This is the first file you should be reading when contributing code via Git.
+We'll assume you're basically familiar with Git, but feel free to post your
+questions on the mailing list. Please have a look at https://git-scm.com/ for
+more detailed information on Git.
+
+PHP is developed through the efforts of a large number of people. Collaboration
+is a Good Thing(tm), and Git lets us do this. Thus, following some basic rules
+with regards to Git usage will:
+
+* Make everybody happier, especially those responsible for maintaining PHP
+  itself.
+* Keep the changes consistently well documented and easily trackable.
+* Prevent some of those 'Oops' moments.
+* Increase the general level of good will on planet Earth.
+
+Having said that, here are the organizational rules:
+
+1. Respect other people working on the project.
+
+2. Discuss any significant changes on the list before committing and get
+   confirmation from the release manager for the given branch.
+
+3. Look at [EXTENSIONS](/EXTENSIONS) file to see who is the primary maintainer
+   of the code you want to contribute to.
+
+4. If you "strongly disagree" about something another person did, don't start
+   fighting publicly - take it up in private email.
+
+5. If you don't know how to do something, ask first!
+
+6. Test your changes before committing them. We mean it. Really. To do so use
+   `make test`.
+
+7. For development use the `--enable-debug` switch to avoid memory leaks and the
+   `--enable-maintainer-zts` switch to ensure your code handles TSRM correctly
+   and doesn't break for those who need that.
+
+Currently we have the following branches in use:
+
+| Branch    |           |
+| --------- | --------- |
+| master    | Active development branch for PHP 8.0, which is open for backwards incompatible changes and major internal API changes. |
+| PHP-7.4   | Active development branch for PHP 7.4, which is open for new features and minor internal API changes. |
+| PHP-7.3   | Is used to release the PHP 7.3.x series. This is a current stable version and is open for bugfixes only. |
+| PHP-7.2   | Is used to release the PHP 7.2.x series. This is a current stable version and is open for bugfixes only. |
+| PHP-7.1   | Is used to release the PHP 7.1.x series. This is an old stable version and is open for security fixes only. |
+| PHP-7.0   | This branch is closed. |
+| PHP-5.6   | This branch is closed. |
+| PHP-5.5   | This branch is closed. |
+| PHP-5.4   | This branch is closed. |
+| PHP-5.3   | This branch is closed. |
+| PHP-5.2   | This branch is closed. |
+| PHP-5.1   | This branch is closed. |
+| PHP-4.4   | This branch is closed. |
+| PHP-X.Y.Z | These branches are used for the release managers for tagging the releases, hence they are closed to the general public. |
+
+The next few rules are more of a technical nature:
+
+1. All non-security bugfix changes should first go to the lowest bugfix branch
+   (i.e. 7.2) and then get merged up to all other branches. All security fixes
+   should go to the lowest security fixes branch (i.e 7.1). If a change is not
+   needed for later branches (i.e. fixes for features which were dropped from
+   later branches) an empty merge should be done.
+
+2. All news updates intended for public viewing, such as new features, bug
+   fixes, improvements, etc., should go into the NEWS file of *any stable
+   release* version with the given change. In other words, news about a bug fix
+   which went into PHP-5.4, PHP-5.5 and master should be noted in both
+   PHP-5.4/NEWS and PHP-5.5/NEWS but not master, which is not a public released
+   version yet.
+
+3. Do not commit multiple files and dump all messages in one commit. If you
+   modified several unrelated files, commit each group separately and provide a
+   nice commit message for each one. See example below.
+
+4. Do write your commit message in such a way that it makes sense even without
+   the corresponding diff. One should be able to look at it, and immediately
+   know what was modified. Definitely include the function name in the message
+   as shown below.
+
+5. In your commit messages, keep each line shorter than 80 characters. And try
+   to align your lines vertically, if they wrap. It looks bad otherwise.
+
+6. If you modified a function that is callable from PHP, prepend PHP to the
+   function name as shown below.
+
+The format of the commit messages is pretty simple.
+
+    <max 79 characters short description>\n
+    \n
+    <long description, 79 chars per line>
+    \n
+
+An Example from the git project (commit 2b34e486bc):
+
+    pack-objects: Fix compilation with NO_PTHREDS
+
+    It looks like commit 99fb6e04 (pack-objects: convert to use parse_options(),
+    2012-02-01) moved the #ifdef NO_PTHREDS around but hasn't noticed that the
+    'arg' variable no longer is available.
+
+If you fix some bugs, you should note the bug ID numbers in your commit message.
+Bug ID should be prefixed by `#`.
+
+Example:
+
+    Fixed bug #14016 (pgsql notice handler double free crash bug.)
+
+When you change the NEWS file for a bug fix, then please keep the bugs sorted in
+decreasing order under the fixed version.
+
+You can use [gitweb](https://git.php.net/) to look at PHP Git repository in
+various ways.
 
 Thank you for contributing to PHP!
