@@ -939,13 +939,15 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 		xlink = (zend_resource*) le->ptr;
 		if ((!persistent && xlink->type == le_link) || xlink->type == le_plink) {
-			if (IBG(default_link)) {
-				zend_list_close(IBG(default_link));
+			if (IBG(default_link) != xlink) {
+				GC_REFCOUNT(xlink)++;
+				if (IBG(default_link)) {
+					zend_list_delete(IBG(default_link));
+				}
+				IBG(default_link) = xlink;
 			}
-			xlink->gc.refcount++;
-			xlink->gc.refcount++;
-			IBG(default_link) = xlink;
-			RETVAL_RES(xlink);
+			GC_REFCOUNT(xlink)++;
+			RETURN_RES(xlink);
 		} else {
 			zend_hash_str_del(&EG(regular_list), hash, sizeof(hash)-1);
 		}

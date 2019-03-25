@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.18
 
+- interbase:
+  . Fixed bug #72175 (Impossibility of creating multiple connections to
+    Interbase with php 7.x). (Nikita)
+
 - phpdbg:
   . Fixed bug #76801 (too many open files). (alekitto)
 
