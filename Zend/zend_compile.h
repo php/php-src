@@ -204,7 +204,7 @@ typedef struct _zend_oparray_context {
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
-/* Staic method or property                               |     |     |     */
+/* Static method or property                              |     |     |     */
 #define ZEND_ACC_STATIC                  (1 <<  4) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Final class or method                                  |     |     |     */
