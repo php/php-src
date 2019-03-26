@@ -3498,17 +3498,27 @@ static void preload_link(void)
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_string *key = zend_string_tolower(ce->name);
 			if (zend_hash_exists(EG(class_table), key)) {
-				zend_error(E_WARNING, "Can't preload already declared class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+				zend_error_at(
+					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
 			} else {
-				zend_error(E_WARNING, "Can't preload unlinked class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+				zend_error_at(
+					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					"Can't preload unlinked class %s", ZSTR_VAL(ce->name));
 			}
 			zend_string_release(key);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			const char *kind, *name;
 			get_unresolved_initializer(ce, &kind, &name);
-			zend_error(E_WARNING, "Can't preload class %s with unresolved initializer for %s%s at %s:%d", ZSTR_VAL(ce->name), kind, name, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			zend_error_at(
+				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+				"Can't preload class %s with unresolved initializer for %s%s",
+				ZSTR_VAL(ce->name), kind, name);
 		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			zend_error(E_WARNING, "Can't preload class %s with unresolved property types at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			zend_error_at(
+				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+				"Can't preload class %s with unresolved property types",
+				ZSTR_VAL(ce->name));
 		} else {
 			continue;
 		}

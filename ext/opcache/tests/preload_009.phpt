@@ -13,6 +13,6 @@ var_dump(trait_exists('T'));
 var_dump(class_exists('Foo'));
 ?>
 --EXPECTF--
-Warning: Can't preload class Foo with unresolved initializer for constant C at %s:%d in Unknown on line 0
+Warning: Can't preload class Foo with unresolved initializer for constant C in %spreload_undef_const_2.inc on line 8
 bool(true)
 bool(false)

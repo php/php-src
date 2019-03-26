@@ -1239,20 +1239,13 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
-#else
-static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list args)
-#endif
+static ZEND_COLD void zend_error_va_list(
+		int type, const char *error_filename, uint32_t error_lineno,
+		const char *format, va_list args)
 {
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-	va_list args;
-#endif
 	va_list usr_copy;
 	zval params[4];
 	zval retval;
-	const char *error_filename;
-	uint32_t error_lineno = 0;
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
@@ -1292,69 +1285,14 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 		}
 	}
 
-	/* Obtain relevant filename and lineno */
-	switch (type) {
-		case E_CORE_ERROR:
-		case E_CORE_WARNING:
-			error_filename = NULL;
-			error_lineno = 0;
-			break;
-		case E_PARSE:
-		case E_COMPILE_ERROR:
-		case E_COMPILE_WARNING:
-		case E_ERROR:
-		case E_NOTICE:
-		case E_STRICT:
-		case E_DEPRECATED:
-		case E_WARNING:
-		case E_USER_ERROR:
-		case E_USER_WARNING:
-		case E_USER_NOTICE:
-		case E_USER_DEPRECATED:
-		case E_RECOVERABLE_ERROR:
-			if (zend_is_compiling()) {
-				error_filename = ZSTR_VAL(zend_get_compiled_filename());
-				error_lineno = zend_get_compiled_lineno();
-			} else if (zend_is_executing()) {
-				error_filename = zend_get_executed_filename();
-				if (error_filename[0] == '[') { /* [no active file] */
-					error_filename = NULL;
-					error_lineno = 0;
-				} else {
-					error_lineno = zend_get_executed_lineno();
-				}
-			} else {
-				error_filename = NULL;
-				error_lineno = 0;
-			}
-			break;
-		default:
-			error_filename = NULL;
-			error_lineno = 0;
-			break;
-	}
-	if (!error_filename) {
-		error_filename = "Unknown";
-	}
-
 #ifdef HAVE_DTRACE
 	if (DTRACE_ERROR_ENABLED()) {
 		char *dtrace_error_buffer;
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-		va_start(args, format);
-#endif
 		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
 		DTRACE_ERROR(dtrace_error_buffer, (char *)error_filename, error_lineno);
 		efree(dtrace_error_buffer);
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-		va_end(args);
-#endif
 	}
 #endif /* HAVE_DTRACE */
-
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-	va_start(args, format);
-#endif
 
 	/* if we don't have a user defined error handler */
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
@@ -1439,10 +1377,6 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			break;
 	}
 
-#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
-	va_end(args);
-#endif
-
 	if (type == E_PARSE) {
 		/* eval() errors do not affect exit_status */
 		if (!(EG(current_execute_data) &&
@@ -1456,30 +1390,92 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 }
 /* }}} */
 
-#ifdef HAVE_NORETURN
-# ifdef HAVE_NORETURN_ALIAS
-ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
-# else
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) /* {{{ */
-{
-	va_list va;
+static void get_filename_lineno(int type, const char **filename, uint32_t *lineno) {
+	/* Obtain relevant filename and lineno */
+	switch (type) {
+		case E_CORE_ERROR:
+		case E_CORE_WARNING:
+			*filename = NULL;
+			*lineno = 0;
+			break;
+		case E_PARSE:
+		case E_COMPILE_ERROR:
+		case E_COMPILE_WARNING:
+		case E_ERROR:
+		case E_NOTICE:
+		case E_STRICT:
+		case E_DEPRECATED:
+		case E_WARNING:
+		case E_USER_ERROR:
+		case E_USER_WARNING:
+		case E_USER_NOTICE:
+		case E_USER_DEPRECATED:
+		case E_RECOVERABLE_ERROR:
+			if (zend_is_compiling()) {
+				*filename = ZSTR_VAL(zend_get_compiled_filename());
+				*lineno = zend_get_compiled_lineno();
+			} else if (zend_is_executing()) {
+				*filename = zend_get_executed_filename();
+				if ((*filename)[0] == '[') { /* [no active file] */
+					*filename = NULL;
+					*lineno = 0;
+				} else {
+					*lineno = zend_get_executed_lineno();
+				}
+			} else {
+				*filename = NULL;
+				*lineno = 0;
+			}
+			break;
+		default:
+			*filename = NULL;
+			*lineno = 0;
+			break;
+	}
+	if (!*filename) {
+		*filename = "Unknown";
+	}
+}
 
-	va_start(va, format);
-	zend_error_va_list(type, format, va);
-	va_end(va);
+ZEND_API ZEND_COLD void zend_error_at(
+		int type, const char *filename, uint32_t lineno, const char *format, ...) {
+	va_list args;
+
+	if (!filename) {
+		uint32_t dummy_lineno;
+		get_filename_lineno(type, &filename, &dummy_lineno);
+	}
+
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+}
+
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	va_list va;
+	const char *filename;
+	uint32_t lineno;
+	va_list args;
 
-	va_start(va, format);
-	zend_error_va_list(type, format, va);
-	va_end(va);
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
 }
 /* }}} */
-# endif
-#endif
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
