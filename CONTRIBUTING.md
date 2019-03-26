@@ -280,10 +280,10 @@ file.
 
 ## Git commit rules
 
-This is the first file you should be reading when contributing code via Git.
-We'll assume you're basically familiar with Git, but feel free to post your
-questions on the mailing list. Please have a look at https://git-scm.com/ for
-more detailed information on Git.
+This section refers to contributors that have Git push access and make commit
+changes themselves. We'll assume you're basically familiar with Git, but feel
+free to post your questions on the mailing list. Please have a look at the more
+detailed [information on Git](https://git-scm.com/).
 
 PHP is developed through the efforts of a large number of people. Collaboration
 is a Good Thing(tm), and Git lets us do this. Thus, following some basic rules
