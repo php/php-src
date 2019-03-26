@@ -12,7 +12,9 @@ PHP                                                                        NEWS
 
 - phpdbg:
   . Fixed bug #76801 (too many open files). (alekitto)
-
+  . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
+    (krakjoe)
+    
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
 
