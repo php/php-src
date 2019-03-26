@@ -213,10 +213,12 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 										zend_string_release(filename);
 									} break;
 
-									default: { /* do nothing */ } break;
+									default: {
+                                                                            phpdbg_asprintf(&new_str, "%sbreak %s\n", *str, conditional->code);
+                                                                        } break;
 								}
 							} else {
-								phpdbg_asprintf(&new_str, "%sbreak if %s\n", str, conditional->code);
+								phpdbg_asprintf(&new_str, "%sbreak if %s\n", *str, conditional->code);
 							}
 						} break;
 

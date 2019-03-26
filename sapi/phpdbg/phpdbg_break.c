@@ -42,7 +42,30 @@ const phpdbg_command_t phpdbg_break_commands[] = {
 
 PHPDBG_BREAK(at) /* {{{ */
 {
-	phpdbg_set_breakpoint_at(param);
+        switch (param->type) {
+                case NUMERIC_PARAM: {
+                        if (!PHPDBG_G(exec)) {
+                                phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
+                                return FAILURE;
+                        }
+
+                        phpdbg_param_t new_param;
+                        new_param = *(param);
+                        new_param.file.name = phpdbg_current_file();
+                        new_param.file.line = param->num;
+                        new_param.len = strlen(phpdbg_current_file());
+                        new_param.type = FILE_PARAM;
+
+                        phpdbg_set_breakpoint_at(&new_param);
+
+                } break;
+
+                case FILE_PARAM: {
+                        phpdbg_set_breakpoint_at(param);
+                } break;
+
+                phpdbg_default_switch_case();
+        }
 
 	return SUCCESS;
 } /* }}} */
