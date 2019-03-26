@@ -258,6 +258,26 @@ ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize)
 	return ht;
 }
 
+ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2)
+{
+	Bucket *p;
+	HashTable *ht = emalloc(sizeof(HashTable));
+	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	ht->nNumUsed = ht->nNumOfElements = ht->nNextFreeElement = 2;
+	zend_hash_real_init_packed_ex(ht);
+
+	p = ht->arData;
+	ZVAL_COPY_VALUE(&p->val, val1);
+	p->h = 0;
+	p->key = NULL;
+
+	p++;
+	ZVAL_COPY_VALUE(&p->val, val2);
+	p->h = 1;
+	p->key = NULL;
+	return ht;
+}
+
 static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 {
 	HT_ASSERT_RC1(ht);
