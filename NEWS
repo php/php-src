@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
   . Fixed bug #76801 (too many open files). (alekitto)
+  . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
+    (krakjoe)
   
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
