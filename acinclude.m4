@@ -1861,12 +1861,16 @@ AC_DEFUN([PHP_PROG_BISON], [
         break
       fi
     done
+
+    if test "$php_bison_check" != "invalid"; then
+      AC_MSG_RESULT([$php_bison_version (ok)])
+    else
+      AC_MSG_RESULT([$php_bison_version])
+    fi
   fi
 
   case $php_bison_check in
     ""|invalid[)]
-      AC_MSG_RESULT([$php_bison_version])
-
       if test -f "$abs_srcdir/Zend/zend_language_parser.h" && test -f "$abs_srcdir/Zend/zend_language_parser.c"; then
         AC_MSG_WARN([bison $php_bison_required_version is required if you want to regenerate PHP parsers (excluded versions: $php_bison_excluded_versions)])
       else
@@ -1874,9 +1878,6 @@ AC_DEFUN([PHP_PROG_BISON], [
       fi
 
       YACC="exit 0;"
-      ;;
-    *[)]
-      AC_MSG_RESULT([$php_bison_version (ok)])
       ;;
   esac
 
@@ -1917,12 +1918,16 @@ AC_DEFUN([PHP_PROG_RE2C],[
         php_re2c_check=invalid
       fi
     fi
+
+    if test "$php_re2c_check" != "invalid"; then
+      AC_MSG_RESULT([$php_re2c_version (ok)])
+    else
+      AC_MSG_RESULT([$php_re2c_version])
+    fi
   fi
 
   case $php_re2c_check in
     ""|invalid[)]
-      AC_MSG_RESULT([$php_re2c_version])
-
       if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
         AC_MSG_WARN([re2c $php_re2c_required_version is required if you want to regenerate PHP lexers.])
       else
@@ -1930,9 +1935,6 @@ AC_DEFUN([PHP_PROG_RE2C],[
       fi
 
       RE2C="exit 0;"
-      ;;
-    *[)]
-      AC_MSG_RESULT([$php_re2c_version (ok)])
       ;;
   esac
 
