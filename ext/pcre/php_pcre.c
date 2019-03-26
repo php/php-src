@@ -964,23 +964,17 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 }/*}}}*/
 
 static void init_unmatched_null_pair() {
-	zval tmp;
-	zval *pair = &PCRE_G(unmatched_null_pair);
-	array_init_size(pair, 2);
-	ZVAL_NULL(&tmp);
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
-	ZVAL_LONG(&tmp, -1);
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+	zval val1, val2;
+	ZVAL_NULL(&val1);
+	ZVAL_LONG(&val2, -1);
+	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
 }
 
 static void init_unmatched_empty_pair() {
-	zval tmp;
-	zval *pair = &PCRE_G(unmatched_empty_pair);
-	array_init_size(pair, 2);
-	ZVAL_EMPTY_STRING(&tmp);
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
-	ZVAL_LONG(&tmp, -1);
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(pair), &tmp);
+	zval val1, val2;
+	ZVAL_EMPTY_STRING(&val1);
+	ZVAL_LONG(&val2, -1);
+	ZVAL_ARR(&PCRE_G(unmatched_empty_pair), zend_new_pair(&val1, &val2));
 }
 
 static zend_always_inline void populate_match_value_str(
@@ -1013,7 +1007,7 @@ static inline void add_offset_pair(
 		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
 		zend_string *name, uint32_t unmatched_as_null)
 {
-	zval match_pair, tmp;
+	zval match_pair;
 
 	/* Add (match, offset) to the return value */
 	if (PCRE2_UNSET == start_offset) {
@@ -1029,11 +1023,10 @@ static inline void add_offset_pair(
 			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_empty_pair));
 		}
 	} else {
-		array_init_size(&match_pair, 2);
-		populate_match_value_str(&tmp, subject, start_offset, end_offset);
-		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
-		ZVAL_LONG(&tmp, start_offset);
-		zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
+		zval val1, val2;
+		populate_match_value_str(&val1, subject, start_offset, end_offset);
+		ZVAL_LONG(&val2, start_offset);
+		ZVAL_ARR(&match_pair, zend_new_pair(&val1, &val2));
 	}
 
 	if (name) {
