@@ -29,6 +29,8 @@
 
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
+ *
+ * Minimum required PHP version: 7.0.0
  */
 
 /**
