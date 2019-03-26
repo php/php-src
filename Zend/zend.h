@@ -71,16 +71,6 @@
 
 ZEND_TSRMLS_CACHE_EXTERN()
 
-#ifdef HAVE_NORETURN
-# ifdef ZEND_NORETURN_ALIAS
-ZEND_COLD void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-# else
-ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-# endif
-#else
-# define zend_error_noreturn zend_error
-#endif
-
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
 
@@ -303,6 +293,10 @@ extern ZEND_API int (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+/* If filename is NULL the default filename is used. */
+ZEND_API ZEND_COLD void zend_error_at(int type, const char *filename, uint32_t lineno, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 4, 5);
+
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
