@@ -2261,6 +2261,10 @@ static void accel_reset_pcre_cache(void)
 {
 	Bucket *p;
 
+	if (PCRE_G(per_request_cache)) {
+		return;
+	}
+
 	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
 		if (zend_accel_in_shm(p->key)) {

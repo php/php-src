@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
+#include "SAPI.h"
 
 #include "ext/standard/php_string.h"
 
@@ -144,7 +145,7 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
-	pefree(pce, 1);
+	pefree(pce, !PCRE_G(per_request_cache));
 }
 /* }}} */
 
@@ -253,7 +254,13 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
 	php_pcre_mutex_alloc();
 
-	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
+	/* If we're on the CLI SAPI, there will only be one request, so we don't need the
+	 * cache to survive after RSHUTDOWN. */
+	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0;
+	if (!pcre_globals->per_request_cache) {
+		zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
+	}
+
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
@@ -272,7 +279,9 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 
 static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
-	zend_hash_destroy(&pcre_globals->pcre_cache);
+	if (!pcre_globals->per_request_cache) {
+		zend_hash_destroy(&pcre_globals->pcre_cache);
+	}
 
 	php_pcre_shutdown_pcre2();
 #if HAVE_SETLOCALE
@@ -438,10 +447,10 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
-#ifdef HAVE_PCRE_JIT_SUPPORT
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
 		php_pcre_mutex_lock();
@@ -454,14 +463,22 @@ static PHP_RINIT_FUNCTION(pcre)
 	}
 
 	mdata_used = 0;
+#endif
+
+	if (PCRE_G(per_request_cache)) {
+		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 0);
+	}
 
 	return SUCCESS;
 }
 /* }}} */
-#endif
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
+	if (PCRE_G(per_request_cache)) {
+		zend_hash_destroy(&PCRE_G(pcre_cache));
+	}
+
 	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
 	ZVAL_UNDEF(&PCRE_G(unmatched_null_pair));
@@ -859,21 +876,21 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT) && !PCRE_G(per_request_cache)) {
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
-
 		GC_MAKE_PERSISTENT_LOCAL(str);
 
-#if HAVE_SETLOCALE
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-#endif
 		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), str, &new_entry, sizeof(pcre_cache_entry));
 		zend_string_release(str);
 	} else {
 		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
+
+#if HAVE_SETLOCALE
+	if (key != regex) {
+		zend_string_release_ex(key, 0);
+	}
+#endif
 
 	return ret;
 }
@@ -3023,11 +3040,7 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-#ifdef HAVE_PCRE_JIT_SUPPORT
 	PHP_RINIT(pcre),
-#else
-	NULL,
-#endif
 	PHP_RSHUTDOWN(pcre),
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,

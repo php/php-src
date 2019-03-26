@@ -72,6 +72,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	zend_bool jit;
 #endif
+	zend_bool per_request_cache;
 	int  error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;
