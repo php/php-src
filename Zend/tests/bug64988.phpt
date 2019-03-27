@@ -26,5 +26,5 @@ $o = new Smooth1();
 echo "okey";
 ?>
 --EXPECTF--
-Warning: Declaration of Smooth1::insert(array $data) should be compatible with Noisy1::insert(array $data, $option1 = NULL) in %sbug64988.php on line 20
+Warning: Declaration of Smooth1::insert(array $data) should be compatible with Noisy1::insert(array $data, $option1 = NULL) in %sbug64988.php on line 17
 okey
