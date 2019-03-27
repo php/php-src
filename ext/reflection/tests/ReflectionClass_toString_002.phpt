@@ -114,7 +114,7 @@ Class [ <user> class D extends C ] {
   }
 
   - Methods [1] {
-    Method [ <user, overwrites B, prototype A> public method f ] {
+    Method [ <user, overwrites B, prototype B> public method f ] {
       @@ %s 12 - 12
     }
   }

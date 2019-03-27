@@ -587,27 +587,24 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
+	if (parent_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_ABSTRACT_PARENT)) {
+		child->common.fn_flags |= ZEND_ACC_HAS_ABSTRACT_PARENT;
+	}
+
 	do {
 		if (!(parent_flags & ZEND_ACC_PRIVATE)) {
-			zend_function *proto = parent->common.prototype ?
-				parent->common.prototype : parent;
-
-			if (!(parent_flags & ZEND_ACC_CTOR)) {
-				if (!proto) {
-					proto = parent;
-				}
-			} else if (proto) {
+			if (parent_flags & ZEND_ACC_CTOR) {
 				/* ctors only have a prototype if is abstract (or comes from an interface) */
 				/* and if that is the case, we want to check inheritance against it */
+				zend_function *proto = parent->common.prototype
+					? parent->common.prototype : parent;
 				if (proto->common.fn_flags & ZEND_ACC_ABSTRACT) {
 					parent = proto;
 				} else {
 					break;
 				}
-			} else {
-				break;
 			}
-			if (child_zv && child->common.prototype != proto) {
+			if (child_zv && child->common.prototype != parent) {
 				do {
 					if (child->common.scope != ce
 					 && child->type == ZEND_USER_FUNCTION
@@ -622,7 +619,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 							Z_PTR_P(child_zv) = child = new_function;
 						}
 					}
-					child->common.prototype = proto;
+					child->common.prototype = parent;
 				} while (0);
 			}
 			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
@@ -638,9 +635,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 				zend_string *method_prototype = zend_get_function_declaration(parent);
 				zend_string *child_prototype = zend_get_function_declaration(child);
 
-				if (child->common.prototype && (
-					child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-				)) {
+				if (child->common.fn_flags & ZEND_ACC_HAS_ABSTRACT_PARENT) {
 					error_level = E_COMPILE_ERROR;
 					error_verb = "must";
 				} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&

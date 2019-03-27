@@ -326,6 +326,9 @@ typedef struct _zend_oparray_context {
 /* function is a destructor                               |     |     |     */
 #define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* function is a destructor                               |     |     |     */
+#define ZEND_ACC_HAS_ABSTRACT_PARENT     (1 << 30) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
