@@ -1462,6 +1462,24 @@ ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
 	va_end(args);
 }
 
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
+		int type, const char *filename, uint32_t lineno, const char *format, ...)
+{
+	va_list args;
+
+	if (!filename) {
+		uint32_t dummy_lineno;
+		get_filename_lineno(type, &filename, &dummy_lineno);
+	}
+
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
+}
+/* }}} */
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
 	const char *filename;
