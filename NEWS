@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     (Ryan McCullagh, Nikita)
   . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
     created on the fly). (David Walker)
+  . Increased default time_cost for argon2i(d) password_hash to 3. (Sara)
 
 - COM:
   . Deprecated registering of case-insensitive constants from typelibs. (cmb)
