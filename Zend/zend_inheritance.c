@@ -546,13 +546,19 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 }
 /* }}} */
 
+static zend_always_inline uint32_t func_lineno(zend_function *fn) {
+	return fn->common.type == ZEND_USER_FUNCTION ? fn->op_array.line_start : 0;
+}
+
 static void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
 
 	if (UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name));
+		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			"Cannot override final method %s::%s()",
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name));
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -560,15 +566,21 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	 */
 	if (UNEXPECTED((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC))) {
 		if (child_flags & ZEND_ACC_STATIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+				"Cannot make non static method %s::%s() static in class %s",
+				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 		} else {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+			zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+				"Cannot make static method %s::%s() non static in class %s",
+				ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 		}
 	}
 
 	/* Disallow making an inherited method abstract. */
 	if (UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			"Cannot make non abstract method %s::%s() abstract in class %s",
+			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
 	if (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED)) {
@@ -615,7 +627,9 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			}
 			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
 			if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+					"Access level to %s::%s() must be %s (as in class %s)%s",
+					ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			}
 
 			if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
@@ -639,8 +653,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 					error_level = E_WARNING;
 					error_verb = "should";
 				}
-				zend_error_at(error_level, NULL,
-					child->common.type == ZEND_USER_FUNCTION ? child->op_array.line_start : 0,
+				zend_error_at(error_level, NULL, func_lineno(child),
 					"Declaration of %s %s be compatible with %s",
 					ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
 				zend_string_efree(child_prototype);

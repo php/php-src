@@ -28,4 +28,4 @@ class fail extends same {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Access level to fail::f3() must be protected (as in class same) or weaker in %s on line %d
+Fatal error: Access level to fail::f3() must be protected (as in class same) or weaker in %s on line 22
