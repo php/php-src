@@ -968,7 +968,7 @@ dnl ---------------------------------------------- Shared module
 dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
-      cgi|embed[)]
+      cgi|embed|phpdbg[)]
         PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
         EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
