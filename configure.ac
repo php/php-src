@@ -1590,7 +1590,7 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
-ALL_OUTPUT_FILES="php7.spec main/build-defs.h \
+ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"
