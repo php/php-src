@@ -597,11 +597,11 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 					proto = parent;
 				}
 			} else if (proto) {
-				if (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) {
-					/* ctors only have a prototype if it comes from an interface */
-					/* and if that is the case, we want to check inheritance against it */
+				/* ctors only have a prototype if is abstract (or comes from an interface) */
+				/* and if that is the case, we want to check inheritance against it */
+				if (proto->common.fn_flags & ZEND_ACC_ABSTRACT) {
 					parent = proto;
-				} else if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+				} else {
 					break;
 				}
 			} else {
