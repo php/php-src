@@ -9,4 +9,4 @@ class MyDateTime extends DateTime {
 }
 ?>
 --EXPECTF--
-Warning: Declaration of MyDateTime::__set_state() should be compatible with DateTime::__set_state(array $array) in %s on line %d
+Fatal error: Declaration of MyDateTime::__set_state() must be compatible with DateTime::__set_state(array $array) in %s on line %d

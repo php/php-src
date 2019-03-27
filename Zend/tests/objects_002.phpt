@@ -20,5 +20,4 @@ class test3 extends test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Declaration of test3::foo($arg) should be compatible with test::foo() in %s on line %d
-Done
+Fatal error: Declaration of test3::foo($arg) must be compatible with test::foo() in %s on line %d

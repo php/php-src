@@ -633,29 +633,11 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			}
 
 			if (UNEXPECTED(!zend_do_perform_implementation_check(child, parent))) {
-				int error_level;
-				const char *error_verb;
 				zend_string *method_prototype = zend_get_function_declaration(parent);
 				zend_string *child_prototype = zend_get_function_declaration(child);
-
-				if (child->common.prototype && (
-					child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT
-				)) {
-					error_level = E_COMPILE_ERROR;
-					error_verb = "must";
-				} else if ((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-		                   (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-				            !zend_do_perform_type_hint_check(child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) ||
-				            (ZEND_TYPE_ALLOW_NULL(child->common.arg_info[-1].type) && !ZEND_TYPE_ALLOW_NULL(parent->common.arg_info[-1].type)))) {
-					error_level = E_COMPILE_ERROR;
-					error_verb = "must";
-				} else {
-					error_level = E_WARNING;
-					error_verb = "should";
-				}
-				zend_error_at(error_level, NULL, func_lineno(child),
-					"Declaration of %s %s be compatible with %s",
-					ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
+				zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
+					"Declaration of %s must be compatible with %s",
+					ZSTR_VAL(child_prototype), ZSTR_VAL(method_prototype));
 				zend_string_efree(child_prototype);
 				zend_string_efree(method_prototype);
 			}
