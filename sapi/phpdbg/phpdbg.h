@@ -83,12 +83,14 @@
 #define zend_hash_str_add(...) zend_hash_str_add_tmp(__VA_ARGS__)
 #endif
 
-#ifdef HAVE_LIBREADLINE
-#	include <readline/readline.h>
-#	include <readline/history.h>
-#endif
-#ifdef HAVE_LIBEDIT
-#	include <editline/readline.h>
+#ifdef HAVE_PHPDBG_READLINE
+# ifdef HAVE_LIBREADLINE
+#	 include <readline/readline.h>
+#	 include <readline/history.h>
+# endif
+# ifdef HAVE_LIBEDIT
+#	 include <editline/readline.h>
+# endif
 #endif
 
 /* {{{ remote console headers */

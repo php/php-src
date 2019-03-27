@@ -1158,15 +1158,19 @@ PHPDBG_COMMAND(info) /* {{{ */
 {
 	phpdbg_out("Execution Context Information\n\n");
 	phpdbg_xml("<printinfo %r>");
-#ifdef HAVE_LIBREADLINE
-	phpdbg_writeln("info", "readline=\"yes\"", "Readline   yes");
+#ifdef HAVE_PHPDBG_READLINE
+# ifdef HAVE_LIBREADLINE
+	 phpdbg_writeln("info", "readline=\"yes\"", "Readline   yes");
+# else
+	 phpdbg_writeln("info", "readline=\"no\"", "Readline   no");
+# endif
+# ifdef HAVE_LIBEDIT
+	 phpdbg_writeln("info", "libedit=\"yes\"", "Libedit    yes");
+# else
+	 phpdbg_writeln("info", "libedit=\"no\"", "Libedit    no");
+# endif
 #else
-	phpdbg_writeln("info", "readline=\"no\"", "Readline   no");
-#endif
-#ifdef HAVE_LIBEDIT
-	phpdbg_writeln("info", "libedit=\"yes\"", "Libedit    yes");
-#else
-	phpdbg_writeln("info", "libedit=\"no\"", "Libedit    no");
+     phpdbg_writeln("info", "readline=\"unavailable\"", "Readline   unavailable");
 #endif
 
 	phpdbg_writeln("info", "context=\"%s\"", "Exec       %s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");

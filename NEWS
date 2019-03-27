@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #76801 (too many open files). (alekitto)
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
+  . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
