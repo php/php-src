@@ -619,6 +619,18 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
 				return FAILURE;
 			}
+			// Constant strings are interned so that (for example)
+			// regexp caching is fast.  Most constant strings were
+			// interned at compile time; the ones which make it
+			// to this point had references to other classes
+			// whose loading was deferred.
+			if (Z_TYPE(tmp) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR(tmp))) {
+			// This is the same as zval_make_interned_string()
+				Z_STR(tmp) = zend_new_interned_string(Z_STR(tmp));
+				if (ZSTR_IS_INTERNED(Z_STR(tmp))) {
+					Z_TYPE_FLAGS(tmp) = 0;
+				}
+			}
 			zval_ptr_dtor_nogc(p);
 			ZVAL_COPY_VALUE(p, &tmp);
 		}
