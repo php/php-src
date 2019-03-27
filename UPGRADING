@@ -66,6 +66,10 @@ PHP 8.0 UPGRADE NOTES
     Additionally, care should be taken that error messages are not displayed in
     production environments, which can result in information leaks. Please
     ensure that display_errors=Off is used in conjunction with error logging.
+  . Inheritance errors due to incompatible method signatures (LSP violations)
+    will now always generate a fatal error. Previously a warning was generated
+    in some cases.
+    RFC: https://wiki.php.net/rfc/lsp_errors
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

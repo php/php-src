@@ -17,8 +17,6 @@ class test3 extends test {
 	function foo($arg, $arg2) {}
 }
 
-echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Declaration of test3::foo($arg, $arg2) should be compatible with test::foo($arg, $arg2 = NULL) in %s on line %d
-Done
+Fatal error: Declaration of test3::foo($arg, $arg2) must be compatible with test::foo($arg, $arg2 = NULL) in %s on line %d

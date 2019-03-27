@@ -1,5 +1,5 @@
 --TEST--
-Bug #60573 (type hinting with "self" keyword causes weird errors)
+Bug #60573 (type hinting with "self" keyword causes weird errors) -- variation 2
 --FILE--
 <?php
 class Foo1 {
@@ -47,12 +47,18 @@ public function setSelf(self $s) { }
 
 }
 
-class Bar4 extends Foo4 {
+class Foo5 extends Base {
 
-public function setSelf(self $s) { }
+public function setSelf(parent $s) { }
+
+}
+
+class Bar5 extends Foo5 {
+
+public function setSelf(parent $s) { }
 
 }
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of Bar4::setSelf(Bar4 $s) must be compatible with Foo4::setSelf(Foo4 $s) in %s on line %d
+Fatal error: Declaration of Bar5::setSelf(Foo5 $s) must be compatible with Foo5::setSelf(Base $s) in %sbug60573_2.php on line %d
