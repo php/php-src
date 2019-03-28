@@ -1128,7 +1128,7 @@ static void zend_ffi_cdata_write_dim(zend_object *obj, zval *offset, zval *value
 		zend_throw_error(zend_ffi_exception_ce, "Cannot add next element to object of type FFI\\CData");
 		return;
 	}
-	
+
 	dim = zval_get_long(offset);
 	if (EXPECTED(type->kind == ZEND_FFI_TYPE_ARRAY)) {
 		if (UNEXPECTED((zend_ulong)(dim) >= (zend_ulong)type->array.length)
@@ -5907,69 +5907,166 @@ void zend_ffi_set_abi(zend_ffi_dcl *dcl, uint16_t abi) /* {{{ */
 # define __BIGGEST_ALIGNMENT__ sizeof(size_t)
 #endif
 
+#define SIMPLE_ATTRIBUTES(_) \
+	_(cdecl) \
+	_(fastcall) \
+	_(thiscall) \
+	_(stdcall) \
+	_(ms_abi) \
+	_(sysv_abi) \
+	_(aligned) \
+	_(packed) \
+	_(ms_struct) \
+	_(gcc_struct) \
+	_(const) \
+	_(malloc) \
+	_(deprecated) \
+	_(nothrow) \
+	_(leaf) \
+	_(pure) \
+	_(noreturn) \
+	_(warn_unused_result)
+
+#define ATTR_ID(name)   attr_ ## name,
+#define ATTR_NAME(name) {sizeof(#name)-1, #name},
+
 void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len) /* {{{ */
 {
-	if (name_len == sizeof("cdecl")-1 && memcmp(name, "cdecl", sizeof("cdecl")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);
-	} else if (name_len == sizeof("fastcall")-1 && memcmp(name, "fastcall", sizeof("fastcall")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);
-	} else if (name_len == sizeof("thiscall")-1 && memcmp(name, "thiscall", sizeof("thiscall")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);
-	} else if (name_len == sizeof("stdcall")-1 && memcmp(name, "stdcall", sizeof("stdcall")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);
-	} else if (name_len == sizeof("ms_abi")-1 && memcmp(name, "ms_abi", sizeof("ms_abi")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_MS);
-	} else if (name_len == sizeof("sysv_abi")-1 && memcmp(name, "sysv_abi", sizeof("sysv_abi")-1) == 0) {
-		zend_ffi_set_abi(dcl, ZEND_FFI_ABI_SYSV);
-	} else if (name_len == sizeof("aligned")-1 && memcmp(name, "aligned", sizeof("aligned")-1) == 0) {
-		dcl->align = __BIGGEST_ALIGNMENT__;
-	} else if (name_len == sizeof("packed")-1 && memcmp(name, "packed", sizeof("packed")-1) == 0) {
-		dcl->attr |= ZEND_FFI_ATTR_PACKED;
-	} else if (name_len == sizeof("ms_struct")-1 && memcmp(name, "ms_struct", sizeof("ms_struct")-1) == 0) {
-		dcl->attr |= ZEND_FFI_ATTR_MS_STRUCT;
-	} else if (name_len == sizeof("gcc_struct")-1 && memcmp(name, "gcc_struct", sizeof("gcc_struct")-1) == 0) {
-		dcl->attr |= ZEND_FFI_ATTR_GCC_STRUCT;
-	} else if (name_len == sizeof("const")-1 && memcmp(name, "const", sizeof("const")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("malloc")-1 && memcmp(name, "malloc", sizeof("malloc")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("deprecated")-1 && memcmp(name, "deprecated", sizeof("deprecated")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("__nothrow__")-1 && memcmp(name, "__nothrow__", sizeof("__nothrow__")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("__leaf__")-1 && memcmp(name, "__leaf__", sizeof("__leaf__")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("__malloc__")-1 && memcmp(name, "__malloc__", sizeof("__malloc__")-1) == 0) {
-		/* ignore */
-	} else {
-		zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+	enum {
+		SIMPLE_ATTRIBUTES(ATTR_ID)
+		attr_unsupported
+	};
+	static const struct {
+		size_t len;
+		const char * const name;
+	} names[] = {
+		SIMPLE_ATTRIBUTES(ATTR_NAME)
+		{0, NULL}
+	};
+	int id;
+
+	if (name_len > 4
+	 && name[0] == '_'
+	 && name[1] == '_'
+	 && name[name_len-2] == '_'
+	 && name[name_len-1] == '_') {
+		name += 2;
+		name_len -= 4;
+	}
+	for (id = 0; names[id].len != 0; id++) {
+		if (name_len == names[id].len) {
+			if (memcmp(name, names[id].name, name_len) == 0) {
+				break;
+			}
+		}
+	}
+	switch (id) {
+		case attr_cdecl:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);
+			break;
+		case attr_fastcall:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);
+			break;
+		case attr_thiscall:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);
+			break;
+		case attr_stdcall:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);
+			break;
+		case attr_ms_abi:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_MS);
+			break;
+		case attr_sysv_abi:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_SYSV);
+			break;
+		case attr_aligned:
+			dcl->align = __BIGGEST_ALIGNMENT__;
+			break;
+		case attr_packed:
+			dcl->attr |= ZEND_FFI_ATTR_PACKED;
+			break;
+		case attr_ms_struct:
+			dcl->attr |= ZEND_FFI_ATTR_MS_STRUCT;
+			break;
+		case attr_gcc_struct:
+			dcl->attr |= ZEND_FFI_ATTR_GCC_STRUCT;
+			break;
+		case attr_unsupported:
+			zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+			break;
+		default:
+			/* ignore */
+			break;
 	}
 }
 /* }}} */
 
+#define VALUE_ATTRIBUTES(_) \
+	_(regparam) \
+	_(aligned) \
+	_(mode) \
+	_(nonnull) \
+	_(alloc_size) \
+	_(format) \
+	_(deprecated)
+
 void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, int n, zend_ffi_val *val) /* {{{ */
 {
-	if (n == 0 && name_len == sizeof("regparam")-1 && memcmp(name, "regparam", sizeof("regparam")-1) == 0) {
-		if ((val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_INT64 || val->kind == ZEND_FFI_VAL_UINT64) && val->i64 == 3) {
-			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_REGISTER);
-		} else {
-			zend_ffi_parser_error("incorrect 'regparam' value at line %d", FFI_G(line));
+	enum {
+		VALUE_ATTRIBUTES(ATTR_ID)
+		attr_unsupported
+	};
+	static const struct {
+		size_t len;
+		const char * const name;
+	} names[] = {
+		VALUE_ATTRIBUTES(ATTR_NAME)
+		{0, NULL}
+	};
+	int id;
+
+	if (name_len > 4
+	 && name[0] == '_'
+	 && name[1] == '_'
+	 && name[name_len-2] == '_'
+	 && name[name_len-1] == '_') {
+		name += 2;
+		name_len -= 4;
+	}
+	for (id = 0; names[id].len != 0; id++) {
+		if (name_len == names[id].len) {
+			if (memcmp(name, names[id].name, name_len) == 0) {
+				break;
+			}
 		}
-	} else if (n == 0 && name_len == sizeof("aligned")-1 && memcmp(name, "aligned", sizeof("aligned")-1) == 0) {
-		if ((val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_INT64 || val->kind == ZEND_FFI_VAL_UINT64)
-		 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
-			dcl->align = val->i64;
-		} else {
-			zend_ffi_parser_error("incorrect 'alignemnt' value at line %d", FFI_G(line));
-		}
-	} else if (name_len == sizeof("format")-1 && memcmp(name, "format", sizeof("format")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("__format__")-1 && memcmp(name, "__format__", sizeof("__format__")-1) == 0) {
-		/* ignore */
-	} else if (name_len == sizeof("deprecated")-1 && memcmp(name, "deprecated", sizeof("deprecated")-1) == 0) {
-		/* ignore */
-	} else {
-		zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+	}
+	switch (id) {
+		case attr_regparam:
+			if (n == 0
+			 && (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_INT64 || val->kind == ZEND_FFI_VAL_UINT64)
+			 && val->i64 == 3) {
+				zend_ffi_set_abi(dcl, ZEND_FFI_ABI_REGISTER);
+			} else {
+				zend_ffi_parser_error("incorrect 'regparam' value at line %d", FFI_G(line));
+			}
+			break;
+		case attr_aligned:
+			if (n == 0
+			 && (val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_INT64 || val->kind == ZEND_FFI_VAL_UINT64)
+			 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
+				dcl->align = val->i64;
+			} else {
+				zend_ffi_parser_error("incorrect 'alignemnt' value at line %d", FFI_G(line));
+			}
+			break;
+		case attr_mode:
+			// TODO: ???
+		case attr_unsupported:
+			zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
+			break;
+		default:
+			/* ignore */
+			break;
 	}
 }
 /* }}} */
