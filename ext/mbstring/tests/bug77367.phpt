@@ -12,10 +12,5 @@ var_dump(mb_split("\\w", "\xfc"));
 ?>
 ===DONE===
 --EXPECT--
-array(2) {
-  [0]=>
-  string(0) ""
-  [1]=>
-  string(0) ""
-}
+bool(false)
 ===DONE===

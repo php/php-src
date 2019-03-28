@@ -14,6 +14,6 @@ var_dump($var1);
 --EXPECTF--
 Notice: Undefined variable: var in %s on line %d
 
-Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %sbug72994.php on line %d
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %sbug72994.php on line %d
 bool(false)
 ===DONE===
