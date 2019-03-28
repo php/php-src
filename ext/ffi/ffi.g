@@ -158,7 +158,7 @@ type_qualifier(zend_ffi_dcl *dcl):
 		("const"|"__const"|"__const__")
 		{dcl->flags |= ZEND_FFI_DCL_CONST;}
 		{dcl->attr |= ZEND_FFI_ATTR_CONST;}
-	|	("restrict"|"__restict"|"__restrict__")
+	|	("restrict"|"__restrict"|"__restrict__")
 		{dcl->flags |= ZEND_FFI_DCL_RESTRICT;}
 	|	("volatile"|"__volatile"|"__volatile__")
 		{dcl->flags |= ZEND_FFI_DCL_VOLATILE;}
