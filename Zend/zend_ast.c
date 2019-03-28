@@ -871,8 +871,9 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  *  160     left            &
  *  170     non-associative == != === !==
  *  180     non-associative < <= > >= <=>
+ *  185     left            .
  *  190     left            << >>
- *  200     left            + - .
+ *  200     left            + -
  *  210     left            * / %
  *  220     right           !
  *  230     non-associative instanceof
@@ -1682,7 +1683,7 @@ simple_list:
 				case ZEND_MOD:                 BINARY_OP(" % ",   210, 210, 211);
 				case ZEND_SL:                  BINARY_OP(" << ",  190, 190, 191);
 				case ZEND_SR:                  BINARY_OP(" >> ",  190, 190, 191);
-				case ZEND_CONCAT:              BINARY_OP(" . ",   200, 200, 201);
+				case ZEND_CONCAT:              BINARY_OP(" . ",   185, 185, 186);
 				case ZEND_BW_OR:               BINARY_OP(" | ",   140, 140, 141);
 				case ZEND_BW_AND:              BINARY_OP(" & ",   160, 160, 161);
 				case ZEND_BW_XOR:              BINARY_OP(" ^ ",   150, 150, 151);
