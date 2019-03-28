@@ -795,6 +795,9 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 		}
 		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
 	}
+
+	child_info->prototype_ce = parent_info->prototype_ce
+		? parent_info->prototype_ce : child_info->ce;
 }
 /* }}} */
 

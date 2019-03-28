@@ -331,13 +331,6 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_never_inline int is_protected_compatible_scope(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
-{
-	return scope &&
-		(is_derived_class(ce, scope) || is_derived_class(scope, ce));
-}
-/* }}} */
-
 static zend_never_inline zend_property_info *zend_get_parent_private_property(zend_class_entry *scope, zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zval *zv;
@@ -433,7 +426,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!zend_check_protected(property_info->prototype_ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -524,7 +517,7 @@ wrong:
 				}
 			} else {
 				ZEND_ASSERT(flags & ZEND_ACC_PROTECTED);
-				if (UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+				if (UNEXPECTED(!zend_check_protected(property_info->prototype_ce, scope))) {
 					goto wrong;
 				}
 			}
@@ -1425,7 +1418,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 		}
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
-			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
+			 || UNEXPECTED(!zend_check_protected(property_info->prototype_ce, scope))) {
 				if (type != BP_VAR_IS) {
 					zend_bad_property_access(property_info, ce, property_name);
 				}

@@ -1021,7 +1021,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
-			 !zend_check_protected(prop_info->ce, scope)) ||
+			 !zend_check_protected(prop_info->prototype_ce, scope)) ||
 			((prop_info->flags & ZEND_ACC_PRIVATE) &&
 			  prop_info->ce != scope)) {
 			continue;

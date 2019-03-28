@@ -3464,6 +3464,7 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
+	zend_class_entry *prototype_ce = ce;
 
 	if (ZEND_TYPE_IS_SET(type)) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
@@ -3488,6 +3489,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	if (access_type & ZEND_ACC_STATIC) {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
+			prototype_ce = property_info_ptr->prototype_ce;
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
 			zend_hash_del(&ce->properties_info, name);
@@ -3508,6 +3510,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	} else {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
+			prototype_ce = property_info_ptr->prototype_ce;
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 			zend_hash_del(&ce->properties_info, name);
@@ -3556,6 +3559,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->ce = ce;
+	property_info->prototype_ce = prototype_ce;
 	property_info->type = type;
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);

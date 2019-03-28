@@ -570,6 +570,7 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
 		if (!IS_SERIALIZED(prop->ce)) {
 			SERIALIZE_PTR(prop->ce);
+			SERIALIZE_PTR(prop->prototype_ce);
 			SERIALIZE_STR(prop->name);
 			if (prop->doc_comment) {
 				SERIALIZE_STR(prop->doc_comment);
@@ -1263,6 +1264,7 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
 		if (!IS_UNSERIALIZED(prop->ce)) {
 			UNSERIALIZE_PTR(prop->ce);
+			UNSERIALIZE_PTR(prop->prototype_ce);
 			UNSERIALIZE_STR(prop->name);
 			if (prop->doc_comment) {
 				UNSERIALIZE_STR(prop->doc_comment);

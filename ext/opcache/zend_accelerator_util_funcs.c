@@ -233,6 +233,10 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 				prop_info->ce = ARENA_REALLOC(prop_info->ce);
 			}
 
+			if (IN_ARENA(prop_info->prototype_ce)) {
+				prop_info->prototype_ce = ARENA_REALLOC(prop_info->prototype_ce);
+			}
+
 			if (ZEND_TYPE_IS_CE(prop_info->type)) {
 				zend_class_entry *ce = ZEND_TYPE_CE(prop_info->type);
 				if (IN_ARENA(ce)) {

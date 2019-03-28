@@ -728,6 +728,10 @@ static void zend_persist_property_info(zval *zv)
 	if (ce) {
 		prop->ce = ce;
 	}
+	ce = zend_shared_alloc_get_xlat_entry(prop->prototype_ce);
+	if (ce) {
+		prop->prototype_ce = ce;
+	}
 	zend_accel_store_interned_string(prop->name);
 	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
