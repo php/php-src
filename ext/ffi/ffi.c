@@ -5772,11 +5772,39 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 		FFI_G(symbols) = pemalloc(sizeof(HashTable), FFI_G(persistent));
 		zend_hash_init(FFI_G(symbols), 0, NULL, FFI_G(persistent) ? zend_ffi_symbol_hash_persistent_dtor : zend_ffi_symbol_hash_dtor, FFI_G(persistent));
 	}
+	zend_ffi_finalize_type(dcl);
 	sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 	if (sym) {
+		if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_TYPEDEF
+		 && sym->kind == ZEND_FFI_SYM_TYPE
+		 && zend_ffi_is_same_type(ZEND_FFI_TYPE(sym->type), ZEND_FFI_TYPE(dcl->type))
+		 && sym->is_const == (zend_bool)(dcl->attr & ZEND_FFI_ATTR_CONST)) {
+			/* allowed redeclaration */
+			zend_ffi_type_dtor(dcl->type);
+			return;
+		} else if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == 0
+		 || (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN) {
+			zend_ffi_type *type = ZEND_FFI_TYPE(dcl->type);
+
+			if (type->kind == ZEND_FFI_TYPE_FUNC) {
+				if (sym->kind == ZEND_FFI_SYM_FUNC
+				 && zend_ffi_same_types(ZEND_FFI_TYPE(sym->type), type)) {
+					/* allowed redeclaration */
+					zend_ffi_type_dtor(dcl->type);
+					return;
+				}
+			} else {
+				if (sym->kind == ZEND_FFI_SYM_VAR
+				 && zend_ffi_is_same_type(ZEND_FFI_TYPE(sym->type), type)
+				 && sym->is_const == (zend_bool)(dcl->attr & ZEND_FFI_ATTR_CONST)) {
+					/* allowed redeclaration */
+					zend_ffi_type_dtor(dcl->type);
+					return;
+				}
+			}
+		}
 		zend_ffi_parser_error("redeclaration of '%.*s' at line %d", name_len, name, FFI_G(line));
 	} else {
-		zend_ffi_finalize_type(dcl);
 		if ((dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_TYPEDEF) {
 			if (zend_ffi_validate_vla(ZEND_FFI_TYPE(dcl->type)) != SUCCESS) {
 				zend_ffi_cleanup_dcl(dcl);
