@@ -1974,7 +1974,8 @@ ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 {
     ssize_t ret;
     off_t written = 0;
-    unsigned char in[BUFSIZ] = {0};
+    const size_t bufsiz = 16384;
+    unsigned char in[bufsiz] = {0};
 
     if (lseek(fdIn, *off, SEEK_SET) == -1) {
         return -1;
