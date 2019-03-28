@@ -21,7 +21,7 @@ PHP_ARG_ENABLE([phpdbg-debug],
   [no])
 
 PHP_ARG_ENABLE(phpdbg-readline, for phpdbg readline support,
-[  --enable-phpdbg-readline   Enable readline support in phpdbg (depends on static ext/readline)], yes, yes)
+[  --enable-phpdbg-readline   Enable readline support in phpdbg (depends on static ext/readline)], no, no)
 
 if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
