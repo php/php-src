@@ -85,14 +85,13 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 {
 	zval token;
 	int token_type;
-	zend_ast_loc loc;
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
 
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
-	while ((token_type = lex_scan(&token, NULL, &loc))) {
+	while ((token_type=lex_scan(&token, NULL))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				next_color = syntax_highlighter_ini->highlight_html;
@@ -175,11 +174,10 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 ZEND_API void zend_strip(void)
 {
 	zval token;
-	zend_ast_loc loc;
 	int token_type;
 	int prev_space = 0;
 
-	while ((token_type = lex_scan(&token, NULL, &loc))) {
+	while ((token_type=lex_scan(&token, NULL))) {
 		switch (token_type) {
 			case T_WHITESPACE:
 				if (!prev_space) {
@@ -195,7 +193,7 @@ ZEND_API void zend_strip(void)
 			case T_END_HEREDOC:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				/* read the following character, either newline or ; */
-				if (lex_scan(&token, NULL, &loc) != T_WHITESPACE) {
+				if (lex_scan(&token, NULL) != T_WHITESPACE) {
 					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
 				zend_write("\n", sizeof("\n") - 1);

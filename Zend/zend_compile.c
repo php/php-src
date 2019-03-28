@@ -1503,10 +1503,16 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 }
 /* }}} */
 
-int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem, zend_ast_loc *loc) /* {{{ */
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem) /* {{{ */
 {
 	zval zv;
-	return lex_scan(&zv, elem, loc);
+
+	if (CG(increment_lineno)) {
+		CG(zend_lineno)++;
+		CG(increment_lineno) = 0;
+	}
+
+	return lex_scan(&zv, elem);
 }
 /* }}} */
 
@@ -2306,9 +2312,8 @@ void zend_compile_assign(znode *result, zend_ast *ast);
 static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
 	znode dummy_node;
-	zend_ast_loc loc = zend_ast_get_loc(var_ast);
-	zend_ast *assign_ast = zend_ast_create(&loc, ZEND_AST_ASSIGN, var_ast,
-		zend_ast_create_znode(&loc, value_node));
+	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
+		zend_ast_create_znode(value_node));
 	zend_compile_assign(&dummy_node, assign_ast);
 	zend_do_free(&dummy_node);
 }
@@ -2815,9 +2820,8 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
-	zend_ast_loc loc = zend_ast_get_loc(var_ast);
-	zend_ast *assign_ast = zend_ast_create(&loc, ZEND_AST_ASSIGN_REF, var_ast,
-		zend_ast_create_znode(&loc, value_node));
+	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN_REF, var_ast,
+		zend_ast_create_znode(value_node));
 	zend_compile_assign_ref(NULL, assign_ast);
 }
 /* }}} */
@@ -3410,10 +3414,9 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		    (args->child[0]->kind != ZEND_AST_ZVAL ||
 		     Z_TYPE_P(zend_ast_get_zval(args->child[0])) != IS_STRING)) {
 			/* add "assert(condition) as assertion message */
-			zend_ast_loc loc = zend_ast_get_loc(args->child[0]);
 			zend_ast_list_add((zend_ast*)args,
 				zend_ast_create_zval_from_str(
-					&loc, zend_ast_export("assert(", args->child[0], ")")));
+					zend_ast_export("assert(", args->child[0], ")")));
 		}
 
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
@@ -4013,9 +4016,8 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 			zend_string_addref(Z_STR(name_node.u.constant));
 		}
 
-		zend_ast_loc loc = zend_ast_get_loc(var_ast);
 		zend_emit_assign_ref_znode(
-			zend_ast_create(&loc, ZEND_AST_VAR, zend_ast_create_znode(&loc, &name_node)),
+			zend_ast_create(ZEND_AST_VAR, zend_ast_create_znode(&name_node)),
 			&result
 		);
 	}
@@ -6422,9 +6424,7 @@ void zend_compile_group_use(zend_ast *ast) /* {{{ */
 		zend_string *compound_ns = zend_concat_names(ZSTR_VAL(ns), ZSTR_LEN(ns), ZSTR_VAL(name), ZSTR_LEN(name));
 		zend_string_release_ex(name, 0);
 		ZVAL_STR(name_zval, compound_ns);
-
-		zend_ast_loc loc = zend_ast_get_loc(ast);
-		inline_use = zend_ast_create_list(&loc, 1, ZEND_AST_USE, use);
+		inline_use = zend_ast_create_list(1, ZEND_AST_USE, use);
 		inline_use->attr = ast->attr ? ast->attr : use->attr;
 		zend_compile_use(inline_use);
 	}
@@ -7423,8 +7423,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	if (!zend_is_variable(var_ast)) {
 		if (ast->kind == ZEND_AST_EMPTY) {
 			/* empty(expr) can be transformed to !expr */
-			zend_ast_loc loc = zend_ast_get_loc(ast);
-			zend_ast *not_ast = zend_ast_create_ex(&loc, ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
+			zend_ast *not_ast = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, var_ast);
 			zend_compile_expr(result, not_ast);
 			return;
 		} else {
@@ -7494,10 +7493,9 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *name_ast, *args_ast, *call_ast;
 
 	ZVAL_STRING(&fn_name, "shell_exec");
-	zend_ast_loc loc = zend_ast_get_loc(ast);
-	name_ast = zend_ast_create_zval(&loc, &fn_name);
-	args_ast = zend_ast_create_list(&loc, 1, ZEND_AST_ARG_LIST, expr_ast);
-	call_ast = zend_ast_create(&loc, ZEND_AST_CALL, name_ast, args_ast);
+	name_ast = zend_ast_create_zval(&fn_name);
+	args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
+	call_ast = zend_ast_create(ZEND_AST_CALL, name_ast, args_ast);
 
 	zend_compile_expr(result, call_ast);
 
@@ -7895,8 +7893,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 	zend_ast_destroy(ast);
 	zend_string_release_ex(class_name, 0);
 
-	zend_ast_loc loc = zend_ast_get_loc(ast);
-	*ast_ptr = zend_ast_create_constant(&loc, name, fetch_type | ZEND_FETCH_CLASS_EXCEPTION);
+	*ast_ptr = zend_ast_create_constant(name, fetch_type | ZEND_FETCH_CLASS_EXCEPTION);
 }
 /* }}} */
 
@@ -7931,7 +7928,6 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 	zend_bool is_fully_qualified;
 	zval result;
 	zend_string *resolved_name;
-	zend_ast_loc loc = zend_ast_get_loc(ast);
 
 	resolved_name = zend_resolve_const_name(
 		orig_name, name_ast->attr, &is_fully_qualified);
@@ -7939,12 +7935,12 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 	if (zend_try_ct_eval_const(&result, resolved_name, is_fully_qualified)) {
 		zend_string_release_ex(resolved_name, 0);
 		zend_ast_destroy(ast);
-		*ast_ptr = zend_ast_create_zval(&loc, &result);
+		*ast_ptr = zend_ast_create_zval(&result);
 		return;
 	}
 
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create_constant(&loc, resolved_name,
+	*ast_ptr = zend_ast_create_constant(resolved_name,
 		!is_fully_qualified && FC(current_namespace) ? IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE : 0);
 }
 /* }}} */
@@ -7952,13 +7948,12 @@ void zend_compile_const_expr_const(zend_ast **ast_ptr) /* {{{ */
 void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
-	zend_ast_loc loc = zend_ast_get_loc(ast);
 
 	/* Other cases already resolved by constant folding */
 	ZEND_ASSERT(ast->attr == T_CLASS_C);
 
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create(&loc, ZEND_AST_CONSTANT_CLASS);
+	*ast_ptr = zend_ast_create(ZEND_AST_CONSTANT_CLASS);
 }
 /* }}} */
 
@@ -8604,8 +8599,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			return;
 	}
 
-	zend_ast_loc loc = zend_ast_get_loc(ast);
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create_zval(&loc, &result);
+	*ast_ptr = zend_ast_create_zval(&result);
 }
 /* }}} */

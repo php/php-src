@@ -94,6 +94,7 @@ struct _zend_compiler_globals {
 	struct _zend_ini_parser_param *ini_parser_param;
 
 	uint32_t start_lineno;
+	zend_bool increment_lineno;
 
 	zend_string *doc_comment;
 	uint32_t extra_fn_flags;
