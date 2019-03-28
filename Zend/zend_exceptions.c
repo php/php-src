@@ -371,7 +371,7 @@ ZEND_METHOD(error_exception, __construct)
 	}
 
 	ZVAL_LONG(&tmp, severity);
-	zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	zend_update_property_ex(zend_ce_error_exception, object, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
 	if (argc >= 4) {
 		ZVAL_STR_COPY(&tmp, filename);
@@ -474,7 +474,8 @@ ZEND_METHOD(error_exception, getSeverity)
 
 	DEFAULT_0_PARAMS;
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
+	prop = zend_read_property_ex(
+		zend_ce_error_exception, ZEND_THIS, ZSTR_KNOWN(ZEND_STR_SEVERITY), 0, &rv);
 	ZVAL_DEREF(prop);
 	ZVAL_COPY(return_value, prop);
 }

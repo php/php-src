@@ -1172,7 +1172,9 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
    	zend_string *key;
    	zend_long h;
    	zend_property_info *property_info;
+	zend_class_entry *old_scope = EG(fake_scope);
 
+	EG(fake_scope) = object->ce;
    	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
 			if (ZSTR_VAL(key)[0] == '\0') {
@@ -1221,6 +1223,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
+	EG(fake_scope) = old_scope;
 }
 /* }}} */
 

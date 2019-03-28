@@ -11,13 +11,14 @@ class Schema_Base {
     }
 }
 
-class Field_Base {
+abstract class Field_Base {
     public function __construct(array $params = null) {
         if (! is_array($params)) {
             $params = (array) $params;
         }
         call_user_func_array(array($this, 'acceptParams'), $params);
     }
+    abstract protected function acceptParams();
 }
 
 class Field_Integer extends Field_Base {

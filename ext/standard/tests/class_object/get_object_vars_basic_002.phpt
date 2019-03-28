@@ -53,9 +53,7 @@ array(4) {
 
 ---( Superclass: )---
 A::testA
-array(3) {
-  ["prot"]=>
-  string(7) "B::prot"
+array(2) {
   ["pub"]=>
   string(6) "B::pub"
   ["hiddenPriv"]=>

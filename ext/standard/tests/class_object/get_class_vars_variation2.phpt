@@ -119,27 +119,19 @@ array(6) {
 }
 
 -- From inside an  parent object instance --
-array(4) {
+array(2) {
   ["pub"]=>
   string(10) "public var"
-  ["prot"]=>
-  string(13) "protected var"
   ["pubs"]=>
   string(17) "public static var"
-  ["prots"]=>
-  string(20) "protected static var"
 }
 
 -- From a parents static context --
-array(4) {
+array(2) {
   ["pub"]=>
   string(10) "public var"
-  ["prot"]=>
-  string(13) "protected var"
   ["pubs"]=>
   string(17) "public static var"
-  ["prots"]=>
-  string(20) "protected static var"
 }
 
 -- From inside a child object instance --

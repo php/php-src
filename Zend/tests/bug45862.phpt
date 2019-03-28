@@ -6,7 +6,6 @@ Bug #45862 (get_class_vars is inconsistent with 'protected' and 'private' variab
 class Ancestor {
   function test() {
     var_dump(get_class_vars("Tester"));
-    var_dump(Tester::$prot);
   }
 }
 
@@ -29,11 +28,8 @@ $child->test();
 ?>
 --EXPECT--
  From parent scope
-array(1) {
-  ["prot"]=>
-  string(13) "protected var"
+array(0) {
 }
-string(13) "protected var"
 
  From child scope
 array(1) {

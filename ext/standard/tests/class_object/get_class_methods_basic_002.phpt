@@ -90,20 +90,18 @@ array(4) {
   string(9) "testFromC"
 }
 Accessing D from C:
-array(7) {
+array(6) {
   [0]=>
-  string(5) "protD"
-  [1]=>
   string(4) "pubD"
-  [2]=>
+  [1]=>
   string(9) "testFromD"
-  [3]=>
+  [2]=>
   string(5) "privC"
-  [4]=>
+  [3]=>
   string(5) "protC"
-  [5]=>
+  [4]=>
   string(4) "pubC"
-  [6]=>
+  [5]=>
   string(9) "testFromC"
 }
 Accessing X from C:

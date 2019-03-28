@@ -4,7 +4,6 @@ Bug #43483 (get_class_methods() does not list all visible methods)
 <?php
 class C {
 	public static function test() {
-		D::prot();
 		print_r(get_class_methods("D"));
 	}
 }
@@ -16,9 +15,7 @@ class D extends C {
 D::test();
 ?>
 --EXPECT--
-Successfully called D::prot().
 Array
 (
-    [0] => prot
-    [1] => test
+    [0] => test
 )

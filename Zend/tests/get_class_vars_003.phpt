@@ -33,11 +33,9 @@ new C;
 
 ?>
 --EXPECT--
-array(6) {
+array(5) {
   ["aaa"]=>
   int(7)
-  ["ccc"]=>
-  int(9)
   ["a"]=>
   int(1)
   ["aa"]=>

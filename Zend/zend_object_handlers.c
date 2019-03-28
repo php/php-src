@@ -1133,18 +1133,6 @@ static zend_never_inline zend_function *zend_get_parent_private_method(zend_clas
  */
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
 {
-	zend_class_entry *fbc_scope = ce;
-
-	/* Is the context that's calling the function, the same as one of
-	 * the function's parents?
-	 */
-	while (fbc_scope) {
-		if (fbc_scope==scope) {
-			return 1;
-		}
-		fbc_scope = fbc_scope->parent;
-	}
-
 	/* Is the function's scope the same as our current object context,
 	 * or any of the parents of our context?
 	 */
