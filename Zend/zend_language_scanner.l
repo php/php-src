@@ -567,6 +567,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	RESET_DOC_COMMENT();
+	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
 END_EXTERN_C()
@@ -719,6 +720,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 	zend_set_compiled_filename(new_compiled_filename);
 	zend_string_release_ex(new_compiled_filename, 0);
 	CG(zend_lineno) = 1;
+	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
 	return SUCCESS;
 }
@@ -1231,7 +1233,7 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto skip_token; \
 	} while (0)
 
-int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem, zend_ast_loc *loc)
+int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
 int offset;
@@ -2124,7 +2126,7 @@ inline_char_handler:
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
 	if (yytext[yyleng-1] != '>') {
-		CG(zend_lineno)++;
+		CG(increment_lineno) = 1;
 	}
 	if (PARSER_MODE()) {
 		RETURN_TOKEN(';');  /* implicit ';' at php-end tag */
@@ -2361,10 +2363,9 @@ skip_escape_conversion:
 		while (heredoc_nesting_level) {
 			zval zv;
 			int retval;
-			zend_ast_loc loc;
 
 			ZVAL_UNDEF(&zv);
-			retval = lex_scan(&zv, NULL, &loc);
+			retval = lex_scan(&zv, NULL);
 			zval_ptr_dtor_nogc(&zv);
 
 			if (EG(exception)) {
@@ -2402,6 +2403,7 @@ skip_escape_conversion:
 
 		zend_restore_lexical_state(&current_state);
 		SCNG(heredoc_scan_ahead) = 0;
+		CG(increment_lineno) = 0;
 	}
 
 	RETURN_TOKEN(T_START_HEREDOC);
@@ -2601,6 +2603,8 @@ double_quotes_scan_done:
 						newline = 1;
 					}
 
+					CG(increment_lineno) = 1; /* For newline before label */
+
 					if (SCNG(heredoc_scan_ahead)) {
 						SCNG(heredoc_indentation) = indentation;
 						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
@@ -2661,9 +2665,6 @@ heredoc_scan_done:
 		HANDLE_NEWLINES(yytext, yyleng - newline);
 	}
 
-	if (newline) {
-		CG(zend_lineno)++;
-	}
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2723,6 +2724,8 @@ heredoc_scan_done:
 						newline = 1;
 					}
 
+					CG(increment_lineno) = 1; /* For newline before label */
+
 					YYCURSOR -= indentation;
 					heredoc_label->indentation = indentation;
 
@@ -2750,9 +2753,6 @@ nowdoc_scan_done:
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);
-	if (newline) {
-		CG(zend_lineno)++;
-	}
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
@@ -2774,15 +2774,13 @@ emit_token_with_str:
 emit_token_with_val:
 	if (PARSER_MODE()) {
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
-		loc->start_line = start_line;
-		elem->ast = zend_ast_create_zval(loc, zendlval);
+		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
 	}
 
 emit_token:
 	if (SCNG(on_event)) {
 		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
 	}
-	loc->start_line = start_line;
 	return token;
 
 return_whitespace:
@@ -2794,7 +2792,6 @@ return_whitespace:
 		start_line = CG(zend_lineno);
 		goto restart;
 	} else {
-		loc->start_line = start_line;
 		return T_WHITESPACE;
 	}
 

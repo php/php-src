@@ -35,15 +35,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYERROR_VERBOSE
 #define YYSTYPE zend_parser_stack_elem
 
-#define YYLTYPE zend_ast_loc
-#define YYLLOC_DEFAULT(Res, RHS, N) do { \
-	if (N) { \
-		(Res).start_line = YYRHSLOC(RHS, 1).start_line; \
-	} else { \
-		(Res).start_line = yylloc.start_line; \
-	} \
-} while (0)
-
 #ifdef _MSC_VER
 #define YYMALLOC malloc
 #define YYFREE free
@@ -249,19 +240,19 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
-%type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt elseif_stmt
-%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list else_stmt
-%type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list
-%type <ast> implements_list case_list case if_stmt_without_else catch class_statement_list
+%type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
+%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
-%type <ast> lexical_var_list encaps_list alt_elseif_stmt alt_else_stmt
+%type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
 
-%type <num> returns_ref is_reference is_variadic variable_modifiers
+%type <num> returns_ref function is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
@@ -293,13 +284,13 @@ identifier:
 	| 	semi_reserved  {
 			zval zv;
 			zend_lex_tstring(&zv);
-			$$ = zend_ast_create_zval(&@$, &zv);
+			$$ = zend_ast_create_zval(&zv);
 		}
 ;
 
 top_statement_list:
 		top_statement_list top_statement { $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */ { $$ = zend_ast_create_list(&@$, 0, ZEND_AST_STMT_LIST); }
+	|	/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 namespace_name:
@@ -320,18 +311,18 @@ top_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_HALT_COMPILER,
-			      zend_ast_create_zval_from_long(&@$, zend_get_scanned_file_offset()));
+			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
+			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
 			  zend_stop_lexing(); }
 	|	T_NAMESPACE namespace_name ';'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_NAMESPACE, $2, NULL);
+			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, NULL);
 			  RESET_DOC_COMMENT(); }
 	|	T_NAMESPACE namespace_name { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_NAMESPACE, $2, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, $5); }
 	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_NAMESPACE, NULL, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, NULL, $4); }
 	|	T_USE mixed_group_use_declaration ';'		{ $$ = $2; }
 	|	T_USE use_type group_use_declaration ';'	{ $$ = $3; $$->attr = $2; }
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
@@ -346,16 +337,16 @@ use_type:
 
 group_use_declaration:
 		namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GROUP_USE, $1, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4); }
 	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' unprefixed_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GROUP_USE, $2, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 mixed_group_use_declaration:
 		namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GROUP_USE, $1, $4);}
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $1, $4);}
 	|	T_NS_SEPARATOR namespace_name T_NS_SEPARATOR '{' inline_use_declarations possible_comma '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GROUP_USE, $2, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_GROUP_USE, $2, $5); }
 ;
 
 possible_comma:
@@ -367,21 +358,21 @@ inline_use_declarations:
 		inline_use_declarations ',' inline_use_declaration
 			{ $$ = zend_ast_list_add($1, $3); }
 	|	inline_use_declaration
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_USE, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
 unprefixed_use_declarations:
 		unprefixed_use_declarations ',' unprefixed_use_declaration
 			{ $$ = zend_ast_list_add($1, $3); }
 	|	unprefixed_use_declaration
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_USE, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
 use_declarations:
 		use_declarations ',' use_declaration
 			{ $$ = zend_ast_list_add($1, $3); }
 	|	use_declaration
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_USE, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
 ;
 
 inline_use_declaration:
@@ -391,9 +382,9 @@ inline_use_declaration:
 
 unprefixed_use_declaration:
 		namespace_name
-			{ $$ = zend_ast_create(&@$, ZEND_AST_USE_ELEM, $1, NULL); }
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, NULL); }
 	|	namespace_name T_AS T_STRING
-			{ $$ = zend_ast_create(&@$, ZEND_AST_USE_ELEM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_USE_ELEM, $1, $3); }
 ;
 
 use_declaration:
@@ -403,14 +394,14 @@ use_declaration:
 
 const_list:
 		const_list ',' const_decl { $$ = zend_ast_list_add($1, $3); }
-	|	const_decl { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_CONST_DECL, $1); }
+	|	const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1); }
 ;
 
 inner_statement_list:
 		inner_statement_list inner_statement
 			{ $$ = zend_ast_list_add($1, $2); }
 	|	/* empty */
-			{ $$ = zend_ast_create_list(&@$, 0, ZEND_AST_STMT_LIST); }
+			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
@@ -431,51 +422,48 @@ statement:
 	|	if_stmt { $$ = $1; }
 	|	alt_if_stmt { $$ = $1; }
 	|	T_WHILE '(' expr ')' while_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_WHILE, $3, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_WHILE, $3, $5); }
 	|	T_DO statement T_WHILE '(' expr ')' ';'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DO_WHILE, $2, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_DO_WHILE, $2, $5); }
 	|	T_FOR '(' for_exprs ';' for_exprs ';' for_exprs ')' for_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_FOR, $3, $5, $7, $9); }
+			{ $$ = zend_ast_create(ZEND_AST_FOR, $3, $5, $7, $9); }
 	|	T_SWITCH '(' expr ')' switch_case_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_SWITCH, $3, $5); }
-	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(&@$, ZEND_AST_BREAK, $2); }
-	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(&@$, ZEND_AST_CONTINUE, $2); }
-	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(&@$, ZEND_AST_RETURN, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_SWITCH, $3, $5); }
+	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
+	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
+	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $2; }
-	|	T_INLINE_HTML { $$ = zend_ast_create(&@$, ZEND_AST_ECHO, $1); }
+	|	T_INLINE_HTML { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
 	|	expr ';' { $$ = $1; }
 	|	T_UNSET '(' unset_variables possible_comma ')' ';' { $$ = $3; }
 	|	T_FOREACH '(' expr T_AS foreach_variable ')' foreach_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_FOREACH, $3, $5, NULL, $7); }
+			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $5, NULL, $7); }
 	|	T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
 		foreach_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_FOREACH, $3, $7, $5, $9); }
+			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
 			{ if (!zend_handle_encoding_declaration($3)) { YYERROR; } }
 		declare_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DECLARE, $3, $6); }
+			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
 	|	T_TRY '{' inner_statement_list '}' catch_list finally_statement
-			{ $$ = zend_ast_create(&@$, ZEND_AST_TRY, $3, $5, $6); }
-	|	T_THROW expr ';' { $$ = zend_ast_create(&@$, ZEND_AST_THROW, $2); }
-	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(&@$, ZEND_AST_GOTO, $2); }
-	|	T_STRING ':' { $$ = zend_ast_create(&@$, ZEND_AST_LABEL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_TRY, $3, $5, $6); }
+	|	T_THROW expr ';' { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
+	|	T_GOTO T_STRING ';' { $$ = zend_ast_create(ZEND_AST_GOTO, $2); }
+	|	T_STRING ':' { $$ = zend_ast_create(ZEND_AST_LABEL, $1); }
 ;
 
 catch_list:
-		/* empty */ { $$ = zend_ast_create_list(&@$, 0, ZEND_AST_CATCH_LIST); }
-	|	catch_list catch { $$ = zend_ast_list_add($1, $2); }
-;
-
-catch:
-		T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_CATCH, $3, $4, $7); }
+		/* empty */
+			{ $$ = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
+	|	catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CATCH, $4, $5, $8)); }
 ;
 
 catch_name_list:
-		name { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_NAME_LIST, $1); }
+		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
 	|	catch_name_list '|' name { $$ = zend_ast_list_add($1, $3); }
 ;
 
@@ -485,18 +473,18 @@ finally_statement:
 ;
 
 unset_variables:
-		unset_variable { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_STMT_LIST, $1); }
+		unset_variable { $$ = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1); }
 	|	unset_variables ',' unset_variable { $$ = zend_ast_list_add($1, $3); }
 ;
 
 unset_variable:
-		variable { $$ = zend_ast_create(&@$, ZEND_AST_UNSET, $1); }
+		variable { $$ = zend_ast_create(ZEND_AST_UNSET, $1); }
 ;
 
 function_declaration_statement:
-	T_FUNCTION returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
+	function returns_ref T_STRING backup_doc_comment '(' parameter_list ')' return_type
 	backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-		{ $$ = zend_ast_create_decl(&@$, ZEND_AST_FUNC_DECL, $2 | $13, $4,
+		{ $$ = zend_ast_create_decl(ZEND_AST_FUNC_DECL, $2 | $13, $1, $4,
 		      zend_ast_get_str($3), $6, NULL, $11, $8); CG(extra_fn_flags) = $9; }
 ;
 
@@ -511,10 +499,12 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLASS, $1, $6, zend_ast_get_str($3), $4, $5, $8, NULL); }
-	|	T_CLASS T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLASS, 0, $5, zend_ast_get_str($2), $3, $4, $7, NULL); }
+		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
+		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL); }
+	|	T_CLASS { $<num>$ = CG(zend_lineno); }
+		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL); }
 ;
 
 class_modifiers:
@@ -529,13 +519,15 @@ class_modifier:
 ;
 
 trait_declaration_statement:
-		T_TRAIT T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLASS, ZEND_ACC_TRAIT, $3, zend_ast_get_str($2), NULL, NULL, $5, NULL); }
+		T_TRAIT { $<num>$ = CG(zend_lineno); }
+		T_STRING backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL); }
 ;
 
 interface_declaration_statement:
-		T_INTERFACE T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $4, zend_ast_get_str($2), NULL, $3, $6, NULL); }
+		T_INTERFACE { $<num>$ = CG(zend_lineno); }
+		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL); }
 ;
 
 extends_from:
@@ -555,7 +547,7 @@ implements_list:
 
 foreach_variable:
 		variable			{ $$ = $1; }
-	|	'&' variable		{ $$ = zend_ast_create(&@$, ZEND_AST_REF, $2); }
+	|	'&' variable		{ $$ = zend_ast_create(ZEND_AST_REF, $2); }
 	|	T_LIST '(' array_pair_list ')' { $$ = $3; $$->attr = ZEND_ARRAY_SYNTAX_LIST; }
 	|	'[' array_pair_list ']' { $$ = $2; $$->attr = ZEND_ARRAY_SYNTAX_SHORT; }
 ;
@@ -583,15 +575,11 @@ switch_case_list:
 ;
 
 case_list:
-		/* empty */ { $$ = zend_ast_create_list(&@$, 0, ZEND_AST_SWITCH_LIST); }
-	|	case_list case { $$ = zend_ast_list_add($1, $2); }
-;
-
-case:
-		T_CASE expr case_separator inner_statement_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_SWITCH_CASE, $2, $4); }
-	|	T_DEFAULT case_separator inner_statement_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_SWITCH_CASE, NULL, $3); }
+		/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
+	|	case_list T_CASE expr case_separator inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
+	|	case_list T_DEFAULT case_separator inner_statement_list
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
 ;
 
 case_separator:
@@ -608,66 +596,53 @@ while_statement:
 
 if_stmt_without_else:
 		T_IF '(' expr ')' statement
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_IF,
-			      zend_ast_create(&@$, ZEND_AST_IF_ELEM, $3, $5)); }
-	|	if_stmt_without_else elseif_stmt
-			{ $$ = zend_ast_list_add($1, $2); }
-;
-
-elseif_stmt:
-		T_ELSEIF '(' expr ')' statement { $$ = zend_ast_create(&@$, ZEND_AST_IF_ELEM, $3, $5); }
-;
-
-else_stmt:
-		T_ELSE statement { $$ = zend_ast_create(&@$, ZEND_AST_IF_ELEM, NULL, $2); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_IF,
+			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $5)); }
+	|	if_stmt_without_else T_ELSEIF '(' expr ')' statement
+			{ $$ = zend_ast_list_add($1,
+			      zend_ast_create(ZEND_AST_IF_ELEM, $4, $6)); }
 ;
 
 if_stmt:
 		if_stmt_without_else %prec T_NOELSE { $$ = $1; }
-	|	if_stmt_without_else else_stmt { $$ = zend_ast_list_add($1, $2); }
+	|	if_stmt_without_else T_ELSE statement
+			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_IF_ELEM, NULL, $3)); }
 ;
 
 alt_if_stmt_without_else:
 		T_IF '(' expr ')' ':' inner_statement_list
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_IF,
-			      zend_ast_create(&@$, ZEND_AST_IF_ELEM, $3, $6)); }
-	|	alt_if_stmt_without_else alt_elseif_stmt
-			{ $$ = zend_ast_list_add($1, $2); }
-;
-
-alt_elseif_stmt:
-		T_ELSEIF '(' expr ')' ':' inner_statement_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_IF_ELEM, $3, $6); }
-;
-
-alt_else_stmt:
-		T_ELSE ':' inner_statement_list T_ENDIF ';'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_IF_ELEM, NULL, $3); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_IF,
+			      zend_ast_create(ZEND_AST_IF_ELEM, $3, $6)); }
+	|	alt_if_stmt_without_else T_ELSEIF '(' expr ')' ':' inner_statement_list
+			{ $$ = zend_ast_list_add($1,
+			      zend_ast_create(ZEND_AST_IF_ELEM, $4, $7)); }
 ;
 
 alt_if_stmt:
 		alt_if_stmt_without_else T_ENDIF ';' { $$ = $1; }
-	|	alt_if_stmt_without_else alt_else_stmt { $$ = zend_ast_list_add($1, $2); }
+	|	alt_if_stmt_without_else T_ELSE ':' inner_statement_list T_ENDIF ';'
+			{ $$ = zend_ast_list_add($1,
+			      zend_ast_create(ZEND_AST_IF_ELEM, NULL, $4)); }
 ;
 
 parameter_list:
 		non_empty_parameter_list { $$ = $1; }
-	|	/* empty */	{ $$ = zend_ast_create_list(&@$, 0, ZEND_AST_PARAM_LIST); }
+	|	/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 ;
 
 
 non_empty_parameter_list:
 		parameter
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_PARAM_LIST, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, $1); }
 	|	non_empty_parameter_list ',' parameter
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 parameter:
 		optional_type is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_PARAM, $2 | $3, $1, $4, NULL); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL); }
 	|	optional_type is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
 ;
 
 
@@ -682,8 +657,8 @@ type_expr:
 ;
 
 type:
-		T_ARRAY		{ $$ = zend_ast_create_ex(&@$, ZEND_AST_TYPE, IS_ARRAY); }
-	|	T_CALLABLE	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_TYPE, IS_CALLABLE); }
+		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
 ;
 
@@ -693,41 +668,41 @@ return_type:
 ;
 
 argument_list:
-		'(' ')'	{ $$ = zend_ast_create_list(&@$, 0, ZEND_AST_ARG_LIST); }
+		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
 ;
 
 non_empty_argument_list:
 		argument
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_ARG_LIST, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
 	|	non_empty_argument_list ',' argument
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 argument:
 		expr			{ $$ = $1; }
-	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(&@$, ZEND_AST_UNPACK, $2); }
+	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
 global_var_list:
 		global_var_list ',' global_var { $$ = zend_ast_list_add($1, $3); }
-	|	global_var { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_STMT_LIST, $1); }
+	|	global_var { $$ = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1); }
 ;
 
 global_var:
 	simple_variable
-		{ $$ = zend_ast_create(&@$, ZEND_AST_GLOBAL, zend_ast_create(&@$, ZEND_AST_VAR, $1)); }
+		{ $$ = zend_ast_create(ZEND_AST_GLOBAL, zend_ast_create(ZEND_AST_VAR, $1)); }
 ;
 
 
 static_var_list:
 		static_var_list ',' static_var { $$ = zend_ast_list_add($1, $3); }
-	|	static_var { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_STMT_LIST, $1); }
+	|	static_var { $$ = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1); }
 ;
 
 static_var:
-		T_VARIABLE			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC, $1, NULL); }
-	|	T_VARIABLE '=' expr	{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC, $1, $3); }
+		T_VARIABLE			{ $$ = zend_ast_create(ZEND_AST_STATIC, $1, NULL); }
+	|	T_VARIABLE '=' expr	{ $$ = zend_ast_create(ZEND_AST_STATIC, $1, $3); }
 ;
 
 
@@ -735,26 +710,26 @@ class_statement_list:
 		class_statement_list class_statement
 			{ $$ = zend_ast_list_add($1, $2); }
 	|	/* empty */
-			{ $$ = zend_ast_create_list(&@$, 0, ZEND_AST_STMT_LIST); }
+			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 
 class_statement:
 		variable_modifiers optional_type property_list ';'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP_GROUP, $2, $3);
+			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3);
 			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'
 			{ $$ = $3; $$->attr = $1; }
 	|	T_USE name_list trait_adaptations
-			{ $$ = zend_ast_create(&@$, ZEND_AST_USE_TRAIT, $2, $3); }
-	|	method_modifiers T_FUNCTION returns_ref identifier backup_doc_comment '(' parameter_list ')'
+			{ $$ = zend_ast_create(ZEND_AST_USE_TRAIT, $2, $3); }
+	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 		return_type backup_fn_flags method_body backup_fn_flags
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_METHOD, $3 | $1 | $12, $5,
+			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9); CG(extra_fn_flags) = $10; }
 ;
 
 name_list:
-		name { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_NAME_LIST, $1); }
+		name { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
 	|	name_list ',' name { $$ = zend_ast_list_add($1, $3); }
 ;
 
@@ -766,7 +741,7 @@ trait_adaptations:
 
 trait_adaptation_list:
 		trait_adaptation
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_TRAIT_ADAPTATIONS, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_TRAIT_ADAPTATIONS, $1); }
 	|	trait_adaptation_list trait_adaptation
 			{ $$ = zend_ast_list_add($1, $2); }
 ;
@@ -778,29 +753,29 @@ trait_adaptation:
 
 trait_precedence:
 	absolute_trait_method_reference T_INSTEADOF name_list
-		{ $$ = zend_ast_create(&@$, ZEND_AST_TRAIT_PRECEDENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_TRAIT_PRECEDENCE, $1, $3); }
 ;
 
 trait_alias:
 		trait_method_reference T_AS T_STRING
-			{ $$ = zend_ast_create(&@$, ZEND_AST_TRAIT_ALIAS, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, $3); }
 	|	trait_method_reference T_AS reserved_non_modifiers
-			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create(&@$, ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&@3, &zv)); }
+			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&zv)); }
 	|	trait_method_reference T_AS member_modifier identifier
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }
 	|	trait_method_reference T_AS member_modifier
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_TRAIT_ALIAS, $3, $1, NULL); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, NULL); }
 ;
 
 trait_method_reference:
 		identifier
-			{ $$ = zend_ast_create(&@$, ZEND_AST_METHOD_REFERENCE, NULL, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, NULL, $1); }
 	|	absolute_trait_method_reference { $$ = $1; }
 ;
 
 absolute_trait_method_reference:
 	name T_PAAMAYIM_NEKUDOTAYIM identifier
-		{ $$ = zend_ast_create(&@$, ZEND_AST_METHOD_REFERENCE, $1, $3); }
+		{ $$ = zend_ast_create(ZEND_AST_METHOD_REFERENCE, $1, $3); }
 ;
 
 method_body:
@@ -836,35 +811,35 @@ member_modifier:
 
 property_list:
 		property_list ',' property { $$ = zend_ast_list_add($1, $3); }
-	|	property { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_PROP_DECL, $1); }
+	|	property { $$ = zend_ast_create_list(1, ZEND_AST_PROP_DECL, $1); }
 ;
 
 property:
 		T_VARIABLE backup_doc_comment
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str(&@2, $2) : NULL)); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, NULL, ($2 ? zend_ast_create_zval_from_str($2) : NULL)); }
 	|	T_VARIABLE '=' expr backup_doc_comment
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str(&@4, $4) : NULL)); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 class_const_list:
 		class_const_list ',' class_const_decl { $$ = zend_ast_list_add($1, $3); }
-	|	class_const_decl { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_CLASS_CONST_DECL, $1); }
+	|	class_const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CLASS_CONST_DECL, $1); }
 ;
 
 class_const_decl:
-	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(&@$, ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str(&@4, $4) : NULL)); }
+	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 const_decl:
-	T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(&@$, ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str(&@4, $4) : NULL)); }
+	T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
 ;
 
 echo_expr_list:
 		echo_expr_list ',' echo_expr { $$ = zend_ast_list_add($1, $3); }
-	|	echo_expr { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_STMT_LIST, $1); }
+	|	echo_expr { $$ = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1); }
 ;
 echo_expr:
-	expr { $$ = zend_ast_create(&@$, ZEND_AST_ECHO, $1); }
+	expr { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
 ;
 
 for_exprs:
@@ -874,21 +849,22 @@ for_exprs:
 
 non_empty_for_exprs:
 		non_empty_for_exprs ',' expr { $$ = zend_ast_list_add($1, $3); }
-	|	expr { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_EXPR_LIST, $1); }
+	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
 ;
 
 anonymous_class:
-        T_CLASS ctor_arguments extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
+        T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
+		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
 			zend_ast *decl = zend_ast_create_decl(
-				&@$, ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, $5, NULL,
-				$3, $4, $7, NULL);
-			$$ = zend_ast_create(&@$, ZEND_AST_NEW, decl, $2);
+				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS, $<num>2, $6, NULL,
+				$4, $5, $8, NULL);
+			$$ = zend_ast_create(ZEND_AST_NEW, decl, $3);
 		}
 ;
 
 new_expr:
 		T_NEW class_name_reference ctor_arguments
-			{ $$ = zend_ast_create(&@$, ZEND_AST_NEW, $2, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }
 	|	T_NEW anonymous_class
 			{ $$ = $2; }
 ;
@@ -897,125 +873,129 @@ expr:
 		variable
 			{ $$ = $1; }
 	|	T_LIST '(' array_pair_list ')' '=' expr
-			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(&@$, ZEND_AST_ASSIGN, $3, $6); }
+			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
-			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(&@$, ZEND_AST_ASSIGN, $2, $5); }
+			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
 	|	variable '=' expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_ASSIGN, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' '&' variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	T_CLONE expr { $$ = zend_ast_create(&@$, ZEND_AST_CLONE, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
+	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
 	|	variable T_PLUS_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_ADD, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_ADD, $1, $3); }
 	|	variable T_MINUS_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_SUB, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SUB, $1, $3); }
 	|	variable T_MUL_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_MUL, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_MUL, $1, $3); }
 	|	variable T_POW_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_POW, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_POW, $1, $3); }
 	|	variable T_DIV_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_DIV, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_DIV, $1, $3); }
 	|	variable T_CONCAT_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_CONCAT, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_CONCAT, $1, $3); }
 	|	variable T_MOD_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_MOD, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_MOD, $1, $3); }
 	|	variable T_AND_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_BW_AND, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_AND, $1, $3); }
 	|	variable T_OR_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_BW_OR, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_OR, $1, $3); }
 	|	variable T_XOR_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_BW_XOR, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_XOR, $1, $3); }
 	|	variable T_SL_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_SL, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SL, $1, $3); }
 	|	variable T_SR_EQUAL expr
-			{ $$ = zend_ast_create_assign_op(&@$, ZEND_ASSIGN_SR, $1, $3); }
+			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SR, $1, $3); }
 	|	variable T_COALESCE_EQUAL expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_ASSIGN_COALESCE, $1, $3); }
-	|	variable T_INC { $$ = zend_ast_create(&@$, ZEND_AST_POST_INC, $1); }
-	|	T_INC variable { $$ = zend_ast_create(&@$, ZEND_AST_PRE_INC, $2); }
-	|	variable T_DEC { $$ = zend_ast_create(&@$, ZEND_AST_POST_DEC, $1); }
-	|	T_DEC variable { $$ = zend_ast_create(&@$, ZEND_AST_PRE_DEC, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_COALESCE, $1, $3); }
+	|	variable T_INC { $$ = zend_ast_create(ZEND_AST_POST_INC, $1); }
+	|	T_INC variable { $$ = zend_ast_create(ZEND_AST_PRE_INC, $2); }
+	|	variable T_DEC { $$ = zend_ast_create(ZEND_AST_POST_DEC, $1); }
+	|	T_DEC variable { $$ = zend_ast_create(ZEND_AST_PRE_DEC, $2); }
 	|	expr T_BOOLEAN_OR expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_OR, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_OR, $1, $3); }
 	|	expr T_BOOLEAN_AND expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_AND, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_AND, $1, $3); }
 	|	expr T_LOGICAL_OR expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_OR, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_OR, $1, $3); }
 	|	expr T_LOGICAL_AND expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_AND, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_AND, $1, $3); }
 	|	expr T_LOGICAL_XOR expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_BOOL_XOR, $1, $3); }
-	|	expr '|' expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_BW_OR, $1, $3); }
-	|	expr '&' expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_BW_AND, $1, $3); }
-	|	expr '^' expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_BW_XOR, $1, $3); }
-	|	expr '.' expr 	{ $$ = zend_ast_create_binary_op(&@$, ZEND_CONCAT, $1, $3); }
-	|	expr '+' expr 	{ $$ = zend_ast_create_binary_op(&@$, ZEND_ADD, $1, $3); }
-	|	expr '-' expr 	{ $$ = zend_ast_create_binary_op(&@$, ZEND_SUB, $1, $3); }
-	|	expr '*' expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_MUL, $1, $3); }
-	|	expr T_POW expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_POW, $1, $3); }
-	|	expr '/' expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_DIV, $1, $3); }
-	|	expr '%' expr 	{ $$ = zend_ast_create_binary_op(&@$, ZEND_MOD, $1, $3); }
-	| 	expr T_SL expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_SL, $1, $3); }
-	|	expr T_SR expr	{ $$ = zend_ast_create_binary_op(&@$, ZEND_SR, $1, $3); }
-	|	'+' expr %prec T_INC { $$ = zend_ast_create(&@$, ZEND_AST_UNARY_PLUS, $2); }
-	|	'-' expr %prec T_INC { $$ = zend_ast_create(&@$, ZEND_AST_UNARY_MINUS, $2); }
-	|	'!' expr { $$ = zend_ast_create_ex(&@$, ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, $2); }
-	|	'~' expr { $$ = zend_ast_create_ex(&@$, ZEND_AST_UNARY_OP, ZEND_BW_NOT, $2); }
+			{ $$ = zend_ast_create_binary_op(ZEND_BOOL_XOR, $1, $3); }
+	|	expr '|' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_OR, $1, $3); }
+	|	expr '&' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
+	|	expr '^' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_XOR, $1, $3); }
+	|	expr '.' expr 	{ $$ = zend_ast_create_binary_op(ZEND_CONCAT, $1, $3); }
+	|	expr '+' expr 	{ $$ = zend_ast_create_binary_op(ZEND_ADD, $1, $3); }
+	|	expr '-' expr 	{ $$ = zend_ast_create_binary_op(ZEND_SUB, $1, $3); }
+	|	expr '*' expr	{ $$ = zend_ast_create_binary_op(ZEND_MUL, $1, $3); }
+	|	expr T_POW expr	{ $$ = zend_ast_create_binary_op(ZEND_POW, $1, $3); }
+	|	expr '/' expr	{ $$ = zend_ast_create_binary_op(ZEND_DIV, $1, $3); }
+	|	expr '%' expr 	{ $$ = zend_ast_create_binary_op(ZEND_MOD, $1, $3); }
+	| 	expr T_SL expr	{ $$ = zend_ast_create_binary_op(ZEND_SL, $1, $3); }
+	|	expr T_SR expr	{ $$ = zend_ast_create_binary_op(ZEND_SR, $1, $3); }
+	|	'+' expr %prec T_INC { $$ = zend_ast_create(ZEND_AST_UNARY_PLUS, $2); }
+	|	'-' expr %prec T_INC { $$ = zend_ast_create(ZEND_AST_UNARY_MINUS, $2); }
+	|	'!' expr { $$ = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, $2); }
+	|	'~' expr { $$ = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BW_NOT, $2); }
 	|	expr T_IS_IDENTICAL expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_IDENTICAL, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_IDENTICAL, $1, $3); }
 	|	expr T_IS_NOT_IDENTICAL expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_NOT_IDENTICAL, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_IDENTICAL, $1, $3); }
 	|	expr T_IS_EQUAL expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_EQUAL, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_EQUAL, $1, $3); }
 	|	expr T_IS_NOT_EQUAL expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_NOT_EQUAL, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
 	|	expr '<' expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_SMALLER, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_IS_SMALLER_OR_EQUAL, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER_OR_EQUAL, $1, $3); }
 	|	expr '>' expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GREATER, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_GREATER, $1, $3); }
 	|	expr T_IS_GREATER_OR_EQUAL expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_GREATER_EQUAL, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_GREATER_EQUAL, $1, $3); }
 	|	expr T_SPACESHIP expr
-			{ $$ = zend_ast_create_binary_op(&@$, ZEND_SPACESHIP, $1, $3); }
+			{ $$ = zend_ast_create_binary_op(ZEND_SPACESHIP, $1, $3); }
 	|	expr T_INSTANCEOF class_name_reference
-			{ $$ = zend_ast_create(&@$, ZEND_AST_INSTANCEOF, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1, $3); }
 	|	'(' expr ')' { $$ = $2; }
 	|	new_expr { $$ = $1; }
 	|	expr '?' expr ':' expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_CONDITIONAL, $1, $3, $5); }
+			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
 	|	expr '?' ':' expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_CONDITIONAL, $1, NULL, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
 	|	expr T_COALESCE expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_COALESCE, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
-	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(&@$, IS_LONG, $2); }
-	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(&@$, IS_DOUBLE, $2); }
-	|	T_STRING_CAST expr	{ $$ = zend_ast_create_cast(&@$, IS_STRING, $2); }
-	|	T_ARRAY_CAST expr	{ $$ = zend_ast_create_cast(&@$, IS_ARRAY, $2); }
-	|	T_OBJECT_CAST expr	{ $$ = zend_ast_create_cast(&@$, IS_OBJECT, $2); }
-	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(&@$, _IS_BOOL, $2); }
-	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(&@$, IS_NULL, $2); }
-	|	T_EXIT exit_expr	{ $$ = zend_ast_create(&@$, ZEND_AST_EXIT, $2); }
-	|	'@' expr			{ $$ = zend_ast_create(&@$, ZEND_AST_SILENCE, $2); }
+	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
+	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(IS_DOUBLE, $2); }
+	|	T_STRING_CAST expr	{ $$ = zend_ast_create_cast(IS_STRING, $2); }
+	|	T_ARRAY_CAST expr	{ $$ = zend_ast_create_cast(IS_ARRAY, $2); }
+	|	T_OBJECT_CAST expr	{ $$ = zend_ast_create_cast(IS_OBJECT, $2); }
+	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(_IS_BOOL, $2); }
+	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $2); }
+	|	T_EXIT exit_expr	{ $$ = zend_ast_create(ZEND_AST_EXIT, $2); }
+	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
-	|	'`' backticks_expr '`' { $$ = zend_ast_create(&@$, ZEND_AST_SHELL_EXEC, $2); }
-	|	T_PRINT expr { $$ = zend_ast_create(&@$, ZEND_AST_PRINT, $2); }
-	|	T_YIELD { $$ = zend_ast_create(&@$, ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD expr { $$ = zend_ast_create(&@$, ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(&@$, ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD_FROM expr { $$ = zend_ast_create(&@$, ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_FUNCTION returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
+	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
+	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLOSURE, $2 | $13, $3,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
-	|	T_STATIC T_FUNCTION returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
+	|	T_STATIC function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
 		return_type backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(&@$, ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, $4,
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, $2, $4,
 			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 			      $6, $8, $12, $9); CG(extra_fn_flags) = $10; }
+;
+
+function:
+	T_FUNCTION { $$ = CG(zend_lineno); }
 ;
 
 backup_doc_comment:
@@ -1038,7 +1018,7 @@ lexical_vars:
 
 lexical_var_list:
 		lexical_var_list ',' lexical_var { $$ = zend_ast_list_add($1, $3); }
-	|	lexical_var { $$ = zend_ast_create_list(&@$, 1, ZEND_AST_CLOSURE_USES, $1); }
+	|	lexical_var { $$ = zend_ast_create_list(1, ZEND_AST_CLOSURE_USES, $1); }
 ;
 
 lexical_var:
@@ -1048,19 +1028,19 @@ lexical_var:
 
 function_call:
 		name argument_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_CALL, $1, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_CALL, $1, $2); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_CALL, $1, $3, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_CALL, $1, $3, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	callable_expr argument_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_CALL, $1, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_CALL, $1, $2); }
 ;
 
 class_name:
 		T_STATIC
 			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
-			  $$ = zend_ast_create_zval_ex(&@$, &zv, ZEND_NAME_NOT_FQ); }
+			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
 ;
 
@@ -1076,14 +1056,14 @@ exit_expr:
 
 backticks_expr:
 		/* empty */
-			{ $$ = zend_ast_create_zval_from_str(&@$, ZSTR_EMPTY_ALLOC()); }
+			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$ = $1; }
 	|	encaps_list { $$ = $1; }
 ;
 
 
 ctor_arguments:
-		/* empty */	{ $$ = zend_ast_create_list(&@$, 0, ZEND_AST_ARG_LIST); }
+		/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	argument_list { $$ = $1; }
 ;
 
@@ -1097,17 +1077,17 @@ dereferencable_scalar:
 scalar:
 		T_LNUMBER 	{ $$ = $1; }
 	|	T_DNUMBER 	{ $$ = $1; }
-	|	T_LINE 		{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_LINE); }
-	|	T_FILE 		{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_FILE); }
-	|	T_DIR   	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_DIR); }
-	|	T_TRAIT_C	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
-	|	T_METHOD_C	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_METHOD_C); }
-	|	T_FUNC_C	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_FUNC_C); }
-	|	T_NS_C		{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_NS_C); }
-	|	T_CLASS_C	{ $$ = zend_ast_create_ex(&@$, ZEND_AST_MAGIC_CONST, T_CLASS_C); }
+	|	T_LINE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_LINE); }
+	|	T_FILE 		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FILE); }
+	|	T_DIR   	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_DIR); }
+	|	T_TRAIT_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_TRAIT_C); }
+	|	T_METHOD_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_METHOD_C); }
+	|	T_FUNC_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_FUNC_C); }
+	|	T_NS_C		{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_NS_C); }
+	|	T_CLASS_C	{ $$ = zend_ast_create_ex(ZEND_AST_MAGIC_CONST, T_CLASS_C); }
 	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
 	|	T_START_HEREDOC T_END_HEREDOC
-			{ $$ = zend_ast_create_zval_from_str(&@$, ZSTR_EMPTY_ALLOC()); }
+			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }
@@ -1115,11 +1095,11 @@ scalar:
 ;
 
 constant:
-		name { $$ = zend_ast_create(&@$, ZEND_AST_CONST, $1); }
+		name { $$ = zend_ast_create(ZEND_AST_CONST, $1); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-			{ $$ = zend_ast_create_class_const_or_name(&@$, $1, $3); }
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
-			{ $$ = zend_ast_create_class_const_or_name(&@$, $1, $3); }
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 ;
 
 optional_expr:
@@ -1145,15 +1125,15 @@ callable_expr:
 
 callable_variable:
 		simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 	|	dereferencable '[' optional_expr ']'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	constant '[' optional_expr ']'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	dereferencable '{' expr '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	dereferencable T_OBJECT_OPERATOR property_name argument_list
-			{ $$ = zend_ast_create(&@$, ZEND_AST_METHOD_CALL, $1, $3, $4); }
+			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
 ;
 
@@ -1163,47 +1143,47 @@ variable:
 	|	static_member
 			{ $$ = $1; }
 	|	dereferencable T_OBJECT_OPERATOR property_name
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 ;
 
 simple_variable:
 		T_VARIABLE			{ $$ = $1; }
 	|	'$' '{' expr '}'	{ $$ = $3; }
-	|	'$' simple_variable	{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $2); }
+	|	'$' simple_variable	{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
 ;
 
 static_member:
 		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 
 new_variable:
 		simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 	|	new_variable '[' optional_expr ']'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	new_variable '{' expr '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	new_variable T_OBJECT_OPERATOR property_name
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	new_variable T_PAAMAYIM_NEKUDOTAYIM simple_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_STATIC_PROP, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 
 member_name:
 		identifier { $$ = $1; }
 	|	'{' expr '}'	{ $$ = $2; }
-	|	simple_variable	{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+	|	simple_variable	{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 ;
 
 property_name:
 		T_STRING { $$ = $1; }
 	|	'{' expr '}'	{ $$ = $2; }
-	|	simple_variable	{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+	|	simple_variable	{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 ;
 
 array_pair_list:
@@ -1220,24 +1200,24 @@ non_empty_array_pair_list:
 		non_empty_array_pair_list ',' possible_array_pair
 			{ $$ = zend_ast_list_add($1, $3); }
 	|	possible_array_pair
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_ARRAY, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ARRAY, $1); }
 ;
 
 array_pair:
 		expr T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_ARRAY_ELEM, $3, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
 	|	expr
-			{ $$ = zend_ast_create(&@$, ZEND_AST_ARRAY_ELEM, $1, NULL); }
+			{ $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
 	|	expr T_DOUBLE_ARROW '&' variable
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_ARRAY_ELEM, 1, $4, $1); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $4, $1); }
 	|	'&' variable
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
 	|	expr T_DOUBLE_ARROW T_LIST '(' array_pair_list ')'
 			{ $5->attr = ZEND_ARRAY_SYNTAX_LIST;
-			  $$ = zend_ast_create(&@$, ZEND_AST_ARRAY_ELEM, $5, $1); }
+			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
 	|	T_LIST '(' array_pair_list ')'
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST;
-			  $$ = zend_ast_create(&@$, ZEND_AST_ARRAY_ELEM, $3, NULL); }
+			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, NULL); }
 ;
 
 encaps_list:
@@ -1246,27 +1226,27 @@ encaps_list:
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE
 			{ $$ = zend_ast_list_add($1, $2); }
 	|	encaps_var
-			{ $$ = zend_ast_create_list(&@$, 1, ZEND_AST_ENCAPS_LIST, $1); }
+			{ $$ = zend_ast_create_list(1, ZEND_AST_ENCAPS_LIST, $1); }
 	|	T_ENCAPSED_AND_WHITESPACE encaps_var
-			{ $$ = zend_ast_create_list(&@$, 2, ZEND_AST_ENCAPS_LIST, $1, $2); }
+			{ $$ = zend_ast_create_list(2, ZEND_AST_ENCAPS_LIST, $1, $2); }
 ;
 
 encaps_var:
 		T_VARIABLE
-			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 	|	T_VARIABLE '[' encaps_var_offset ']'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM,
-			      zend_ast_create(&@1, ZEND_AST_VAR, $1), $3); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM,
+			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
 	|	T_VARIABLE T_OBJECT_OPERATOR T_STRING
-			{ $$ = zend_ast_create(&@$, ZEND_AST_PROP,
-			      zend_ast_create(&@1, ZEND_AST_VAR, $1), $3); }
+			{ $$ = zend_ast_create(ZEND_AST_PROP,
+			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES expr '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
-			{ $$ = zend_ast_create(&@$, ZEND_AST_DIM,
-			      zend_ast_create(&@2, ZEND_AST_VAR, $2), $4); }
+			{ $$ = zend_ast_create(ZEND_AST_DIM,
+			      zend_ast_create(ZEND_AST_VAR, $2), $4); }
 	|	T_CURLY_OPEN variable '}' { $$ = $2; }
 ;
 
@@ -1274,33 +1254,33 @@ encaps_var_offset:
 		T_STRING			{ $$ = $1; }
 	|	T_NUM_STRING		{ $$ = $1; }
 	|	'-' T_NUM_STRING 	{ $$ = zend_negate_num_string($2); }
-	|	T_VARIABLE			{ $$ = zend_ast_create(&@$, ZEND_AST_VAR, $1); }
+	|	T_VARIABLE			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
 ;
 
 
 internal_functions_in_yacc:
 		T_ISSET '(' isset_variables possible_comma ')' { $$ = $3; }
-	|	T_EMPTY '(' expr ')' { $$ = zend_ast_create(&@$, ZEND_AST_EMPTY, $3); }
+	|	T_EMPTY '(' expr ')' { $$ = zend_ast_create(ZEND_AST_EMPTY, $3); }
 	|	T_INCLUDE expr
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE, $2); }
 	|	T_INCLUDE_ONCE expr
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE_ONCE, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_INCLUDE_OR_EVAL, ZEND_INCLUDE_ONCE, $2); }
 	|	T_EVAL '(' expr ')'
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_INCLUDE_OR_EVAL, ZEND_EVAL, $3); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_INCLUDE_OR_EVAL, ZEND_EVAL, $3); }
 	|	T_REQUIRE expr
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE, $2); }
 	|	T_REQUIRE_ONCE expr
-			{ $$ = zend_ast_create_ex(&@$, ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE_ONCE, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_INCLUDE_OR_EVAL, ZEND_REQUIRE_ONCE, $2); }
 ;
 
 isset_variables:
 		isset_variable { $$ = $1; }
 	|	isset_variables ',' isset_variable
-			{ $$ = zend_ast_create(&@$, ZEND_AST_AND, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_AND, $1, $3); }
 ;
 
 isset_variable:
-		expr { $$ = zend_ast_create(&@$, ZEND_AST_ISSET, $1); }
+		expr { $$ = zend_ast_create(ZEND_AST_ISSET, $1); }
 ;
 
 %%
