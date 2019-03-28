@@ -36,14 +36,14 @@ install-programs: $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	@for prog in $(bin_SCRIPTS); do \
-		echo "  program: $(program_prefix)$${prog}$(program_suffix)"; \
-		$(INSTALL) -m 755 $(builddir)/$${prog} $(INSTALL_ROOT)$(bindir)/$(program_prefix)$${prog}$(program_suffix); \
+		echo "  program: "`echo $${prog} | sed '$(program_transform_name)'`; \
+		$(INSTALL) -m 755 $(builddir)/$${prog} $(INSTALL_ROOT)$(bindir)/`echo $${prog} | sed '$(program_transform_name)'`; \
 	done
 	@echo "Installing man pages:             $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
 	@for page in $(man_PAGES); do \
-		echo "  page: $(program_prefix)$${page}$(program_suffix).1"; \
-		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)$${page}$(program_suffix).1; \
+		echo "  page: "`echo $${page} | sed '$(program_transform_name)'`".1"; \
+		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/`echo $${page} | sed '$(program_transform_name)'`.1; \
 	done
 
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status

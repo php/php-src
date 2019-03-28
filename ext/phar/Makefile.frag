@@ -23,7 +23,7 @@ PHP_PHARCMD_EXECUTABLE = ` \
 	else \
 		$(top_srcdir)/build/shtool echo -n -- "$(PHP_EXECUTABLE)"; \
 	fi;`
-PHP_PHARCMD_BANG = `$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)";`
+PHP_PHARCMD_BANG = `$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/\`echo php | $(SED) '$(program_transform_name)'\`$(EXEEXT)";`
 
 $(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
 	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
@@ -42,9 +42,11 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/
 
 install-pharcmd: pharcmd
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
-	$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)
+	@echo "Installing phar binary:           $(INSTALL_ROOT)$(bindir)/"
+	@$(INSTALL) $(builddir)/phar.phar $(INSTALL_ROOT)$(bindir)/`echo phar | $(SED) '$(program_transform_name)'`.phar
 	-@rm -f $(INSTALL_ROOT)$(bindir)/phar
-	$(LN_S) -f phar.phar $(INSTALL_ROOT)$(bindir)/phar
+	@$(LN_S) -f `echo phar | $(SED) '$(program_transform_name)'`.phar $(INSTALL_ROOT)$(bindir)/`echo phar | $(SED) '$(program_transform_name)'`
+	@echo "Installing phar man page:         $(INSTALL_ROOT)$(mandir)/man1/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man1
-	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.1
-	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/phar.phar.1
+	@$(INSTALL_DATA) $(builddir)/phar.1 $(INSTALL_ROOT)$(mandir)/man1/`echo phar | $(SED) '$(program_transform_name)'`.1
+	@$(INSTALL_DATA) $(builddir)/phar.phar.1 $(INSTALL_ROOT)$(mandir)/man1/`echo phar | $(SED) '$(program_transform_name)'`.phar.1
