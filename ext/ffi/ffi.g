@@ -69,6 +69,7 @@ static void yy_error_sym(const char *msg, int sym);
 declarations:
 	(
 		{zend_ffi_dcl common_dcl = ZEND_FFI_ATTR_INIT;}
+		"__extension__"?
 		declaration_specifiers(&common_dcl)
 		(
 			{const char *name;}
@@ -76,6 +77,14 @@ declarations:
 			{zend_ffi_dcl dcl;}
 			{dcl = common_dcl;}
 			declarator(&dcl, &name, &name_len)
+			(
+				{zend_ffi_val asm_str;}
+				"__asm__"
+				"("
+				STRING(&asm_str)+
+				/*TODO*/
+				")"
+			)?
 			attributes(&dcl)?
 			initializer?
 			{zend_ffi_declare(name, name_len, &dcl);}
@@ -140,6 +149,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 ;
 
 specifier_qualifier_list(zend_ffi_dcl *dcl):
+	"__extension__"?
 	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
 		(	type_specifier(dcl)
 		|	type_qualifier(dcl)
@@ -498,6 +508,9 @@ attrib(zend_ffi_dcl *dcl):
 			)*
 			")"
 		)
+	|	"const"
+	|	"__const"
+	|	"__const__"
 	)?
 ;
 
