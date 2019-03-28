@@ -1,6 +1,6 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi
@@ -71,7 +71,6 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
 --with-kerberos \
 --enable-sysvmsg \
 --enable-zend-test \

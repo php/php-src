@@ -44,17 +44,8 @@ typedef uintptr_t tsrm_uintptr_t;
 # ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
 #  define WIN32_LEAN_AND_MEAN
 # endif
-# include <windows.h>
-# include <shellapi.h>
-#elif defined(GNUPTH)
-# include <pth.h>
-#elif defined(PTHREADS)
+#else
 # include <pthread.h>
-#elif defined(TSRM_ST)
-# include <st.h>
-#elif defined(BETHREADS)
-#include <kernel/OS.h>
-#include <TLS.h>
 #endif
 
 #if SIZEOF_SIZE_T == 4
@@ -71,15 +62,9 @@ typedef int ts_rsrc_id;
 #ifdef TSRM_WIN32
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
-#elif defined(GNUPTH)
-# define THREAD_T pth_t
-# define MUTEX_T pth_mutex_t *
-#elif defined(PTHREADS)
+#else
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *
-#elif defined(TSRM_ST)
-# define THREAD_T st_thread_t
-# define MUTEX_T st_mutex_t
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -147,12 +132,6 @@ TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_th
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
 TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 
-/* these 3 APIs should only be used by people that fully understand the threading model
- * used by PHP/Zend and the selected SAPI. */
-TSRM_API void *tsrm_new_interpreter_context(void);
-TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
-TSRM_API void tsrm_free_interpreter_context(void *context);
-
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
@@ -171,8 +150,6 @@ TSRM_API const char *tsrm_api_name(void);
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
-#define TSRMLS_FETCH_FROM_CTX(ctx)	void ***tsrm_ls = (void ***) ctx
-#define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
 #define TSRMG(id, type, element)	(TSRMG_BULK(id, type)->element)
 #define TSRMG_BULK(id, type)	((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST(offset, type, element)	(TSRMG_FAST_BULK(offset, type)->element)
@@ -193,22 +170,11 @@ TSRM_API const char *tsrm_api_name(void);
 #endif
 #define TSRMLS_CACHE _tsrm_ls_cache
 
-/* BC only */
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-#define TSRMLS_FETCH()
-
 #ifdef __cplusplus
 }
 #endif
 
 #else /* non ZTS */
-
-#define TSRMLS_FETCH()
-#define TSRMLS_FETCH_FROM_CTX(ctx)
-#define TSRMLS_SET_CTX(ctx)
 
 #define TSRMG_STATIC(id, type, element)
 #define TSRMLS_CACHE_EXTERN()
@@ -217,12 +183,6 @@ TSRM_API const char *tsrm_api_name(void);
 #define TSRMLS_CACHE
 
 #define TSRM_TLS
-
-/* BC only */
-#define TSRMLS_D	void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
 
 #endif /* ZTS */
 

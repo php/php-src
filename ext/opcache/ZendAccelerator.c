@@ -2265,6 +2265,10 @@ static void accel_reset_pcre_cache(void)
 {
 	Bucket *p;
 
+	if (PCRE_G(per_request_cache)) {
+		return;
+	}
+
 	ZEND_HASH_FOREACH_BUCKET(&PCRE_G(pcre_cache), p) {
 		/* Remove PCRE cache entries with inconsistent keys */
 		if (zend_accel_in_shm(p->key)) {
@@ -3561,17 +3565,27 @@ static void preload_link(void)
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_string *key = zend_string_tolower(ce->name);
 			if (zend_hash_exists(EG(class_table), key)) {
-				zend_error(E_WARNING, "Can't preload already declared class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+				zend_error_at(
+					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
 			} else {
-				zend_error(E_WARNING, "Can't preload unlinked class %s at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+				zend_error_at(
+					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+					"Can't preload unlinked class %s", ZSTR_VAL(ce->name));
 			}
 			zend_string_release(key);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			const char *kind, *name;
 			get_unresolved_initializer(ce, &kind, &name);
-			zend_error(E_WARNING, "Can't preload class %s with unresolved initializer for %s%s at %s:%d", ZSTR_VAL(ce->name), kind, name, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			zend_error_at(
+				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+				"Can't preload class %s with unresolved initializer for %s%s",
+				ZSTR_VAL(ce->name), kind, name);
 		} else if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			zend_error(E_WARNING, "Can't preload class %s with unresolved property types at %s:%d", ZSTR_VAL(ce->name), ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start);
+			zend_error_at(
+				E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
+				"Can't preload class %s with unresolved property types",
+				ZSTR_VAL(ce->name));
 		} else {
 			continue;
 		}
@@ -4183,13 +4197,13 @@ static int accel_finish_startup(void)
 		int rc;
 		int orig_error_reporting;
 
-		int (*orig_activate)(TSRMLS_D) = sapi_module.activate;
-		int (*orig_deactivate)(TSRMLS_D) = sapi_module.deactivate;
-		void (*orig_register_server_variables)(zval *track_vars_array TSRMLS_DC) = sapi_module.register_server_variables;
-		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.header_handler;
-		int (*orig_send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.send_headers;
-		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)= sapi_module.send_header;
-		char *(*orig_getenv)(char *name, size_t name_len TSRMLS_DC) = sapi_module.getenv;
+		int (*orig_activate)() = sapi_module.activate;
+		int (*orig_deactivate)() = sapi_module.deactivate;
+		void (*orig_register_server_variables)(zval *track_vars_array) = sapi_module.register_server_variables;
+		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
+		int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;
+		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context)= sapi_module.send_header;
+		char *(*orig_getenv)(char *name, size_t name_len) = sapi_module.getenv;
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
 #ifdef ZEND_SIGNALS

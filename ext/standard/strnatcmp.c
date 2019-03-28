@@ -1,4 +1,4 @@
-/* -*- mode: c; c-file-style: "k&r" -*-
+/*
 
   Modified for PHP by Andrei Zmievski <andrei@ispi.net>
 

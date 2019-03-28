@@ -206,7 +206,7 @@ typedef struct _zend_oparray_context {
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
-/* Staic method or property                               |     |     |     */
+/* Static method or property                              |     |     |     */
 #define ZEND_ACC_STATIC                  (1 <<  4) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Final class or method                                  |     |     |     */
@@ -234,10 +234,10 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class linked with parent, interfacs and traits         |     |     |     */
+/* Class linked with parent, interfaces and traits        |     |     |     */
 #define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* class is abstarct, since it is set by any              |     |     |     */
+/* Class is abstract, since it is set by any              |     |     |     */
 /* abstract method                                        |     |     |     */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS (1 <<  4) /*  X  |     |     |     */
 /*                                                        |     |     |     */

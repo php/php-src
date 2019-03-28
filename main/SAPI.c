@@ -27,9 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
-#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif

@@ -708,9 +708,8 @@ PHP_FUNCTION(krsort)
 
 	cmp = php_get_key_compare_func(sort_type, 1);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -731,9 +730,8 @@ PHP_FUNCTION(ksort)
 
 	cmp = php_get_key_compare_func(sort_type, 0);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -835,13 +833,9 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (fold_case) {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
-			return;
-		}
+		zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0);
 	} else {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
-			return;
-		}
+		zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0);
 	}
 
 	RETURN_TRUE;
@@ -880,9 +874,8 @@ PHP_FUNCTION(asort)
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -903,9 +896,8 @@ PHP_FUNCTION(arsort)
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 0) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -926,9 +918,8 @@ PHP_FUNCTION(sort)
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -949,9 +940,8 @@ PHP_FUNCTION(rsort)
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), cmp, 1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1021,7 +1011,6 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func,
 {
 	zval *array;
 	zend_array *arr;
-	zend_bool retval;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -1040,13 +1029,13 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func,
 	/* Copy array, so the in-place modifications will not be visible to the callback function */
 	arr = zend_array_dup(arr);
 
-	retval = zend_hash_sort(arr, compare_func, renumber) != FAILURE;
+	zend_hash_sort(arr, compare_func, renumber);
 
 	zval_ptr_dtor(array);
 	ZVAL_ARR(array, arr);
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
-	RETURN_BOOL(retval);
+	RETURN_TRUE;
 }
 /* }}} */
 

@@ -123,7 +123,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);}
 		|	"_Alignas"
 			"("
-			(	&type_name
+			(	&type_name_start
 				{zend_ffi_dcl align_dcl = ZEND_FFI_ATTR_INIT;}
 				type_name(&align_dcl)
 				{zend_ffi_align_as_type(dcl, &align_dcl);}
@@ -158,7 +158,7 @@ type_qualifier(zend_ffi_dcl *dcl):
 		("const"|"__const"|"__const__")
 		{dcl->flags |= ZEND_FFI_DCL_CONST;}
 		{dcl->attr |= ZEND_FFI_ATTR_CONST;}
-	|	("restrict"|"__restict"|"__restrict__")
+	|	("restrict"|"__restrict"|"__restrict__")
 		{dcl->flags |= ZEND_FFI_DCL_RESTRICT;}
 	|	("volatile"|"__volatile"|"__volatile__")
 		{dcl->flags |= ZEND_FFI_DCL_VOLATILE;}
@@ -331,7 +331,6 @@ enumerator(zend_ffi_dcl *enum_dcl, int64_t *min, int64_t *max, int64_t *last):
 ;
 
 declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
-	/* "char" is used as a terminator of nested declaration */
 	{zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};}
 	{zend_bool nested = 0;}
 	pointer(dcl)?
@@ -346,44 +345,35 @@ declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
-abstract_declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
-	/* "char" is used as a terminator of nested declaration */
+abstract_declarator(zend_ffi_dcl *dcl):
 	{zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};}
 	{zend_bool nested = 0;}
 	pointer(dcl)?
-	(	&nested_abstract_declarator
-		nested_abstract_declarator(&nested_dcl, name, name_len)
+	(	&nested_declarator_start
+		"("
+		attributes(&nested_dcl)?
+		abstract_declarator(&nested_dcl)
+		")"
+		{nested = 1;}
+	)?
+	array_or_function_declarators(dcl)?
+	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
+;
+
+parameter_declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
+	{zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};}
+	{zend_bool nested = 0;}
+	pointer(dcl)?
+	(	&nested_declarator_start
+		"("
+		attributes(&nested_dcl)?
+		parameter_declarator(&nested_dcl, name, name_len)
+		")"
 		{nested = 1;}
 	|	ID(name, name_len)
 	|	/* empty */
 	)
 	array_or_function_declarators(dcl)?
-	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
-;
-
-nested_abstract_declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
-	{zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};}
-	{zend_bool nested = 0;}
-	"("
-	attributes(&nested_dcl)?
-	(	pointer(dcl)
-		(	&nested_abstract_declarator
-			nested_abstract_declarator(&nested_dcl, name, name_len)
-			{nested = 1;}
-		|	ID(name, name_len)
-		|	/* empty */
-		)
-		array_or_function_declarators(dcl)?
-	|	(	&nested_abstract_declarator
-			nested_abstract_declarator(&nested_dcl, name, name_len)
-			array_or_function_declarators(dcl)?
-			{nested = 1;}
-		|	ID(name, name_len)
-			array_or_function_declarators(dcl)?
-		|	array_or_function_declarators(dcl)
-		)
-	)
-	")"
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -451,17 +441,15 @@ parameter_declaration(HashTable **args):
 	{FFI_G(allow_vla) = 1;}
 	{zend_ffi_dcl param_dcl = ZEND_FFI_ATTR_INIT;}
 	specifier_qualifier_list(&param_dcl)
-	abstract_declarator(&param_dcl, &name, &name_len)
+	parameter_declarator(&param_dcl, &name, &name_len)
 	/*attributes(&param_dcl)? conflict ???*/
 	{zend_ffi_add_arg(args, name, name_len, &param_dcl);}
 	{FFI_G(allow_vla) = old_allow_vla;}
 ;
 
 type_name(zend_ffi_dcl *dcl):
-	{const char *name = NULL;}
-	{size_t name_len = 0;}
 	specifier_qualifier_list(dcl)
-	abstract_declarator(dcl, &name, &name_len)
+	abstract_declarator(dcl)
 ;
 
 attributes(zend_ffi_dcl *dcl):
@@ -685,7 +673,7 @@ multiplicative_expression(zend_ffi_val *val):
 cast_expression(zend_ffi_val *val):
 	{int do_cast = 0;}
 	{zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;}
-	(	&( "(" type_name ")" )
+	(	&( "(" type_name_start )
 		"("
 		type_name(&dcl)
 		")"
@@ -751,7 +739,7 @@ unary_expression(zend_ffi_val *val):
 		cast_expression(val)
 		{zend_ffi_expr_bool_not(val);}
 	|	"sizeof"
-		(	&( "(" type_name ")" )
+		(	&( "(" type_name_start )
 			"("
 			type_name(&dcl)
 			")"
@@ -765,7 +753,7 @@ unary_expression(zend_ffi_val *val):
 		")"
 		{zend_ffi_expr_alignof_type(val, &dcl);}
 	|	("__alignof"|"__alignof__")
-		(	&( "(" type_name ")" )
+		(	&( "(" type_name_start )
 			"("
 			type_name(&dcl)
 			")"
@@ -776,6 +764,57 @@ unary_expression(zend_ffi_val *val):
 	)
 ;
 
+/* lookahead rules */
+nested_declarator_start:
+    "("
+	(   ?{!zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+		ID
+	|	"__attribute"
+	|	"__attribute__"
+	|	"__declspec"
+	|	"*"
+	|	"("
+	|	"["
+	)
+;
+
+type_name_start:
+	(	?{zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+		ID
+	|	"void"
+	|	"char"
+	|	"short"
+	|   "int"
+	|	"long"
+	|	"float"
+	|	"double"
+	|	"signed"
+	|	"unsigned"
+	|	"_Bool"
+	|	"_Complex"
+	|	"complex"
+	|	"__complex"
+	|	"__complex__"
+	|	"struct"
+	|	"union"
+	|	"enum"
+	|	"const"
+	|	"__const"
+	|	"__const__"
+	|	"restrict"
+	|	"__restict"
+	|	"__restrict__"
+	|	"volatile"
+	|	"__volatile"
+	|	"__volatile__"
+	|	"_Atomic"
+	|	"__attribute"
+	|	"__attribute__"
+	|	"__declspec"
+	)
+;
+
+/* scanner rules */
 ID(const char **name, size_t *name_len):
 	/[A-Za-z_][A-Za-z_0-9]*/
 	{*name = (const char*)yy_text; *name_len = yy_pos - yy_text;}

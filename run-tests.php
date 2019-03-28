@@ -29,6 +29,8 @@
 
 /* Let there be no top-level code beyond this point:
  * Only functions and classes, thanks!
+ *
+ * Minimum required PHP version: 7.0.0
  */
 
 /**
@@ -388,6 +390,10 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
+						// Don't use parallel testing infrastructure if there is only one worker.
+						if ($workers === 1) {
+							$workers = null;
+						}
 						break;
 					case 'r':
 					case 'l':
@@ -1505,7 +1511,7 @@ escape:
 						$rawMessage = $rawMessageBuffers[$i] . $rawMessage;
 						$rawMessageBuffers[$i] = '';
 					}
-					if ($rawMessage[-1] !== "\n") {
+					if (substr($rawMessage, -1) !== "\n") {
 						$rawMessageBuffers[$i] = $rawMessage;
 						continue;
 					}
@@ -1571,14 +1577,14 @@ escape:
 							}
 							break;
 						case "test_result":
-							[$name, $index, $result, $resultText] = [$message["name"], $message["index"], $message["result"], $message["text"]];
+							list($name, $index, $result, $resultText) = [$message["name"], $message["index"], $message["result"], $message["text"]];
 							foreach ($message["PHP_FAILED_TESTS"] as $category => $tests) {
 								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
 							}
 							$test_idx++;
 							clear_show_test();
 							echo $resultText;
-							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
+							show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
 
 							if (!is_array($name) && $result != 'REDIR') {
 								$test_results[$index] = $result;

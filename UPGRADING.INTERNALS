@@ -3,6 +3,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 1. Internal API changes
   a. Object Handlers API
   b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+  c. TSRM changes
 
 2. Build system changes
   a. Abstract
@@ -24,6 +25,20 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      defined "handler" callback should be used instead. This "handler" callback
      should also take care about function cleanup. See ext/zend_test/test.c
      for example.
+  
+  c. The following things have been removed from TSRM:
+      - TSRMLS_DC
+      - TSRMLS_D
+      - TSRMLS_CC
+      - TSRMLS_C
+      - TSRMLS_FETCH
+      - TSRMLS_FETCH_FROM_CTX
+      - TSRMLS_SET_CTX
+      - tsrm_new_interpreter_context
+      - tsrm_set_interpreter_context
+      - tsrm_free_interpreter_context
+      - support for GNUPTH, SGI ST, and BETHREADS
+                       
 
 ========================
 2. Build system changes
@@ -32,6 +47,9 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   a. Abstract
 
   b. Unix build system changes
+  
+    1.  --enable-maintainer-zts is renamed --enable-zts for parity with Windows
+        and as recognition that ZTS is not a "maintainer" or experimental feature.
 
   c. Windows build system changes
 

@@ -62,9 +62,7 @@
 #include "ext/iconv/php_iconv.h"
 #endif
 #include "ext/standard/reg.h"
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-#endif
 #if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
 #endif
@@ -136,9 +134,7 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_UODBC
 	,phpext_odbc_ptr
 #endif
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	,phpext_pcre_ptr
-#endif
 	,phpext_reflection_ptr
 #if HAVE_PHP_SESSION
 	,phpext_session_ptr

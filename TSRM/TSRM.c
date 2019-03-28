@@ -94,31 +94,14 @@ static FILE *tsrm_error_file;
 	}
 #endif
 
-#if defined(GNUPTH)
-static pth_key_t tls_key;
-# define tsrm_tls_set(what)		pth_key_setdata(tls_key, (void*)(what))
-# define tsrm_tls_get()			pth_key_getdata(tls_key)
-
-#elif defined(PTHREADS)
-/* Thread local storage */
-static pthread_key_t tls_key;
-# define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
-# define tsrm_tls_get()			pthread_getspecific(tls_key)
-
-#elif defined(TSRM_ST)
-static int tls_key;
-# define tsrm_tls_set(what)		st_thread_setspecific(tls_key, (void*)(what))
-# define tsrm_tls_get()			st_thread_getspecific(tls_key)
-
-#elif defined(TSRM_WIN32)
+#if defined(TSRM_WIN32)
 static DWORD tls_key;
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
-
 #else
-# define tsrm_tls_set(what)
-# define tsrm_tls_get()			NULL
-# warning tsrm_set_interpreter_context is probably broken on this platform
+static pthread_key_t tls_key;
+# define tsrm_tls_set(what)		pthread_setspecific(tls_key, (void*)(what))
+# define tsrm_tls_get()			pthread_getspecific(tls_key)
 #endif
 
 TSRM_TLS uint8_t in_main_thread = 0;
@@ -126,16 +109,10 @@ TSRM_TLS uint8_t in_main_thread = 0;
 /* Startup TSRM (call once for the entire process) */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_level, char *debug_filename)
 {/*{{{*/
-#if defined(GNUPTH)
-	pth_init();
-	pth_key_create(&tls_key, 0);
-#elif defined(PTHREADS)
-	pthread_key_create( &tls_key, 0 );
-#elif defined(TSRM_ST)
-	st_init();
-	st_key_create(&tls_key, 0);
-#elif defined(TSRM_WIN32)
+#if defined(TSRM_WIN32)
 	tls_key = TlsAlloc();
+#else
+	pthread_key_create(&tls_key, 0);
 #endif
 
 	/* ensure singleton */
@@ -218,13 +195,11 @@ TSRM_API void tsrm_shutdown(void)
 	if (tsrm_error_file!=stderr) {
 		fclose(tsrm_error_file);
 	}
-#if defined(GNUPTH)
-	pth_kill();
-#elif defined(PTHREADS)
+#if defined(TSRM_WIN32)
+	TlsFree(tls_key);
+#else
 	pthread_setspecific(tls_key, 0);
 	pthread_key_delete(tls_key);
-#elif defined(TSRM_WIN32)
-	TlsFree(tls_key);
 #endif
 	if (tsrm_shutdown_handler) {
 		tsrm_shutdown_handler();
@@ -471,67 +446,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 	TSRM_SAFE_RETURN_RSRC(thread_resources->storage, id, thread_resources->count);
 }/*}}}*/
 
-/* frees an interpreter context.  You are responsible for making sure that
- * it is not linked into the TSRM hash, and not marked as the current interpreter */
-void tsrm_free_interpreter_context(void *context)
-{/*{{{*/
-	tsrm_tls_entry *next, *thread_resources = (tsrm_tls_entry*)context;
-	int i;
-
-	while (thread_resources) {
-		next = thread_resources->next;
-
-		for (i=0; i<thread_resources->count; i++) {
-			if (resource_types_table[i].dtor) {
-				resource_types_table[i].dtor(thread_resources->storage[i]);
-			}
-		}
-		for (i=0; i<thread_resources->count; i++) {
-			if (!resource_types_table[i].fast_offset) {
-				free(thread_resources->storage[i]);
-			}
-		}
-		free(thread_resources->storage);
-		free(thread_resources);
-		thread_resources = next;
-	}
-}/*}}}*/
-
-void *tsrm_set_interpreter_context(void *new_ctx)
-{/*{{{*/
-	tsrm_tls_entry *current;
-
-	current = tsrm_tls_get();
-
-	/* TODO: unlink current from the global linked list, and replace it
-	 * it with the new context, protected by mutex where/if appropriate */
-
-	/* Set thread local storage to this new thread resources structure */
-	tsrm_tls_set(new_ctx);
-
-	/* return old context, so caller can restore it when they're done */
-	return current;
-}/*}}}*/
-
-
-/* allocates a new interpreter context */
-void *tsrm_new_interpreter_context(void)
-{/*{{{*/
-	tsrm_tls_entry *new_ctx, *current;
-	THREAD_T thread_id;
-
-	thread_id = tsrm_thread_id();
-	tsrm_mutex_lock(tsmm_mutex);
-
-	current = tsrm_tls_get();
-
-	allocate_new_resource(&new_ctx, thread_id);
-
-	/* switch back to the context that was in use prior to our creation
-	 * of the new one */
-	return tsrm_set_interpreter_context(current);
-}/*}}}*/
-
 
 /* frees all resources allocated for the current thread */
 void ts_free_thread(void)
@@ -661,8 +575,6 @@ void ts_free_id(ts_rsrc_id id)
 }/*}}}*/
 
 
-
-
 /*
  * Utility Functions
  */
@@ -672,12 +584,8 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 {/*{{{*/
 #ifdef TSRM_WIN32
 	return GetCurrentThreadId();
-#elif defined(GNUPTH)
-	return pth_self();
-#elif defined(PTHREADS)
+#else
 	return pthread_self();
-#elif defined(TSRM_ST)
-	return st_thread_self();
 #endif
 }/*}}}*/
 
@@ -689,14 +597,9 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 #ifdef TSRM_WIN32
 	mutexp = malloc(sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(mutexp);
-#elif defined(GNUPTH)
-	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
-	pth_mutex_init(mutexp);
-#elif defined(PTHREADS)
+#else
 	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(mutexp,NULL);
-#elif defined(TSRM_ST)
-	mutexp = st_mutex_new();
 #endif
 #ifdef THR_DEBUG
 	printf("Mutex created thread: %d\n",mythreadid());
@@ -712,13 +615,9 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
 		free(mutexp);
-#elif defined(GNUPTH)
-		free(mutexp);
-#elif defined(PTHREADS)
+#else
 		pthread_mutex_destroy(mutexp);
 		free(mutexp);
-#elif defined(TSRM_ST)
-		st_mutex_destroy(mutexp);
 #endif
 	}
 #ifdef THR_DEBUG
@@ -737,15 +636,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
 	return 0;
-#elif defined(GNUPTH)
-	if (pth_mutex_acquire(mutexp, 0, NULL)) {
-		return 0;
-	}
-	return -1;
-#elif defined(PTHREADS)
+#else
 	return pthread_mutex_lock(mutexp);
-#elif defined(TSRM_ST)
-	return st_mutex_lock(mutexp);
 #endif
 }/*}}}*/
 
@@ -760,15 +652,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
 	return 0;
-#elif defined(GNUPTH)
-	if (pth_mutex_release(mutexp)) {
-		return 0;
-	}
-	return -1;
-#elif defined(PTHREADS)
+#else
 	return pthread_mutex_unlock(mutexp);
-#elif defined(TSRM_ST)
-	return st_mutex_unlock(mutexp);
 #endif
 }/*}}}*/
 
@@ -779,12 +664,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Changed sigmask in thread: %ld", tsrm_thread_id()));
-	/* TODO: add support for other APIs */
-#ifdef PTHREADS
-	return pthread_sigmask(how, set, oldset);
-#else
-	return sigprocmask(how, set, oldset);
-#endif
+
+    return pthread_sigmask(how, set, oldset);
 }/*}}}*/
 #endif
 
@@ -893,16 +774,10 @@ TSRM_API uint8_t tsrm_is_main_thread(void)
 
 TSRM_API const char *tsrm_api_name(void)
 {/*{{{*/
-#if defined(GNUPTH)
-	return "GNU Pth";
-#elif defined(PTHREADS)
-	return "POSIX Threads";
-#elif defined(TSRM_ST)
-	return "State Threads";
-#elif defined(TSRM_WIN32)
+#if defined(TSRM_WIN32)
 	return "Windows Threads";
 #else
-	return "Unknown";
+	return "POSIX Threads";
 #endif
 }/*}}}*/
 

@@ -745,6 +745,32 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 }
 /* }}} */
 
+static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{{ */
+{
+	zval fname;
+	int res;
+
+	ZVAL_STRINGL(&fname, "__serialize", sizeof("__serialize") - 1);
+	BG(serialize_lock)++;
+	res = call_user_function(CG(function_table), obj, &fname, retval, 0, 0);
+	BG(serialize_lock)--;
+	zval_ptr_dtor_str(&fname);
+
+	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
+		zval_ptr_dtor(retval);
+		return FAILURE;
+	}
+
+	if (Z_TYPE_P(retval) != IS_ARRAY) {
+		zval_ptr_dtor(retval);
+		zend_type_error("__serialize() must return an array");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{{ */
 {
 	zval *val;
@@ -914,6 +940,43 @@ again:
 
 		case IS_OBJECT: {
 				zend_class_entry *ce = Z_OBJCE_P(struc);
+
+				if (zend_hash_str_exists(&ce->function_table, "__serialize", sizeof("__serialize")-1)) {
+					zval retval, obj;
+					zend_string *key;
+					zval *data;
+					zend_ulong index;
+
+					ZVAL_COPY(&obj, struc);
+					if (php_var_serialize_call_magic_serialize(&retval, &obj) == FAILURE) {
+						if (!EG(exception)) {
+							smart_str_appendl(buf, "N;", 2);
+						}
+						zval_ptr_dtor(&obj);
+						return;
+					}
+
+					php_var_serialize_class_name(buf, &obj);
+					smart_str_append_unsigned(buf, zend_array_count(Z_ARRVAL(retval)));
+					smart_str_appendl(buf, ":{", 2);
+					ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(retval), index, key, data) {
+						if (!key) {
+							php_var_serialize_long(buf, index);
+						} else {
+							php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
+						}
+
+						if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+							data = Z_REFVAL_P(data);
+						}
+						php_var_serialize_intern(buf, data, var_hash);
+					} ZEND_HASH_FOREACH_END();
+					smart_str_appendc(buf, '}');
+
+					zval_ptr_dtor(&obj);
+					zval_ptr_dtor(&retval);
+					return;
+				}
 
 				if (ce->serialize != NULL) {
 					/* has custom handler */

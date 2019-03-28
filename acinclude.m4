@@ -727,7 +727,7 @@ dnl
 dnl PHP_BUILD_THREAD_SAFE
 dnl
 AC_DEFUN([PHP_BUILD_THREAD_SAFE],[
-  enable_maintainer_zts=yes
+  enable_zts=yes
   if test "$pthreads_working" != "yes"; then
     AC_MSG_ERROR([ZTS currently requires working POSIX threads. We were unable to verify that your system supports Pthreads.])
   fi
@@ -938,7 +938,7 @@ dnl ---------------------------------------------- Shared module
 dnl ---------------------------------------------- CLI static module
     [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=no
     case "$PHP_SAPI" in
-      cgi|embed[)]
+      cgi|embed|phpdbg[)]
         PHP_ADD_SOURCES($ext_dir,$2,$ac_extra,)
         EXT_STATIC="$EXT_STATIC $1;$ext_dir"
         ;;
@@ -2307,7 +2307,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads [)];;
 
       # Allow certain Zend options
-      with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
+      with-zend-vm | enable-zts | enable-inline-optimization[)];;
 
       # All the rest must be set using the PHP_ARG_* macros
       # PHP_ARG_* macros set php_enable_<arg_name> or php_with_<arg_name>

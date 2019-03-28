@@ -5907,6 +5907,12 @@ void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len
 		/* ignore */
 	} else if (name_len == sizeof("deprecated")-1 && memcmp(name, "deprecated", sizeof("deprecated")-1) == 0) {
 		/* ignore */
+	} else if (name_len == sizeof("__nothrow__")-1 && memcmp(name, "__nothrow__", sizeof("__nothrow__")-1) == 0) {
+		/* ignore */
+	} else if (name_len == sizeof("__leaf__")-1 && memcmp(name, "__leaf__", sizeof("__leaf__")-1) == 0) {
+		/* ignore */
+	} else if (name_len == sizeof("__malloc__")-1 && memcmp(name, "__malloc__", sizeof("__malloc__")-1) == 0) {
+		/* ignore */
 	} else {
 		zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
 	}

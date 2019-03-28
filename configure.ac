@@ -361,7 +361,7 @@ if test -z "$PHP_INSTALLED_SAPIS"; then
 fi
 
 dnl force ZTS
-if test "$enable_maintainer_zts" = "yes"; then
+if test "$enable_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
 fi
@@ -1218,7 +1218,7 @@ LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
 
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
+if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   PHP_THREAD_SAFETY=yes
 else
@@ -1240,7 +1240,7 @@ PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 TSRM_BASIC_CHECKS
 if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_THREADS_CHECKS
+  TSRM_CHECK_PTHREADS
 fi
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
@@ -1289,7 +1289,7 @@ if test -z "$EXTENSION_DIR"; then
     else
       part1=no-debug
     fi
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       part2=zts
     else
       part2=non-zts
@@ -1297,7 +1297,7 @@ if test -z "$EXTENSION_DIR"; then
     extbasedir=$part1-$part2-$extbasedir
     EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       extbasedir=$extbasedir-zts
     fi
 
@@ -1674,7 +1674,7 @@ cat <<X
 |                                                                    |
 | You have built PHP for Apache's current non-threaded MPM.          |
 | If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-maintainer-zts                                   |
+| PHP with --enable-zts                                              |
 X
         fi
       fi

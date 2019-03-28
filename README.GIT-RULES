@@ -39,7 +39,7 @@ Having said that, here are the organizational rules::
       To do so use "make test".
 
    7. For development use the --enable-debug switch to avoid memory leaks
-      and the --enable-maintainer-zts switch to ensure your code handles
+      and the --enable-zts switch to ensure your code handles
       TSRM correctly and doesn't break for those who need that.
 
 Currently we have the following branches in use::

@@ -751,20 +751,15 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		}
 
 		if (buffered == NULL) {
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
-#define USE_LIB_STAR 1
-#else
-#define USE_LIB_STAR 0
-#endif
+#ifdef HAVE_PHPDBG_READLINE
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
-#if USE_LIB_STAR
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))
 #endif
 			{
 				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
 				phpdbg_consume_stdin_line(cmd = buf);
 			}
-#if USE_LIB_STAR
+#ifdef HAVE_PHPDBG_READLINE
 			else {
 				cmd = readline(phpdbg_get_prompt());
 				PHPDBG_G(last_was_newline) = 1;
@@ -783,7 +778,7 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 
 		buffer = estrdup(cmd);
 
-#if USE_LIB_STAR
+#ifdef HAVE_PHPDBG_READLINE
 		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
 			free(cmd);
 		}
