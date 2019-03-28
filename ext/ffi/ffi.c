@@ -5964,6 +5964,8 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 		}
 	} else if (name_len == sizeof("format")-1 && memcmp(name, "format", sizeof("format")-1) == 0) {
 		/* ignore */
+	} else if (name_len == sizeof("__format__")-1 && memcmp(name, "__format__", sizeof("__format__")-1) == 0) {
+		/* ignore */
 	} else if (name_len == sizeof("deprecated")-1 && memcmp(name, "deprecated", sizeof("deprecated")-1) == 0) {
 		/* ignore */
 	} else {
