@@ -110,7 +110,7 @@ string(10) "string_val"
 
 -- Iteration 4 --
 
-Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %smb_ereg_replace_variation1.php on line %d
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -118,7 +118,7 @@ string(10) "string_val"
 
 -- Iteration 6 --
 
-Warning: mb_ereg_replace(): mbregex compile err: invalid code point value in %smb_ereg_replace_variation1.php on line %d
+Warning: mb_ereg_replace(): Pattern is not valid under UTF-8 encoding in %s on line %d
 bool(false)
 
 -- Iteration 7 --
