@@ -11,5 +11,5 @@ imap_mail('1', 1, NULL);
 ===DONE===
 --EXPECTF--
 Warning: imap_mail(): No message string in mail command in %s on line %d
-%s
+%A
 ===DONE===
