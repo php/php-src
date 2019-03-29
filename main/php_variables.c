@@ -548,6 +548,8 @@ void _php_import_environment_variables(zval *array_ptr)
 	zval val;
 	zend_ulong idx;
 
+	tsrm_env_lock();
+
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
 		if (!p
@@ -572,6 +574,8 @@ void _php_import_environment_variables(zval *array_ptr)
 			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
 		}
 	}
+	
+	tsrm_env_unlock();
 }
 
 zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
