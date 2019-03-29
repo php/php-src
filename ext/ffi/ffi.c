@@ -3249,9 +3249,9 @@ static int zend_ffi_validate_vla(zend_ffi_type *type) /* {{{ */
 }
 /* }}} */
 
-static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allow_ic) /* {{{ */
+static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allow_incomplete_tag, zend_bool allow_incomplete_array) /* {{{ */
 {
-	if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
+	if (!allow_incomplete_tag && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG)) {
 		if (FFI_G(tags)) {
 			zend_string *key;
 			zend_ffi_tag *tag;
@@ -3282,7 +3282,7 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 		}
 		zend_ffi_throw_parser_error("incomplete type at line %d", FFI_G(line));
 		return FAILURE;
-	} else if (!allow_ic && type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
+	} else if (!allow_incomplete_array && type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
 		zend_ffi_throw_parser_error("'[]' not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!FFI_G(allow_vla) && (type->attr & ZEND_FFI_ATTR_VLA)) {
@@ -3293,23 +3293,23 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 }
 /* }}} */
 
-static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_ic) /* {{{ */
+static int zend_ffi_validate_type(zend_ffi_type *type, zend_bool allow_incomplete_tag, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_VOID) {
 		zend_ffi_throw_parser_error("'void' type is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_incomplete_type(type, allow_ic);
+	return zend_ffi_validate_incomplete_type(type, allow_incomplete_tag, allow_incomplete_array);
 }
 /* }}} */
 
-static int zend_ffi_validate_var_type(zend_ffi_type *type, zend_bool allow_ic) /* {{{ */
+static int zend_ffi_validate_var_type(zend_ffi_type *type, zend_bool allow_incomplete_array) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
 		zend_ffi_throw_parser_error("'function' type is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_type(type, allow_ic);
+	return zend_ffi_validate_type(type, 0, allow_incomplete_array);
 }
 /* }}} */
 
@@ -5560,7 +5560,7 @@ static int zend_ffi_validate_array_element_type(zend_ffi_type *type) /* {{{ */
 		zend_ffi_throw_parser_error("only the leftmost array can be undimensioned at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_type(type, 1);
+	return zend_ffi_validate_type(type, 0, 1);
 }
 /* }}} */
 
@@ -5620,7 +5620,7 @@ static int zend_ffi_validate_func_ret_type(zend_ffi_type *type) /* {{{ */
 		zend_ffi_throw_parser_error("function returning array is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
-	return zend_ffi_validate_incomplete_type(type, 0);
+	return zend_ffi_validate_incomplete_type(type, 1, 0);
 }
 /* }}} */
 
@@ -5753,7 +5753,7 @@ void zend_ffi_add_arg(HashTable **args, const char *name, size_t name_len, zend_
 		new_type->pointer.type = arg_dcl->type;
 		arg_dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(new_type);
 	}
-	if (zend_ffi_validate_incomplete_type(type, 1) != SUCCESS) {
+	if (zend_ffi_validate_incomplete_type(type, 1, 1) != SUCCESS) {
 		zend_ffi_cleanup_dcl(arg_dcl);
 		zend_hash_destroy(*args);
 		pefree(*args, FFI_G(persistent));
@@ -5832,7 +5832,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 			zend_ffi_type *type;
 
 			type = ZEND_FFI_TYPE(dcl->type);
-			if (zend_ffi_validate_type(type, 1) != SUCCESS) {
+			if (zend_ffi_validate_type(type, (dcl->flags & ZEND_FFI_DCL_STORAGE_CLASS) == ZEND_FFI_DCL_EXTERN, 1) != SUCCESS) {
 				zend_ffi_cleanup_dcl(dcl);
 				LONGJMP(FFI_G(bailout), FAILURE);
 			}

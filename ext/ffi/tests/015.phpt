@@ -61,8 +61,8 @@ FFI\ParserException: incomplete 'struct DIR' at line 1
 ok
 FFI\ParserException: incomplete 'struct DIR' at line 1
 ok
-FFI\ParserException: incomplete 'struct DIR' at line 1
 ok
-FFI\ParserException: incomplete 'struct DIR' at line 1
+ok
+ok
 ok
 ok
