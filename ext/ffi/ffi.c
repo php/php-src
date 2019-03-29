@@ -6572,7 +6572,7 @@ void zend_ffi_expr_mod(zend_ffi_val *val, zend_ffi_val *op2) /* {{{ */
 void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 {
 	zend_ffi_finalize_type(dcl);
-	switch (dcl->type->kind) {
+	switch (ZEND_FFI_TYPE(dcl->type)->kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_UINT64) {
 				val->kind = ZEND_FFI_VAL_FLOAT;
@@ -6699,6 +6699,7 @@ void zend_ffi_expr_cast(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 			val->kind = ZEND_FFI_VAL_ERROR;
 			break;
 	}
+	zend_ffi_type_dtor(dcl->type);
 }
 /* }}} */
 
@@ -6793,9 +6794,13 @@ void zend_ffi_expr_sizeof_val(zend_ffi_val *val) /* {{{ */
 
 void zend_ffi_expr_sizeof_type(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 {
+	zend_ffi_type *type;
+
 	zend_ffi_finalize_type(dcl);
-	val->kind = (dcl->type->size > 0xffffffff) ? ZEND_FFI_VAL_UINT64 : ZEND_FFI_VAL_UINT32;
-	val->u64 = dcl->type->size;
+	type = ZEND_FFI_TYPE(dcl->type);
+	val->kind = (type->size > 0xffffffff) ? ZEND_FFI_VAL_UINT64 : ZEND_FFI_VAL_UINT32;
+	val->u64 = type->size;
+	zend_ffi_type_dtor(dcl->type);
 }
 /* }}} */
 
@@ -6834,7 +6839,8 @@ void zend_ffi_expr_alignof_type(zend_ffi_val *val, zend_ffi_dcl *dcl) /* {{{ */
 {
 	zend_ffi_finalize_type(dcl);
 	val->kind = ZEND_FFI_VAL_UINT32;
-	val->u64 = dcl->type->align;
+	val->u64 = ZEND_FFI_TYPE(dcl->type)->align;
+	zend_ffi_type_dtor(dcl->type);
 }
 /* }}} */
 
