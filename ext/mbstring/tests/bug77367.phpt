@@ -2,8 +2,8 @@
 Bug #77367 (Negative size parameter in mb_split)
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('mbstring extension not available');
-if (!function_exists('mb_split')) die('mb_split() not available');
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_split')) die('skip mb_split() not available');
 ?>
 --FILE--
 <?php
