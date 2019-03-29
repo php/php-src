@@ -1,5 +1,10 @@
 --TEST--
 Bug #77428: mb_ereg_replace() doesn't replace a substitution variable 
+--SKIPIF--
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_ereg_replace')) die('skip mb_ereg_replace() not available');
+?>
 --FILE--
 <?php
 
