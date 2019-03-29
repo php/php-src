@@ -954,6 +954,7 @@ PHPAPI void php_print_info(int flag)
 		SECTION("Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
+		tsrm_env_lock();
 		for (env=environ; env!=NULL && *env !=NULL; env++) {
 			tmp1 = estrdup(*env);
 			if (!(tmp2=strchr(tmp1,'='))) { /* malformed entry? */
@@ -965,6 +966,7 @@ PHPAPI void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
+        tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 

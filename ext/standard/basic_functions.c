@@ -3832,7 +3832,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_string) = NULL;
 #ifdef HAVE_PUTENV
+	tsrm_env_lock();
 	zend_hash_destroy(&BG(putenv_ht));
+	tsrm_env_unlock();
 #endif
 
 	BG(mt_rand_is_seeded) = 0;
@@ -4141,11 +4143,22 @@ PHP_FUNCTION(getenv)
 		}
 	}
 #else
+
+    tsrm_env_lock();
+    
 	/* system method returns a const */
 	ptr = getenv(str);
+	
 	if (ptr) {
-		RETURN_STRING(ptr);
+		RETVAL_STRING(ptr);
 	}
+
+    tsrm_env_unlock();
+
+    if (ptr) {
+        return;
+    }
+
 #endif
 	RETURN_FALSE;
 }
@@ -4196,6 +4209,7 @@ PHP_FUNCTION(putenv)
 	}
 #endif
 
+	tsrm_env_lock();
 	zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
 
 	/* find previous value */
@@ -4256,6 +4270,7 @@ PHP_FUNCTION(putenv)
 			tzset();
 		}
 #endif
+		tsrm_env_unlock();
 #if defined(PHP_WIN32)
 		free(keyw);
 		free(valw);
