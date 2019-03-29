@@ -121,6 +121,10 @@ PHP 7.4 UPGRADE NOTES
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
 
+- Filter:
+  . The FILTER_VALIDATE_FLOAT filter now supports the min_range and max_range
+    options, with the same semantics as FILTER_VALIDATE_INT.
+
 - FFI:
   . A new extension which provides a simple way to call native functions, access
     native variables and create/access data structures defined in C libraries.
