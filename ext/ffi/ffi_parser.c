@@ -2930,6 +2930,7 @@ static int parse_attrib(int sym, zend_ffi_dcl *dcl) {
 	size_t name_len;
 	int n;
 	zend_ffi_val val;
+	zend_bool orig_attribute_parsing;
 	if (sym == YY_ID || sym == YY_CONST || sym == YY___CONST || sym == YY___CONST__) {
 		if (sym == YY_ID) {
 			sym = parse_ID(sym, &name, &name_len);
@@ -2937,6 +2938,8 @@ static int parse_attrib(int sym, zend_ffi_dcl *dcl) {
 				zend_ffi_add_attribute(dcl, name, name_len);
 			} else if (sym == YY__LPAREN) {
 				sym = get_sym();
+				orig_attribute_parsing = FFI_G(attribute_parsing);
+				FFI_G(attribute_parsing) = 1;
 				sym = parse_assignment_expression(sym, &val);
 				zend_ffi_add_attribute_value(dcl, name, name_len, 0, &val);
 				n = 0;
@@ -2945,6 +2948,7 @@ static int parse_attrib(int sym, zend_ffi_dcl *dcl) {
 					sym = parse_assignment_expression(sym, &val);
 					zend_ffi_add_attribute_value(dcl, name, name_len, ++n, &val);
 				}
+				FFI_G(attribute_parsing) = orig_attribute_parsing;
 				if (sym != YY__RPAREN) {
 					yy_error_sym("')' expected, got", sym);
 				}
@@ -3516,6 +3520,7 @@ static void parse(void) {
 int zend_ffi_parse_decl(const char *str, size_t len) {
 	if (SETJMP(FFI_G(bailout))==0) {
 		FFI_G(allow_vla) = 0;
+		FFI_G(attribute_parsing) = 0;
 		yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
 		parse();
@@ -3530,6 +3535,7 @@ int zend_ffi_parse_type(const char *str, size_t len, zend_ffi_dcl *dcl) {
 
 	if (SETJMP(FFI_G(bailout))==0) {
 		FFI_G(allow_vla) = 0;
+		FFI_G(attribute_parsing) = 0;
 		yy_pos = yy_text = yy_buf = (unsigned char*)str;
 		yy_end = yy_buf + len;
 		yy_line = 1;

@@ -5050,7 +5050,12 @@ void zend_ffi_resolve_const(const char *name, size_t name_len, zend_ffi_val *val
 {
 	zend_ffi_symbol *sym;
 
-	if (FFI_G(symbols)) {
+	if (UNEXPECTED(FFI_G(attribute_parsing))) {
+		val->kind = ZEND_FFI_VAL_NAME;
+		val->str = name;
+		val->len = name_len;
+		return;
+	} else if (FFI_G(symbols)) {
 		sym = zend_hash_str_find_ptr(FFI_G(symbols), name, name_len);
 		if (sym && sym->kind == ZEND_FFI_SYM_CONST) {
 			val->i64 = sym->value;
@@ -6060,6 +6065,60 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 			}
 			break;
 		case attr_mode:
+			if (n == 0
+			 && (val->kind == ZEND_FFI_VAL_NAME)) {
+				const char *str = val->str;
+				size_t len = val->len;
+				if (len > 4
+				 && str[0] == '_'
+				 && str[1] == '_'
+				 && str[len-2] == '_'
+				 && str[len-1] == '_') {
+					str += 2;
+					len -= 4;
+				}
+				// TODO: Add support for vector type 'VnXX' ???
+				if (len == 2) {
+					if (str[1] == 'I') {
+						if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_CHAR|ZEND_FFI_DCL_SHORT|ZEND_FFI_DCL_INT|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_SIGNED|ZEND_FFI_DCL_UNSIGNED))) {
+							/* inappropriate type */
+						} else if (str[0] == 'Q') {
+							dcl->flags &= ~(ZEND_FFI_DCL_CHAR|ZEND_FFI_DCL_SHORT|ZEND_FFI_DCL_INT|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG);
+							dcl->flags |= ZEND_FFI_DCL_CHAR;
+							break;
+						} else if (str[0] == 'H') {
+							dcl->flags &= ~(ZEND_FFI_DCL_CHAR|ZEND_FFI_DCL_SHORT|ZEND_FFI_DCL_INT|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG);
+							dcl->flags |= ZEND_FFI_DCL_SHORT;
+							break;
+						} else if (str[0] == 'S') {
+							dcl->flags &= ~(ZEND_FFI_DCL_CHAR|ZEND_FFI_DCL_SHORT|ZEND_FFI_DCL_INT|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG);
+							dcl->flags |= ZEND_FFI_DCL_INT;
+							break;
+						} else if (str[0] == 'D') {
+							dcl->flags &= ~(ZEND_FFI_DCL_CHAR|ZEND_FFI_DCL_SHORT|ZEND_FFI_DCL_INT|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG);
+							if (sizeof(long) == 8) {
+								dcl->flags |= ZEND_FFI_DCL_LONG;
+							} else {
+								dcl->flags |= ZEND_FFI_DCL_LONG_LONG;
+							}
+							break;
+						}
+					} else if (str[1] == 'F') {
+						if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE))) {
+							/* inappropriate type */
+						} else if (str[0] == 'S') {
+							dcl->flags &= ~(ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE);
+							dcl->flags |= ZEND_FFI_DCL_FLOAT;
+							break;
+						} else if (str[0] == 'D') {
+							dcl->flags &= ~(ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE);
+							dcl->flags |= ZEND_FFI_DCL_DOUBLE;
+							break;
+						}
+					}
+				}
+			}
+			zend_ffi_parser_error("unsupported 'mode' value at line %d", FFI_G(line));
 			// TODO: ???
 		case attr_unsupported:
 			zend_ffi_parser_error("unsupported attribute '%.*s' at line %d", name_len, name, FFI_G(line));
