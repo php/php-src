@@ -1,7 +1,10 @@
 --TEST--
 Check for empty pattern
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_ereg_search_init')) die('skip mb_ereg_search_init() not available');
+?>
 --FILE--
 <?php
 

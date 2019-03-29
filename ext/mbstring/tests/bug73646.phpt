@@ -1,5 +1,10 @@
 --TEST--
 Bug #73646 (mb_ereg_search_init null pointer dereference)
+--SKIPIF--
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_ereg_search_init')) die('skip mb_ereg_search_init() not available');
+?>
 --FILE--
 <?php
 

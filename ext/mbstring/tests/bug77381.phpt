@@ -1,7 +1,10 @@
 --TEST--
 Bug #77381 (heap buffer overflow in multibyte match_at)
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_ereg')) die('skip mb_ereg() not available');
+?>
 --FILE--
 <?php
 var_dump(mb_ereg("000||0\xfa","0"));

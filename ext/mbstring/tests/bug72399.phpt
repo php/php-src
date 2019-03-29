@@ -1,5 +1,10 @@
 --TEST--
 Bug #72399 (Use-After-Free in MBString (search_re))
+--SKIPIF--
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_ereg_replace')) die('skip mb_ereg_replace() not available');
+?>
 --FILE--
 <?php
 $var5 = mbereg_search_init("","2");
