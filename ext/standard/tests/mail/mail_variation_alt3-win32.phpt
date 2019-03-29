@@ -87,5 +87,5 @@ imap_close($imap_stream, CL_EXPUNGE);
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 
-Warning: mail(): "sendmail_from" not set in php.ini or custom "From:" header missing in %s on line %d
+Warning: mail(): Bad Message Return Path in %s on line %d
 TEST COMPLETED : Unable to send test email
