@@ -645,8 +645,8 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
-	zend_string *key;
 	zend_ulong num_ind;
+	zend_string *key;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
@@ -673,8 +673,9 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 				} else {
 					dest_elem = zend_hash_update(ht, key, elem);
 				}
-
-				zval_add_ref(dest_elem);
+				if (dest_elem) {
+					zval_add_ref(dest_elem);
+				}
 				ret++;
 				continue;
 			}
@@ -694,13 +695,15 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
+	zend_ulong num_ind;
+	zend_string *key;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -713,7 +716,11 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			 * This branch of code also allows blocking streams with buffered data to
 			 * operate correctly in stream_select.
 			 * */
-			dest_elem = zend_hash_next_index_insert(ht, elem);
+			if (!key) {
+				dest_elem = zend_hash_index_update(ht, num_ind, elem);
+			} else {
+				dest_elem = zend_hash_update(ht, key, elem);
+			}
 			if (dest_elem) {
 				zval_add_ref(dest_elem);
 			}
