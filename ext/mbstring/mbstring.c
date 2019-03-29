@@ -2267,7 +2267,9 @@ PHP_FUNCTION(mb_str_split)
 		while (p < last) { /* split cycle work until the cursor has reached the last byte */
 			char const *chunk_p = p; /* chunk first byte pointer */
 			chunk_len = 0; /* chunk length in bytes */
-			for (zend_long char_count = 0; char_count < split_length && p < last; ++char_count) {
+			zend_long char_count;
+
+			for (char_count = 0; char_count < split_length && p < last; ++char_count) {
 				char unsigned const m = mbtab[*(const unsigned char *)p]; /* single character length table */
 				chunk_len += m;
 				p += m;
@@ -2335,7 +2337,9 @@ PHP_FUNCTION(mb_str_split)
 	chunks = (mb_len + split_length - 1) / split_length; /* (round up idiom) */
 	array_init_size(return_value, chunks);
 	if (chunks != 0) {
-		for (zend_long i = 0; i < chunks - 1; p += chunk_len, ++i) {
+		zend_long i;
+
+		for (i = 0; i < chunks - 1; p += chunk_len, ++i) {
 			add_next_index_stringl(return_value, p, chunk_len);
 		}
 		add_next_index_stringl(return_value, p, last - p);
