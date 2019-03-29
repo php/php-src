@@ -56,6 +56,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	HashTable *symbols;
 	HashTable *tags;
 	zend_bool allow_vla;
+	zend_bool attribute_parsing;
 	zend_bool persistent;
 	uint32_t  default_type_attr;
 ZEND_END_MODULE_GLOBALS(ffi)
@@ -182,6 +183,7 @@ typedef enum _zend_ffi_val_kind {
 	ZEND_FFI_VAL_LONG_DOUBLE,
 	ZEND_FFI_VAL_CHAR,
 	ZEND_FFI_VAL_STRING,
+	ZEND_FFI_VAL_NAME, /* attribute value */
 } zend_ffi_val_kind;
 
 #ifdef HAVE_LONG_DOUBLE
