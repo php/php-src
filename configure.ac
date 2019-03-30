@@ -8,7 +8,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT(README.GIT-RULES)
+AC_INIT([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
