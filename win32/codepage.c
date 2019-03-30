@@ -173,16 +173,12 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 			while (end - idx > 15) {
 				const __m128i block = _mm_load_si128((__m128i *)idx);
 
-				{
-					const __m128i lo = _mm_unpacklo_epi8(block, mask);
-					_mm_storeu_si128((__m128i *)ret_idx, lo);
-				}
+				const __m128i lo = _mm_unpacklo_epi8(block, mask);
+				_mm_storeu_si128((__m128i *)ret_idx, lo);
 
 				ret_idx += 8;
-				{
-					const __m128i hi = _mm_unpackhi_epi8(block, mask);
-					_mm_storeu_si128((__m128i *)ret_idx, hi);
-				}
+				const __m128i hi = _mm_unpackhi_epi8(block, mask);
+				_mm_storeu_si128((__m128i *)ret_idx, hi);
 
 				idx += 16;
 				ret_idx += 8;
