@@ -94,8 +94,8 @@ contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
 - [PHP coding standards](/CODING_STANDARDS)
-- [Mailinglist rules](/README.MAILINGLIST_RULES)
-- [PHP release process](/README.RELEASE_PROCESS)
+- [Mailinglist rules](/docs/mailinglist-rules.md)
+- [PHP release process](/docs/release-process.md)
 
 ## Testing
 
