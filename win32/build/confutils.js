@@ -3294,6 +3294,8 @@ function toolset_setup_common_cflags()
 		if (VCVERS >= 1914) {
 			ADD_FLAG("CFLAGS", "/d2FuncCache1");
 		}
+
+		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
 		if (X64) {
 			ADD_FLAG('CFLAGS', '-m64');
