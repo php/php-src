@@ -4954,6 +4954,7 @@ PHP_FUNCTION(parse_str)
 	} else 	{
 		arrayArg = zend_try_array_init(arrayArg);
 		if (!arrayArg) {
+			efree(res);
 			return;
 		}
 
