@@ -37,20 +37,16 @@
 
 YACC=${YACC:-bison}
 YACC="$YACC -l"
-SED=${SED:-sed}
 RE2C=${RE2C:-re2c}
 RE2C_FLAGS="-i"
+SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
-# Current path to return to it later. This enables running script from any path.
-original_path=`pwd`
+# Go to project root.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
-# Project root directory
-project_root=`CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P`
-cd $project_root
-
-# Get required bison version from the configure.ac file.
-required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\(.*\)\])/\1/p' configure.ac)
+# Check required bison version from the configure.ac file.
+required_bison_version=$($SED -n 's/PHP_PROG_BISON(\[\([0-9\.]*\)\].*/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_bison_version; set +f; IFS=' '
 required_bison_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
@@ -58,7 +54,6 @@ current_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -
 set -f; IFS='.'; set -- $current_version; set +f; IFS=' '
 current_bison_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
-# Check if bison exists.
 if test -z "$current_version"; then
   echo "genfiles: bison not found." >&2
   echo "          You need bison version $required_bison_version or newer installed" >&2
@@ -75,7 +70,7 @@ else
   echo "genfiles: bison version $current_version (ok)"
 fi
 
-# Get required re2c version from the configure.ac file.
+# Check required re2c version from the configure.ac file.
 required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
 required_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
@@ -84,7 +79,6 @@ current_version="$($RE2C --version | cut -d ' ' -f 2  2>/dev/null)"
 set -f; IFS='.'; set -- $current_version; set +f; IFS=' '
 current_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
-# Check if bison exists.
 if test -z "$current_version"; then
   echo "genfiles: re2c not found." >&2
   echo "          You need re2c version $required_re2c_version or newer installed" >&2
@@ -103,11 +97,11 @@ fi
 
 # Check if make exists.
 if ! test -x "$(command -v $MAKE)"; then
-  echo "make not found. Please install make to generate files." >&2
+  echo "genfiles: make not found. Please install make to generate files." >&2
   exit 1
 fi
 
-echo "Generating Zend parser and lexer files"
+echo "genfiles: Generating Zend parser and lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=Zend builddir=Zend top_srcdir=. \
   -f Zend/Makefile.frag \
   Zend/zend_language_parser.c \
@@ -115,33 +109,30 @@ $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=Zend builddir=Ze
   Zend/zend_ini_parser.c \
   Zend/zend_ini_scanner.c
 
-echo "Generating phpdbg parser and lexer files"
+echo "genfiles: Generating phpdbg parser and lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=sapi/phpdbg builddir=sapi/phpdbg top_srcdir=. \
   -f sapi/phpdbg/Makefile.frag \
   sapi/phpdbg/phpdbg_parser.c \
   sapi/phpdbg/phpdbg_lexer.c
 
-echo "Generating json extension parser and lexer files"
+echo "genfiles: enerating json extension parser and lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=ext/json builddir=ext/json top_srcdir=. \
   -f ext/json/Makefile.frag \
   ext/json/json_parser.tab.c \
   ext/json/json_scanner.c
 
-echo "Generating PDO lexer file"
+echo "genfiles: Generating PDO lexer file"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo builddir=ext/pdo top_srcdir=. \
   -f ext/pdo/Makefile.frag \
   ext/pdo/pdo_sql_parser.c
 
-echo "Generating standard extension lexer files"
+echo "genfiles: Generating standard extension lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/standard builddir=ext/standard top_srcdir=. \
   -f ext/standard/Makefile.frag \
   ext/standard/var_unserializer.c \
   ext/standard/url_scanner_ex.c
 
-echo "Generating phar extension lexer file"
+echo "genfiles: Generating phar extension lexer file"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/phar builddir=ext/phar top_srcdir=. \
   -f ext/phar/Makefile.frag \
   ext/phar/phar_path_check.c
-
-# Return to the original directory.
-cd $original_path
