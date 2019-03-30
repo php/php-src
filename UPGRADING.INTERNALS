@@ -204,7 +204,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   a. Abstract
     - The hash extension is now always available, meaning the --enable-hash
-	    configure argument has been removed.
+        configure argument has been removed.
     - The filter extension no longer exposes the --with-pcre-dir configure 
       argument and therefore allows shared builds with ./configure for Unix 
       builds.
@@ -222,6 +222,10 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - new --enable-rtld-now build option allow to switch dlopen behavior
       from RTLD_LAZY to RTLD_NOW
     - Minimum Bison version is 3.0+ for generating parser files.
+    - PHP_PROG_BISON macro now takes two optional arguments - minimum required
+      version and excluded versions that aren't supported.
+    - PHP_PROG_RE2C is not called in the generated configure.ac for extensions
+      anymore and now takes one optional argument - minimum required version.
 
   c. Windows build system changes
 
@@ -235,4 +239,4 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   b. ext/hash
     - The hash extension is now always available, allowing extensions to rely
-	  on its functionality to be available without compile time checks.
+      on its functionality to be available without compile time checks.
