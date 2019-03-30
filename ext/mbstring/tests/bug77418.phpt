@@ -1,7 +1,10 @@
 --TEST--
 Bug #77418 (Heap overflow in utf32be_mbc_to_code)
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
+if (!function_exists('mb_split')) die('skip mb_split() not available');
+?>
 --FILE--
 <?php
 mb_regex_encoding("UTF-32");
