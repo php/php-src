@@ -3,10 +3,7 @@ dnl This file contains Zend specific autoconf functions.
 dnl
 
 AC_DEFUN([LIBZEND_BASIC_CHECKS],[
-
 AC_REQUIRE([AC_PROG_CC])
-
-LIBZEND_BISON_CHECK
 
 AC_CHECK_HEADERS(
 inttypes.h \
