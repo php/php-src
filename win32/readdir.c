@@ -68,6 +68,7 @@ DIR *opendir(const char *dir)
 
 	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
 	if (dp == NULL) {
+		free(filespecw);
 		free(resolvedw);
 		return NULL;
 	}
