@@ -460,13 +460,49 @@ PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *pa
 		per the current knowledge.
 		
 		This check is to be extended as new VS versions come out. */
-	if (14 == major && PHP_LINKER_MINOR < minor
+	if (14 == PHP_LINKER_MAJOR && 14 == major && PHP_LINKER_MINOR < minor
 			|| PHP_LINKER_MAJOR != major) {
 		spprintf(err, 0, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
 		ImageUnload(img);
 		return FALSE;
 	}
 
+	ImageUnload(img);
+
+	return TRUE;
+}/*}}}*/
+
+/* Expect a CRT name DLL. */
+PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *name, char **err)
+{/*{{{*/
+	PLOADED_IMAGE img = ImageLoad(name, NULL);
+
+	if (!img) {
+		DWORD _err = GetLastError();
+		char *err_txt = php_win32_error_to_msg(_err);
+		spprintf(err, 0, "Failed to load %s, %s", name, err_txt);
+		free(err_txt);
+		return FALSE;
+	}
+	
+	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
+	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
+
+#if PHP_LINKER_MAJOR == 14
+	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
+	DWORD comp_minor = (DWORD)(minor/10);
+	if (core_minor > comp_minor) {
+		spprintf(err, 0, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		ImageUnload(img);
+		return FALSE;
+	}
+#else
+	if (PHP_LINKER_MAJOR != major) {
+		spprintf(err, 0, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		ImageUnload(img);
+		return FALSE;
+	}
+#endif
 	ImageUnload(img);
 
 	return TRUE;
