@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #77773 (Unbuffered queries leak memory - MySQLi / mysqlnd).
     (Nikita)
 
+- PCRE:
+  . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
+    cmb)
+
 - phpdbg:
   . Fixed bug #76801 (too many open files). (alekitto)
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
