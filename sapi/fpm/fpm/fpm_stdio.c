@@ -106,9 +106,11 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
+#define FPM_STDIO_CMD_FLUSH "\0fscf"
+
 int fpm_stdio_flush_child() /* {{{ */
 {
-	return write(STDERR_FILENO, "\0", 1);
+	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
 }
 /* }}} */
 
@@ -173,10 +175,20 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 				}
 			} else {
 				in_buf += res;
-				/* if buffer ends with \0, then the stream will be finished */
-				if (!buf[in_buf - 1]) {
+				/* check if buffer should be flushed */
+				if (!buf[in_buf - 1] && in_buf >= sizeof(FPM_STDIO_CMD_FLUSH) &&
+						!memcmp(buf + in_buf - sizeof(FPM_STDIO_CMD_FLUSH),
+							FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
+					/* if buffer ends with flush cmd, then the stream will be finished */
 					finish_log_stream = 1;
-					in_buf--;
+					in_buf -= sizeof(FPM_STDIO_CMD_FLUSH);
+				} else if (!buf[0] && in_buf > sizeof(FPM_STDIO_CMD_FLUSH) &&
+						!memcmp(buf, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
+					/* if buffer starts with flush cmd, then the stream will be finished */
+					finish_log_stream = 1;
+					in_buf -= sizeof(FPM_STDIO_CMD_FLUSH);
+					/* move data behind the flush cmd */
+					memmove(buf, buf + sizeof(FPM_STDIO_CMD_FLUSH), in_buf);
 				}
 			}
 		}
