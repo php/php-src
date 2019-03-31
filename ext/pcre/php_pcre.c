@@ -486,6 +486,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 			case ' ':
 			case '\n':
+			case '\r':
 				break;
 
 			default:

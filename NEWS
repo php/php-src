@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
+- PCRE:
+  . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
+    cmb)
+
 - phpdbg:
   . Fixed bug #76801 (too many open files). (alekitto)
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
