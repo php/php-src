@@ -453,6 +453,7 @@ PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *pa
 	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
 	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
 
+#if PHP_LINKER_MAJOR == 14
 	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
 		It should be fine, if we load a module linked with an older one into
 		the core linked with the newer one, but not the otherway round.
@@ -460,8 +461,11 @@ PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *pa
 		per the current knowledge.
 		
 		This check is to be extended as new VS versions come out. */
-	if (14 == PHP_LINKER_MAJOR && 14 == major && PHP_LINKER_MINOR < minor
-			|| PHP_LINKER_MAJOR != major) {
+	if (14 == major && PHP_LINKER_MINOR < minor || PHP_LINKER_MAJOR != major)
+#else
+	if (PHP_LINKER_MAJOR != major)
+#endif
+	{
 		spprintf(err, 0, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
 		ImageUnload(img);
 		return FALSE;
@@ -491,18 +495,15 @@ PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *name, char **err)
 #if PHP_LINKER_MAJOR == 14
 	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
 	DWORD comp_minor = (DWORD)(minor/10);
-	if (core_minor > comp_minor) {
-		spprintf(err, 0, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
-		ImageUnload(img);
-		return FALSE;
-	}
+	if (14 == major && core_minor > comp_minor || PHP_LINKER_MAJOR != major)
 #else
-	if (PHP_LINKER_MAJOR != major) {
+	if (PHP_LINKER_MAJOR != major)
+#endif
+	{
 		spprintf(err, 0, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
 		ImageUnload(img);
 		return FALSE;
 	}
-#endif
 	ImageUnload(img);
 
 	return TRUE;
