@@ -343,7 +343,7 @@ static void php_load_zend_extension_cb(void *arg)
 	char *err;
 	if (!php_win32_image_compatible(filename, NULL, &err)) {
 		php_error(E_CORE_WARNING, err);
-		return FAILURE;
+		return;
 	}
 #endif
 		zend_load_extension(filename);
@@ -397,7 +397,7 @@ static void php_load_zend_extension_cb(void *arg)
 				efree(err1);
 				efree(libpath);
 				DL_UNLOAD(handle);
-				return FAILURE;
+				return;
 		}
 #endif
 
