@@ -167,6 +167,16 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 		efree(err1);
 	}
 
+#ifdef PHP_WIN32
+	if (!php_win32_image_compatible(libpath, NULL, &err1)) {
+			php_error_docref(NULL, error_type, err1);
+			efree(err1);
+			efree(libpath);
+			DL_UNLOAD(handle);
+			return FAILURE;
+	}
+#endif
+
 	efree(libpath);
 
 	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");

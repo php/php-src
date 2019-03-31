@@ -339,6 +339,13 @@ static void php_load_zend_extension_cb(void *arg)
 #endif
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
+#ifdef PHP_WIN32
+	char *err;
+	if (!php_win32_image_compatible(filename, NULL, &err)) {
+		php_error(E_CORE_WARNING, err);
+		return FAILURE;
+	}
+#endif
 		zend_load_extension(filename);
 	} else {
 		DL_HANDLE handle;
@@ -383,6 +390,16 @@ static void php_load_zend_extension_cb(void *arg)
 			efree(orig_libpath);
 			efree(err1);
 		}
+
+#ifdef PHP_WIN32
+		if (!php_win32_image_compatible(libpath, NULL, &err1)) {
+				php_error(E_CORE_WARNING, err1);
+				efree(err1);
+				efree(libpath);
+				DL_UNLOAD(handle);
+				return FAILURE;
+		}
+#endif
 
 		zend_load_extension_handle(handle, libpath);
 		efree(libpath);
