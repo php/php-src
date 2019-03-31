@@ -22,6 +22,8 @@
 #include "codepage.h"
 #include <bcrypt.h>
 #include <lmcons.h>
+#include <imagehlp.h>
+
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {/*{{{*/
@@ -435,3 +437,38 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 
 	return uname;
 }/*}}}*/
+
+PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *path, char **err)
+{/*{{{*/
+	PLOADED_IMAGE img = ImageLoad(name, NULL);
+
+	if (!img) {
+		DWORD _err = GetLastError();
+		char *err_txt = php_win32_error_to_msg(_err);
+		spprintf(err, 0, "Failed to load %s, %s", name, err_txt);
+		free(err_txt);
+		return FALSE;
+	}
+	
+	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
+	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
+
+	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
+		It should be fine, if we load a module linked with an older one into
+		the core linked with the newer one, but not the otherway round.
+		Otherwise, if the linker major version is not same, it is an error, as
+		per the current knowledge.
+		
+		This check is to be extended as new VS versions come out. */
+	if (14 == major && PHP_LINKER_MINOR < minor
+			|| PHP_LINKER_MAJOR != major) {
+		spprintf(err, 0, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		ImageUnload(img);
+		return FALSE;
+	}
+
+	ImageUnload(img);
+
+	return TRUE;
+}/*}}}*/
+
