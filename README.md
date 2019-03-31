@@ -58,9 +58,9 @@ Shall run `make` with a maximum of 4 concurrent jobs: Generally the maximum numb
 
 PHP ships with an extensive test suite, the command `make test` is used after successful compilation of the sources to run this test suite. 
 
-It is possible to run tests using multiple cores by setting `-jN` in `PHP_TEST_ARGS`:
+It is possible to run tests using multiple cores by setting `-jN` in `TEST_PHP_ARGS`:
 
-    make PHP_TEST_ARGS=-j4 test
+    make TEST_PHP_ARGS=-j4 test
     
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum number of jobs should not exceed the number of cores available.
 
