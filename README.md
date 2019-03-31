@@ -33,23 +33,46 @@ For Windows, the PHP binaries can be obtained from
 
 For other systems, see the [installation chapter](https://php.net/install).
 
-### Building PHP from source
+### Building PHP source code
 
-On \*nix systems:
+*For Windows, see [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).*
+
+PHP uses autotools on Unix systems to configure the build:
 
     ./buildconf
-    ./configure
-    make
-    make test
+    ./configure [options]
 
-See `./configure -h` and `make -h` for configuration options. For example, the
-`-j` option allows parallel execution of the build recipes where `N` is the
-number of available processor cores:
+*See `./configure -h` for configuration options.*
 
-    make -j N
+    make [options]
 
-For Windows, see
-[Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).
+*See `make -h` for make options.*
+
+The `-j` option shall set the maximum number of jobs `make` can use for the build:
+
+    make -j4
+    
+Shall run `make` with a maximum of 4 concurrent jobs: Generally the maximum number of jobs should not exceed the number of cores available.
+
+## Testing PHP source code
+
+PHP ships with an extensive test suite, the command `make test` is used after successful compilation of the sources to run this test suite. 
+
+It is possible to run tests using multiple cores by setting `-jN` in `PHP_TEST_ARGS`:
+
+    make PHP_TEST_ARGS=-j4 test
+    
+Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum number of jobs should not exceed the number of cores available.
+
+The [qa.php.net](https://qa.php.net) site provides more detailed info about testing and quality assurance.
+
+## Installing PHP built from source
+
+After a successful build (and test), PHP may be installed with:
+
+    make install
+    
+Depending on your permissions and prefix, `make install` may need super user permissions.
 
 ## PHP extensions
 
@@ -96,17 +119,6 @@ contribute:
 - [PHP coding standards](/CODING_STANDARDS)
 - [Mailinglist rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
-
-## Testing
-
-To run tests the `make test` is used after a successful compilation of the
-sources. The `-j` option provides faster parallel execution based on the number
-of cores (`N`):
-
-    make -j N test
-
-The [qa.php.net](https://qa.php.net) site provides more detailed info about
-testing and quality assurance.
 
 ## Credits
 
