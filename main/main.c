@@ -2161,6 +2161,16 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 #endif
 
 #ifdef PHP_WIN32
+# if PHP_LINKER_MAJOR == 14
+	/* Extend for other CRT if needed. */
+	char *img_err;
+	if (!php_win32_crt_compatible("vcruntime140.dll", &img_err)) {
+		php_error(E_CORE_WARNING, img_err);
+		efree(img_err);
+		return FAILURE;
+	}
+# endif
+
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		php_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
