@@ -416,17 +416,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_dim_rw_helper);
 	REGISTER_HELPER(zend_jit_fetch_dim_w_helper);
 	REGISTER_HELPER(zend_jit_assign_dim_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_add_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_sub_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_mul_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_div_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_bw_or_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_bw_and_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_bw_xor_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_sl_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_sr_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_mod_helper);
-	REGISTER_HELPER(zend_jit_assign_dim_concat_helper);
+	REGISTER_HELPER(zend_jit_assign_dim_op_helper);
 	REGISTER_HELPER(zend_jit_fast_assign_concat_helper);
 	REGISTER_HELPER(zend_jit_fast_concat_helper);
 	REGISTER_HELPER(zend_jit_isset_dim_helper);
