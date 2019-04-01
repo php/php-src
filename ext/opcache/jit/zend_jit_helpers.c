@@ -662,49 +662,45 @@ try_string_offset:
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_obj_r_helper(zval *container, zval *dim, zval *result)
 {
+	zval *retval;
+
 	if (UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 		dim = &EG(uninitialized_zval);
 	}
-	if (!Z_OBJ_HT_P(container)->read_dimension) {
-		zend_throw_error(NULL, "Cannot use object as array");
-		ZVAL_NULL(result);
-	} else {
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(Z_OBJ_P(container), dim, BP_VAR_R, result);
 
-		if (retval) {
-			if (result != retval) {
-				ZVAL_COPY_DEREF(result, retval);
-			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-				zend_unwrap_reference(retval);
-			}
-		} else {
-			ZVAL_NULL(result);
+	retval = Z_OBJ_HT_P(container)->read_dimension(Z_OBJ_P(container), dim, BP_VAR_R, result);
+
+	if (retval) {
+		if (result != retval) {
+			ZVAL_COPY_DEREF(result, retval);
+		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+			zend_unwrap_reference(retval);
 		}
+	} else {
+		ZVAL_NULL(result);
 	}
 }
 
 static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval *dim, zval *result)
 {
+	zval *retval;
+
 	if (UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
 		dim = &EG(uninitialized_zval);
 	}
-	if (!Z_OBJ_HT_P(container)->read_dimension) {
-		zend_throw_error(NULL, "Cannot use object as array");
-		ZVAL_NULL(result);
-	} else {
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(Z_OBJ_P(container), dim, BP_VAR_IS, result);
 
-		if (retval) {
-			if (result != retval) {
-				ZVAL_COPY_DEREF(result, retval);
-			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-				zend_unwrap_reference(result);
-			}
-		} else {
-			ZVAL_NULL(result);
+	retval = Z_OBJ_HT_P(container)->read_dimension(Z_OBJ_P(container), dim, BP_VAR_IS, result);
+
+	if (retval) {
+		if (result != retval) {
+			ZVAL_COPY_DEREF(result, retval);
+		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+			zend_unwrap_reference(result);
 		}
+	} else {
+		ZVAL_NULL(result);
 	}
 }
 
@@ -941,13 +937,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 {
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 		ZVAL_DEREF(value);
-		if (UNEXPECTED(!Z_OBJ_HT_P(object_ptr)->write_dimension)) {
-			zend_throw_error(NULL, "Cannot use object as array");
-		} else {
-			Z_OBJ_HT_P(object_ptr)->write_dimension(Z_OBJ_P(object_ptr), dim, value);
-			if (result && EXPECTED(!EG(exception))) {
-				ZVAL_COPY(result, value);
-			}
+		Z_OBJ_HT_P(object_ptr)->write_dimension(Z_OBJ_P(object_ptr), dim, value);
+		if (result && EXPECTED(!EG(exception))) {
+			ZVAL_COPY(result, value);
 		}
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (!dim) {
@@ -973,8 +965,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_add_helper(zval *container, zval *
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1029,8 +1021,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_sub_helper(zval *container, zval *
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1085,8 +1077,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_mul_helper(zval *container, zval *
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1141,8 +1133,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_div_helper(zval *container, zval *
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1197,8 +1189,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_bw_or_helper(zval *container, zval
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1253,8 +1245,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_bw_and_helper(zval *container, zva
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1309,8 +1301,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_bw_xor_helper(zval *container, zva
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1365,8 +1357,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_sl_helper(zval *container, zval *d
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1421,8 +1413,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_sr_helper(zval *container, zval *d
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1477,8 +1469,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_mod_helper(zval *container, zval *
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1533,8 +1525,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_concat_helper(zval *container, zva
 		zval *z;
 		zval rv, res;
 
-		if (Z_OBJ_HT_P(object)->read_dimension &&
-			(z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
+		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
+		if (z != NULL) {
 
 			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 				zval rv2;
@@ -1635,11 +1627,7 @@ static int ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offset
 	}
 
 	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
-			return Z_OBJ_HT_P(container)->has_dimension(Z_OBJ_P(container), offset, 0);
-		} else {
-			zend_error(E_NOTICE, "Trying to check element of non-array");
-		}
+		return Z_OBJ_HT_P(container)->has_dimension(Z_OBJ_P(container), offset, 0);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
 		zend_long lval;
 
@@ -1964,23 +1952,15 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 {
 	zval *retval;
 	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_string *name, *tmp_name;
 
-	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
-		zend_string *property_name = zval_get_string(offset);
-		zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
-		zend_string_release(property_name);
-		ZVAL_NULL(result);
-	} else {
-		zend_string *name, *tmp_name;
-
-		name = zval_get_tmp_string(offset, &tmp_name);
-		retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, CACHE_ADDR(cache_slot), result);
-		zend_tmp_string_release(tmp_name);
-		if (retval != result) {
-			ZVAL_COPY_DEREF(result, retval);
-		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-			zend_unwrap_reference(retval);
-		}
+	name = zval_get_tmp_string(offset, &tmp_name);
+	retval = zobj->handlers->read_property(zobj, name, BP_VAR_R, CACHE_ADDR(cache_slot), result);
+	zend_tmp_string_release(tmp_name);
+	if (retval != result) {
+		ZVAL_COPY_DEREF(result, retval);
+	} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+		zend_unwrap_reference(retval);
 	}
 }
 
@@ -2024,20 +2004,15 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *of
 {
 	zval *retval;
 	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_string *name, *tmp_name;
 
-	if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
-		ZVAL_NULL(result);
-	} else {
-		zend_string *name, *tmp_name;
-
-		name = zval_get_tmp_string(offset, &tmp_name);
-		retval = zobj->handlers->read_property(zobj, name, BP_VAR_IS, CACHE_ADDR(cache_slot), result);
-		zend_tmp_string_release(tmp_name);
-		if (retval != result) {
-			ZVAL_COPY_DEREF(result, retval);
-		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-			zend_unwrap_reference(retval);
-		}
+	name = zval_get_tmp_string(offset, &tmp_name);
+	retval = zobj->handlers->read_property(zobj, name, BP_VAR_IS, CACHE_ADDR(cache_slot), result);
+	zend_tmp_string_release(tmp_name);
+	if (retval != result) {
+		ZVAL_COPY_DEREF(result, retval);
+	} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+		zend_unwrap_reference(retval);
 	}
 }
 
