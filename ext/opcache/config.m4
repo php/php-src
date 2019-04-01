@@ -40,7 +40,7 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
     rm -rf conftest*
 
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
