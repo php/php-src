@@ -164,6 +164,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
     void *http_output_conv_mimetypes;
 #if HAVE_MBREGEX
     struct _zend_mb_regex_globals *mb_regex_globals;
+    zend_long regex_stack_limit;
 #endif
 	zend_string *last_used_encoding_name;
 	const mbfl_encoding *last_used_encoding;
