@@ -50,7 +50,18 @@
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
 
-// TODO: define DASM_M_GROW and DASM_M_FREE to use CG(arena) ???
+#define DASM_M_GROW(ctx, t, p, sz, need) \
+  do { \
+    size_t _sz = (sz), _need = (need); \
+    if (_sz < _need) { \
+      if (_sz < 16) _sz = 16; \
+      while (_sz < _need) _sz += _sz; \
+      (p) = (t *)erealloc((p), _sz); \
+      (sz) = _sz; \
+    } \
+  } while(0)
+
+#define DASM_M_FREE(ctx, p, sz)	efree(p)
 
 #include "dynasm/dasm_proto.h"
 
