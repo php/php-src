@@ -46,6 +46,10 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/md5.h"
 
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
+
 #ifndef ZEND_WIN32
 #include  <netdb.h>
 #endif
@@ -2394,12 +2398,24 @@ int accel_activate(INIT_FUNC_ARGS)
 		accel_reset_pcre_cache();
 	}
 
+
+#ifdef HAVE_JIT
+	zend_jit_activate();
+#endif
+
 	if (ZCSG(preload_script)) {
 		preload_activate();
 	}
 
 	return SUCCESS;
 }
+
+#ifdef HAVE_JIT
+void accel_deactivate(void)
+{
+	zend_jit_deactivate();
+}
+#endif
 
 int accel_post_deactivate(void)
 {
@@ -2813,12 +2829,46 @@ static int accel_post_startup(void)
 		}
 	}
 
+	/* Initialize zend_func_info_rid */
+	zend_optimizer_startup();
+
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 	if (!file_cache_only) {
-		switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
+		size_t shm_size = ZCG(accel_directives).memory_consumption;
+#ifdef HAVE_JIT
+		size_t jit_size = 0;
+		zend_bool reattached = 0;
+
+		if (ZCG(accel_directives).jit &&
+		    ZCG(accel_directives).jit_buffer_size) {
+			size_t page_size;
+
+# ifdef _WIN32
+			SYSTEM_INFO system_info;
+			GetSystemInfo(&system_info);
+			page_size = system_info.dwPageSize;
+# else
+			page_size = getpagesize();
+# endif
+			if (!page_size || (page_size & (page_size - 1))) {
+				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
+				abort();
+			}
+			jit_size = ZCG(accel_directives).jit_buffer_size;
+			jit_size = ZEND_MM_ALIGNED_SIZE_EX(jit_size, page_size);
+			shm_size += jit_size;
+		} else {
+			ZCG(accel_directives).jit = 0;
+			ZCG(accel_directives).jit_buffer_size = 0;
+		}
+
+		switch (zend_shared_alloc_startup(shm_size, jit_size)) {
+#else
+		switch (zend_shared_alloc_startup(shm_size, 0)) {
+#endif
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
 					accel_startup_ok = 0;
@@ -2830,6 +2880,9 @@ static int accel_post_startup(void)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
+#ifdef HAVE_JIT
+				reattached = 1;
+#endif
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
@@ -2861,6 +2914,16 @@ static int accel_post_startup(void)
 		zend_accel_init_auto_globals();
 
 		zend_shared_alloc_lock();
+#ifdef HAVE_JIT
+		if (ZCG(accel_directives).jit &&
+		    ZCG(accel_directives).jit_buffer_size &&
+		    ZSMMG(reserved)) {
+			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached);
+		} else {
+			ZCG(accel_directives).jit = 0;
+			ZCG(accel_directives).jit_buffer_size = 0;
+		}
+#endif
 		zend_shared_alloc_save_state();
 		zend_shared_alloc_unlock();
 
@@ -2943,6 +3006,10 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool _file_cache_only = 0;
+
+#ifdef HAVE_JIT
+	zend_jit_shutdown();
+#endif
 
 	zend_optimizer_shutdown();
 
@@ -4244,7 +4311,11 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */
+#ifdef HAVE_JIT
+    accel_deactivate,                       /* per-script deactivation */
+#else
 	NULL,									/* per-script deactivation */
+#endif
 	NULL,									/* message handler */
 	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */

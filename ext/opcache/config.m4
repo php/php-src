@@ -13,10 +13,63 @@ PHP_ARG_ENABLE([huge-code-pages],
   [yes],
   [no])
 
+PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
+[  --disable-opcache-jit  Disable JIT], yes, no)
+
 if test "$PHP_OPCACHE" != "no"; then
+
+  dnl Always build as shared extension
+  ext_shared=yes
 
   if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
+  fi
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c"
+
+    dnl Find out which ABI we are using.
+    echo 'int i;' > conftest.$ac_ext
+    if AC_TRY_EVAL(ac_compile); then
+      case `/usr/bin/file conftest.o` in
+        *64-bit*)
+          DASM_FLAGS="-D X64=1"
+        ;;
+      esac
+    fi
+    rm -rf conftest*
+
+    if test "$enable_maintainer_zts" = "yes"; then
+      DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
+    fi
+
+    PHP_SUBST(DASM_FLAGS)
+
+    AC_MSG_CHECKING(for opagent in default path)
+    for i in /usr/local /usr; do
+      if test -r $i/include/opagent.h; then
+        OPAGENT_DIR=$i
+        AC_MSG_RESULT(found in $i)
+        break
+      fi
+    done
+    if test -z "$OPAGENT_DIR"; then
+      AC_MSG_RESULT(not found)
+    else
+      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
+      [
+        AC_DEFINE(HAVE_OPROFILE,1,[ ])
+        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
+        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
+        PHP_SUBST(OPCACHE_SHARED_LIBADD)
+      ],[
+        AC_MSG_RESULT(not found)
+      ],[
+        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
+      ])
+    fi
+
   fi
 
   AC_CHECK_FUNC(mprotect,[
@@ -375,9 +428,15 @@ int main() {
 	Optimizer/dce.c \
 	Optimizer/escape_analysis.c \
 	Optimizer/compact_vars.c \
-	Optimizer/zend_dump.c,
+	Optimizer/zend_dump.c \
+	$ZEND_JIT_SRC,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
+    PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
+  fi
 fi
