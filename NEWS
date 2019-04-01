@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #77578 (Crash when php unload). (cmb)
 
+- EXIF:
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
+
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
     (Kevin Adler)
