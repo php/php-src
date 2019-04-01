@@ -5189,7 +5189,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		binary_op = get_binary_op(opline->opcode);
 		|.if X64
 			|	LOAD_ZVAL_ADDR CARG3, op3_addr
-			|	LOAD_ADDR CARG4, binaty_op, r0
+			|	LOAD_ADDR CARG4, binary_op
 		|.else
 			|	sub r4, 8
 			|	PUSH_ADDR binary_op, r0
