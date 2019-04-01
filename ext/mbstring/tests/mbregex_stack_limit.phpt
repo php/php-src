@@ -2,6 +2,8 @@
 Test oniguruma stack limit
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--XFAIL--
+Travis CI has old oniguruma library
 --FILE--
 <?php
 $s = str_repeat(' ', 30000);
