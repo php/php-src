@@ -18,38 +18,41 @@
 
 #include "Zend/zend_API.h"
 
+static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+{
+	void **run_time_cache;
+
+	run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
+	memset(run_time_cache, 0, op_array->cache_size);
+	ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
+	return (zend_function*)op_array;
+}
+/* }}} */
+
+static zend_never_inline ZEND_FASTCALL zend_op_array* zend_jit_init_func_run_time_cache_helper(zend_op_array *op_array) /* {{{ */
+{
+	void **run_time_cache;
+
+	if (!RUN_TIME_CACHE(op_array)) {
+		run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
+		memset(run_time_cache, 0, op_array->cache_size);
+		ZEND_MAP_PTR_SET(op_array->run_time_cache, run_time_cache);
+	}
+	return op_array;
+}
+/* }}} */
+
 static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 {
-	zval *func = zend_hash_find(EG(function_table), name);
+	zval *func = zend_hash_find_ex(EG(function_table), name, 1);
 	zend_function *fbc;
 
 	if (UNEXPECTED(func == NULL)) {
-		zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(name));
 		return NULL;
 	}
 	fbc = Z_FUNC_P(func);
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-		void **run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-		memset(run_time_cache, 0, fbc->op_array.cache_size);
-		ZEND_MAP_PTR_SET(fbc->op_array.run_time_cache, run_time_cache);
-	}
-	return fbc;
-}
-
-static zend_function* ZEND_FASTCALL zend_jit_find_func_by_name_helper(zend_string *name, zend_string *key)
-{
-	zval *func = zend_hash_find(EG(function_table), key);
-	zend_function *fbc;
-
-	if (UNEXPECTED(func == NULL)) {
-		zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(name));
-		return NULL;
-	}
-	fbc = Z_FUNC_P(func);
-	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-		void **run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-		memset(run_time_cache, 0, fbc->op_array.cache_size);
-		ZEND_MAP_PTR_SET(fbc->op_array.run_time_cache, run_time_cache);
+		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
 	}
 	return fbc;
 }

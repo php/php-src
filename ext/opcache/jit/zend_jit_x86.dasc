@@ -2135,6 +2135,32 @@ static int zend_jit_not_obj_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_undefined_function_stub(dasm_State **Dst)
+{
+	|->undefined_function:
+	|	mov r0, aword EX->opline
+	|.if X64
+		|	xor CARG1, CARG1
+		|	LOAD_ADDR CARG2, "Call to undefined function %s()"
+		|	movsxd CARG3, dword [r0 + offsetof(zend_op, op2.constant)]
+		|	mov CARG3, aword [r0 + CARG3]
+		|	add CARG3, offsetof(zend_string, val)
+		|	EXT_CALL zend_throw_error, r0
+	|.else
+		|	sub r4, 4
+		|	mov r0, aword [r0 + offsetof(zend_op, op2.zv)]
+		|	mov r0, aword [r0]
+		|	add r0, offsetof(zend_string, val)
+		|	push r0
+		|	push "Call to undefined function %s()"
+		|	push 0
+		|	EXT_CALL zend_throw_error, r0
+		|	add r4, 16
+	|.endif
+	|	jmp ->exception_handler
+	return 1;
+}
+
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
@@ -2428,6 +2454,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_index_ex),
 	JIT_STUB(cannot_add_element_ex),
 	JIT_STUB(not_obj),
+	JIT_STUB(undefined_function),
 	JIT_STUB(negative_shift),
 	JIT_STUB(mod_by_zero),
 	JIT_STUB(double_one),
@@ -7271,8 +7298,6 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		/* recursive call */
 		|	mov r0,	EX->func
 	} else {
-		zval *zv = RT_CONSTANT(opline, opline->op2);
-
 		|	// if (CACHED_PTR(opline->result.num))
 		|	mov r0,	EX->run_time_cache
 		|	mov r0, aword [r0 + opline->result.num]
@@ -7280,27 +7305,32 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|	jz >1
 		|.cold_code
 		|1:
-		|	// SAVE_OPLINE();
-		|	SAVE_VALID_OPLINE opline
-		if (opline->opcode == ZEND_INIT_FCALL) {
-			|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
-			|	EXT_CALL zend_jit_find_func_helper, r0
-		} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
-			|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
-			|	LOAD_ADDR FCARG2a, Z_STR_P(zv + 1);
-			|	EXT_CALL zend_jit_find_func_by_name_helper, r0
+		if (func && func->type == ZEND_USER_FUNCTION && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+			|	LOAD_ADDR FCARG1a, func
+			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, r0
+			|	mov r1,	EX->run_time_cache
+			|	mov aword [r1 + opline->result.num], r0
+			|	jmp >3
 		} else {
-			ZEND_ASSERT(0);
-		}
-		if (opline->opcode != ZEND_INIT_FCALL) {
-			// TODO: INIT_FCALL may fail in some cases ???
+			zval *zv = RT_CONSTANT(opline, opline->op2);
+
+			if (opline->opcode == ZEND_INIT_FCALL) {
+				|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
+				|	LOAD_ADDR FCARG1a, Z_STR_P(zv + 1);
+			} else {
+				ZEND_ASSERT(0);
+			}
+			|	EXT_CALL zend_jit_find_func_helper, r0
+			|	// CACHE_PTR(opline->result.num, fbc);
+			|	mov r1,	EX->run_time_cache
+			|	mov aword [r1 + opline->result.num], r0
 			|	test r0, r0
-			|	jz ->exception_handler
+			|	jnz >3
+			|	// SAVE_OPLINE();
+			|	SAVE_VALID_OPLINE opline
+			|	jmp ->undefined_function
 		}
-		|	// CACHE_PTR(opline->result.num, fbc);
-		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + opline->result.num], r0
-		|	jmp >3
 		|.code
 		|3:
 	}
