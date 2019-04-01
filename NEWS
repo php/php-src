@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
+- mbstring:
+  . Implemented FR #72777 (Implement regex stack limits for mbregex functions). 
+    (Yasuo Ohgaki, Stas)
+
 - MySQLi:
   . Fixed bug #77773 (Unbuffered queries leak memory - MySQLi / mysqlnd).
     (Nikita)

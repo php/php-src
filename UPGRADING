@@ -727,6 +727,10 @@ LDAP:
   . New INI to set syslog ident string which is prepended to every message. It
     is used only when error_log is set syslog.
 
+- mbstring.regex_stack_limit
+  . New INI directive (since 7.3.6) limiting stack depth of mbstring/oniguruma
+  regular expressions. 
+
 ========================================
 12. Windows Support
 ========================================
