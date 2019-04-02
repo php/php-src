@@ -35,7 +35,7 @@ PHP                                                                        NEWS
   . Fixed bug #77793 (Segmentation fault in extract() when overwriting
     reference with itself). (Nikita)
 
-28 Mar 2019, PHP 7.3.4
+04 April 2019, PHP 7.3.4
 
 - Core:
   . Fixed bug #77738 (Nullptr deref in zend_compile_expr). (Laruence)
@@ -60,6 +60,10 @@ PHP                                                                        NEWS
 
 - COM:
   . Fixed bug #77578 (Crash when php unload). (cmb)
+
+- EXIF:
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). (Stas)
 
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
