@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-21 Mar 2019, PHP 7.2.17RC1
+04 Apr 2019, PHP 7.2.17
 
 - Core:
   . Fixed bug #77738 (Nullptr deref in zend_compile_expr). (Laruence)
