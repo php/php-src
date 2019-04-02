@@ -2816,19 +2816,6 @@ static int zend_jit_cond_jmp(dasm_State **Dst, const zend_op *next_opline, unsig
 	return 1;
 }
 
-static int zend_jit_smart_branch(dasm_State **Dst, const zend_op *opline, unsigned int next_label, unsigned int target_label)
-{
-	const zend_op *next_opline = opline + 1;
-	const zend_op *target_opline = OP_JMP_ADDR(opline, opline->op2);
-
-	|	CMP_IP next_opline
-	|	je =>next_label
-	|	CMP_IP target_opline
-	|	je =>target_label
-
-	return 1;
-}
-
 #ifdef CONTEXT_THREADED_JIT
 static int zend_jit_context_threaded_call(dasm_State **Dst, const zend_op *opline)
 {

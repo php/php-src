@@ -2058,58 +2058,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 
 		is_terminated = 0;
 
-		if (ssa->cfg.blocks[b].len == 1 &&
-		    ssa->cfg.blocks[b].start != 0 &&
-		    zend_is_smart_branch(&op_array->opcodes[ssa->cfg.blocks[b].start-1])) {
-
-			/* Special handling for splitted smart branch instruction pairs */
-			opline = &op_array->opcodes[ssa->cfg.blocks[b].start];
-			if (zend_jit_level >= ZEND_JIT_LEVEL_INLINE) {
-				if ((opline->opcode == ZEND_JMPZ ||
-				     opline->opcode == ZEND_JMPNZ ||
-				     opline->opcode == ZEND_JMPZNZ ||
-				     opline->opcode == ZEND_JMPZ_EX ||
-				     opline->opcode == ZEND_JMPNZ_EX) &&
-				    ((opline-1)->opcode == ZEND_IS_EQUAL ||
-				     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
-				     (opline-1)->opcode == ZEND_IS_SMALLER ||
-				     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-				     (opline-1)->opcode == ZEND_CASE)) {
-					zend_jit_jmp(&dasm_state, b + 1);
-				} else if (opline->opcode == ZEND_JMPZ ||
-						   opline->opcode == ZEND_JMPNZ) {
-					    /* smart branch */
-					if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
-						goto jit_failure;
-					}
-					zend_jit_jmp(&dasm_state, b + 1);
-				}
-			} else {
-				if (opline->opcode == ZEND_JMPZ ||
-				    opline->opcode == ZEND_JMPNZ) {
-				    opline--;
-					if ((opline->opcode == ZEND_IS_EQUAL ||
-					     opline->opcode == ZEND_IS_NOT_EQUAL ||
-					     opline->opcode == ZEND_IS_SMALLER ||
-					     opline->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-					     opline->opcode == ZEND_CASE) &&
-					    ((OP1_INFO() & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
-					     (OP2_INFO() & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-						/* might be smart branch */
-						if (!zend_jit_smart_branch(&dasm_state, opline + 1, (b + 1), ssa->cfg.blocks[b].successors[0])) {
-							goto jit_failure;
-						}
-					} else {
-						/* smart branch */
-						if (!zend_jit_cond_jmp(&dasm_state, opline + 2, ssa->cfg.blocks[b].successors[0])) {
-							goto jit_failure;
-						}
-						zend_jit_jmp(&dasm_state, b + 1);
-					}
-				}
-			}
-		}
-
 		zend_jit_label(&dasm_state, b);
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 			if (!zend_jit_reset_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
@@ -2446,30 +2394,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 					if (i != ssa->cfg.blocks[b].start) {
-						if ((opline-1)->opcode == ZEND_IS_EQUAL ||
-						    (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
-						    (opline-1)->opcode == ZEND_IS_SMALLER ||
-						    (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-						    (opline-1)->opcode == ZEND_CASE) {
-
-							uint32_t t1 = _ssa_op1_info(op_array, ssa, (opline-1));
-							uint32_t t2 = _ssa_op2_info(op_array, ssa, (opline-1));
-
-							if ((t1 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
-							    (t2 & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
-								/* might be smart branch */
-								if (!zend_jit_smart_branch(&dasm_state, opline, (b + 1), ssa->cfg.blocks[b].successors[0])) {
-									goto jit_failure;
-								}
-								/* break missing intentionally */
-							} else {
-								/* smart branch */
-								if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
-									goto jit_failure;
-								}
-								break;
-							}
-						} else if (zend_is_smart_branch(opline-1)) {
+						if (zend_is_smart_branch(opline-1)) {
 						    /* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
@@ -2485,6 +2410,10 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				case ZEND_FE_RESET_R:
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
@@ -2492,15 +2421,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					break;
 				case ZEND_NEW:
 					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa, call_level)) {
-						goto jit_failure;
-					}
-					break;
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
-					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
 					break;
