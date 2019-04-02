@@ -1987,6 +1987,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	void *checkpoint = NULL;
 	zend_lifetime_interval **ra = NULL;
 	zend_bitset checked_this = NULL;
+	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
 
 	if (zend_jit_reg_alloc) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
@@ -2019,7 +2020,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 		}
 #ifndef CONTEXT_THREADED_JIT
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
-			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
+			if (!is_terminated && (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET)) {
 				zend_jit_jmp(&dasm_state, b);
 			}
 			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
@@ -2054,6 +2055,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				zend_jit_prologue(&dasm_state);
 			}
 		}
+
+		is_terminated = 0;
 
 		if (ssa->cfg.blocks[b].len == 1 &&
 		    ssa->cfg.blocks[b].start != 0 &&
@@ -2254,6 +2257,8 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 						}
 						goto done;
 					case ZEND_DO_UCALL:
+						is_terminated = 1;
+						/* break missing intentionally */
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
@@ -2402,6 +2407,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					if (!zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
+					is_terminated = 1;
 					break;
 				case ZEND_CATCH:
 				case ZEND_FAST_CALL:
@@ -2417,6 +2423,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					if (!zend_jit_tail_handler(&dasm_state, opline)) {
 						goto jit_failure;
 					}
+					is_terminated = 1;
 					break;
 				/* stackless execution */
 				case ZEND_INCLUDE_OR_EVAL:
@@ -2426,6 +2433,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					if (!zend_jit_call(&dasm_state, opline)) {
 						goto jit_failure;
 					}
+					is_terminated = 1;
 					break;
 				case ZEND_JMPZNZ:
 					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
@@ -2433,6 +2441,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					    !zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
+					is_terminated = 1;
 					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
