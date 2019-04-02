@@ -7852,11 +7852,11 @@ static int zend_jit_new(dasm_State **Dst, const zend_op *opline, int *opnum, zen
 
 			|	CMP_IP next_opline
 			|	jne >6
-#if 0
-			zend_jit_call(Dst, next_opline);
-#else
-			zend_jit_do_fcall(Dst, next_opline, op_array, ssa, call_level);
-#endif
+			if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
+				zend_jit_call(Dst, next_opline);
+			} else {
+				zend_jit_do_fcall(Dst, next_opline, op_array, ssa, call_level);
+			}
 			|6:
 		}
 	}
