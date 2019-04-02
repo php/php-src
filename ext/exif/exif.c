@@ -41,8 +41,6 @@
 #define EXIFERR_CC
 #endif
 
-#undef EXIF_JPEG2000
-
 #include "php_exif.h"
 #include <math.h>
 #include "php_ini.h"
@@ -2566,35 +2564,6 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 #define M_COM   0xFE    /* COMment                                  */
 
 #define M_PSEUDO 0x123 	/* Extra value.                             */
-
-/* }}} */
-
-/* {{{ jpeg2000 markers
- */
-/* Markers x30 - x3F do not have a segment */
-/* Markers x00, x01, xFE, xC0 - xDF ISO/IEC 10918-1 -> M_<xx> */
-/* Markers xF0 - xF7 ISO/IEC 10918-3 */
-/* Markers xF7 - xF8 ISO/IEC 14495-1 */
-/* XY=Main/Tile-header:(R:required, N:not_allowed, O:optional, L:last_marker) */
-#define JC_SOC   0x4F   /* NN, Start of codestream                          */
-#define JC_SIZ   0x51   /* RN, Image and tile size                          */
-#define JC_COD   0x52   /* RO, Codeing style defaulte                       */
-#define JC_COC   0x53   /* OO, Coding style component                       */
-#define JC_TLM   0x55   /* ON, Tile part length main header                 */
-#define JC_PLM   0x57   /* ON, Packet length main header                    */
-#define JC_PLT   0x58   /* NO, Packet length tile part header               */
-#define JC_QCD   0x5C   /* RO, Quantization default                         */
-#define JC_QCC   0x5D   /* OO, Quantization component                       */
-#define JC_RGN   0x5E   /* OO, Region of interest                           */
-#define JC_POD   0x5F   /* OO, Progression order default                    */
-#define JC_PPM   0x60   /* ON, Packed packet headers main header            */
-#define JC_PPT   0x61   /* NO, Packet packet headers tile part header       */
-#define JC_CME   0x64   /* OO, Comment: "LL E <text>" E=0:binary, E=1:ascii */
-#define JC_SOT   0x90   /* NR, Start of tile                                */
-#define JC_SOP   0x91   /* NO, Start of packeter default                    */
-#define JC_EPH   0x92   /* NO, End of packet header                         */
-#define JC_SOD   0x93   /* NL, Start of data                                */
-#define JC_EOC   0xD9   /* NN, End of codestream                            */
 /* }}} */
 
 /* {{{ exif_process_COM
@@ -2606,34 +2575,6 @@ static void exif_process_COM (image_info_type *image_info, char *value, size_t l
 {
 	exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2, length-2);
 }
-/* }}} */
-
-/* {{{ exif_process_CME
-   Process a CME marker.
-   We want to print out the marker contents as legible text;
-   we must guard against random junk and varying newline representations.
-*/
-#ifdef EXIF_JPEG2000
-static void exif_process_CME (image_info_type *image_info, char *value, size_t length)
-{
-	if (length>3) {
-		switch(value[2]) {
-			case 0:
-				exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_UNDEFINED, length, value, length);
-				break;
-			case 1:
-				exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length, value, length);
-				break;
-			default:
-				php_error_docref(NULL, E_NOTICE, "Undefined JPEG2000 comment encoding");
-				break;
-		}
-	} else {
-		exif_iif_add_tag(image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_UNDEFINED, 0, NULL, 0);
-		php_error_docref(NULL, E_NOTICE, "JPEG2000 comment section too small");
-	}
-}
-#endif
 /* }}} */
 
 /* {{{ exif_process_SOFn
