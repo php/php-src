@@ -43,11 +43,11 @@
  |.define SPAD,    0x08      // padding for CPU stack alignment
  |.define NR_SPAD, 0x58      // padding for CPU stack alignment
  |.define SSE,     1
- |.define T3,      [r4+0x50]
- |.define T2,      [r4+0x48]
+ |.define T3,      [r4+0x50] // Used to store old value of IP
+ |.define T2,      [r4+0x48] // Used to store old value of FP
  |.define T1,      [r4+0x40]
- |.define A6,      [r4+0x28]
- |.define A5,      [r4+0x20]
+ |.define A6,      [r4+0x28] // preallocated slot for 6-th argument
+ |.define A5,      [r4+0x20] // preallocated slot for 5-th argument
 |.elif X64
  |.define FP,      r14
  |.define IP,      r15
@@ -72,8 +72,8 @@
  |.define SPAD,    0x08      // padding for CPU stack alignment
  |.define NR_SPAD, 0x18      // padding for CPU stack alignment
  |.define SSE,     1
- |.define T3,      [r4+0x10]
- |.define T2,      [r4+0x08]
+ |.define T3,      [r4+0x10] // Used to store old value of IP (CALL VM only)
+ |.define T2,      [r4+0x08] // Used to store old value of FP (CALL VM only)
  |.define T1,      [r4]
 |.else
  |.define FP,      esi
@@ -87,8 +87,8 @@
  |.define SPAD,    12        // padding for CPU stack alignment
  |.define NR_SPAD, 12        // padding for CPU stack alignment
  |.define SSE,     1
- |.define T3,      [r4+0x10]
- |.define T2,      [r4+0x08]
+ |.define T3,      [r4+0x10] // Used to store old value of IP (CALL VM only)
+ |.define T2,      [r4+0x08] // Used to store old value of FP (CALL VM only)
  |.define T1,      [r4]
 |.endif
 
@@ -2751,11 +2751,19 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 		return 0;
 	}
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		const void *handler = zend_get_opcode_handler_func(opline);
+#if 0
+		/* TODO: Use tail call to HYBRID VM handler (works, but need disassembler support ???) */
+		const void *handler = opline->handler;
 
 		|	add r4, HYBRID_SPAD
+		|	EXT_JMP handler, r0
+#else
+		const void *handler = zend_get_opcode_handler_func(opline);
+
 		|	EXT_CALL handler, r0
+		|	add r4, HYBRID_SPAD
 		|	JMP_IP
+#endif
 	} else {
 		const void *handler = opline->handler;
 
