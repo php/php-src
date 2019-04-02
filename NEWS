@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #75113 (Added DatePeriod::getRecurrences() method). (Ignace
     Nyamagana Butera)
 
+- EXIF:
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). (Stas)
+
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
     (Kevin Adler)
