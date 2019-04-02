@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - EXIF:
   . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). (Stas)
 
 - SQLite3:
   . Added sqlite3.defensive INI directive. (BohwaZ)
