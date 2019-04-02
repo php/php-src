@@ -22,7 +22,10 @@ if ($count > 0) {
 ?>
 ===DONE===
 --CLEAN--
-<?php rmdir(__DIR__ . '/bug42364'); ?>
+<?php
+unlink(__DIR__ . '/bug42364/test');
+rmdir(__DIR__ . '/bug42364');
+?>
 --EXPECTF--
 Found %i entries!
 ===DONE===
