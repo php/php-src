@@ -29,7 +29,7 @@ static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_ti
 }
 /* }}} */
 
-static zend_never_inline ZEND_FASTCALL zend_op_array* zend_jit_init_func_run_time_cache_helper(zend_op_array *op_array) /* {{{ */
+static zend_never_inline zend_op_array* ZEND_FASTCALL zend_jit_init_func_run_time_cache_helper(zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
 
