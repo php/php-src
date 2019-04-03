@@ -2026,8 +2026,16 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 		}
 #ifndef CONTEXT_THREADED_JIT
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
-			if (!is_terminated && (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET)) {
-				zend_jit_jmp(&dasm_state, b);
+			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
+				if (!is_terminated) {
+					zend_jit_jmp(&dasm_state, b);
+				}
+			} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
+			           ssa->cfg.blocks[b].len == 1 &&
+			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT) &&
+			           op_array->opcodes[ssa->cfg.blocks[b].start].opcode != ZEND_JMP) {
+				/* don't generate code for BB with single opcode */
+				continue;
 			}
 			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
@@ -2079,15 +2087,32 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				} else {
 					if (recv_emited) {
 						zend_jit_jmp(&dasm_state, b);
+					} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
+					           ssa->cfg.blocks[b].len == 1 &&
+					           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
+						/* don't generate code for BB with single opcode */
+						dasm_free(&dasm_state);
+
+						if (zend_jit_reg_alloc) {
+							zend_arena_release(&CG(arena), checkpoint);
+						}
+						return SUCCESS;
 					}
 					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 					zend_jit_prologue(&dasm_state);
 					recv_emited = 1;
 				}
-			} else {
-				if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
-					zend_jit_jmp(&dasm_state, b);
+			} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
+			           ssa->cfg.blocks[b].len == 1 &&
+			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT)) {
+				/* don't generate code for BB with single opcode */
+				dasm_free(&dasm_state);
+
+				if (zend_jit_reg_alloc) {
+					zend_arena_release(&CG(arena), checkpoint);
 				}
+				return SUCCESS;
+			} else {
 				zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 				zend_jit_prologue(&dasm_state);
 			}
