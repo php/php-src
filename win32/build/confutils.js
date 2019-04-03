@@ -105,7 +105,7 @@ var PHP_VERSION_STRING = "7.3.0";
 function get_version_numbers()
 {
 	var cin = file_get_contents("configure.ac");
-	var regex = /AC_INIT\(\[PHP\],\[(\d+)\.(\d+)\.(\d+)([^\]]*)\],.+\)/g;
+	var regex = /AC_INIT.+(\d+)\.(\d+)\.(\d+)([^\,^\]]*).+/g;
 
 	if (cin.match(new RegExp(regex))) {
 		PHP_VERSION = RegExp.$1;
