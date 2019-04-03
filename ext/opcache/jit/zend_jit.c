@@ -290,16 +290,21 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 #endif
 				zend_op *opline = op_array->opcodes + ssa->cfg.blocks[b].start;
+				int offset = dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b);
 
-				opline->handler = (void*)(((char*)entry) +
-					dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b));
+				if (offset >= 0) {
+					opline->handler = (void*)(((char*)entry) + offset);
+				}
 			}
 		}
 	    if (rt_opline && ssa && ssa->cfg.map) {
 			int b = ssa->cfg.map[rt_opline - op_array->opcodes];
 			zend_op *opline = (zend_op*)rt_opline;
-			opline->handler = (void*)(((char*)entry) +
-				dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b));
+			int offset = dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b);
+
+			if (offset >= 0) {
+				opline->handler = (void*)(((char*)entry) + offset);
+			}
 		}
 	}
 
@@ -1988,6 +1993,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	zend_lifetime_interval **ra = NULL;
 	zend_bitset checked_this = NULL;
 	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
+	zend_bool recv_emited = 0;   /* emited at least one RECV opcode */
 
 	if (zend_jit_reg_alloc) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
@@ -2029,26 +2035,57 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 #endif
 		if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
-			if ((ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) && opline->opcode == ZEND_RECV_INIT) {
-				if (opline > op_array->opcodes &&
-				    (opline-1)->opcode == ZEND_RECV_INIT) {
-					if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
-						/* repeatable opcode */
-						zend_jit_label(&dasm_state, b);
+			if (ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) {
+				if (opline->opcode == ZEND_RECV_INIT) {
+					if (opline == op_array->opcodes ||
+					    (opline-1)->opcode != ZEND_RECV_INIT) {
+						if (recv_emited) {
+							zend_jit_jmp(&dasm_state, b);
+						}
+						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
+						for (i = 1; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
+							zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b + i);
+						}
+						zend_jit_prologue(&dasm_state);
+					}
+					recv_emited = 1;
+				} else if (opline->opcode == ZEND_RECV) {
+					if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+						/* skip */
 						continue;
+					} else if (recv_emited) {
+						zend_jit_jmp(&dasm_state, b);
+						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
+						zend_jit_prologue(&dasm_state);
+					} else {
+						zend_arg_info *arg_info;
+
+						if (opline->op1.num <= op_array->num_args) {
+							arg_info = &op_array->arg_info[opline->op1.num - 1];
+						} else if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+							arg_info = &op_array->arg_info[op_array->num_args];
+						} else {
+							/* skip */
+							continue;
+						}
+						if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+							/* skip */
+							continue;
+						}
+						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
+						zend_jit_prologue(&dasm_state);
+						recv_emited = 1;
 					}
 				} else {
-					if (opline != op_array->opcodes) {
+					if (recv_emited) {
 						zend_jit_jmp(&dasm_state, b);
 					}
 					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
-					for (i = 1; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
-						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b + i);
-					}
 					zend_jit_prologue(&dasm_state);
+					recv_emited = 1;
 				}
 			} else {
-				if (ssa->cfg.blocks[b].flags & (ZEND_BB_TARGET|ZEND_BB_RECV_ENTRY)) {
+				if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 					zend_jit_jmp(&dasm_state, b);
 				}
 				zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
@@ -2344,13 +2381,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 
 			switch (opline->opcode) {
 				case ZEND_RECV_INIT:
-					if ((ssa->cfg.flags & ZEND_CFG_RECV_ENTRY)) {
-						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
-							goto jit_failure;
-						}
-						break;
-					}
-					/* break missing intentionally */
 				case ZEND_BIND_GLOBAL:
 					if (opline == op_array->opcodes ||
 					    opline->opcode != op_array->opcodes[i-1].opcode) {
@@ -2573,7 +2603,6 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 
 		/* restore original opcode handlers */
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			zend_vm_set_opcode_handler(opline);
 			opline++;
 		}
 		opline->handler = ZEND_FUNC_INFO(op_array);
@@ -2714,7 +2743,6 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		/* Set run-time JIT handler */
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline->handler = (const void*)zend_jit_runtime_jit_handler;
 			opline++;
 		}
 		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
