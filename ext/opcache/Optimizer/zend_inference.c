@@ -3746,6 +3746,9 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				if (!p->has_range_constraint) {
 					zend_ssa_type_constraint *constraint = &p->constraint.type;
 					tmp &= constraint->type_mask;
+					if (!(tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+						tmp &= ~(MAY_BE_RC1|MAY_BE_RCN);
+					}
 					if ((tmp & MAY_BE_OBJECT) && constraint->ce && ce != constraint->ce) {
 						if (!ce) {
 							ce = constraint->ce;
