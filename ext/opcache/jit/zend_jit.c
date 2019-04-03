@@ -2097,11 +2097,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 
 		zend_jit_label(&dasm_state, b);
 		if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
-			opline = op_array->opcodes + (ssa->cfg.blocks[b].start - 1);
 			if ((ssa->cfg.blocks[b].flags & ZEND_BB_FOLLOW)
-			  && (opline->opcode == ZEND_NOP
-			   || opline->opcode == ZEND_SWITCH_LONG
-			   || opline->opcode == ZEND_SWITCH_STRING)) {
+			  && ssa->cfg.blocks[b].start != 0
+			  && (op_array->opcodes[ssa->cfg.blocks[b].start - 1].opcode == ZEND_NOP
+			   || op_array->opcodes[ssa->cfg.blocks[b].start - 1].opcode == ZEND_SWITCH_LONG
+			   || op_array->opcodes[ssa->cfg.blocks[b].start - 1].opcode == ZEND_SWITCH_STRING)) {
 				if (!zend_jit_reset_opline(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)
 				 || !zend_jit_set_valid_ip(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
 					goto jit_failure;
