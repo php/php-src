@@ -1,5 +1,5 @@
 --TEST--
-JIT INC: 019
+JIT INC: 020
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -11,17 +11,18 @@ opcache.protect_memory=1
 <?php require_once('../skipif.inc'); ?>
 --FILE--
 <?php
-function bar($b) {
-	if ($b) {
-		$a = 1;
-	} else {
-		$a = 2;
+function foo($row) {
+	foreach ($row as $key => $value) {
+		if (is_int($key)) {
+			$key++;
+		}
+		if (isset($row[$key])) {
+			return false;
+		}
 	}
-	isset($a);
-	var_dump($a++);
-	return $a;
+	return true;
 }
-var_dump(bar(0));
+?>
+OK
 --EXPECT--
-int(2)
-int(3)
+OK

@@ -3026,21 +3026,21 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 			|.if X64
 				|	mov64 rax, 0x43e0000000000000
-				|	SET_ZVAL_LVAL op1_addr, rax
+				|	SET_ZVAL_LVAL op1_def_addr, rax
 			|.else
-				|	SET_ZVAL_LVAL op1_addr, 0
-				|	SET_ZVAL_W2 op1_addr, 0x41e00000
+				|	SET_ZVAL_LVAL op1_def_addr, 0
+				|	SET_ZVAL_W2 op1_def_addr, 0x41e00000
 			|.endif
 		} else {
 			|.if X64
 				|	mov64 rax, 0xc3e0000000000000
-				|	SET_ZVAL_LVAL op1_addr, rax
+				|	SET_ZVAL_LVAL op1_def_addr, rax
 			|.else
-				|	SET_ZVAL_LVAL op1_addr, 0x00200000
-				|	SET_ZVAL_W2 op1_addr, 0xc1e00000
+				|	SET_ZVAL_LVAL op1_def_addr, 0x00200000
+				|	SET_ZVAL_W2 op1_def_addr, 0xc1e00000
 			|.endif
 		}
-		|	SET_ZVAL_TYPE_INFO op1_addr, IS_DOUBLE
+		|	SET_ZVAL_TYPE_INFO op1_def_addr, IS_DOUBLE
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
 			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_def_addr, MAY_BE_DOUBLE, ZREG_R0, ZREG_R1
