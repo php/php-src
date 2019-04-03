@@ -1800,6 +1800,16 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT_BOT(result);
 			break;
 		}
+		case ZEND_ASSIGN_STATIC_PROP_REF:
+		case ZEND_ASSIGN_OBJ_REF:
+			SET_RESULT_BOT(result);
+			SET_RESULT_BOT(op1);
+			SET_RESULT_BOT(op2);
+			opline++;
+			ssa_op++;
+			op1 = get_op1_value(ctx, opline, ssa_op);
+			SET_RESULT_BOT(op1);
+			break;
 		default:
 		{
 			/* If we have no explicit implementation return BOT */
