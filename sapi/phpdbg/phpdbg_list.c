@@ -273,6 +273,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint32_t) * line);
 	dataptr->line[line] = endptr - data.buf;
 
+	zend_hash_del(&PHPDBG_G(file_sources), ret->filename);
 	zend_hash_add_ptr(&PHPDBG_G(file_sources), ret->filename, dataptr);
 	phpdbg_resolve_pending_file_break(ZSTR_VAL(ret->filename));
 
