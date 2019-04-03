@@ -2653,19 +2653,23 @@ static int zend_jit_check_timeout(dasm_State **Dst, const zend_op *opline)
 		if (!zend_jit_set_valid_ip(Dst, opline)) {
 			return 0;
 		}
+		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
+		|	jne ->interrupt_handler
 #else
 		|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
-		|	jne >1
-		|.cold_code
-		|1:
-		|	LOAD_IP_ADDR opline
-		|	jmp ->interrupt_handler
-		|.code
+		if (last_valid_opline == opline) {
+			|	jne ->interrupt_handler
+		} else {
+			|	jne >1
+			|.cold_code
+			|1:
+			|	LOAD_IP_ADDR opline
+			|	jmp ->interrupt_handler
+			|.code
+	    }
 		return 1;
 #endif
 	}
-	|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
-	|	jne ->interrupt_handler
 	return 1;
 }
 
