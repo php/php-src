@@ -2751,19 +2751,23 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 		return 0;
 	}
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-#if 0
-		/* TODO: Use tail call to HYBRID VM handler (works, but need disassembler support ???) */
-		const void *handler = opline->handler;
+		if (opline->opcode == ZEND_DO_UCALL ||
+		    opline->opcode == ZEND_DO_FCALL_BY_NAME ||
+		    opline->opcode == ZEND_DO_FCALL ||
+		    opline->opcode == ZEND_RETURN) {
 
-		|	add r4, HYBRID_SPAD
-		|	EXT_JMP handler, r0
-#else
-		const void *handler = zend_get_opcode_handler_func(opline);
+			/* Use inlined HYBRID VM handler */
+			const void *handler = opline->handler;
 
-		|	EXT_CALL handler, r0
-		|	add r4, HYBRID_SPAD
-		|	JMP_IP
-#endif
+			|	add r4, HYBRID_SPAD
+			|	EXT_JMP handler, r0
+		} else {
+			const void *handler = zend_get_opcode_handler_func(opline);
+
+			|	EXT_CALL handler, r0
+			|	add r4, HYBRID_SPAD
+			|	JMP_IP
+		}
 	} else {
 		const void *handler = opline->handler;
 

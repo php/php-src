@@ -450,6 +450,62 @@ static int zend_jit_disasm_init(void)
 	zend_elf_load_symbols();
 #endif
 
+	if (zend_vm_kind() == ZEND_VM_KIND_HYBRID) {
+		zend_op opline;
+
+		memset(&opline, 0, sizeof(opline));
+
+		opline.opcode = ZEND_DO_UCALL;
+		opline.result_type = IS_UNUSED;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_UCALL_SPEC_RETVAL_UNUSED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_DO_UCALL;
+		opline.result_type = IS_VAR;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_UCALL_SPEC_RETVAL_USED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_DO_FCALL_BY_NAME;
+		opline.result_type = IS_UNUSED;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_UNUSED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_DO_FCALL_BY_NAME;
+		opline.result_type = IS_VAR;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_FCALL_BY_NAME_SPEC_RETVAL_USED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_DO_FCALL;
+		opline.result_type = IS_UNUSED;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_FCALL_SPEC_RETVAL_UNUSED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_DO_FCALL;
+		opline.result_type = IS_VAR;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_DO_FCALL_SPEC_RETVAL_USED_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_RETURN;
+		opline.op1_type = IS_CONST;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_CONST_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_RETURN;
+		opline.op1_type = IS_TMP_VAR;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_TMP_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_RETURN;
+		opline.op1_type = IS_VAR;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_VAR_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+
+		opline.opcode = ZEND_RETURN;
+		opline.op1_type = IS_CV;
+		zend_vm_set_opcode_handler(&opline);
+		zend_jit_disasm_add_symbol("ZEND_RETURN_SPEC_CV_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
+	}
+
 	return 1;
 }
 
