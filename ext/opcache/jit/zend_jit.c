@@ -2472,8 +2472,42 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					}
 					break;
 				case ZEND_NEW:
-					if (!zend_jit_new(&dasm_state, opline, &i, op_array, ssa, call_level)) {
-						goto jit_failure;
+					if (!zend_jit_handler(&dasm_state, opline, 1)) {
+						return 0;
+					}
+					if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
+						zend_class_entry *ce = NULL;
+
+						if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC) {
+							if (ssa->ops && ssa->var_info) {
+								zend_ssa_var_info *res_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].result_def];
+								if (res_ssa->ce && !res_ssa->is_instanceof) {
+									ce = res_ssa->ce;
+								}
+							}
+						} else {
+							if (opline->op1_type == IS_CONST) {
+								zval *zv = RT_CONSTANT(opline, opline->op1);
+								if (Z_TYPE_P(zv) == IS_STRING) {
+									zval *lc = zv + 1;
+									ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
+								}
+							}
+						}
+
+						i++;
+
+						if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || ce->constructor) {
+							const zend_op *next_opline = opline + 1;
+
+							zend_jit_cond_jmp(&dasm_state, next_opline, ssa->cfg.blocks[b].successors[0]);
+							if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
+								zend_jit_call(&dasm_state, next_opline);
+								is_terminated = 1;
+							} else {
+								zend_jit_do_fcall(&dasm_state, next_opline, op_array, ssa, call_level);
+							}
+						}
 					}
 					break;
 				default:

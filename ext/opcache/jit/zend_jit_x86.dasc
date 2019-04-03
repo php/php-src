@@ -7812,48 +7812,6 @@ fallback:
 	}
 }
 
-static int zend_jit_new(dasm_State **Dst, const zend_op *opline, int *opnum, zend_op_array *op_array, zend_ssa *ssa, int call_level)
-{
-	if (!zend_jit_handler(Dst, opline, 1)) {
-		return 0;
-	}
-	if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
-		zend_class_entry *ce = NULL;
-
-		if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC) {
-			if (ssa->ops && ssa->var_info) {
-				zend_ssa_var_info *res_ssa = &ssa->var_info[ssa->ops[opline - op_array->opcodes].result_def];
-				if (res_ssa->ce && !res_ssa->is_instanceof) {
-					ce = res_ssa->ce;
-				}
-			}
-		} else {
-			if (opline->op1_type == IS_CONST) {
-				zval *zv = RT_CONSTANT(opline, opline->op1);
-				if (Z_TYPE_P(zv) == IS_STRING) {
-					zval *lc = zv + 1;
-					ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
-				}
-			}
-		}
-
-		(*opnum)++;
-		if (!ce || !(ce->ce_flags & ZEND_ACC_LINKED) || ce->constructor) {
-			const zend_op *next_opline = opline + 1;
-
-			|	CMP_IP next_opline
-			|	jne >6
-			if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
-				zend_jit_call(Dst, next_opline);
-			} else {
-				zend_jit_do_fcall(Dst, next_opline, op_array, ssa, call_level);
-			}
-			|6:
-		}
-	}
-	return 1;
-}
-
 static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
 	uint32_t op1_info;
