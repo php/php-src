@@ -74,8 +74,8 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 					}
 				} else {
 					ZEND_ASSERT(opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING);
-					if (i == b->successors_count) {
-						succ->flags |= ZEND_BB_FOLLOW;
+					if (i == b->successors_count - 1) {
+						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
 					} else {
 						succ->flags |= ZEND_BB_TARGET;
 					}
