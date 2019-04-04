@@ -24,6 +24,12 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 
+#if defined(__FreeBSD__)
+#include <sys/thr.h>
+#elif defined(__NetBSD__)
+#include <lwp.h>
+#endif
+
 #include "zend_elf.h"
 
 /*
@@ -171,13 +177,25 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		static uint64_t id = 1;
 		zend_perf_jitdump_load_record rec;
 		size_t len = strlen(name);
+		uint32_t thread_id;
+#if defined(__linux__)
+		thread_id = syscall(SYS_gettid);
+#elif defined(__FreeBSD__)
+		long tid;
+		thr_self(&tid);
+		thread_id = (uint32_t)tid;
+#elif defined(__OpenBSD__)
+		thread_id = getthrid();
+#elif defined(__NetBSD__)
+		thread_id = _lwp_self();
+#endif
 
 		memset(&rec, 0, sizeof(rec));
 		rec.hdr.event      = ZEND_PERF_JITDUMP_RECORD_LOAD;
 		rec.hdr.size       = sizeof(rec) + len + 1 + size;
 		rec.hdr.time_stamp = zend_perf_timestamp();
 		rec.process_id     = getpid();
-		rec.thread_id      = syscall(SYS_gettid);
+		rec.thread_id      = thread_id;
 		rec.vma            = (uint64_t)(uintptr_t)start;
 		rec.code_address   = (uint64_t)(uintptr_t)start;
 		rec.code_size      = (uint64_t)size;
