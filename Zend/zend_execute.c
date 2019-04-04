@@ -4259,12 +4259,32 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+#define ZEND_VM_SMART_BRANCH_TRUE() do { \
+		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+			ZEND_VM_CONTINUE(); \
+		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+			ZEND_VM_CONTINUE(); \
+		} \
+	} while (0)
+#define ZEND_VM_SMART_BRANCH_FALSE() do { \
+		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+			ZEND_VM_CONTINUE(); \
+		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+			ZEND_VM_CONTINUE(); \
+		} \
+	} while (0)
 #else
 # define ZEND_VM_REPEATABLE_OPCODE
 # define ZEND_VM_REPEAT_OPCODE(_opcode)
 # define ZEND_VM_SMART_BRANCH(_result, _check)
 # define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
 # define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
+# define ZEND_VM_SMART_BRANCH_TRUE()
+# define ZEND_VM_SMART_BRANCH_FASLE()
 #endif
 
 #ifdef __GNUC__
