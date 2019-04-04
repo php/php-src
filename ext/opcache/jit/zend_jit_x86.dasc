@@ -6534,8 +6534,8 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 				zend_jit_check_exception_undef_result(Dst, opline);
 				|	mov r0, aword T1 // restore
 			}
-		|	test r0, r0
 		if (smart_branch) {
+			|	test al, al
 			if (not_identical_label != (uint32_t)-1) {
 				|	jz =>not_identical_label
 				if (identical_label != (uint32_t)-1) {
@@ -6545,13 +6545,13 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 				|	jnz =>identical_label
 			}
 		} else {
-			if (opline->opcode == ZEND_IS_IDENTICAL) {
-				|	setnz al
-			} else {
-				|	setz al
-			}
 			|	movzx eax, al
-			|	lea eax, [eax + 2]
+			if (opline->opcode == ZEND_IS_IDENTICAL) {
+				|	lea eax, [eax + 2]
+			} else {
+				|	neg eax
+				|	lea eax, [eax + 3]
+			}
 			|	SET_ZVAL_TYPE_INFO res_addr, eax
 		}
 	}
