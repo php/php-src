@@ -35,7 +35,7 @@ PHP                                                                        NEWS
   . Fixed bug #77793 (Segmentation fault in extract() when overwriting
     reference with itself). (Nikita)
 
-04 April 2019, PHP 7.3.4
+04 Apr 2019, PHP 7.3.4
 
 - Core:
   . Fixed bug #77738 (Nullptr deref in zend_compile_expr). (Laruence)
@@ -85,7 +85,7 @@ PHP                                                                        NEWS
     (Nikita)
 
 - Phar:
-  . Fxied bug #77697 (Crash on Big_Endian platform). (Laruence)
+  . Fixed bug #77697 (Crash on Big_Endian platform). (Laruence)
 
 - phpdbg:
   . Fixed bug #77767 (phpdbg break cmd aliases listed in help do not match
