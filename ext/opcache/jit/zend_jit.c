@@ -1993,7 +1993,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	zend_lifetime_interval **ra = NULL;
 	zend_bitset checked_this = NULL;
 	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
-	zend_bool recv_emited = 0;   /* emited at least one RECV opcode */
+	zend_bool recv_emitted = 0;   /* emitted at least one RECV opcode */
 
 	if (zend_jit_reg_alloc) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
@@ -2047,7 +2047,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				if (opline->opcode == ZEND_RECV_INIT) {
 					if (opline == op_array->opcodes ||
 					    (opline-1)->opcode != ZEND_RECV_INIT) {
-						if (recv_emited) {
+						if (recv_emitted) {
 							zend_jit_jmp(&dasm_state, b);
 						}
 						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
@@ -2056,12 +2056,12 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 						}
 						zend_jit_prologue(&dasm_state);
 					}
-					recv_emited = 1;
+					recv_emitted = 1;
 				} else if (opline->opcode == ZEND_RECV) {
 					if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 						/* skip */
 						continue;
-					} else if (recv_emited) {
+					} else if (recv_emitted) {
 						zend_jit_jmp(&dasm_state, b);
 						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 						zend_jit_prologue(&dasm_state);
@@ -2082,10 +2082,10 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 						}
 						zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 						zend_jit_prologue(&dasm_state);
-						recv_emited = 1;
+						recv_emitted = 1;
 					}
 				} else {
-					if (recv_emited) {
+					if (recv_emitted) {
 						zend_jit_jmp(&dasm_state, b);
 					} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
 					           ssa->cfg.blocks[b].len == 1 &&
@@ -2100,7 +2100,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					}
 					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 					zend_jit_prologue(&dasm_state);
-					recv_emited = 1;
+					recv_emitted = 1;
 				}
 			} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
 			           ssa->cfg.blocks[b].len == 1 &&
