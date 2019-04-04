@@ -499,7 +499,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(19, ZEND_IS_SMALLER, CONST|TMPVAR|CV, CONST|TMPV
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);

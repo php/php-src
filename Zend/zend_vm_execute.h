@@ -4522,7 +4522,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_C
 {
 	USE_OPLINE
 
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = RT_CONSTANT(opline, opline->op1);
@@ -6887,7 +6887,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVAR_H
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = RT_CONSTANT(opline, opline->op1);
@@ -9892,7 +9892,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CV_HANDL
 {
 	USE_OPLINE
 
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = RT_CONSTANT(opline, opline->op1);
@@ -13447,7 +13447,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CONST_H
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -15047,7 +15047,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_TMPVAR_
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -16755,7 +16755,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CV_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -40650,7 +40650,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CONST_HANDL
 {
 	USE_OPLINE
 
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = EX_VAR(opline->op1.var);
@@ -44793,7 +44793,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_TMPVAR_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = EX_VAR(opline->op1.var);
@@ -50783,7 +50783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CV_HANDLER(
 {
 	USE_OPLINE
 
-	zval *op1, *op2, *ret;
+	zval *op1, *op2;
 	int result;
 
 	op1 = EX_VAR(opline->op1.var);
