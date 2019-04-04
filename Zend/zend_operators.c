@@ -2161,8 +2161,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 
 static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 {
-	zval result;
-
 	/* is_identical_function() returns 1 in case of identity and 0 in case
 	 * of a difference;
 	 * whereas this comparison function is expected to return 0 on identity,
@@ -2170,14 +2168,11 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 	 */
 	ZVAL_DEREF(z1);
 	ZVAL_DEREF(z2);
-	if (is_identical_function(&result, z1, z2)==FAILURE) {
-		return 1;
-	}
-	return Z_TYPE(result) != IS_TRUE;
+	return fast_is_not_identical_function(z1, z2);
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
 		return 0;
