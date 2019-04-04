@@ -354,7 +354,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(15, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2;
-	int result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
@@ -372,7 +372,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CON
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2;
-	int result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
