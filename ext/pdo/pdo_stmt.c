@@ -2263,22 +2263,6 @@ static int dbstmt_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-static zend_object *dbstmt_clone_obj(zval *zobject)
-{
-	pdo_stmt_t *stmt;
-	pdo_stmt_t *old_stmt;
-
-	stmt = zend_object_alloc(sizeof(pdo_stmt_t), Z_OBJCE_P(zobject));
-	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject));
-	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
-
-	old_stmt = Z_PDO_STMT_P(zobject);
-
-	zend_objects_clone_members(&stmt->std, &old_stmt->std);
-
-	return &stmt->std;
-}
-
 zend_object_handlers pdo_dbstmt_object_handlers;
 static int pdo_row_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 
@@ -2301,7 +2285,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
 	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
 	pdo_dbstmt_object_handlers.compare_objects = dbstmt_compare;
-	pdo_dbstmt_object_handlers.clone_obj = dbstmt_clone_obj;
+	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
 	pdo_row_ce = zend_register_internal_class(&ce);
