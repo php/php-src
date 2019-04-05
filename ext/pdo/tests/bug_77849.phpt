@@ -14,21 +14,9 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
-$db->exec('CREATE TABLE test(id INT NULL)');
-
-$stmt = $db->query('SELECT * FROM test');
-var_dump($stmt->fetchAll());
-
 $db2 = clone $db;
-
-$stmt2 = $db2->query('SELECT * FROM test');
-var_dump($stmt2->fetchAll());
-
 ?>
 --EXPECTF--
-array(0) {
-}
-
 Fatal error: Uncaught Error: Trying to clone an uncloneable object of class PDO in %s
 Stack trace:
 #0 {main}
