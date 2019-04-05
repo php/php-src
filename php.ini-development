@@ -1687,7 +1687,7 @@ zend.assertions = 1
 ;mbstring.http_output_conv_mimetype=
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
-; to the pcre.recursion_limit for PCRE. 
+; to the pcre.recursion_limit for PCRE.
 ; Default: 100000
 ;mbstring.regex_stack_limit=100000
 
@@ -1892,6 +1892,14 @@ ldap.max_links = -1
 ; start-up.
 ; http://php.net/opcache.preload
 ;opcache.preload=
+
+; Prevents caching files that are less than this number of seconds old. It
+; protects from caching of incompletely updated files. In case all file updates
+; on your site are atomic, you may increase performance by setting it to "0".
+;opcache.file_update_protection=2
+
+; Absolute path used to store shared lockfiles (for *nix only).
+;opcache.lockfile_path=/tmp
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
