@@ -4284,7 +4284,7 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 # define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
 # define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
 # define ZEND_VM_SMART_BRANCH_TRUE()
-# define ZEND_VM_SMART_BRANCH_FASLE()
+# define ZEND_VM_SMART_BRANCH_FALSE()
 #endif
 
 #ifdef __GNUC__
