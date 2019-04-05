@@ -73,6 +73,10 @@ PHP                                                                        NEWS
   . Fixed bug #73948 (Preg_match_all should return NULLs on trailing optional
     capture groups).
 
+- PDO:
+  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
+    (camporter)
+
 - PDO_OCI:
   . Support Oracle Database tracing attributes ACTION, MODULE,
     CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
