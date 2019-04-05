@@ -118,11 +118,11 @@ Getting the non stable release (alpha/beta/RC) announced
 
    Note: Remember to update the sha256 checksum information.
 
-2. Update ``web/php.git/include/version.inc`` (x=major version number)
+2. Update ``web/php.git/include/version.inc`` (X_Y=major_minor version number)
 
- a. ``$PHP_x_RC`` = "5.4.0RC1"  (should be set to "false" before)
+ a. ``$PHP_X_Y_RC`` = "5.4.0RC1"  (should be set to "false" before)
 
- b. ``$PHP_x_RC_DATE`` = "06 September 2007"
+ b. ``$PHP_X_Y_RC_DATE`` = "06 September 2007"
 
 3. Skip this step for non stable releases after GA of minor or major versions
    (e.g. announce 7.3.0RC1, but not 7.3.1RC1):
@@ -184,7 +184,7 @@ credits files in ext/standard.
 
 8. Push the tag f.e. "``git push origin php-5.4.1``"
 
-9. run: ``PHPROOT=. ./scripts/dev/makedist php 5.4.1``, this will export the tag, create configure
+9. run: ``PHPROOT=. ./scripts/dev/makedist 5.4.1``, this will export the tag, create configure
 and build three tarballs (gz, bz2 and xz).
    Check if the pear files are updated (phar).
    On some systems the behavior of GNU tar can default to produce POSIX compliant archives
@@ -224,18 +224,21 @@ Getting the stable release announced
  b. If that fails for any non-trivially fixable reason, you can
     manually copy the old information to include/releases.inc
 
-2. Edit ``phpweb/include/version.inc`` and change (X=major release number):
+2. Update ``phpweb/include/version.inc`` (X_Y=major_minor release number):
 
- a. ``$PHP_X_VERSION`` to the correct version
+ a. ``$PHP_X_Y_VERSION`` to the correct version
 
- b. ``$PHP_X_DATE`` to the release date
+ b. ``$PHP_X_Y_DATE`` to the release date
 
- c. ``$PHP_X_SHA256`` array and update all the SHA256 sums
+ c. ``$PHP_X_Y_SHA256`` array and update all the SHA256 sums
 
- d. set ``$PHP_X_RC`` to false!
+ d. set ``$PHP_X_Y_RC`` to false!
 
  e. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
+
+ f. Only for the first revision of a major or minor release bump
+    ``$PHP_X_VERSION``, ``$PHP_X_DATE`` and ``$PHP_X_RC_DATE``.
 
 3. Create the release file (releases/x_y_z.php)
    Usually we use the same content as for point 6, but included in php template
@@ -275,11 +278,11 @@ to upgrade.
 
  b. Add the content for the news entry
 
-7. **Check mirrors have been synced before announcing or pushing news**
+7. Commit and push all the changes to their respective git repos
+
+8. **Check mirrors have been synced before announcing or pushing news**
   Try, f.e. http://www.php.net/get/php-5.5.1.tar.bz2/from/a/mirror
   Try several mirrors, mirrors may update slowly (may take an hour)
-
-8. Commit all the changes to their respective git repos
 
 9. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
@@ -295,15 +298,15 @@ Re-releasing the same version (or -pl)
 
 1. Commit the new binaries to ``phpweb/distributions/``
 
-2. Edit ``phpweb/include/version.inc`` and change (X=major release number):
+2. Update ``phpweb/include/version.inc`` (X_Y=major_minor release number):
 
  a. If only releasing for one OS, make sure you edit only those variables
 
- b. ``$PHP_X_VERSION`` to the correct version
+ b. ``$PHP_X_Y_VERSION`` to the correct version
 
- c. ``$PHP_X_DATE`` to the release date
+ c. ``$PHP_X_Y_DATE`` to the release date
 
- d. ``$PHP_X_SHA256`` array and update all the SHA256 sums
+ d. ``$PHP_X_Y_SHA256`` array and update all the SHA256 sums
 
  e. Make sure there are no outdated "notes" or edited "date" keys in the
  ``$RELEASES[X][$PHP_X_VERSION]["source"]`` array
@@ -390,6 +393,6 @@ New Release Manager Checklist
 
 4. Request karma for web/qa.git and web/php.git for publishing release announcements.
 
-5. Request moderation access to announce@php.net and primary-qa-tester@lists.php.net lists, to
+5. Request moderation access to php-announce@lists.php.net and primary-qa-tester@lists.php.net lists, to
    be able to moderate your release announcements. All the announcements should be sent from
    the @php.net alias.
