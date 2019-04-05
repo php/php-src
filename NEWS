@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
     cmb)
+    
+- PDO:
+  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
+    (camporter)
 
 - phpdbg:
   . Fixed bug #76801 (too many open files). (alekitto)
