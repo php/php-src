@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
+- PDO:
+  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
+    (camporter)
+
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
   . Fixed bug #76801 (too many open files). (alekitto)
