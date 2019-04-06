@@ -2940,7 +2940,7 @@ function toolset_setup_compiler()
 
 		if ("unknown" == COMPILER_NAME_LONG) {
 			var tmp = probe_binary(PHP_CL);
-			COMPILER_NAME = "MSVC " + tmp + ", untested";
+			COMPILER_NAME_LONG = COMPILER_NAME_SHORT = "MSVC " + tmp + ", untested";
 
 			WARNING("Using unknown MSVC version " + tmp);
 
@@ -3652,7 +3652,7 @@ function get_clang_lib_dir()
 	var ret = null;
 	var ver = null;
 
-	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
 		ERROR("Faled to determine clang lib path");
@@ -3685,7 +3685,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 
 	var ver = null;
 
-	if (COMPILER_NAME.match(/clang version ([\d\.]+) \((.*)\)/)) {
+	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
 		ERROR("Faled to determine clang lib path");
