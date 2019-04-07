@@ -76,6 +76,7 @@
 #define HAVE_MEMMOVE 1
 #define HAVE_PUTENV 1
 #define HAVE_REGCOMP 1
+#define HAVE_LOCALE_H 1
 #ifndef HAVE_LIBBIND
 # define HAVE_SETVBUF 1
 #endif
