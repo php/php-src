@@ -30,10 +30,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
-
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
