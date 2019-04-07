@@ -105,24 +105,17 @@ var PHP_VERSION_STRING = "7.3.0";
 function get_version_numbers()
 {
 	var cin = file_get_contents("configure.ac");
+	var regex = /AC_INIT.+(\d+)\.(\d+)\.(\d+)([^\,^\]]*).+/g;
 
-	if (cin.match(new RegExp("PHP_MAJOR_VERSION=(\\d+)"))) {
+	if (cin.match(new RegExp(regex))) {
 		PHP_VERSION = RegExp.$1;
+		PHP_MINOR_VERSION = RegExp.$2;
+		PHP_RELEASE_VERSION = RegExp.$3;
+		PHP_EXTRA_VERSION = RegExp.$4;
 	}
-	if (cin.match(new RegExp("PHP_MINOR_VERSION=(\\d+)"))) {
-		PHP_MINOR_VERSION = RegExp.$1;
-	}
-	if (cin.match(new RegExp("PHP_RELEASE_VERSION=(\\d+)"))) {
-		PHP_RELEASE_VERSION = RegExp.$1;
-	}
-	PHP_VERSION_STRING = PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION;
 
-	if (cin.match(new RegExp("PHP_EXTRA_VERSION=\"([^\"]+)\""))) {
-		PHP_EXTRA_VERSION = RegExp.$1;
-		if (PHP_EXTRA_VERSION.length) {
-			PHP_VERSION_STRING += PHP_EXTRA_VERSION;
-		}
-	}
+	PHP_VERSION_STRING = PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION + PHP_EXTRA_VERSION;
+
 	DEFINE('PHP_VERSION_STRING', PHP_VERSION_STRING);
 }
 

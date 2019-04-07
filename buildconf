@@ -9,9 +9,9 @@ debug=0
 # Go to project root.
 cd $(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 
-eval $(grep '^PHP_EXTRA_VERSION=' configure.ac)
-case "$PHP_EXTRA_VERSION" in
-  *-dev)
+php_extra_version=$(grep '^AC_INIT(' configure.ac)
+case "$php_extra_version" in
+  *-dev*)
     dev=1
     ;;
   *)

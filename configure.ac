@@ -8,7 +8,8 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([main/php_version.h])
+AC_INIT([PHP],[8.0.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
@@ -99,10 +100,13 @@ extern "C++" {
 #endif /* PHP_CONFIG_H */
 ])
 
-PHP_MAJOR_VERSION=8
-PHP_MINOR_VERSION=0
-PHP_RELEASE_VERSION=0
-PHP_EXTRA_VERSION="-dev"
+ac_IFS=$IFS; IFS="."
+set $(echo AC_PACKAGE_VERSION | $SED 's/\([[0-9\.]]*\)\(.*\)/\1\.\2/')
+IFS=$ac_IFS
+PHP_MAJOR_VERSION=[$]1
+PHP_MINOR_VERSION=[$]2
+PHP_RELEASE_VERSION=[$]3
+PHP_EXTRA_VERSION=[$]4
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
 
