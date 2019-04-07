@@ -174,38 +174,6 @@ const zend_function_entry php_dom_child_node_class_functions[] = { /* {{{ */
 };
 /* }}} */
 
-static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
-{
-	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
-
-	if (nodep->type == XML_ELEMENT_NODE) {
-		/* Following if block primarily used for inserting nodes created via createElementNS */
-		if (nodep->nsDef != NULL) {
-			curns = nodep->nsDef;
-			while (curns) {
-				nsdftptr = curns->next;
-				if (curns->href != NULL) {
-					if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
-						(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
-						curns->next = NULL;
-						if (prevns == NULL) {
-							nodep->nsDef = nsdftptr;
-						} else {
-							prevns->next = nsdftptr;
-						}
-						dom_set_old_ns(doc, curns);
-						curns = prevns;
-					}
-				}
-				prevns = curns;
-				curns = nsdftptr;
-			}
-		}
-		xmlReconciliateNs(doc, nodep);
-	}
-}
-/* }}} */
-
 /* {{{ nodeName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095

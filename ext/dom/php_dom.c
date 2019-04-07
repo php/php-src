@@ -1456,6 +1456,38 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
 }
 /* }}} end dom_set_old_ns */
 
+void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
+{
+	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
+
+	if (nodep->type == XML_ELEMENT_NODE) {
+		/* Following if block primarily used for inserting nodes created via createElementNS */
+		if (nodep->nsDef != NULL) {
+			curns = nodep->nsDef;
+			while (curns) {
+				nsdftptr = curns->next;
+				if (curns->href != NULL) {
+					if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
+						(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
+						curns->next = NULL;
+						if (prevns == NULL) {
+							nodep->nsDef = nsdftptr;
+						} else {
+							prevns->next = nsdftptr;
+						}
+						dom_set_old_ns(doc, curns);
+						curns = prevns;
+					}
+				}
+				prevns = curns;
+				curns = nsdftptr;
+			}
+		}
+		xmlReconciliateNs(doc, nodep);
+	}
+}
+/* }}} */
+
 /*
 http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-DocCrElNS
 

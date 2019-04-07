@@ -209,7 +209,12 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 	prevsib = contextNode->last;
 
 	if (newchild) {
-		prevsib->next = newchild;
+		if (prevsib != NULL) {
+			prevsib->next = newchild;
+		} else {
+			contextNode->children = newchild;
+		}
+
 		newchild->prev = prevsib;
 		contextNode->last = fragment->last;
 
@@ -225,6 +230,8 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 
 		fragment->children = NULL;
 		fragment->last = NULL;
+
+		dom_reconcile_ns(contextNode->doc, newchild);
 	}
 }
 
@@ -256,6 +263,8 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 
 		fragment->children = NULL;
 		fragment->last = NULL;
+
+		dom_reconcile_ns(contextNode->doc, newchild);
 	}
 }
 
@@ -293,6 +302,8 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 		fragment->children = NULL;
 		fragment->last = NULL;
+
+		dom_reconcile_ns(prevsib->doc, newchild);
 	}
 }
 
@@ -325,6 +336,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 
 		fragment->children = NULL;
 		fragment->last = NULL;
+
+		dom_reconcile_ns(nextsib->doc, newchild);
 	}
 }
 
