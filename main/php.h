@@ -243,9 +243,7 @@ char *strerror(int);
 # endif
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L

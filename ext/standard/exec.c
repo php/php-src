@@ -49,9 +49,7 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifdef PHP_WIN32
 # include "win32/nice.h"

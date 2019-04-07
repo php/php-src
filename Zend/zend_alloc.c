@@ -77,9 +77,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <fcntl.h>
 #include <errno.h>
 
