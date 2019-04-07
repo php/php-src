@@ -114,13 +114,8 @@ typedef struct buf_area buffy;
  */
 #define PREFIX( str, length, ch )	 *--str = ch ; length++ ; has_prefix = YES
 
-
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
-#else
-#define LCONV_DECIMAL_POINT '.'
-#endif
 #define NUL '\0'
 #define S_NULL "(null)"
 #define S_NULL_LEN 6
@@ -155,9 +150,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef HAVE_LOCALE_H
 	struct lconv *lconv = NULL;
-#endif
 
 	/*
 	 * Flag variables
@@ -621,11 +614,10 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 						s = "INF";
 						s_len = 3;
 					} else {
-#ifdef HAVE_LOCALE_H
 						if (!lconv) {
 							lconv = localeconv();
 						}
-#endif
+
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
 						 (*fmt == 'f')?LCONV_DECIMAL_POINT:'.',
@@ -678,11 +670,10 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef HAVE_LOCALE_H
 					if (!lconv) {
 						lconv = localeconv();
 					}
-#endif
+
 					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-') {
 						prefix_char = *s++;

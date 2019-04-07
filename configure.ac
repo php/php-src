@@ -629,8 +629,6 @@ random \
 rand_r \
 scandir \
 setitimer \
-setlocale \
-localeconv \
 setenv \
 setpgid \
 setsockopt \

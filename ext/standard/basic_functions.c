@@ -76,10 +76,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #include <string.h>
-
-#if HAVE_LOCALE_H
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #if HAVE_SYS_MMAN_H
 # include <sys/mman.h>
@@ -3678,7 +3675,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(mt_rand)
 
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#if defined(ZTS)
 	BASIC_MINIT_SUBMODULE(localeconv)
 #endif
 
@@ -3762,7 +3759,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_MSHUTDOWN_SUBMODULE(file)
 	BASIC_MSHUTDOWN_SUBMODULE(standard_filters)
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#if defined(ZTS)
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)

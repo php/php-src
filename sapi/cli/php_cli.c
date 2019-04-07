@@ -48,10 +48,7 @@
 #endif
 
 #include <signal.h>
-
-#if HAVE_SETLOCALE
 #include <locale.h>
-#endif
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"

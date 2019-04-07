@@ -45,9 +45,7 @@
 #include "php_standard.h"
 #include "php_string.h"
 #include "SAPI.h"
-#if HAVE_LOCALE_H
 #include <locale.h>
-#endif
 #if HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
@@ -408,14 +406,13 @@ static enum entity_charset determine_charset(char *charset_hint)
 	}
 
 	/* try to detect the charset for the locale */
-#if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
+#if HAVE_NL_LANGINFO && defined(CODESET)
 	charset_hint = nl_langinfo(CODESET);
 	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
 		goto det_charset;
 	}
 #endif
 
-#if HAVE_LOCALE_H
 	/* try to figure out the charset from the locale */
 	{
 		char *localename;
@@ -441,7 +438,6 @@ static enum entity_charset determine_charset(char *charset_hint)
 			len = strlen(charset_hint);
 		}
 	}
-#endif
 
 det_charset:
 

@@ -23,9 +23,7 @@
 #include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
-#ifdef HAVE_LOCALE_H
-# include <locale.h>
-#endif
+#include <locale.h>
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
@@ -88,12 +86,8 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
 
-#ifdef HAVE_LOCALECONV
 	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
 	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
-#endif
-
-#ifdef HAVE_LOCALE_H
 	REGISTER_LONG_CONSTANT("LC_CTYPE", LC_CTYPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LC_NUMERIC", LC_NUMERIC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LC_TIME", LC_TIME, CONST_CS | CONST_PERSISTENT);
@@ -103,7 +97,6 @@ void register_string_constants(INIT_FUNC_ARGS)
 # ifdef LC_MESSAGES
 	REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
 # endif
-#endif
 
 }
 /* }}} */
@@ -176,15 +169,14 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 }
 /* }}} */
 
-#ifdef HAVE_LOCALECONV
 /* {{{ localeconv_r
  * glibc's localeconv is not reentrant, so lets make it so ... sorta */
 PHPAPI struct lconv *localeconv_r(struct lconv *out)
 {
 
-# ifdef ZTS
+#ifdef ZTS
 	tsrm_mutex_lock( locale_mutex );
-# endif
+#endif
 
 /*  cur->locinfo is struct __crt_locale_info which implementation is
 	hidden in vc14. TODO revisit this and check if a workaround available
@@ -202,15 +194,15 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 	*out = *localeconv();
 #endif
 
-# ifdef ZTS
+#ifdef ZTS
 	tsrm_mutex_unlock( locale_mutex );
-# endif
+#endif
 
 	return out;
 }
 /* }}} */
 
-# ifdef ZTS
+#ifdef ZTS
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(localeconv)
@@ -229,7 +221,6 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 	return SUCCESS;
 }
 /* }}} */
-# endif
 #endif
 
 /* {{{ proto string bin2hex(string data)
@@ -4678,7 +4669,6 @@ PHP_FUNCTION(setlocale)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef HAVE_SETLOCALE
 	idx = 0;
 	while (1) {
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
@@ -4747,7 +4737,6 @@ PHP_FUNCTION(setlocale)
 		}
 	}
 
-#endif
 	RETURN_FALSE;
 }
 /* }}} */
@@ -5419,7 +5408,6 @@ PHP_FUNCTION(localeconv)
 	array_init(&grouping);
 	array_init(&mon_grouping);
 
-#ifdef HAVE_LOCALECONV
 	{
 		struct lconv currlocdata;
 
@@ -5456,30 +5444,6 @@ PHP_FUNCTION(localeconv)
 		add_assoc_long(  return_value, "p_sign_posn",       currlocdata.p_sign_posn);
 		add_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn);
 	}
-#else
-	/* Ok, it doesn't look like we have locale info floating around, so I guess it
-	   wouldn't hurt to just go ahead and return the POSIX locale information?  */
-
-	add_index_long(&grouping, 0, -1);
-	add_index_long(&mon_grouping, 0, -1);
-
-	add_assoc_string(return_value, "decimal_point",     "\x2E");
-	add_assoc_string(return_value, "thousands_sep",     "");
-	add_assoc_string(return_value, "int_curr_symbol",   "");
-	add_assoc_string(return_value, "currency_symbol",   "");
-	add_assoc_string(return_value, "mon_decimal_point", "\x2E");
-	add_assoc_string(return_value, "mon_thousands_sep", "");
-	add_assoc_string(return_value, "positive_sign",     "");
-	add_assoc_string(return_value, "negative_sign",     "");
-	add_assoc_long(  return_value, "int_frac_digits",   CHAR_MAX);
-	add_assoc_long(  return_value, "frac_digits",       CHAR_MAX);
-	add_assoc_long(  return_value, "p_cs_precedes",     CHAR_MAX);
-	add_assoc_long(  return_value, "p_sep_by_space",    CHAR_MAX);
-	add_assoc_long(  return_value, "n_cs_precedes",     CHAR_MAX);
-	add_assoc_long(  return_value, "n_sep_by_space",    CHAR_MAX);
-	add_assoc_long(  return_value, "p_sign_posn",       CHAR_MAX);
-	add_assoc_long(  return_value, "n_sign_posn",       CHAR_MAX);
-#endif
 
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "grouping", sizeof("grouping")-1, &grouping);
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "mon_grouping", sizeof("mon_grouping")-1, &mon_grouping);
