@@ -65,7 +65,7 @@ credits files in ext/standard.
 
 4. Checkout the release branch for this release (e.g., PHP-5.4.2) from the main branch.
 
-5. Bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac``, ``scripts/phpize.m4`` and possibly ``NEWS``.
+5. Bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac`` and possibly ``NEWS``.
 Do not use abbreviations for alpha and beta. Do not use dashes, you should
 ``#define PHP_VERSION "5.4.22RC1"`` and not ``#define PHP_VERSION "5.4.22-RC1"``
 
@@ -79,7 +79,7 @@ Do not use abbreviations for alpha and beta. Do not use dashes, you should
 9. Tag the repository release branch with the version, e.g.:
 ``git tag -u YOURKEYID php-5.4.2RC2``
 
-10. Bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac``, ``scripts/phpize.m4`` and ``NEWS``
+10. Bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac`` and ``NEWS``
 in the *main* branch (PHP-5.4 for example) to prepare for the **next** version.
 F.e. if the RC is "5.4.1RC1" then the new one should be "5.4.2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
@@ -162,7 +162,7 @@ Rolling a stable release
 ------------------------
 
 1. Checkout your release branch, you should have created when releasing previous RC
-and bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac``, ``scripts/phpize.m4`` and possibly ``NEWS``.
+and bump the version numbers in ``main/php_version.h``, ``Zend/zend.h``, ``configure.ac`` and possibly ``NEWS``.
 
 2. If a CVE commit needs to be merged to the release, then have it committed to
 the base branches and merged upwards as usual (f.e commit the CVE fix to 5.3,
@@ -336,7 +336,7 @@ Forking a new release branch
 
 2. Just prior to cutting X.Y.0beta1, create the new branch locally.
    Add a commit on master after the branch point clearing the NEWS, UPGRADING
-   and UPGRADING.INTERNALS files, updating the version in configure.ac and scripts/phpize.m4 (run
+   and UPGRADING.INTERNALS files, updating the version in configure.ac (run
    ./configure to automatically update main/php_versions.h, too) and Zend/zend.h.
    Also list the new branch in CONTRIBUTING.md.
      Example: http://git.php.net/?p=php-src.git;a=commit;h=a63c99b
