@@ -143,6 +143,7 @@ locations.
     ├─ ltmain.sh                    # https://git.savannah.gnu.org/cgit/libtool.git
     ├─ shtool                       # https://www.gnu.org/software/shtool/
     └─ ...
+ ├─ docs/                           # PHP internals and repository documentation
  └─ ext/                            # PHP core extensions
     └─ bcmath/
        ├─ libbcmath/                # Forked and maintained in php-src
