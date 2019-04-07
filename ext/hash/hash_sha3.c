@@ -191,7 +191,7 @@ static void PHP_SHA3_Final(unsigned char* digest,
 	}
 
 	// Zero out context
-	memset(ctx, 0, sizeof(PHP_SHA3_CTX));
+	ZEND_SECURE_ZERO(ctx, sizeof(PHP_SHA3_CTX));
 }
 
 // ==========================================================================

@@ -605,6 +605,8 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	RETVAL_LONG(result);
 
+	ZEND_SECURE_ZERO(key_s, key_len);
+	ZEND_SECURE_ZERO(iv_s, iv_len);
 	efree(iv_s);
 	efree(key_s);
 }
