@@ -159,7 +159,6 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 {
 	zend_llist global_vars;
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								 that sockets created via fsockopen()
@@ -167,7 +166,6 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 								 closes it.  in apache|apxs mode apache
 								 does that for us!  thies@thieso.net
 								 20000419 */
-#endif
 #endif
 
 #ifdef ZTS

@@ -43,12 +43,7 @@
 
 #endif
 
-#if HAVE_SIGNAL_H
-
 #include <signal.h>
-
-#endif
-
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -1228,10 +1223,8 @@ int main( int argc, char * argv[] )
     int slow_script_msec = 0;
     char time_buf[40];
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
     signal(SIGPIPE, SIG_IGN);
-#endif
 #endif
 
 #ifdef ZTS

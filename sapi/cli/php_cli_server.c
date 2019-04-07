@@ -43,9 +43,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #if HAVE_SETLOCALE
 #include <locale.h>
 #endif
@@ -2601,7 +2599,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 				PHP_VERSION, buf, server_bind_address, document_root);
 	}
 
-#if defined(HAVE_SIGNAL_H) && defined(SIGINT)
+#if defined(SIGINT)
 	signal(SIGINT, php_cli_server_sigint_handler);
 	zend_signal_init();
 #endif

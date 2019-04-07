@@ -43,9 +43,7 @@
 # include <unistd.h>
 #endif
 
-#if HAVE_SIGNAL_H
-# include <signal.h>
-#endif
+#include <signal.h>
 
 #if HAVE_SETLOCALE
 # include <locale.h>
@@ -1567,7 +1565,6 @@ int main(int argc, char *argv[])
 	zend_bool old_rc_debug;
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1575,7 +1572,6 @@ int main(int argc, char *argv[])
 								closes it.  in apache|apxs mode apache
 								does that for us!  thies@thieso.net
 								20000419 */
-#endif
 #endif
 
 #ifdef ZTS

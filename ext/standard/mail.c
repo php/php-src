@@ -35,9 +35,7 @@
 #endif
 
 #if PHP_SIGCHILD
-#if HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #endif
 
 #include "php_syslog.h"

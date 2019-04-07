@@ -82,9 +82,7 @@ typedef int ts_rsrc_id;
 # define MUTEX_T st_mutex_t
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 typedef void (*ts_allocate_ctor)(void *);
 typedef void (*ts_allocate_dtor)(void *);

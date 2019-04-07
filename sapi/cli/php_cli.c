@@ -46,9 +46,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_SIGNAL_H
+
 #include <signal.h>
-#endif
+
 #if HAVE_SETLOCALE
 #include <locale.h>
 #endif
@@ -64,10 +64,6 @@
 #include <io.h>
 #include <fcntl.h>
 #include "win32/php_registry.h"
-#endif
-
-#if HAVE_SIGNAL_H
-#include <signal.h>
 #endif
 
 #ifdef __riscos__
@@ -1233,7 +1229,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1242,8 +1237,6 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 #endif
-#endif
-
 
 #ifdef ZTS
 	php_tsrm_startup();
