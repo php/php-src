@@ -13,8 +13,12 @@ PHP_ARG_ENABLE([huge-code-pages],
   [yes],
   [no])
 
-PHP_ARG_ENABLE(opcache-jit, whether to enable JIT,
-[  --disable-opcache-jit  Disable JIT], yes, no)
+PHP_ARG_ENABLE([opcache-jit],
+  [whether to enable JIT],
+  [AS_HELP_STRING([--disable-opcache-jit],
+    [Disable JIT])],
+  [yes],
+  [no])
 
 if test "$PHP_OPCACHE" != "no"; then
 
