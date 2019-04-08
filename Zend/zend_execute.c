@@ -65,7 +65,7 @@
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
 
-#ifdef ZEND_VM_FP_GLOBAL_REG
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 # define EXECUTE_DATA_D     void
 # define EXECUTE_DATA_C
 # define EXECUTE_DATA_DC
@@ -79,7 +79,7 @@
 # define NO_EXECUTE_DATA_CC , NULL
 #endif
 
-#ifdef ZEND_VM_IP_GLOBAL_REG
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 # define OPLINE_D           void
 # define OPLINE_C
 # define OPLINE_DC
