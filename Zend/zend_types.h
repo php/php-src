@@ -15,7 +15,7 @@
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
    |          Dmitry Stogov <dmitry@php.net>                              |
-   |          Xinchen Hui <xinchen.h@zend.com>                            |
+   |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 

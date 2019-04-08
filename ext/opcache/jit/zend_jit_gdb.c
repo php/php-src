@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
-   |          Xinchen Hui <xinchen.h@zend.com>                            |
+   |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
    | Based on Mike Pall's implementation of GDB interface for LuaJIT.     |
    | LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/        |
