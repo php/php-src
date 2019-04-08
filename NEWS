@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77680 (recursive mkdir on ftp stream wrapper is incorrect).
     (Vlad Temian)
+  . Fixed bug #77844 (Crash due to null pointer in parse_ini_string with
+    INI_SCANNER_TYPED). (Nikita)
 
 04 Apr 2019, PHP 7.2.17
 
