@@ -1757,7 +1757,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			gen_null_handler($f);
 			break;
 		case ZEND_VM_KIND_SWITCH:
-			out($f,"default:\n");
+			out($f,"default: ZEND_NULL_LABEL:\n");
 			out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
 			out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
 			break;
@@ -2069,7 +2069,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						$prolog = $m[1];
 						out($f,$prolog."if (UNEXPECTED(execute_data == NULL)) {\n");
 						out($f,$prolog."\tstatic const void * const labels[] = {\n");
-						gen_labels($f, $spec, ZEND_VM_KIND_GOTO, $prolog."\t\t", $specs);
+						gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_GOTO : $kind, $prolog."\t\t", $specs);
 						out($f,$prolog."\t};\n");
 						out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
 						out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
@@ -2184,7 +2184,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,$prolog.$executor_name."_ex(NULL);\n");
 					} else {
 						out($f,$prolog."static const void * const labels[] = {\n");
-						gen_labels($f, $spec, ZEND_VM_KIND_CALL, $prolog."\t", $specs, $switch_labels);
+						gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_CALL : $kind, $prolog."\t", $specs, $switch_labels);
 						out($f,$prolog."};\n");
 						out($f,$prolog."static const uint32_t specs[] = {\n");
 						gen_specs($f, $prolog."\t", $specs);
@@ -2528,13 +2528,15 @@ function gen_vm($def, $skel) {
 
 	// Search for opcode handlers those are used by other opcode handlers
 	foreach ($opcodes as $dsc) {
-		if (preg_match("/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $m)) {
-			$op = $m[1];
-			if (!isset($opnames[$op])) {
-				die("ERROR ($def:$lineno): Opcode with name '$op' is not defined.\n");
+		if (preg_match_all("/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $mm, PREG_SET_ORDER)) {
+			foreach ($mm as $m) {
+				$op = $m[1];
+				if (!isset($opnames[$op])) {
+					die("ERROR ($def:$lineno): Opcode with name '$op' is not defined.\n");
+				}
+				$code = $opnames[$op];
+				$opcodes[$code]['use'] = 1;
 			}
-			$code = $opnames[$op];
-			$opcodes[$code]['use'] = 1;
 		}
 	}
 
