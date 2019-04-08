@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77793 (Segmentation fault in extract() when overwriting
     reference with itself). (Nikita)
+  . Fixed bug #77844 (Crash due to null pointer in parse_ini_string with
+    INI_SCANNER_TYPED). (Nikita)
 
 04 Apr 2019, PHP 7.3.4
 
