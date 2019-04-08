@@ -176,7 +176,7 @@ PHP_FUNCTION(xml_parse_into_struct);
 
 static zend_object *xml_parser_create_object(zend_class_entry *class_type);
 static void xml_parser_free_obj(zend_object *object);
-static HashTable *xml_parser_get_gc(zval *object, zval **table, int *n);
+static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n);
 static zend_function *xml_parser_get_constructor(zend_object *object);
 
 static zend_string *xml_utf8_decode(const XML_Char *, size_t, const XML_Char *);
@@ -572,9 +572,9 @@ static void xml_parser_free_obj(zend_object *object)
 	zend_object_std_dtor(&parser->std);
 }
 
-static HashTable *xml_parser_get_gc(zval *object, zval **table, int *n)
+static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 {
-	xml_parser *parser = Z_XMLPARSER_P(object);
+	xml_parser *parser = xml_parser_from_obj(object);
 	*table = &parser->object;
 	*n = XML_PARSER_NUM_ZVALS;
 	return zend_std_get_properties(object);
