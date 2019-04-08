@@ -3572,24 +3572,6 @@ PHP_FUNCTION(stripslashes)
 }
 /* }}} */
 
-#ifndef HAVE_STRERROR
-/* {{{ php_strerror
- */
-char *php_strerror(int errnum)
-{
-	extern int sys_nerr;
-	extern char *sys_errlist[];
-
-	if ((unsigned int) errnum < sys_nerr) {
-		return(sys_errlist[errnum]);
-	}
-
-	(void) snprintf(BG(str_ebuf), sizeof(php_basic_globals.str_ebuf), "Unknown error: %d", errnum);
-	return(BG(str_ebuf));
-}
-/* }}} */
-#endif
-
 /* {{{ php_stripcslashes
  */
 PHPAPI void php_stripcslashes(zend_string *str)
