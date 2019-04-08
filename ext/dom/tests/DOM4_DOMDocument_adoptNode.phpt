@@ -22,7 +22,11 @@ if(!$target) {
 $element = $source->documentElement->firstChild;
 $adoptedElement = $target->adoptNode($element);
 
-if($adoptedElement !== $element || $element->ownerDocument !== $target) {
+if($adoptedElement !== $element) {
+  echo "Adopted element must be the same as element passed to adoptNode()\n";
+  exit;
+}
+if($element->ownerDocument !== $target) {
   echo "Node was not adopted into target document\n";
   exit;
 }
