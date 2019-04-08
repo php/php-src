@@ -230,10 +230,6 @@ typedef unsigned int socklen_t;
 #include "zend_stack.h"
 #include <string.h>
 
-#ifndef HAVE_STRERROR
-char *strerror(int);
-#endif
-
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
 #include "win32/param.h"
