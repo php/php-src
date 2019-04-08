@@ -143,11 +143,6 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
-#ifndef HAVE_STRERROR
-PHPAPI char *php_strerror(int errnum);
-#define strerror php_strerror
-#endif
-
 #ifndef HAVE_MBLEN
 # define php_mblen(ptr, len) 1
 # define php_mb_reset()
