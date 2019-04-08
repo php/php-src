@@ -40,6 +40,8 @@ PHP                                                                        NEWS
     reference with itself). (Nikita)
   . Fixed bug #77844 (Crash due to null pointer in parse_ini_string with
     INI_SCANNER_TYPED). (Nikita)
+  . Fixed bug #77853 (Inconsistent substr_compare behaviour with empty
+    haystack). (Nikita)
 
 04 Apr 2019, PHP 7.3.4
 

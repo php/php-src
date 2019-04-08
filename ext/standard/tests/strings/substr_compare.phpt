@@ -27,9 +27,7 @@ int(0)
 int(0)
 bool(true)
 bool(true)
-
-Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
-bool(false)
+int(-1)
 bool(true)
 int(0)
 
