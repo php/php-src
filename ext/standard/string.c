@@ -6213,7 +6213,7 @@ PHP_FUNCTION(substr_compare)
 		offset = (offset < 0) ? 0 : offset;
 	}
 
-	if ((size_t)offset >= ZSTR_LEN(s1)) {
+	if ((size_t)offset > ZSTR_LEN(s1)) {
 		php_error_docref(NULL, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
