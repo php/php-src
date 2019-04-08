@@ -1761,7 +1761,7 @@ PHP_FUNCTION(time)
    Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
-	zend_long timestamp = (zend_long)time(NULL);
+	zend_long timestamp;
 	zend_bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
@@ -1771,6 +1771,10 @@ PHP_FUNCTION(localtime)
 		Z_PARAM_LONG(timestamp)
 		Z_PARAM_BOOL(associative)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	if (ZEND_NUM_ARGS() == 0) {
+		timestamp = (zend_long) time(NULL);
+	}
 
 	tzi = get_timezone_info();
 	ts = timelib_time_ctor();
@@ -1810,7 +1814,7 @@ PHP_FUNCTION(localtime)
    Get date/time information */
 PHP_FUNCTION(getdate)
 {
-	zend_long timestamp = (zend_long)time(NULL);
+	zend_long timestamp;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 
@@ -1818,6 +1822,10 @@ PHP_FUNCTION(getdate)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(timestamp)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	if (ZEND_NUM_ARGS() == 0) {
+		timestamp = (zend_long) time(NULL);
+	}
 
 	tzi = get_timezone_info();
 	ts = timelib_time_ctor();
