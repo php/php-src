@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
+- JIT:
+  . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
+
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
@@ -30,8 +33,5 @@ PHP                                                                        NEWS
   
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
-
-- XML:
-  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
