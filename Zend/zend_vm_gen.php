@@ -1805,7 +1805,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						$prolog = $m[1];
 						out($f,$prolog."if (UNEXPECTED(execute_data == NULL)) {\n");
 						out($f,$prolog."\tstatic const void* labels[] = {\n");
-						gen_labels($f, $spec, ZEND_VM_KIND_GOTO, $prolog."\t\t", $specs);
+						gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_GOTO : $kind, $prolog."\t\t", $specs);
 						out($f,$prolog."\t};\n");
 						out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
 						out($f,$prolog."\tzend_handlers_count = sizeof(labels) / sizeof(void*);\n");
@@ -1920,7 +1920,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,$prolog.$executor_name."_ex(NULL);\n");
 					} else {
 						out($f,$prolog."static const void *labels[] = {\n");
-						gen_labels($f, $spec, ZEND_VM_KIND_CALL, $prolog."\t", $specs, $switch_labels);
+						gen_labels($f, $spec, ($kind == ZEND_VM_KIND_HYBRID) ? ZEND_VM_KIND_CALL : $kind, $prolog."\t", $specs, $switch_labels);
 						out($f,$prolog."};\n");
 						out($f,$prolog."static const uint32_t specs[] = {\n");
 						gen_specs($f, $prolog."\t", $specs);
