@@ -24416,11 +24416,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -24498,11 +24498,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -27115,11 +27115,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -27197,11 +27197,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -31523,11 +31523,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -31605,11 +31605,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -33606,11 +33606,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -33687,11 +33687,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -35553,11 +35553,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -35634,11 +35634,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -38147,11 +38147,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -38228,11 +38228,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -43555,11 +43555,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -43636,11 +43636,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -47662,11 +47662,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -47743,11 +47743,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -53735,11 +53735,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
@@ -53816,11 +53816,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
-	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
