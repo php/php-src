@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-__serialize() must return an array
+Test::__serialize() must return an array
