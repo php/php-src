@@ -27,6 +27,16 @@ PHP 7.4 UPGRADE NOTES
   . "fn" is now a reserved keyword. In particular it can no longer be used as a
     function or class name. It can still be used as a method or class constant
     name.
+  . Nesting ternary operators without explicit parentheses is deprecated:
+
+        // Code like
+        $a ? $b : $c ? $d : $e
+        // should be replaced by (current interpretation)
+        ($a ? $b : $c) ? $d : $e
+        // or (likely intended interpretation)
+        $a ? $b : ($c ? $d : $e)
+
+    RFC: https://wiki.php.net/rfc/ternary_associativity
 
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
