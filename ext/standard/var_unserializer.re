@@ -646,6 +646,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements, NULL)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
+            zval_ptr_dtor(&ary);
 			return 0;
 		}
 
