@@ -205,4 +205,11 @@ test -d modules || $php_shtool mkdir modules
 
 AC_CONFIG_HEADERS([config.h])
 
+AC_CONFIG_COMMANDS_POST([
+  # Disable PACKAGE_* symbols in config.h.in
+  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/config.h.in \
+    > $srcdir/config.h.in.tmp && \
+    mv $srcdir/config.h.in.tmp $srcdir/config.h.in
+])
+
 AC_OUTPUT
