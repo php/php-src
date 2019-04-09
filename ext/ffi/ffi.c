@@ -5004,18 +5004,12 @@ static void zend_ffi_finalize_type(zend_ffi_dcl *dcl) /* {{{ */
 					dcl->type = (zend_ffi_type*)&zend_ffi_type_uint64;
 				}
 				break;
-#ifdef _WIN32
-			case ZEND_FFI_DCL_LONG_LONG:
-#endif
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG:
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_SIGNED:
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_INT:
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_SIGNED|ZEND_FFI_DCL_INT:
 				dcl->type = (zend_ffi_type*)&zend_ffi_type_sint64;
 				break;
-#ifdef _WIN32
-			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_UNSIGNED:
-#endif
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_UNSIGNED:
 			case ZEND_FFI_DCL_LONG_LONG|ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_UNSIGNED|ZEND_FFI_DCL_INT:
 				dcl->type = (zend_ffi_type*)&zend_ffi_type_uint64;
@@ -6144,7 +6138,7 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 							if (sizeof(long) == 8) {
 								dcl->flags |= ZEND_FFI_DCL_LONG;
 							} else {
-								dcl->flags |= ZEND_FFI_DCL_LONG_LONG;
+								dcl->flags |= ZEND_FFI_DCL_LONG|ZEND_FFI_DCL_LONG_LONG;
 							}
 							break;
 						}
