@@ -608,6 +608,59 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				}
 			}
 
+#ifdef SQL_BOOLEAN
+			/* keep native BOOLEAN type */
+			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
+				switch (Z_TYPE_P(parameter)) {
+				case IS_LONG:
+				case IS_DOUBLE:
+				case IS_TRUE:
+				case IS_FALSE:
+					*(FB_BOOLEAN*)var->sqldata = zend_is_true(parameter) ? FB_TRUE : FB_FALSE;
+					break;
+				case IS_STRING:
+					if ((Z_STRLEN_P(parameter) == 0)) {
+						*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+						break;
+					}
+
+					long lval;
+					double dval;
+
+					switch (is_numeric_string(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), &lval, &dval, 0)) {
+					case IS_LONG:
+						*(FB_BOOLEAN*)var->sqldata = (lval != 0) ? FB_TRUE : FB_FALSE;
+						break;
+					case IS_DOUBLE:
+						*(FB_BOOLEAN*)var->sqldata = (dval != 0) ? FB_TRUE : FB_FALSE;
+						break;
+					default:
+						if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "true", 4, 4)) {
+							*(FB_BOOLEAN*)var->sqldata = FB_TRUE;
+						}
+						else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
+							*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+						}
+						else {
+							strcpy(stmt->error_code, "HY105");
+							S->H->last_app_error = "Cannot convert string to boolean";
+							return 0;
+						}
+
+					}
+					break;
+				case IS_NULL:
+					*var->sqlind = -1;
+					break;
+				default:
+					strcpy(stmt->error_code, "HY105");
+					S->H->last_app_error = "Binding arrays/objects is not supported";
+					return 0;
+				}
+				break;
+			}
+#endif
+
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
 				int force_null;
