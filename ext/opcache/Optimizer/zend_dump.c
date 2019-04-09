@@ -732,6 +732,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
 	}
+	if (b->flags & ZEND_BB_RECV_ENTRY) {
+		fprintf(stderr, " recv");
+	}
 	if (b->flags & ZEND_BB_FOLLOW) {
 		fprintf(stderr, " follow");
 	}

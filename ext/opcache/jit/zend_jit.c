@@ -591,7 +591,16 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 
 static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
 {
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS, cfg) != SUCCESS) {
+	uint32_t flags;
+
+	flags = ZEND_CFG_STACKLESS | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS;
+
+	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		/* First RECV/RECV_INIT instructions may be skipped */
+		flags |= ZEND_CFG_RECV_ENTRY;
+	}
+
+	if (zend_build_cfg(&CG(arena), op_array, flags, cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
