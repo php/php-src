@@ -1132,7 +1132,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	if ((src_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE)) &&
 ||    	has_concrete_type(src_info & MAY_BE_ANY)) {
 ||		if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
-||			if (dst_info != src_info) {
+||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (src_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
 ||				zend_uchar type = concrete_type(src_info);
 |				SET_ZVAL_TYPE_INFO dst_addr, type
 ||			}
@@ -1220,7 +1220,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||	    has_concrete_type(src_info & MAY_BE_ANY)) {
 ||		zend_uchar type = concrete_type(src_info);
 ||		if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
-||			if (((dst_info & MAY_BE_ANY) != (1<<type)) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
+||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (src_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
 |				SET_ZVAL_TYPE_INFO dst_addr, type
 ||			}
 ||		}
