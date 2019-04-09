@@ -1220,6 +1220,67 @@ error:
 
 } /* }}} */
 
+/* {{{ proto array SplDoublyLinkedList::__serialize() */
+SPL_METHOD(SplDoublyLinkedList, __serialize)
+{
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	spl_ptr_llist_element *current = intern->llist->head;
+	zval tmp;
+
+	if (zend_parse_parameters_none_throw() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	/* flags */
+	ZVAL_LONG(&tmp, intern->flags);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* elements */
+	array_init_size(&tmp, intern->llist->count);
+	while (current) {
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
+		current = current->next;
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* members */
+	ZVAL_ARR(&tmp, zend_std_get_properties(ZEND_THIS));
+	Z_TRY_ADDREF(tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+} /* }}} */
+
+/* {{{ proto void SplDoublyLinkedList::__unserialize(array serialized) */
+SPL_METHOD(SplDoublyLinkedList, __unserialize) {
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	HashTable *data;
+	zval *flags_zv, *storage_zv, *members_zv, *elem;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		return;
+	}
+
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
+	members_zv = zend_hash_index_find(data, 2);
+	if (!flags_zv || !storage_zv || !members_zv ||
+			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
+			Z_TYPE_P(members_zv) != IS_ARRAY) {
+		zend_throw_exception(spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data", 0);
+		return;
+	}
+
+	intern->flags = (int) Z_LVAL_P(flags_zv);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+		spl_ptr_llist_push(intern->llist, elem);
+	} ZEND_HASH_FOREACH_END();
+
+	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
+} /* }}} */
+
 /* {{{ proto void SplDoublyLinkedList::add(mixed index, mixed newval)
  Inserts a new entry before the specified $index consisting of $newval. */
 SPL_METHOD(SplDoublyLinkedList, add)
@@ -1374,6 +1435,8 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	/* Serializable */
 	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_dllist_serialized,      ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  __unserialize,    arginfo_dllist_serialized,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  __serialize,      arginfo_dllist_void,          ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
