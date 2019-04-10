@@ -115,10 +115,11 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 
 } /* }}} */
 
-static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zend_object *this, zval *obj) {
+static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zval *obj) {
 	if (intern->fptr_get_hash) {
 		zval rv;
-		zend_call_method_with_1_params(this, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
+		zend_call_method_with_1_params(
+			&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
 		if (!Z_ISUNDEF(rv)) {
 			if (Z_TYPE(rv) == IS_STRING) {
 				key->key = Z_STR(rv);
@@ -162,11 +163,11 @@ static spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage 
 	}
 } /* }}} */
 
-spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *this, zval *obj, zval *inf) /* {{{ */
+spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zval *obj, zval *inf) /* {{{ */
 {
 	spl_SplObjectStorageElement *pelement, element;
 	zend_hash_key key;
-	if (spl_object_storage_get_hash(&key, intern, this, obj) == FAILURE) {
+	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		return NULL;
 	}
 
@@ -198,11 +199,11 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 	return pelement;
 } /* }}} */
 
-static int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *obj) /* {{{ */
+static int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *obj) /* {{{ */
 {
 	int ret = FAILURE;
 	zend_hash_key key;
-	if (spl_object_storage_get_hash(&key, intern, Z_OBJ_P(this), obj) == FAILURE) {
+	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		return ret;
 	}
 	if (key.key) {
@@ -215,11 +216,11 @@ static int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, z
 	return ret;
 } /* }}}*/
 
-void spl_object_storage_addall(spl_SplObjectStorage *intern, zend_object *this, spl_SplObjectStorage *other) { /* {{{ */
+void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
 	spl_SplObjectStorageElement *element;
 
 	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
-		spl_object_storage_attach(intern, this, &element->obj, &element->inf);
+		spl_object_storage_attach(intern, &element->obj, &element->inf);
 	} ZEND_HASH_FOREACH_END();
 
 	intern->index = 0;
@@ -257,7 +258,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 
 	if (orig) {
 		spl_SplObjectStorage *other = spl_object_storage_from_obj(orig);
-		spl_object_storage_addall(intern, orig, other);
+		spl_object_storage_addall(intern, other);
 	}
 
 	return &intern->std;
@@ -374,11 +375,11 @@ static zend_object *spl_SplObjectStorage_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *obj) /* {{{ */
+int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *obj) /* {{{ */
 {
 	int found;
 	zend_hash_key key;
-	if (spl_object_storage_get_hash(&key, intern, Z_OBJ_P(this), obj) == FAILURE) {
+	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		return 0;
 	}
 
@@ -402,7 +403,7 @@ SPL_METHOD(SplObjectStorage, attach)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|z!", &obj, &inf) == FAILURE) {
 		return;
 	}
-	spl_object_storage_attach(intern, Z_OBJ_P(ZEND_THIS), obj, inf);
+	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::detach(object obj)
@@ -415,7 +416,7 @@ SPL_METHOD(SplObjectStorage, detach)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 		return;
 	}
-	spl_object_storage_detach(intern, ZEND_THIS, obj);
+	spl_object_storage_detach(intern, obj);
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
@@ -448,7 +449,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 		return;
 	}
 
-	if (spl_object_storage_get_hash(&key, intern, Z_OBJ_P(ZEND_THIS), obj) == FAILURE) {
+	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		return;
 	}
 
@@ -478,7 +479,7 @@ SPL_METHOD(SplObjectStorage, addAll)
 
 	other = Z_SPLOBJSTORAGE_P(obj);
 
-	spl_object_storage_addall(intern, Z_OBJ_P(ZEND_THIS), other);
+	spl_object_storage_addall(intern, other);
 
 	RETURN_LONG(zend_hash_num_elements(&intern->storage));
 } /* }}} */
@@ -500,7 +501,7 @@ SPL_METHOD(SplObjectStorage, removeAll)
 
 	zend_hash_internal_pointer_reset(&other->storage);
 	while ((element = zend_hash_get_current_data_ptr(&other->storage)) != NULL) {
-		if (spl_object_storage_detach(intern, ZEND_THIS, &element->obj) == FAILURE) {
+		if (spl_object_storage_detach(intern, &element->obj) == FAILURE) {
 			zend_hash_move_forward(&other->storage);
 		}
 	}
@@ -527,8 +528,8 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 	other = Z_SPLOBJSTORAGE_P(obj);
 
 	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
-		if (!spl_object_storage_contains(other, ZEND_THIS, &element->obj)) {
-			spl_object_storage_detach(intern, ZEND_THIS, &element->obj);
+		if (!spl_object_storage_contains(other, &element->obj)) {
+			spl_object_storage_detach(intern, &element->obj);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -549,7 +550,7 @@ SPL_METHOD(SplObjectStorage, contains)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 		return;
 	}
-	RETURN_BOOL(spl_object_storage_contains(intern, ZEND_THIS, obj));
+	RETURN_BOOL(spl_object_storage_contains(intern, obj));
 } /* }}} */
 
 /* {{{ proto int SplObjectStorage::count()
@@ -813,7 +814,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 			goto outexcept;
 		}
 
-		if (spl_object_storage_get_hash(&key, intern, Z_OBJ_P(ZEND_THIS), &entry) == FAILURE) {
+		if (spl_object_storage_get_hash(&key, intern, &entry) == FAILURE) {
 			zval_ptr_dtor(&entry);
 			zval_ptr_dtor(&inf);
 			goto outexcept;
@@ -828,7 +829,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 				var_push_dtor(&var_hash, &pelement->obj);
 			}
 		}
-		element = spl_object_storage_attach(intern, Z_OBJ_P(ZEND_THIS), &entry, Z_ISUNDEF(inf)?NULL:&inf);
+		element = spl_object_storage_attach(intern, &entry, Z_ISUNDEF(inf)?NULL:&inf);
 		var_replace(&var_hash, &entry, &element->obj);
 		var_replace(&var_hash, &inf, &element->inf);
 		zval_ptr_dtor(&entry);
@@ -928,7 +929,7 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 				return;
 			}
 
-			spl_object_storage_attach(intern, &intern->std, key, val);
+			spl_object_storage_attach(intern, key, val);
 			key = NULL;
 		} else {
 			key = val;
@@ -1080,7 +1081,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 		}
 	}
 
-	spl_object_storage_attach(intern, Z_OBJ_P(ZEND_THIS), iterator, info);
+	spl_object_storage_attach(intern, iterator, info);
 }
 /* }}} */
 
