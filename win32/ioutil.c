@@ -308,18 +308,35 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 		 already needs to be a long path. The given path is already normalized
 		 and prepared, need only to prefix it.
 		 */
-		wchar_t *tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+		wchar_t *tmp = (wchar_t *) malloc((path_len + 1) * sizeof(wchar_t));
 		if (!tmp) {
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return -1;
 		}
+		memmove(tmp, path, (path_len + 1) * sizeof(wchar_t));
 
-		memmove(tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, path, path_len * sizeof(wchar_t));
-		path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
-		tmp[path_len] = L'\0';
+		if (PHP_WIN32_IOUTIL_NORM_FAIL == php_win32_ioutil_normalize_path_w(&tmp, path_len, &path_len)) {
+			free(tmp);
+			return -1;
+		}
+
+		if (!PHP_WIN32_IOUTIL_IS_LONG_PATHW(tmp, path_len)) {
+			wchar_t *_tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+			if (!_tmp) {
+				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+				free(tmp);
+				return -1;
+			}
+			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+			memmove(_tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, tmp, path_len * sizeof(wchar_t));
+			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+			_tmp[path_len] = L'\0';
+			free(tmp);
+			tmp = _tmp;
+		}
 
 		my_path = tmp;
+
 	} else {
 		my_path = path;
 	}
@@ -575,7 +592,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 /* Partial normalization can still be acceptable, explicit fail has to be caught. */
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
 {/*{{{*/
-	wchar_t *pos, *idx = *buf, canonicalw[MAXPATHLEN];
+	wchar_t *idx = *buf, canonicalw[MAXPATHLEN], _tmp[MAXPATHLEN], *pos = _tmp;
 	size_t ret_len = len;
 
 	if (len >= MAXPATHLEN) {
@@ -584,12 +601,17 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
-	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && (size_t)(idx - *buf) <= len) {
-		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
-		idx = pos++;
+	for (; (size_t)(idx - *buf) <= len; idx++, pos++) {
+		*pos = *idx;
+		if (PHP_WIN32_IOUTIL_FW_SLASHW == *pos) {
+			*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+		}
+		while (PHP_WIN32_IOUTIL_IS_SLASHW(*idx) && PHP_WIN32_IOUTIL_IS_SLASHW(*(idx+1))) {
+			idx++;
+		}
 	}
 
-	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf, PATHCCH_ALLOW_LONG_PATHS)) {
+	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, _tmp, PATHCCH_ALLOW_LONG_PATHS)) {
 		/* Length unchanged. */
 		*new_len = len;
 		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
