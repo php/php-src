@@ -7788,10 +7788,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			return 0;
 		}
 		if (opline->opcode != ZEND_DO_ICALL) {
-			uint32_t target_label = ssa->cfg.map[opline - op_array->opcodes] + 1;
-
 			|	LOAD_IP_ADDR (opline + 1)
-			|	jmp =>target_label
 		}
 	}
 

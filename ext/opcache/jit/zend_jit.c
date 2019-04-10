@@ -2036,15 +2036,18 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 #ifndef CONTEXT_THREADED_JIT
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
 			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
-				if (!is_terminated) {
-					zend_jit_jmp(&dasm_state, b);
-				}
+				/* pass */
 			} else if (zend_jit_level < ZEND_JIT_LEVEL_INLINE &&
 			           ssa->cfg.blocks[b].len == 1 &&
 			           (ssa->cfg.blocks[b].flags & ZEND_BB_EXIT) &&
 			           op_array->opcodes[ssa->cfg.blocks[b].start].opcode != ZEND_JMP) {
 				/* don't generate code for BB with single opcode */
 				continue;
+			}
+			if (ssa->cfg.blocks[b].flags & ZEND_BB_FOLLOW) {
+				if (!is_terminated) {
+					zend_jit_jmp(&dasm_state, b);
+				}
 			}
 			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
