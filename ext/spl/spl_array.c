@@ -1822,6 +1822,80 @@ outexcept:
 
 } /* }}} */
 
+/* {{{ proto array ArrayObject::__serialize() */
+SPL_METHOD(Array, __serialize)
+{
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
+	zval tmp;
+
+	if (zend_parse_parameters_none_throw() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	/* flags */
+	ZVAL_LONG(&tmp, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* storage */
+	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
+		ZVAL_NULL(&tmp);
+	} else {
+		ZVAL_COPY(&tmp, &intern->array);
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* members */
+	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
+	Z_TRY_ADDREF(tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+}
+/* }}} */
+
+
+/* {{{ proto void ArrayObject::__unserialize(array data) */
+SPL_METHOD(Array, __unserialize)
+{
+	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
+	HashTable *data;
+	zval *flags_zv, *storage_zv, *members_zv;
+	zend_long flags;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		return;
+	}
+
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
+	members_zv = zend_hash_index_find(data, 2);
+	if (!flags_zv || !storage_zv || !members_zv ||
+			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(members_zv) != IS_ARRAY) {
+		zend_throw_exception(spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data", 0);
+		return;
+	}
+
+	flags = Z_LVAL_P(flags_zv);
+	intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;
+	intern->ar_flags |= flags & SPL_ARRAY_CLONE_MASK;
+
+	if (flags & SPL_ARRAY_IS_SELF) {
+		zval_ptr_dtor(&intern->array);
+		ZVAL_UNDEF(&intern->array);
+	} else if (Z_TYPE_P(storage_zv) == IS_ARRAY) {
+		zval_ptr_dtor(&intern->array);
+		ZVAL_COPY_VALUE(&intern->array, storage_zv);
+		ZVAL_NULL(storage_zv);
+		SEPARATE_ARRAY(&intern->array);
+	} else {
+		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, 1);
+	}
+
+	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
+}
+/* }}} */
+
 /* {{{ arginfo and function table */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, input)
@@ -1894,6 +1968,8 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, natcasesort,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, unserialize,      arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, serialize,        arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __unserialize,    arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __serialize,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
 	SPL_ME(Array, getIterator,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_array_exchangeArray,    ZEND_ACC_PUBLIC)
@@ -1921,6 +1997,8 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, natcasesort,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, unserialize,      arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, serialize,        arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __unserialize,    arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __serialize,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
 	SPL_ME(Array, rewind,           arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, current,          arginfo_array_void,             ZEND_ACC_PUBLIC)

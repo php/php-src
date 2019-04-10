@@ -866,6 +866,78 @@ outexcept:
 
 } /* }}} */
 
+/* {{{ proto auto SplObjectStorage::__serialize() */
+SPL_METHOD(SplObjectStorage, __serialize)
+{
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+	spl_SplObjectStorageElement *elem;
+	zval tmp;
+
+	if (zend_parse_parameters_none_throw() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	/* storage */
+	array_init_size(&tmp, 2 * zend_hash_num_elements(&intern->storage));
+	ZEND_HASH_FOREACH_PTR(&intern->storage, elem) {
+		Z_TRY_ADDREF(elem->obj);
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), &elem->obj);
+		Z_TRY_ADDREF(elem->inf);
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), &elem->inf);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* members */
+	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
+	Z_TRY_ADDREF(tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+} /* }}} */
+
+/* {{{ proto void SplObjectStorage::__unserialize(array serialized) */
+SPL_METHOD(SplObjectStorage, __unserialize)
+{
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+	HashTable *data;
+	zval *storage_zv, *members_zv, *key, *val;
+
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		return;
+	}
+
+	storage_zv = zend_hash_index_find(data, 0);
+	members_zv = zend_hash_index_find(data, 1);
+	if (!storage_zv || !members_zv ||
+			Z_TYPE_P(storage_zv) != IS_ARRAY || Z_TYPE_P(members_zv) != IS_ARRAY) {
+		zend_throw_exception(spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data", 0);
+		return;
+	}
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(storage_zv)) % 2 != 0) {
+		zend_throw_exception(spl_ce_UnexpectedValueException, "Odd number of elements", 0);
+		return;
+	}
+
+	key = NULL;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), val) {
+		if (key) {
+			if (Z_TYPE_P(key) != IS_OBJECT) {
+				zend_throw_exception(spl_ce_UnexpectedValueException, "Non-object key", 0);
+				return;
+			}
+
+			spl_object_storage_attach(intern, &intern->std, key, val);
+			key = NULL;
+		} else {
+			key = val;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
+}
+
 ZEND_BEGIN_ARG_INFO(arginfo_Object, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO();
@@ -915,6 +987,8 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	/* Serializable */
 	SPL_ME(SplObjectStorage,  unserialize, arginfo_Serialized,    0)
 	SPL_ME(SplObjectStorage,  serialize,   arginfo_splobject_void,0)
+	SPL_ME(SplObjectStorage,  __unserialize, arginfo_Serialized,    0)
+	SPL_ME(SplObjectStorage,  __serialize,   arginfo_splobject_void,0)
 	/* ArrayAccess */
 	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_offsetGet, 0)
 	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_attach, 0)
