@@ -447,6 +447,7 @@ PHP_METHOD(Phar, mount)
 	fname_len = strlen(fname);
 
 #ifdef PHP_WIN32
+	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
 #endif
 
@@ -457,7 +458,7 @@ PHP_METHOD(Phar, mount)
 		if (path_len > 7 && !memcmp(path, "phar://", 7)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Can only mount internal paths within a phar archive, use a relative path instead of \"%s\"", path);
 			efree(arch);
-			return;
+			goto finish;
 		}
 carry_on2:
 		if (NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), arch, arch_len))) {
@@ -472,7 +473,7 @@ carry_on2:
 			if (arch) {
 				efree(arch);
 			}
-			return;
+			goto finish;
 		}
 carry_on:
 		if (SUCCESS != phar_mount_entry(pphar, actual, actual_len, path, path_len)) {
@@ -484,8 +485,7 @@ carry_on:
 			if (arch) {
 				efree(arch);
 			}
-
-			return;
+			goto finish;
 		}
 
 		if (entry && path && path == entry) {
@@ -495,8 +495,7 @@ carry_on:
 		if (arch) {
 			efree(arch);
 		}
-
-		return;
+		goto finish;
 	} else if (HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
@@ -512,6 +511,11 @@ carry_on:
 	}
 
 	zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s failed", path, actual);
+
+finish: ;
+#ifdef PHP_WIN32
+	efree(fname);
+#endif
 }
 /* }}} */
 

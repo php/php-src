@@ -510,38 +510,39 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
-	phar_entry_data *ret;
+	phar_entry_data *ret = NULL;
 	const char *pcr_error;
 	char is_dir;
 
 #ifdef PHP_WIN32
+	path = estrndup(path, path_len);
 	phar_unixify_path_separators(path, path_len);
 #endif
 
 	is_dir = (path_len && path[path_len - 1] == '/') ? 1 : 0;
 
 	if (FAILURE == phar_get_archive(&phar, fname, fname_len, NULL, 0, error)) {
-		return NULL;
+		goto finish;
 	}
 
 	if (FAILURE == phar_get_entry_data(&ret, fname, fname_len, path, path_len, mode, allow_dir, error, security)) {
-		return NULL;
+		goto finish;
 	} else if (ret) {
-		return ret;
+		goto finish;
 	}
 
 	if (phar_path_check(&path, &path_len, &pcr_error) > pcr_is_ok) {
 		if (error) {
 			spprintf(error, 0, "phar error: invalid path \"%s\" contains %s", path, pcr_error);
 		}
-		return NULL;
+		goto finish;
 	}
 
 	if (phar->is_persistent && FAILURE == phar_copy_on_write(&phar)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: file \"%s\" in phar \"%s\" cannot be created, could not make cached phar writeable", path, fname);
 		}
-		return NULL;
+		goto finish;
 	}
 
 	/* create a new phar data holder */
@@ -558,7 +559,8 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 			spprintf(error, 0, "phar error: unable to create temporary file");
 		}
 		efree(ret);
-		return NULL;
+		ret = NULL;
+		goto finish;
 	}
 
 	etemp.fp_refcount = 1;
@@ -592,16 +594,18 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 		if (error) {
 			spprintf(error, 0, "phar error: unable to add new entry \"%s\" to phar \"%s\"", etemp.filename, phar->fname);
 		}
-		efree(ret);
 		efree(etemp.filename);
-		return NULL;
+		efree(ret);
+		ret = NULL;
+		goto finish;
 	}
 
 	if (!entry) {
 		php_stream_close(etemp.fp);
 		efree(etemp.filename);
 		efree(ret);
-		return NULL;
+		ret = NULL;
+		goto finish;
 	}
 
 	++(phar->refcount);
@@ -613,6 +617,10 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 	ret->is_tar = entry->is_tar;
 	ret->internal_file = entry;
 
+finish:
+#ifdef PHP_WIN32
+	efree(path);
+#endif
 	return ret;
 }
 /* }}} */
