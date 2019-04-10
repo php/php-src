@@ -7077,7 +7077,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, zen
 	}
 	|	// zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
 	|	// ZEND_SET_CALL_INFO(call, 0, call_info);
-	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | (ZEND_CALL_NESTED_FUNCTION << ZEND_CALL_INFO_SHIFT))
+	|	mov dword EX:RX->This.u1.type_info, (IS_UNDEF | ZEND_CALL_NESTED_FUNCTION)
 	|	// call->func = func;
 #ifdef _WIN32
 	if (0) {
@@ -7726,7 +7726,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		if (opline->opcode == ZEND_DO_FCALL) {
 			// TODO: optimize ???
 			|	// if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS))
-			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_RELEASE_THIS
+			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_RELEASE_THIS >> 16)
 			|	jnz >1
 			|.cold_code
 			|1:
@@ -7750,7 +7750,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		}
 
 		|	// zend_vm_stack_free_call_frame(call);
-		|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], ZEND_CALL_ALLOCATED
+		|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_ALLOCATED >> 16)
 		|	jnz >1
 		|.cold_code
 		|1:
@@ -8591,7 +8591,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 		return 0;
 	}
 
-	|	movzx FCARG1d, word [FP + offsetof(zend_execute_data, This.u1.type_info) + 2]
+	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
 	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_FAKE_CLOSURE)
 	|	jnz ->leave_function_handler
 

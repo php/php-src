@@ -3854,13 +3854,14 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	}
 
 	return zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC,
-		fbc, num_args, called_scope, NULL);
+		fbc, num_args, called_scope);
 }
 /* }}} */
 
 static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_object *function, uint32_t num_args) /* {{{ */
 {
 	zend_function *fbc;
+	void *object_or_called_scope;
 	zend_class_entry *called_scope;
 	zend_object *object;
 	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
@@ -3868,6 +3869,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	if (EXPECTED(function->handlers->get_closure) &&
 	    EXPECTED(function->handlers->get_closure(function, &called_scope, &fbc, &object) == SUCCESS)) {
 
+	    object_or_called_scope = called_scope;
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
 			GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
@@ -3875,9 +3877,14 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 			if (fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
 			}
+			if (object) {
+				call_info |= ZEND_CALL_HAS_THIS;
+				object_or_called_scope = object;
+			}
 		} else if (object) {
-			call_info |= ZEND_CALL_RELEASE_THIS;
+			call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 			GC_ADDREF(object); /* For $this pointer */
+			object_or_called_scope = object;
 		}
 	} else {
 		zend_throw_error(NULL, "Function name must be a string");
@@ -3889,15 +3896,14 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 	}
 
 	return zend_vm_stack_push_call_frame(call_info,
-		fbc, num_args, called_scope, object);
+		fbc, num_args, object_or_called_scope);
 }
 /* }}} */
 
 static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_array *function, uint32_t num_args) /* {{{ */
 {
 	zend_function *fbc;
-	zend_class_entry *called_scope;
-	zend_object *object;
+	void *object_or_called_scope;
 	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC;
 
 	if (zend_hash_num_elements(function) == 2) {
@@ -3924,8 +3930,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 		}
 
 		if (Z_TYPE_P(obj) == IS_STRING) {
-			object = NULL;
-			called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			zend_class_entry *called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+
 			if (UNEXPECTED(called_scope == NULL)) {
 				return NULL;
 			}
@@ -3945,9 +3951,9 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 				zend_non_static_method_call(fbc);
 				return NULL;
 			}
+			object_or_called_scope = called_scope;
 		} else {
-			called_scope = Z_OBJCE_P(obj);
-			object = Z_OBJ_P(obj);
+			zend_object *object = Z_OBJ_P(obj);
 
 			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
 			if (UNEXPECTED(fbc == NULL)) {
@@ -3958,10 +3964,11 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 
 			if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-				object = NULL;
+				object_or_called_scope = object->ce;
 			} else {
-				call_info |= ZEND_CALL_RELEASE_THIS;
+				call_info |= ZEND_CALL_RELEASE_THIS | ZEND_CALL_HAS_THIS;
 				GC_ADDREF(object); /* For $this pointer */
+				object_or_called_scope = object;
 			}
 		}
 	} else {
@@ -3974,7 +3981,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 	}
 
 	return zend_vm_stack_push_call_frame(call_info,
-		fbc, num_args, called_scope, object);
+		fbc, num_args, object_or_called_scope);
 }
 /* }}} */
 
