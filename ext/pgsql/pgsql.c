@@ -90,7 +90,7 @@
 #define PQ_SETNONBLOCKING(pg_link, flag) 0
 #endif
 
-#define CHECK_DEFAULT_LINK(x) if ((x) == NULL) { php_error_docref(NULL, E_WARNING, "No PostgreSQL link opened yet"); }
+#define CHECK_DEFAULT_LINK(x) if ((x) == NULL) { php_error_docref(NULL, E_WARNING, "No PostgreSQL link opened yet"); RETURN_FALSE; }
 #define FETCH_DEFAULT_LINK()  PGG(default_link)
 
 #ifndef HAVE_PQFREEMEM
@@ -1559,13 +1559,15 @@ PHP_FUNCTION(pg_close)
 		return;
 	}
 
-	if (pgsql_link) {
-		link = Z_RES_P(pgsql_link);
-	} else {
-		link = FETCH_DEFAULT_LINK();
+	if (!pgsql_link) {
+		link = PGG(default_link);
 		CHECK_DEFAULT_LINK(link);
+		zend_list_delete(link);
+		PGG(default_link) = NULL;
+		RETURN_TRUE;
 	}
 
+	link = Z_RES_P(pgsql_link);
 	if (zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink) == NULL) {
 		RETURN_FALSE;
 	}
