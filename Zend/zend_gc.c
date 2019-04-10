@@ -54,7 +54,7 @@
  *    gc_scan_black will be called on that node to scan it's subgraph.
  * otherwise (refcount == 0), it marks the node white.
  *
- * A node MAY be added to possbile roots when ZEND_UNSET_VAR happens or
+ * A node MAY be added to possible roots when ZEND_UNSET_VAR happens or
  * zend_assign_to_variable is called only when possible garbage node is
  * produced.
  * gc_possible_root() will be called to add the nodes to possible roots.
