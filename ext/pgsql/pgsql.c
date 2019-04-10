@@ -936,12 +936,20 @@ static void _close_pgsql_link(zend_resource *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
 	PGresult *res;
+	zval *hash;
 
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
 	PQfinish(link);
 	PGG(num_links)--;
+
+	/* Remove connection hash for this link */
+	hash = zend_hash_index_find(&PGG(hashes), (uintptr_t) link);
+	if (hash) {
+		zend_hash_index_del(&PGG(hashes), (uintptr_t) link);
+		zend_hash_del(&EG(regular_list), Z_STR_P(hash));
+	}
 }
 /* }}} */
 
@@ -1095,6 +1103,7 @@ static PHP_GINIT_FUNCTION(pgsql)
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initialize notice message hash at MINIT only */
 	zend_hash_init_ex(&pgsql_globals->notices, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&pgsql_globals->hashes, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 }
 /* }}} */
 
@@ -1229,6 +1238,7 @@ PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(&PGG(notices));
+	zend_hash_destroy(&PGG(hashes));
 
 	return SUCCESS;
 }
@@ -1250,6 +1260,7 @@ PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
 	/* clean up notice messages */
 	zend_hash_clean(&PGG(notices));
+	zend_hash_clean(&PGG(hashes));
 	/* clean up persistent connection */
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions);
 	return SUCCESS;
@@ -1440,14 +1451,11 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			link = (zend_resource *)index_ptr->ptr;
-			if (link->ptr && (link->type == le_link || link->type == le_plink)) {
-				php_pgsql_set_default_link(link);
-				GC_ADDREF(link);
-				RETVAL_RES(link);
-				goto cleanup;
-			} else {
-				zend_hash_del(&EG(regular_list), str.s);
-			}
+			ZEND_ASSERT(link->ptr && (link->type == le_link || link->type == le_plink));
+			php_pgsql_set_default_link(link);
+			GC_ADDREF(link);
+			RETVAL_RES(link);
+			goto cleanup;
 		}
 		if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 			php_error_docref(NULL, E_WARNING, "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
@@ -1491,6 +1499,16 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		new_index_ptr.ptr = (void *) Z_RES_P(return_value);
 		new_index_ptr.type = le_index_ptr;
 		zend_hash_update_mem(&EG(regular_list), str.s, (void *) &new_index_ptr, sizeof(zend_resource));
+
+		/* Keep track of link => hash mapping, so we can remove the hash entry from regular_list
+		 * when the connection is closed. This uses the address of the connection rather than the
+		 * zend_resource, because the resource destructor is passed a stack copy of the resource
+		 * structure. */
+		{
+			zval tmp;
+			ZVAL_STR_COPY(&tmp, str.s);
+			zend_hash_index_update(&PGG(hashes), (uintptr_t) pgsql, &tmp);
+		}
 		PGG(num_links)++;
 	}
 	/* set notice processor */
