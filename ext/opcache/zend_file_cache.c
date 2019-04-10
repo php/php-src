@@ -775,7 +775,21 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	filename[len] = '\\';
 
 	memcpy(filename + len + 1, ZCG(system_id), 32);
-	if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
+
+	if (ZSTR_LEN(script_path) >= 7 && ':' == ZSTR_VAL(script_path)[4] && '/' == ZSTR_VAL(script_path)[5]  && '/' == ZSTR_VAL(script_path)[6]) {
+		/* phar:// or file:// */
+		*(filename + len + 33) = '\\';
+		memcpy(filename + len + 34, ZSTR_VAL(script_path), 4);
+		if (ZSTR_LEN(script_path) - 7 >= 2 && ':' == ZSTR_VAL(script_path)[8]) {
+			*(filename + len + 38) = '\\';
+			*(filename + len + 39) = ZSTR_VAL(script_path)[7];
+			memcpy(filename + len + 40, ZSTR_VAL(script_path) + 9, ZSTR_LEN(script_path) - 9);
+			memcpy(filename + len + 40 + ZSTR_LEN(script_path) - 9, SUFFIX, sizeof(SUFFIX));
+		} else {
+			memcpy(filename + len + 38, ZSTR_VAL(script_path) + 7, ZSTR_LEN(script_path) - 7);
+			memcpy(filename + len + 38 + ZSTR_LEN(script_path) - 7, SUFFIX, sizeof(SUFFIX));
+		}
+	} else if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
 		/* local fs */
 		*(filename + len + 33) = '\\';
 		*(filename + len + 34) = ZSTR_VAL(script_path)[0];
