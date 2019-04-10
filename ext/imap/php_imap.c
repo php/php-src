@@ -1351,11 +1351,11 @@ PHP_FUNCTION(imap_append)
 
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex))== NULL) {
-			zend_string_free(regex);
+			zend_string_release(regex);
 			RETURN_FALSE;
 		}
 
-		zend_string_free(regex);
+		zend_string_release(regex);
 		php_pcre_match_impl(pce, internal_date, return_value, subpats, global,
 			0, Z_L(0), Z_L(0));
 
