@@ -3795,8 +3795,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 		if ((OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			}
-			if (call_info & ZEND_CALL_RELEASE_THIS) {
+			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
 				zend_object_release(fcc.object);
 			}
 			HANDLE_EXCEPTION();
@@ -4979,8 +4978,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 		zend_type_error("call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
 		if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(call)->func));
-		}
-		if (Z_TYPE(EX(call)->This) == IS_OBJECT) {
+		} else if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(EX(call)->This));
 		}
 		FREE_UNFETCHED_OP2();

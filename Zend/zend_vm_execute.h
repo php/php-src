@@ -1676,8 +1676,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_ARRAY_SPEC_HANDLER(ZEND_O
 		zend_type_error("call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
 		if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(call)->func));
-		}
-		if (Z_TYPE(EX(call)->This) == IS_OBJECT) {
+		} else if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(EX(call)->This));
 		}
 		FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
@@ -5646,8 +5645,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 		if ((IS_CONST & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			}
-			if (call_info & ZEND_CALL_RELEASE_THIS) {
+			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
 				zend_object_release(fcc.object);
 			}
 			HANDLE_EXCEPTION();
@@ -7909,8 +7907,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 		if (((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			}
-			if (call_info & ZEND_CALL_RELEASE_THIS) {
+			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
 				zend_object_release(fcc.object);
 			}
 			HANDLE_EXCEPTION();
@@ -10863,8 +10860,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 		if ((IS_CV & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(func));
-			}
-			if (call_info & ZEND_CALL_RELEASE_THIS) {
+			} else if (call_info & ZEND_CALL_RELEASE_THIS) {
 				zend_object_release(fcc.object);
 			}
 			HANDLE_EXCEPTION();
