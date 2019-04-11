@@ -57,8 +57,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 	struct dirent **vector = NULL;
 	int vector_size = 0;
 	int nfiles = 0;
-	char entry[sizeof(struct dirent)+MAXPATHLEN];
-	struct dirent *dp = (struct dirent *)&entry;
+	struct dirent *dp;
 
 	if (namelist == NULL) {
 		return -1;
@@ -68,7 +67,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 		return -1;
 	}
 
-	while (!php_readdir_r(dirp, (struct dirent *)entry, &dp) && dp) {
+	while ((dp = readdir(dirp))) {
 		size_t dsize = 0;
 		struct dirent *newdp = NULL;
 

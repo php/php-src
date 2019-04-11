@@ -284,8 +284,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
-	char dentry[sizeof(struct dirent) + MAXPATHLEN];
-	struct dirent *entry = (struct dirent *) &dentry;
+	struct dirent *entry;
 	zend_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
@@ -312,7 +311,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	memcpy(buf, dirname, dirname_len);
 	buf[dirname_len] = PHP_DIR_SEPARATOR;
 
-	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
+	while ((entry = readdir(dir))) {
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
 			size_t entry_len = strlen(entry->d_name);
