@@ -1727,11 +1727,4 @@ Check '[$]0 --help' for available options
 fi
 ])
 
-AC_CONFIG_COMMANDS_POST([
-  # Disable PACKAGE_* symbols in main/php_config.h.in
-  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/main/php_config.h.in \
-    > $srcdir/main/php_config.h.in.tmp && \
-    mv $srcdir/main/php_config.h.in.tmp $srcdir/main/php_config.h.in
-])
-
 AC_OUTPUT

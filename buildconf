@@ -3,6 +3,7 @@
 # A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
 MAKE=${MAKE:-make}
+SED=${SED:-sed}
 force=0
 debug=0
 
