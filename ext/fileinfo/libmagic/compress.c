@@ -71,6 +71,7 @@ typedef void (*sig_t)(int);
 #define lrzip_flags "-do"
 #define lzip_flags gzip_flags
 
+#ifdef PHP_FILEINFO_UNCOMPRESS
 static const char *gzip_args[] = {
 	"gzip", gzip_flags, NULL
 };
@@ -122,6 +123,7 @@ private const struct {
 	{ RCAST(const void *, zlibcmp),	0, zlib_args },		/* zlib */
 #endif
 };
+#endif
 
 #define OKDATA 	0
 #define NODATA	1

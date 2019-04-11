@@ -145,10 +145,7 @@ private uint16_t swap2(uint16_t);
 private uint32_t swap4(uint32_t);
 private uint64_t swap8(uint64_t);
 private char *mkdbname(struct magic_set *, const char *, int);
-private struct magic_map *apprentice_buf(struct magic_set *, struct magic *,
-    size_t);
 private struct magic_map *apprentice_map(struct magic_set *, const char *);
-private int check_buffer(struct magic_set *, struct magic_map *, const char *);
 private void apprentice_unmap(struct magic_map *);
 private int apprentice_compile(struct magic_set *, struct magic_map *,
     const char *);
@@ -2925,6 +2922,7 @@ eatsize(const char **p)
 	*p = l;
 }
 
+#if 0
 /*
  * handle a buffer containing a compiled file.
  */
@@ -2946,6 +2944,7 @@ apprentice_buf(struct magic_set *ms, struct magic *buf, size_t len)
 	}
 	return map;
 }
+#endif
 
 /*
  * handle a compiled file.
@@ -3095,6 +3094,7 @@ error:
 	return NULL;
 }
 
+#if 0
 private int
 check_buffer(struct magic_set *ms, struct magic_map *map, const char *dbname)
 {
@@ -3150,6 +3150,7 @@ check_buffer(struct magic_set *ms, struct magic_map *map, const char *dbname)
 			byteswap(map->magic[i], map->nmagic[i]);
 	return 0;
 }
+#endif
 
 /*
  * handle an mmaped file.

@@ -76,8 +76,6 @@ FILE_RCSID("@(#)$File: magic.c,v 1.102 2017/08/28 13:39:18 christos Exp $")
 # undef S_IFIFO
 #endif
 
-private void close_and_restore(const struct magic_set *, const char *, int,
-    const zend_stat_t *);
 private int unreadable_info(struct magic_set *, mode_t, const char *);
 #if 0
 private const char* get_default_magic(void);
@@ -157,6 +155,7 @@ magic_list(struct magic_set *ms, const char *magicfile)
 	return file_apprentice(ms, magicfile, FILE_LIST);
 }
 
+#if 0
 private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
     const zend_stat_t *sb)
@@ -189,6 +188,7 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 #endif
 	}
 }
+#endif
 
 
 /*
