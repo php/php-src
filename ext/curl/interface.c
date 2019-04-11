@@ -93,7 +93,9 @@ int  le_curl_share_handle;
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
 static MUTEX_T *php_curl_openssl_tsl = NULL;
 
-static void php_curl_ssl_lock(int mode, int n, const char * file, int line)
+/* Locking callbacks are no longer used since OpenSSL 1.1. Mark the functions as unused to
+ * avoid warnings due to this. */
+static ZEND_ATTRIBUTE_UNUSED void php_curl_ssl_lock(int mode, int n, const char * file, int line)
 {
 	if (mode & CRYPTO_LOCK) {
 		tsrm_mutex_lock(php_curl_openssl_tsl[n]);
@@ -102,7 +104,7 @@ static void php_curl_ssl_lock(int mode, int n, const char * file, int line)
 	}
 }
 
-static unsigned long php_curl_ssl_id(void)
+static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
 {
 	return (unsigned long) tsrm_thread_id();
 }
