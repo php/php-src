@@ -902,10 +902,12 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #endif
 	void *mem, *buf;
 
+#ifdef HAVE_JIT
 	/* FIXME: dump jited codes out to file cache? */
 	if (ZCG(accel_directives).jit) {
 		return FAILURE;
 	}
+#endif
 
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
