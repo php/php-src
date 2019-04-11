@@ -153,7 +153,7 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	zend_internal_function *fptr;
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = &EG(trampoline);
+		fptr = (zend_internal_function *) &EG(trampoline);
 	} else {
 		fptr = emalloc(sizeof(zend_internal_function));
 	}
@@ -173,7 +173,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 	zend_internal_function *fptr;
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = &EG(trampoline);
+		fptr = (zend_internal_function *) &EG(trampoline);
 	} else {
 		fptr = emalloc(sizeof(zend_internal_function));
 	}
