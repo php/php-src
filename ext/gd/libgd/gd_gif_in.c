@@ -467,7 +467,7 @@ LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, i
 	if (sd->sp > sd->stack)
 		return *--sd->sp;
 
-		while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
+	while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
 		if (code == sd->clear_code) {
 			for (i = 0; i < sd->clear_code; ++i) {
 				sd->table[0][i] = 0;
