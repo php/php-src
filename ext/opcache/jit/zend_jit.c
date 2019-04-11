@@ -905,7 +905,7 @@ static zend_lifetime_interval *zend_jit_sort_intervals(zend_lifetime_interval **
 	return list;
 }
 
-static void zend_jit_print_regset(zend_regset regset)
+static ZEND_ATTRIBUTE_UNUSED void zend_jit_print_regset(zend_regset regset)
 {
 	zend_reg reg;
 	int first = 1;
