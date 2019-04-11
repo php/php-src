@@ -85,19 +85,6 @@ typedef int gid_t;
 #include <immintrin.h>
 #endif
 
-#define SHM_PROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(1); \
-		} \
-	} while (0)
-#define SHM_UNPROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(0); \
-		} \
-	} while (0)
-
 ZEND_EXTENSION();
 
 #ifndef ZTS

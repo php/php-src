@@ -2644,21 +2644,6 @@ jit_failure:
 	return FAILURE;
 }
 
-/* memory write protection */
-#define SHM_PROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(1); \
-		} \
-	} while (0)
-
-#define SHM_UNPROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(0); \
-		} \
-	} while (0)
-
 /* Run-time JIT handler */
 static void ZEND_FASTCALL zend_runtime_jit(void)
 {

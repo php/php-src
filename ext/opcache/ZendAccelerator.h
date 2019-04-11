@@ -315,4 +315,19 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
+/* memory write protection */
+#define SHM_PROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(1); \
+		} \
+	} while (0)
+
+#define SHM_UNPROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(0); \
+		} \
+	} while (0)
+
 #endif /* ZEND_ACCELERATOR_H */
