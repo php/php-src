@@ -169,7 +169,11 @@ static int zend_file_cache_mkdir(char *filename, size_t start)
 		if (IS_SLASH(*s)) {
 			char old = *s;
 			*s = '\000';
+#ifndef ZEND_WIN32
 			if (mkdir(filename, S_IRWXU) < 0 && errno != EEXIST) {
+#else
+			if (php_win32_ioutil_mkdir(filename, 0700) < 0 && errno != EEXIST) {
+#endif
 				*s = old;
 				return FAILURE;
 			}
@@ -827,7 +831,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #ifndef ZEND_WIN32
 	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
 #else
-	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, _S_IREAD | _S_IWRITE);
+	fd = php_win32_ioutil_open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, _S_IREAD | _S_IWRITE);
 #endif
 	if (fd < 0) {
 		if (errno != EEXIST) {
@@ -1374,7 +1378,11 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	}
 	filename = zend_file_cache_get_bin_file_path(full_path);
 
+#ifndef ZEND_WIN32
 	fd = open(filename, O_RDONLY | O_BINARY);
+#else
+	fd = php_win32_ioutil_open(filename, O_RDONLY | O_BINARY);
+#endif
 	if (fd < 0) {
 		efree(filename);
 		return NULL;
