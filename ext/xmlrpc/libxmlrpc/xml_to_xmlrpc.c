@@ -31,8 +31,6 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id$";
-
 #include "php.h"
 #include "main/snprintf.h"
 #include <string.h>

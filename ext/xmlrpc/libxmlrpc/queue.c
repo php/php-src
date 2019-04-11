@@ -1,5 +1,3 @@
-static const char rcsid[] = "#(@) $Id$";
-
 /*
  * Date last modified: Jan 2001
  * Modifications by Dan Libby (dan@libby.com), including:
