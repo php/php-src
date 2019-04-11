@@ -32,8 +32,6 @@
 
 #include <php.h>
 
-static const char rcsid[] = "#(@) $Id$";
-
 #include <errno.h>
 #include <string.h>
 
