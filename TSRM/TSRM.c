@@ -219,12 +219,12 @@ TSRM_API void tsrm_shutdown(void)
 
 /* {{{ */
 /* environ lock api */
-TSRM_API int tsrm_env_lock() {
-    return tsrm_mutex_lock(tsrm_env_mutex);
+TSRM_API void tsrm_env_lock() {
+    tsrm_mutex_lock(tsrm_env_mutex);
 }
 
-TSRM_API int tsrm_env_unlock() {
-    return tsrm_mutex_unlock(tsrm_env_mutex);
+TSRM_API void tsrm_env_unlock() {
+    tsrm_mutex_unlock(tsrm_env_mutex);
 } /* }}} */
 
 /* enlarge the arrays for the already active threads */
