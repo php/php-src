@@ -626,7 +626,7 @@ void zend_accel_shared_protect(int mode)
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		DWORD oldProtect;
-		if (!VirtualProtect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->size, mode, &oldProtect)) {
+		if (!VirtualProtect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode, &oldProtect)) {
 			zend_accel_error(ACCEL_LOG_ERROR, "Failed to protect memory");
 		}
 	}
