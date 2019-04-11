@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
     collection). (Alexandru Patranescu, Nikita, Dmitry)
-  . Fixed bug #77877 (call_user_func() passes $this to satatic methods).
+  . Fixed bug #77877 (call_user_func() passes $this to static methods).
     (Dmitry)
   . Implemented request #76148 (Add array_key_exists() to the list of
     specially compiled functions). (Majkl578)
