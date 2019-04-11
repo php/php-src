@@ -1125,7 +1125,7 @@ static void zend_timeout_handler(int dummy) /* {{{ */
 
 		output_len = snprintf(log_buffer, sizeof(log_buffer), "\nFatal error: Maximum execution time of " ZEND_LONG_FMT "+" ZEND_LONG_FMT " seconds exceeded (terminated) in %s on line %d\n", EG(timeout_seconds), EG(hard_timeout), error_filename, error_lineno);
 		if (output_len > 0) {
-			write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
+			zend_quiet_write(2, log_buffer, MIN(output_len, sizeof(log_buffer)));
 		}
 		_exit(124);
     }
