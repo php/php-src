@@ -8591,27 +8591,28 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 		return 0;
 	}
 
+	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
 	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_FAKE_CLOSURE)
 	|	jnz ->leave_function_handler
 
-	if (op_array->scope || (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+	if ((op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) ||
+	    (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
 		|	// EG(current_execute_data) = EX(prev_execute_data);
 		|	mov r0, EX->prev_execute_data
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, r0, r2
-		if (op_array->scope) {
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+			|	mov r0, EX->func
+			|	sub r0, sizeof(zend_object)
+			|	OBJ_RELEASE r0, ecx, >4
+		} else if (op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) {
 			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
 			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
-			if (op_array->fn_flags & ZEND_ACC_STATIC) {
-				|	jnz >1
-				|.cold_code
-				|1:
-			} else {
-				|	je >2
-			}
+			|	je >4
 			|	// zend_object *object = Z_OBJ(execute_data->This);
 			|	mov r0, EX->This.value.obj
-			if (op_array->scope && op_array->scope->constructor == (zend_function*)op_array) {
+			if (op_array->scope->constructor == (zend_function*)op_array) {
 				|	// if (UNEXPECTED(EG(exception) != NULL)
 				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
 				|	jne >6
@@ -8631,26 +8632,6 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			}
 			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE r0, ecx, >4
-			if (op_array->fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_STATIC)) {
-				|	jmp >4
-			}
-			if (op_array->fn_flags & ZEND_ACC_STATIC) {
-				|.code
-			} else {
-				|2:
-			}
-		}
-		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
-			|	test FCARG1d, ZEND_CALL_CLOSURE
-			|	jnz >3
-			|.cold_code
-			|3:
-			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
-			|	mov r0, EX->func
-			|	sub r0, sizeof(zend_object)
-			|	OBJ_RELEASE r0, ecx, >4
-			|	jmp >4
-			|.code
 		}
 		|4:
 		|	// EG(vm_stack_top) = (zval*)execute_data;
