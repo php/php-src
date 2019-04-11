@@ -256,14 +256,6 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#ifndef restrict
-# if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004
-# else
-#  define __restrict__
-# endif
-# define restrict __restrict__
-#endif
-
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
