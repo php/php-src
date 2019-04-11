@@ -3170,6 +3170,10 @@ get_function_via_handler:
 
 	if (fcc->object) {
 		fcc->called_scope = fcc->object->ce;
+		if (fcc->function_handler
+		 && fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC) {
+			fcc->object = NULL;
+		}
 	}
 	return retval;
 }
