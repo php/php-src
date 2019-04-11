@@ -59,15 +59,8 @@
 	"cause random crashes on SSL requests"
 #   endif
 #  elif defined(HAVE_CURL_GNUTLS)
-#   if defined(HAVE_GCRYPT_H)
-#    define PHP_CURL_NEED_GNUTLS_TSL
-#    include <gcrypt.h>
-#   else
-#    warning \
-	"libcurl was compiled with GnuTLS support, but configure could not find " \
-	"gcrypt.h; thus no SSL crypto locking callbacks will be set, which may " \
-	"cause random crashes on SSL requests"
-#   endif
+    /* Modern versions of GnuTLS use the nette backend rather than gcrypt, so there
+	 * is nothing to do here anymore. */
 #  else
 #   warning \
 	"libcurl was compiled with SSL support, but configure could not determine which" \
@@ -108,43 +101,6 @@ static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
 {
 	return (unsigned long) tsrm_thread_id();
 }
-#endif
-/* }}} */
-
-#ifdef PHP_CURL_NEED_GNUTLS_TSL /* {{{ */
-static int php_curl_ssl_mutex_create(void **m)
-{
-	if (*((MUTEX_T *) m) = tsrm_mutex_alloc()) {
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
-static int php_curl_ssl_mutex_destroy(void **m)
-{
-	tsrm_mutex_free(*((MUTEX_T *) m));
-	return SUCCESS;
-}
-
-static int php_curl_ssl_mutex_lock(void **m)
-{
-	return tsrm_mutex_lock(*((MUTEX_T *) m));
-}
-
-static int php_curl_ssl_mutex_unlock(void **m)
-{
-	return tsrm_mutex_unlock(*((MUTEX_T *) m));
-}
-
-static struct gcry_thread_cbs php_curl_gnutls_tsl = {
-	GCRY_THREAD_OPTION_USER,
-	NULL,
-	php_curl_ssl_mutex_create,
-	php_curl_ssl_mutex_destroy,
-	php_curl_ssl_mutex_lock,
-	php_curl_ssl_mutex_unlock
-};
 #endif
 /* }}} */
 
@@ -1472,9 +1428,6 @@ PHP_MINIT_FUNCTION(curl)
 		CRYPTO_set_id_callback(php_curl_ssl_id);
 		CRYPTO_set_locking_callback(php_curl_ssl_lock);
 	}
-#endif
-#ifdef PHP_CURL_NEED_GNUTLS_TSL
-	gcry_control(GCRYCTL_SET_THREAD_CBS, &php_curl_gnutls_tsl);
 #endif
 
 	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {

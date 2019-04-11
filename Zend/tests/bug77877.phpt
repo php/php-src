@@ -1,5 +1,5 @@
 --TEST--
-Bug #77877 call_user_func() passes $this to satatic methods
+Bug #77877 call_user_func() passes $this to static methods
 --FILE--
 <?php
 class Foo {
