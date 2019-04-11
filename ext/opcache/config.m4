@@ -30,6 +30,17 @@ if test "$PHP_OPCACHE" != "no"; then
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
+    case $host_cpu in
+      x86*)
+        ;;
+      *)
+        AC_MSG_WARN([JIT not supported by host architecture])
+        PHP_OPCACHE_JIT=no
+        ;;
+    esac
+  fi
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c"
 

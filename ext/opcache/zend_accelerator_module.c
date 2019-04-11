@@ -464,6 +464,15 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
+#if HAVE_JIT
+	if (ZCG(accel_directives).jit) {
+		php_info_print_table_row(2, "JIT", "Enabled");
+	} else {
+		php_info_print_table_row(2, "JIT", "Disabled");
+	}
+#else
+	php_info_print_table_row(2, "JIT", "Not Available");
+#endif
 	if (file_cache_only) {
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
