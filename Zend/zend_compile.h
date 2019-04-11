@@ -477,13 +477,6 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-typedef enum _zend_call_kind {
-	ZEND_CALL_NESTED_FUNCTION,	/* stackless VM call to function */
-	ZEND_CALL_NESTED_CODE,		/* stackless VM call to include/require/eval */
-	ZEND_CALL_TOP_FUNCTION,		/* direct VM call to function from external C code */
-	ZEND_CALL_TOP_CODE			/* direct VM call to "main" code from external C code */
-} zend_call_kind;
-
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
