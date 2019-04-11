@@ -63,7 +63,7 @@
 #if ONIGURUMA_VERSION_INT < 60800
 typedef void OnigMatchParam;
 #define onig_new_match_param() (NULL)
-#define onig_initialize_match_param(x)
+#define onig_initialize_match_param(x) (void)(x)
 #define onig_set_match_stack_limit_size_of_match_param(x, y)
 #define onig_free_match_param(x)
 #define onig_search_with_param(reg, str, end, start, range, region, option, mp) \
