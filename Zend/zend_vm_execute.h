@@ -796,16 +796,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			zend_object *object = Z_OBJ(execute_data->This);
-#if 0
-			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-#else
-			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-#endif
-				GC_DELREF(object);
-				zend_object_store_ctor_failed(object);
-			}
-			OBJ_RELEASE(object);
+			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -827,16 +818,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 		}
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			zend_object *object = Z_OBJ(execute_data->This);
-#if 0
-			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-#else
-			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-#endif
-				GC_DELREF(object);
-				zend_object_store_ctor_failed(object);
-			}
-			OBJ_RELEASE(object);
+			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -1207,7 +1189,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
-	zend_object *object;
 	zval *ret;
 
 	SAVE_OPLINE();
@@ -1301,16 +1282,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 fcall_end:
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
-		object = Z_OBJ(call->This);
-#if 0
-		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
-#else
-		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
-#endif
-			GC_DELREF(object);
-			zend_object_store_ctor_failed(object);
-		}
-		OBJ_RELEASE(object);
+		OBJ_RELEASE(Z_OBJ(call->This));
 	}
 
 	zend_vm_stack_free_call_frame(call);
@@ -1328,7 +1300,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	USE_OPLINE
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
-	zend_object *object;
 	zval *ret;
 
 	SAVE_OPLINE();
@@ -1422,16 +1393,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 fcall_end:
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
-		object = Z_OBJ(call->This);
-#if 0
-		if (UNEXPECTED(EG(exception) != NULL) && (opline->op1.num & ZEND_CALL_CTOR)) {
-#else
-		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
-#endif
-			GC_DELREF(object);
-			zend_object_store_ctor_failed(object);
-		}
-		OBJ_RELEASE(object);
+		OBJ_RELEASE(Z_OBJ(call->This));
 	}
 
 	zend_vm_stack_free_call_frame(call);
@@ -9122,7 +9084,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_CONST_UNUSED_HANDLER(
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR,
+			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS,
 			constructor,
 			opline->extended_value,
 			ce,
@@ -29170,7 +29132,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_VAR_UNUSED_HANDLER(ZE
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR,
+			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS,
 			constructor,
 			opline->extended_value,
 			ce,
@@ -36681,7 +36643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NEW_SPEC_UNUSED_UNUSED_HANDLER
 		}
 		/* We are not handling overloaded classes right now */
 		call = zend_vm_stack_push_call_frame(
-			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS | ZEND_CALL_CTOR,
+			ZEND_CALL_FUNCTION | ZEND_CALL_RELEASE_THIS,
 			constructor,
 			opline->extended_value,
 			ce,
@@ -59189,16 +59151,7 @@ zend_leave_helper_SPEC_LABEL:
 
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			zend_object *object = Z_OBJ(execute_data->This);
-#if 0
-			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-#else
-			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-#endif
-				GC_DELREF(object);
-				zend_object_store_ctor_failed(object);
-			}
-			OBJ_RELEASE(object);
+			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
@@ -59220,16 +59173,7 @@ zend_leave_helper_SPEC_LABEL:
 		}
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-			zend_object *object = Z_OBJ(execute_data->This);
-#if 0
-			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
-#else
-			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-#endif
-				GC_DELREF(object);
-				zend_object_store_ctor_failed(object);
-			}
-			OBJ_RELEASE(object);
+			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}

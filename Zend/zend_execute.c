@@ -3675,12 +3675,6 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			zend_vm_stack_free_args(EX(call));
 
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
-				if (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR) {
-					GC_DELREF(Z_OBJ(call->This));
-					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {
-						zend_object_store_ctor_failed(Z_OBJ(call->This));
-					}
-				}
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -3729,6 +3723,12 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 
 				if (kind == ZEND_LIVE_TMPVAR) {
 					zval_ptr_dtor_nogc(var);
+				} else if (kind == ZEND_LIVE_NEW) {
+					zend_object *obj;
+					ZEND_ASSERT(Z_TYPE_P(var) == IS_OBJECT);
+					obj = Z_OBJ_P(var);
+					zend_object_store_ctor_failed(obj);
+					OBJ_RELEASE(obj);
 				} else if (kind == ZEND_LIVE_LOOP) {
 					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
