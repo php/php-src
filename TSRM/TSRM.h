@@ -98,8 +98,8 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 TSRM_API void tsrm_shutdown(void);
 
 /* environ lock API */
-TSRM_API int tsrm_env_lock();
-TSRM_API int tsrm_env_unlock();
+TSRM_API void tsrm_env_lock();
+TSRM_API void tsrm_env_unlock();
 
 /* allocates a new thread-safe-resource id */
 TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
@@ -207,8 +207,8 @@ TSRM_API const char *tsrm_api_name(void);
 
 #else /* non ZTS */
 
-#define tsrm_env_lock()    0
-#define tsrm_env_unlock()  0
+#define tsrm_env_lock()
+#define tsrm_env_unlock()
 
 #define TSRMLS_FETCH()
 #define TSRMLS_FETCH_FROM_CTX(ctx)
