@@ -50,12 +50,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t
 	}
 	EG(current_execute_data) = EX(prev_execute_data);
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
-		zend_object *object = Z_OBJ(execute_data->This);
-		if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-			GC_DELREF(object);
-			zend_object_store_ctor_failed(object);
-		}
-		OBJ_RELEASE(object);
+		OBJ_RELEASE(Z_OBJ(execute_data->This));
 	} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 	}

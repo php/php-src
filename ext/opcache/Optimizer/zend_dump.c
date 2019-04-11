@@ -1027,6 +1027,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
 						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
+						break;
 				}
 			}
 		}
@@ -1082,6 +1085,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 						break;
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
+						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
 						break;
 				}
 			}

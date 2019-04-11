@@ -172,7 +172,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_LIVE_LOOP    1
 #define ZEND_LIVE_SILENCE 2
 #define ZEND_LIVE_ROPE    3
-#define ZEND_LIVE_MASK    3
+#define ZEND_LIVE_NEW     4
+#define ZEND_LIVE_MASK    7
 
 typedef struct _zend_live_range {
 	uint32_t var; /* low bits are used for variable type (ZEND_LIVE_* macros) */
@@ -501,11 +502,10 @@ struct _zend_execute_data {
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 19)
 #define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 20)
 #define ZEND_CALL_RELEASE_THIS       (1 << 21)
-#define ZEND_CALL_CTOR               (1 << 22)
-#define ZEND_CALL_CLOSURE            (1 << 23)
-#define ZEND_CALL_FAKE_CLOSURE       (1 << 24)
-#define ZEND_CALL_GENERATOR          (1 << 25)
-#define ZEND_CALL_DYNAMIC            (1 << 26)
+#define ZEND_CALL_CLOSURE            (1 << 22)
+#define ZEND_CALL_FAKE_CLOSURE       (1 << 23)
+#define ZEND_CALL_GENERATOR          (1 << 24)
+#define ZEND_CALL_DYNAMIC            (1 << 25)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1 << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)

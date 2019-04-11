@@ -7731,17 +7731,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|.cold_code
 			|1:
 			|	GET_Z_PTR r0, RX + offsetof(zend_execute_data, This)
-			if (opline->op1.num & ZEND_CALL_CTOR) {
-				|	// if (UNEXPECTED(EG(exception)
-				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
-				|	je >1
-				|	// GC_DELREF(object);
-				|	GC_DELREF r0
-				|	// zend_object_store_ctor_failed(object);
-				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				|	or byte [r0 + offsetof(zend_object, gc.u.type_info)], IS_OBJ_DESTRUCTOR_CALLED
-				|1:
-			}
 			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE r0, ecx, >2
 			|	jmp >2
@@ -8612,24 +8601,6 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	je >4
 			|	// zend_object *object = Z_OBJ(execute_data->This);
 			|	mov r0, EX->This.value.obj
-			if (op_array->scope->constructor == (zend_function*)op_array) {
-				|	// if (UNEXPECTED(EG(exception) != NULL)
-				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
-				|	jne >6
-				|.cold_code
-				|6:
-				|	// if (call_info & ZEND_CALL_CTOR)
-				|	test FCARG1d, ZEND_CALL_CTOR
-				|	jz >5
-				|	// GC_DELREF(object);
-				|	GC_DELREF r0
-				|	// zend_object_store_ctor_failed(object);
-				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				|	or byte [r0 + offsetof(zend_object, gc.u.type_info)], IS_OBJ_DESTRUCTOR_CALLED
-				|	jmp >5
-				|.code
-				|5:
-			}
 			|	// OBJ_RELEASE(object);
 			|	OBJ_RELEASE r0, ecx, >4
 		}

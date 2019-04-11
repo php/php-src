@@ -603,10 +603,15 @@ static void emit_live_range(
 			start++;
 			break;
 		/* Objects created via ZEND_NEW are only fully initialized
-		 * after the DO_FCALL (constructor call). */
+		 * after the DO_FCALL (constructor call).
+		 * We are creating two live-ranges: ZEND_LINE_NEW for uninitialized
+		 * part, and ZEND_LIVE_TMPVAR for initialized.
+		 */
 		case ZEND_NEW:
 		{
 			int level = 0;
+			uint32_t orig_start = start;
+
 			while (def_opline + 1 < use_opline) {
 				def_opline++;
 				start++;
@@ -635,6 +640,7 @@ static void emit_live_range(
 					}
 				}
 			}
+			emit_live_range_raw(op_array, var_num, ZEND_LIVE_NEW, orig_start + 1, start + 1);
 			if (start + 1 == end) {
 				/* Trivial live-range, no need to store it. */
 				return;
