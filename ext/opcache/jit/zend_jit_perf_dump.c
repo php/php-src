@@ -151,7 +151,7 @@ static void zend_jit_perf_jitdump_open(void)
 	jit_hdr.process_id      = getpid();
 	jit_hdr.time_stamp      = zend_perf_timestamp();
 	jit_hdr.flags           = 0;
-	ZEND_IGNORE_VALUE(write(jitdump_fd, &jit_hdr, sizeof(jit_hdr)));
+	zend_quiet_write(jitdump_fd, &jit_hdr, sizeof(jit_hdr));
 }
 
 static void zend_jit_perf_jitdump_close(void)
@@ -162,7 +162,7 @@ static void zend_jit_perf_jitdump_close(void)
 		rec.event      = ZEND_PERF_JITDUMP_RECORD_CLOSE;
 		rec.size       = sizeof(rec);
 		rec.time_stamp = zend_perf_timestamp();
-		ZEND_IGNORE_VALUE(write(jitdump_fd, &rec, sizeof(rec)));
+		zend_quiet_write(jitdump_fd, &rec, sizeof(rec));
 		close(jitdump_fd);
 
 		if (jitdump_mem != MAP_FAILED) {
@@ -201,9 +201,9 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		rec.code_size      = (uint64_t)size;
 		rec.code_id        = id++;
 
-		ZEND_IGNORE_VALUE(write(jitdump_fd, &rec, sizeof(rec)));
-		ZEND_IGNORE_VALUE(write(jitdump_fd, name, len + 1));
-		ZEND_IGNORE_VALUE(write(jitdump_fd, start, size));
+		zend_quiet_write(jitdump_fd, &rec, sizeof(rec));
+		zend_quiet_write(jitdump_fd, name, len + 1);
+		zend_quiet_write(jitdump_fd, start, size);
 	}
 }
 
