@@ -1279,65 +1279,6 @@ AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 ])
 
 dnl
-dnl PHP_READDIR_R_TYPE
-dnl
-AC_DEFUN([PHP_READDIR_R_TYPE],[
-  dnl HAVE_READDIR_R is also defined by libmysql
-  AC_CHECK_FUNC(readdir_r,ac_cv_func_readdir_r=yes,ac_cv_func_readdir=no)
-  if test "$ac_cv_func_readdir_r" = "yes"; then
-  AC_CACHE_CHECK(for type of readdir_r, ac_cv_what_readdir_r,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#define _REENTRANT
-#include <sys/types.h>
-#include <dirent.h>
-
-#ifndef PATH_MAX
-#define PATH_MAX 1024
-#endif
-
-main() {
-  DIR *dir;
-  char entry[sizeof(struct dirent)+PATH_MAX];
-  struct dirent *pentry = (struct dirent *) &entry;
-
-  dir = opendir("/");
-  if (!dir)
-    exit(1);
-  if (readdir_r(dir, (struct dirent *) entry, &pentry) == 0) {
-    close(dir);
-    exit(0);
-  }
-  close(dir);
-  exit(1);
-}
-    ]])],[
-      ac_cv_what_readdir_r=POSIX
-    ],[
-      AC_PREPROC_IFELSE([
-        AC_LANG_SOURCE([[
-#define _REENTRANT
-#include <sys/types.h>
-#include <dirent.h>
-int readdir_r(DIR *, struct dirent *);
-        ]])],[
-          ac_cv_what_readdir_r=old-style
-        ],[
-          ac_cv_what_readdir_r=none
-      ])
-    ],[
-      ac_cv_what_readdir_r=none
-   ])
-  ])
-    case $ac_cv_what_readdir_r in
-    POSIX)
-      AC_DEFINE(HAVE_POSIX_READDIR_R,1,[whether you have POSIX readdir_r]);;
-    old-style)
-      AC_DEFINE(HAVE_OLD_READDIR_R,1,[whether you have old-style readdir_r]);;
-    esac
-  fi
-])
-
-dnl
 dnl PHP_STRUCT_FLOCK
 dnl
 AC_DEFUN([PHP_STRUCT_FLOCK],[

@@ -109,54 +109,6 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 
 #endif
 
-#if !defined(HAVE_POSIX_READDIR_R)
-
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
-		struct dirent **result)
-{
-#if defined(HAVE_OLD_READDIR_R)
-	int ret = 0;
-
-	/* We cannot rely on the return value of readdir_r
-	   as it differs between various platforms
-	   (HPUX returns 0 on success whereas Solaris returns non-zero)
-	 */
-	entry->d_name[0] = '\0';
-	readdir_r(dirp, entry);
-
-	if (entry->d_name[0] == '\0') {
-		*result = NULL;
-		ret = errno;
-	} else {
-		*result = entry;
-	}
-	return ret;
-#else
-	struct dirent *ptr;
-	int ret = 0;
-
-	local_lock(READDIR_R);
-
-	errno = 0;
-
-	ptr = readdir(dirp);
-
-	if (!ptr && errno != 0)
-		ret = errno;
-
-	if (ptr)
-		memcpy(entry, ptr, sizeof(*ptr));
-
-	*result = ptr;
-
-	local_unlock(READDIR_R);
-
-	return ret;
-#endif
-}
-
-#endif
-
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
 PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
