@@ -80,9 +80,7 @@ int main(int argc, char *argv[])
 }
 ]])], [
       AC_MSG_RESULT([yes])
-      AC_CHECK_HEADER([gcrypt.h], [
-        AC_DEFINE([HAVE_CURL_GNUTLS], [1], [Have cURL with GnuTLS support])
-      ])
+      AC_DEFINE([HAVE_CURL_GNUTLS], [1], [Have cURL with GnuTLS support])
     ], [
       AC_MSG_RESULT([no])
     ], [
