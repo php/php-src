@@ -243,7 +243,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		zend_extension *extension;
 		zend_llist_position pos;
 		zval *name = NULL;
-		zend_string *strkey;
+		zend_string *strkey = NULL;
 
 		extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 		while (extension) {
@@ -257,6 +257,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 					break;
 				}
 				name = NULL;
+				strkey = NULL;
 			} ZEND_HASH_FOREACH_END();
 
 			if (name) {
@@ -283,6 +284,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				pefree(elm, zend_extensions.persistent);
 				zend_extensions.count--;
 			} else {
+				ZEND_ASSERT(strkey);
 				zend_hash_del(Z_ARRVAL_P(zvp), strkey);
 			}
 		}
