@@ -521,13 +521,12 @@ TODO:
 		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
 		char *lc_text, *class_name_end;
-		size_t class_name_len;
-		zend_string *class_name;
+		zend_string *class_name = NULL;
 		zend_class_entry *ce = NULL;
 
 		class_name_end = strstr(text, "::");
 		if (class_name_end) {
-			class_name_len = class_name_end - text;
+			size_t class_name_len = class_name_end - text;
 			class_name = zend_string_alloc(class_name_len, 0);
 			zend_str_tolower_copy(ZSTR_VAL(class_name), text, class_name_len);
 			if ((ce = zend_lookup_class(class_name)) == NULL) {
@@ -561,11 +560,11 @@ TODO:
 				break;
 		}
 		efree(lc_text);
-		if (class_name_end) {
+		if (class_name) {
 			zend_string_release_ex(class_name, 0);
 		}
 		if (ce && retval) {
-			size_t len = class_name_len + 2 + strlen(retval) + 1;
+			size_t len = ZSTR_LEN(ce->name) + 2 + strlen(retval) + 1;
 			char *tmp = malloc(len);
 
 			snprintf(tmp, len, "%s::%s", ZSTR_VAL(ce->name), retval);
