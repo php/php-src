@@ -210,7 +210,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 	int brace_count = 0;
 	size_t i;
 	php_code_type code_type = body;
-	char *heredoc_tag;
+	char *heredoc_tag = NULL;
 	size_t heredoc_len;
 
 	for (i = 0; i < len; ++i) {
@@ -282,6 +282,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 						if (i + 2 < len && code[i+1] == '<' && code[i+2] == '<') {
 							i += 2;
 							code_type = heredoc_start;
+							heredoc_tag = NULL;
 							heredoc_len = 0;
 						}
 						break;
@@ -333,10 +334,15 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 						break;
 					case '\r':
 					case '\n':
-						code_type = heredoc;
+						if (heredoc_tag) {
+							code_type = heredoc;
+						} else {
+							/* Malformed heredoc without label */
+							code_type = body;
+						}
 						break;
 					default:
-						if (!heredoc_len) {
+						if (!heredoc_tag) {
 							heredoc_tag = code+i;
 						}
 						heredoc_len++;
@@ -344,6 +350,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 				}
 				break;
 			case heredoc:
+				ZEND_ASSERT(heredoc_tag);
 				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len) && code[i] == '\n') {
 					code_type = body;
 				} else if (code[i - (heredoc_len + 2)] == '\n' && !strncmp(code + i - heredoc_len - 1, heredoc_tag, heredoc_len) && code[i-1] == ';' && code[i] == '\n') {
