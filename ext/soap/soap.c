@@ -51,7 +51,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 static void clear_soap_fault(zval *obj);
 static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail, char *name);
 static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
-static void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name);
+static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
