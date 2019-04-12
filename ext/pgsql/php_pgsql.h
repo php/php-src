@@ -34,9 +34,8 @@ extern zend_module_entry pgsql_module_entry;
 #undef SOCKET_SIZE_TYPE
 #include <libpq-fe.h>
 
+#include <libpq/libpq-fs.h>
 #ifdef PHP_WIN32
-#define INV_WRITE            0x00020000
-#define INV_READ             0x00040000
 #undef PHP_PGSQL_API
 #ifdef PGSQL_EXPORTS
 #define PHP_PGSQL_API __declspec(dllexport)
@@ -44,7 +43,6 @@ extern zend_module_entry pgsql_module_entry;
 #define PHP_PGSQL_API __declspec(dllimport)
 #endif
 #else
-#include <libpq/libpq-fs.h>
 # if defined(__GNUC__) && __GNUC__ >= 4
 #  define PHP_PGSQL_API __attribute__ ((visibility("default")))
 # else
