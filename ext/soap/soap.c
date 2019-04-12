@@ -2079,7 +2079,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 }
 /* }}} */
 
-static void soap_server_fault(char* code, char* string, char *actor, zval* details, char* name) /* {{{ */
+static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, char* name) /* {{{ */
 {
 	zval ret;
 
@@ -3400,6 +3400,31 @@ static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_
 }
 /* }}} */
 
+static xmlNodePtr get_envelope(xmlNodePtr trav, int *version, char **envelope_ns) {
+	while (trav != NULL) {
+		if (trav->type == XML_ELEMENT_NODE) {
+			if (node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV_NAMESPACE)) {
+				*version = SOAP_1_1;
+				*envelope_ns = SOAP_1_1_ENV_NAMESPACE;
+				SOAP_GLOBAL(soap_version) = SOAP_1_1;
+				return trav;
+			}
+
+			if (node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV_NAMESPACE)) {
+				*version = SOAP_1_2;
+				*envelope_ns = SOAP_1_2_ENV_NAMESPACE;
+				SOAP_GLOBAL(soap_version) = SOAP_1_2;
+				return trav;
+			}
+
+			soap_server_fault("VersionMismatch", "Wrong Version", NULL, NULL, NULL);
+		}
+		trav = trav->next;
+	}
+
+	return NULL;
+}
+
 static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval **parameters, int *version, soapHeader **headers) /* {{{ */
 {
 	char* envelope_ns = NULL;
@@ -3410,27 +3435,8 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 	encode_reset_ns();
 
 	/* Get <Envelope> element */
-	env = NULL;
-	trav = request->children;
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV_NAMESPACE)) {
-				env = trav;
-				*version = SOAP_1_1;
-				envelope_ns = SOAP_1_1_ENV_NAMESPACE;
-				SOAP_GLOBAL(soap_version) = SOAP_1_1;
-			} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV_NAMESPACE)) {
-				env = trav;
-				*version = SOAP_1_2;
-				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
-				SOAP_GLOBAL(soap_version) = SOAP_1_2;
-			} else {
-				soap_server_fault("VersionMismatch", "Wrong Version", NULL, NULL, NULL);
-			}
-		}
-		trav = trav->next;
-	}
-	if (env == NULL) {
+	env = get_envelope(request->children, version, &envelope_ns);
+	if (!env) {
 		soap_server_fault("Client", "looks like we got XML without \"Envelope\" element", NULL, NULL, NULL);
 	}
 
