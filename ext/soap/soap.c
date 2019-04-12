@@ -2597,6 +2597,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 	int old_features;
 	HashTable *old_typemap, *typemap = NULL;
 	smart_str action = {0};
+	int bailout = 0;
 
 	SOAP_CLIENT_BEGIN_CODE();
 
@@ -2763,7 +2764,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 		}
 
 	} zend_catch {
-		_bailout = 1;
+		bailout = 1;
 	} zend_end_try();
 
 	if (SOAP_GLOBAL(encoding) != NULL) {
@@ -2775,12 +2776,11 @@ static void do_soap_call(zend_execute_data *execute_data,
 	SOAP_GLOBAL(class_map) = old_class_map;
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
-	if (_bailout) {
+	if (bailout) {
 		smart_str_free(&action);
 		if (request) {
 			xmlFreeDoc(request);
 		}
-		_bailout = 0;
 		zend_bailout();
 	}
 	SOAP_CLIENT_END_CODE();
