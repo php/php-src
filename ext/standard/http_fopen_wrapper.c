@@ -661,11 +661,11 @@ finish:
 		array_init(response_header);
 	}
 
-	if (!php_stream_eof(stream)) {
-		size_t tmp_line_len;
+	{
 		/* get response header */
-
-		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
+		size_t tmp_line_len;
+		if (!php_stream_eof(stream) &&
+			php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval http_response;
 
 			if (tmp_line_len > 9) {
@@ -726,10 +726,10 @@ finish:
 			}
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
 			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
+		} else {
+			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
+			goto out;
 		}
-	} else {
-		php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
-		goto out;
 	}
 
 	/* read past HTTP headers */
