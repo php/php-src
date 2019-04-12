@@ -3144,7 +3144,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 {
 	HashTable *output, *chash;
 	zend_long idx;
-	zend_string *key, *key_tmp;
+	zend_string *key;
 	zval *entry, entry_tmp;
 	size_t ckey_len, cval_len;
 	char *ckey, *cval;
@@ -3164,7 +3164,8 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		/* convert key */
 		if (key) {
 			ckey = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), _to_encoding, _from_encodings, &ckey_len);
-			key_tmp = zend_string_init(ckey, ckey_len, 0);
+			key = zend_string_init(ckey, ckey_len, 0);
+			efree(ckey);
 		}
 		/* convert value */
 		ZEND_ASSERT(entry);
@@ -3192,13 +3193,14 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			case IS_OBJECT:
 			default:
 				if (key) {
-					efree(key_tmp);
+					zend_string_release(key);
 				}
 				php_error_docref(NULL, E_WARNING, "Object is not supported");
 				continue;
 		}
 		if (key) {
-			zend_hash_add(output, key_tmp, &entry_tmp);
+			zend_hash_add(output, key, &entry_tmp);
+			zend_string_release(key);
 		} else {
 			zend_hash_index_add(output, idx, &entry_tmp);
 		}
