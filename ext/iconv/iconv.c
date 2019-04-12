@@ -55,7 +55,7 @@
 #include "ext/standard/quot_print.h"
 
 #define _php_iconv_memequal(a, b, c) \
-  ((c) == sizeof(zend_ulong) ? *((zend_ulong *)(a)) == *((zend_ulong *)(b)) : ((c) == sizeof(unsigned int) ? *((unsigned int *)(a)) == *((unsigned int *)(b)) : memcmp(a, b, c) == 0))
+	(memcmp(a, b, c) == 0)
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strlen, 0, 0, 1)
