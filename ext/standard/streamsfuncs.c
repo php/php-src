@@ -1488,7 +1488,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	zend_long cryptokind = 0;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
-	zend_bool enable, cryptokindnull;
+	zend_bool enable, cryptokindnull = 1;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 	php_stream_from_zval(stream, zstream);
 
 	if (enable) {
-		if (ZEND_NUM_ARGS() < 3 || cryptokindnull) {
+		if (cryptokindnull) {
 			zval *val;
 
 			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {

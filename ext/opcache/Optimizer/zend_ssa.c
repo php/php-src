@@ -533,7 +533,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 	int i, j;
 	zend_op *opline, *end;
 	int *tmp = NULL;
-	ALLOCA_FLAG(use_heap);
+	ALLOCA_FLAG(use_heap = 0);
 
 	// FIXME: Can we optimize this copying out in some cases?
 	if (blocks[n].next_child >= 0) {

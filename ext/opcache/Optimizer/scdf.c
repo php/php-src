@@ -158,7 +158,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 				/* Zero length blocks don't have a last instruction that would normally do this */
 				scdf_mark_edge_feasible(scdf, i, block->successors[0]);
 			} else {
-				zend_op *opline;
+				zend_op *opline = NULL;
 				int j, end = block->start + block->len;
 				for (j = block->start; j < end; j++) {
 					opline = &scdf->op_array->opcodes[j];
@@ -170,6 +170,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 				if (block->successors_count == 1) {
 					scdf_mark_edge_feasible(scdf, i, block->successors[0]);
 				} else if (block->successors_count > 1) {
+					ZEND_ASSERT(opline && "Should have opline in non-empty block");
 					if (opline->opcode == ZEND_OP_DATA) {
 						opline--;
 						j--;
