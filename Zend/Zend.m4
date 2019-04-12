@@ -101,13 +101,13 @@ if test "$ZEND_DEBUG" = "yes"; then
   if test "$CFLAGS" = "-g -O2"; then
   	CFLAGS=-g
   fi
-  test -n "$GCC" && DEBUG_CFLAGS="$DEBUG_CFLAGS -Wall"
   test -n "$GCC" && test "$USE_MAINTAINER_MODE" = "yes" && \
     DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"
 else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
+test -n "$GCC" && CFLAGS="$CFLAGS -Wall"
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
