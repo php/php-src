@@ -371,9 +371,7 @@ static int convert_case_filter(int c, void *void_data)
 			}
 			break;
 		}
-		default:
-			assert(0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	for (i = 0; i < len; i++) {
