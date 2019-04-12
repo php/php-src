@@ -174,7 +174,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
 	xsltTransformContextPtr tctxt;
-	zval *args;
+	zval *args = NULL;
 	zval retval;
 	int result, i;
 	int error = 0;

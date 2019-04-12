@@ -6570,38 +6570,32 @@ static int do_exec(smart_str *querystr, ExecStatusType expect, PGconn *pg_link, 
 
 static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const char *table) /* {{{ */
 {
-	char *table_copy, *escaped, *tmp;
-	const char *token;
-	size_t len;
+	size_t table_len = strlen(table);
 
-	/* schame.table should be "schame"."table" */
-	table_copy = estrdup(table);
-	token = php_strtok_r(table_copy, ".", &tmp);
-	if (token == NULL) {
-		token = table;
-	}
-	len = strlen(token);
-	if (_php_pgsql_detect_identifier_escape(token, len) == SUCCESS) {
-		smart_str_appendl(querystr, token, len);
+	/* schema.table should be "schema"."table" */
+	const char *dot = memchr(table, '.', table_len);
+	size_t len = dot ? dot - table : table_len;
+	if (_php_pgsql_detect_identifier_escape(table, len) == SUCCESS) {
+		smart_str_appendl(querystr, table, len);
 	} else {
-		escaped = PGSQLescapeIdentifier(pg_link, token, len);
+		char *escaped = PGSQLescapeIdentifier(pg_link, table, len);
 		smart_str_appends(querystr, escaped);
 		PGSQLfree(escaped);
 	}
-	if (tmp && *tmp) {
-		len = strlen(tmp);
+	if (dot) {
+		const char *after_dot = dot + 1;
+		len = table_len - len - 1;
 		/* "schema"."table" format */
-		if (_php_pgsql_detect_identifier_escape(tmp, len) == SUCCESS) {
+		if (_php_pgsql_detect_identifier_escape(after_dot, len) == SUCCESS) {
 			smart_str_appendc(querystr, '.');
-			smart_str_appendl(querystr, tmp, len);
+			smart_str_appendl(querystr, after_dot, len);
 		} else {
-			escaped = PGSQLescapeIdentifier(pg_link, tmp, len);
+			char *escaped = PGSQLescapeIdentifier(pg_link, after_dot, len);
 			smart_str_appendc(querystr, '.');
 			smart_str_appends(querystr, escaped);
 			PGSQLfree(escaped);
 		}
 	}
-	efree(table_copy);
 }
 /* }}} */
 
