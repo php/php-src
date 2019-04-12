@@ -4757,7 +4757,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	znode expr_node, case_node;
 	zend_op *opline;
-	uint32_t *jmpnz_opnums, opnum_default_jmp, opnum_switch;
+	uint32_t *jmpnz_opnums, opnum_default_jmp, opnum_switch = (uint32_t)-1;
 	zend_uchar jumptable_type;
 	HashTable *jumptable = NULL;
 
@@ -4850,6 +4850,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 			zend_update_jump_target_to_next(opnum_default_jmp);
 
 			if (jumptable) {
+				ZEND_ASSERT(opnum_switch != (uint32_t)-1);
 				opline = &CG(active_op_array)->opcodes[opnum_switch];
 				opline->extended_value = get_next_op_number();
 			}
@@ -4942,12 +4943,11 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 		zend_bool is_last_catch = (i + 1 == catches->children);
 
 		uint32_t *jmp_multicatch = safe_emalloc(sizeof(uint32_t), classes->children - 1, 0);
-		uint32_t opnum_catch;
+		uint32_t opnum_catch = (uint32_t)-1;
 
 		CG(zend_lineno) = catch_ast->lineno;
 
 		for (j = 0; j < classes->children; j++) {
-
 			zend_ast *class_ast = classes->child[j];
 			zend_bool is_last_class = (j + 1 == classes->children);
 
@@ -4997,6 +4997,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			jmp_opnums[i + 1] = zend_emit_jump(0);
 		}
 
+		ZEND_ASSERT(opnum_catch != (uint32_t)-1 && "Should have at least one class");
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
 		if (!is_last_catch) {
 			opline->op2.opline_num = get_next_op_number();

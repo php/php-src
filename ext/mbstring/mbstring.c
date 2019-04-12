@@ -3076,7 +3076,7 @@ PHP_FUNCTION(mb_strimwidth)
 {
 	char *str, *trimmarker = NULL;
 	zend_string *encoding = NULL;
-	zend_long from, width, swidth;
+	zend_long from, width, swidth = 0;
 	size_t str_len, trimmarker_len;
 	mbfl_string string, result, marker, *ret;
 

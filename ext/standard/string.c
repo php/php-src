@@ -5029,7 +5029,6 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const
 	uint8_t state = 0;
 	size_t pos;
 	char *allow_free = NULL;
-	const char *allow_actual;
 	char is_xml = 0;
 
 	buf = estrndup(rbuf, len);
@@ -5040,7 +5039,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const
 	br = 0;
 	if (allow) {
 		allow_free = zend_str_tolower_dup_ex(allow, allow_len);
-		allow_actual = allow_free ? allow_free : allow;
+		allow = allow_free ? allow_free : allow;
 		tbuf = emalloc(PHP_TAG_BUF_SIZE + 1);
 		tp = tbuf;
 	} else {
@@ -5145,7 +5144,7 @@ state_1:
 				}
 				*(tp++) = '>';
 				*tp='\0';
-				if (php_tag_find(tbuf, tp-tbuf, allow_actual)) {
+				if (php_tag_find(tbuf, tp-tbuf, allow)) {
 					memcpy(rp, tbuf, tp-tbuf);
 					rp += tp-tbuf;
 				}
@@ -5339,11 +5338,11 @@ finish:
 		*rp = '\0';
 	}
 	efree((void *)buf);
-	if (allow) {
+	if (tbuf) {
 		efree(tbuf);
-		if (allow_free) {
-			efree(allow_free);
-		}
+	}
+	if (allow_free) {
+		efree(allow_free);
 	}
 	if (stateptr)
 		*stateptr = state;

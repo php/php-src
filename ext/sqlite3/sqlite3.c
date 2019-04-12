@@ -865,6 +865,11 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	zval retval;
 	int ret;
 
+	// Exception occurred on previous callback. Don't attempt to call function.
+	if (EG(exception)) {
+		return 0;
+	}
+
 	collation->fci.fci.size = (sizeof(collation->fci.fci));
 	ZVAL_COPY_VALUE(&collation->fci.fci.function_name, &collation->cmp_func);
 	collation->fci.fci.object = NULL;
@@ -876,13 +881,8 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 
 	collation->fci.fci.params = zargs;
 
-	if (!EG(exception)) {
-		//Exception occurred on previous callback. Don't attempt to call function
-		if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
-		}
-	} else {
-		ZVAL_UNDEF(&retval);
+	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the compare callback");
 	}
 
 	zval_ptr_dtor(&zargs[0]);
