@@ -448,7 +448,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.2",
+    "LiteSpeed V7.3",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1368,6 +1368,7 @@ ZEND_END_ARG_INFO()
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
 PHP_FUNCTION(apache_get_modules);
+PHP_FUNCTION(litespeed_finish_request);
 
 PHP_MINFO_FUNCTION(litespeed);
 
@@ -1375,9 +1376,11 @@ static const zend_function_entry litespeed_functions[] = {
     PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
     PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
     PHP_FE(apache_get_modules,          arginfo_litespeed__void)
+    PHP_FE(litespeed_finish_request,    arginfo_litespeed__void)
     PHP_FALIAS(getallheaders,           litespeed_request_headers,  arginfo_litespeed__void)
     PHP_FALIAS(apache_request_headers,  litespeed_request_headers,  arginfo_litespeed__void)
     PHP_FALIAS(apache_response_headers, litespeed_response_headers, arginfo_litespeed__void)
+    PHP_FALIAS(fastcgi_finish_request,  litespeed_finish_request,   arginfo_litespeed__void)
     {NULL, NULL, NULL}
 };
 
@@ -1502,5 +1505,20 @@ PHP_FUNCTION(apache_get_modules)
         add_next_index_string(return_value, *name);
         ++name;
     }
+}
+/* }}} */
+
+
+/* {{{ proto array litespeed_finish_request(void)
+   Flushes all response data to the client */
+PHP_FUNCTION(litespeed_finish_request)
+{
+    if (ZEND_NUM_ARGS() > 0) {
+        WRONG_PARAM_COUNT;
+    }
+    if (LSAPI_End_Response() != -1) {
+        RETURN_TRUE;
+    }
+    RETURN_FALSE;
 }
 /* }}} */
