@@ -379,21 +379,25 @@ PHPDBG_COMMAND(wait) /* {{{ */
 		return FAILURE;
 	}
 
-	char msglen[5];
-	int recvd = 4;
+	unsigned char msglen_buf[4];
+	int needed = 4;
 
 	do {
-		recvd -= recv(sr, &(msglen[4 - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &msglen_buf[4 - needed], needed, 0);
+	} while (needed > 0);
 
-	recvd = *(size_t *) msglen;
-	char *data = emalloc(recvd);
+	uint32_t msglen = (msglen_buf[3] << 24)
+					| (msglen_buf[2] << 16)
+					| (msglen_buf[1] <<  8)
+					| (msglen_buf[0] <<  0);
+	char *data = emalloc(msglen);
+	needed = msglen;
 
 	do {
-		recvd -= recv(sr, &(data[(*(int *) msglen) - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &(data[msglen - needed]), needed, 0);
+	} while (needed > 0);
 
-	phpdbg_webdata_decompress(data, *(int *) msglen);
+	phpdbg_webdata_decompress(data, msglen);
 
 	if (PHPDBG_G(socket_fd) != -1) {
 		close(PHPDBG_G(socket_fd));
