@@ -293,9 +293,11 @@ cdf_zero_stream(cdf_stream_t *scn)
 static size_t
 cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
 {
+#ifndef NDEBUG
 	size_t ss = sst->sst_dirlen < h->h_min_size_standard_stream ?
 	    CDF_SHORT_SEC_SIZE(h) : CDF_SEC_SIZE(h);
 	assert(ss == sst->sst_ss);
+#endif
 	return sst->sst_ss;
 }
 
@@ -383,9 +385,8 @@ ssize_t
 cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
     const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t ss = CDF_SEC_SIZE(h);
 	size_t pos = CDF_SEC_POS(h, id);
-	assert(ss == len);
+	assert(CDF_SEC_SIZE(h) == len);
 	return cdf_read(info, (zend_off_t)pos, ((char *)buf) + offs, len);
 }
 
@@ -393,9 +394,8 @@ ssize_t
 cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
     size_t len, const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t ss = CDF_SHORT_SEC_SIZE(h);
 	size_t pos = CDF_SHORT_SEC_POS(h, id);
-	assert(ss == len);
+	assert(CDF_SHORT_SEC_SIZE(h) == len);
 	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
 		    SIZE_T_FORMAT "u\n",

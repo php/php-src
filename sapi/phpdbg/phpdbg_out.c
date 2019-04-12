@@ -1030,9 +1030,8 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 				} else {
 					phpdbg_mixed_write(fd, msg, msglen);
 				}
-				return msglen;
 			}
-		break;
+			return msglen;
 
 		/* no formatting on logging output */
 		case P_LOG:
@@ -1046,6 +1045,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 				}
 			}
 			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {

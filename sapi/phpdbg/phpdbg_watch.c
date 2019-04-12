@@ -1021,6 +1021,7 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 				break;
 			} ZEND_HASH_FOREACH_END();
 
+			ZEND_ASSERT(element); /* elements must be non-empty */
 			new = zend_symtable_find(element->parent_container, element->name_in_parent);
 
 			if (!new) {

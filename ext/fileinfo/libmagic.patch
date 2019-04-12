@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/apprentice.c	2019-04-11 15:17:54.486688613 +0200
++++ libmagic/apprentice.c	2019-04-12 10:04:15.721646341 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -1400,7 +1400,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/cdf.c	2019-03-08 09:31:16.392796494 +0100
++++ libmagic/cdf.c	2019-04-12 12:02:54.279893504 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1469,7 +1469,19 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  	scn->sst_tab = NULL;
  	return -1;
  }
-@@ -336,12 +318,13 @@
+@@ -311,9 +293,11 @@
+ static size_t
+ cdf_check_stream(const cdf_stream_t *sst, const cdf_header_t *h)
+ {
++#ifndef NDEBUG
+ 	size_t ss = sst->sst_dirlen < h->h_min_size_standard_stream ?
+ 	    CDF_SHORT_SEC_SIZE(h) : CDF_SEC_SIZE(h);
+ 	assert(ss == sst->sst_ss);
++#endif
+ 	return sst->sst_ss;
+ }
+ 
+@@ -336,12 +320,13 @@
  }
  
  static ssize_t
@@ -1485,7 +1497,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  
  	if (info->i_buf != NULL && info->i_len >= siz) {
  		(void)memcpy(buf, &info->i_buf[off], len);
-@@ -351,7 +334,10 @@
+@@ -351,7 +336,10 @@
  	if (info->i_fd == -1)
  		goto out;
  
@@ -1497,7 +1509,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  
  	return (ssize_t)len;
-@@ -366,7 +352,7 @@
+@@ -366,7 +354,7 @@
  	char buf[512];
  
  	(void)memcpy(cdf_bo.s, "\01\02\03\04", 4);
@@ -1506,15 +1518,29 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
  	cdf_unpack_header(h, buf);
  	cdf_swap_header(h);
-@@ -400,7 +386,7 @@
- 	size_t ss = CDF_SEC_SIZE(h);
+@@ -397,19 +385,17 @@
+ cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
+     const cdf_header_t *h, cdf_secid_t id)
+ {
+-	size_t ss = CDF_SEC_SIZE(h);
  	size_t pos = CDF_SEC_POS(h, id);
- 	assert(ss == len);
+-	assert(ss == len);
 -	return cdf_read(info, (off_t)pos, ((char *)buf) + offs, len);
++	assert(CDF_SEC_SIZE(h) == len);
 +	return cdf_read(info, (zend_off_t)pos, ((char *)buf) + offs, len);
  }
  
  ssize_t
+ cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
+     size_t len, const cdf_header_t *h, cdf_secid_t id)
+ {
+-	size_t ss = CDF_SHORT_SEC_SIZE(h);
+ 	size_t pos = CDF_SHORT_SEC_POS(h, id);
+-	assert(ss == len);
++	assert(CDF_SHORT_SEC_SIZE(h) == len);
+ 	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
+ 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
+ 		    SIZE_T_FORMAT "u\n",
 @@ -501,14 +487,14 @@
  	}
  out:
@@ -1731,7 +1757,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2017-11-02 21:25:39.000000000 +0100
-+++ libmagic/compress.c	2019-04-11 15:16:47.060067956 +0200
++++ libmagic/compress.c	2019-04-12 10:04:15.721646341 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -3212,7 +3238,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2017-08-28 15:39:18.000000000 +0200
-+++ libmagic/magic.c	2019-04-11 15:19:30.857295866 +0200
++++ libmagic/magic.c	2019-04-12 10:04:15.721646341 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */

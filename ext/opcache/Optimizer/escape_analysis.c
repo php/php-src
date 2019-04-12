@@ -535,7 +535,6 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 								if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
 									num_non_escaped--;
 									if (num_non_escaped == 0) {
-										i = ssa_vars_count;
 										changed = 0;
 									} else {
 										changed = 1;

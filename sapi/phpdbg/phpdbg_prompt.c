@@ -1687,33 +1687,33 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 	return ret;
 } /* }}} */
 
+static inline void list_code() {
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
+		const char *file_char = zend_get_executed_filename();
+		zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
+		phpdbg_list_file(file, 3, zend_get_executed_lineno()-1, zend_get_executed_lineno());
+		efree(file);
+	}
+}
+
 /* code may behave weirdly if EG(exception) is set; thus backup it */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
-	const zend_op *backup_opline; \
-	const zend_op *before_ex; \
 	if (exception) { \
+		const zend_op *before_ex = EG(opline_before_exception); \
+		const zend_op *backup_opline = NULL; \
 		if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) { \
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
-		before_ex = EG(opline_before_exception); \
 		GC_ADDREF(exception); \
 		zend_clear_exception(); \
-	} \
-	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
-		const char *file_char = zend_get_executed_filename(); \
-		zend_string *file = zend_string_init(file_char, strlen(file_char), 0); \
-		phpdbg_list_file(file, 3, zend_get_executed_lineno()-1, zend_get_executed_lineno()); \
-		efree(file); \
-	} \
-	\
-	switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
-		zval zv; \
-		case PHPDBG_LEAVE: \
-		case PHPDBG_FINISH: \
-		case PHPDBG_UNTIL: \
-		case PHPDBG_NEXT: \
-			if (exception) { \
-				if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type) \
+		list_code(); \
+		switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
+			zval zv; \
+			case PHPDBG_LEAVE: \
+			case PHPDBG_FINISH: \
+			case PHPDBG_UNTIL: \
+			case PHPDBG_NEXT: \
+				if (backup_opline \
 				 && (backup_opline->opcode == ZEND_HANDLE_EXCEPTION || backup_opline->opcode == ZEND_CATCH)) { \
 					EG(current_execute_data)->opline = backup_opline; \
 					EG(exception) = exception; \
@@ -1722,11 +1722,12 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 					zend_throw_exception_internal(&zv); \
 				} \
 				EG(opline_before_exception) = before_ex; \
-			} \
-			/* fallthrough */ \
-		default: \
-			goto next; \
+		} \
+	} else { \
+		list_code(); \
+		phpdbg_interactive(allow_async_unsafe, NULL); \
 	} \
+	goto next; \
 } while (0)
 
 void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */

@@ -671,11 +671,11 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 
 	{
 		zend_string *last_file = NULL;
-		HashTable *file_ht;
+		HashTable *file_ht = NULL;
 		zend_string *last_function = (void *)~(uintptr_t)0;
 		zend_class_entry *last_scope = NULL;
 
-		HashTable *insert_ht;
+		HashTable *insert_ht = NULL;
 		zend_long insert_idx;
 
 		do {
@@ -717,6 +717,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 				insert_idx = cur->op->lineno;
 			}
 
+			ZEND_ASSERT(insert_ht && file_ht);
 			{
 				zval *num = zend_hash_index_find(insert_ht, insert_idx);
 				if (!num) {

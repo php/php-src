@@ -430,7 +430,7 @@ PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent,
 PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
-	char *last_index;
+	char *last_index = NULL;
 	size_t index_len = 0;
 	zval *zv;
 
