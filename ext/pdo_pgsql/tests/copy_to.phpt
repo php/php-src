@@ -116,7 +116,7 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() with default parameters
 bool(true)
 0	test insert 0	\N
@@ -133,6 +133,6 @@ bool(true)
 1;NULL
 2;NULL
 Testing pgsqlCopyToFile() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() to unwritable file
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file for writing
