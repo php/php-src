@@ -4683,6 +4683,8 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
+static void add_config_entries(HashTable *hash, zval *return_value);
+
 /* {{{ add_config_entry
  */
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
@@ -4694,14 +4696,9 @@ static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *
 			add_index_str(retval, h, zend_string_copy(Z_STR_P(entry)));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
-		zend_ulong h;
-		zend_string *key;
-		zval *zv, tmp;
-
+		zval tmp;
 		array_init(&tmp);
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(entry), h, key, zv)
-			add_config_entry(h, key, zv, &tmp);
-		ZEND_HASH_FOREACH_END();
+		add_config_entries(Z_ARRVAL_P(entry), &tmp);
 		zend_hash_update(Z_ARRVAL_P(retval), key, &tmp);
 	}
 }
