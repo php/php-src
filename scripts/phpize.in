@@ -160,6 +160,10 @@ phpize_autotools()
 {
   $PHP_AUTOCONF   || exit 1
   $PHP_AUTOHEADER || exit 1
+
+  # Disable PACKAGE_* symbols in config.h.in
+  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < config.h.in > config.h.in.tmp
+  mv config.h.in.tmp config.h.in
 }
 
 # Main script

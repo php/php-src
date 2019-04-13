@@ -28,11 +28,13 @@ SUPPRESS_WARNINGS ?= 2>&1 | (egrep -v '(AC_PROG_CXXCPP was called before AC_PROG
 all: $(targets)
 
 $(config_h_in): configure
-# explicitly remove target since autoheader does not seem to work
-# correctly otherwise (timestamps are not updated)
+# Explicitly remove target since autoheader does not seem to work correctly
+# otherwise (timestamps are not updated). Also disable PACKAGE_* symbols in the
+# generated php_config.h.in template.
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOHEADER) $(SUPPRESS_WARNINGS)
+	sed -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $@ > $@.tmp && mv $@.tmp $@
 
 aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@

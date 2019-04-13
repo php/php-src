@@ -109,11 +109,6 @@ $prepend_config_h = '
 # include <php_config.h>
 #endif
 
-#undef PACKAGE_NAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_TARNAME
-#undef PACKAGE_STRING
-
 #define SUPPORT_UCP
 #define SUPPORT_UTF8
 
