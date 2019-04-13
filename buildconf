@@ -91,8 +91,6 @@ fi
 
 echo "buildconf: Building configure files"
 
-rm -f generated_lists
-
 if test "$debug" = "1"; then
   $MAKE -s -f build/build.mk SUPPRESS_WARNINGS=""
 else

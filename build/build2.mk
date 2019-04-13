@@ -14,7 +14,7 @@
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
 
-include generated_lists
+m4_files != echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config.m4
 
 config_h_in = main/php_config.h.in
 
@@ -40,7 +40,7 @@ aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@
 	cat acinclude.m4 ./build/libtool.m4 > $@
 
-configure: aclocal.m4 configure.ac $(config_m4_files)
+configure: aclocal.m4 configure.ac $(m4_files)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)
