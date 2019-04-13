@@ -14,8 +14,6 @@
 #  | Author: Sascha Schumann <sascha@schumann.cx>                         |
 #  +----------------------------------------------------------------------+
 
-include generated_lists
-
 config_h_in = main/php_config.h.in
 
 targets = configure $(config_h_in)
@@ -40,7 +38,7 @@ aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@
 	cat acinclude.m4 ./build/libtool.m4 > $@
 
-configure: aclocal.m4 configure.ac $(config_m4_files)
+configure: aclocal.m4 configure.ac $(M4_FILES)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)

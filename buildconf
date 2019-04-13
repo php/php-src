@@ -91,10 +91,11 @@ fi
 
 echo "buildconf: Building configure files"
 
-rm -f generated_lists
+# List of *.m4 prerequisites files for the make configure target.
+M4_FILES=$(echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4)
 
 if test "$debug" = "1"; then
-  $MAKE -s -f build/build.mk SUPPRESS_WARNINGS=""
+  $MAKE -s -f build/build.mk M4_FILES="$M4_FILES" SUPPRESS_WARNINGS=""
 else
-  $MAKE -s -f build/build.mk
+  $MAKE -s -f build/build.mk M4_FILES="$M4_FILES"
 fi
