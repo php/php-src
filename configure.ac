@@ -717,7 +717,6 @@ fi
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
-PHP_READDIR_R_TYPE
 PHP_CHECK_IN_ADDR_T
 
 AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
