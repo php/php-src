@@ -10,15 +10,6 @@ PHP_ARG_WITH([xmlrpc],
   [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
     [Include XMLRPC-EPI support])])
 
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH([libxml-dir],
-    [libxml2 install dir],
-    [AS_HELP_STRING([--with-libxml-dir=DIR],
-      [XMLRPC-EPI: libxml2 install prefix])],
-    [no],
-    [no])
-fi
-
 PHP_ARG_WITH([libexpat-dir],
   [libexpat dir for XMLRPC-EPI],
   [AS_HELP_STRING([--with-libexpat-dir=DIR],
@@ -54,7 +45,7 @@ if test "$PHP_XMLRPC" != "no"; then
         PHP_ADD_BUILD_DIR(ext/xml)
       fi
     ], [
-      AC_MSG_ERROR([libxml2 not found. Use --with-libxml-dir=<DIR>])
+      AC_MSG_ERROR([libxml2 not found.])
     ])
   else
     testval=no

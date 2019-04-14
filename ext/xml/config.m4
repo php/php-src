@@ -6,15 +6,6 @@ PHP_ARG_ENABLE([xml],
     [Disable XML support])],
   [yes])
 
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH([libxml-dir],
-    [libxml2 install dir],
-    [AS_HELP_STRING([--with-libxml-dir=DIR],
-      [XML: libxml2 install prefix])],
-    [no],
-    [no])
-fi
-
 PHP_ARG_WITH([libexpat-dir],
   [libexpat install dir],
   [AS_HELP_STRING([--with-libexpat-dir=DIR],
@@ -37,7 +28,7 @@ if test "$PHP_XML" != "no"; then
       xml_extra_sources="compat.c"
       PHP_ADD_EXTENSION_DEP(xml, libxml)
     ], [
-      AC_MSG_ERROR([libxml2 not found. Use --with-libxml-dir=<DIR>])
+      AC_MSG_ERROR([libxml2 not found.])
     ])
   fi
 
