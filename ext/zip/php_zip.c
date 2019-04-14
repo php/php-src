@@ -28,11 +28,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
-#if PHP_VERSION_ID >= 70200
 #include "zend_interfaces.h"
-#elif defined(HAVE_SPL)
-#include "ext/spl/spl_iterators.h"
-#endif
 #include "php_zip.h"
 
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
@@ -2984,11 +2980,7 @@ static PHP_MINIT_FUNCTION(zip)
 	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_LONG);
 	php_zip_register_prop_handler(&zip_prop_handlers, "filename", NULL, NULL, php_zipobj_get_filename, IS_STRING);
 	php_zip_register_prop_handler(&zip_prop_handlers, "comment", NULL, php_zipobj_get_zip_comment, NULL, IS_STRING);
-#if PHP_VERSION_ID >= 70200
 	zend_class_implements(zip_class_entry, 1, zend_ce_countable);
-#elif defined(HAVE_SPL)
-	zend_class_implements(zip_class_entry, 1, spl_ce_Countable);
-#endif
 
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
