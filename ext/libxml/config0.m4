@@ -6,15 +6,6 @@ PHP_ARG_ENABLE([libxml],
     [Disable LIBXML support])],
   [yes])
 
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH([libxml-dir],
-    [libxml2 install dir],
-    [AS_HELP_STRING([[--with-libxml-dir[=DIR]]],
-      [LIBXML: libxml2 install prefix])],
-    [no],
-    [no])
-fi
-
 if test "$PHP_LIBXML" != "no"; then
 
   dnl This extension can not be build as shared
