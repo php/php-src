@@ -91,8 +91,10 @@ fi
 
 echo "buildconf: Building configure files"
 
+M4_FILES=$(echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4)
+
 if test "$debug" = "1"; then
-  $MAKE -s -f build/build.mk SUPPRESS_WARNINGS=""
+  $MAKE -s -f build/build.mk SUPPRESS_WARNINGS="" M4_FILES="$M4_FILES"
 else
-  $MAKE -s -f build/build.mk
+  $MAKE -s -f build/build.mk M4_FILES="$M4_FILES"
 fi
