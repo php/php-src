@@ -260,7 +260,9 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 			add_assoc_long(&value, "target", target);
 			add_assoc_long(&value, "count", count);
 			add_assoc_long(&value, "errcode", errcode);
-			add_assoc_stringl(&value, "context", context->bv_val, context->bv_len);
+			if ( context && (context->bv_len >= 0) ) {
+				add_assoc_stringl(&value, "context", context->bv_val, context->bv_len);
+			}
 			add_assoc_zval(array, "value", &value);
 		} else {
 			add_assoc_null(array, "value");
