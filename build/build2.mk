@@ -18,6 +18,9 @@ config_h_in = main/php_config.h.in
 
 targets = configure $(config_h_in)
 
+m4_files.exec = echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4
+m4_files = $(shell $(m4_files.exec))$(m4_files.exec:sh)
+
 PHP_AUTOCONF ?= 'autoconf'
 PHP_AUTOHEADER ?= 'autoheader'
 
@@ -38,7 +41,7 @@ aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@
 	cat acinclude.m4 ./build/libtool.m4 > $@
 
-configure: aclocal.m4 configure.ac TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4
+configure: aclocal.m4 configure.ac $(m4_files)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)
