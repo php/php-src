@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
+- Intl:
+  . Fixed bug #77895 (IntlDateFormatter::create fails in strict mode if $locale
+    = null). (Nikita)
+
 - LDAP:
   . Fixed bug #77869 (Core dump when using server controls) (mcmic)
 
