@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
 
+- Intl:
+  . Fixed bug #77895 (IntlDateFormatter::create fails in strict mode if $locale
+    = null). (Nikita)
+
 - PCRE:
   . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
     cmb)
