@@ -1128,6 +1128,41 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	return 1;
 }
 
+static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+{
+	zend_arg_info *cur_arg_info = &zf->common.arg_info[arg_num-1];
+	zend_class_entry *ce;
+
+	ZEND_ASSERT(arg_num <= zf->common.num_args);
+	cur_arg_info = &zf->common.arg_info[arg_num-1];
+
+	ce = NULL;
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0))) {
+		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
+		return 0;
+	}
+
+	return 1;
+}
+
+static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+{
+	zend_arg_info *cur_arg_info;
+	zend_class_entry *ce;
+
+	ZEND_ASSERT(arg_num > zf->common.num_args);
+	ZEND_ASSERT(zf->common.fn_flags & ZEND_ACC_VARIADIC);
+	cur_arg_info = &zf->common.arg_info[zf->common.num_args];
+
+	ce = NULL;
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0))) {
+		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
+		return 0;
+	}
+
+	return 1;
+}
+
 static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
 {
 	uint32_t i;
