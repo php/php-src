@@ -1819,7 +1819,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 {
 	int n;
 	int retry = 1;
-	int cert_captured;
+	int cert_captured = 0;
 	X509 *peer_cert;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
