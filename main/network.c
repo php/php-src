@@ -514,6 +514,8 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
 #endif
 
+	memset(sa, 0, sizeof(struct sockaddr));
+
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);
 		if (!colon || colon[1] != ':') {
