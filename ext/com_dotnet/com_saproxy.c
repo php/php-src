@@ -78,9 +78,10 @@ static zval *saproxy_property_read(zval *object, zval *member, int type, void **
 	return rv;
 }
 
-static void saproxy_property_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *saproxy_property_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_com_throw_exception(E_INVALIDARG, "safearray has no properties");
+	return value;
 }
 
 static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *rv)

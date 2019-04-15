@@ -179,11 +179,7 @@ php
 # ------------------------------------------------------------------------------
 /ext/*/acinclude.m4
 /ext/*/build/
-/ext/*/config.guess
-/ext/*/config.sub
 /ext/*/configure.ac
-/ext/*/ltmain.sh
-/ext/*/Makefile.global
 /ext/*/run-tests.php
 
 # ------------------------------------------------------------------------------
