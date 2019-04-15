@@ -28,9 +28,6 @@ Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 	$image = imagecreatefrompng($cwd . "/test.png");
 	var_dump(imagecolorclosesthwb($image, 116, 120, 115));
 
-	$image = imagecreatefromgif('https://www.tutorialspoint.com/images/html.gif');
-	var_dump(imagecolorclosesthwb($image, 50, 110, 90));
-
 	imagedestroy($image);
 ?>
 --EXPECT--
