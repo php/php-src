@@ -1795,7 +1795,11 @@ static void curl_free_string(void **string)
  */
 static void curl_free_post(void **post)
 {
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	curl_mime_free((curl_mime *)*post);
+#else
 	curl_formfree((struct HttpPost *)*post);
+#endif
 }
 /* }}} */
 
@@ -2715,15 +2719,27 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				HashTable *postfields;
 				zend_string *string_key;
 				zend_ulong  num_key;
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+				curl_mime *mime;
+				curl_mimepart *part;
+				CURLcode form_error;
+#else
 				struct HttpPost *first = NULL;
 				struct HttpPost *last  = NULL;
 				CURLFORMcode form_error;
-
+#endif
 				postfields = HASH_OF(zvalue);
 				if (!postfields) {
 					php_error_docref(NULL, E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS");
 					return FAILURE;
 				}
+
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+				mime = curl_mime_init(ch->cp);
+				if (mime == NULL) {
+					return FAILURE;
+				}
+#endif
 
 				ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
 					zend_string *postval, *tmp_postval;
@@ -2759,6 +2775,20 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 							if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 								filename = Z_STRVAL_P(prop);
 							}
+
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+							part = curl_mime_addpart(mime);
+							if (part == NULL) {
+								zend_string_release_ex(string_key, 0);
+								return FAILURE;
+							}
+							if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
+								|| (form_error = curl_mime_filedata(part, ZSTR_VAL(postval))) != CURLE_OK
+								|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
+								|| (form_error = curl_mime_type(part, type ? type : "application/octet-stream")) != CURLE_OK) {
+								error = form_error;
+							}
+#else
 							form_error = curl_formadd(&first, &last,
 											CURLFORM_COPYNAME, ZSTR_VAL(string_key),
 											CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
@@ -2770,6 +2800,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 								/* Not nice to convert between enums but we only have place for one error type */
 								error = (CURLcode)form_error;
 							}
+#endif
 						}
 
 						zend_string_release_ex(string_key, 0);
@@ -2778,6 +2809,18 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 
 					postval = zval_get_tmp_string(current, &tmp_postval);
 
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+					part = curl_mime_addpart(mime);
+					if (part == NULL) {
+						zend_tmp_string_release(tmp_postval);
+						zend_string_release_ex(string_key, 0);
+						return FAILURE;
+					}
+					if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
+						|| (form_error = curl_mime_data(part, ZSTR_VAL(postval), ZSTR_LEN(postval))) != CURLE_OK) {
+						error = form_error;
+					}
+#else
 					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
 					 * must be explicitly cast to long in curl_formadd
 					 * use since curl needs a long not an int. */
@@ -2792,6 +2835,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						/* Not nice to convert between enums but we only have place for one error type */
 						error = (CURLcode)form_error;
 					}
+#endif
 					zend_tmp_string_release(tmp_postval);
 					zend_string_release_ex(string_key, 0);
 				} ZEND_HASH_FOREACH_END();
@@ -2804,8 +2848,13 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				if ((*ch->clone) == 1) {
 					zend_llist_clean(&ch->to_free->post);
 				}
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+				zend_llist_add_element(&ch->to_free->post, &mime);
+				error = curl_easy_setopt(ch->cp, CURLOPT_MIMEPOST, mime);
+#else
 				zend_llist_add_element(&ch->to_free->post, &first);
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
+#endif
 			} else {
 #if LIBCURL_VERSION_NUM >= 0x071101
 				zend_string *tmp_str;
