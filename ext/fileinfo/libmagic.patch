@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2018-03-11 01:46:42.000000000 +0100
-+++ libmagic/apprentice.c	2019-04-12 10:04:15.721646341 +0200
++++ libmagic/apprentice.c	2019-04-15 10:57:47.115181746 +0200
 @@ -2,7 +2,7 @@
   * Copyright (c) Ian F. Darwin 1986-1995.
   * Software written by Ian F. Darwin and others;
@@ -945,7 +945,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 -	int fd;
 -	struct stat st;
 +	uint32_t *ptr;
-+	uint32_t version, entries, nentries;
++	uint32_t version, entries = 0, nentries;
 +	int needsbyteswap;
  	char *dbname = NULL;
  	struct magic_map *map;
