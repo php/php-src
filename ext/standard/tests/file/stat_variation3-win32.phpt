@@ -54,7 +54,7 @@ $new_stat1 = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($new_stat1) );
 // compare the stats
-var_dump(compare_stats($new_stat, $new_stat1, $all_stat_keys, "=="));
+var_dump(compare_stats($new_stat, $new_stat1, $affected_members, "<"));
 clearstatcache();
 
 echo "\n*** Done ***";
