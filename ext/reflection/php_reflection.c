@@ -4671,6 +4671,10 @@ ZEND_METHOD(reflection_class, newInstance)
 		for (i = 0; i < num_args; i++) {
 			zval_ptr_dtor(&params[i]);
 		}
+
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
+		}
 		if (ret == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ZSTR_VAL(ce->name));
 			zval_ptr_dtor(return_value);
@@ -4770,6 +4774,10 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 				zval_ptr_dtor(&params[i]);
 			}
 			efree(params);
+		}
+
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
 		}
 		if (ret == FAILURE) {
 			zval_ptr_dtor(&retval);
