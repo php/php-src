@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
+  . Fixed bug #77882 (Different behavior: always calls destructor). (Nikita)
 
 - Standard:
   . Fixed bug #77793 (Segmentation fault in extract() when overwriting
