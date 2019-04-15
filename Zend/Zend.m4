@@ -107,7 +107,7 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="$CFLAGS -Wall"
+test -n "$GCC" && CFLAGS="$CFLAGS -Wall -Wno-strict-aliasing"
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_ZTS" = "yes"; then
