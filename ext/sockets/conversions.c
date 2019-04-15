@@ -701,6 +701,9 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 	zval	*elem;
 	int		fill_sockaddr;
 
+	*sockaddr_ptr = NULL;
+	*sockaddr_len = 0;
+
 	if (Z_TYPE_P(container) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
 		return;

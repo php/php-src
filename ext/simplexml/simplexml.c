@@ -1016,6 +1016,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 	zval             iter_data;
 	int              test;
 	int              is_empty;
+	int              use_iter = 0;
 
 	sxe = Z_SXEOBJ_P(object);
 
@@ -1052,6 +1053,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
 				ZVAL_UNDEF(&sxe->iter.data);
 				node = php_sxe_reset_iterator(sxe, 0);
+				use_iter = 1;
 			}
 		}
 
@@ -1080,7 +1082,7 @@ static int sxe_prop_is_empty(zval *object) /* {{{ */
 			is_empty = 0;
 			break;
 next_iter:
-			if (!Z_ISUNDEF(iter_data)) {
+			if (use_iter) {
 				node = php_sxe_iterator_fetch(sxe, node->next, 0);
 			} else {
 				node = node->next;
@@ -1088,7 +1090,7 @@ next_iter:
 		}
 	}
 
-	if (!Z_ISUNDEF(iter_data)) {
+	if (use_iter) {
 		if (!Z_ISUNDEF(sxe->iter.data)) {
 			zval_ptr_dtor(&sxe->iter.data);
 		}

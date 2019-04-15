@@ -181,7 +181,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	int fd = -1;
 	int mode_rw = 0;
 	php_stream * stream = NULL;
-	char *p, *token, *pathdup;
+	char *p, *token = NULL, *pathdup;
 	zend_long max_memory;
 	FILE *file = NULL;
 #ifdef PHP_WIN32
