@@ -2978,8 +2978,8 @@ static int zend_jit_update_regs(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 
 static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
-	uint32_t op1_info, op1_def_info, res_use_info;
-	zend_jit_addr op1_addr, op1_def_addr, res_addr;
+	uint32_t op1_info, op1_def_info, res_use_info = 0;
+	zend_jit_addr op1_addr, op1_def_addr, res_addr = 0;
 
 	op1_info = OP1_INFO();
 	if (opline->op1_type != IS_CV || !(op1_info & MAY_BE_LONG)) {
@@ -6570,7 +6570,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 	zend_bool set_bool_not = 0;
 	zend_bool jmp_done = 0;
 	zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
-	zend_jit_addr res_addr;
+	zend_jit_addr res_addr = 0;
 
 	if (opline->opcode == ZEND_JMPZ) {
 		false_label = ssa->cfg.blocks[b].successors[0];
@@ -9385,7 +9385,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 
 static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_bool is_last, zend_ssa *ssa)
 {
-	zend_arg_info *arg_info;
+	zend_arg_info *arg_info = NULL;
 	zend_bool has_slow = 0;
 	uint32_t arg_num = opline->op1.num;
 	zval *zv = RT_CONSTANT(opline, opline->op2);
