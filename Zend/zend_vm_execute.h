@@ -2104,7 +2104,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSERT_CHECK_SPEC_HANDLER(ZEND
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_array *args;
+	zend_array *args = NULL;
 	zend_function *fbc = EX(func);
 	zval *ret = EX(return_value);
 	uint32_t call_info = EX_CALL_INFO() & (ZEND_CALL_NESTED | ZEND_CALL_TOP | ZEND_CALL_RELEASE_THIS);
@@ -2135,7 +2135,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	ZEND_CALL_NUM_ARGS(call) = 2;
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
-	if (num_args) {
+	if (args) {
 		ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
 	} else {
 		ZVAL_EMPTY_ARRAY(ZEND_CALL_ARG(call, 2));

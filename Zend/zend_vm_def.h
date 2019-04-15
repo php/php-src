@@ -7992,7 +7992,7 @@ ZEND_VM_HANDLER(157, ZEND_FETCH_CLASS_NAME, UNUSED|CLASS_FETCH, ANY)
 
 ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 {
-	zend_array *args;
+	zend_array *args = NULL;
 	zend_function *fbc = EX(func);
 	zval *ret = EX(return_value);
 	uint32_t call_info = EX_CALL_INFO() & (ZEND_CALL_NESTED | ZEND_CALL_TOP | ZEND_CALL_RELEASE_THIS);
@@ -8023,7 +8023,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	ZEND_CALL_NUM_ARGS(call) = 2;
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
-	if (num_args) {
+	if (args) {
 		ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
 	} else {
 		ZVAL_EMPTY_ARRAY(ZEND_CALL_ARG(call, 2));

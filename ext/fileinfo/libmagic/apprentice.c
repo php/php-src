@@ -2954,7 +2954,7 @@ private struct magic_map *
 apprentice_map(struct magic_set *ms, const char *fn)
 {
 	uint32_t *ptr;
-	uint32_t version, entries, nentries;
+	uint32_t version, entries = 0, nentries;
 	int needsbyteswap;
 	char *dbname = NULL;
 	struct magic_map *map;
