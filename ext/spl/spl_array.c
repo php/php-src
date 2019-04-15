@@ -1480,7 +1480,8 @@ exit:
 		} else {
 			GC_DELREF(aht);
 		}
-		efree(Z_REF(params[0]));
+		ZVAL_NULL(Z_REFVAL(params[0]));
+		zval_ptr_dtor(&params[0]);
 		zend_string_free(Z_STR(function_name));
 	}
 } /* }}} */
