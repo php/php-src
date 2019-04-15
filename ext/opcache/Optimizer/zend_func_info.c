@@ -934,7 +934,6 @@ static const func_info_t func_infos[] = {
 	F0("eregi",			                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F1("eregi_replace",	                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("split",			                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F1("spliti",			                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("sql_regcase",		                    MAY_BE_NULL | MAY_BE_STRING),
 
 	/* ext/mysql */
