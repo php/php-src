@@ -26,6 +26,7 @@ PHP                                                                        NEWS
     
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
+  . Fixed bug #77882 (Different behavior: always calls destructor). (Nikita)
 
 - Standard:
   . Fixed bug #77680 (recursive mkdir on ftp stream wrapper is incorrect).
