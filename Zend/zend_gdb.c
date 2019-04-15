@@ -108,7 +108,7 @@ ZEND_API int zend_gdb_present(void)
 	int fd = open("/proc/self/status", O_RDONLY);
 
 	if (fd > 0) {
-		char buf[1024];
+		char buf[1024], out[1024];
 		ssize_t n = read(fd, buf, sizeof(buf) - 1);
 		char *s;
 		pid_t pid;
@@ -124,8 +124,8 @@ ZEND_API int zend_gdb_present(void)
 				pid = atoi(s);
 				if (pid) {
 					sprintf(buf, "/proc/%d/exe", (int)pid);
-					if (readlink(buf, buf, sizeof(buf) - 1) > 0) {
-						if (strstr(buf, "gdb")) {
+					if (readlink(buf, out, sizeof(out) - 1) > 0) {
+						if (strstr(out, "gdb")) {
 							ret = 1;
 						}
 					}
