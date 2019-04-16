@@ -25,35 +25,37 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
   AC_DEFINE(HAVE_PCRE, 1, [ ])
 
   if test "$PHP_PCRE_JIT" != "no"; then
-    AC_MSG_CHECKING([for JIT support in PCRE2])
-    AC_RUN_IFELSE([
-      AC_LANG_SOURCE([[
-          #include <pcre2.h>
-          #include <stdlib.h>
-          int main(void) {
-            uint32_t have_jit;
-            pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
-            return !have_jit;
-          }
-      ]])], [
-      AC_MSG_RESULT([yes])
-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
-    ],
-    [
-      AC_MSG_RESULT([no])
-    ],
-    [
-      AC_CANONICAL_HOST
-      case $host_cpu in
-      arm*|i[34567]86|x86_64|mips*|powerpc*|sparc)
-        AC_MSG_RESULT([yes])
+    AC_CACHE_CHECK([for JIT support in PCRE2], ac_cv_have_pcre2_jit, [
+      AC_RUN_IFELSE([
+          AC_LANG_SOURCE([[
+              #include <pcre2.h>
+              #include <stdlib.h>
+              int main(void) {
+                uint32_t have_jit;
+                pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
+                return !have_jit;
+              }
+          ]])], [
+          ac_cv_have_pcre2_jit=yes
+        ],
+        [
+          ac_cv_have_pcre2_jit=no
+        ],
+        [
+          AC_CANONICAL_HOST
+          case $host_cpu in
+          arm*|i[34567]86|x86_64|mips*|powerpc*|sparc)
+            ac_cv_have_pcre2_jit=yes
+            ;;
+          *)
+            ac_cv_have_pcre2_jit=no
+            ;;
+          esac
+        ])
+      ])
+      if test $ac_cv_have_pcre2_jit = yes; then
         AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
-        ;;
-      esac
-    ])
+      fi
   fi
 
   PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
