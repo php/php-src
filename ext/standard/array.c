@@ -3134,6 +3134,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	}
 
 	/* replace HashTable data */
+	HT_SET_ITERATORS_COUNT(&out_hash, HT_ITERATORS_COUNT(in_hash));
 	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);

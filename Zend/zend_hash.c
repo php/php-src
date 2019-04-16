@@ -129,7 +129,8 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 		data = emalloc(HT_SIZE_EX(ht->nTableSize, HT_MIN_MASK));
 	}
 	HT_SET_DATA_ADDR(ht, data);
-	HT_FLAGS(ht) = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
+	/* Don't overwrite iterator count. */
+	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET_PACKED(ht);
 }
 
@@ -144,7 +145,8 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		data = emalloc(HT_SIZE_EX(HT_MIN_SIZE, HT_SIZE_TO_MASK(HT_MIN_SIZE)));
 		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
 		HT_SET_DATA_ADDR(ht, data);
-		HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
+		/* Don't overwrite iterator count. */
+		ht->u.v.flags = HASH_FLAG_STATIC_KEYS;
 #ifdef __SSE2__
 		do {
 			__m128i xmm0 = _mm_setzero_si128();
@@ -504,6 +506,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
 			&& EXPECTED(!HT_ITERATORS_OVERFLOW(iter->ht))) {
+		ZEND_ASSERT(HT_ITERATORS_COUNT(iter->ht) != 0);
 		HT_DEC_ITERATORS_COUNT(iter->ht);
 	}
 	iter->ht = NULL;
@@ -2027,7 +2030,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -2037,7 +2040,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nInternalPointer = source->nInternalPointer;
 		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
 	} else if (HT_FLAGS(source) & HASH_FLAG_PACKED) {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -2056,7 +2059,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			zend_array_dup_packed_elements(source, target, 1);
 		}
 	} else {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer =
