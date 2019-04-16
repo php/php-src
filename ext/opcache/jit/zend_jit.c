@@ -226,11 +226,11 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		 */
 		int b = ssa->cfg.map[rt_opline - op_array->opcodes];
 
-#ifdef CONTEXT_THREADED_JIT
-		if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY))) {
-#else
+//#ifdef CONTEXT_THREADED_JIT
+//		if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY))) {
+//#else
 		if (!(ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY))) {
-#endif
+//#endif
 			zend_jit_label(dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(dasm_state);
 			if (ra) {
@@ -284,11 +284,11 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 		int b;
 
 		for (b = 0; b < ssa->cfg.blocks_count; b++) {
-#ifdef CONTEXT_THREADED_JIT
-			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
-#else
+//#ifdef CONTEXT_THREADED_JIT
+//			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
+//#else
 			if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
-#endif
+//#endif
 				zend_op *opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 				int offset = dasm_getpclabel(dasm_state, ssa->cfg.blocks_count + b);
 
@@ -2033,7 +2033,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 		if ((ssa->cfg.blocks[b].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
-#ifndef CONTEXT_THREADED_JIT
+//#ifndef CONTEXT_THREADED_JIT
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_ENTRY) {
 			if (ssa->cfg.blocks[b].flags & ZEND_BB_TARGET) {
 				/* pass */
@@ -2052,7 +2052,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 			zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 			zend_jit_prologue(&dasm_state);
 		} else
-#endif
+//#endif
 		if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
 			if (ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) {
@@ -2299,7 +2299,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
-						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level)) {
+						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level, b + 1)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2467,7 +2467,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				case ZEND_DO_FCALL:
 				case ZEND_DO_UCALL:
 				case ZEND_DO_FCALL_BY_NAME:
-					if (!zend_jit_call(&dasm_state, opline)) {
+					if (!zend_jit_call(&dasm_state, opline, b + 1)) {
 						goto jit_failure;
 					}
 					is_terminated = 1;
@@ -2539,10 +2539,10 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 
 							zend_jit_cond_jmp(&dasm_state, next_opline, ssa->cfg.blocks[b].successors[0]);
 							if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
-								zend_jit_call(&dasm_state, next_opline);
+								zend_jit_call(&dasm_state, next_opline, b + 1);
 								is_terminated = 1;
 							} else {
-								zend_jit_do_fcall(&dasm_state, next_opline, op_array, ssa, call_level);
+								zend_jit_do_fcall(&dasm_state, next_opline, op_array, ssa, call_level, b + 1);
 							}
 						}
 					}
