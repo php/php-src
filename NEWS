@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.5
+?? ??? ????, PHP 7.3.6
+
+02 May 2019, PHP 7.3.5
 
 - Core:
   . Fixed bug #77903 (ArrayIterator stops iterating after offsetSet call).
