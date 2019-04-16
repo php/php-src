@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.18
+?? ??? 2019, PHP 7.2.19
+
+
+02 May 2019, PHP 7.2.18
 
 - CLI:
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
