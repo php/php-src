@@ -201,7 +201,10 @@ static isc_callback  _php_ibase_callback(ibase_event *event, /* {{{ */
 #endif
 {
 	/* this function is called asynchronously by the Interbase client library. */
-	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+//	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+#ifdef ZTS
+	void ***tsrm_ls = (void ***) ctx;
+#endif
 
 	/**
 	 * The callback function is called when the event is first registered and when the event
@@ -326,7 +329,10 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
-	TSRMLS_SET_CTX(event->thread_ctx);
+//	TSRMLS_SET_CTX(event->thread_ctx);
+#if ZTS
+	event->thread_ctx = (void ***) tsrm_get_ls_cache()
+#endif
 	event->link_res = link_res;
 	GC_ADDREF(link_res);
 	event->link = ib_link;
