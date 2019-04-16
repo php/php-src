@@ -40,6 +40,9 @@
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 #define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
+/* Only the low byte are real flags */
+#define HASH_FLAG_MASK 0xff
+
 #define HT_FLAGS(ht) (ht)->u.flags
 
 #define HT_INVALIDATE(ht) do { \
