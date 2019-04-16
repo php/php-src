@@ -2140,7 +2140,7 @@ static int seek_cb(void *arg, curl_off_t offset, int origin) /* {{{ */
 	int res = php_stream_seek(stream, offset, origin);
 
 	if (res) {
-		return CURL_SEEKFUNC_FAIL;
+		return CURL_SEEKFUNC_CANTSEEK;
 	}
 	return CURL_SEEKFUNC_OK;
 }
@@ -2792,7 +2792,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						char *type = NULL, *filename = NULL;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 						php_stream *stream;
-						php_stream_statbuf ssb;
 #endif
 
 						prop = zend_read_property(curl_CURLFile_class, current, "name", sizeof("name")-1, 0, &rv);
@@ -2815,11 +2814,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 							}
 
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-							if (!(stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
-								zend_string_release_ex(string_key, 0);
-								return FAILURE;
-							}
-							if (php_stream_stat(stream, &ssb)) {
+							if (!(stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", IGNORE_PATH, NULL))) {
 								zend_string_release_ex(string_key, 0);
 								return FAILURE;
 							}
@@ -2829,7 +2824,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 								return FAILURE;
 							}
 							if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
-								|| (form_error = curl_mime_data_cb(part, ssb.sb.st_size, read_cb, seek_cb, free_cb, stream)) != CURLE_OK
+								|| (form_error = curl_mime_data_cb(part, -1, read_cb, seek_cb, free_cb, stream)) != CURLE_OK
 								|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
 								|| (form_error = curl_mime_type(part, type ? type : "application/octet-stream")) != CURLE_OK) {
 								error = form_error;
