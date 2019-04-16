@@ -481,6 +481,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 
 	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
 			&& EXPECTED(!HT_ITERATORS_OVERFLOW(iter->ht))) {
+		ZEND_ASSERT(HT_ITERATORS_COUNT(iter->ht) != 0);
 		HT_DEC_ITERATORS_COUNT(iter->ht);
 	}
 	iter->ht = NULL;
@@ -1928,7 +1929,8 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = ZVAL_PTR_DTOR;
 
 	if (source->nNumOfElements == 0) {
-		HT_FLAGS(target) = (HT_FLAGS(source) & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED)) | HASH_FLAG_STATIC_KEYS;
+		uint32_t mask = HASH_FLAG_MASK & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED);
+		HT_FLAGS(target) = (HT_FLAGS(source) & mask) | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
@@ -1936,7 +1938,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nInternalPointer = 0;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1945,7 +1947,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nInternalPointer = source->nInternalPointer;
 		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
 	} else if (HT_FLAGS(source) & HASH_FLAG_PACKED) {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1963,7 +1965,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			zend_array_dup_packed_elements(source, target, 1);
 		}
 	} else {
-		HT_FLAGS(target) = HT_FLAGS(source);
+		HT_FLAGS(target) = HT_FLAGS(source) & HASH_FLAG_MASK;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer =
