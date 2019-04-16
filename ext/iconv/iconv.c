@@ -338,37 +338,25 @@ PHP_MINFO_FUNCTION(miconv)
 }
 /* }}} */
 
-static char *get_internal_encoding(void) {
+static const char *get_internal_encoding(void) {
 	if (ICONVG(internal_encoding) && ICONVG(internal_encoding)[0]) {
 		return ICONVG(internal_encoding);
-	} else if (PG(internal_encoding) && PG(internal_encoding)[0]) {
-		return PG(internal_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
 	}
-	return "";
+	return php_get_internal_encoding();
 }
 
-static char *get_input_encoding(void) {
+static const char *get_input_encoding(void) {
 	if (ICONVG(input_encoding) && ICONVG(input_encoding)[0]) {
 		return ICONVG(input_encoding);
-	} else if (PG(input_encoding) && PG(input_encoding)[0]) {
-		return PG(input_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
 	}
-	return "";
+	return php_get_input_encoding();
 }
 
-static char *get_output_encoding(void) {
+static const char *get_output_encoding(void) {
 	if (ICONVG(output_encoding) && ICONVG(output_encoding)[0]) {
 		return ICONVG(output_encoding);
-	} else if (PG(output_encoding) && PG(output_encoding)[0]) {
-		return PG(output_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
 	}
-	return "";
+	return php_get_output_encoding();
 }
 
 
@@ -2064,7 +2052,7 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
    Returns the character count of str */
 PHP_FUNCTION(iconv_strlen)
 {
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_string *str;
 
@@ -2096,7 +2084,7 @@ PHP_FUNCTION(iconv_strlen)
    Returns specified part of a string */
 PHP_FUNCTION(iconv_substr)
 {
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_string *str;
 	zend_long offset, length = 0;
@@ -2135,7 +2123,7 @@ PHP_FUNCTION(iconv_substr)
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0, haystk_len;
 	zend_string *haystk;
 	zend_string *ndl;
@@ -2190,7 +2178,7 @@ PHP_FUNCTION(iconv_strpos)
    Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_string *haystk;
 	zend_string *ndl;
@@ -2331,7 +2319,7 @@ PHP_FUNCTION(iconv_mime_encode)
 PHP_FUNCTION(iconv_mime_decode)
 {
 	zend_string *encoded_str;
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_long mode = 0;
 
@@ -2371,7 +2359,7 @@ PHP_FUNCTION(iconv_mime_decode)
 PHP_FUNCTION(iconv_mime_decode_headers)
 {
 	zend_string *encoded_str;
-	char *charset = get_internal_encoding();
+	const char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_long mode = 0;
 	char *enc_str_tmp;

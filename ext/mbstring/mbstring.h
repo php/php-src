@@ -130,9 +130,6 @@ MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, zend_string *from_encoding);
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
 
-/* internal use only */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length);
-
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;
 	const mbfl_encoding *internal_encoding;
@@ -169,6 +166,10 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 #endif
 	zend_string *last_used_encoding_name;
 	const mbfl_encoding *last_used_encoding;
+	/* Whether an explicit internal_encoding / http_output / http_input encoding was set. */
+	zend_bool internal_encoding_set;
+	zend_bool http_output_set;
+	zend_bool http_input_set;
 ZEND_END_MODULE_GLOBALS(mbstring)
 
 #define MB_OVERLOAD_MAIL 1

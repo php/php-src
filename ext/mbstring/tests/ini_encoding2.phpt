@@ -50,7 +50,7 @@ string(6) "EUC-JP"
 string(0) ""
 string(0) ""
 string(0) ""
-string(5) "UTF-8"
+string(6) "EUC-JP"
 string(0) ""
 string(0) ""
 Setting INI

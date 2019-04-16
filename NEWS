@@ -60,6 +60,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Deprecated ldap_control_paged_result_response and ldap_control_paged_result
 
+- Mbstring:
+  . Fixed bug #77907 (mb-functions do not respect default_encoding). (Nikita)
+
 - Opcache:
   . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
 
