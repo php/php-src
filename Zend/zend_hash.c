@@ -1070,6 +1070,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 			p++;
 		} while (++i < ht->nNumUsed);
 	} else {
+		uint32_t old_num_used = ht->nNumUsed;
 		do {
 			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) {
 				uint32_t j = i;
@@ -1126,6 +1127,12 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 			HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(i);
 			p++;
 		} while (++i < ht->nNumUsed);
+
+		/* Migrate pointer to one past the end of the array to the new one past the end, so that
+		 * newly inserted elements are picked up correctly. */
+		if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+			_zend_hash_iterators_update(ht, old_num_used, ht->nNumUsed);
+		}
 	}
 	return SUCCESS;
 }

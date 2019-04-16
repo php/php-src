@@ -22,8 +22,8 @@ $a->next();
 var_dump($a->valid()); // false
 var_dump($a->current()); // null
 $a->offsetSet(2,2);
-var_dump($a->valid()); // should: true; got: false
-var_dump($a->current()); // should: 2; got: null
+var_dump($a->valid()); // true
+var_dump($a->current()); // 2
 $a->next();
 var_dump($a->valid()); // false
 var_dump($a->current()); // null
@@ -44,8 +44,8 @@ bool(false)
 NULL
 bool(false)
 NULL
-bool(false)
-NULL
+bool(true)
+int(2)
 bool(false)
 NULL
 bool(false)

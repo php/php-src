@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.5
 
+- Core:
+  . Fixed bug #77903 (ArrayIterator stops iterating after offsetSet call).
+    (Nikita)
+
 - CLI:
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
     (kelunik)
