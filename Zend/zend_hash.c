@@ -377,10 +377,8 @@ ZEND_API uint32_t zend_array_count(HashTable *ht)
 }
 /* }}} */
 
-static zend_always_inline HashPosition _zend_hash_get_first_pos(const HashTable *ht)
+static zend_always_inline HashPosition _zend_hash_get_valid_pos(const HashTable *ht, HashPosition pos)
 {
-	HashPosition pos = 0;
-
 	while (pos < ht->nNumUsed && Z_ISUNDEF(ht->arData[pos].val)) {
 		pos++;
 	}
@@ -389,12 +387,7 @@ static zend_always_inline HashPosition _zend_hash_get_first_pos(const HashTable 
 
 static zend_always_inline HashPosition _zend_hash_get_current_pos(const HashTable *ht)
 {
-	HashPosition pos = ht->nInternalPointer;
-
-	if (pos == 0) {
-		pos = _zend_hash_get_first_pos(ht);
-	}
-	return pos;
+	return _zend_hash_get_valid_pos(ht, ht->nInternalPointer);
 }
 
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht)
@@ -2189,7 +2182,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, H
 {
 	IS_CONSISTENT(ht);
 	HT_ASSERT(ht, &ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
-	*pos = _zend_hash_get_first_pos(ht);
+	*pos = _zend_hash_get_valid_pos(ht, 0);
 }
 
 
@@ -2217,19 +2210,13 @@ ZEND_API void ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, Has
 
 ZEND_API int ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
-	uint32_t idx = *pos;
+	uint32_t idx;
 
 	IS_CONSISTENT(ht);
 	HT_ASSERT(ht, &ht->nInternalPointer != pos || GC_REFCOUNT(ht) == 1);
 
+	idx = _zend_hash_get_valid_pos(ht, *pos);
 	if (idx < ht->nNumUsed) {
-		if (idx == 0) {
-			idx = _zend_hash_get_first_pos(ht);
-			if (idx >= ht->nNumUsed) {
-				*pos = idx;
-				return SUCCESS;
-			}
-		}
 		while (1) {
 			idx++;
 			if (idx >= ht->nNumUsed) {
@@ -2272,17 +2259,12 @@ ZEND_API int ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, HashPositi
 /* This function should be made binary safe  */
 ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos)
 {
-	uint32_t idx = *pos;
+	uint32_t idx;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
+	idx = _zend_hash_get_valid_pos(ht, *pos);
 	if (idx < ht->nNumUsed) {
-		if (idx == 0) {
-			idx = _zend_hash_get_first_pos(ht);
-			if (idx >= ht->nNumUsed) {
-				return HASH_KEY_NON_EXISTENT;
-			}
-		}
 		p = ht->arData + idx;
 		if (p->key) {
 			*str_index = p->key;
@@ -2297,20 +2279,14 @@ ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zen
 
 ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos)
 {
-	uint32_t idx = *pos;
+	uint32_t idx;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
+	idx = _zend_hash_get_valid_pos(ht, *pos);
 	if (idx >= ht->nNumUsed) {
 		ZVAL_NULL(key);
 	} else {
-		if (idx == 0) {
-			idx = _zend_hash_get_first_pos(ht);
-			if (idx >= ht->nNumUsed) {
-				ZVAL_NULL(key);
-				return;
-			}
-		}
 		p = ht->arData + idx;
 		if (p->key) {
 			ZVAL_STR_COPY(key, p->key);
@@ -2322,17 +2298,12 @@ ZEND_API void ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *h
 
 ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 {
-    uint32_t idx = *pos;
+	uint32_t idx;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
+	idx = _zend_hash_get_valid_pos(ht, *pos);
 	if (idx < ht->nNumUsed) {
-		if (idx == 0) {
-			idx = _zend_hash_get_first_pos(ht);
-			if (idx >= ht->nNumUsed) {
-				return HASH_KEY_NON_EXISTENT;
-			}
-		}
 		p = ht->arData + idx;
 		if (p->key) {
 			return HASH_KEY_IS_STRING;
@@ -2346,17 +2317,12 @@ ZEND_API int ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, Hash
 
 ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 {
-	uint32_t idx = *pos;
+	uint32_t idx;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
+	idx = _zend_hash_get_valid_pos(ht, *pos);
 	if (idx < ht->nNumUsed) {
-		if (idx == 0) {
-			idx = _zend_hash_get_first_pos(ht);
-			if (idx >= ht->nNumUsed) {
-				return NULL;
-			}
-		}
 		p = ht->arData + idx;
 		return &p->val;
 	} else {
