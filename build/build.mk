@@ -22,15 +22,8 @@ SUBDIRS = Zend TSRM
 
 STAMP = buildmk.stamp
 
-ALWAYS = generated_lists
-
-
-all: $(STAMP) $(ALWAYS)
+all: $(STAMP)
 	@$(MAKE) -s -f build/build2.mk
-
-generated_lists:
-	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 TSRM/threads.m4 \
-		Zend/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
 	@build/buildcheck.sh $(STAMP)
@@ -64,4 +57,4 @@ gitclean-work:
 	fi; \
 	git clean -X -f -d;
 
-.PHONY: $(ALWAYS) snapshot
+.PHONY: snapshot
