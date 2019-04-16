@@ -3,6 +3,8 @@
 # A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
 MAKE=${MAKE:-make}
+PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
+PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
 debug=0
 
@@ -91,11 +93,14 @@ fi
 
 echo "buildconf: Building configure files"
 
-# List of *.m4 prerequisites files for the make configure target.
-M4_FILES=$(echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4)
-
 if test "$debug" = "1"; then
-  $MAKE -s -f build/build.mk M4_FILES="$M4_FILES" SUPPRESS_WARNINGS=""
+  autoconf_flags="-f -Wall"
 else
-  $MAKE -s -f build/build.mk M4_FILES="$M4_FILES"
+  autoconf_flags="-f"
 fi
+
+$MAKE -s -f build/build.mk \
+  PHP_AUTOCONF="$PHP_AUTOCONF" \
+  PHP_AUTOHEADER="$PHP_AUTOHEADER" \
+  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4)" \
+  PHP_AUTOCONF_FLAGS="$autoconf_flags"
