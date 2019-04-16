@@ -578,12 +578,44 @@ static PHP_INI_DISP(display_errors_mode)
 }
 /* }}} */
 
+PHPAPI const char *php_get_internal_encoding() {
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+PHPAPI const char *php_get_input_encoding() {
+	if (PG(input_encoding) && PG(input_encoding)[0]) {
+		return PG(input_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+PHPAPI const char *php_get_output_encoding() {
+	if (PG(output_encoding) && PG(output_encoding)[0]) {
+		return PG(output_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
+
 /* {{{ PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+		if (php_internal_encoding_changed) {
+			php_internal_encoding_changed();
+		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -598,6 +630,9 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+		if (php_internal_encoding_changed) {
+			php_internal_encoding_changed();
+		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -612,6 +647,9 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+		if (php_internal_encoding_changed) {
+			php_internal_encoding_changed();
+		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
@@ -626,6 +664,9 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+		if (php_internal_encoding_changed) {
+			php_internal_encoding_changed();
+		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
