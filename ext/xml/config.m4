@@ -27,8 +27,6 @@ if test "$PHP_XML" != "no"; then
     PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
       xml_extra_sources="compat.c"
       PHP_ADD_EXTENSION_DEP(xml, libxml)
-    ], [
-      AC_MSG_ERROR([libxml2 not found.])
     ])
   fi
 

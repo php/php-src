@@ -15,7 +15,5 @@ if test "$PHP_SOAP" != "no"; then
     AC_DEFINE(HAVE_SOAP,1,[ ])
     PHP_NEW_EXTENSION(soap, soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_SUBST(SOAP_SHARED_LIBADD)
-  ], [
-    AC_MSG_ERROR([libxml2 not found. Please check your libxml2 installation.])
   ])
 fi
