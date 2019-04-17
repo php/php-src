@@ -18,15 +18,35 @@
 # Makefile to generate build tools
 #
 
-SUBDIRS = Zend TSRM
+subdirs = Zend TSRM
+stamp = buildmk.stamp
+config_h_in = main/php_config.h.in
+PHP_AUTOCONF = autoconf
+PHP_AUTOHEADER = autoheader
+PHP_AUTOCONF_FLAGS = -f
 
-STAMP = buildmk.stamp
+all: $(stamp) configure $(config_h_in)
 
-all: $(STAMP)
-	@$(MAKE) -s -f build/build2.mk
+$(stamp): build/buildcheck.sh
+	@build/buildcheck.sh $@
 
-$(STAMP): build/buildcheck.sh
-	@build/buildcheck.sh $(STAMP)
+configure: aclocal.m4 configure.ac $(PHP_M4_FILES)
+	@echo rebuilding $@
+	@rm -f $@
+	@$(PHP_AUTOCONF) $(PHP_AUTOCONF_FLAGS)
+
+aclocal.m4: configure.ac acinclude.m4
+	@echo rebuilding $@
+	@cat acinclude.m4 ./build/libtool.m4 > $@
+
+$(config_h_in): configure
+# Explicitly remove target since autoheader does not seem to work correctly
+# otherwise (timestamps are not updated). Also disable PACKAGE_* symbols in the
+# generated php_config.h.in template.
+	@echo rebuilding $@
+	@rm -f $@
+	@$(PHP_AUTOHEADER) $(PHP_AUTOCONF_FLAGS)
+	@sed -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $@ > $@.tmp && mv $@.tmp $@
 
 snapshot:
 	distname='$(DISTNAME)'; \
@@ -36,8 +56,8 @@ snapshot:
 	myname=`basename \`pwd\`` ; \
 	cd .. && cp -rp $$myname $$distname; \
 	cd $$distname; \
-	rm -f $(SUBDIRS) 2>/dev/null || true; \
-	for i in $(SUBDIRS); do \
+	rm -f $(subdirs) 2>/dev/null || true; \
+	for i in $(subdirs); do \
 		test -d $$i || (test -d ../$$i && cp -rp ../$$i $$i); \
 	done; \
 	find . -type l -exec rm {} \; ; \
