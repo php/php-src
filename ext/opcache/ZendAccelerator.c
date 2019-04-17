@@ -577,10 +577,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	/* empty string */
 	zend_empty_string = new_interned_string(zend_empty_string);
 	for (j = 0; j < 256; j++) {
-		char s[2];
-		s[0] = j;
-		s[1] = 0;
-		zend_one_char_string[j] = new_interned_string(zend_string_init(s, 1, 0));
+		zend_one_char_string[j] = new_interned_string(ZSTR_CHAR(j));
 	}
 	for (j = 0; j < ZEND_STR_LAST_KNOWN; j++) {
 		zend_known_strings[j] = new_interned_string(zend_known_strings[j]);
