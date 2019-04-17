@@ -3923,7 +3923,6 @@ ZEND_VM_HOT_HANDLER(130, ZEND_DO_UCALL, ANY, ANY, SPEC(RETVAL))
 	ret = NULL;
 	if (RETURN_VALUE_USED(opline)) {
 		ret = EX_VAR(opline->result.var);
-		ZVAL_NULL(ret);
 	}
 
 	call->prev_execute_data = execute_data;
@@ -3948,7 +3947,6 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		ret = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -4036,7 +4034,6 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		ret = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -5732,7 +5729,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL)
 
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
-			ZVAL_NULL(return_value);
 		}
 
 		new_op_array->scope = EX(func)->op_array.scope;
@@ -7256,6 +7252,10 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 		zend_generator_close(generator, 1);
 		ZEND_VM_RETURN();
 	} else {
+		/* We didn't execute RETURN, and have to initialize return_value */
+		if (EX(return_value)) {
+			ZVAL_UNDEF(EX(return_value));
+		}
 		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 	}
 }
