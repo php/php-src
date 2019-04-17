@@ -24,6 +24,7 @@
  * - perform compile-time evaluation of constant binary and unary operations
  * - convert CAST(IS_BOOL,x) into BOOL(x)
  * - pre-evaluate constant function calls
+ * - eliminate FETCH $GLOBALS followed by FETCH_DIM/UNSET_DIM/ISSET_ISEMPTY_DIM
  */
 
 #include "php.h"
@@ -512,6 +513,49 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
 			    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_STRING) {
 				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
+			}
+			break;
+//		case ZEND_FETCH_R:
+		case ZEND_FETCH_W:
+//		case ZEND_FETCH_RW:
+		case ZEND_FETCH_IS:
+//		case ZEND_FETCH_FUNC_ARG:
+		case ZEND_FETCH_UNSET:
+			/* convert FETCH $GLOBALS (global), FETCH_DIM $x into FETCH $x (glboal) */
+			if ((opline->extended_value & ZEND_FETCH_GLOBAL) != 0 &&
+			    opline->op1_type == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    zend_string_equals_literal(Z_STR(ZEND_OP1_LITERAL(opline)), "GLOBALS") &&
+			    ((opline + 1)->opcode == opline->opcode + 1 ||
+			     ((opline + 1)->opcode == ZEND_UNSET_DIM &&
+			      opline->opcode == ZEND_FETCH_UNSET) ||
+			     ((opline + 1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ &&
+			      opline->opcode == ZEND_FETCH_IS)) &&
+			    (opline + 1)->op1_type == opline->result_type &&
+			    (opline + 1)->op1.var == opline->result.var &&
+			    ((opline + 1)->op2_type != IS_CONST ||
+			     Z_TYPE(ZEND_OP2_LITERAL(opline + 1)) < IS_ARRAY)) {
+
+				if ((opline + 1)->opcode == ZEND_UNSET_DIM) {
+					(opline + 1)->opcode = ZEND_UNSET_VAR;
+					(opline + 1)->extended_value = ZEND_FETCH_GLOBAL;
+				} else if ((opline + 1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ) {
+					(opline + 1)->opcode = ZEND_ISSET_ISEMPTY_VAR;
+					(opline + 1)->extended_value |= ZEND_FETCH_GLOBAL;
+				} else {
+					(opline + 1)->opcode = opline->opcode;
+					(opline + 1)->extended_value = ZEND_FETCH_GLOBAL;
+				}
+				(opline + 1)->op1_type = (opline + 1)->op2_type;
+				(opline + 1)->op1 = (opline + 1)->op2;
+				if ((opline + 1)->op1_type == IS_CONST &&
+				    Z_TYPE(ZEND_OP1_LITERAL(opline + 1)) != IS_STRING) {
+
+					convert_to_string(&ZEND_OP1_LITERAL(opline + 1));
+					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline + 1)));
+				}
+				SET_UNUSED(opline->op2);
+				MAKE_NOP(opline);
 			}
 			break;
 
