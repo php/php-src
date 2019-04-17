@@ -16,7 +16,5 @@ if test "$PHP_XMLWRITER" != "no"; then
     AC_DEFINE(HAVE_XMLWRITER,1,[ ])
     PHP_NEW_EXTENSION(xmlwriter, php_xmlwriter.c, $ext_shared)
     PHP_SUBST(XMLWRITER_SHARED_LIBADD)
-  ], [
-    AC_MSG_ERROR([libxml2 not found. Please check your libxml2 installation.])
   ])
 fi

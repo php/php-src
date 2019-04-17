@@ -44,8 +44,6 @@ if test "$PHP_XMLRPC" != "no"; then
         PHP_ADD_SOURCES(ext/xml, compat.c)
         PHP_ADD_BUILD_DIR(ext/xml)
       fi
-    ], [
-      AC_MSG_ERROR([libxml2 not found.])
     ])
   else
     testval=no
