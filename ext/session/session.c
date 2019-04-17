@@ -751,7 +751,7 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 		return SUCCESS;
 	}
 
-	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits' must be between 4 and 6.");
+	php_error_docref(NULL, E_WARNING, "session.configuration 'session.sid_bits_per_character' must be between 4 and 6.");
 	return FAILURE;
 }
 /* }}} */

@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.19
 
+- Session:
+  . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
 02 May 2019, PHP 7.2.18
 
