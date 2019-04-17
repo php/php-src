@@ -995,7 +995,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	ret = NULL;
 	if (0) {
 		ret = EX_VAR(opline->result.var);
-		ZVAL_NULL(ret);
 	}
 
 	call->prev_execute_data = execute_data;
@@ -1019,7 +1018,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	ret = NULL;
 	if (1) {
 		ret = EX_VAR(opline->result.var);
-		ZVAL_NULL(ret);
 	}
 
 	call->prev_execute_data = execute_data;
@@ -1044,7 +1042,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ret = NULL;
 		if (0) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1121,7 +1118,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ret = NULL;
 		if (1) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1209,7 +1205,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		ret = NULL;
 		if (0) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1320,7 +1315,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		ret = NULL;
 		if (1) {
 			ret = EX_VAR(opline->result.var);
-			ZVAL_NULL(ret);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1964,6 +1958,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try_catch_finally_hel
 		zend_generator_close(generator, 1);
 		ZEND_VM_RETURN();
 	} else {
+		/* We didn't execute RETURN, and have to initialize return_value */
+		if (EX(return_value)) {
+			ZVAL_UNDEF(EX(return_value));
+		}
 		ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 }
@@ -3454,7 +3452,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
-			ZVAL_NULL(return_value);
 		}
 
 		new_op_array->scope = EX(func)->op_array.scope;
@@ -12925,7 +12922,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
-			ZVAL_NULL(return_value);
 		}
 
 		new_op_array->scope = EX(func)->op_array.scope;
@@ -39960,7 +39956,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
-			ZVAL_NULL(return_value);
 		}
 
 		new_op_array->scope = EX(func)->op_array.scope;
