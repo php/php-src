@@ -4,7 +4,6 @@ Bug #52931 (strripos not overloaded with function overloading enabled)
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --INI--
 mbstring.func_overload = 7
-mbstring.internal_encoding = utf-8
 --FILE--
 <?php
 

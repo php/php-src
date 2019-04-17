@@ -4,7 +4,6 @@ Bug #68644 strlen incorrect : mbstring + func_overload=2 + UTF-8 + Opcache
 opcache.enable=1
 opcache.enable_cli=1
 mbstring.func_overload=2
-mbstring.internal_encoding=UTF-8
 --SKIPIF--
 <?php if (!extension_loaded('Zend OPcache') || !extension_loaded("mbstring")) die("skip"); ?>
 --FILE--

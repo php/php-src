@@ -7,7 +7,7 @@ Function overloading test 1
 --INI--
 output_handler=
 mbstring.func_overload=7
-mbstring.internal_encoding=EUC-JP
+internal_encoding=EUC-JP
 --FILE--
 <?php
 echo mb_internal_encoding()."\n";
