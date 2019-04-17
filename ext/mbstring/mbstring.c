@@ -1690,6 +1690,8 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 	PHP_MSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+	php_internal_encoding_changed = NULL;
+
 	return SUCCESS;
 }
 /* }}} */
