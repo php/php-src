@@ -596,34 +596,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(mbstring)
 #endif
 
-static char *get_internal_encoding(void) {
-	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
-		return PG(internal_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
-	}
-	return "";
-}
-
-static char *get_input_encoding(void) {
-	if (PG(input_encoding) && PG(input_encoding)[0]) {
-		return PG(input_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
-	}
-	return "";
-}
-
-static char *get_output_encoding(void) {
-	if (PG(output_encoding) && PG(output_encoding)[0]) {
-		return PG(output_encoding);
-	} else if (SG(default_charset)) {
-		return SG(default_charset);
-	}
-	return "";
-}
-
-
 /* {{{ allocators */
 static void *_php_mb_allocators_malloc(size_t sz)
 {
@@ -1270,77 +1242,70 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 }
 /* }}} */
 
-/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
-static PHP_INI_MH(OnUpdate_mbstring_http_input)
-{
+static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new_value_length) {
 	const mbfl_encoding **list;
 	size_t size;
-
-	if (!new_value || !ZSTR_VAL(new_value)) {
-		if (MBSTRG(http_input_list)) {
-			pefree(MBSTRG(http_input_list), 1);
-		}
-		if (SUCCESS == php_mb_parse_encoding_list(get_input_encoding(), strlen(get_input_encoding())+1, &list, &size, 1)) {
-			MBSTRG(http_input_list) = list;
-			MBSTRG(http_input_list_size) = size;
-			return SUCCESS;
-		}
-		MBSTRG(http_input_list) = NULL;
-		MBSTRG(http_input_list_size) = 0;
-		return SUCCESS;
-	}
-
-	if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value), &list, &size, 1)) {
+	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1)) {
 		return FAILURE;
 	}
-
 	if (MBSTRG(http_input_list)) {
 		pefree(MBSTRG(http_input_list), 1);
 	}
 	MBSTRG(http_input_list) = list;
 	MBSTRG(http_input_list_size) = size;
+	return SUCCESS;
+}
 
+/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
+static PHP_INI_MH(OnUpdate_mbstring_http_input)
+{
 	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_input is deprecated");
 	}
 
-	return SUCCESS;
+	if (!new_value || !ZSTR_VAL(new_value)) {
+		const char *encoding = php_get_input_encoding();
+		MBSTRG(http_input_set) = 0;
+		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
+		return SUCCESS;
+	}
+
+	MBSTRG(http_input_set) = 1;
+	return _php_mb_ini_mbstring_http_input_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 }
 /* }}} */
+
+static int _php_mb_ini_mbstring_http_output_set(const char *new_value) {
+	const mbfl_encoding *encoding = mbfl_name2encoding(new_value);
+	if (!encoding) {
+		return FAILURE;
+	}
+
+	MBSTRG(http_output_encoding) = encoding;
+	MBSTRG(current_http_output_encoding) = encoding;
+	return SUCCESS;
+}
 
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_output) */
 static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
-	const mbfl_encoding *encoding;
-
-	if (new_value == NULL || ZSTR_LEN(new_value) == 0) {
-		encoding = mbfl_name2encoding(get_output_encoding());
-		if (!encoding) {
-			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-			return SUCCESS;
-		}
-	} else {
-		encoding = mbfl_name2encoding(ZSTR_VAL(new_value));
-		if (!encoding) {
-			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-			return FAILURE;
-		}
-	}
-	MBSTRG(http_output_encoding) = encoding;
-	MBSTRG(current_http_output_encoding) = encoding;
-
 	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_output is deprecated");
 	}
 
-	return SUCCESS;
+	if (new_value == NULL || ZSTR_LEN(new_value) == 0) {
+		MBSTRG(http_output_set) = 0;
+		_php_mb_ini_mbstring_http_output_set(php_get_output_encoding());
+		return SUCCESS;
+	}
+
+	MBSTRG(http_output_set) = 1;
+	return _php_mb_ini_mbstring_http_output_set(ZSTR_VAL(new_value));
 }
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length)
+static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length)
 {
 	const mbfl_encoding *encoding;
 
@@ -1376,20 +1341,13 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 		return FAILURE;
 	}
 
-	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
-		if (new_value && ZSTR_LEN(new_value)) {
-			return _php_mb_ini_mbstring_internal_encoding_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-		} else {
-			return _php_mb_ini_mbstring_internal_encoding_set(get_internal_encoding(), strlen(get_internal_encoding())+1);
-		}
+	if (new_value && ZSTR_LEN(new_value)) {
+		MBSTRG(internal_encoding_set) = 1;
+		return _php_mb_ini_mbstring_internal_encoding_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	} else {
-		/* the corresponding mbstring globals needs to be set according to the
-		 * ini value in the later stage because it never falls back to the
-		 * default value if 1. no value for mbstring.internal_encoding is given,
-		 * 2. mbstring.language directive is processed in per-dir or runtime
-		 * context and 3. call to the handler for mbstring.language is done
-		 * after mbstring.internal_encoding is handled. */
-		return SUCCESS;
+		const char *encoding = php_get_internal_encoding();
+		MBSTRG(internal_encoding_set) = 0;
+		return _php_mb_ini_mbstring_internal_encoding_set(encoding, strlen(encoding));
 	}
 }
 /* }}} */
@@ -1511,6 +1469,24 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+static void mbstring_internal_encoding_changed_hook() {
+	/* One of the internal_encoding / input_encoding / output_encoding ini settings changed. */
+	if (!MBSTRG(internal_encoding_set)) {
+		const char *encoding = php_get_internal_encoding();
+		_php_mb_ini_mbstring_internal_encoding_set(encoding, strlen(encoding));
+	}
+
+	if (!MBSTRG(http_output_set)) {
+		const char *encoding = php_get_output_encoding();
+		_php_mb_ini_mbstring_http_output_set(encoding);
+	}
+
+	if (!MBSTRG(http_input_set)) {
+		const char *encoding = php_get_input_encoding();
+		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
+	}
+}
+
 /* {{{ module global initialize handler */
 static PHP_GINIT_FUNCTION(mbstring)
 {
@@ -1550,6 +1526,9 @@ ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	mbstring_globals->last_used_encoding_name = NULL;
 	mbstring_globals->last_used_encoding = NULL;
+	mbstring_globals->internal_encoding_set = 0;
+	mbstring_globals->http_output_set = 0;
+	mbstring_globals->http_input_set = 0;
 }
 /* }}} */
 
@@ -1580,6 +1559,11 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	__mbfl_allocators = (mbfl_allocators*)&_php_mb_allocators;
 
 	REGISTER_INI_ENTRIES();
+
+	/* We assume that we're the only user of the hook. */
+	ZEND_ASSERT(php_internal_encoding_changed == NULL);
+	php_internal_encoding_changed = mbstring_internal_encoding_changed_hook;
+	mbstring_internal_encoding_changed_hook();
 
 	/* This is a global handler. Should not be set in a per-request handler. */
 	sapi_register_treat_data(mbstr_treat_data);
@@ -1680,6 +1664,10 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(last_used_encoding_name) = NULL;
 	}
 
+	MBSTRG(internal_encoding_set) = 0;
+	MBSTRG(http_output_set) = 0;
+	MBSTRG(http_input_set) = 0;
+
 #if HAVE_MBREGEX
 	PHP_RSHUTDOWN(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -1763,6 +1751,7 @@ PHP_FUNCTION(mb_internal_encoding)
 			RETURN_FALSE;
 		} else {
 			MBSTRG(current_internal_encoding) = encoding;
+			MBSTRG(internal_encoding_set) = 1;
 			RETURN_TRUE;
 		}
 	}
@@ -1886,6 +1875,7 @@ PHP_FUNCTION(mb_http_output)
 			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", name);
 			RETURN_FALSE;
 		} else {
+			MBSTRG(http_output_set) = 1;
 			MBSTRG(current_http_output_encoding) = encoding;
 			RETURN_TRUE;
 		}
