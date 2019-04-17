@@ -2051,13 +2051,13 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	}
 
 	name_len = strlen(module->name);
-	lcname = zend_string_alloc(name_len, 1);
+	lcname = zend_string_alloc(name_len, module->type == MODULE_PERSISTENT);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
 
 	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
-		zend_string_release_ex(lcname, 1);
+		zend_string_release(lcname);
 		return NULL;
 	}
 	module = module_ptr;
@@ -2065,14 +2065,14 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type)==FAILURE) {
 		zend_hash_del(&module_registry, lcname);
-		zend_string_release_ex(lcname, 1);
+		zend_string_release(lcname);
 		EG(current_module) = NULL;
 		zend_error(E_CORE_WARNING,"%s: Unable to register functions, unable to load", module->name);
 		return NULL;
 	}
 
 	EG(current_module) = NULL;
-	zend_string_release_ex(lcname, 1);
+	zend_string_release(lcname);
 	return module;
 }
 /* }}} */
