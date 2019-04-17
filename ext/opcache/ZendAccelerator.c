@@ -572,10 +572,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	/* empty string */
 	zend_empty_string = new_interned_string(zend_empty_string);
 	for (j = 0; j < 256; j++) {
-		char s[2];
-		s[0] = j;
-		s[1] = 0;
-		zend_one_char_string[j] = new_interned_string(zend_string_init(s, 1, 0));
+		zend_one_char_string[j] = new_interned_string(ZSTR_CHAR(j));
 	}
 	for (j = 0; j < ZEND_STR_LAST_KNOWN; j++) {
 		zend_known_strings[j] = new_interned_string(zend_known_strings[j]);
@@ -739,12 +736,11 @@ static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_str
 static zend_string* ZEND_FASTCALL accel_replace_string_by_process_permanent(zend_string *str)
 {
 	zend_string *ret = zend_interned_string_find_permanent(str);
-
 	if (ret) {
 		zend_string_release(str);
 		return ret;
 	}
-	ZEND_ASSERT(0);
+	ZEND_ASSERT(!IS_ACCEL_INTERNED(str));
 	return str;
 }
 
