@@ -22,6 +22,10 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 
+#if defined(__aarch64__)
+# include <arm_neon.h>
+#endif
+
 #ifdef __SSE2__
 # include <mmintrin.h>
 # include <emmintrin.h>
@@ -155,6 +159,14 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data,  4), xmm0);
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data,  8), xmm0);
 			_mm_storeu_si128((__m128i*)&HT_HASH_EX(data, 12), xmm0);
+		} while (0);
+#elif defined(__aarch64__)
+		do {
+			int32x4_t t = vdupq_n_s32(-1);
+			vst1q_s32((int32_t*)&HT_HASH_EX(data,  0), t);
+			vst1q_s32((int32_t*)&HT_HASH_EX(data,  4), t);
+			vst1q_s32((int32_t*)&HT_HASH_EX(data,  8), t);
+			vst1q_s32((int32_t*)&HT_HASH_EX(data, 12), t);
 		} while (0);
 #else
 		HT_HASH_EX(data,  0) = -1;
