@@ -5336,13 +5336,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->type = ZEND_TYPE_ENCODE(0, 1);
 
 		if (type_ast) {
-			uint32_t default_type = Z_TYPE(default_node.u.constant);
+			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
 
 			uint32_t arg_type;
 			zend_bool is_class;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->type = zend_compile_typename(type_ast, default_ast && default_type == IS_NULL);
+			arg_info->type = zend_compile_typename(type_ast, default_type == IS_NULL);
 
 			is_class = ZEND_TYPE_IS_CLASS(arg_info->type);
 			arg_type = ZEND_TYPE_CODE(arg_info->type);
@@ -5351,7 +5351,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
-			if (default_ast && default_type != IS_NULL && default_type != IS_CONSTANT_AST) {
+			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST) {
 				if (is_class) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 						"with a class type can only be NULL");
