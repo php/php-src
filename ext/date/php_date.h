@@ -131,7 +131,6 @@ typedef struct _php_period_obj php_period_obj;
 
 struct _php_date_obj {
 	timelib_time *time;
-	HashTable    *props;
 	zend_object   std;
 };
 
@@ -149,7 +148,6 @@ struct _php_timezone_obj {
 		timelib_sll       utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
 		timelib_abbr_info z;          /* TIMELIB_ZONETYPE_ABBR */
 	} tzi;
-	HashTable *props;
 	zend_object std;
 };
 
@@ -161,7 +159,6 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 
 struct _php_interval_obj {
 	timelib_rel_time *diff;
-	HashTable        *props;
 	int               initialized;
 	zend_object       std;
 };
