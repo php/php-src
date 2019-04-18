@@ -9,7 +9,7 @@ PHP_ARG_ENABLE([xmlwriter],
 if test "$PHP_XMLWRITER" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XMLWriter extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([XMLWriter extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(XMLWRITER_SHARED_LIBADD, [

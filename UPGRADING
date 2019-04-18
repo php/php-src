@@ -441,6 +441,10 @@ The following extensions are affected:
   . --with-webp-dir becomes --with-webp.
   . --with-xpm-dir becomes --with-xpm.
 
+- Libxml:
+  . --with-libxml-dir has been removed.
+  . --enable-libxml becomes --with-libxml.
+
 ========================================
 14. Other Changes
 ========================================

@@ -1,9 +1,9 @@
 dnl config.m4 for extension libxml
 
-PHP_ARG_ENABLE([libxml],
-  [whether to enable LIBXML support],
-  [AS_HELP_STRING([--disable-libxml],
-    [Disable LIBXML support])],
+PHP_ARG_WITH([libxml],
+  [whether to build with LIBXML support],
+  [AS_HELP_STRING([--without-libxml],
+    [Build without LIBXML support])],
   [yes])
 
 if test "$PHP_LIBXML" != "no"; then

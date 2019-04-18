@@ -9,7 +9,7 @@ PHP_ARG_ENABLE([dom],
 if test "$PHP_DOM" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([DOM extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([DOM extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(DOM_SHARED_LIBADD, [

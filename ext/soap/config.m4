@@ -8,7 +8,7 @@ PHP_ARG_ENABLE([soap],
 if test "$PHP_SOAP" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([SOAP extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([SOAP extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(SOAP_SHARED_LIBADD, [
