@@ -73,7 +73,7 @@ $TS \
 --with-enchant=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-zend-test \
+--enable-zend-test=shared \
 > "$CONFIG_LOG_FILE"
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
