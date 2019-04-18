@@ -2493,6 +2493,7 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 			if (module->type != MODULE_TEMPORARY) {
 				break;
 			}
+			module_destructor(module);
 		} ZEND_HASH_FOREACH_END_DEL();
 	} else {
 		zend_module_entry **p = module_post_deactivate_handlers;
