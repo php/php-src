@@ -656,8 +656,9 @@ static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n
 static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp);
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
-zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
-zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+static int date_interval_compare_objects(zval *o1, zval *o2);
+static zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
+static zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot);
@@ -2164,6 +2165,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
+	date_object_handlers_interval.compare_objects = date_interval_compare_objects;
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -4142,8 +4144,16 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	return retval;
 } /* }}} */
 
+static int date_interval_compare_objects(zval *o1, zval *o2) {
+	/* There is no well defined way to compare intervals like P1M and P30D, which may compare
+	 * smaller, equal or greater depending on the point in time at which the interval starts. As
+	 * such, we treat DateInterval objects are non-comparable and emit a warning. */
+	zend_error(E_WARNING, "Cannot compare DateInterval objects");
+	return 1;
+}
+
 /* {{{ date_interval_read_property */
-zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+static zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
 {
 	php_interval_obj *obj;
 	zval *retval;
@@ -4214,7 +4224,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 /* }}} */
 
 /* {{{ date_interval_write_property */
-zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_interval_obj *obj;
 	zval tmp_member;
