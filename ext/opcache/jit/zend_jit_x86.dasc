@@ -2160,7 +2160,6 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
-	|	SAVE_OPLINE
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_arithmetic_error
@@ -2189,7 +2188,6 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
-	|	SAVE_OPLINE
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_division_by_zero_error
@@ -3844,9 +3842,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				if (EXPECTED(op2_lval > 0)) {
 					|	xor Ra(result_reg), Ra(result_reg)
 				} else {
-					if (!zend_jit_set_ip(Dst, opline)) {
-						return 0;
-					}
+					|	SAVE_VALID_OPLINE opline
 					|	jmp ->negative_shift
 				}
 			} else {
@@ -3868,9 +3864,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	cmp r1, 0
 				|	mov Ra(result_reg), 0
 				|	jg >1
-				if (!zend_jit_set_ip(Dst, opline)) {
-					return 0;
-				}
+				|	SAVE_VALID_OPLINE opline
 				|	jmp ->negative_shift
 				|.code
 			}
@@ -3887,9 +3881,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				if (EXPECTED(op2_lval > 0)) {
 					|	sar Ra(result_reg), (SIZEOF_ZEND_LONG * 8) - 1
 				} else {
-					if (!zend_jit_set_ip(Dst, opline)) {
-						return 0;
-					}
+					|	SAVE_VALID_OPLINE opline
 					|	jmp ->negative_shift
 				}
 			} else {
@@ -3910,9 +3902,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	cmp r1, 0
 				|	mov r1, (SIZEOF_ZEND_LONG * 8) - 1
 				|	jg >1
-					if (!zend_jit_set_ip(Dst, opline)) {
-						return 0;
-					}
+				|	SAVE_VALID_OPLINE opline
 				|	jmp ->negative_shift
 				|.code
 			}
@@ -3924,9 +3914,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			zend_long op2_lval = Z_LVAL_P(Z_ZV(op2_addr));
 
 			if (op2_lval == 0) {
-				if (!zend_jit_set_ip(Dst, opline)) {
-					return 0;
-				}
+				|	SAVE_VALID_OPLINE opline
 				|	jmp ->mod_by_zero
 			} else if (op2_lval == -1) {
 				|	xor Ra(result_reg), Ra(result_reg)
@@ -3946,9 +3934,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			    !ssa->var_info[op2_ssa_var].has_range ||
 			     (ssa->var_info[op2_ssa_var].range.min <= 0 &&
 			      ssa->var_info[op2_ssa_var].range.max >= 0)) {
-				if (!zend_jit_set_valid_ip(Dst, opline)) {
-					return 0;
-				}
 				if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
 					|	cmp aword [Ra(Z_REG(op2_addr))+Z_OFFSET(op2_addr)], 0
 				} else if (Z_MODE(op2_addr) == IS_REG) {
@@ -3957,9 +3942,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	jz >1
 				|.cold_code
 				|1:
-					if (!zend_jit_set_ip(Dst, opline)) {
-						return 0;
-					}
+				|	SAVE_VALID_OPLINE opline
 				|	jmp ->mod_by_zero
 				|.code
 			}
@@ -9887,10 +9870,7 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, zend_op_array 
 			if (len > 0) {
 				const char *str = Z_STRVAL_P(zv);
 
-				if (!zend_jit_set_valid_ip(Dst, opline)) {
-					return 0;
-				}
-				|	SAVE_OPLINE
+				|	SAVE_VALID_OPLINE opline
 				|.if X64
 					|	LOAD_ADDR CARG1, str
 					|	LOAD_ADDR CARG2, len
