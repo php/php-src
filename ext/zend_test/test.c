@@ -192,6 +192,7 @@ static const zend_function_entry zend_test_trait_methods[] = {
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_class_entry class_entry;
+	zend_bool persistent_str = EG(current_module)->type == MODULE_PERSISTENT;
 
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestInterface", NULL);
 	zend_test_interface = zend_register_internal_interface(&class_entry);
@@ -205,7 +206,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_declare_property_null(zend_test_class, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_STATIC);
 
 	{
-		zend_string *name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+		zend_string *name = zend_string_init("intProp", sizeof("intProp") - 1, persistent_str);
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
@@ -214,7 +215,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	{
-		zend_string *name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+		zend_string *name = zend_string_init("classProp", sizeof("classProp") - 1, persistent_str);
 		zend_string *class_name = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
 		zval val;
 		ZVAL_NULL(&val);
@@ -225,7 +226,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	{
-		zend_string *name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+		zend_string *name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, persistent_str);
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
