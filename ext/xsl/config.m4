@@ -9,7 +9,7 @@ PHP_ARG_WITH([xsl],
 if test "$PHP_XSL" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XSL extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([XSL extension requires LIBXML extension, add --with-libxml])
   fi
 
   if test "$PHP_DOM" = "no"; then
