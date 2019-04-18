@@ -7,7 +7,7 @@ if (!extension_loaded('%EXTNAME%')) {
 }
 ?>
 --FILE--
-<?php
+<?php declare(strict_types=1);
 echo 'The extension "%EXTNAME%" is available';
 ?>
 --EXPECT--
