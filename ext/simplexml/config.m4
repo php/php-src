@@ -9,7 +9,7 @@ PHP_ARG_ENABLE([simplexml],
 if test "$PHP_SIMPLEXML" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([SimpleXML extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([SimpleXML extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [

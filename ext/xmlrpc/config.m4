@@ -36,7 +36,7 @@ if test "$PHP_XMLRPC" != "no"; then
   if test "$PHP_LIBEXPAT_DIR" = "no"; then
 
     if test "$PHP_LIBXML" = "no"; then
-      AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --enable-libxml])
+      AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --with-libxml])
     fi
 
     PHP_SETUP_LIBXML(XMLRPC_SHARED_LIBADD, [

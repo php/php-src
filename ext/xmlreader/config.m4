@@ -9,7 +9,7 @@ PHP_ARG_ENABLE([xmlreader],
 if test "$PHP_XMLREADER" != "no"; then
 
   if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XMLReader extension requires LIBXML extension, add --enable-libxml])
+    AC_MSG_ERROR([XMLReader extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(XMLREADER_SHARED_LIBADD, [
