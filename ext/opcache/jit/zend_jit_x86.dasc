@@ -7474,8 +7474,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	mov aword EX:RX->call, 0
 
 		if (RETURN_VALUE_USED(opline)) {
-			|	// ZVAL_NULL(EX_VAR(opline->result.var));
-			|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
 			|	// EX(return_value) = EX_VAR(opline->result.var);
 			|	LOAD_ZVAL_ADDR r2, res_addr
 			|	mov aword EX:RX->return_value, r2
