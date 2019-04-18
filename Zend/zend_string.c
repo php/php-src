@@ -232,7 +232,13 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 	}
 
 	/* Create a short living interned, freed after the request. */
-	ZEND_ASSERT(!(GC_FLAGS(str) & GC_PERSISTENT));
+#if ZEND_RC_DEBUG
+	if (zend_rc_debug) {
+		/* PHP shouldn't create persistent interned string during request,
+		 * but at least dl() may do this */
+		ZEND_ASSERT(!(GC_FLAGS(str) & GC_PERSISTENT));
+	}
+#endif
 	if (GC_REFCOUNT(str) > 1) {
 		zend_ulong h = ZSTR_H(str);
 		zend_string_delref(str);
@@ -255,6 +261,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char
 		return ret;
 	}
 
+	ZEND_ASSERT(permanent);
 	ret = zend_string_init(str, size, permanent);
 	ZSTR_H(ret) = h;
 	return zend_add_interned_string(ret, &interned_strings_permanent, IS_STR_PERMANENT);
@@ -276,6 +283,13 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *
 		return ret;
 	}
 
+#if ZEND_RC_DEBUG
+	if (zend_rc_debug) {
+		/* PHP shouldn't create persistent interned string during request,
+		 * but at least dl() may do this */
+		ZEND_ASSERT(!permanent);
+	}
+#endif
 	ret = zend_string_init(str, size, permanent);
 	ZSTR_H(ret) = h;
 
