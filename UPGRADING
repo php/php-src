@@ -32,6 +32,9 @@ PHP 7.4 UPGRADE NOTES
 - Date:
   . Calling var_dump() or similar on a DateTime(Immutable) instance will no
     longer leave behind accessible properties on the object.
+  . Comparison of DateInterval objects (using ==, < and so on) will now generate
+    a warning and always return false. Previously all DateInterval objects were
+    considered equal, unless they had properties.
 
 - Intl:
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
