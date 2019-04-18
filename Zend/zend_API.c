@@ -2209,14 +2209,14 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				return FAILURE;
 			}
 		}
-		lowercase_name = zend_string_tolower_ex(internal_function->function_name, 1);
+		lowercase_name = zend_string_tolower_ex(internal_function->function_name, type == MODULE_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		reg_function = malloc(sizeof(zend_internal_function));
 		memcpy(reg_function, &function, sizeof(zend_internal_function));
 		if (zend_hash_add_ptr(target_function_table, lowercase_name, reg_function) == NULL) {
 			unload=1;
 			free(reg_function);
-			zend_string_release_ex(lowercase_name, 1);
+			zend_string_release(lowercase_name);
 			break;
 		}
 
@@ -2312,7 +2312,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		ptr++;
 		count++;
-		zend_string_release_ex(lowercase_name, 1);
+		zend_string_release(lowercase_name);
 	}
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		if (scope) {
@@ -2642,10 +2642,10 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	class_entry->info.internal.module = EG(current_module);
 
 	if (class_entry->info.internal.builtin_functions) {
-		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, MODULE_PERSISTENT);
+		zend_register_functions(class_entry, class_entry->info.internal.builtin_functions, &class_entry->function_table, EG(current_module)->type);
 	}
 
-	lowercase_name = zend_string_tolower_ex(orig_class_entry->name, 1);
+	lowercase_name = zend_string_tolower_ex(orig_class_entry->name, EG(current_module)->type == MODULE_PERSISTENT);
 	lowercase_name = zend_new_interned_string(lowercase_name);
 	zend_hash_update_ptr(CG(class_table), lowercase_name, class_entry);
 	zend_string_release_ex(lowercase_name, 1);
@@ -2704,6 +2704,11 @@ ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *or
 ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent) /* {{{ */
 {
 	zend_string *lcname;
+
+	/* TODO: Move this out of here in 7.4. */
+	if (persistent && EG(current_module) && EG(current_module)->type == MODULE_TEMPORARY) {
+		persistent = 0;
+	}
 
 	if (name[0] == '\\') {
 		lcname = zend_string_alloc(name_len-1, persistent);
@@ -3607,6 +3612,11 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 	return Z_STR_P(zv);
 }
 
+static zend_always_inline zend_bool is_persistent_class(zend_class_entry *ce) {
+	return (ce->type & ZEND_INTERNAL_CLASS)
+		&& ce->info.internal.module->type == MODULE_PERSISTENT;
+}
+
 ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
@@ -3692,10 +3702,10 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 	if (access_type & ZEND_ACC_PUBLIC) {
 		property_info->name = zend_string_copy(name);
 	} else if (access_type & ZEND_ACC_PRIVATE) {
-		property_info->name = zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		property_info->name = zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
 	} else {
 		ZEND_ASSERT(access_type & ZEND_ACC_PROTECTED);
-		property_info->name = zend_mangle_property_name("*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		property_info->name = zend_mangle_property_name("*", 1, ZSTR_VAL(name), ZSTR_LEN(name), is_persistent_class(ce));
 	}
 
 	property_info->name = zend_new_interned_string(property_info->name);
@@ -3845,7 +3855,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type) /* {{{ */
 {
-	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	zend_string *key = zend_string_init(name, name_length, is_persistent_class(ce));
 	int ret = zend_declare_property_ex(ce, key, property, access_type, NULL);
 	zend_string_release(key);
 	return ret;
