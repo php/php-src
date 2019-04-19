@@ -1,8 +1,5 @@
 --TEST--
 Test imagecolorclosesthwb() basic functionality
---CREDITS--
-Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
-#PHPSP User Group Brazil
 --SKIPIF--
 <?php
 	if (!extension_loaded('gd')) {
@@ -11,29 +8,28 @@ Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+    // Create the size of image or blank image 
+    $image = imagecreate(500, 200); 
+ 
+    // Set the background color of image 
+    $background_color = imagecolorallocate($image, 0, 24, 200);
+        
+    // Set the text color of image 
+    $text_color = imagecolorallocate($image, 255, 255, 255);
+    
+    // Function to create image which contains string. 
+    imagestring($image, 5, 180, 100,  "PHP is awesome", $text_color); 
+    imagestring($image, 3, 120, 120,  "A test for PHP imagecolorclosesthwb function", $text_color);
 
-	$image = imagecreatefromjpeg($cwd . "/conv_test.jpeg");
-	var_dump(imagecolorclosesthwb($image, 116, 115, 152));
+    var_dump(imagecolorclosesthwb($image, 0, 115, 152)); // 0
+    var_dump(imagecolorclosesthwb($image, 0, 24, 200)); // 0
+    var_dump(imagecolorclosesthwb($image, 116, 120, 115)); // 1
+	var_dump(imagecolorclosesthwb($image, 50, 0, 90)); // 0
 
-	$image = imagecreatefromjpeg($cwd . "/conv_test.jpeg");
-	var_dump(imagecolorclosesthwb($image, 12, 14, 25));
-
-	$image = imagecreatefromjpeg($cwd . "/conv_test.jpeg");
-	var_dump(imagecolorclosesthwb($image, 1, 1, 1));
-
-	$image = imagecreatefrompng($cwd . "/test.png");
-	var_dump(imagecolorclosesthwb($image, 1, 12, 12));
-
-	$image = imagecreatefrompng($cwd . "/test.png");
-	var_dump(imagecolorclosesthwb($image, 116, 120, 115));
-
-	imagedestroy($image);
+    imagedestroy($image);
 ?>
 --EXPECT--
-int(7631768)
-int(790041)
-int(65793)
-int(68620)
-int(7633011)
-int(87)
+int(0)
+int(0)
+int(1)
+int(0)
