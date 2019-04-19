@@ -51,11 +51,6 @@ AC_DEFUN([PHP_IMAP_KRB_CHK], [
     PHP_SETUP_KERBEROS(IMAP_SHARED_LIBADD,
     [
       AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    ], [
-      AC_MSG_ERROR([Kerberos libraries not found.
-
-      Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
-      ])
     ])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
@@ -98,8 +93,8 @@ PHP_ARG_WITH([imap],
 
 PHP_ARG_WITH([kerberos],
   [for IMAP Kerberos support],
-  [AS_HELP_STRING([[--with-kerberos[=DIR]]],
-    [IMAP: Include Kerberos support. DIR is the Kerberos install prefix])],
+  [AS_HELP_STRING([--with-kerberos],
+    [IMAP: Include Kerberos support])],
   [no],
   [no])
 

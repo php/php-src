@@ -7,7 +7,7 @@ PHP_ARG_WITH([openssl],
 
 PHP_ARG_WITH([kerberos],
   [for Kerberos support],
-  [AS_HELP_STRING([[--with-kerberos[=DIR]]],
+  [AS_HELP_STRING([--with-kerberos],
     [OPENSSL: Include Kerberos support])],
   [no],
   [no])

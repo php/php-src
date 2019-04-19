@@ -1906,61 +1906,17 @@ AC_DEFUN([PHP_SETUP_ICU],[
 ])
 
 dnl
-dnl PHP_SETUP_KERBEROS(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_KERBEROS(shared-add [, action-found])
 dnl
 dnl Common setup macro for kerberos
 dnl
 AC_DEFUN([PHP_SETUP_KERBEROS],[
-  found_kerberos=no
-  unset KERBEROS_CFLAGS
-  unset KERBEROS_LIBS
+  PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
 
-  dnl First try to find krb5-config
-  if test -z "$KRB5_CONFIG"; then
-    AC_PATH_PROG(KRB5_CONFIG, krb5-config, no, [$PATH:/usr/kerberos/bin:/usr/local/bin])
-  fi
+  PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+  PHP_EVAL_LIBLINE($KERBEROS_LIBS, $1)
 
-  dnl If krb5-config is found try using it
-  if test "$PHP_KERBEROS" != "no" && test -x "$KRB5_CONFIG"; then
-    KERBEROS_LIBS=`$KRB5_CONFIG --libs gssapi`
-    KERBEROS_CFLAGS=`$KRB5_CONFIG --cflags gssapi`
-
-    if test -n "$KERBEROS_LIBS"; then
-      found_kerberos=yes
-      PHP_EVAL_LIBLINE($KERBEROS_LIBS, $1)
-      PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
-    fi
-  fi
-
-  dnl If still not found use old skool method
-  if test "$found_kerberos" = "no"; then
-
-    if test "$PHP_KERBEROS" = "yes"; then
-      PHP_KERBEROS="/usr/kerberos /usr/local /usr"
-    fi
-
-    for i in $PHP_KERBEROS; do
-      if test -f $i/$PHP_LIBDIR/libkrb5.a || test -f $i/$PHP_LIBDIR/libkrb5.$SHLIB_SUFFIX_NAME; then
-        PHP_KERBEROS_DIR=$i
-        break
-      fi
-    done
-
-    if test "$PHP_KERBEROS_DIR"; then
-      found_kerberos=yes
-      PHP_ADD_LIBPATH($PHP_KERBEROS_DIR/$PHP_LIBDIR, $1)
-      PHP_ADD_LIBRARY(gssapi_krb5, 1, $1)
-      PHP_ADD_LIBRARY(krb5, 1, $1)
-      PHP_ADD_LIBRARY(k5crypto, 1, $1)
-      PHP_ADD_LIBRARY(com_err,  1, $1)
-      PHP_ADD_INCLUDE($PHP_KERBEROS_DIR/include)
-    fi
-  fi
-
-  if test "$found_kerberos" = "yes"; then
-ifelse([$2],[],:,[$2])
-ifelse([$3],[],,[else $3])
-  fi
+  ifelse([$2],[],:,[$2])
 ])
 
 dnl
