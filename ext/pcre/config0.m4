@@ -22,7 +22,6 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
   PHP_EVAL_INCLINE($PCRE2_CFLAGS)
   PHP_EVAL_LIBLINE($PCRE2_LIBS)
   AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
-  AC_DEFINE(HAVE_PCRE, 1, [ ])
 
   if test "$PHP_PCRE_JIT" != "no"; then
     AC_CACHE_CHECK([for JIT support in PCRE2], ac_cv_have_pcre2_jit, [
