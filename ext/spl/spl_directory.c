@@ -1598,7 +1598,7 @@ SPL_METHOD(GlobIterator, __construct)
 }
 /* }}} */
 
-/* {{{ proto int GlobIterator::cont()
+/* {{{ proto int GlobIterator::count()
    Return the number of directories and files found by globbing */
 SPL_METHOD(GlobIterator, count)
 {
