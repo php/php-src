@@ -521,7 +521,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_FETCH_IS:
 //		case ZEND_FETCH_FUNC_ARG:
 		case ZEND_FETCH_UNSET:
-			/* convert FETCH $GLOBALS (global), FETCH_DIM $x into FETCH $x (glboal) */
+			/* convert FETCH $GLOBALS (global), FETCH_DIM $x into FETCH $x (global) */
 			if ((opline->extended_value & ZEND_FETCH_GLOBAL) != 0 &&
 			    opline->op1_type == IS_CONST &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
