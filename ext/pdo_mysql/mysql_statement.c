@@ -552,13 +552,15 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_VAR_STRING);
 						break;
 					case IS_LONG:
-					case IS_TRUE:
-					case IS_FALSE:
 #if SIZEOF_ZEND_LONG==8
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONGLONG);
 #elif SIZEOF_ZEND_LONG==4
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
+						break;
+					case IS_TRUE:
+					case IS_FALSE:
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_TINY);
 						break;
 					case IS_DOUBLE:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_DOUBLE);

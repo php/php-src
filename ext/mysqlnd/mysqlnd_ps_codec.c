@@ -612,7 +612,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 		zval *parameter = &stmt->param_bind[i].zv;
 
 		ZVAL_DEREF(parameter);
-		if (!Z_ISNULL_P(parameter) && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+		if (!Z_ISNULL_P(parameter) && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG || current_type == MYSQL_TYPE_TINY)) {
 			/* always copy the var, because we do many conversions */
 			if (Z_TYPE_P(parameter) != IS_LONG &&
 				PASS != mysqlnd_stmt_copy_it(copies_param, parameter, stmt->param_count, i))
@@ -824,6 +824,14 @@ mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies,
 					/* data has alreade been converted to long */
 					int4store(*p, Z_LVAL_P(data));
 					(*p) += 4;
+					break;
+				case MYSQL_TYPE_TINY:
+					if (Z_TYPE_P(data) == IS_STRING) {
+						goto send_string;
+					} else {
+						int1store(*p, Z_LVAL_P(data));
+						(*p)++;
+					}
 					break;
 				case MYSQL_TYPE_LONG_BLOB:
 					if (stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED) {
