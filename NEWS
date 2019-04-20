@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.6
 
+- FPM:
+  . Fixed bug #77921 (static.php.net doesn't work anymore). (Peter Kokot)
+
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
