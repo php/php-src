@@ -281,7 +281,7 @@ PHP 7.4 UPGRADE NOTES
     by passing -1 as $new_width.
 
 - Filter:
-  . The filter extension no longer exposes --with-pcre-dir for Unix builds and 
+  . The filter extension no longer exposes --with-pcre-dir for Unix builds and
     can now reliably be built as shared when using ./configure once more.
 
 - Hash:
@@ -394,7 +394,7 @@ PHP 7.4 UPGRADE NOTES
   PHP, so they're a fake.
 
 - CTRL+C and CTRL+BREAK on console can be caught by setting a handler function
-  with sapi_windows_set_ctrl_handler(). 
+  with sapi_windows_set_ctrl_handler().
 
 ========================================
 13. Migration to pkg-config
@@ -412,6 +412,9 @@ The following extensions are affected:
 - Curl:
   . --with-curl no longer accepts a directory.
 
+- IMAP:
+  . --with-kerberos no longer accepts a directory.
+
 - Intl:
   . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
     always required.
@@ -422,6 +425,7 @@ The following extensions are affected:
 
 - OpenSSL:
   . --with-openssl no longer accepts a directory.
+  . --with-kerberos no longer accepts a directory.
 
 - PCRE:
   . --with-pcre-regex has been removed. Instead --with-external-pcre is provided

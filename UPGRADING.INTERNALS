@@ -19,7 +19,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   p. ZEND_EXT_FCALL_BEGIN can access arguments
   q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
   r. TSRM environment locking
-  
+
 2. Build system changes
   a. Abstract
   b. Unix build system changes
@@ -184,11 +184,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      are respected by zend_get_call_op such that when set, the only possible
      call opcodes are ZEND_DO_FCALL and ZEND_DO_FCALL_BY_NAME, previously they
      were ignored by zend_get_call_op.
-     
-  r. TSRM adds tsrm_env_lock() and tsrm_env_unlock() for ZTS: 
+
+  r. TSRM adds tsrm_env_lock() and tsrm_env_unlock() for ZTS:
      code that may change environ and may run concurrently with user code in ZTS
      is expected to use this exclusion API to maintain as much safety as reasonable.
-     This results in "thread safe" getenv/putenv in Windows and Unix, however 
+     This results in "thread safe" getenv/putenv in Windows and Unix, however
      functions that may read the environment without exclusion still exist,
      for example:
        - setlocale
@@ -197,7 +197,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      The above is not an exhaustive list of such functions, while getenv/putenv will
      behave as if they are safe, care should still be taken in multi-threaded
      environments.
-     
+
 ========================
 2. Build system changes
 ========================
@@ -205,8 +205,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   a. Abstract
     - The hash extension is now always available, meaning the --enable-hash
         configure argument has been removed.
-    - The filter extension no longer exposes the --with-pcre-dir configure 
-      argument and therefore allows shared builds with ./configure for Unix 
+    - The filter extension no longer exposes the --with-pcre-dir configure
+      argument and therefore allows shared builds with ./configure for Unix
       builds.
 
   b. Unix build system changes
@@ -218,7 +218,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - Local PHP m4 unused or obsolete macros have been removed:
       PHP_TARGET_RDYNAMIC, PHP_SOLARIS_PIC_WEIRDNESS, PHP_SYS_LFS,
       PHP_AC_BROKEN_SPRINTF, PHP_EXTENSION, PHP_DECLARED_TIMEZONE,
-      PHP_CHECK_TYPES, PHP_TM_GMTOFF, PHP_CHECK_64BIT, PHP_READDIR_R_TYPE.
+      PHP_CHECK_TYPES, PHP_TM_GMTOFF, PHP_CHECK_64BIT, PHP_READDIR_R_TYPE,
+      PHP_SETUP_KERBEROS.
     - new --enable-rtld-now build option allow to switch dlopen behavior
       from RTLD_LAZY to RTLD_NOW
     - Minimum Bison version is 3.0+ for generating parser files.
