@@ -1,7 +1,7 @@
 # The bcmath library
 
 This is a fork of the bcmath library initially created by Phil Nelson in May
-2010.
+2000.
 
 Bcmath is a library of arbitrary precision math routines. These routines, in a
 different form, are the routines that to the arbitrary precision calculations
