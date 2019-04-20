@@ -48,10 +48,12 @@ AC_DEFUN([PHP_IMAP_TEST_BUILD], [
 
 AC_DEFUN([PHP_IMAP_KRB_CHK], [
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(IMAP_SHARED_LIBADD,
-    [
-      AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    ])
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
+
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, IMAP_SHARED_LIBADD)
+
+    AC_DEFINE(HAVE_IMAP_KRB, 1, [Whether IMAP extension has Kerberos support])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
       AC_MSG_ERROR([This c-client library is built with Kerberos support.

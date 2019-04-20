@@ -1906,20 +1906,6 @@ AC_DEFUN([PHP_SETUP_ICU],[
 ])
 
 dnl
-dnl PHP_SETUP_KERBEROS(shared-add [, action-found])
-dnl
-dnl Common setup macro for kerberos
-dnl
-AC_DEFUN([PHP_SETUP_KERBEROS],[
-  PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
-
-  PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
-  PHP_EVAL_LIBLINE($KERBEROS_LIBS, $1)
-
-  ifelse([$2],[],:,[$2])
-])
-
-dnl
 dnl PHP_SETUP_OPENSSL(shared-add [, action-found [, action-not-found]])
 dnl
 dnl Common setup macro for openssl
