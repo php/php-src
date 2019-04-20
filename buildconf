@@ -103,4 +103,4 @@ $MAKE -s -f build/build.mk \
   PHP_AUTOCONF="$PHP_AUTOCONF" \
   PHP_AUTOHEADER="$PHP_AUTOHEADER" \
   PHP_AUTOCONF_FLAGS="$autoconf_flags" \
-  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/*.m4 ext/*/config*.m4 sapi/*/config*.m4)"
+  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/Zend.m4 ext/*/config*.m4 sapi/*/config*.m4)"
