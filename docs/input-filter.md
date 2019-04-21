@@ -1,26 +1,23 @@
-# Input Filter Support in PHP 5
+# Input filter support in PHP
 
-XSS (Cross Site Scripting) hacks are becoming more and more prevalent,
-and can be quite difficult to prevent.  Whenever you accept user data
-and somehow display this data back to users, you are likely vulnerable
-to XSS hacks.
+XSS (Cross Site Scripting) hacks are becoming more and more prevalent, and can
+be quite difficult to prevent. Whenever you accept user data and somehow display
+this data back to users, you are likely vulnerable to XSS hacks.
 
-The Input Filter support in PHP 5 is aimed at providing the framework
-through which a company-wide or site-wide security policy can be
-enforced.  It is implemented as a SAPI hook and is called from the
-treat_data and post handler functions.  To implement your own security
-policy you will need to write a standard PHP extension.  There is also
-a powerful standard implementation in ext/filter that should suit most
-peoples' needs.  However, if you want to implement your own security
-policy, read on.
+The Input Filter support in PHP is aimed at providing the framework through
+which a company-wide or site-wide security policy can be enforced. It is
+implemented as a SAPI hook and is called from the `treat_data` and post handler
+functions. To implement your own security policy you will need to write a
+standard PHP extension. There is also a powerful standard implementation in
+`ext/filter` that should suit most peoples' needs. However, if you want to
+implement your own security policy, read on.
 
-A simple implementation might look like the following.  This stores the
-original raw user data and adds a my_get_raw() function while the normal
-$_POST, $_GET and $_COOKIE arrays are only populated with stripped
-data.  In this simple example all I am doing is calling strip_tags() on
-the data.
+A simple implementation might look like the following. This stores the original
+raw user data and adds a `my_get_raw()` function while the normal `$_POST`,
+`$_GET` and `$_COOKIE` arrays are only populated with stripped data. In this
+simple example all I am doing is calling `strip_tags()` on the data.
 
-```
+```c
 ZEND_BEGIN_MODULE_GLOBALS(my_input_filter)
         zval *post_array;
         zval *get_array;

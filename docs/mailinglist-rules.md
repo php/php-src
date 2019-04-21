@@ -1,4 +1,4 @@
-# Mailinglist Rules
+# Mailinglist rules
 
 This is the first file you should be reading before doing any posts on PHP
 mailinglists. Following these rules is considered imperative to the success of
@@ -19,7 +19,6 @@ following some basic rules with regards to mailinglist usage will:
 
    d. Increase the general level of good will on planet Earth.
 
-
 Having said that, here are the organizational rules:
 
    1. Respect other people working on the project.
@@ -28,9 +27,9 @@ Having said that, here are the organizational rules:
       your post after a good breather or a good nights sleep.
 
    3. Make sure you pick the right mailinglist for your posting. Please review
-      the descriptions on the mailinglist overview page
-      (http://www.php.net/mailing-lists.php). When in doubt ask a friend or
-      someone you trust on IRC.
+      the descriptions on the
+      [mailinglist overview page](https://www.php.net/mailing-lists.php). When
+      in doubt ask a friend or someone you trust on IRC.
 
    4. Make sure you know what you are talking about. PHP is a very large project
       that strives to be very open. The flip side is that the core developers
@@ -70,7 +69,7 @@ The next few rules are more some general hints:
       new thread.
 
 Finally, additional hints on how to behave inside the virtual community can be
-found in RFC 1855 (http://www.faqs.org/rfcs/rfc1855.html).
+found in [RFC 1855](http://www.faqs.org/rfcs/rfc1855.html).
 
 Happy hacking,
 
