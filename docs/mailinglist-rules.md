@@ -1,6 +1,5 @@
-====================
-  Mailinglist Rules
-====================
+Mailinglist Rules
+=================
 
 This is the first file you should be reading before doing any posts on PHP
 mailinglists. Following these rules is considered imperative to the success of
