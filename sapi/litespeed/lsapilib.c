@@ -1602,8 +1602,11 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
 }
 
 
-static struct lsapi_packet_header   finish = {'L', 'S',
-                LSAPI_RESP_END, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} };
+static struct lsapi_packet_header   finish_close[2] =
+{
+    {'L', 'S', LSAPI_RESP_END, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} },
+    {'L', 'S', LSAPI_CONN_CLOSE, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} }
+};
 
 
 int LSAPI_Finish_r( LSAPI_Request * pReq )
@@ -1624,7 +1627,7 @@ int LSAPI_Finish_r( LSAPI_Request * pReq )
                 Flush_RespBuf_r( pReq );
             }
 
-            pReq->m_pIovecCur->iov_base = (void *)&finish;
+            pReq->m_pIovecCur->iov_base = (void *)finish_close;
             pReq->m_pIovecCur->iov_len  = LSAPI_PACKET_HEADER_LEN;
             pReq->m_totalLen += LSAPI_PACKET_HEADER_LEN;
             ++pReq->m_pIovecCur;
@@ -1640,12 +1643,17 @@ int LSAPI_End_Response_r(LSAPI_Request * pReq)
 {
     if (!pReq)
         return -1;
+    if (pReq->m_reqState & LSAPI_ST_BACKGROUND)
+        return 0;
     if (pReq->m_reqState)
     {
         if ( pReq->m_fd != -1 )
         {
             if ( pReq->m_reqState & LSAPI_ST_RESP_HEADER )
             {
+                if ( pReq->m_pRespHeaderBufPos <= pReq->m_pRespHeaderBuf )
+                    return 0;
+
                 LSAPI_FinalizeRespHeaders_r( pReq );
             }
             if ( pReq->m_pRespBufPos != pReq->m_pRespBuf )
@@ -1653,14 +1661,13 @@ int LSAPI_End_Response_r(LSAPI_Request * pReq)
                 Flush_RespBuf_r( pReq );
             }
 
-            pReq->m_pIovecCur->iov_base = (void *)&finish;
-            pReq->m_pIovecCur->iov_len  = LSAPI_PACKET_HEADER_LEN;
-            pReq->m_totalLen += LSAPI_PACKET_HEADER_LEN;
+            pReq->m_pIovecCur->iov_base = (void *)finish_close;
+            pReq->m_pIovecCur->iov_len  = LSAPI_PACKET_HEADER_LEN << 1;
+            pReq->m_totalLen += LSAPI_PACKET_HEADER_LEN << 1;
             ++pReq->m_pIovecCur;
             LSAPI_Flush_r( pReq );
+            lsapi_close_connection(pReq);
         }
-        send_conn_close_notification(pReq->m_fd);
-        lsapi_close_connection(pReq);
         pReq->m_reqState |= LSAPI_ST_BACKGROUND;
     }
     return 0;
@@ -3165,8 +3172,8 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         *s_avail_pages = sysconf(_SC_AVPHYS_PAGES);
-        lsapi_log("Memory total: %zd, free: %zd, free %%%zd\n",
-                  s_total_pages, *s_avail_pages, *s_avail_pages * 100 / s_total_pages);
+//        lsapi_log("Memory total: %zd, free: %zd, free %%%zd\n",
+//                  s_total_pages, *s_avail_pages, *s_avail_pages * 100 / s_total_pages);
 
 #endif
         FD_ZERO( &readfds );
