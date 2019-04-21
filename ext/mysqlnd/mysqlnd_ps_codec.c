@@ -828,10 +828,9 @@ mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies,
 				case MYSQL_TYPE_TINY:
 					if (Z_TYPE_P(data) == IS_STRING) {
 						goto send_string;
-					} else {
-						int1store(*p, Z_LVAL_P(data));
-						(*p)++;
 					}
+					int1store(*p, Z_LVAL_P(data));
+					(*p)++;
 					break;
 				case MYSQL_TYPE_LONG_BLOB:
 					if (stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED) {
