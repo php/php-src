@@ -1,4 +1,4 @@
-PHP Build System V5 Overview
+# PHP Build System V5 Overview
 
 - supports Makefile.ins during transition phase
 - not-really-portable Makefile includes have been eliminated
@@ -21,28 +21,21 @@ PHP Build System V5 Overview
 - upgraded shtool to 1.5.4
 - removed $(moduledir) (use EXTENSION_DIR)
 
-The Reason For a New System
+## The Reason For a New System
 
 It became more and more apparent that there is a severe need
 for addressing the portability concerns and improving the chance
 that your build is correct (how often have you been told to
 "make clean"? When this is done, you won't need to anymore).
 
-
-If You Build PHP on a Unix System
-
+## If You Build PHP on a Unix System
 
 You, as a user of PHP, will notice no changes.  Of course, the build
 system will be faster, look better and work smarter.
 
+## If You Are Developing PHP
 
-
-If You Are Developing PHP
-
-
-
-
-Extension developers:
+### Extension developers:
 
 Makefile.ins are abandoned.  The files which are to be compiled
 are specified in the config.m4 now using the following macro:
@@ -95,8 +88,7 @@ change the working directory anymore, we must use either
 absolute paths or relative ones to the top build-directory.
 Correct prefixing ensures that.
 
-
-SAPI developers:
+### SAPI developers:
 
 Instead of using PHP_SAPI=foo/PHP_BUILD_XYZ, you will need to type
 
@@ -110,9 +102,7 @@ For example for APXS:
 
 PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php7.c php_apache.c)
 
-
-
-General info
+## General info
 
 The foundation for the new system is the flexible handling of
 sources and their contexts.  With the help of macros you

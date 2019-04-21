@@ -1,4 +1,4 @@
-HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
+# HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
 
   A self-contained extension can be distributed independently of
   the PHP source. To create such an extension, two things are
@@ -10,7 +10,7 @@ HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
   We will describe now how to create these and how to put things
   together.
 
-PREPARING YOUR SYSTEM
+## PREPARING YOUR SYSTEM
 
   While the result will run on any system, a developer's setup needs these
   tools:
@@ -23,7 +23,7 @@ PREPARING YOUR SYSTEM
 
     ftp://ftp.gnu.org/pub/gnu/
 
-CONVERTING AN EXISTING EXTENSION
+## CONVERTING AN EXISTING EXTENSION
 
   Just to show you how easy it is to create a self-contained
   extension, we will convert an embedded extension into a
@@ -56,7 +56,7 @@ CONVERTING AN EXISTING EXTENSION
   library or the MySQL installation in MYSQL-DIR.
 
 
-DEFINING THE NEW EXTENSION
+## DEFINING THE NEW EXTENSION
 
   Our demo extension is called "foobar".
 
@@ -72,13 +72,13 @@ DEFINING THE NEW EXTENSION
   LTLIBRARY_SOURCES specifies the names of the sources files. You can
   name an arbitrary number of source files here.
 
-CREATING THE M4 CONFIGURATION FILE
+## CREATING THE M4 CONFIGURATION FILE
 
   The m4 configuration can perform additional checks. For a
   self-contained extension, you do not need more than a few
   macro calls.
 
-------------------------------------------------------------------------------
+```
 PHP_ARG_ENABLE([foobar],
   [whether to enable foobar],
   [AS_HELP_STRING([--enable-foobar],
@@ -87,7 +87,7 @@ PHP_ARG_ENABLE([foobar],
 if test "$PHP_FOOBAR" != "no"; then
   PHP_NEW_EXTENSION(foobar, foo.c bar.c, $ext_shared)
 fi
-------------------------------------------------------------------------------
+```
 
   PHP_ARG_ENABLE will automatically set the correct variables, so
   that the extension will be enabled by PHP_NEW_EXTENSION in shared mode.
@@ -100,7 +100,7 @@ fi
   plan to distribute your module with PHP, these facilities allow you
   to integrate your module easily into the main PHP module framework.
 
-CREATING SOURCE FILES
+## CREATING SOURCE FILES
 
   ext_skel can be of great help when creating the common code for all modules
   in PHP for you and also writing basic function definitions and C code for
@@ -111,7 +111,7 @@ CREATING SOURCE FILES
   modules, use a simple module as a starting point and add your own code.
 
 
-CREATING THE SELF-CONTAINED EXTENSION
+## CREATING THE SELF-CONTAINED EXTENSION
 
   Put config.m4 and the source files into one directory. Then, run phpize
   (this is installed during make install by PHP 4.0).
@@ -125,7 +125,7 @@ CREATING THE SELF-CONTAINED EXTENSION
 
   And that's it. You now have a self-contained extension.
 
-INSTALLING A SELF-CONTAINED EXTENSION
+## INSTALLING A SELF-CONTAINED EXTENSION
 
   An extension can be installed by running:
 
@@ -133,7 +133,7 @@ INSTALLING A SELF-CONTAINED EXTENSION
             [--with-php-config=/path/to/php-config]
      $ make install
 
-ADDING SHARED MODULE SUPPORT TO A MODULE
+## ADDING SHARED MODULE SUPPORT TO A MODULE
 
   In order to be useful, a self-contained extension must be loadable
   as a shared module. I will explain now how you can add shared module
@@ -148,11 +148,13 @@ ADDING SHARED MODULE SUPPORT TO A MODULE
 
   3. Add the following lines to your C source file:
 
+```
         #ifdef COMPILE_DL_FOO
         ZEND_GET_MODULE(foo)
         #endif
+```
 
-PECL SITE CONFORMITY
+## PECL SITE CONFORMITY
 
   If you plan to release an extension to the PECL website, there are several
   points to be regarded.

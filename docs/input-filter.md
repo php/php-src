@@ -1,5 +1,4 @@
-Input Filter Support in PHP 5
------------------------------
+# Input Filter Support in PHP 5
 
 XSS (Cross Site Scripting) hacks are becoming more and more prevalent,
 and can be quite difficult to prevent.  Whenever you accept user data
@@ -21,6 +20,7 @@ $_POST, $_GET and $_COOKIE arrays are only populated with stripped
 data.  In this simple example all I am doing is calling strip_tags() on
 the data.
 
+```
 ZEND_BEGIN_MODULE_GLOBALS(my_input_filter)
         zval *post_array;
         zval *get_array;
@@ -180,3 +180,4 @@ PHP_FUNCTION(my_get_raw)
         RETVAL_FALSE;
     }
 }
+```
