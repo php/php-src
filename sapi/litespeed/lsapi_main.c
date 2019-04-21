@@ -466,7 +466,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.3",
+    "LiteSpeed V7.3.1",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -1406,7 +1406,6 @@ zend_function_entry litespeed_functions[] = {
     PHP_FALIAS(getallheaders,           litespeed_request_headers,  arginfo_litespeed__void)
     PHP_FALIAS(apache_request_headers,  litespeed_request_headers,  arginfo_litespeed__void)
     PHP_FALIAS(apache_response_headers, litespeed_response_headers, arginfo_litespeed__void)
-    PHP_FALIAS(fastcgi_finish_request,  litespeed_finish_request,   arginfo_litespeed__void)
     {NULL, NULL, NULL}
 };
 
@@ -1542,6 +1541,10 @@ PHP_FUNCTION(litespeed_finish_request)
     if (ZEND_NUM_ARGS() > 0) {
         WRONG_PARAM_COUNT;
     }
+
+    php_output_end_all();
+    php_header();
+
     if (LSAPI_End_Response() != -1) {
         RETURN_TRUE;
     }
