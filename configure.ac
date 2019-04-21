@@ -1,9 +1,5 @@
 dnl ## Process this file with autoconf to produce a configure script.
 
-dnl include Zend specific macro definitions first
-dnl -------------------------------------------------------------------------
-sinclude(Zend/acinclude.m4)
-
 dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
