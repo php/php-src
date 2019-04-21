@@ -21,6 +21,7 @@
 
 static int fd_stdout[2];
 static int fd_stderr[2];
+static int fd_ioctrl[2];
 
 int fpm_stdio_init_main() /* {{{ */
 {
@@ -106,11 +107,36 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-#define FPM_STDIO_CMD_FLUSH "\0fscf"
+#define FPM_STDIO_CTRL_FLUSH "f"
 
 int fpm_stdio_flush_child() /* {{{ */
 {
-	return write(STDERR_FILENO, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH));
+	return write(fd_ioctrl[1], FPM_STDIO_CTRL_FLUSH, sizeof(FPM_STDIO_CTRL_FLUSH));
+}
+/* }}} */
+
+static void fpm_stdio_child_ctrl(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+{
+	static const int max_buf_size = 16;
+	int fd = ev->fd;
+	char buf[max_buf_size];
+	struct fpm_child_s *child;
+	int res;
+
+	if (!arg) {
+		return;
+	}
+	child = (struct fpm_child_s *)arg;
+
+	res = read(fd, buf, max_buf_size);
+
+	if (res <= 0) {
+		return;
+	}
+
+	if (!memcmp(buf, FPM_STDIO_CTRL_FLUSH, sizeof(FPM_STDIO_CTRL_FLUSH)) && child->log_stream) {
+		zlog_stream_finish(child->log_stream);
+	}
 }
 /* }}} */
 
@@ -124,7 +150,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	struct fpm_event_s *event;
 	int fifo_in = 1, fifo_out = 1;
 	int in_buf = 0;
-	int read_fail = 0, finish_log_stream = 0, create_log_stream;
+	int read_fail = 0, create_log_stream;
 	int res;
 	struct zlog_stream *log_stream;
 
@@ -175,21 +201,6 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 				}
 			} else {
 				in_buf += res;
-				/* check if buffer should be flushed */
-				if (!buf[in_buf - 1] && in_buf >= sizeof(FPM_STDIO_CMD_FLUSH) &&
-						!memcmp(buf + in_buf - sizeof(FPM_STDIO_CMD_FLUSH),
-							FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
-					/* if buffer ends with flush cmd, then the stream will be finished */
-					finish_log_stream = 1;
-					in_buf -= sizeof(FPM_STDIO_CMD_FLUSH);
-				} else if (!buf[0] && in_buf > sizeof(FPM_STDIO_CMD_FLUSH) &&
-						!memcmp(buf, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
-					/* if buffer starts with flush cmd, then the stream will be finished */
-					finish_log_stream = 1;
-					in_buf -= sizeof(FPM_STDIO_CMD_FLUSH);
-					/* move data behind the flush cmd */
-					memmove(buf, buf + sizeof(FPM_STDIO_CMD_FLUSH), in_buf);
-				}
 			}
 		}
 
@@ -237,8 +248,6 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 			close(child->fd_stderr);
 			child->fd_stderr = -1;
 		}
-	} else if (finish_log_stream) {
-		zlog_stream_finish(log_stream);
 	}
 }
 /* }}} */
@@ -261,12 +270,25 @@ int fpm_stdio_prepare_pipes(struct fpm_child_s *child) /* {{{ */
 		return -1;
 	}
 
-	if (0 > fd_set_blocked(fd_stdout[0], 0) || 0 > fd_set_blocked(fd_stderr[0], 0)) {
+	if (0 > pipe(fd_ioctrl)) {
+		zlog(ZLOG_SYSERROR, "failed to prepare the IO control pipe");
+		close(fd_stdout[0]);
+		close(fd_stdout[1]);
+		close(fd_stderr[0]);
+		close(fd_stderr[1]);
+		return -1;
+	}
+
+	if (0 > fd_set_blocked(fd_stdout[0], 0) ||
+			0 > fd_set_blocked(fd_stderr[0], 0) ||
+			0 > fd_set_blocked(fd_ioctrl[0], 0)) {
 		zlog(ZLOG_SYSERROR, "failed to unblock pipes");
 		close(fd_stdout[0]);
 		close(fd_stdout[1]);
 		close(fd_stderr[0]);
 		close(fd_stderr[1]);
+		close(fd_ioctrl[0]);
+		close(fd_ioctrl[1]);
 		return -1;
 	}
 	return 0;
@@ -284,12 +306,17 @@ int fpm_stdio_parent_use_pipes(struct fpm_child_s *child) /* {{{ */
 
 	child->fd_stdout = fd_stdout[0];
 	child->fd_stderr = fd_stderr[0];
+	child->fd_ioctrl = fd_ioctrl[0];
 
 	fpm_event_set(&child->ev_stdout, child->fd_stdout, FPM_EV_READ, fpm_stdio_child_said, child);
 	fpm_event_add(&child->ev_stdout, 0);
 
 	fpm_event_set(&child->ev_stderr, child->fd_stderr, FPM_EV_READ, fpm_stdio_child_said, child);
 	fpm_event_add(&child->ev_stderr, 0);
+
+	fpm_event_set(&child->ev_ioctrl, child->fd_ioctrl, FPM_EV_READ, fpm_stdio_child_ctrl, child);
+	fpm_event_add(&child->ev_ioctrl, 0);
+
 	return 0;
 }
 /* }}} */
@@ -302,9 +329,12 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child) /* {{{ */
 
 	close(fd_stdout[1]);
 	close(fd_stderr[1]);
+	close(fd_ioctrl[1]);
 
 	close(fd_stdout[0]);
 	close(fd_stderr[0]);
+	close(fd_ioctrl[0]);
+
 	return 0;
 }
 /* }}} */
@@ -314,8 +344,11 @@ void fpm_stdio_child_use_pipes(struct fpm_child_s *child) /* {{{ */
 	if (child->wp->config->catch_workers_output) {
 		dup2(fd_stdout[1], STDOUT_FILENO);
 		dup2(fd_stderr[1], STDERR_FILENO);
-		close(fd_stdout[0]); close(fd_stdout[1]);
-		close(fd_stderr[0]); close(fd_stderr[1]);
+		close(fd_stdout[0]);
+		close(fd_stdout[1]);
+		close(fd_stderr[0]);
+		close(fd_stderr[1]);
+		close(fd_ioctrl[0]);
 	} else {
 		/* stdout of parent is always /dev/null */
 		dup2(STDOUT_FILENO, STDERR_FILENO);
