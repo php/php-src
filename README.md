@@ -2,7 +2,7 @@
     <a href="https://php.net">
         <img
             alt="PHP"
-            src="https://static.php.net/www.php.net/images/logos/new-php-logo.svg"
+            src="https://www.php.net/images/logos/new-php-logo.svg"
             width="150">
     </a>
 </div>
@@ -51,17 +51,17 @@ PHP uses autotools on Unix systems to configure the build:
 The `-j` option shall set the maximum number of jobs `make` can use for the build:
 
     make -j4
-    
+
 Shall run `make` with a maximum of 4 concurrent jobs: Generally the maximum number of jobs should not exceed the number of cores available.
 
 ## Testing PHP source code
 
-PHP ships with an extensive test suite, the command `make test` is used after successful compilation of the sources to run this test suite. 
+PHP ships with an extensive test suite, the command `make test` is used after successful compilation of the sources to run this test suite.
 
 It is possible to run tests using multiple cores by setting `-jN` in `TEST_PHP_ARGS`:
 
     make TEST_PHP_ARGS=-j4 test
-    
+
 Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum number of jobs should not exceed the number of cores available.
 
 The [qa.php.net](https://qa.php.net) site provides more detailed info about testing and quality assurance.
@@ -71,7 +71,7 @@ The [qa.php.net](https://qa.php.net) site provides more detailed info about test
 After a successful build (and test), PHP may be installed with:
 
     make install
-    
+
 Depending on your permissions and prefix, `make install` may need super user permissions.
 
 ## PHP extensions
