@@ -21,6 +21,7 @@ $_POST, $_GET and $_COOKIE arrays are only populated with stripped
 data.  In this simple example all I am doing is calling strip_tags() on
 the data.
 
+```
 ZEND_BEGIN_MODULE_GLOBALS(my_input_filter)
         zval *post_array;
         zval *get_array;
@@ -180,3 +181,4 @@ PHP_FUNCTION(my_get_raw)
         RETVAL_FALSE;
     }
 }
+```
