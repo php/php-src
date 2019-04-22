@@ -8237,8 +8237,24 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	|	mov r0, aword [r0 + opline->extended_value]
 	|	test r0, r0
 	|	jz >1
+	|	test r0, 0x1
+	|	jnz >4
 	|.cold_code
+	|4:
+	|	MEM_OP2_2_ZTS mov, FCARG1a, aword, executor_globals, zend_constants, FCARG1a
+	|	shl	r0, 1
+	|	cmp dword [FCARG1a + offsetof(HashTable, nNumOfElements)], eax
+	if (smart_branch) {
+		if (undefined_label != (uint32_t)-1) {
+			|	jz =>undefined_label
+		} else {
+			|	jz >3
+		}
+	} else {
+		|	jz >2
+	}
 	|1:
+	|	SAVE_VALID_OPLINE opline
 	|	LOAD_ADDR FCARG1a, zv
 	|	EXT_CALL zend_jit_check_constant, r0
 	|	test r0, r0
@@ -8255,9 +8271,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 		}
 	} else {
 		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
-		|	jnz >2
-		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-		|	jmp >3
+		|	jz >1
 		|2:
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 		|	jmp >3
@@ -8268,6 +8282,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 			|	jmp =>defined_label
 		}
 	} else {
+		|1:
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 	}
 	|3:

@@ -238,8 +238,8 @@ static zend_always_inline int _zend_quick_get_constant(
 {
 #ifndef HAVE_GCC_GLOBAL_REGS
 	zend_execute_data *execute_data = EG(current_execute_data);
-	const zend_op *opline = EX(opline);
 #endif
+	const zend_op *opline = EX(opline);
 	zval *zv;
 	zend_constant *c = NULL;
 
@@ -260,6 +260,7 @@ static zend_always_inline int _zend_quick_get_constant(
 			zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
+		CACHE_PTR(opline->extended_value, ENCODE_SPECIAL_CACHE_NUM(zend_hash_num_elements(EG(zend_constants))));
 		return FAILURE;
 	}
 
