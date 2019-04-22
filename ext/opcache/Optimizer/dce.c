@@ -241,6 +241,8 @@ static inline zend_bool may_have_side_effects(
 				return 1;
 			}
 			return 0;
+		case ZEND_BIND_STATIC:
+			return 0;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
@@ -267,19 +269,23 @@ static inline void add_to_phi_worklist_no_val(context *ctx, int var_num) {
 	}
 }
 
-static zend_always_inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend_ssa_op *ssa_op, int check) {
+static zend_always_inline void add_operands_to_worklists(context *ctx, zend_op *opline, zend_ssa_op *ssa_op, zend_ssa *ssa, int check) {
 	if (ssa_op->result_use >= 0) {
 		add_to_worklists(ctx, ssa_op->result_use, check);
 	}
 	if (ssa_op->op1_use >= 0) {
-		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
+		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)
+		 || (opline->opcode == ZEND_ASSIGN
+		  && (ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF) != 0)) {
 			add_to_worklists(ctx, ssa_op->op1_use, check);
 		} else {
 			add_to_phi_worklist_no_val(ctx, ssa_op->op1_use);
 		}
 	}
 	if (ssa_op->op2_use >= 0) {
-		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
+		if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)
+		 || (opline->opcode == ZEND_FE_FETCH_R
+		  && (ssa->var_info[ssa_op->op2_use].type & MAY_BE_REF) != 0)) {
 			add_to_worklists(ctx, ssa_op->op2_use, check);
 		} else {
 			add_to_phi_worklist_no_val(ctx, ssa_op->op2_use);
@@ -528,9 +534,9 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 
 			if (zend_bitset_in(ctx.instr_worklist, i)) {
 				zend_bitset_excl(ctx.instr_worklist, i);
-				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], ssa, 0);
 				if (op_data >= 0) {
-					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], ssa, 0);
 				}
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
 					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
@@ -542,9 +548,9 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 					zend_bitset_incl(ctx.instr_dead, i);
 					zend_bitset_incl(ctx.instr_dead, i+1);
 				} else {
-					add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+					add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], ssa, 0);
 					if (op_data >= 0) {
-						add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+						add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], ssa, 0);
 					}
 				}
 			} else {
@@ -562,10 +568,10 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			|| !zend_bitset_empty(ctx.phi_worklist, ctx.phi_worklist_len)) {
 		while ((i = zend_bitset_pop_first(ctx.instr_worklist, ctx.instr_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.instr_dead, i);
-			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 1);
+			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], ssa, 1);
 			if (i < op_array->last && op_array->opcodes[i+1].opcode == ZEND_OP_DATA) {
 				zend_bitset_excl(ctx.instr_dead, i+1);
-				add_operands_to_worklists(&ctx, &op_array->opcodes[i+1], &ssa->ops[i+1], 1);
+				add_operands_to_worklists(&ctx, &op_array->opcodes[i+1], &ssa->ops[i+1], ssa, 1);
 			}
 		}
 		while ((i = zend_bitset_pop_first(ctx.phi_worklist, ctx.phi_worklist_len)) >= 0) {
