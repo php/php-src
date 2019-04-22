@@ -832,7 +832,7 @@ PW32IO int php_win32_ioutil_link_w(const wchar_t *target, const wchar_t *link)
 {/*{{{*/
 	BOOL res;
 
-	res = CreateHardLinkW(target, link, NULL);
+	res = CreateHardLinkW(link, target, NULL);
 	if (!res) {
 		SET_ERRNO_FROM_WIN32_CODE(GetLastError());
 		return -1;
