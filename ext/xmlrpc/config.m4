@@ -1,10 +1,5 @@
 dnl config.m4 for extension xmlrpc
 
-sinclude(ext/xmlrpc/libxmlrpc/acinclude.m4)
-sinclude(ext/xmlrpc/libxmlrpc/xmlrpc.m4)
-sinclude(libxmlrpc/acinclude.m4)
-sinclude(libxmlrpc/xmlrpc.m4)
-
 PHP_ARG_WITH([xmlrpc],
   [for XMLRPC-EPI support],
   [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
@@ -80,7 +75,6 @@ if test "$PHP_XMLRPC" != "no"; then
 fi
 
 if test "$PHP_XMLRPC" = "yes"; then
-  XMLRPC_CHECKS
   PHP_NEW_EXTENSION(xmlrpc,xmlrpc-epi-php.c libxmlrpc/base64.c \
           libxmlrpc/simplestring.c libxmlrpc/xml_to_dandarpc.c \
           libxmlrpc/xmlrpc_introspection.c libxmlrpc/encodings.c \
