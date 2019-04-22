@@ -62,9 +62,6 @@
 #include <windows.h>
 #pragma optimize("", off)
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
-#if ITT_PLATFORM != ITT_PLATFORM_MAC && ITT_PLATFORM != ITT_PLATFORM_FREEBSD
-#include <malloc.h>
-#endif
 #include <stdlib.h>
 
 #include "jitprofiling.h"
