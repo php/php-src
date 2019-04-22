@@ -4435,7 +4435,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	EXT_CALL zend_hash_find, r0
 					|1:
 				} else {
-					|	EXT_CALL zend_hash_find, r0
+					|	EXT_CALL _zend_hash_find_known_hash, r0
 				}
 				|	test r0, r0
 				|	jz >9 // NOT_FOUND
@@ -4458,7 +4458,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	EXT_CALL zend_hash_find, r0
 					|1:
 				} else {
-					|	EXT_CALL zend_hash_find, r0
+					|	EXT_CALL _zend_hash_find_known_hash, r0
 				}
 				|	test r0, r0
 				|	jz >2 // NOT_FOUND
