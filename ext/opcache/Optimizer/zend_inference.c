@@ -4382,6 +4382,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				case ZEND_ASSIGN_DIM:
 				case ZEND_ASSIGN_REF:
 				case ZEND_BIND_GLOBAL:
+				case ZEND_BIND_STATIC:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_SEND_REF:
@@ -4605,6 +4606,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			if (t1 & MAY_BE_REF) {
 				return 1;
 			}
+		case ZEND_BIND_STATIC:
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
 		case ZEND_ASSIGN_DIM:
