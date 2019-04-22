@@ -47,6 +47,9 @@
 # if defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(i386)
 #  define ZEND_VM_FP_GLOBAL_REG "%esi"
 #  define ZEND_VM_IP_GLOBAL_REG "%edi"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
+# define ZEND_VM_FP_GLOBAL_REG "x27"
+# define ZEND_VM_IP_GLOBAL_REG "x28"
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__x86_64__)
 #  define ZEND_VM_FP_GLOBAL_REG "%r14"
 #  define ZEND_VM_IP_GLOBAL_REG "%r15"
