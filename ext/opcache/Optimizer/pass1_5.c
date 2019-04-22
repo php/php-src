@@ -554,7 +554,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					convert_to_string(&ZEND_OP1_LITERAL(opline + 1));
 					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline + 1)));
 				}
-				SET_UNUSED(opline->op2);
+				SET_UNUSED((opline + 1)->op2);
 				MAKE_NOP(opline);
 			}
 			break;
