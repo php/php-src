@@ -30,14 +30,10 @@ all: $(stamp) configure $(config_h_in)
 $(stamp): build/buildcheck.sh
 	@build/buildcheck.sh $@
 
-configure: aclocal.m4 configure.ac $(PHP_M4_FILES)
+configure: configure.ac $(PHP_M4_FILES)
 	@echo rebuilding $@
 	@rm -f $@
 	@$(PHP_AUTOCONF) $(PHP_AUTOCONF_FLAGS)
-
-aclocal.m4: configure.ac acinclude.m4
-	@echo rebuilding $@
-	@cat acinclude.m4 ./build/libtool.m4 > $@
 
 $(config_h_in): configure
 # Explicitly remove target since autoheader does not seem to work correctly

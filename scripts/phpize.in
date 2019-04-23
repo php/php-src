@@ -9,11 +9,11 @@ includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
 SED="@SED@"
 
-FILES_BUILD="shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4 php_cxx_compile_stdcxx.m4 pkg.m4 config.guess config.sub ltmain.sh Makefile.global"
-FILES="acinclude.m4 run-tests*.php"
+FILES_BUILD="php.m4 shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4 php_cxx_compile_stdcxx.m4 pkg.m4 config.guess config.sub ltmain.sh Makefile.global"
+FILES="run-tests*.php"
 CLEAN_FILES="$FILES *.o *.lo *.la .libs/ build/ modules/ \
 	config.nice configure configure.ac \
-	aclocal.m4 config.h config.h.in conftest* libtool config.cache autom4te.cache/ \
+	config.h config.h.in conftest* libtool config.cache autom4te.cache/ \
 	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h \
 	run-tests*.php tests/*.diff tests/*.exp tests/*.log tests/*.out tests/*.php"
 
@@ -146,7 +146,6 @@ phpize_copy_files()
 
   (cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
   (cd "$phpdir" && cp $FILES "$builddir")
-  (cd "$builddir" && cat acinclude.m4 ./build/libtool.m4 > aclocal.m4)
 }
 
 phpize_replace_prefix()
