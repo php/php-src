@@ -398,6 +398,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, interval_spec)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_comparable_interval_construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
@@ -540,6 +543,13 @@ static const zend_function_entry date_funcs_interval[] = {
 	PHP_FE_END
 };
 
+static const zend_function_entry date_funcs_comparable_interval[] = {
+	PHP_ME(DateComparableInterval, __construct, arginfo_date_comparable_interval_construct, ZEND_ACC_PRIVATE)
+	PHP_ME(DateComparableInterval, __wakeup, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateComparableInterval, __set_state, arginfo_date_set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_FE_END
+};
+
 static const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __wakeup,                    NULL, ZEND_ACC_PUBLIC)
@@ -583,8 +593,13 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-zend_class_entry *date_ce_date, *date_ce_timezone, *date_ce_interval, *date_ce_period;
-zend_class_entry *date_ce_immutable, *date_ce_interface;
+zend_class_entry *date_ce_date;
+zend_class_entry *date_ce_timezone;
+zend_class_entry *date_ce_interval;
+zend_class_entry *date_ce_comparable_interval;
+zend_class_entry *date_ce_period;
+zend_class_entry *date_ce_immutable;
+zend_class_entry *date_ce_interface;
 
 
 PHPAPI zend_class_entry *php_date_get_date_ce(void)
@@ -2166,6 +2181,10 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 	date_object_handlers_interval.compare_objects = date_interval_compare_objects;
+
+	INIT_CLASS_ENTRY(ce_interval, "DateComparableInterval", date_funcs_comparable_interval);
+	ce_interval.create_object = date_object_new_interval;
+	date_ce_comparable_interval = zend_register_internal_class_ex(&ce_interval, date_ce_interval);
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -3767,7 +3786,7 @@ PHP_FUNCTION(date_timestamp_get)
 }
 /* }}} */
 
-/* {{{ proto DateInterval date_diff(DateTime object [, bool absolute])
+/* {{{ proto DateComparableInterval date_diff(DateTime object [, bool absolute])
    Returns the difference between two DateTime objects.
 */
 PHP_FUNCTION(date_diff)
@@ -3787,7 +3806,7 @@ PHP_FUNCTION(date_diff)
 	timelib_update_ts(dateobj1->time, NULL);
 	timelib_update_ts(dateobj2->time, NULL);
 
-	php_date_instantiate(date_ce_interval, return_value);
+	php_date_instantiate(date_ce_comparable_interval, return_value);
 	interval = Z_PHPINTERVAL_P(return_value);
 	interval->diff = timelib_diff(dateobj1->time, dateobj2->time);
 	if (absolute) {
@@ -4144,7 +4163,51 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	return retval;
 } /* }}} */
 
+static zend_bool date_ensure_comparable_interval(php_interval_obj *obj) {
+	if (obj->diff->have_weekday_relative || obj->diff->have_special_relative ||
+			obj->diff->days == -99999) {
+		zend_throw_error(NULL, "Malformed comparable interval");
+		return 0;
+	}
+	return 1;
+}
+
 static int date_interval_compare_objects(zval *o1, zval *o2) {
+	if (instanceof_function(Z_OBJCE_P(o1), date_ce_comparable_interval) &&
+		instanceof_function(Z_OBJCE_P(o2), date_ce_comparable_interval)
+	) {
+		php_interval_obj *obj1 = Z_PHPINTERVAL_P(o1), *obj2 = Z_PHPINTERVAL_P(o2);
+		timelib_rel_time *d1 = obj1->diff, *d2 = obj2->diff;
+		timelib_sll secs1, secs2;
+
+		if (!obj1->initialized || !obj2->initialized) {
+			zend_error(E_WARNING, "Cannot compare uninitialized DateComparableInterval objects");
+			return 1;
+		}
+
+		/* Shouldn't happen, but better safe than sorry. */
+		if (!date_ensure_comparable_interval(obj1) || !date_ensure_comparable_interval(obj2)) {
+			return 1;
+		}
+
+		if (d1->invert != d2->invert) {
+			/* Negative date smaller than positive date. */
+			return d1->invert ? -1 : 1;
+		}
+
+		secs1 = d1->days * (24*60*60) + d1->h * (60*60) + d1->m * 60 + d1->s;
+		secs2 = d2->days * (24*60*60) + d2->h * (60*60) + d2->m * 60 + d2->s;
+		if (secs1 != secs2) {
+			return secs1 < secs2 ? -1 : 1;
+		}
+
+		if (d1->us != d2->us) {
+			return d1->us < d2->us ? -1 : 1;
+		}
+
+		return 0;
+	}
+
 	/* There is no well defined way to compare intervals like P1M and P30D, which may compare
 	 * smaller, equal or greater depending on the point in time at which the interval starts. As
 	 * such, we treat DateInterval objects are non-comparable and emit a warning. */
@@ -4332,7 +4395,6 @@ PHP_METHOD(DateInterval, __construct)
 }
 /* }}} */
 
-
 static int php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
 	(*intobj)->diff = timelib_rel_time_ctor();
@@ -4431,6 +4493,46 @@ PHP_METHOD(DateInterval, __wakeup)
 	myht = Z_OBJPROP_P(object);
 
 	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
+}
+/* }}} */
+
+/* {{{ proto DateComparableInterval::__construct()
+   Forbid direct construction of DateComparableInterval.
+*/
+PHP_METHOD(DateComparableInterval, __construct)
+{
+	zend_throw_error(NULL, "Cannot directly construct DateComparableInterval");
+}
+/* }}} */
+
+/* {{{ proto DateComparableInterval::__set_state(array array)
+*/
+PHP_METHOD(DateComparableInterval, __set_state)
+{
+	php_interval_obj *intobj;
+	zval             *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
+	php_date_instantiate(date_ce_interval, return_value);
+	intobj = Z_PHPINTERVAL_P(return_value);
+	php_date_interval_initialize_from_hash(&return_value, &intobj, Z_ARRVAL_P(array));
+	date_ensure_comparable_interval(intobj);
+}
+/* }}} */
+
+/* {{{ proto DateComparableInterval::__wakeup()
+*/
+PHP_METHOD(DateComparableInterval, __wakeup)
+{
+	zval             *object = ZEND_THIS;
+	php_interval_obj *intobj = Z_PHPINTERVAL_P(object);
+	HashTable        *myht = Z_OBJPROP_P(object);
+
+	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
+	date_ensure_comparable_interval(intobj);
 }
 /* }}} */
 

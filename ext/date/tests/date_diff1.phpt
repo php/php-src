@@ -28,7 +28,7 @@ object(DateTime)#2 (3) {
   ["timezone"]=>
   string(3) "EDT"
 }
-object(DateInterval)#%d (16) {
+object(DateComparableInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>

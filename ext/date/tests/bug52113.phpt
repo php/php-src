@@ -33,7 +33,7 @@ var_dump($unser, $p);
 
 ?>
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateComparableInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -67,8 +67,8 @@ object(DateInterval)#%d (16) {
   ["have_special_relative"]=>
   int(0)
 }
-string(332) "O:12:"DateInterval":16:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
-DateInterval::__set_state(array(
+string(342) "O:22:"DateComparableInterval":16:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
+DateComparableInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
    'd' => 0,
@@ -85,7 +85,7 @@ DateInterval::__set_state(array(
    'special_amount' => 0,
    'have_weekday_relative' => 0,
    'have_special_relative' => 0,
-))object(DateInterval)#%d (16) {
+))object(DateComparableInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>

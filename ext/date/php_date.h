@@ -98,6 +98,9 @@ PHP_FUNCTION(timezone_version_get);
 PHP_METHOD(DateInterval, __construct);
 PHP_METHOD(DateInterval, __wakeup);
 PHP_METHOD(DateInterval, __set_state);
+PHP_METHOD(DateComparableInterval, __construct);
+PHP_METHOD(DateComparableInterval, __wakeup);
+PHP_METHOD(DateComparableInterval, __set_state);
 PHP_FUNCTION(date_interval_format);
 PHP_FUNCTION(date_interval_create_from_date_string);
 

@@ -22,7 +22,7 @@ var_dump($df,
 ?>
 ==DONE==
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateComparableInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>

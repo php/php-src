@@ -58,7 +58,7 @@ microseconds = true
 2016-10-02 00:00:00.000000
 2016-10-03 12:00:00.000000
 2016-10-17 00:00:00.000000
-object(DateInterval)#%d (16) {
+object(DateComparableInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
