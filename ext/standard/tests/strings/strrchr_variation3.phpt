@@ -32,11 +32,11 @@ foreach($needles as $needle) {
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
 string(19) "ing heredoc syntax."
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation3.php on line 27
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 string(8) " syntax."
 string(63) "Example of string

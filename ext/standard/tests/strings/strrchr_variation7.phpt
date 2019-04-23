@@ -32,7 +32,7 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
 bool(false)
 bool(false)
@@ -40,9 +40,9 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation7.php on line 28
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation7.php on line 28
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 *** Done ***

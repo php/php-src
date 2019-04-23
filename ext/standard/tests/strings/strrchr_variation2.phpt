@@ -138,7 +138,7 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation2.php on line 76
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 
 -- Iteration 17 --

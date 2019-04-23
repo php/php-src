@@ -33,19 +33,19 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing strrchr() function: with heredoc strings ***
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation8.php on line 26
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation8.php on line 26
-bool(false)
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 
 Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+bool(false)
 bool(false)
 
-Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation8.php on line 26
+Warning: strrchr(): Empty needle in %s on line %d
 bool(false)
 *** Done ***
