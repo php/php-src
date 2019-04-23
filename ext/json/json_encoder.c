@@ -542,8 +542,16 @@ again:
 				return php_json_encode_serializable_object(buf, val, options, encoder);
 			}
 			/* fallthrough -- Non-serializable object */
-		case IS_ARRAY:
-			return php_json_encode_array(buf, val, options, encoder);
+		case IS_ARRAY: {
+			/* Avoid modifications (and potential freeing) of the array through a reference when a
+			 * jsonSerialize() method is invoked. */
+			zval zv;
+			int res;
+			ZVAL_COPY(&zv, val);
+			res = php_json_encode_array(buf, &zv, options, encoder);
+			zval_ptr_dtor_nogc(&zv);
+			return res;
+		}
 
 		case IS_REFERENCE:
 			val = Z_REFVAL_P(val);
