@@ -1968,11 +1968,6 @@ void php_request_shutdown(void *dummy)
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
-	/* 16. Reset max_execution_time */
-	zend_try {
-		zend_unset_timeout();
-	} zend_end_try();
-
 #ifdef PHP_WIN32
 	if (PG(com_initialized)) {
 		CoUninitialize();
