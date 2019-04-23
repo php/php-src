@@ -90,31 +90,31 @@ string(22) "lo123456he \x234 \101 "
 bool(false)
 
 -- Iteration 3 --
-string(63) "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
+bool(false)
 
 -- Iteration 4 --
-string(14) "he \x234 \101 "
+bool(false)
 
 -- Iteration 5 --
-string(5) "\101 "
+string(57) "\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 6 --
-string(5) "\101 "
+bool(false)
 
 -- Iteration 7 --
-string(1) " "
+bool(false)
 
 -- Iteration 8 --
-string(5) "\101 "
+string(51) "\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 9 --
-string(5) "\101 "
+bool(false)
 
 -- Iteration 10 --
 bool(false)
 
 -- Iteration 11 --
-string(5) "\101 "
+string(53) "\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 12 --
 
@@ -137,6 +137,8 @@ Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s o
 bool(false)
 
 -- Iteration 16 --
+
+Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation2.php on line 76
 bool(false)
 
 -- Iteration 17 --
@@ -146,7 +148,7 @@ string(1) " "
 string(47) "$&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 19 --
-string(1) " "
+string(48) " $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 20 --
 string(46) "&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
@@ -158,7 +160,7 @@ string(45) "!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 string(43) "%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 23 --
-string(5) "\101 "
+string(42) "\o,()*+-./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 24 --
 string(39) "()*+-./:;<=>?@hello123456he \x234 \101 "
@@ -176,7 +178,7 @@ string(35) "-./:;<=>?@hello123456he \x234 \101 "
 string(34) "./:;<=>?@hello123456he \x234 \101 "
 
 -- Iteration 29 --
-string(34) "./:;<=>?@hello123456he \x234 \101 "
+bool(false)
 
 -- Iteration 30 --
 string(32) ":;<=>?@hello123456he \x234 \101 "
@@ -200,13 +202,13 @@ string(27) "?@hello123456he \x234 \101 "
 string(26) "@hello123456he \x234 \101 "
 
 -- Iteration 37 --
-string(26) "@hello123456he \x234 \101 "
+bool(false)
 
 -- Iteration 38 --
-string(2) "1 "
+string(20) "123456he \x234 \101 "
 
 -- Iteration 39 --
-string(5) "\101 "
+string(11) "\x234 \101 "
 
 -- Iteration 40 --
 string(44) "#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "
@@ -218,7 +220,7 @@ string(5) "\101 "
 bool(false)
 
 -- Iteration 43 --
-string(7) "4 \101 "
+bool(false)
 
 -- Iteration 44 --
 

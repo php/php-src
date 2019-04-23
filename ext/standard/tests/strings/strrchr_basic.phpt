@@ -50,8 +50,8 @@ string(5) "World"
 string(7) ", World"
 string(7) ", World"
 string(12) "Hello, World"
-string(12) "Hello, World"
+bool(false)
 string(4) "orld"
-string(4) "orld"
+bool(false)
 bool(false)
 *** Done ***

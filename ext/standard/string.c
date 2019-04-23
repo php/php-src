@@ -1940,6 +1940,60 @@ PHP_FUNCTION(strstr)
    An alias for strstr */
 /* }}} */
 
+/* {{{ proto string strrstr(string haystack, string needle[, bool part])
+   Finds first occurrence of a string within another */
+PHP_FUNCTION(strrstr)
+{
+	zval *needle;
+	zend_string *haystack;
+	const char *found = NULL;
+	char needle_char[2];
+	zend_long found_offset;
+	zend_bool part = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+	Z_PARAM_STR(haystack)
+	Z_PARAM_ZVAL(needle)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(part)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(needle) == IS_STRING) {
+		if (!Z_STRLEN_P(needle)) {
+			php_error_docref(NULL, E_WARNING, "Empty needle");
+			RETURN_FALSE;
+		}
+
+		found = php_memnrstr(ZSTR_VAL(haystack), Z_STRVAL_P(needle), Z_STRLEN_P(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+	} else {
+		if (php_needle_char(needle, needle_char) != SUCCESS) {
+			RETURN_FALSE;
+		}
+		needle_char[1] = 0;
+
+		php_error_docref(NULL, E_DEPRECATED,
+			"Non-string needles will be interpreted as strings in the future. " \
+			"Use an explicit chr() call to preserve the current behavior");
+
+		found = php_memnrstr(ZSTR_VAL(haystack), needle_char, 1, ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+	}
+
+	if (found) {
+		found_offset = found - ZSTR_VAL(haystack);
+		if (part) {
+			RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
+		} else {
+			RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
+		}
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto string strrchr(string haystack, string needle)
+   An alias for strrstr */
+/* }}} */
+
 /* {{{ proto int strpos(string haystack, string needle [, int offset])
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
@@ -2246,44 +2300,6 @@ PHP_FUNCTION(strripos)
 		zend_string_release_ex(needle_dup, 0);
 		zend_string_release_ex(haystack_dup, 0);
 		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto string strrchr(string haystack, string needle)
-   Finds the last occurrence of a character in a string within another */
-PHP_FUNCTION(strrchr)
-{
-	zval *needle;
-	zend_string *haystack;
-	const char *found = NULL;
-	zend_long found_offset;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(haystack)
-		Z_PARAM_ZVAL(needle)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (Z_TYPE_P(needle) == IS_STRING) {
-		found = zend_memrchr(ZSTR_VAL(haystack), *Z_STRVAL_P(needle), ZSTR_LEN(haystack));
-	} else {
-		char needle_chr;
-		if (php_needle_char(needle, &needle_chr) != SUCCESS) {
-			RETURN_FALSE;
-		}
-
-		php_error_docref(NULL, E_DEPRECATED,
-			"Non-string needles will be interpreted as strings in the future. " \
-			"Use an explicit chr() call to preserve the current behavior");
-
-		found = zend_memrchr(ZSTR_VAL(haystack),  needle_chr, ZSTR_LEN(haystack));
-	}
-
-	if (found) {
-		found_offset = found - ZSTR_VAL(haystack);
-		RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
-	} else {
 		RETURN_FALSE;
 	}
 }

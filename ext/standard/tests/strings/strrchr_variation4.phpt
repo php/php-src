@@ -40,17 +40,15 @@ echo "*** Done ***";
 ?>
 --EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
-string(24) "!$#$^^&*(special)
-chars."
+bool(false)
 string(31) "_")!#@@!$#$^^&*(special)
 chars."
+string(33) "("_")!#@@!$#$^^&*(special)
+chars."
+bool(false)
 string(16) "(special)
 chars."
-string(21) "$^^&*(special)
-chars."
-string(16) "(special)
-chars."
-string(19) "^&*(special)
+string(20) "^^&*(special)
 chars."
 string(76) "Example of heredoc string contains
 $#%^*&*_("_")!#@@!$#$^^&*(special)

@@ -169,8 +169,12 @@ Notice: Object of class sample could not be converted to int in %s on line %d
 Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 20 --
+
+Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation11.php on line 80
 bool(false)
 -- Iteration 21 --
+
+Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation11.php on line 80
 bool(false)
 -- Iteration 22 --
 

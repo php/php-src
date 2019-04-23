@@ -362,6 +362,7 @@ END_EXTERN_C()
 #define phpin zendin
 
 #define php_memnstr zend_memnstr
+#define php_memnrstr zend_memnrstr
 
 /* functions */
 BEGIN_EXTERN_C()

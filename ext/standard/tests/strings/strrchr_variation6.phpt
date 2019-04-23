@@ -34,12 +34,12 @@ echo "*** Done ***";
 ?>
 --EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
-string(3) "te'"
-string(32) ""
+string(29) "things' 'in' 'single' 'quote'"
+string(61) ""things" "in" "double" "quote"
 'things' 'in' 'single' 'quote'"
 bool(false)
 string(14) "ingle' 'quote'"
 string(6) "quote'"
-string(32) ""
+string(61) ""things" "in" "double" "quote"
 'things' 'in' 'single' 'quote'"
 *** Done ***

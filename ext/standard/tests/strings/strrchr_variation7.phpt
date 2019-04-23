@@ -39,6 +39,10 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation7.php on line 28
 bool(false)
+
+Warning: strrchr(): Empty needle in /mnt/c/Dev/php-src/ext/standard/tests/strings/strrchr_variation7.php on line 28
 bool(false)
 *** Done ***
