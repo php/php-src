@@ -1,5 +1,7 @@
 dnl ## Process this file with autoconf to produce a configure script.
 
+m4_include([build/ax_func_which_gethostbyname_r.m4])
+
 dnl Basic autoconf initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
@@ -653,6 +655,8 @@ vasprintf \
 asprintf \
 nanosleep \
 )
+
+AX_FUNC_WHICH_GETHOSTBYNAME_R
 
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc
 PHP_CHECK_FUNC_LIB(nanosleep, rt)
