@@ -9912,6 +9912,191 @@ static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, zend_op_array 
 	return 1;
 }
 
+static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+{
+	HashTable *jumptable = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
+
+	if (sizeof(void*) == 8 && !IS_32BIT(dasm_end)) {
+		// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+		return 1;
+	}
+	if (opline->op1_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op1);
+		zval *jump_zv;
+		int b;
+
+		if (opline->opcode == ZEND_SWITCH_LONG) {
+			if (Z_TYPE_P(zv) == IS_LONG) {
+				jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(zv));
+				if (jump_zv != NULL) {
+					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv)) - op_array->opcodes];
+				} else {
+					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+				}
+				|	jmp =>b
+			}
+		} else if (opline->opcode == ZEND_SWITCH_STRING) {
+			if (Z_TYPE_P(zv) == IS_STRING) {
+				jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(zv), 1);
+				if (jump_zv != NULL) {
+					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(jump_zv)) - op_array->opcodes];
+				} else {
+					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+				}
+				|	jmp =>b
+			}
+		} else {
+			ZEND_ASSERT(0);
+		}
+	} else {
+		uint32_t op1_info = OP1_INFO();
+		zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
+		int	b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
+		zval *val;
+
+		if (opline->opcode == ZEND_SWITCH_LONG) {
+			if (op1_info & MAY_BE_LONG) {
+				if (op1_info & MAY_BE_REF) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >1
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op1_addr
+					|.cold_code
+					|1:
+					|	// ZVAL_DEREF(op)
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >3
+					|	GET_ZVAL_PTR FCARG2a, op1_addr
+					|	IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_LONG, >3
+					|	mov FCARG2a, aword [FCARG2a + offsetof(zend_reference, val.value.lval)]
+					|	jmp >2
+					|.code
+					|2:
+				} else if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3
+					|	GET_ZVAL_LVAL ZREG_FCARG2a, op1_addr
+				}
+				if (HT_IS_PACKED(jumptable)) {
+					uint32_t count = jumptable->nNumUsed;
+					Bucket *p = jumptable->arData;
+
+					|	cmp FCARG2a, jumptable->nNumUsed
+					|	jae >3
+					|.if X64
+					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+					|	movsxd r0, dword [FCARG2a * 4 + >4]
+					|	jmp r0
+					|.else
+					|	jmp aword [FCARG2a * 4 + >4]
+					|.endif
+					|3:
+					|.cold_code
+					|4:
+					p = jumptable->arData;
+					do {
+						if (Z_TYPE(p->val) == IS_UNDEF) {
+							|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+							|	.aword =>b
+						} else {
+							int b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL(p->val)) - op_array->opcodes];
+							|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+							|	.aword =>b
+						}
+						p++;
+						count--;
+					} while (count);
+					|.code
+				} else {
+					|	LOAD_ADDR FCARG1a, jumptable
+					|	EXT_CALL zend_hash_index_find, r0
+					|	test r0, r0
+					|	jz =>b
+					|	LOAD_ADDR FCARG1a, jumptable
+					|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
+					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+					|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
+					|.if X64
+					|	cqo
+					|.else
+					|	cdq
+					|.endif
+					|	idiv FCARG1a
+					|.if X64
+					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+					|	movsxd r0, dword [r0 + >4]
+					|	jmp r0
+					|.else
+					|	jmp dword [r0 + >4]
+					|.endif
+					|3:
+					|.cold_code
+					|4:
+					ZEND_HASH_FOREACH_VAL(jumptable, val) {
+						b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
+						|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+						|	.aword =>b
+					} ZEND_HASH_FOREACH_END();
+					|.code
+				}
+			}
+		} else if (opline->opcode == ZEND_SWITCH_STRING) {
+			if (op1_info & MAY_BE_STRING) {
+				if (op1_info & MAY_BE_REF) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >1
+					|	GET_ZVAL_PTR FCARG2a, op1_addr
+					|.cold_code
+					|1:
+					|	// ZVAL_DEREF(op)
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_REFERENCE, >3
+					|	GET_ZVAL_PTR FCARG2a, op1_addr
+					|	IF_NOT_Z_TYPE FCARG2a + offsetof(zend_reference, val), IS_STRING, >3
+					|	mov FCARG2a, aword [FCARG2a + offsetof(zend_reference, val.value.ptr)]
+					|	jmp >2
+					|.code
+					|2:
+				} else if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_STRING)) {
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >3
+					|	GET_ZVAL_PTR FCARG2a, op1_addr
+				}
+				|	LOAD_ADDR FCARG1a, jumptable
+				|	EXT_CALL zend_hash_find, r0
+				|	test r0, r0
+				|	jz =>b
+				|	LOAD_ADDR FCARG1a, jumptable
+				|	sub r0, aword [FCARG1a + offsetof(HashTable, arData)]
+				|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+				|	mov FCARG1a, (sizeof(Bucket) / sizeof(uint32_t))
+				|.if X64
+				|	cqo
+				|.else
+				|	cdq
+				|.endif
+				|	idiv FCARG1a
+				|.if X64
+				|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+				|	movsxd r0, dword [r0 + >4]
+				|	jmp r0
+				|.else
+				|	jmp dword [r0 + >4]
+				|.endif
+				|3:
+				|.cold_code
+				|4:
+				ZEND_HASH_FOREACH_VAL(jumptable, val) {
+					b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, Z_LVAL_P(val)) - op_array->opcodes];
+					|	// TODO: DynASM stores .aword as 4-bytes even in 64-bit mode ???
+					|.if X64
+					|	.aword =>b
+					|.else
+					|	.aword =>b
+					|.endif
+				} ZEND_HASH_FOREACH_END();
+				|.code
+			}
+		} else {
+			ZEND_ASSERT(0);
+		}
+	}
+	return 1;
+}
+
 static zend_bool zend_jit_may_reuse_reg(zend_op_array *op_array, zend_ssa *ssa, uint32_t position, int def_var, int use_var)
 {
 	if (ssa->var_info[def_var].type != ssa->var_info[use_var].type) {

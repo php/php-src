@@ -2408,6 +2408,12 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_SWITCH_LONG:
+					case ZEND_SWITCH_STRING:
+						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}
