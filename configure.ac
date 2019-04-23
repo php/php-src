@@ -1089,6 +1089,12 @@ else
   AC_MSG_RESULT([using system default])
 fi
 
+PHP_ARG_ENABLE([werror],,
+  [AS_HELP_STRING([--enable-werror],
+    [Enable -Werror])],
+  [no],
+  [no])
+
 dnl Extension configuration.
 dnl -------------------------------------------------------------------------
 
@@ -1459,6 +1465,11 @@ dnl This will go away, if we have a facility to run per-extension code
 dnl after the thread_safety decision was done
 if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DTHREAD=1"
+fi
+
+if test "$PHP_WERROR" = "yes"; then
+  CFLAGS="$CFLAGS -Werror"
+  CPPFLAGS="$CPPFLAGS -Werror"
 fi
 
 ZEND_EXT_TYPE="zend_extension"
