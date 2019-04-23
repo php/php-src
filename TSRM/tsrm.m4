@@ -46,8 +46,6 @@ AC_DEFUN([TSRM_CHECK_ST],[
   AC_DEFINE(TSRM_ST, 1, [ ])
 ])
 
-sinclude(threads.m4)
-
 AC_DEFUN([TSRM_CHECK_PTHREADS],[
 
 PTHREADS_CHECK
