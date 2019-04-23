@@ -4,6 +4,7 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 dnl -------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 m4_include([build/libtool.m4])
 m4_include([build/php_cxx_compile_stdcxx.m4])
@@ -664,6 +665,8 @@ vasprintf \
 asprintf \
 nanosleep \
 )
+
+AX_FUNC_WHICH_GETHOSTBYNAME_R
 
 dnl Some systems (like OpenSolaris) do not have nanosleep in libc
 PHP_CHECK_FUNC_LIB(nanosleep, rt)
