@@ -1884,6 +1884,42 @@ static void sccp_mark_feasible_successors(
 			}
 			s = zend_hash_num_elements(Z_ARR_P(op1)) != 0;
 			break;
+		case ZEND_SWITCH_LONG:
+			if (Z_TYPE_P(op1) == IS_LONG) {
+				zend_op_array *op_array = scdf->op_array;
+				zend_ssa *ssa = scdf->ssa;
+				HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+				zval *jmp_zv = zend_hash_index_find(jmptable, Z_LVAL_P(op1));
+				int target;
+
+				if (jmp_zv) {
+					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv))];
+				} else {
+					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				}
+				scdf_mark_edge_feasible(scdf, block_num, target);
+				return;
+			}
+			s = 0;
+			break;
+		case ZEND_SWITCH_STRING:
+			if (Z_TYPE_P(op1) == IS_STRING) {
+				zend_op_array *op_array = scdf->op_array;
+				zend_ssa *ssa = scdf->ssa;
+				HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+				zval *jmp_zv = zend_hash_find(jmptable, Z_STR_P(op1));
+				int target;
+
+				if (jmp_zv) {
+					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv))];
+				} else {
+					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				}
+				scdf_mark_edge_feasible(scdf, block_num, target);
+				return;
+			}
+			s = 0;
+			break;
 		default:
 			for (s = 0; s < block->successors_count; s++) {
 				scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);

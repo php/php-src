@@ -490,6 +490,19 @@ static zend_always_inline void take_successor_1(zend_ssa *ssa, int block_num, ze
 	}
 }
 
+static zend_always_inline void take_successor_ex(zend_ssa *ssa, int block_num, zend_basic_block *block, int target_block)
+{
+	int i;
+
+	for (i = 0; i < block->successors_count; i++) {
+		if (block->successors[i] != target_block) {
+			zend_ssa_remove_predecessor(ssa, block_num, block->successors[i]);
+		}
+	}
+	block->successors[0] = target_block;
+	block->successors_count = 1;
+}
+
 static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 {
 	while (block->len > 0) {
@@ -857,6 +870,64 @@ optimize_jmpnz:
 					}
 					break;
 				}
+				case ZEND_SWITCH_LONG:
+					if (opline->op1_type == IS_CONST) {
+						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						if (Z_TYPE_P(zv) != IS_LONG) {
+							removed_ops++;
+							MAKE_NOP(opline);
+							opline->extended_value = 0;
+							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							goto optimize_nop;
+						} else {
+							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+							zval *jmp_zv = zend_hash_index_find(jmptable, Z_LVAL_P(zv));
+							uint32_t target;
+
+							if (jmp_zv) {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
+							} else {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
+							}
+							opline->opcode = ZEND_JMP;
+							opline->extended_value = 0;
+							SET_UNUSED(opline->op1);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+							SET_UNUSED(opline->op2);
+							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+							goto optimize_jmp;
+						}
+					}
+					break;
+				case ZEND_SWITCH_STRING:
+					if (opline->op1_type == IS_CONST) {
+						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
+						if (Z_TYPE_P(zv) != IS_STRING) {
+							removed_ops++;
+							MAKE_NOP(opline);
+							opline->extended_value = 0;
+							take_successor_ex(ssa, block_num, block, block->successors[0]);
+							goto optimize_nop;
+						} else {
+							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
+							zval *jmp_zv = zend_hash_find(jmptable, Z_STR_P(zv));
+							uint32_t target;
+
+							if (jmp_zv) {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
+							} else {
+								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
+							}
+							opline->opcode = ZEND_JMP;
+							opline->extended_value = 0;
+							SET_UNUSED(opline->op1);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+							SET_UNUSED(opline->op2);
+							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+							goto optimize_jmp;
+						}
+					}
+					break;
 				case ZEND_NOP:
 optimize_nop:
 					compress_block(op_array, block);
