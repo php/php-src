@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #77921 (static.php.net doesn't work anymore). (Peter Kokot)
 
+- JSON:
+  . Fixed bug #77843 (Use after free with json serializer). (Nikita)
+
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
