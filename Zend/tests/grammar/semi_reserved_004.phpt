@@ -56,6 +56,7 @@ class Obj
     static $switch = 'switch';
     static $yield = 'yield';
     static $function = 'function';
+    static $fn = 'fn';
     static $if = 'if';
     static $endswitch = 'endswitch';
     static $finally = 'finally';
@@ -134,6 +135,7 @@ echo Obj::$continue, PHP_EOL;
 echo Obj::$switch, PHP_EOL;
 echo Obj::$yield, PHP_EOL;
 echo Obj::$function, PHP_EOL;
+echo Obj::$fn, PHP_EOL;
 echo Obj::$if, PHP_EOL;
 echo Obj::$endswitch, PHP_EOL;
 echo Obj::$finally, PHP_EOL;
@@ -213,6 +215,7 @@ continue
 switch
 yield
 function
+fn
 if
 endswitch
 finally
