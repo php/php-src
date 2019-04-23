@@ -617,7 +617,16 @@ try_again:
 		smart_str_append_smart_str(&soap_headers, &soap_headers_z);
 
 		if (soap_version == SOAP_1_2) {
-			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");
+			if (context &&
+				(tmp = php_stream_context_get_option(context, "http", "content_type")) != NULL &&
+				Z_TYPE_P(tmp) == IS_STRING &&
+				Z_STRLEN_P(tmp) > 0
+			) {
+				smart_str_append_const(&soap_headers, "Content-Type: ");
+				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+			} else {
+				smart_str_append_const(&soap_headers, "Content-Type: application/soap+xml; charset=utf-8");
+			}
 			if (soapaction) {
 				smart_str_append_const(&soap_headers,"; action=\"");
 				smart_str_appends(&soap_headers, soapaction);
@@ -625,7 +634,17 @@ try_again:
 			}
 			smart_str_append_const(&soap_headers,"\r\n");
 		} else {
-			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=utf-8\r\n");
+			if (context &&
+				(tmp = php_stream_context_get_option(context, "http", "content_type")) != NULL &&
+				Z_TYPE_P(tmp) == IS_STRING &&
+				Z_STRLEN_P(tmp) > 0
+			) {
+				smart_str_append_const(&soap_headers, "Content-Type: ");
+				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append_const(&soap_headers, "\r\n");
+			} else {
+				smart_str_append_const(&soap_headers, "Content-Type: text/xml; charset=utf-8\r\n");
+			}
 			if (soapaction) {
 				smart_str_append_const(&soap_headers, "SOAPAction: \"");
 				smart_str_appends(&soap_headers, soapaction);
