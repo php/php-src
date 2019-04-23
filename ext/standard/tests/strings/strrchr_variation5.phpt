@@ -34,23 +34,16 @@ echo "*** Done ***";
 ?>
 --EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
-string(32) "	 st
-
-ch
- using
+string(32) "	 stch using
 scape \seque
 ce"
 bool(false)
-string(24) "
- using
+string(24) " using
 scape \seque
 ce"
 string(9) "\seque
 ce"
-string(32) "	 st
-
-ch
- using
+string(35) "	es	 stch using
 scape \seque
 ce"
 *** Done ***
