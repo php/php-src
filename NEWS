@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
+- Standard:
+  . Fixed bug #77931 (Warning for array_map mentions wrong type). (Nikita)
+
 02 May 2019, PHP 7.3.5
 
 - Core:
