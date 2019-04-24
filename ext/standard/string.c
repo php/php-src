@@ -3485,7 +3485,7 @@ PHP_FUNCTION(similar_text)
 
 	if (ZSTR_LEN(t1) + ZSTR_LEN(t2) == 0) {
 		if (ac > 2) {
-			ZEND_TRY_ASSIGN_DOUBLE(percent, 0);
+			ZEND_TRY_ASSIGN_REF_DOUBLE(percent, 0);
 		}
 
 		RETURN_LONG(0);
@@ -3494,7 +3494,7 @@ PHP_FUNCTION(similar_text)
 	sim = php_similar_char(ZSTR_VAL(t1), ZSTR_LEN(t1), ZSTR_VAL(t2), ZSTR_LEN(t2));
 
 	if (ac > 2) {
-		ZEND_TRY_ASSIGN_DOUBLE(percent, sim * 200.0 / (ZSTR_LEN(t1) + ZSTR_LEN(t2)));
+		ZEND_TRY_ASSIGN_REF_DOUBLE(percent, sim * 200.0 / (ZSTR_LEN(t1) + ZSTR_LEN(t2)));
 	}
 
 	RETURN_LONG(sim);
@@ -4291,7 +4291,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		count = php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity);
 	}
 	if (argc > 3) {
-		ZEND_TRY_ASSIGN_LONG(zcount, count);
+		ZEND_TRY_ASSIGN_REF_LONG(zcount, count);
 	}
 }
 /* }}} */

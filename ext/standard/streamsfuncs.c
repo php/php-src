@@ -130,10 +130,10 @@ PHP_FUNCTION(stream_socket_client)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zerrno) {
-		ZEND_TRY_ASSIGN_LONG(zerrno, 0);
+		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		ZEND_TRY_ASSIGN_EMPTY_STRING(zerrstr);
+		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(ZSTR_VAL(host), ZSTR_LEN(host), REPORT_ERRORS,
@@ -156,10 +156,10 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (stream == NULL) {
 		if (zerrno) {
-			ZEND_TRY_ASSIGN_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
+			ZEND_TRY_ASSIGN_REF_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release_ex(errstr, 0);
 		}
@@ -206,10 +206,10 @@ PHP_FUNCTION(stream_socket_server)
 	}
 
 	if (zerrno) {
-		ZEND_TRY_ASSIGN_LONG(zerrno, 0);
+		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		ZEND_TRY_ASSIGN_EMPTY_STRING(zerrstr);
+		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
@@ -222,10 +222,10 @@ PHP_FUNCTION(stream_socket_server)
 
 	if (stream == NULL) {
 		if (zerrno) {
-			ZEND_TRY_ASSIGN_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
-			ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
+			ZEND_TRY_ASSIGN_REF_STR(zerrstr, errstr);
 		} else if (errstr) {
 			zend_string_release_ex(errstr, 0);
 		}
@@ -279,7 +279,7 @@ PHP_FUNCTION(stream_socket_accept)
 				) && clistream) {
 
 		if (peername) {
-			ZEND_TRY_ASSIGN_STR(zpeername, peername);
+			ZEND_TRY_ASSIGN_REF_STR(zpeername, peername);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -381,7 +381,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	php_stream_from_zval(stream, zstream);
 
 	if (zremote) {
-		ZEND_TRY_ASSIGN_NULL(zremote);
+		ZEND_TRY_ASSIGN_REF_NULL(zremote);
 	}
 
 	if (to_read <= 0) {
@@ -397,7 +397,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	if (recvd >= 0) {
 		if (zremote && remote_addr) {
-			ZEND_TRY_ASSIGN_STR(zremote, remote_addr);
+			ZEND_TRY_ASSIGN_REF_STR(zremote, remote_addr);
 		}
 		ZSTR_VAL(read_buf)[recvd] = '\0';
 		ZSTR_LEN(read_buf) = recvd;

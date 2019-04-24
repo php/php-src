@@ -2307,7 +2307,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 	}
 
 	if (zcount) {
-		ZEND_TRY_ASSIGN_LONG(zcount, replace_count);
+		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
 /* }}} */
@@ -2355,7 +2355,7 @@ static PHP_FUNCTION(preg_replace_callback)
 
 	replace_count = preg_replace_func_impl(return_value, regex, &fci, &fcc, subject, limit, flags);
 	if (zcount) {
-		ZEND_TRY_ASSIGN_LONG(zcount, replace_count);
+		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
 /* }}} */
@@ -2423,7 +2423,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 	} ZEND_HASH_FOREACH_END();
 
 	if (zcount) {
-		ZEND_TRY_ASSIGN_LONG(zcount, replace_count);
+		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
 /* }}} */

@@ -764,9 +764,9 @@ void decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zval
 			if (method_name_out) {
 				method_name = XMLRPC_RequestGetMethodName(response);
 				if (method_name) {
-					ZEND_TRY_ASSIGN_STRING(method_name_out, method_name);
+					ZEND_TRY_ASSIGN_REF_STRING(method_name_out, method_name);
 				} else {
-					ZEND_TRY_ASSIGN_NULL(retval);
+					ZVAL_NULL(retval);
 				}
 			}
 		}
@@ -1396,7 +1396,7 @@ PHP_FUNCTION(xmlrpc_set_type)
 		zval tmp;
 		ZVAL_COPY(&tmp, Z_REFVAL_P(arg));
 		if (set_zval_xmlrpc_type(&tmp, vtype) == SUCCESS) {
-			ZEND_TRY_ASSIGN_VALUE(arg, &tmp);
+			ZEND_TRY_ASSIGN_REF_VALUE(arg, &tmp);
 			RETURN_TRUE;
 		}
 		Z_TRY_DELREF(tmp);

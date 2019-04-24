@@ -688,7 +688,7 @@ PHP_FUNCTION(ftp_alloc)
 	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
 
 	if (response) {
-		ZEND_TRY_ASSIGN_STR(zresponse, response);
+		ZEND_TRY_ASSIGN_REF_STR(zresponse, response);
 	}
 
 	if (!ret) {

@@ -355,14 +355,14 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
-		ZEND_TRY_ASSIGN_LONG(wouldblock, 0);
+		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
-			ZEND_TRY_ASSIGN_LONG(wouldblock, 1);
+			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;
 	}

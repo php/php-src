@@ -4377,7 +4377,7 @@ PHP_FUNCTION(getopt)
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		ZEND_TRY_ASSIGN_LONG(zoptind, 1);
+		ZEND_TRY_ASSIGN_REF_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4525,7 +4525,7 @@ PHP_FUNCTION(getopt)
 
 	/* Set zoptind to php_optind */
 	if (zoptind) {
-		ZEND_TRY_ASSIGN_LONG(zoptind, php_optind);
+		ZEND_TRY_ASSIGN_REF_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);

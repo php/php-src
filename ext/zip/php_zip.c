@@ -2110,8 +2110,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	ZEND_TRY_ASSIGN_LONG(z_opsys, opsys);
-	ZEND_TRY_ASSIGN_LONG(z_attr, attr);
+	ZEND_TRY_ASSIGN_REF_LONG(z_opsys, opsys);
+	ZEND_TRY_ASSIGN_REF_LONG(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2139,8 +2139,8 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 			(zip_flags_t)flags, &opsys, &attr) < 0) {
 		RETURN_FALSE;
 	}
-	ZEND_TRY_ASSIGN_LONG(z_opsys, opsys);
-	ZEND_TRY_ASSIGN_LONG(z_attr, attr);
+	ZEND_TRY_ASSIGN_REF_LONG(z_opsys, opsys);
+	ZEND_TRY_ASSIGN_REF_LONG(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */

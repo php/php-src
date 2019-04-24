@@ -742,7 +742,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	}
 #endif
 
-	ZEND_TRY_ASSIGN_LONG(z_status, status);
+	ZEND_TRY_ASSIGN_REF_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }
@@ -792,7 +792,7 @@ PHP_FUNCTION(pcntl_wait)
 	}
 #endif
 
-	ZEND_TRY_ASSIGN_LONG(z_status, status);
+	ZEND_TRY_ASSIGN_REF_LONG(z_status, status);
 
 	RETURN_LONG((zend_long) child_id);
 }
