@@ -23,4 +23,4 @@ var_dump($x->test());
 
 ?>
 --EXPECTF--
-Fatal error: Trait method test has not been applied, because there are collisions with other trait methods on bar in %s on line %d
+Fatal error: Trait method c::test has not been applied as bar::test, because of collision with foo::test in %s

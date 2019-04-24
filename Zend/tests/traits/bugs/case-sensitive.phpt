@@ -20,4 +20,4 @@ class MyClass {
 }
 ?>
 --EXPECTF--
-Fatal error: Trait method M1 has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d
+Fatal error: Trait method B::M1 has not been applied as MyClass::M1, because of collision with A::M1 in %s
