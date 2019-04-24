@@ -176,11 +176,8 @@ engine = On
 ; documents, however this remains supported for backward compatibility reasons.
 ; Note that this directive does not control the <?= shorthand tag, which can be
 ; used regardless of this directive.
-; Default Value: Off
-; Development Value: Off
-; Production Value: Off
 ; http://php.net/short-open-tag
-;short_open_tag =
+;short_open_tag = Off
 
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
