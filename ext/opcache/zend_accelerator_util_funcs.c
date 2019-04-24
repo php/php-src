@@ -425,6 +425,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 			memcpy(trait_aliases[i], ce->trait_aliases[i], sizeof(zend_trait_alias));
 			trait_aliases[i]->trait_method = emalloc(sizeof(zend_trait_method_reference));
 			memcpy(trait_aliases[i]->trait_method, ce->trait_aliases[i]->trait_method, sizeof(zend_trait_method_reference));
+			trait_aliases[i]->trait_names = ce->trait_aliases[i]->trait_names;
 			i++;
 		}
 		trait_aliases[i] = NULL;

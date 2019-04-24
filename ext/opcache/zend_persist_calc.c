@@ -356,6 +356,14 @@ static void zend_persist_class_entry_calc(zval *zv)
 					ADD_SIZE(sizeof(zend_trait_method_reference));
 				}
 
+				if (ce->trait_aliases[i]->trait_names) {
+					int j = 0;
+					while (ce->trait_aliases[i]->trait_names[j]) {
+						ADD_INTERNED_STRING(ce->trait_aliases[i]->trait_names[j], 0);
+						j++;
+					}
+				}
+
 				if (ce->trait_aliases[i]->alias) {
 					ADD_INTERNED_STRING(ce->trait_aliases[i]->alias, 0);
 				}

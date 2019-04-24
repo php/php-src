@@ -211,6 +211,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 				zend_string_release(ce->trait_aliases[i]->alias);
 			}
 
+			if (ce->trait_aliases[i]->trait_names) {
+				size_t j = 0;
+				while (ce->trait_aliases[i]->trait_names[j]) {
+					zend_string_release(ce->trait_aliases[i]->trait_names[j]);
+					j++;
+				}
+
+				efree(ce->trait_aliases[i]->trait_names);
+			}
+
 			efree(ce->trait_aliases[i]);
 			i++;
 		}

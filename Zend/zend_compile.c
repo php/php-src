@@ -6150,7 +6150,7 @@ static void zend_compile_trait_precedence(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_trait_alias(zend_ast *ast) /* {{{ */
+static void zend_compile_trait_alias(zend_ast *ast, zend_ast *traits_ast) /* {{{ */
 {
 	zend_ast *method_ref_ast = ast->child[0];
 	zend_ast *alias_ast = ast->child[1];
@@ -6169,6 +6169,11 @@ static void zend_compile_trait_alias(zend_ast *ast) /* {{{ */
 	alias = emalloc(sizeof(zend_trait_alias));
 	alias->trait_method = zend_compile_method_ref(method_ref_ast);
 	alias->modifiers = modifiers;
+	if (!alias->trait_method->class_name) {
+		alias->trait_names = zend_compile_name_list(traits_ast);
+	} else {
+		alias->trait_names = NULL;
+	}
 
 	if (alias_ast) {
 		alias->alias = zend_string_copy(zend_ast_get_str(alias_ast));
@@ -6227,7 +6232,7 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 				zend_compile_trait_precedence(adaptation_ast);
 				break;
 			case ZEND_AST_TRAIT_ALIAS:
-				zend_compile_trait_alias(adaptation_ast);
+				zend_compile_trait_alias(adaptation_ast, ast->child[0]);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}

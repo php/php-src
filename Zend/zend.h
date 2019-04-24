@@ -110,6 +110,11 @@ typedef struct _zend_trait_alias {
 	* modifiers to be set on trait method
 	*/
 	uint32_t modifiers;
+
+	/**
+	* names of the traits for this alias
+	*/
+	zend_string **trait_names;
 } zend_trait_alias;
 
 struct _zend_class_entry {

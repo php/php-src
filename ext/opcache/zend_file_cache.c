@@ -644,6 +644,19 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 				}
 			}
 
+			if (q->trait_names) {
+				zend_string **r;
+
+				SERIALIZE_PTR(q->trait_names);
+				r = q->trait_names;
+				UNSERIALIZE_PTR(r);
+
+				while (*r) {
+					SERIALIZE_STR(*r);
+					r++;
+				}
+			}
+
 			if (q->alias) {
 				SERIALIZE_STR(q->alias);
 			}
@@ -1275,6 +1288,18 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 				}
 				if (m->class_name) {
 					UNSERIALIZE_STR(m->class_name);
+				}
+			}
+
+			if (q->trait_names) {
+				zend_string **r;
+
+				UNSERIALIZE_PTR(q->trait_names);
+				r = q->trait_names;
+
+				while (*r) {
+					UNSERIALIZE_STR(*r);
+					r++;
 				}
 			}
 
