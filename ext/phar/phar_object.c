@@ -438,6 +438,10 @@ PHP_METHOD(Phar, mount)
 	size_t fname_len, arch_len, entry_len;
 	size_t path_len, actual_len;
 	phar_archive_data *pphar;
+#if PHP_WIN32
+	char *save_fname;
+	ALLOCA_FLAG(fname_use_heap)
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &path, &path_len, &actual, &actual_len) == FAILURE) {
 		return;
@@ -447,7 +451,13 @@ PHP_METHOD(Phar, mount)
 	fname_len = strlen(fname);
 
 #ifdef PHP_WIN32
-	phar_unixify_path_separators(fname, fname_len);
+	save_fname = fname;
+	if (memchr(fname, '\\', fname_len)) {
+		fname = do_alloca(fname_len + 1, fname_use_heap);
+		memcpy(fname, save_fname, fname_len);
+		fname[fname_len] = '\0';
+		phar_unixify_path_separators(fname, fname_len);
+	}
 #endif
 
 	if (fname_len > 7 && !memcmp(fname, "phar://", 7) && SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
@@ -457,6 +467,10 @@ PHP_METHOD(Phar, mount)
 		if (path_len > 7 && !memcmp(path, "phar://", 7)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Can only mount internal paths within a phar archive, use a relative path instead of \"%s\"", path);
 			efree(arch);
+			if (fname != save_fname) {
+				free_alloca(fname, fname_use_heap);
+				fname = save_fname;
+			}
 			return;
 		}
 carry_on2:
@@ -472,6 +486,10 @@ carry_on2:
 			if (arch) {
 				efree(arch);
 			}
+			if (fname != save_fname) {
+				free_alloca(fname, fname_use_heap);
+				fname = save_fname;
+			}
 			return;
 		}
 carry_on:
@@ -485,6 +503,11 @@ carry_on:
 				efree(arch);
 			}
 
+			if (fname != save_fname) {
+				free_alloca(fname, fname_use_heap);
+				fname = save_fname;
+			}
+
 			return;
 		}
 
@@ -494,6 +517,11 @@ carry_on:
 
 		if (arch) {
 			efree(arch);
+		}
+
+		if (fname != save_fname) {
+			free_alloca(fname, fname_use_heap);
+			fname = save_fname;
 		}
 
 		return;
@@ -511,6 +539,10 @@ carry_on:
 		goto carry_on2;
 	}
 
+	if (fname != save_fname) {
+		free_alloca(fname, fname_use_heap);
+		fname = save_fname;
+	}
 	zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s failed", path, actual);
 }
 /* }}} */
@@ -570,8 +602,10 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 #ifdef PHP_WIN32
-	fname = estrndup(fname, fname_len);
-	phar_unixify_path_separators(fname, fname_len);
+	if (memchr(fname, '\\', fname_len)) {
+		fname = estrndup(fname, fname_len);
+		phar_unixify_path_separators(fname, fname_len);
+	}
 #endif
 	basename = zend_memrchr(fname, '/', fname_len);
 
@@ -3616,6 +3650,10 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 	phar_entry_data *data;
 	php_stream *contents_file = NULL;
 	php_stream_statbuf ssb;
+#ifdef PHP_WIN32
+	char *save_filename;
+	ALLOCA_FLAG(filename_use_heap)
+#endif
 
 	if (filename_len >= sizeof(".phar")-1) {
 		start_pos = '/' == filename[0]; /* account for any leading slash: multiple-leads handled elsewhere */
@@ -3625,6 +3663,15 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 		}
 	}
 
+#ifdef PHP_WIN32
+	save_filename = filename;
+	if (memchr(filename, '\\', filename_len)) {
+		filename = do_alloca(filename_len + 1, filename_use_heap);
+		memcpy(filename, save_filename, filename_len);
+		filename[filename_len] = '\0';
+	}
+#endif
+
 	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, 1))) {
 		if (error) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created: %s", filename, error);
@@ -3632,6 +3679,12 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 		} else {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s does not exist and cannot be created", filename);
 		}
+#ifdef PHP_WIN32
+		if (filename != save_filename) {
+			free_alloca(filename, filename_use_heap);
+			filename = save_filename;
+		}
+#endif
 		return;
 	} else {
 		if (error) {
@@ -3643,17 +3696,37 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, size_t file
 				contents_len = php_stream_write(data->fp, cont_str, cont_len);
 				if (contents_len != cont_len) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+#ifdef PHP_WIN32
+					if (filename != save_filename) {
+						free_alloca(filename, filename_use_heap);
+						filename = save_filename;
+					}
+#endif
 					return;
 				}
 			} else {
 				if (!(php_stream_from_zval_no_verify(contents_file, zresource))) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Entry %s could not be written to", filename);
+#ifdef PHP_WIN32
+					if (filename != save_filename) {
+						free_alloca(filename, filename_use_heap);
+						filename = save_filename;
+					}
+#endif
 					return;
 				}
 				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
 		}
+
+
+#ifdef PHP_WIN32
+		if (filename != save_filename) {
+			free_alloca(filename, filename_use_heap);
+			filename = save_filename;
+		}
+#endif
 
 		if (contents_file != NULL && php_stream_stat(contents_file, &ssb) != -1) {
 			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;

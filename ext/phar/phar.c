@@ -533,28 +533,32 @@ int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t ali
 {
 	phar_archive_data *phar;
 #ifdef PHP_WIN32
-	char *unixfname;
+	char *save_fname;
+	ALLOCA_FLAG(fname_use_heap)
 #endif
 
 	if (error) {
 		*error = NULL;
 	}
 #ifdef PHP_WIN32
-	unixfname = estrndup(fname, fname_len);
-	phar_unixify_path_separators(unixfname, fname_len);
-
-	if (SUCCESS == phar_get_archive(&phar, unixfname, fname_len, alias, alias_len, error)
-		&& ((alias && fname_len == phar->fname_len
-		&& !strncmp(unixfname, phar->fname, fname_len)) || !alias)
-	) {
-		phar_entry_info *stub;
-		efree(unixfname);
-#else
+	save_fname = fname;
+  if (memchr(fname, '\\', fname_len)) {
+		fname = do_alloca(fname_len + 1, fname_use_heap);
+		memcpy(fname, save_fname, fname_len);
+		fname[fname_len] = '\0';
+		phar_unixify_path_separators(fname, fname_len);
+	}
+#endif
 	if (SUCCESS == phar_get_archive(&phar, fname, fname_len, alias, alias_len, error)
 		&& ((alias && fname_len == phar->fname_len
 		&& !strncmp(fname, phar->fname, fname_len)) || !alias)
 	) {
 		phar_entry_info *stub;
+#ifdef PHP_WIN32
+		if (fname != save_fname) {
+			free_alloca(fname, fname_use_heap);
+			fname = save_fname;
+		}
 #endif
 		/* logic above is as follows:
 		   If an explicit alias was requested, ensure the filename passed in
@@ -581,7 +585,10 @@ int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t ali
 		return SUCCESS;
 	} else {
 #ifdef PHP_WIN32
-		efree(unixfname);
+		if (fname != save_fname) {
+			free_alloca(fname, fname_use_heap);
+			fname = save_fname;
+		}
 #endif
 		if (pphar) {
 			*pphar = NULL;
@@ -2229,8 +2236,10 @@ int phar_split_fname(const char *filename, size_t filename_len, char **arch, siz
 	ext_len = 0;
 #ifdef PHP_WIN32
 	save = (char *)filename;
-	filename = estrndup(filename, filename_len);
-	phar_unixify_path_separators((char *)filename, filename_len);
+	if (memchr(filename, '\\', filename_len)) {
+		filename = estrndup(filename, filename_len);
+		phar_unixify_path_separators((char *)filename, filename_len);
+	}
 #endif
 	if (phar_detect_phar_fname_ext(filename, filename_len, &ext_str, &ext_len, executable, for_create, 0) == FAILURE) {
 		if (ext_len != -1) {
@@ -2244,7 +2253,9 @@ int phar_split_fname(const char *filename, size_t filename_len, char **arch, siz
 			}
 
 #ifdef PHP_WIN32
-			efree((char *)filename);
+			if (filename != save) {
+				efree((char *)filename);
+			}
 #endif
 			return FAILURE;
 		}
@@ -2269,7 +2280,9 @@ int phar_split_fname(const char *filename, size_t filename_len, char **arch, siz
 	}
 
 #ifdef PHP_WIN32
-	efree((char *)filename);
+	if (filename != save) {
+		efree((char *)filename);
+	}
 #endif
 
 	return SUCCESS;
