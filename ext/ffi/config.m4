@@ -10,12 +10,6 @@ if test "$PHP_FFI" != "no"; then
     FFI_INCDIR=$PHP_FFI/include
     FFI_LIBDIR=$PHP_FFI
   else
-    dnl First try to find pkg-config
-    if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-    fi
-
-    dnl If pkg-config is installed, try using it
     if test -x "$PKG_CONFIG" && "$PKG_CONFIG" --exists libffi; then
       FFI_VER=`"$PKG_CONFIG" --modversion libffi`
       FFI_INCDIR=`"$PKG_CONFIG" --variable=includedir libffi`

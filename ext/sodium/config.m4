@@ -9,7 +9,6 @@ if test "$PHP_SODIUM" != "no"; then
   SEARCH_PATH="/usr/local /usr"     # you might want to change this
   SEARCH_FOR="/include/sodium.h"  # you most likely want to change this
 
-  AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
   AC_MSG_CHECKING([for libsodium])
 
   dnl user provided location

@@ -17,9 +17,6 @@ if test "$PHP_ZIP" != "no"; then
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"
 
   if test "$PHP_LIBZIP" != "no"; then
-
-    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-
     AC_MSG_CHECKING(for libzip)
     if test -r $PHP_LIBZIP/include/zip.h; then
       LIBZIP_CFLAGS="-I$PHP_LIBZIP/include"

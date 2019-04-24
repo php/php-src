@@ -327,9 +327,6 @@ PHP_ARG_WITH([iodbc],,
 
   AC_MSG_CHECKING(for iODBC support)
   if test "$PHP_IODBC" != "no"; then
-    if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-    fi
     if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libiodbc ; then
       PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
       ODBC_TYPE=iodbc
