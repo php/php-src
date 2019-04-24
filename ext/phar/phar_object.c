@@ -438,7 +438,7 @@ PHP_METHOD(Phar, mount)
 	size_t fname_len, arch_len, entry_len;
 	size_t path_len, actual_len;
 	phar_archive_data *pphar;
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	char *save_fname;
 	ALLOCA_FLAG(fname_use_heap)
 #endif
@@ -467,10 +467,12 @@ PHP_METHOD(Phar, mount)
 		if (path_len > 7 && !memcmp(path, "phar://", 7)) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Can only mount internal paths within a phar archive, use a relative path instead of \"%s\"", path);
 			efree(arch);
+#ifdef PHP_WIN32
 			if (fname != save_fname) {
 				free_alloca(fname, fname_use_heap);
 				fname = save_fname;
 			}
+#endif
 			return;
 		}
 carry_on2:
@@ -486,10 +488,12 @@ carry_on2:
 			if (arch) {
 				efree(arch);
 			}
+#ifdef PHP_WIN32
 			if (fname != save_fname) {
 				free_alloca(fname, fname_use_heap);
 				fname = save_fname;
 			}
+#endif
 			return;
 		}
 carry_on:
@@ -503,11 +507,12 @@ carry_on:
 				efree(arch);
 			}
 
+#ifdef PHP_WIN32
 			if (fname != save_fname) {
 				free_alloca(fname, fname_use_heap);
 				fname = save_fname;
 			}
-
+#endif
 			return;
 		}
 
@@ -519,11 +524,12 @@ carry_on:
 			efree(arch);
 		}
 
+#ifdef PHP_WIN32
 		if (fname != save_fname) {
 			free_alloca(fname, fname_use_heap);
 			fname = save_fname;
 		}
-
+#endif
 		return;
 	} else if (HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 		goto carry_on;
@@ -539,10 +545,12 @@ carry_on:
 		goto carry_on2;
 	}
 
+#ifdef PHP_WIN32
 	if (fname != save_fname) {
 		free_alloca(fname, fname_use_heap);
 		fname = save_fname;
 	}
+#endif
 	zend_throw_exception_ex(phar_ce_PharException, 0, "Mounting of %s to %s failed", path, actual);
 }
 /* }}} */

@@ -542,7 +542,7 @@ int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t ali
 	}
 #ifdef PHP_WIN32
 	save_fname = fname;
-  if (memchr(fname, '\\', fname_len)) {
+	if (memchr(fname, '\\', fname_len)) {
 		fname = do_alloca(fname_len + 1, fname_use_heap);
 		memcpy(fname, save_fname, fname_len);
 		fname[fname_len] = '\0';
