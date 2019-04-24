@@ -44,47 +44,56 @@ PHP_FUNCTION(gettype)
 PHP_FUNCTION(settype)
 {
 	zval *var;
-	char *type;
-	size_t type_len;
-	zval tmp;
+	zend_string *type;
+	zval tmp, *ptr;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(var)
-		Z_PARAM_STRING(type, type_len)
+		Z_PARAM_STR(type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_COPY(&tmp, var);
-	if (!strcasecmp(type, "integer")) {
-		convert_to_long(&tmp);
-	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(&tmp);
-	} else if (!strcasecmp(type, "float")) {
-		convert_to_double(&tmp);
-	} else if (!strcasecmp(type, "double")) { /* deprecated */
-		convert_to_double(&tmp);
-	} else if (!strcasecmp(type, "string")) {
-		convert_to_string(&tmp);
-	} else if (!strcasecmp(type, "array")) {
-		convert_to_array(&tmp);
-	} else if (!strcasecmp(type, "object")) {
-		convert_to_object(&tmp);
-	} else if (!strcasecmp(type, "bool")) {
-		convert_to_boolean(&tmp);
-	} else if (!strcasecmp(type, "boolean")) {
-		convert_to_boolean(&tmp);
-	} else if (!strcasecmp(type, "null")) {
-		convert_to_null(&tmp);
-	} else if (!strcasecmp(type, "resource")) {
-		zval_ptr_dtor(&tmp);
-		php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
-		RETURN_FALSE;
+	ZEND_ASSERT(Z_ISREF_P(var));
+	if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(var)))) {
+		ZVAL_COPY(&tmp, Z_REFVAL_P(var));
+		ptr = &tmp;
 	} else {
-		zval_ptr_dtor(&tmp);
-		php_error_docref(NULL, E_WARNING, "Invalid type");
+		ptr = Z_REFVAL_P(var);
+	}
+	if (zend_string_equals_literal_ci(type, "integer")) {
+		convert_to_long(ptr);
+	} else if (zend_string_equals_literal_ci(type, "int")) {
+		convert_to_long(ptr);
+	} else if (zend_string_equals_literal_ci(type, "float")) {
+		convert_to_double(ptr);
+	} else if (zend_string_equals_literal_ci(type, "double")) { /* deprecated */
+		convert_to_double(ptr);
+	} else if (zend_string_equals_literal_ci(type, "string")) {
+		convert_to_string(ptr);
+	} else if (zend_string_equals_literal_ci(type, "array")) {
+		convert_to_array(ptr);
+	} else if (zend_string_equals_literal_ci(type, "object")) {
+		convert_to_object(ptr);
+	} else if (zend_string_equals_literal_ci(type, "bool")) {
+		convert_to_boolean(ptr);
+	} else if (zend_string_equals_literal_ci(type, "boolean")) {
+		convert_to_boolean(ptr);
+	} else if (zend_string_equals_literal_ci(type, "null")) {
+		convert_to_null(ptr);
+	} else {
+		if (ptr == &tmp) {
+			zval_ptr_dtor(&tmp);
+		}
+		if (zend_string_equals_literal_ci(type, "resource")) {
+			php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
+		} else {
+			php_error_docref(NULL, E_WARNING, "Invalid type");
+		}
 		RETURN_FALSE;
 	}
 
-	ZEND_TRY_ASSIGN_REF_TMP(var, &tmp);
+	if (ptr == &tmp) {
+		zend_try_assign_typed_ref(Z_REF_P(var), &tmp);
+	}
 	RETVAL_TRUE;
 }
 /* }}} */
