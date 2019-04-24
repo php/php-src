@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : basic functionality - with default arguments
---INI--
-short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -43,7 +41,6 @@ foreach($string_array as $string)
 echo "Done";
 ?>
 --EXPECT--
-Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 string(5) "hello"

@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : usage variations - heredoc strings
---INI--
-short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -78,7 +76,6 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 echo "Done\n";
 ?>
 --EXPECT--
-Deprecated: Directive 'short_open_tag' is deprecated in Unknown on line 0
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(0) ""
@@ -90,7 +87,8 @@ string(67) "<html>hello world</html>
 
 This is a double quoted string"
 -- Iteration 4 --
-string(44) "<html>hello world	
+string(44) "<html>hello
+ world	
 1111		 != 2222</html>
 "
 -- Iteration 5 --
