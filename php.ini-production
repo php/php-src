@@ -143,12 +143,6 @@
 ;   Development Value: 5
 ;   Production Value: 5
 
-; This directive is DEPRECATED.
-; short_open_tag
-;   Default Value: Off
-;   Development Value: Off
-;   Production Value: Off
-
 ; track_errors
 ;   Default Value: Off
 ;   Development Value: On
@@ -191,7 +185,7 @@ engine = On
 ; Development Value: Off
 ; Production Value: Off
 ; http://php.net/short-open-tag
-short_open_tag = Off
+;short_open_tag =
 
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
