@@ -370,9 +370,9 @@ PHP_FUNCTION(msg_receive)
 
 	if (result >= 0) {
 		/* got it! */
-		ZEND_TRY_ASSIGN_LONG(out_msgtype, messagebuffer->mtype);
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, messagebuffer->mtype);
 		if (zerrcode) {
-			ZEND_TRY_ASSIGN_LONG(zerrcode, 0);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, 0);
 		}
 
 		RETVAL_TRUE;
@@ -384,20 +384,20 @@ PHP_FUNCTION(msg_receive)
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash)) {
 				php_error_docref(NULL, E_WARNING, "message corrupted");
-				ZEND_TRY_ASSIGN_FALSE(out_message);
+				ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 				RETVAL_FALSE;
 			} else {
-				ZEND_TRY_ASSIGN_VALUE(out_message, &tmp);
+				ZEND_TRY_ASSIGN_REF_VALUE(out_message, &tmp);
 			}
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {
-			ZEND_TRY_ASSIGN_STRINGL(out_message, messagebuffer->mtext, result);
+			ZEND_TRY_ASSIGN_REF_STRINGL(out_message, messagebuffer->mtext, result);
 		}
 	} else {
-		ZEND_TRY_ASSIGN_LONG(out_msgtype, 0);
-		ZEND_TRY_ASSIGN_FALSE(out_message);
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, 0);
+		ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 		if (zerrcode) {
-			ZEND_TRY_ASSIGN_LONG(zerrcode, errno);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, errno);
 		}
 	}
 	efree(messagebuffer);
@@ -484,7 +484,7 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
-			ZEND_TRY_ASSIGN_LONG(zerror, errno);
+			ZEND_TRY_ASSIGN_REF_LONG(zerror, errno);
 		}
 	} else {
 		RETVAL_TRUE;

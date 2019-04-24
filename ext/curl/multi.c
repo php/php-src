@@ -290,7 +290,7 @@ PHP_FUNCTION(curl_multi_exec)
 
 	still_running = zval_get_long(z_still_running);
 	error = curl_multi_perform(mh->multi, &still_running);
-	ZEND_TRY_ASSIGN_LONG(z_still_running, still_running);
+	ZEND_TRY_ASSIGN_REF_LONG(z_still_running, still_running);
 
 	SAVE_CURLM_ERROR(mh, error);
 	RETURN_LONG((zend_long) error);
@@ -350,7 +350,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	}
 
 	if (zmsgs_in_queue) {
-		ZEND_TRY_ASSIGN_LONG(zmsgs_in_queue, queued_msgs);
+		ZEND_TRY_ASSIGN_REF_LONG(zmsgs_in_queue, queued_msgs);
 	}
 
 	array_init(return_value);

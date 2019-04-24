@@ -3029,7 +3029,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (ldap_get_option(ld->link, option, &val)) {
 				RETURN_FALSE;
 			}
-			ZEND_TRY_ASSIGN_LONG(retval, val);
+			ZEND_TRY_ASSIGN_REF_LONG(retval, val);
 		} break;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
 	case LDAP_OPT_NETWORK_TIMEOUT:
@@ -3045,7 +3045,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			ZEND_TRY_ASSIGN_LONG(retval, timeout->tv_sec);
+			ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
@@ -3056,7 +3056,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (ldap_get_option(ld->link, LDAP_X_OPT_CONNECT_TIMEOUT, &timeout)) {
 				RETURN_FALSE;
 			}
-			ZEND_TRY_ASSIGN_LONG(retval, (timeout / 1000));
+			ZEND_TRY_ASSIGN_REF_LONG(retval, (timeout / 1000));
 		} break;
 #endif
 #ifdef LDAP_OPT_TIMEOUT
@@ -3073,7 +3073,7 @@ PHP_FUNCTION(ldap_get_option)
 			if (!timeout) {
 				RETURN_FALSE;
 			}
-			ZEND_TRY_ASSIGN_LONG(retval, timeout->tv_sec);
+			ZEND_TRY_ASSIGN_REF_LONG(retval, timeout->tv_sec);
 			ldap_memfree(timeout);
 		} break;
 #endif
@@ -3120,7 +3120,7 @@ PHP_FUNCTION(ldap_get_option)
 				}
 				RETURN_FALSE;
 			}
-			ZEND_TRY_ASSIGN_STRING(retval, val);
+			ZEND_TRY_ASSIGN_REF_STRING(retval, val);
 			ldap_memfree(val);
 		} break;
 	case LDAP_OPT_SERVER_CONTROLS:
@@ -3363,7 +3363,7 @@ PHP_FUNCTION(ldap_parse_result)
 		RETURN_FALSE;
 	}
 
-	ZEND_TRY_ASSIGN_LONG(errcode, lerrcode);
+	ZEND_TRY_ASSIGN_REF_LONG(errcode, lerrcode);
 
 	/* Reverse -> fall through */
 	switch (myargcount) {
@@ -3384,16 +3384,16 @@ PHP_FUNCTION(ldap_parse_result)
 			}
 		case 5:
 			if (lerrmsg == NULL) {
-				ZEND_TRY_ASSIGN_EMPTY_STRING(errmsg);
+				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(errmsg);
 			} else {
-				ZEND_TRY_ASSIGN_STRING(errmsg, lerrmsg);
+				ZEND_TRY_ASSIGN_REF_STRING(errmsg, lerrmsg);
 				ldap_memfree(lerrmsg);
 			}
 		case 4:
 			if (lmatcheddn == NULL) {
-				ZEND_TRY_ASSIGN_EMPTY_STRING(matcheddn);
+				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(matcheddn);
 			} else {
-				ZEND_TRY_ASSIGN_STRING(matcheddn, lmatcheddn);
+				ZEND_TRY_ASSIGN_REF_STRING(matcheddn, lmatcheddn);
 				ldap_memfree(lmatcheddn);
 			}
 	}
@@ -3440,17 +3440,17 @@ PHP_FUNCTION(ldap_parse_exop)
 	switch (myargcount) {
 		case 4:
 			if (lretoid == NULL) {
-				ZEND_TRY_ASSIGN_EMPTY_STRING(retoid);
+				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retoid);
 			} else {
-				ZEND_TRY_ASSIGN_STRING(retoid, lretoid);
+				ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			}
 		case 3:
 			/* use arg #3 as the data returned by the server */
 			if (lretdata == NULL) {
-				ZEND_TRY_ASSIGN_EMPTY_STRING(retdata);
+				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
 			} else {
-				ZEND_TRY_ASSIGN_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+				ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 				ldap_memfree(lretdata->bv_val);
 				ldap_memfree(lretdata);
 			}
@@ -4089,13 +4089,13 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 	ldap_controls_free(lserverctrls);
 	if (myargcount == 4) {
-		ZEND_TRY_ASSIGN_LONG(estimated, lestimated);
+		ZEND_TRY_ASSIGN_REF_LONG(estimated, lestimated);
 	}
 
  	if (lcookie.bv_len == 0) {
-		ZEND_TRY_ASSIGN_EMPTY_STRING(cookie);
+		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(cookie);
  	} else {
-		ZEND_TRY_ASSIGN_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len);
+		ZEND_TRY_ASSIGN_REF_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len);
  	}
  	ldap_memfree(lcookie.bv_val);
 
@@ -4159,19 +4159,19 @@ PHP_FUNCTION(ldap_exop)
 
 		if (retoid) {
 			if (lretoid) {
-				ZEND_TRY_ASSIGN_STRING(retoid, lretoid);
+				ZEND_TRY_ASSIGN_REF_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			} else {
-				ZEND_TRY_ASSIGN_EMPTY_STRING(retoid);
+				ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retoid);
 			}
 		}
 
 		if (lretdata) {
-			ZEND_TRY_ASSIGN_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			ZEND_TRY_ASSIGN_REF_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 			ldap_memfree(lretdata->bv_val);
 			ldap_memfree(lretdata);
 		} else {
-			ZEND_TRY_ASSIGN_EMPTY_STRING(retdata);
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(retdata);
 		}
 
 		RETVAL_TRUE;

@@ -95,11 +95,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (stream == NULL) {
 		if (zerrno) {
-			ZEND_TRY_ASSIGN_LONG(zerrno, err);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrno, err);
 		}
 		if (errstr) {
 			if (zerrstr) {
-				ZEND_TRY_ASSIGN_STR(zerrstr, errstr);
+				ZEND_TRY_ASSIGN_REF_STR(zerrstr, errstr);
 			} else {
 				zend_string_release(errstr);
 			}
@@ -109,10 +109,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (zerrno) {
-		ZEND_TRY_ASSIGN_LONG(zerrno, 0);
+		ZEND_TRY_ASSIGN_REF_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		ZEND_TRY_ASSIGN_EMPTY_STRING(zerrstr);
+		ZEND_TRY_ASSIGN_REF_EMPTY_STRING(zerrstr);
 	}
 
 	if (errstr) {

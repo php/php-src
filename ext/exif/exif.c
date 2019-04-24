@@ -4622,11 +4622,11 @@ PHP_FUNCTION(exif_thumbnail)
 				ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
 			}
 		}
-		ZEND_TRY_ASSIGN_LONG(z_width,  ImageInfo.Thumbnail.width);
-		ZEND_TRY_ASSIGN_LONG(z_height, ImageInfo.Thumbnail.height);
+		ZEND_TRY_ASSIGN_REF_LONG(z_width,  ImageInfo.Thumbnail.width);
+		ZEND_TRY_ASSIGN_REF_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		ZEND_TRY_ASSIGN_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
+		ZEND_TRY_ASSIGN_REF_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG

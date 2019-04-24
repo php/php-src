@@ -992,16 +992,16 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								} while (--j > 0);
 								tmp[10]= '\0';
 								/* unsigned int > INT_MAX is 10 digits - ALWAYS */
-								ZEND_TRY_ASSIGN_STRINGL(result, tmp, 10);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, tmp, 10);
 								efree(tmp);
 								break;
 							}
 #endif
 						}
 						if (stmt->stmt->fields[i].flags & UNSIGNED_FLAG) {
-							ZEND_TRY_ASSIGN_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
+							ZEND_TRY_ASSIGN_REF_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
 						} else {
-							ZEND_TRY_ASSIGN_LONG(result, *(int *)stmt->result.buf[i].val);
+							ZEND_TRY_ASSIGN_REF_LONG(result, *(int *)stmt->result.buf[i].val);
 						}
 						break;
 					case IS_DOUBLE:
@@ -1018,7 +1018,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							dval = *((double *)stmt->result.buf[i].val);
 						}
 
-						ZEND_TRY_ASSIGN_DOUBLE(result, dval);
+						ZEND_TRY_ASSIGN_REF_DOUBLE(result, dval);
 						break;
 					}
 					case IS_STRING:
@@ -1059,20 +1059,20 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								 * use MYSQLI_LL_SPEC.
 								 */
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
-								ZEND_TRY_ASSIGN_STRING(result, tmp);
+								ZEND_TRY_ASSIGN_REF_STRING(result, tmp);
 							} else {
-								ZEND_TRY_ASSIGN_LONG(result, llval);
+								ZEND_TRY_ASSIGN_REF_LONG(result, llval);
 							}
 						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
-								ZEND_TRY_ASSIGN_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
 							} else {
 #else
 							{
 #endif
-								ZEND_TRY_ASSIGN_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
 							}
 						}
 						break;
@@ -1080,7 +1080,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						break;
 				}
 			} else {
-				ZEND_TRY_ASSIGN_NULL(result);
+				ZEND_TRY_REF_ASSIGN_NULL(result);
 			}
 		}
 	} else {
