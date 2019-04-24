@@ -84,7 +84,7 @@ PHP_FUNCTION(settype)
 		RETURN_FALSE;
 	}
 
-	ZEND_TRY_ASSIGN_TMP(var, &tmp);
+	ZEND_TRY_ASSIGN_REF_TMP(var, &tmp);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -371,7 +371,7 @@ PHP_FUNCTION(is_callable)
 	}
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
-		ZEND_TRY_ASSIGN_STR(callable_name, name);
+		ZEND_TRY_ASSIGN_REF_STR(callable_name, name);
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
 	}

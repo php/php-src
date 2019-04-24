@@ -243,7 +243,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		ZEND_TRY_ASSIGN_LONG(ret_code, ret);
+		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret);
 	}
 }
 /* }}} */

@@ -353,12 +353,12 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		ZEND_TRY_ASSIGN_LONG(arg2, line);
+		ZEND_TRY_ASSIGN_REF_LONG(arg2, line);
 	case 1:
 		if (file) {
-			ZEND_TRY_ASSIGN_STRING(arg1, file);
+			ZEND_TRY_ASSIGN_REF_STRING(arg1, file);
 		} else {
-			ZEND_TRY_ASSIGN_EMPTY_STRING(arg1);
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(arg1);
 		}
 		break;
 	}

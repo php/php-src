@@ -738,7 +738,7 @@ literal:
 						break;
 					} else if (numVars) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_LONG(current, (zend_long) (string - baseString));
+						ZEND_TRY_ASSIGN_REF_LONG(current, (zend_long) (string - baseString));
 					} else {
 						add_index_long(return_value, objIndex++, string - baseString);
 					}
@@ -856,7 +856,7 @@ literal:
 						break;
 					} else if (numVars) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_STRINGL(current, string, end - string);
+						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -896,7 +896,7 @@ literal:
 						break;
 					} else if (numVars) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_STRINGL(current, string, end - string);
+						ZEND_TRY_ASSIGN_REF_STRINGL(current, string, end - string);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
@@ -1049,7 +1049,7 @@ addToInt:
 						} else if (numVars) {
 							 /* change passed value type to string */
 							current = args + objIndex++;
-							ZEND_TRY_ASSIGN_STRING(current, buf);
+							ZEND_TRY_ASSIGN_REF_STRING(current, buf);
 						} else {
 							add_index_string(return_value, objIndex++, buf);
 						}
@@ -1058,7 +1058,7 @@ addToInt:
 							break;
 						} else if (numVars) {
 							current = args + objIndex++;
-							ZEND_TRY_ASSIGN_LONG(current, value);
+							ZEND_TRY_ASSIGN_REF_LONG(current, value);
 						} else {
 							add_index_long(return_value, objIndex++, value);
 						}
@@ -1162,7 +1162,7 @@ addToFloat:
 						break;
 					} else if (numVars) {
 						current = args + objIndex++;
-						ZEND_TRY_ASSIGN_DOUBLE(current, dvalue);
+						ZEND_TRY_ASSIGN_REF_DOUBLE(current, dvalue);
 					} else {
 						add_index_double(return_value, objIndex++, dvalue );
 					}

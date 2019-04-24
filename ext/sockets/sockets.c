@@ -1335,19 +1335,15 @@ PHP_FUNCTION(socket_getsockname)
 		RETURN_FALSE;
 	}
 
-	if (port != NULL) {
-		ZVAL_DEREF(port);
-	}
-
 	switch (sa->sa_family) {
 #if HAVE_IPV6
 		case AF_INET6:
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
-			ZEND_TRY_ASSIGN_STRING(addr, addr6);
+			ZEND_TRY_ASSIGN_REF_STRING(addr, addr6);
 
 			if (port != NULL) {
-				ZEND_TRY_ASSIGN_LONG(port, htons(sin6->sin6_port));
+				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin6->sin6_port));
 			}
 			RETURN_TRUE;
 			break;
@@ -1359,10 +1355,10 @@ PHP_FUNCTION(socket_getsockname)
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
 
-			ZEND_TRY_ASSIGN_STRING(addr, addr_string);
+			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (port != NULL) {
-				ZEND_TRY_ASSIGN_LONG(port, htons(sin->sin_port));
+				ZEND_TRY_ASSIGN_REF_LONG(port, htons(sin->sin_port));
 			}
 			RETURN_TRUE;
 			break;
@@ -1370,7 +1366,7 @@ PHP_FUNCTION(socket_getsockname)
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
-			ZEND_TRY_ASSIGN_STRING(addr, s_un->sun_path);
+			ZEND_TRY_ASSIGN_REF_STRING(addr, s_un->sun_path);
 			RETURN_TRUE;
 			break;
 
@@ -1419,10 +1415,10 @@ PHP_FUNCTION(socket_getpeername)
 			sin6 = (struct sockaddr_in6 *) sa;
 			inet_ntop(AF_INET6, &sin6->sin6_addr, addr6, INET6_ADDRSTRLEN);
 
-			ZEND_TRY_ASSIGN_STRING(arg2, addr6);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr6);
 
 			if (arg3 != NULL) {
-				ZEND_TRY_ASSIGN_LONG(arg3, htons(sin6->sin6_port));
+				ZEND_TRY_ASSIGN_REF_LONG(arg3, htons(sin6->sin6_port));
 			}
 
 			RETURN_TRUE;
@@ -1435,10 +1431,10 @@ PHP_FUNCTION(socket_getpeername)
 			addr_string = inet_ntoa(sin->sin_addr);
 			inet_ntoa_lock = 0;
 
-			ZEND_TRY_ASSIGN_STRING(arg2, addr_string);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
-				ZEND_TRY_ASSIGN_LONG(arg3, htons(sin->sin_port));
+				ZEND_TRY_ASSIGN_REF_LONG(arg3, htons(sin->sin_port));
 			}
 
 			RETURN_TRUE;
@@ -1447,7 +1443,7 @@ PHP_FUNCTION(socket_getpeername)
 		case AF_UNIX:
 			s_un = (struct sockaddr_un *) sa;
 
-			ZEND_TRY_ASSIGN_STRING(arg2, s_un->sun_path);
+			ZEND_TRY_ASSIGN_REF_STRING(arg2, s_un->sun_path);
 			RETURN_TRUE;
 			break;
 
@@ -1718,11 +1714,11 @@ PHP_FUNCTION(socket_recv)
 
 	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
 		zend_string_efree(recv_buf);
-		ZEND_TRY_ASSIGN_NULL(buf);
+		ZEND_TRY_ASSIGN_REF_NULL(buf);
 	} else {
 		ZSTR_LEN(recv_buf) = retval;
 		ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
-		ZEND_TRY_ASSIGN_NEW_STR(buf, recv_buf);
+		ZEND_TRY_ASSIGN_REF_NEW_STR(buf, recv_buf);
 	}
 
 	if (retval == -1) {
@@ -1817,8 +1813,8 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_STRING(arg5, s_un.sun_path);
+			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, s_un.sun_path);
 			break;
 
 		case AF_INET:
@@ -1843,9 +1839,9 @@ PHP_FUNCTION(socket_recvfrom)
 
 			address = inet_ntoa(sin.sin_addr);
 
-			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_STRING(arg5, address ? address : "0.0.0.0");
-			ZEND_TRY_ASSIGN_LONG(arg6, ntohs(sin.sin_port));
+			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
+			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin.sin_port));
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1871,9 +1867,9 @@ PHP_FUNCTION(socket_recvfrom)
 			memset(addr6, 0, INET6_ADDRSTRLEN);
 			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
 
-			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
-			ZEND_TRY_ASSIGN_STRING(arg5, addr6[0] ? addr6 : "::");
-			ZEND_TRY_ASSIGN_LONG(arg6, ntohs(sin6.sin6_port));
+			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_REF_STRING(arg5, addr6[0] ? addr6 : "::");
+			ZEND_TRY_ASSIGN_REF_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif
 		default:
