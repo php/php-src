@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #77895 (IntlDateFormatter::create fails in strict mode if $locale
     = null). (Nikita)
 
+- litespeed:
+  . LiteSpeed SAPI 7.3.1, better process management, new API function
+    litespeed_finish_request(). (George Wang)
+
 - LDAP:
   . Fixed bug #77869 (Core dump when using server controls) (mcmic)
 
