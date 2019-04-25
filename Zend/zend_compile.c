@@ -2374,6 +2374,9 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	if (dim_node.op_type == IS_CONST) {
 		zend_handle_numeric_dim(opline, &dim_node);
+		if (Z_TYPE_P(CT_CONSTANT(opline->op2)) == IS_STRING) {
+			opline->extended_value = zend_alloc_cache_slots(2);
+		}
 	}
 	return opline;
 }
@@ -2568,6 +2571,9 @@ static void zend_compile_list_assign(
 
 		if (dim_node.op_type == IS_CONST) {
 			zend_handle_numeric_dim(opline, &dim_node);
+			if (Z_TYPE_P(CT_CONSTANT(opline->op2)) == IS_STRING) {
+				opline->extended_value = zend_alloc_cache_slots(2);
+			}
 		}
 
 		if (var_ast->kind == ZEND_AST_ARRAY) {

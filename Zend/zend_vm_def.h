@@ -6583,6 +6583,27 @@ ZEND_VM_C_LABEL(isset_again):
 				if (ZEND_HANDLE_NUMERIC(str, hval)) {
 					ZEND_VM_C_GOTO(num_index_prop);
 				}
+			} else if (zend_hash_shape(ht)) {
+				uintptr_t offset;
+				void **cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_ISEMPTY);
+
+				if (EXPECTED(zend_hash_shape(ht) == (uint32_t)(uintptr_t)CACHED_PTR_EX(cache_slot))) {
+					offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+					if (offset != (uintptr_t)-1) {
+						value = (zval*)(((char*)(ht->arData)) + offset);
+					} else {
+						value = NULL;
+					}
+				} else {
+					value = zend_hash_find_ex_ind(ht, str, OP2_TYPE == IS_CONST);
+					if (value) {
+						offset = ((char*)value) - ((char*)(ht->arData));
+					} else {
+						offset = (uintptr_t)-1;
+					}
+					CACHE_POLYMORPHIC_PTR_EX(cache_slot, (void*)(uintptr_t)zend_hash_shape(ht), (void*)(uintptr_t)offset);
+				}
+				ZEND_VM_C_GOTO(isset_dim_obj_check_value);
 			}
 			value = zend_hash_find_ex_ind(ht, str, OP2_TYPE == IS_CONST);
 		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
@@ -6596,6 +6617,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
 		}
 
+ZEND_VM_C_LABEL(isset_dim_obj_check_value):
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&

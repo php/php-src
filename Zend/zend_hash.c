@@ -82,6 +82,148 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 
 static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht);
 
+/*
+ * HashTableShape[] - CG(shape_table)
+ * ==================================
+ *
+ *                 +=====+=====+============+============+============+
+ * idx             | key | len |   parent   |  children  | next_child |
+ *                 +=====+=====+============+============+============+
+ *  1. ([])   ---> | nil |  0  |  0 (nil)   |  2 ([a])   |  0 (nil)   |
+ *                 +-----+-----+------------+------------+------------+
+ *  2. ([a])  ---> |  a  |  1  |  1 ([])    |  0 (nil)   |  2 ([b])   |
+ *                 +-----+-----+------------+------------+------------+
+ *  3. ([b])  ---> |  b  |  1  |  1 ([])    |  4 ([b,a]) |  0 (nil)   |
+ *                 +-----+-----+------------+------------+------------+
+ *  4. ([b,a]) --> |  a  |  2  |  3 ([b])   |  0 (nil)   |  0 (nil)   |
+ *                 +-----+-----+------------+------------+------------+
+ */
+
+struct _HashTableShape {
+	zend_string *key;
+	HashTable   *hash;
+	uint32_t     len;
+	uint32_t     parent;
+	uint32_t     children;
+	uint32_t     next_child;
+};
+
+#define ZEND_EMPTY_SHAPE 1
+
+#define ZEND_INITIAL_SHAPE_TABLE_SIZE   2048
+#define ZEND_MAXIMAL_SHAPE_TABLE_SIZE   4096
+
+#define ZEND_MAXIMAL_SHAPE_LEN_LIST     8
+#define ZEND_MAXIMAL_SHAPE_LEN          4096
+
+void zend_shape_table_startup(void)
+{
+	CG(shape_table_size) = ZEND_INITIAL_SHAPE_TABLE_SIZE;
+	CG(shape_table_top) = ZEND_EMPTY_SHAPE + 1;
+	CG(persistent_shape_table_top) = CG(shape_table_top);
+	CG(shape_table) = pecalloc(CG(shape_table_size), sizeof(HashTableShape), 1);
+}
+
+void zend_shape_table_shutdown(void)
+{
+	pefree(CG(shape_table), 1);
+}
+
+static zend_never_inline void ZEND_FASTCALL zend_hash_shape_update_int(HashTable *ht, zend_string *key)
+{
+	HashTableShape *shape_table;
+	uint32_t parent;
+	zval tmp;
+
+	if (UNEXPECTED(!ZSTR_IS_INTERNED(key))) {
+		// TODO: support for non interned strings ???
+		ht->nShape = ZEND_NO_SHAPE;
+		return;
+	}
+
+	shape_table = CG(shape_table);
+	parent = ht->nShape;
+
+	if (shape_table[parent].children == ZEND_NO_SHAPE) {
+		if (CG(shape_table_top) == CG(shape_table_size)) {
+			//TODO: support for shape table resize ???
+			ht->nShape = ZEND_NO_SHAPE;
+			return;
+		}
+		shape_table[parent].children = ht->nShape = CG(shape_table_top);
+		shape_table[CG(shape_table_top)].len = shape_table[parent].len + 1;
+		shape_table[CG(shape_table_top)].key = key;
+		shape_table[CG(shape_table_top)].parent = parent;
+		CG(shape_table_top)++;
+	} else if (shape_table[parent].hash) {
+		zval *zv = _zend_hash_find_known_hash(shape_table[parent].hash, key);
+
+		if (zv) {
+			ht->nShape = Z_LVAL_P(zv);
+		} else {
+			if (UNEXPECTED(shape_table[parent].len == ZEND_MAXIMAL_SHAPE_LEN)) {
+				ht->nShape = ZEND_NO_SHAPE;
+				return;
+			}
+add_to_hash:
+			if (CG(shape_table_top) == CG(shape_table_size)) {
+				//TODO: support for shape table resize ???
+				ht->nShape = ZEND_NO_SHAPE;
+				return;
+			}
+			ZVAL_LONG(&tmp, CG(shape_table_top));
+			zend_hash_add_new(shape_table[parent].hash, key, &tmp);
+			ht->nShape = CG(shape_table_top);
+			shape_table[CG(shape_table_top)].len = shape_table[parent].len + 1;
+			shape_table[CG(shape_table_top)].key = key;
+			shape_table[CG(shape_table_top)].parent = parent;
+			CG(shape_table_top)++;
+		}
+	} else {
+		uint32_t child = shape_table[parent].children;
+		uint32_t count = ZEND_MAXIMAL_SHAPE_LEN_LIST;
+
+		do {
+			if (shape_table[child].key == key) {
+				ht->nShape = child;
+				return;
+			} else if (shape_table[child].next_child == ZEND_NO_SHAPE) {
+				if (UNEXPECTED(CG(shape_table_top) == CG(shape_table_size))) {
+					//TODO: support for shape table resize ???
+					ht->nShape = ZEND_NO_SHAPE;
+					return;
+				}
+				shape_table[child].next_child = ht->nShape = CG(shape_table_top);
+				shape_table[CG(shape_table_top)].len = shape_table[child].len;
+				shape_table[CG(shape_table_top)].key = key;
+				shape_table[CG(shape_table_top)].parent = shape_table[child].parent;
+				CG(shape_table_top)++;
+				return;
+			}
+			child = shape_table[child].next_child;
+		} while (--count);
+
+		/* Convert List to HashTable */
+		shape_table[parent].hash = pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(shape_table[parent].hash, ZEND_MAXIMAL_SHAPE_LEN_LIST * 2, NULL, NULL, 1);
+		child = shape_table[parent].children;
+		count = ZEND_MAXIMAL_SHAPE_LEN_LIST;
+		do {
+			ZVAL_LONG(&tmp, child);
+			zend_hash_add_new(shape_table[parent].hash, shape_table[child].key, &tmp);
+			child = shape_table[child].next_child;
+		} while (--count);
+		goto add_to_hash;
+	}
+}
+
+static zend_always_inline void ZEND_FASTCALL zend_hash_shape_update(HashTable *ht, zend_string *key)
+{
+	if (ht->nShape != ZEND_NO_SHAPE) {
+		zend_hash_shape_update_int(ht, key);
+	}
+}
+
 static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 {
 #if defined(ZEND_WIN32)
@@ -132,6 +274,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 	/* Don't overwrite iterator count. */
 	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET_PACKED(ht);
+	zend_hash_shape_reset(ht);
 }
 
 static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
@@ -209,7 +352,8 @@ ZEND_API const HashTable zend_empty_array = {
 	.nTableSize = HT_MIN_SIZE,
 	.nInternalPointer = 0,
 	.nNextFreeElement = 0,
-	.pDestructor = ZVAL_PTR_DTOR
+	.pDestructor = ZVAL_PTR_DTOR,
+	.nShape = ZEND_EMPTY_SHAPE
 };
 
 static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
@@ -225,6 +369,7 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 	ht->nNextFreeElement = 0;
 	ht->pDestructor = pDestructor;
 	ht->nTableSize = zend_hash_check_size(nSize);
+	ht->nShape = ZEND_NO_SHAPE;
 }
 
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
@@ -236,6 +381,7 @@ ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
 	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	ht->nShape = ZEND_EMPTY_SHAPE;
 	return ht;
 }
 
@@ -243,6 +389,7 @@ ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
 	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0);
+	ht->nShape = ZEND_EMPTY_SHAPE;
 	return ht;
 }
 
@@ -309,6 +456,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	HT_HASH_RESET_PACKED(ht);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 	pefree(old_data, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+	zend_hash_shape_reset(ht);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed)
@@ -367,6 +515,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_discard(HashTable *ht, uint32_t nNumUsed)
 		nIndex = p->h | ht->nTableMask;
 		HT_HASH_EX(arData, nIndex) = Z_NEXT(p->val);
 	}
+	zend_hash_shape_reset(ht);
 }
 
 static uint32_t zend_array_recalc_elements(HashTable *ht)
@@ -749,6 +898,7 @@ add_to_hash:
 	Z_NEXT(p->val) = HT_HASH_EX(arData, nIndex);
 	HT_HASH_EX(arData, nIndex) = HT_IDX_TO_HASH(idx);
 	ZVAL_COPY_VALUE(&p->val, pData);
+	zend_hash_shape_update(ht, p->key);
 
 	return &p->val;
 }
@@ -818,6 +968,12 @@ add_to_hash:
 	nIndex = h | ht->nTableMask;
 	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
 	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	// TODO: support for non interned strings ???
+#if 0
+	zend_hash_shape_update(ht, p->key);
+#else
+	zend_hash_shape_reset(ht);
+#endif
 
 	return &p->val;
 }
@@ -1002,6 +1158,8 @@ add:
 	p->h = h;
 	p->key = NULL;
 	ZVAL_COPY_VALUE(&p->val, pData);
+	// TODO: support for numeric keys ???
+	zend_hash_shape_reset(ht);
 
 	return &p->val;
 }
@@ -1106,6 +1264,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, 
 		Z_NEXT(b->val) = Z_NEXT(p->val);
 		Z_NEXT(p->val) = idx;
 	}
+	zend_hash_shape_reset(ht);
 	return &b->val;
 }
 
@@ -1272,6 +1431,7 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 	} else {
 		ZVAL_UNDEF(&p->val);
 	}
+	zend_hash_shape_reset(ht);
 }
 
 static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bucket *p)
@@ -1670,6 +1830,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht)
 	ht->nNumOfElements = 0;
 	ht->nNextFreeElement = 0;
 	ht->nInternalPointer = 0;
+	zend_hash_shape_reset(ht);
 }
 
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
@@ -1709,6 +1870,7 @@ ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht)
 	ht->nNumOfElements = 0;
 	ht->nNextFreeElement = 0;
 	ht->nInternalPointer = 0;
+	zend_hash_shape_reset(ht);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_graceful_destroy(HashTable *ht)
@@ -2015,6 +2177,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	GC_TYPE_INFO(target) = IS_ARRAY | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 
 	target->pDestructor = ZVAL_PTR_DTOR;
+	target->nShape = source->nShape;
 
 	if (source->nNumOfElements == 0) {
 		HT_FLAGS(target) = HASH_FLAG_UNINITIALIZED;
@@ -2495,6 +2658,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, co
 			zend_hash_rehash(ht);
 		}
 	}
+	zend_hash_shape_reset(ht);
 
 	return SUCCESS;
 }

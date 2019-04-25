@@ -321,6 +321,23 @@ static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPos
 	}
 }
 
+void zend_shape_table_startup(void);
+void zend_shape_table_shutdown(void);
+
+static zend_always_inline uint32_t zend_hash_shape(HashTable *ht)
+{
+	return ht->nShape;
+}
+
+static zend_always_inline void zend_hash_shape_set(HashTable *ht, uint32_t shape)
+{
+	ht->nShape = shape;
+}
+
+static zend_always_inline void zend_hash_shape_reset(HashTable *ht)
+{
+	ht->nShape = ZEND_NO_SHAPE;
+}
 
 END_EXTERN_C()
 
