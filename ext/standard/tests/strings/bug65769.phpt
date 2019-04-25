@@ -38,7 +38,7 @@ string(1) " "
 string(3) "SEK"
 string(2) "kr"
 string(1) ","
-string(1) "."
+string(1) " "
 ++++++++++++++++++++++
 string(18) "French_France.1252"
 string(1) ","
