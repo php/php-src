@@ -31,8 +31,10 @@ $(stamp): build/buildcheck.sh
 	@build/buildcheck.sh $@
 
 configure: configure.ac $(PHP_M4_FILES)
+# Remove aclocal.m4 if present. It is automatically included by autoconf but
+# not used by the PHP build system since PHP 7.4.
 	@echo rebuilding $@
-	@rm -f $@
+	@rm -f $@ aclocal.m4
 	@$(PHP_AUTOCONF) $(PHP_AUTOCONF_FLAGS)
 
 $(config_h_in): configure
