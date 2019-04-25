@@ -27,7 +27,7 @@ foreach ($locales as $locale) {
 		$lconv['mon_thousands_sep']
 	);
 	if ($locale === 'Swedish_Sweden.1252') {
-		var_dump(in_array($lconv['mon_thousands_sep'], [',', ' ']));
+		var_dump(in_array($lconv['mon_thousands_sep'], ['.', ' ']));
 	}
 	echo '++++++++++++++++++++++', "\n";
 }
