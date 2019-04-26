@@ -172,6 +172,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("void")},
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
+    {ZEND_STRL("arraykey")},
 	{NULL, 0}
 };
 
@@ -218,6 +219,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("void"), IS_VOID},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
+    {ZEND_STRL("arraykey"), IS_ARRAYKEY},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -5839,7 +5841,12 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 						zend_error_noreturn(E_COMPILE_ERROR,
 								"Default value for property of type float can only be float or int");
 					}
-				} else if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(type), Z_TYPE(value_zv))) {
+				} else if (ZEND_TYPE_CODE(type) == IS_ARRAYKEY) {
+                    if (Z_TYPE(value_zv) != IS_STRING && Z_TYPE(value_zv) != IS_LONG) {
+                        zend_error_noreturn(E_COMPILE_ERROR,
+                                            "Default value for property of type arraykey can only be string or int");
+                    }
+                } else if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(type), Z_TYPE(value_zv))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for property of type %s can only be %s",
 							zend_get_type_by_const(ZEND_TYPE_CODE(type)),

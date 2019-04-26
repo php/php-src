@@ -124,6 +124,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "void";
 		case _IS_NUMBER:
 			return "number";
+	    case IS_ARRAYKEY:
+	        return "arraykey";
 		default:
 			return "unknown";
 	}

@@ -422,6 +422,7 @@ struct _zend_ast_ref {
 #define IS_OBJECT					8
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
+#define IS_ARRAYKEY                 21
 
 /* constant expressions */
 #define IS_CONSTANT_AST				11
