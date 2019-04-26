@@ -405,15 +405,34 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 	}
 #else
 	/* variant with the hash unrolled eight times */
-	for (; len >= 8; len -= 8) {
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
-		hash = ((hash << 5) + hash) + *str++;
+	for (; len >= 8; len -= 8, str += 8) {
+#if defined(__aarch64__)
+		uint64_t chunk;
+		/* On some architectures it is beneficial to load 8 bytes at a
+		   time and extract each byte with a bit field extract instr. */
+		memcpy(&chunk, str, sizeof(chunk));
+		hash = 33 * 33 * 33 * 33 * hash +
+			33 * 33 * 33 * ((chunk >> (8 * 0)) & 0xff) +
+			33 * 33 * ((chunk >> (8 * 1)) & 0xff) +
+			33 * ((chunk >> (8 * 2)) & 0xff) +
+			((chunk >> (8 * 3)) & 0xff);
+		hash = 33 * 33 * 33 * 33 * hash +
+			33 * 33 * 33 * ((chunk >> (8 * 4)) & 0xff) +
+			33 * 33 * ((chunk >> (8 * 5)) & 0xff) +
+			33 * ((chunk >> (8 * 6)) & 0xff) +
+			(chunk >> (8 * 7));
+#else
+		hash = 33 * 33 * 33 * 33 * hash +
+			33 * 33 * 33 * str[0] +
+			33 * 33 * str[1] +
+			33 * str[2] +
+			str[3];
+		hash = 33 * 33 * 33 * 33 * hash +
+			33 * 33 * 33 * str[4] +
+			33 * 33 * str[5] +
+			33 * str[6] +
+			str[7];
+#endif
 	}
 	switch (len) {
 		case 7: hash = ((hash << 5) + hash) + *str++; /* fallthrough... */
