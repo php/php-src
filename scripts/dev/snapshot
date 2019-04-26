@@ -1,7 +1,82 @@
-#! /bin/sh
+#!/bin/sh
+#
+# Create a PHP release snapshot (tar.gz, tar.bz2, tar.xz) from the current Git
+# repository files. Archive files are created in the current php-src directory.
+# Used, for example, to create a nightly PHP release and similar use cases.
+# Beside the bare Git repository files, the snapshot archive also includes
+# generated configure script, configuration headers, PHP parsers, PHP lexers,
+# and similar generated files.
+#
+# SYNOPSIS:
+#   snapshot
+#
+# Environment:
+#   The following environment variables can be used:
+#
+#   DISTNAME  Override the name of the archive. Default=php-snapshot
+#             DISTNAME=php-YYYY-MM-DD snapshot
 
-if test -n "$1"; then
-  flags="DISTNAME=$1"
+DISTNAME=${DISTNAME:-php-snapshot}
+
+# Go to project root directory.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
+
+git archive --format=tar --prefix=$DISTNAME/ HEAD | tar xvf -
+
+cd $DISTNAME
+./buildconf --force
+
+# Generate lexer and parser files
+./scripts/dev/genfiles
+exit_code=$?
+if test "$exit_code" != "0"; then
+  exit $exit_code
 fi
 
-${MAKE:-make} $flags -f build/build.mk snapshot
+# Remove not needed files.
+rm -rf autom4te.cache/ buildmk.stamp
+
+# Download pear
+echo "makedist: Attempting to download PEAR's phar archive"
+if test ! -x wget; then
+  wget https://pear.php.net/install-pear-nozlib.phar -nd -P pear/
+  if [ "x$?" != "x0" ]; then
+    echo "Pear download failed" >&2
+    exit 1
+  fi
+else
+  echo "Missing wget binary needed for pear download" >&2
+  exit 1
+fi
+
+# Touch everything to be packaged.
+find . -exec touch -c {} \;
+
+cd ..
+
+echo "Creating tar archive"
+tar cf $DISTNAME.tar $DISTNAME
+rm -rf $DISTNAME $DISTNAME.tar.*
+
+echo "Creating tar.gz archive"
+gzip -9 -k $DISTNAME.tar || exit 9
+md5sum $DISTNAME.tar.gz
+gzip -t $DISTNAME.tar.gz
+
+sync
+sleep 2
+
+echo "Creating tar.bz2 archive"
+bzip2 -9 -k $DISTNAME.tar
+md5sum $DISTNAME.tar.bz2
+bzip2 -t $DISTNAME.tar.bz2
+
+sync
+sleep 2
+
+echo "Creating tar.xz archive"
+xz -9 -k $DISTNAME.tar
+md5sum $DISTNAME.tar.xz
+xz -t $DISTNAME.tar.xz
+
+rm -f $DISTNAME.tar
