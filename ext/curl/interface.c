@@ -1803,6 +1803,14 @@ static void curl_free_post(void **post)
 }
 /* }}} */
 
+/* {{{ curl_free_stream
+ */
+static void curl_free_stream(void **post)
+{
+	php_stream_close((php_stream *)*post);
+}
+/* }}} */
+
 /* {{{ curl_free_slist
  */
 static void curl_free_slist(zval *el)
@@ -1894,6 +1902,7 @@ php_curl *alloc_curl_handle()
 
 	zend_llist_init(&ch->to_free->str,   sizeof(char *),          (llist_dtor_func_t)curl_free_string, 0);
 	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
+	zend_llist_init(&ch->to_free->stream, sizeof(php_stream *),   (llist_dtor_func_t)curl_free_stream, 0);
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -2143,14 +2152,6 @@ static int seek_cb(void *arg, curl_off_t offset, int origin) /* {{{ */
 		return CURL_SEEKFUNC_CANTSEEK;
 	}
 	return CURL_SEEKFUNC_OK;
-}
-/* }}} */
-
-static void free_cb(void *arg) /* {{{ */
-{
-	php_stream *stream = (php_stream *) arg;
-
-	php_stream_close(stream);
 }
 /* }}} */
 #endif
@@ -2820,15 +2821,18 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 							}
 							part = curl_mime_addpart(mime);
 							if (part == NULL) {
+								php_stream_close(stream);
 								zend_string_release_ex(string_key, 0);
 								return FAILURE;
 							}
 							if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
-								|| (form_error = curl_mime_data_cb(part, -1, read_cb, seek_cb, free_cb, stream)) != CURLE_OK
+								|| (form_error = curl_mime_data_cb(part, -1, read_cb, seek_cb, NULL, stream)) != CURLE_OK
 								|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
 								|| (form_error = curl_mime_type(part, type ? type : "application/octet-stream")) != CURLE_OK) {
+								php_stream_close(stream);
 								error = form_error;
 							}
+							zend_llist_add_element(&ch->to_free->stream, &stream);
 #else
 							form_error = curl_formadd(&first, &last,
 											CURLFORM_COPYNAME, ZSTR_VAL(string_key),
@@ -3558,6 +3562,7 @@ static void _php_curl_close_ex(php_curl *ch)
 	if (--(*ch->clone) == 0) {
 		zend_llist_clean(&ch->to_free->str);
 		zend_llist_clean(&ch->to_free->post);
+		zend_llist_clean(&ch->to_free->stream);
 		zend_hash_destroy(ch->to_free->slist);
 		efree(ch->to_free->slist);
 		efree(ch->to_free);
