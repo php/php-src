@@ -22,7 +22,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($row);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(3) "foo"

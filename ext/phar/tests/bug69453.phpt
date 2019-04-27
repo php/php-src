@@ -4,7 +4,7 @@ Phar: bug #69453: Memory Corruption in phar_parse_tarfile when entry filename st
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/bug69453.tar.phar';
+$fname = __DIR__ . '/bug69453.tar.phar';
 try {
 $r = new Phar($fname, 0);
 } catch(UnexpectedValueException $e) {

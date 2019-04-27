@@ -3,7 +3,7 @@ Test strval() function : usage variations  - Pass all valid char codes
 --FILE--
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 
@@ -61,7 +61,7 @@ echo "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strval() : usage variations  - Pass all valid char codes ***
 000102030405060708090a0b0c0d0e0f
 101112131415161718191a1b1c1d1e1f

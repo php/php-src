@@ -2,8 +2,6 @@
 mysqli_real_escape_string() - euckr
 --SKIPIF--
 <?php
-if (ini_get('unicode.semantics'))
-	die("skip Test cannot be run in unicode mode");
 
 require_once('skipif.inc');
 require_once('skipifemb.inc');
@@ -68,7 +66,7 @@ mysqli_error($link));
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 done!

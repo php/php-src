@@ -3,7 +3,7 @@ Bug #47849 (Non-deep import loses the namespace).
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 
 $aDOM= new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('urn::root','r:root'));

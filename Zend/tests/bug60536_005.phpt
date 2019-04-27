@@ -2,10 +2,9 @@
 Introducing new private variables of the same name in a subclass is ok, and does not lead to any output. That is consitent with normal inheritance handling. (relevant to #60536)
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class Base {
-  protected $hello;    
+  protected $hello;
 }
 
 trait THello1 {
@@ -28,7 +27,7 @@ class Notice extends Base {
 }
 echo "POST-CLASS-GUARD2\n";
 ?>
---EXPECTF--	
+--EXPECT--
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 POST-CLASS-GUARD2

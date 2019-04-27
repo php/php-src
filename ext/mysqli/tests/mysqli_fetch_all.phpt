@@ -12,15 +12,6 @@ if (!function_exists('mysqli_fetch_all'))
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_fetch_all()))
-			printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_all($link)))
-			printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 2")) {
 			printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -296,8 +287,8 @@ if (!function_exists('mysqli_fetch_all'))
 
 	mysqli_close($link);
 
-	if (null !== ($tmp = mysqli_fetch_array($res, MYSQLI_ASSOC)))
-			printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_array($res, MYSQLI_ASSOC)))
+		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[016] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",

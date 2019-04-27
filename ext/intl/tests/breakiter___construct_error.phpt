@@ -2,7 +2,6 @@
 IntlRuleBasedBreakIterator::__construct(): arg errors
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip ICU >= 4.8 only'; ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -38,13 +37,12 @@ try {
 	print_exception($e);
 }
 --EXPECTF--
-
 Exception: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to create RuleBasedBreakIterator from rules (parse error on line 1, offset 31) in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct() expects at least 1 parameter, 0 given in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct() expects at most 2 parameters, 3 given in %s on line %d
 
-Exception: IntlRuleBasedBreakIterator::__construct() expects parameter 2 to be boolean, array given in %s on line %d
+Exception: IntlRuleBasedBreakIterator::__construct() expects parameter 2 to be bool, array given in %s on line %d
 
 Exception: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to create instance from compiled rules in %s on line %d

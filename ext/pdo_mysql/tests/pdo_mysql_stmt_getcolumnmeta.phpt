@@ -1,9 +1,9 @@
 --TEST--
 MySQL: PDOStatement->getColumnMeta()
 --SKIPIF--
-<?php # vim:ft=php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // Too many differences among MySQL version - run only with a recent one
 $db = MySQLPDOTest::factory();
@@ -15,7 +15,7 @@ if ($version < 51)
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 MySQLPDOTest::createTestTable($db);
@@ -30,21 +30,10 @@ try {
 		printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
 	$stmt->execute();
-	// Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 0 given in
-	if (false !== ($tmp = @$stmt->getColumnMeta()))
-		printf("[003] Expecting false got %s\n", var_export($tmp, true));
 
 	// invalid offset
 	if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
 		printf("[004] Expecting false got %s\n", var_export($tmp, true));
-
-	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be integer, array given in
-	if (false !== ($tmp = @$stmt->getColumnMeta(array())))
-		printf("[005] Expecting false got %s\n", var_export($tmp, true));
-
-	// Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 2 given in
-	if (false !== ($tmp = @$stmt->getColumnMeta(1, 1)))
-		printf("[006] Expecting false got %s\n", var_export($tmp, true));
 
 	$emulated =  $stmt->getColumnMeta(0);
 
@@ -162,37 +151,37 @@ try {
 	test_meta($db, 100, 'INT', -2147483648, 'LONG', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 	test_meta($db, 110, 'INT UNSIGNED', 4294967295, 'LONG', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 
-	test_meta($db, 120, 'BIGINT', -9223372036854775808, 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
-	test_meta($db, 130, 'BIGINT UNSIGNED', 18446744073709551615, 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
+	test_meta($db, 120, 'BIGINT', '-9223372036854775808', 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
+	test_meta($db, 130, 'BIGINT UNSIGNED', '18446744073709551615', 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
 
 	test_meta($db, 130, 'REAL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
 	test_meta($db, 140, 'REAL UNSIGNED', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
-	test_meta($db, 150, 'REAL ZEROFILL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 150, 'REAL ZEROFILL', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
 	test_meta($db, 160, 'REAL UNSIGNED ZEROFILL', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
 
 	test_meta($db, 170, 'DOUBLE', -1.01, 'DOUBLE', PDO::PARAM_STR);
 	test_meta($db, 180, 'DOUBLE UNSIGNED', 1.01, 'DOUBLE', PDO::PARAM_STR);
-	test_meta($db, 190, 'DOUBLE ZEROFILL', -1.01, 'DOUBLE', PDO::PARAM_STR);
+	test_meta($db, 190, 'DOUBLE ZEROFILL', 1.01, 'DOUBLE', PDO::PARAM_STR);
 	test_meta($db, 200, 'DOUBLE UNSIGNED ZEROFILL', 1.01, 'DOUBLE', PDO::PARAM_STR);
 
 	test_meta($db, 210, 'FLOAT', -1.01, 'FLOAT', PDO::PARAM_STR);
 	test_meta($db, 220, 'FLOAT UNSIGNED', 1.01, 'FLOAT', PDO::PARAM_STR);
-	test_meta($db, 230, 'FLOAT ZEROFILL', -1.01, 'FLOAT', PDO::PARAM_STR);
+	test_meta($db, 230, 'FLOAT ZEROFILL', 1.01, 'FLOAT', PDO::PARAM_STR);
 	test_meta($db, 240, 'FLOAT UNSIGNED ZEROFILL', 1.01, 'FLOAT', PDO::PARAM_STR);
 
 	test_meta($db, 250, 'DECIMAL', -1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 	test_meta($db, 260, 'DECIMAL UNSIGNED', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
-	test_meta($db, 270, 'DECIMAL ZEROFILL', -1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
+	test_meta($db, 270, 'DECIMAL ZEROFILL', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 	test_meta($db, 280, 'DECIMAL UNSIGNED ZEROFILL', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 
 	test_meta($db, 290, 'NUMERIC', -1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 	test_meta($db, 300, 'NUMERIC UNSIGNED', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
-	test_meta($db, 310, 'NUMERIC ZEROFILL', -1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
+	test_meta($db, 310, 'NUMERIC ZEROFILL', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 	test_meta($db, 320, 'NUMERIC UNSIGNED ZEROFILL', 1.01, array('DECIMAL', 'NEWDECIMAL'), PDO::PARAM_STR);
 
 	test_meta($db, 330, 'DATE', '2008-04-23', array('DATE', 'NEWDATE'), PDO::PARAM_STR);
 	test_meta($db, 340, 'TIME', '14:37:00', 'TIME', PDO::PARAM_STR);
-	test_meta($db, 350, 'TIMESTAMP', time(), 'TIMESTAMP', PDO::PARAM_STR);
+	test_meta($db, 350, 'TIMESTAMP', '2008-03-23 14:38:00', 'TIMESTAMP', PDO::PARAM_STR);
 	test_meta($db, 360, 'DATETIME', '2008-03-23 14:38:00', 'DATETIME', PDO::PARAM_STR);
 	test_meta($db, 370, 'YEAR', '2008', 'YEAR', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 
@@ -309,6 +298,6 @@ try {
 $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Testing native PS...
 done!

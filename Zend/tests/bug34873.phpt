@@ -22,6 +22,6 @@ $myPwa->test();
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(7) "myvalue"
 Done

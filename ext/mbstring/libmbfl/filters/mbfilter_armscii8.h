@@ -36,10 +36,3 @@ int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_ARMSCII8_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

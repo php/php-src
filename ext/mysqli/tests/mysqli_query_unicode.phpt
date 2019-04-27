@@ -16,22 +16,10 @@ mysqli_close($link);
 <?php
 	include_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_query()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_query($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require_once('table.inc');
 
 	if (TRUE !== ($tmp = @mysqli_query($link, "set names utf8")))
 		printf("[002.5] Expecting TRUE, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_query($link, "SELECT 1 AS колона", MYSQLI_USE_RESULT, "foo")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (false !== ($tmp = mysqli_query($link, 'това не е ескюел')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -87,8 +75,8 @@ mysqli_close($link);
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

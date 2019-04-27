@@ -9,9 +9,7 @@ function _array_(?array $v): ?array {
 
 var_dump(_array_(null));
 var_dump(_array_([]));
-
 --EXPECT--
 NULL
 array(0) {
 }
-

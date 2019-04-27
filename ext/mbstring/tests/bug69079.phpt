@@ -7,7 +7,7 @@ Bug #69079 (enhancement for mb_substitute_character)
 
 mb_internal_encoding('UTF-8');
 var_dump(mb_substitute_character(0x1F600));
-var_dump(bin2hex(mb_scrub("\xff"))); 
+var_dump(bin2hex(mb_scrub("\xff")));
 mb_substitute_character(0x3f); // Reset to '?', as the next call will fail
 var_dump(mb_substitute_character(0xD800)); // Surrogate (illegal)
 var_dump(bin2hex(mb_scrub("\xff")));

@@ -1,12 +1,11 @@
 --TEST--
 XMLWriter: PI, Comment, CDATA
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
 */

@@ -64,7 +64,7 @@ echo "Testing int with null null constant" . PHP_EOL;
 var_dump(int_val_default_null(null));
 
 ?>
---EXPECTF--
+--EXPECT--
 Testing int val
 int(10)
 Testing float val

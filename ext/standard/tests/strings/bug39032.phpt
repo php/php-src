@@ -10,7 +10,7 @@ var_dump(strcspn(chr(1),"qweqwe"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(1)
 int(0)
 int(1)

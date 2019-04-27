@@ -10,30 +10,16 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_field_tell()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_field_tell($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 
 	var_dump(mysqli_field_tell($res));
-	var_dump(mysqli_field_seek(1));
 	var_dump(mysqli_field_tell($res));
 	var_dump(mysqli_fetch_field($res));
 	var_dump(mysqli_fetch_field($res));
 	var_dump(mysqli_field_tell($res));
-
-	if (!is_null($tmp = @mysqli_field_tell($res, 'too many arguments')))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 
 	var_dump(mysqli_field_seek($res, 2));
 	var_dump(mysqli_field_tell($res));
@@ -60,9 +46,6 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 int(0)
-
-Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
 int(0)
 object(stdClass)#%d (13) {
   ["name"]=>
@@ -106,5 +89,5 @@ bool(true)
 int(0)
 
 Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

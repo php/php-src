@@ -54,7 +54,7 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 string(6) "string"
 string(5) "array"

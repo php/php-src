@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache, Escape Analysis                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -176,17 +176,22 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			case ZEND_NEW:
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)+1));
+					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1));
+					uint32_t forbidden_flags = ZEND_ACC_INHERITED
+						/* These flags will always cause an exception */
+						| ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
+						| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set &&
-					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
+					    !(ce->ce_flags & forbidden_flags) &&
+						(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 						return 1;
 					}
 				}
 				break;
 			case ZEND_QM_ASSIGN:
 				if (opline->op1_type == IS_CONST
-				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)) == IS_ARRAY) {
+				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)) == IS_ARRAY) {
 					return 1;
 				}
 				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
@@ -203,7 +208,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 		switch (opline->opcode) {
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
-				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants)) == IS_ARRAY) {
+				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)) == IS_ARRAY) {
 					return 1;
 				}
 				if (opline->op2_type == IS_CV && (OP2_INFO() & MAY_BE_ARRAY)) {
@@ -212,6 +217,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				break;
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				if (OP1_INFO() & (MAY_BE_UNDEF | MAY_BE_NULL | MAY_BE_FALSE)) {
 					/* implicit object/array allocation */
 					return 1;
@@ -239,7 +245,7 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 			case ZEND_NEW:
 				/* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)+1));
+					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1));
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set &&
 					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
@@ -254,6 +260,7 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 				return 1;
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				return 1;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
@@ -323,6 +330,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				/* break missing intentionally */
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				break;
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
@@ -503,7 +511,8 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 
 							if (opline->opcode == ZEND_OP_DATA &&
 							    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-							     (opline-1)->opcode == ZEND_ASSIGN_OBJ) &&
+							     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
+							     (opline-1)->opcode == ZEND_ASSIGN_OBJ_REF) &&
 							    op->op1_use == i &&
 							    (op-1)->op1_use >= 0) {
 								enclosing_root = ees[(op-1)->op1_use];
@@ -526,7 +535,6 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 								if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
 									num_non_escaped--;
 									if (num_non_escaped == 0) {
-										i = ssa_vars_count;
 										changed = 0;
 									} else {
 										changed = 1;
@@ -556,11 +564,3 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

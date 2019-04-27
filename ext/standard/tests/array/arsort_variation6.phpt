@@ -1,9 +1,9 @@
 --TEST--
-Test arsort() function : usage variations - sort hexadecimal values 
+Test arsort() function : usage variations - sort hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association. 
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -17,7 +17,7 @@ Test arsort() function : usage variations - sort hexadecimal values
 
 echo "*** Testing arsort() : usage variations ***\n";
 
-// an array contains unsorted hexadecimal values  
+// an array contains unsorted hexadecimal values
 // There are multiple keys which are duplicate and the later should be picked
 $unsorted_hex_array = array ( 0x1AB => 0x1AB, 0xFFF => 0xFFF, 0xF => 0xF, 0xFF => 0xFF, 0x2AA => 0x2AA, 0xBB => 0xBB,
                               0x1ab => 0x1ab, 0xff => 0xff, -0xff => -0xFF, 0 => 0, -0x2aa => -0x2aa
@@ -40,7 +40,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying hexadecimal value array, 'flag' value is defualt  --

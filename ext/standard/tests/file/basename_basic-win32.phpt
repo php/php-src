@@ -52,7 +52,7 @@ $file_paths = array (
   /* path with spaces */
   " ",
   ' ',
-  
+
   /* empty paths */
   "",
   '',

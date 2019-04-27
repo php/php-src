@@ -1,11 +1,5 @@
 --TEST--
 Official blowfish tests (http://cvsweb.openwall.com/cgi/cvsweb.cgi/Owl/packages/glibc/crypt_blowfish/wrapper.c)
---SKIPIF--
-<?php
-if (!function_exists('crypt') || !defined("CRYPT_BLOWFISH")) {
-    die("SKIP crypt()-blowfish is not available");
-}
-?>
 --FILE--
 <?php
 

@@ -14,7 +14,7 @@ declare (ticks=1) {
     echo "Done\n";
 }
 ?>
---EXPECTF--	
+--EXPECTF--
 hello
 Warning: unregister_tick_function(): Unable to delete tick function executed at the moment in %s on line %d
 Done

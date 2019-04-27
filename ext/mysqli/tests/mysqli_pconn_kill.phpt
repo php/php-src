@@ -91,5 +91,5 @@ mysqli.max_persistent=2
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

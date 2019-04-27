@@ -13,5 +13,5 @@ interface a{}
 class b implements a { function f($a=1) {}}
 class c extends b {function f() {}}
 ?>
---EXPECTF--
+--EXPECT--
 string(60) "Declaration of c::f() should be compatible with b::f($a = 1)"

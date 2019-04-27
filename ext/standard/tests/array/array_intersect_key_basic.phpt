@@ -1,5 +1,5 @@
 --TEST--
-array_intersect_key(): Basic Test  
+array_intersect_key(): Basic Test
 --FILE--
 <?php
 /*

@@ -1,6 +1,0 @@
-- Unify __ctor and create functions
-- Document U_* error constants
-- For IntlDateFormatter
--- Accept and produce DateTime objects in 5.3 and 6
--- Create convertor from ICU pattern to PHP pattern
-

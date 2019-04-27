@@ -12,5 +12,5 @@ $class = new class() {
 };
 var_dump($class->run());
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "Running..."

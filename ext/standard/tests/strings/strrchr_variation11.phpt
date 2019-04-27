@@ -19,7 +19,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -61,7 +61,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -80,7 +80,11 @@ $values =  array (
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( strrchr($values[$index], $values[$index]) );
+  try {
+    var_dump( strrchr($values[$index], $values[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
@@ -88,58 +92,46 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with unexpected inputs for haystack and needle ***
 -- Iteration 1 --
-bool(false)
+string(1) "0"
 -- Iteration 2 --
-bool(false)
+string(1) "1"
 -- Iteration 3 --
-bool(false)
+string(5) "12345"
 -- Iteration 4 --
-bool(false)
+string(5) "-2345"
 -- Iteration 5 --
-bool(false)
+string(4) "10.5"
 -- Iteration 6 --
-bool(false)
+string(5) "-10.5"
 -- Iteration 7 --
-bool(false)
+string(10) "1234567000"
 -- Iteration 8 --
-bool(false)
+string(4) "1E-9"
 -- Iteration 9 --
-bool(false)
+string(3) "0.5"
 -- Iteration 10 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 11 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 12 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 13 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 14 --
-
-Warning: strrchr() expects parameter 1 to be string, array given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, array given
 -- Iteration 15 --
-bool(false)
+string(1) "1"
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-bool(false)
+string(1) "1"
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
+string(6) "object"
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --
@@ -149,9 +141,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrchr() expects parameter 1 to be string, resource given in %s on line %d
-NULL
+strrchr() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

@@ -1,12 +1,11 @@
 --TEST--
-mb_stripos() 
+mb_stripos()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 // TODO: Add more encodings
 
-//$debug=true;
 ini_set('include_path','.');
 include_once('common.inc');
 
@@ -126,21 +125,9 @@ $r = mb_stripos($euc_jp, '´Ú¹ñ¸ì');
 $r = mb_stripos($euc_jp, "\n");
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
-
-// Invalid Parameters
-echo "== INVALID PARAMETER TEST ==\n";
-
-$r = mb_stripos($euc_jp,'','EUC-JP');
-($r === NULL) ? print("OK_NULL\n") : print("NG_NULL\n");
-$r = mb_stripos($euc_jp, $t_ary, 'EUC-JP');
-($r === NULL) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-$r = mb_stripos($euc_jp, $t_obj, 'EUC-JP');
-($r === NULL) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-$r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
-($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 String len: 43
 == POSITIVE OFFSET ==
 10
@@ -158,25 +145,35 @@ String len: 43
 30
 0
 == INVALID OFFSET ==
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
-ERR: Warning
+
+Warning: mb_stripos(): Offset not contained in string in %s on line %d
 OK_INVALID_OFFSET
 == OUT OF RANGE ==
 OK_OUT_RANGE
@@ -204,13 +201,4 @@ OK_NEWLINE
 0
 OK_STR
 OK_NEWLINE
-== INVALID PARAMETER TEST ==
-ERR: Warning
-OK_NULL
-ERR: Warning
-OK_ARRAY
-ERR: Warning
-OK_OBJECT
-ERR: Warning
-OK_BAD_ENCODING
 ==DONE==

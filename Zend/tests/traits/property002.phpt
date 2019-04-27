@@ -2,7 +2,6 @@
 Non-conflicting properties should work just fine.
 --FILE--
 <?php
-error_reporting(E_ALL);
 
 trait THello1 {
   public $hello = "hello";
@@ -26,7 +25,7 @@ var_dump(property_exists('TraitsTest', 'world'));
 $t = new TraitsTest;
 $t->test();
 ?>
---EXPECTF--	
+--EXPECT--
 bool(true)
 bool(true)
 hello World!

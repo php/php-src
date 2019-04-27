@@ -10,15 +10,15 @@ Test sha1_file() function with ASCII output and raw binary output. Based on ext/
 echo "*** Testing sha1_file() : basic functionality ***\n";
 
 /* Creating an empty file */
-if (($handle = fopen( "EmptyFile.txt", "w+")) == FALSE)
+if (($handle = fopen( "EmptyFileSHA1.txt", "w+")) == FALSE)
 return false;
 
 /* Creating a data file */
-if (($handle2 = fopen( "DataFile.txt", "w+")) == FALSE)
+if (($handle2 = fopen( "DataFileSHA1.txt", "w+")) == FALSE)
 return false;
 
-/* Writing into file */ 
-$filename = "DataFile.txt";
+/* Writing into file */
+$filename = "DataFileSHA1.txt";
 $content = "Add this to the file\n";
 if (is_writable($filename)) {
   if (fwrite($handle2, $content) === FALSE) {
@@ -27,7 +27,7 @@ if (is_writable($filename)) {
   }
 }
 
-// close the files 
+// close the files
 fclose($handle);
 fclose($handle2);
 
@@ -46,27 +46,21 @@ var_dump( sha1_file(12) );
 echo "\n-- NULL as filename --\n";
 var_dump( sha1_file(NULL) );
 
-echo "\n-- Zero arguments --\n";
- var_dump ( sha1_file() );
-
-echo "\n-- More than valid number of arguments ( valid is 2) --\n";
-var_dump ( sha1_file("EmptyFile.txt", true, NULL) );
-
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
-var_dump( sha1_file("EmptyFile.txt") );
+var_dump( sha1_file("EmptyFileSHA1.txt") );
 
 echo "\n-- Raw Binary Output for Empty file as Argument --\n";
-var_dump( bin2hex(sha1_file("EmptyFile.txt", true)));
+var_dump( bin2hex(sha1_file("EmptyFileSHA1.txt", true)));
 
 echo "\n-- Hexadecimal Output for a valid file with some contents --\n";
-var_dump( sha1_file("DataFile.txt") );
+var_dump( sha1_file("DataFileSHA1.txt") );
 
 echo "\n-- Raw Binary Output for a valid file with some contents --\n";
-var_dump ( bin2hex(sha1_file("DataFile.txt", true)));
+var_dump ( bin2hex(sha1_file("DataFileSHA1.txt", true)));
 
 // remove temp files
-unlink("DataFile.txt");
-unlink("EmptyFile.txt");
+unlink("DataFileSHA1.txt");
+unlink("EmptyFileSHA1.txt");
 
 ?>
 ===DONE===
@@ -94,16 +88,6 @@ bool(false)
 
 Warning: sha1_file(): Filename cannot be empty in %s on line %d
 bool(false)
-
--- Zero arguments --
-
-Warning: sha1_file() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- More than valid number of arguments ( valid is 2) --
-
-Warning: sha1_file() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

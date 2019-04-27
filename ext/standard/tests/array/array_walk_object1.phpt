@@ -1,9 +1,9 @@
 --TEST--
-Test array_walk() function : object functionality  
+Test array_walk() function : object functionality
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -40,10 +40,10 @@ class MyClass
     $this->pub_value = $setVal;
     $this->pro_value = $setVal;
   }
-};    
+};
 
 // object for 'input' argument
-$input = new MyClass(10); 
+$input = new MyClass(10);
 
 var_dump( array_walk($input, "callback", 1));
 

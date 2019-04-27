@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -48,7 +46,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMText extends DOMCharacterData
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
 * Since:
 */
 
@@ -61,11 +59,9 @@ const zend_function_entry php_dom_text_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMText::__construct([string value]); */
+/* {{{ proto DOMText::__construct([string value]); */
 PHP_METHOD(domtext, __construct)
 {
-
-	zval *id = getThis();
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
@@ -82,7 +78,7 @@ PHP_METHOD(domtext, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {
@@ -149,7 +145,8 @@ PHP_FUNCTION(dom_text_split_text)
 	int         length;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_text_class_entry, &offset) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
 		return;
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -194,7 +191,7 @@ PHP_FUNCTION(dom_text_split_text)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto boolean dom_text_is_whitespace_in_element_content()
+/* {{{ proto bool dom_text_is_whitespace_in_element_content()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
@@ -204,7 +201,8 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 	xmlNodePtr  node;
 	dom_object	*intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_text_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -228,12 +226,3 @@ PHP_FUNCTION(dom_text_replace_whole_text)
 /* }}} end dom_text_replace_whole_text */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with boolean 
+Test fscanf() function: usage variations - char formats with boolean
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ Test fscanf() function: usage variations - char formats with boolean
 
 /* Test fscanf() to scan boolean data using different char format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different char format types with boolean data ***\n"; 
+echo "*** Test fscanf(): different char format types with boolean data ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation25.tmp";
@@ -31,7 +31,7 @@ $bool_types = array (
 $char_formats = array( "%c",
 		       "%hc", "%lc", "%Lc",
 		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c", 
+		       "\t%c", "\n%c", "%4c",
 		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
@@ -66,7 +66,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation25.tmp";
 unlink($filename);
 ?>
@@ -291,4 +291,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

@@ -34,7 +34,7 @@ aux('ufunc');
 echo "Done.\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 => array_multisort:
 
 Name: arr1

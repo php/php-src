@@ -5,7 +5,7 @@ ZE2 object references
 
 class Foo {
 	public $name;
-    
+
 	function __construct() {
 		$this->name = "I'm Foo!\n";
 	}

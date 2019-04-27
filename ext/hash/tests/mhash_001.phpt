@@ -1,9 +1,7 @@
 --TEST--
-mhash() test
+MHash: mhash() test
 --SKIPIF--
-<?php
-	include "skip_mhash.inc";
-?>
+<?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
 --FILE--
 <?php
 

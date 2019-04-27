@@ -31,7 +31,7 @@ $paths = array (
 			'..',
 			'...',
 			'/usr/lib/.../afile'
-						
+
 );
 
 $counter = 1;
@@ -48,7 +48,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
 string(1) "."
@@ -270,4 +270,3 @@ array(3) {
   string(5) "afile"
 }
 Done
-

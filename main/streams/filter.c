@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Wez Furlong <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_globals.h"
@@ -44,9 +42,13 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void)
 }
 
 /* API for registering GLOBAL filters */
-PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory)
+PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const php_stream_filter_factory *factory)
 {
-	return zend_hash_str_add_ptr(&stream_filters_hash, filterpattern, strlen(filterpattern), factory) ? SUCCESS : FAILURE;
+	int ret;
+	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), 1);
+	ret = zend_hash_add_ptr(&stream_filters_hash, str, (void*)factory) ? SUCCESS : FAILURE;
+	zend_string_release_ex(str, 1);
+	return ret;
 }
 
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
@@ -55,15 +57,15 @@ PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory)
+PHPAPI int php_stream_filter_register_factory_volatile(zend_string *filterpattern, const php_stream_filter_factory *factory)
 {
 	if (!FG(stream_filters)) {
 		ALLOC_HASHTABLE(FG(stream_filters));
-		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash), NULL, NULL, 1);
+		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash) + 1, NULL, NULL, 0);
 		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL);
 	}
 
-	return zend_hash_str_add_ptr(FG(stream_filters), (char*)filterpattern, strlen(filterpattern), factory) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(FG(stream_filters), filterpattern, (void*)factory) ? SUCCESS : FAILURE;
 }
 
 /* Buckets */
@@ -220,7 +222,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
-	php_stream_filter_factory *factory = NULL;
+	const php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
 	size_t n;
 	char *period;
@@ -260,7 +262,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	return filter;
 }
 
-PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
+PHPAPI php_stream_filter *_php_stream_filter_alloc(const php_stream_filter_ops *fops, void *abstract, uint8_t persistent STREAMS_DC)
 {
 	php_stream_filter *filter;
 
@@ -501,12 +503,3 @@ PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, in
 	}
 	return filter;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

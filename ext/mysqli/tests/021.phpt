@@ -49,7 +49,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(10) "1234567890"

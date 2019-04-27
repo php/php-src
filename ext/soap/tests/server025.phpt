@@ -25,7 +25,7 @@ function test() {
 	return "Hello Body!";
 }
 
-$server = new soapserver(dirname(__FILE__)."/server025.wsdl");
+$server = new soapserver(__DIR__."/server025.wsdl");
 $server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

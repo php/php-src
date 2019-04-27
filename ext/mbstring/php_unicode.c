@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -312,6 +312,14 @@ static int convert_case_filter(int c, void *void_data)
 	struct convert_case_data *data = (struct convert_case_data *) void_data;
 	unsigned out[3];
 	unsigned len, i;
+
+	/* Handle invalid characters early, as we assign special meaning to
+	 * codepoints above 0xffffff. */
+	if (UNEXPECTED(c > 0xffffff)) {
+		(*data->next_filter->filter_function)(c, data->next_filter);
+		return 0;
+	}
+
 	switch (data->case_mode) {
 		case PHP_UNICODE_CASE_UPPER_SIMPLE:
 			out[0] = php_unicode_toupper_simple(c, data->no_encoding);
@@ -363,9 +371,7 @@ static int convert_case_filter(int c, void *void_data)
 			}
 			break;
 		}
-		default:
-			assert(0);
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	for (i = 0; i < len; i++) {
@@ -376,7 +382,7 @@ static int convert_case_filter(int c, void *void_data)
 
 MBSTRING_API char *php_unicode_convert_case(
 		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const mbfl_encoding *src_encoding)
+		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
 {
 	struct convert_case_data data;
 	mbfl_convert_filter *from_wchar, *to_wchar;
@@ -402,6 +408,11 @@ MBSTRING_API char *php_unicode_convert_case(
 		mbfl_memory_device_clear(&device);
 		return NULL;
 	}
+
+	to_wchar->illegal_mode = illegal_mode;
+	to_wchar->illegal_substchar = illegal_substchar;
+	from_wchar->illegal_mode = illegal_mode;
+	from_wchar->illegal_substchar = illegal_substchar;
 
 	data.next_filter = from_wchar;
 	data.no_encoding = src_encoding->no_encoding;
@@ -436,12 +447,3 @@ MBSTRING_API char *php_unicode_convert_case(
 
 
 #endif /* HAVE_MBSTRING */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -91,7 +91,7 @@ if ($result){
 $link->close();
 ?>
 done
---EXPECTF--
+--EXPECT--
 Using 'i':
 insert id:1311200011005001566=>1311200011005001566
 fetch  id:1311200011005001566

@@ -98,7 +98,6 @@ echo $fn(" OK".PHP_EOL);
 ?>
 ===DONE===
 --EXPECT--
-
 Access public static function OK
 Access public static function with different case OK
 Access public static function with colon scheme OK

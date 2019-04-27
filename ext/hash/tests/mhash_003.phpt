@@ -1,9 +1,7 @@
 --TEST--
-mhash_keygen_s2k() test
+MHash: mhash_keygen_s2k() test
 --SKIPIF--
-<?php
-	include "skip_mhash.inc";
-?>
+<?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
 --FILE--
 <?php
 

@@ -7,10 +7,10 @@ Emmanuel Dreyfus <manu@netbsd.org>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
 	$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-	$r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees')),
+	$r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
 	$info = ldap_get_entries($link, $r)[0];
 	if (!isset($info['dynamicsubtrees'])) {
-		die("Overlay DDS not available");
+		die("skip Overlay DDS not available");
 	}
 ?>
 --FILE--
@@ -38,6 +38,6 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "cn=tmp,$base");
 remove_dummy_data($link, $base);
 ?>
---EXPECTF--
+--EXPECT--
 int(1234)
 ===DONE===

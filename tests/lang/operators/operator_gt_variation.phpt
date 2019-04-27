@@ -1,12 +1,8 @@
 --TEST--
 Test > operator : max int 32bit range
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --FILE--
 <?php
- 
+
 define("MAX_64Bit", 9223372036854775807);
 define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -9223372036854775807 - 1);
@@ -54,7 +50,7 @@ for ($i = 0; $i < count($invalidGreaterThan); $i +=2) {
 if ($failed == false) {
    echo "Test Passed\n";
 }
-   
+
 ?>
 ===DONE===
 --EXPECT--

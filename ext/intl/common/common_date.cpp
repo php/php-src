@@ -25,6 +25,9 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
+using icu::TimeZone;
+using icu::UnicodeString;
+
 #include "zend_portability.h"
 
 /* {{{ timezone_convert_datetimezone
@@ -80,14 +83,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 
 	UnicodeString s = UnicodeString(id, id_len, US_INV);
 	timeZone = TimeZone::createTimeZone(s);
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	if (*timeZone == TimeZone::getUnknown()) {
-#else
-	UnicodeString resultingId;
-	timeZone->getID(resultingId);
-	if (resultingId == UnicodeString("Etc/Unknown", -1, US_INV)
-			|| resultingId == UnicodeString("GMT", -1, US_INV)) {
-#endif
 		spprintf(&message, 0, "%s: time zone id '%s' "
 			"extracted from ext/date DateTimeZone not recognized", func, id);
 		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
@@ -241,4 +237,3 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 
 	return rv;
 }
-

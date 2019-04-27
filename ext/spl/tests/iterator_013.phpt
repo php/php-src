@@ -47,7 +47,7 @@ foreach($it as $key=>$val)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===Empty===
 ===Append===
 0=>A

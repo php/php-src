@@ -1,6 +1,5 @@
 --TEST--
 Test intval() function with "0b" string prefix
---SKIPIF--
 --FILE--
 <?php
 
@@ -66,7 +65,7 @@ foreach ($badInputs as $input) {
 print '--- Done ---';
 
 ?>
---EXPECTF--
+--EXPECT--
 --- Good Inputs - Base = 0 ---
 int(2147483647)
 int(2147483647)

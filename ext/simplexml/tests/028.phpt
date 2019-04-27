@@ -3,7 +3,7 @@ SimpleXML: Adding an elements without text
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <people></people>
 EOF;
@@ -32,7 +32,7 @@ traverse_xml($people);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 <people>
 </people>
 <people>

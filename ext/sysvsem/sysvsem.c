@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Gavin Sherry <gavin@linuxworld.com.au>                      |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* Latest update build anc tested on Linux 2.2.14
  *
@@ -41,6 +39,7 @@
 #include <errno.h>
 
 #include "php_sysvsem.h"
+#include "ext/standard/info.h"
 
 #if !HAVE_SEMUN
 
@@ -80,7 +79,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ sysvsem_functions[]
  */
-const zend_function_entry sysvsem_functions[] = {
+static const zend_function_entry sysvsem_functions[] = {
 	PHP_FE(sem_get,			arginfo_sem_get)
 	PHP_FE(sem_acquire,		arginfo_sem_acquire)
 	PHP_FE(sem_release,		arginfo_sem_release)
@@ -99,7 +98,7 @@ zend_module_entry sysvsem_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	PHP_MINFO(sysvsem),
 	PHP_SYSVSEM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -175,6 +174,16 @@ PHP_MINIT_FUNCTION(sysvsem)
 {
 	php_sysvsem_module.le_sem = zend_register_list_destructors_ex(release_sysvsem_sem, NULL, "sysvsem", module_number);
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(sysvsem)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "sysvsem support", "enabled");
+	php_info_print_table_end();
 }
 /* }}} */
 
@@ -397,7 +406,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL, E_WARNING, "failed for SysV sempphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for SysV semaphore " ZEND_LONG_FMT ": %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -412,12 +421,3 @@ PHP_FUNCTION(sem_remove)
 /* }}} */
 
 #endif /* HAVE_SYSVSEM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

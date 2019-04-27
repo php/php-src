@@ -3,7 +3,7 @@ Bug #33414 [1] (Comprehensive list of incorrect days returned after strotime() /
 --INI--
 date.timezone=America/Mendoza
 --FILE--
-<?php 
+<?php
 
 print "TZ=America/Mendoza - wrong day.\n";
 $tStamp = mktime (17, 17, 17, 1, 8327, 1970);
@@ -63,27 +63,27 @@ print "wanted=Friday              00:00:00\n\n";
 
 print "TZ=America/Havana - wrong day.\n";
 date_default_timezone_set("America/Havana");
-$tStamp = mktime (17, 17, 17, 1, 12720, 1970);  
+$tStamp = mktime (17, 17, 17, 1, 12720, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday             00:00:00\n\n";
 
 print "TZ=Europe/Tallinn - wrong day.\n";
-date_default_timezone_set("Europe/Tallinn");   
+date_default_timezone_set("Europe/Tallinn");
 $tStamp = mktime (17, 17, 17, 1, 11777, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Saturday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Saturday          00:00:00\n\n";  
+print "wanted=Saturday          00:00:00\n\n";
 
-print "TZ=Asia/Jerusalem - wrong day.\n";     
+print "TZ=Asia/Jerusalem - wrong day.\n";
 date_default_timezone_set("Asia/Jerusalem");
 $tStamp = mktime (17, 17, 17, 1, 13056, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Thursday             00:00:00\n\n";         
+print "wanted=Thursday             00:00:00\n\n";
 
 print "TZ=Europe/Vilnius - wrong day.\n";
 date_default_timezone_set("Europe/Vilnius");
@@ -95,11 +95,11 @@ print "wanted=Friday            00:00:00\n\n";
 
 print "TZ=Pacific/Kwajalein - wrong day.\n";
 date_default_timezone_set("Pacific/Kwajalein");
-$tStamp = mktime (17, 17, 17, 1, 8626, 1970);
+$tStamp = mktime (17, 17, 17, 1, 8627, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Friday", $tStamp);
+$strtotime_tstamp = strtotime("next Saturday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Friday            00:00:00\n\n";
+print "wanted=Sunday            00:00:00\n\n";
 
 print "TZ=Asia/Ulan_Bator - wrong day.\n";
 date_default_timezone_set("Asia/Ulan_Bator");
@@ -141,29 +141,29 @@ $strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Thursday            00:00:00\n\n";
 
-print "TZ=Asia/Kuala_Lumpur - wrong day.\n";     
+print "TZ=Asia/Kuala_Lumpur - wrong day.\n";
 date_default_timezone_set("Asia/Kuala_Lumpur");
 $tStamp = mktime (17, 17, 17, 1, 4380, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Monday            00:00:00\n\n";            
+print "wanted=Monday            00:00:00\n\n";
 
-print "TZ=Pacific/Chatham - wrong day.\n";       
-date_default_timezone_set("Pacific/Chatham");  
+print "TZ=Pacific/Chatham - wrong day.\n";
+date_default_timezone_set("Pacific/Chatham");
 $tStamp = mktime (17, 17, 17, 1, 1762, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Monday            00:00:00\n\n";            
+print "wanted=Monday            00:00:00\n\n";
 
-print "TZ=America/Lima - wrong day.\n";        
-date_default_timezone_set("America/Lima");   
-$tStamp = mktime (17, 17, 17, 1, 5839, 1970); 
+print "TZ=America/Lima - wrong day.\n";
+date_default_timezone_set("America/Lima");
+$tStamp = mktime (17, 17, 17, 1, 5839, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Thursday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Thursday            00:00:00\n\n";          
+print "wanted=Thursday            00:00:00\n\n";
 
 print "TZ=Asia/Karachi - wrong day.\n";
 date_default_timezone_set("Asia/Karachi");
@@ -256,9 +256,9 @@ result=Friday 2003-04-04 00:00:00 EEST 1
 wanted=Friday            00:00:00
 
 TZ=Pacific/Kwajalein - wrong day.
-tStamp=Friday 1993-08-13 17:17:17 -12 0
-result=Saturday 1993-08-21 00:00:00 +12 0
-wanted=Friday            00:00:00
+tStamp=Saturday 1993-08-14 17:17:17 -12 0
+result=Sunday 1993-08-22 00:00:00 +12 0
+wanted=Sunday            00:00:00
 
 TZ=Asia/Ulan_Bator - wrong day.
 tStamp=Saturday 2001-09-22 17:17:17 +09 1

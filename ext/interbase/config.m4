@@ -1,6 +1,8 @@
-PHP_ARG_WITH(interbase,for Firebird support,
-[  --with-interbase[=DIR]    Include Firebird support.  DIR is the Firebird base
-                          install directory [/opt/firebird]])
+PHP_ARG_WITH([interbase],
+  [for Firebird support],
+  [AS_HELP_STRING([[--with-interbase[=DIR]]],
+    [Include Firebird support. DIR is the Firebird base install directory
+    [/opt/firebird]])])
 
 if test "$PHP_INTERBASE" != "no"; then
 
@@ -46,7 +48,7 @@ if test "$PHP_INTERBASE" != "no"; then
     ], [
       -L$IBASE_LIBDIR
     ])
-  
+
     PHP_ADD_LIBRARY_WITH_PATH($IBASE_LIBNAME, $IBASE_LIBDIR, INTERBASE_SHARED_LIBADD)
     PHP_ADD_INCLUDE($IBASE_INCDIR)
   fi

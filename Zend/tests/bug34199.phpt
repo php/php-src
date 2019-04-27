@@ -15,4 +15,3 @@ if(!$kids) echo "ok\n"; else echo "bug\n";
 bool(false)
 ok
 ok
-

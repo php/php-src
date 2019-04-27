@@ -3,7 +3,7 @@ Test rsort() function : object functionality - different visibilities
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -51,7 +51,7 @@ class for_string_rsort
 
 // array of integer objects
 
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_rsort(11,33,30),
   new for_integer_rsort(66,44,4),
   new for_integer_rsort(-88,-5,5),
@@ -59,8 +59,8 @@ $unsorted_int_obj = array(
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
-  new for_string_rsort("axx","AXX","ass"), 
+$unsorted_str_obj = array (
+  new for_string_rsort("axx","AXX","ass"),
   new for_string_rsort("t","eee","abb"),
   new for_string_rsort("w","W", "c"),
   new for_string_rsort("py","PY", "pt"),
@@ -92,7 +92,6 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing rsort() : object functionality ***
 

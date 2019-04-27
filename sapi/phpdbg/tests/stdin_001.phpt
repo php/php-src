@@ -11,7 +11,7 @@ r
 c
 r
 q
---EXPECTF--
+--EXPECT--
 prompt> [Successful compilation of stdin input]
 prompt> [Breakpoint #0 added at Standard input code:3]
 prompt> [Breakpoint #0 at Standard input code:3, hits: 1]

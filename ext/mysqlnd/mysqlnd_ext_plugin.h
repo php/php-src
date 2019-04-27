@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
-  |          Johannes Schlüter <johannes@php.net>                        |
+  |          Johannes SchlÃ¼ter <johannes@php.net>                        |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
@@ -35,7 +35,7 @@ struct st_mysqlnd_plugin__plugin_area_getters
 	void ** (*get_vio_area)(const MYSQLND_VIO * vio, const unsigned int plugin_id);
 };
 
-extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
+PHPAPI extern struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters;
 
 #define mysqlnd_plugin_get_plugin_connection_data(c, p_id)				mysqlnd_plugin_area_getters.get_connection_area((c), (p_id))
 #define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id)			mysqlnd_plugin_area_getters.get_connection_data_area((c), (p_id))
@@ -117,14 +117,14 @@ struct st_mysqlnd_plugin_methods_xetters
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * methods);
 	} error_info;
 
-	struct st_mnd_command_factory_xetters
+	struct st_mnd_command_xetters
 	{
-		func_mysqlnd__command_factory (*get)();
-		void (*set)(func_mysqlnd__command_factory factory);
-	} command_factory;
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * (*get)();
+		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * methods);
+	} command;
 };
 
-extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
+PHPAPI extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 
 
 #define mysqlnd_object_factory_get_methods()	mysqlnd_plugin_methods_xetters.object_factory.get()
@@ -157,19 +157,10 @@ extern struct st_mysqlnd_plugin_methods_xetters mysqlnd_plugin_methods_xetters;
 #define mysqlnd_vio_get_methods()		mysqlnd_plugin_methods_xetters.vio.get()
 #define mysqlnd_vio_set_methods(m)		mysqlnd_plugin_methods_xetters.vio.set((m))
 
-#define mysqlnd_command_factory_get()		mysqlnd_plugin_methods_xetters.command_factory.get()
-#define mysqlnd_command_factory_set(m)		mysqlnd_plugin_methods_xetters.command_factory.set((m))
+#define mysqlnd_command_get_methods()		mysqlnd_plugin_methods_xetters.command.get()
+#define mysqlnd_command_set_methods(m)		mysqlnd_plugin_methods_xetters.command.set((m))
 
 #define mysqlnd_error_info_get_methods()	mysqlnd_plugin_methods_xetters.error_info.get()
 #define mysqlnd_error_info_set_methods(m)	mysqlnd_plugin_methods_xetters.error_info.set((m))
 
 #endif	/* MYSQLND_EXT_PLUGIN_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

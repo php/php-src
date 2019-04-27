@@ -1,11 +1,11 @@
 --TEST--
-Test array_fill_keys() function : variation of parameter 
+Test array_fill_keys() function : variation of parameter
 --FILE--
 <?php
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
- * Description: Create an array using the elements of the first parameter as keys each initialized to val 
+ * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /* Testing with reference types for the arguments */
@@ -46,7 +46,7 @@ var_dump(array_fill_keys($refArray, $simpleStr));
 fclose($fp);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_fill_keys() : parameter variations ***
 
 -- Testing array_fill_keys() function with reference value --

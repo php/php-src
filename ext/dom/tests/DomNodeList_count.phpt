@@ -22,7 +22,7 @@ var_dump($root->childNodes->count());
 var_dump(count($root->childNodes));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(7)
 int(7)
 int(7)

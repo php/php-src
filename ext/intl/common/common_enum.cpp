@@ -127,7 +127,7 @@ static void string_enum_destroy_it(zend_object_iterator *iter)
 	delete (StringEnumeration*)Z_PTR(iter->data);
 }
 
-static zend_object_iterator_funcs string_enum_object_iterator_funcs = {
+static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
@@ -183,7 +183,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 		return NULL;
 	}
 
-	++GC_REFCOUNT(&ii->iterator->std);
+	GC_ADDREF(&ii->iterator->std);
 
 	return ii->iterator;
 }
@@ -211,16 +211,13 @@ static PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::current: bad arguments", 0);
 		return;
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
 	if (data) {
-		ZVAL_DEREF(data);
-		ZVAL_COPY(return_value, data);
+		ZVAL_COPY_DEREF(return_value, data);
 	}
 }
 
@@ -229,8 +226,6 @@ static PHP_METHOD(IntlIterator, key)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::key: bad arguments", 0);
 		return;
 	}
 
@@ -248,8 +243,6 @@ static PHP_METHOD(IntlIterator, next)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::next: bad arguments", 0);
 		return;
 	}
 
@@ -265,8 +258,6 @@ static PHP_METHOD(IntlIterator, rewind)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::rewind: bad arguments", 0);
 		return;
 	}
 
@@ -284,8 +275,6 @@ static PHP_METHOD(IntlIterator, valid)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"IntlIterator::valid: bad arguments", 0);
 		return;
 	}
 
@@ -296,7 +285,7 @@ static PHP_METHOD(IntlIterator, valid)
 ZEND_BEGIN_ARG_INFO_EX(ainfo_se_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry IntlIterator_class_functions[] = {
+static const zend_function_entry IntlIterator_class_functions[] = {
 	PHP_ME(IntlIterator,	current,	ainfo_se_void,			ZEND_ACC_PUBLIC)
 	PHP_ME(IntlIterator,	key,		ainfo_se_void,			ZEND_ACC_PUBLIC)
 	PHP_ME(IntlIterator,	next,		ainfo_se_void,			ZEND_ACC_PUBLIC)
@@ -321,7 +310,7 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	zend_class_implements(IntlIterator_ce_ptr, 1,
 		zend_ce_iterator);
 
-	memcpy(&IntlIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;

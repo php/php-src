@@ -1,9 +1,9 @@
 --TEST--
 new mysqli()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -156,7 +156,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["testing"]=>
   string(19) "mysqli.default_port"

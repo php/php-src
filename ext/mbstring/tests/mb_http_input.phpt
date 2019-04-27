@@ -1,5 +1,5 @@
 --TEST--
-mb_http_input() 
+mb_http_input()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
@@ -14,7 +14,7 @@ b=日本語0123456789日本語カタカナひらがな
 <?php
 // TODO: This is not a real test.... Need to change so that it does real testing
 //$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 $ini = ini_get('mbstring.http_input');
@@ -43,9 +43,7 @@ else {
 }
 
 ?>
-
 --EXPECT--
 日本語0123456789日本語カタカナひらがな
 日本語0123456789日本語カタカナひらがな
 OK
-

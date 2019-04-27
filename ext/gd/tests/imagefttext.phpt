@@ -1,7 +1,7 @@
 --TEST--
 imagefttext() function test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
@@ -11,7 +11,7 @@ imagefttext() function test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 	$fontfile_8859 = "$cwd/test8859.ttf";
 
 	function testrun($im, $fontfile) {

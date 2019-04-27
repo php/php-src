@@ -10,15 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-	if (!is_null($tmp = @mysqli_fetch_fields()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_fields($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 
@@ -55,8 +47,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (NULL !== ($tmp = mysqli_fetch_fields($res)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_fields($res)))
+		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	print "done!";

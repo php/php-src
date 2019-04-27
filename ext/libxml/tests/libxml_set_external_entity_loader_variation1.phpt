@@ -43,7 +43,6 @@ $r = $dd->loadXML($xml);
 var_dump($dd->validate());
 
 echo "Done.\n";
-
 --EXPECTF--
 string(10) "-//FOO/BAR"
 string(25) "http://example.com/foobar"

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ibase_errcode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, role)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 0)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -318,7 +318,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ extension definition structures */
-const zend_function_entry ibase_functions[] = {
+static const zend_function_entry ibase_functions[] = {
 	PHP_FE(ibase_connect, 		arginfo_ibase_connect)
 	PHP_FE(ibase_pconnect, 		arginfo_ibase_pconnect)
 	PHP_FE(ibase_close, 		arginfo_ibase_close)
@@ -833,9 +833,6 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
-#ifdef PHP_WIN32
-		FreeLibrary(l);
-#endif
 	} while (0);
 #endif
 	php_info_print_table_end();
@@ -872,7 +869,7 @@ int _php_ibase_attach_db(char **args, size_t *len, zend_long *largs, isc_db_hand
 		buf_len -= dpb_len;
 	}
 	if (largs[SYNC] && buf_len > 0) {
-		dpb_len = slprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync ? 1 : 0);
+		dpb_len = slprintf(dpb, buf_len, "%c\1%c", isc_dpb_force_write, largs[SYNC] == isc_spb_prp_wm_sync);
 		dpb += dpb_len;
 		buf_len -= dpb_len;
 	}
@@ -942,13 +939,15 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 		xlink = (zend_resource*) le->ptr;
 		if ((!persistent && xlink->type == le_link) || xlink->type == le_plink) {
-			if (IBG(default_link)) {
-				zend_list_close(IBG(default_link));
+			if (IBG(default_link) != xlink) {
+				GC_ADDREF(xlink);
+				if (IBG(default_link)) {
+					zend_list_delete(IBG(default_link));
+				}
+				IBG(default_link) = xlink;
 			}
-			xlink->gc.refcount++;
-			xlink->gc.refcount++;
-			IBG(default_link) = xlink;
-			RETVAL_RES(xlink);
+			GC_ADDREF(xlink);
+			RETURN_RES(xlink);
 		} else {
 			zend_hash_str_del(&EG(regular_list), hash, sizeof(hash)-1);
 		}
@@ -991,18 +990,13 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 			RETVAL_RES(zend_register_resource(ib_link, le_link));
 		} else {
-			zend_resource new_le;
-
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			if (!ib_link) {
 				RETURN_FALSE;
 			}
 
 			/* hash it up */
-			new_le.type = le_plink;
-			new_le.ptr = ib_link;
-			if (zend_hash_str_update_mem(&EG(persistent_list), hash, sizeof(hash)-1,
-					(void *) &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(hash, sizeof(hash)-1, ib_link, le_plink) == NULL) {
 				free(ib_link);
 				RETURN_FALSE;
 			}
@@ -1020,10 +1014,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	/* add it to the hash */
 	new_index_ptr.ptr = (void *) Z_RES_P(return_value);
 	new_index_ptr.type = le_index_ptr;
-	if (zend_hash_str_update_mem(&EG(regular_list), hash, sizeof(hash)-1,
-			(void *) &new_index_ptr, sizeof(zend_resource)) == NULL) {
-		RETURN_FALSE;
-	}
+	zend_hash_str_update_mem(&EG(regular_list), hash, sizeof(hash)-1,
+			(void *) &new_index_ptr, sizeof(zend_resource));
 	if (IBG(default_link)) {
 		zend_list_delete(IBG(default_link));
 	}
@@ -1033,7 +1025,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 }
 /* }}} */
 
-/* {{{ proto resource ibase_connect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_connect([string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]]])
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
 {
@@ -1041,7 +1033,7 @@ PHP_FUNCTION(ibase_connect)
 }
 /* }}} */
 
-/* {{{ proto resource ibase_pconnect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_pconnect([string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]]])
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
@@ -1133,7 +1125,7 @@ PHP_FUNCTION(ibase_drop_db)
 PHP_FUNCTION(ibase_trans)
 {
 	unsigned short i, link_cnt = 0, tpb_len = 0;
-	int argn;
+	int argn = ZEND_NUM_ARGS();
 	char last_tpb[TPB_MAX_SIZE];
 	ibase_db_link **ib_link = NULL;
 	ibase_trans *ib_trans;
@@ -1141,8 +1133,6 @@ PHP_FUNCTION(ibase_trans)
 	ISC_STATUS result;
 
 	RESET_ERRMSG;
-
-	argn = ZEND_NUM_ARGS();
 
 	/* (1+argn) is an upper bound for the number of links this trans connects to */
 	ib_link = (ibase_db_link **) safe_emalloc(sizeof(ibase_db_link *),1+argn,0);
@@ -1153,7 +1143,7 @@ PHP_FUNCTION(ibase_trans)
 		ISC_TEB *teb;
 		zval *args = NULL;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argn) == FAILURE) {
+		if (zend_parse_parameters(argn, "+", &args, &argn) == FAILURE) {
 			efree(ib_link);
 			RETURN_FALSE;
 		}
@@ -1475,12 +1465,3 @@ PHP_FUNCTION(ibase_gen_id)
 /* }}} */
 
 #endif /* HAVE_IBASE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

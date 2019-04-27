@@ -33,7 +33,7 @@ checktimeout($s, 500);
 if (!socket_recv($s, $buf, 20, 0)) die("recv");
 print_r($buf);
 ?>
---EXPECTF--
+--EXPECT--
 creating send socket
 creating receive socket
 int(11)

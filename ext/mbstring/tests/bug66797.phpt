@@ -15,7 +15,7 @@ var_dump(
 );
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 string(3) "bar"
 string(3) "bar"
 string(0) ""

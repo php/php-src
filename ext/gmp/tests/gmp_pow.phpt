@@ -21,16 +21,16 @@ var_dump(gmp_strval(gmp_pow($n,10)));
 $n = gmp_init("-20");
 var_dump(gmp_strval(gmp_pow($n,10)));
 
-var_dump(gmp_pow(2,10,1));
-var_dump(gmp_pow(2));
-var_dump(gmp_pow());
-var_dump(gmp_pow(array(), array()));
-var_dump(gmp_pow(2,array()));
+try {
+    var_dump(gmp_pow(2,array()));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "1024"
 string(4) "1024"
 string(5) "-2048"
@@ -47,21 +47,7 @@ Warning: gmp_pow(): Negative exponent not supported in %s on line %d
 string(1) "0"
 string(14) "10240000000000"
 string(14) "10240000000000"
-
-Warning: gmp_pow() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s on line %d
-NULL
-
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s on line %d
-NULL
+gmp_pow() expects parameter 2 to be int, array given
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,11 +16,9 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "phar_internal.h"
 
-phar_path_check_result phar_path_check(char **s, int *len, const char **error)
+phar_path_check_result phar_path_check(char **s, size_t *len, const char **error)
 {
 	const unsigned char *p = (const unsigned char*)*s;
 	const unsigned char *m;
@@ -41,7 +39,8 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 
 loop:
 /*!re2c
-END = "\x00";
+END     = "\x00";
+NEWLINE = "\r"? "\n";
 UTF8T   = [\x80-\xBF] ;
 UTF8_1  = [\x1A-\x7F] ;
 UTF8_2  = [\xC2-\xDF] UTF8T ;
@@ -55,8 +54,9 @@ UTF8_4B = [\xF1-\xF3] UTF8T{3} ;
 UTF8_4C = "\xF4" [\x80-\x8F] UTF8T{2} ;
 UTF8_4  = UTF8_4A | UTF8_4B | UTF8_4C ;
 UTF8    = UTF8_1 | UTF8_2 | UTF8_3 | UTF8_4 ;
-EOS = "/" | END;
-ANY = .;
+EOS     = "/" | END;
+ANY     = . | NEWLINE;
+
 "//" 	{
 			*error = "double slash";
 			return pcr_err_double_slash;

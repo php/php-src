@@ -2,11 +2,11 @@
 preg_replace_callback()
 --FILE--
 <?php
-$input = "plain [indent] deep [indent] [abcd]deeper[/abcd] [/indent] deep [/indent] plain"; 
+$input = "plain [indent] deep [indent] [abcd]deeper[/abcd] [/indent] deep [/indent] plain";
 
 function parseTagsRecursive($input)
 {
-    
+
     $regex = '#\[indent]((?:[^[]|\[(?!/?indent])|(?R))+)\[/indent]#';
 
     if (is_array($input)) {

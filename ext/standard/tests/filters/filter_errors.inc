@@ -34,4 +34,3 @@ function filter_errors_test($filter, $data) {
 	stream_get_contents($stream);
 
 }
-

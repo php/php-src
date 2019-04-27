@@ -1,7 +1,7 @@
 --TEST--
 bug #44859 (incorrect result with NTFS ACL permissions, is_executable)
 --SKIPIF--
-<?php 
+<?php
 include_once __DIR__ . '/common.inc';
 skipif();
 ?>

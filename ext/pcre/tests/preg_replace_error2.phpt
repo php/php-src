@@ -34,4 +34,3 @@ Warning: preg_replace(): Parameter mismatch, pattern is a string while replaceme
 bool(false)
 
 Recoverable fatal error: Object of class stdClass could not be converted to string in %spreg_replace_error2.php on line %d
-

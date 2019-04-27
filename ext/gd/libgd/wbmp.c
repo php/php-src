@@ -164,7 +164,10 @@ readwbmp (int (*getin) (void *in), void *in, Wbmp ** return_wbmp)
     }
 
   if (skipheader (getin, in))
-    return (-1);
+    {
+      gdFree (wbmp);
+      return (-1);
+    }
 
 
   wbmp->width = getmbi (getin, in);

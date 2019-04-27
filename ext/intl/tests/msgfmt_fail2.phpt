@@ -1,8 +1,7 @@
 --TEST--
 msgfmt creation failures icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 --FILE--
 <?php
 
@@ -28,10 +27,20 @@ function crt($t, $l, $s) {
 			}
 			break;
 		case $t == "C":
-			return MessageFormatter::create($l, $s);
+			try {
+				return MessageFormatter::create($l, $s);
+			} catch (Throwable $e) {
+				print_exception($e);
+				return null;
+			}
 			break;
 		case $t == "P":
-			return msgfmt_create($l, $s);
+			try {
+				return msgfmt_create($l, $s);
+			} catch (Throwable $e) {
+				print_exception($e);
+				return null;
+			}
 			break;
 	}
 }
@@ -51,10 +60,20 @@ try {
 	print_exception($e);
 	$fmt = null;
 }
-err($fmt); 
-$fmt = msgfmt_create();
-err($fmt); 
-$fmt = MessageFormatter::create();
+err($fmt);
+try {
+	$fmt = msgfmt_create();
+} catch (TypeError $e) {
+	print_exception($e);
+	$fmt = null;
+}
+err($fmt);
+try {
+	$fmt = MessageFormatter::create();
+} catch (TypeError $e) {
+	print_exception($e);
+	$fmt = null;
+}
 err($fmt);
 try {
 	$fmt = new MessageFormatter('en');
@@ -62,11 +81,21 @@ try {
 	print_exception($e);
 	$fmt = null;
 }
-err($fmt); 
-$fmt = msgfmt_create('en');
-err($fmt); 
-$fmt = MessageFormatter::create('en');
-err($fmt); 
+err($fmt);
+try {
+	$fmt = msgfmt_create('en');
+} catch (TypeError $e) {
+	print_exception($e);
+	$fmt = null;
+}
+err($fmt);
+try {
+	$fmt = MessageFormatter::create('en');
+} catch (TypeError $e) {
+	print_exception($e);
+	$fmt = null;
+}
+err($fmt);
 
 foreach($args as $arg) {
 	$fmt = crt("O", $arg[0], $arg[1]);
@@ -80,53 +109,53 @@ foreach($args as $arg) {
 ?>
 --EXPECTF--
 ArgumentCountError: MessageFormatter::__construct() expects exactly 2 parameters, 0 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+'U_ZERO_ERROR'
 
-Warning: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+ArgumentCountError: msgfmt_create() expects exactly 2 parameters, 0 given in %s on line %d
+'U_ZERO_ERROR'
 
-Warning: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+ArgumentCountError: MessageFormatter::create() expects exactly 2 parameters, 0 given in %s on line %d
+'U_ZERO_ERROR'
 
 ArgumentCountError: MessageFormatter::__construct() expects exactly 2 parameters, 1 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+'U_ZERO_ERROR'
 
-Warning: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+ArgumentCountError: msgfmt_create() expects exactly 2 parameters, 1 given in %s on line %d
+'U_ZERO_ERROR'
 
-Warning: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+ArgumentCountError: MessageFormatter::create() expects exactly 2 parameters, 1 given in %s on line %d
+'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
 TypeError: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+'U_ZERO_ERROR'
 
-Warning: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+TypeError: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
+'U_ZERO_ERROR'
 
-Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
-'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
+TypeError: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
+'U_ZERO_ERROR'
 
-IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
 'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
 'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
 
-IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 
-IntlException: Constructor failed in %smsgfmt_fail2.php on line %d
+IntlException: Constructor failed in %s on line %d
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'
 'msgfmt_create: error converting pattern to UTF-16: U_INVALID_CHAR_FOUND'

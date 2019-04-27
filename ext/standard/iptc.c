@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /*
  * Functions to parse & compse IPTC data.
@@ -229,7 +227,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xFF) {
 		fclose(fp);
 		if (spoolbuf) {
-			zend_string_free(spoolbuf);
+			zend_string_efree(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -237,7 +235,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xD8) {
 		fclose(fp);
 		if (spoolbuf) {
-			zend_string_free(spoolbuf);
+			zend_string_efree(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -275,7 +273,7 @@ PHP_FUNCTION(iptcembed)
 					iptcdata_len++; /* make the length even */
 				}
 
-				psheader[ 2 ] = (char) (iptcdata_len+28)>>8;
+				psheader[ 2 ] = (char) ((iptcdata_len+28)>>8);
 				psheader[ 3 ] = (iptcdata_len+28)&0xff;
 
 				for (inx = 0; inx < 28; inx++) {
@@ -387,12 +385,3 @@ PHP_FUNCTION(iptcparse)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

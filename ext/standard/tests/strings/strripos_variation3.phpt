@@ -7,7 +7,7 @@ Test strripos() function : usage variations - multi line heredoc string for 'hay
  * Source code: ext/standard/string.c
 */
 
-/* Test strripos() function by passing multi-line heredoc string for haystack and 
+/* Test strripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
 

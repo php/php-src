@@ -37,4 +37,3 @@ Stack trace:
 #0 %s(%d): a(NULL)
 #1 {main}
   thrown in %s on line %d
-

@@ -1,5 +1,5 @@
 --TEST--
-Attempt to instantiate a HashContext directly
+Hash: Attempt to instantiate a HashContext directly
 --SKIPIF--
 <?php if (!extension_loaded('hash')) echo 'skip';
 --FILE--
@@ -10,5 +10,5 @@ try {
 } catch (Error $e) {
   echo "Exception: {$e->getMessage()}\n";
 }
---EXPECTF--
+--EXPECT--
 Exception: Call to private HashContext::__construct() from invalid context

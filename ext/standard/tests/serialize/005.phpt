@@ -1,7 +1,5 @@
 --TEST--
 serialize()/unserialize() objects
---SKIPIF--
-<?php if (!interface_exists('Serializable')) die('skip Interface Serialzable not defined'); ?>
 --FILE--
 <?php
 
@@ -11,7 +9,7 @@ function do_autoload($class_name)
 {
 	if ($class_name != 'autoload_not_available')
 	{
-		require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
+		require_once(__DIR__ . '/' . strtolower($class_name) . '.inc');
 	}
 	echo __FUNCTION__ . "($class_name)\n";
 }
@@ -48,17 +46,17 @@ class TestOld
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __wakeup()
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __sleep()
 	{
 		echo __METHOD__ . "()\n";
@@ -81,17 +79,17 @@ class TestNew implements Serializable
 			return "2";
 		}
 	}
-	
+
 	function unserialize($serialized)
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __wakeup()
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function __sleep()
 	{
 		echo __METHOD__ . "()\n";

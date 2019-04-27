@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -430,7 +430,7 @@ PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent,
 PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
-	char *last_index;
+	char *last_index = NULL;
 	size_t index_len = 0;
 	zval *zv;
 
@@ -660,8 +660,6 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 	int (*element_dump_func)(zval *zv, zend_string *key, zend_ulong num);
 	zend_bool is_ref = 0;
 
-	int is_temp;
-
 	phpdbg_try_access {
 		is_ref = Z_ISREF_P(zv) && GC_REFCOUNT(Z_COUNTED_P(zv)) > 1;
 		ZVAL_DEREF(zv);
@@ -687,20 +685,20 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				break;
 			case IS_ARRAY:
 				myht = Z_ARRVAL_P(zv);
-				if (ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
-					phpdbg_xml("<recursion />");
-					--myht->u.v.nApplyCount;
-					break;
+				if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+					if (GC_IS_RECURSIVE(myht)) {
+						phpdbg_xml("<recursion />");
+						break;
+					}
+					GC_PROTECT_RECURSION(myht);
 				}
 				phpdbg_xml("<array refstatus=\"%s\" num=\"%d\">", COMMON, zend_hash_num_elements(myht));
 				element_dump_func = phpdbg_xml_array_element_dump;
-				is_temp = 0;
 				goto head_done;
 			case IS_OBJECT:
-				myht = Z_OBJDEBUG_P(zv, is_temp);
-				if (myht && ++myht->u.v.nApplyCount > 1) {
+				myht = zend_get_properties_for(zv, ZEND_PROP_PURPOSE_DEBUG);
+				if (myht && GC_IS_RECURSIVE(myht)) {
 					phpdbg_xml("<recursion />");
-					--myht->u.v.nApplyCount;
 					break;
 				}
 
@@ -715,10 +713,9 @@ head_done:
 						element_dump_func(val, key, num);
 					} ZEND_HASH_FOREACH_END();
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
-					--myht->u.v.nApplyCount;
-					if (is_temp) {
-						zend_hash_destroy(myht);
-						efree(myht);
+					GC_UNPROTECT_RECURSION(myht);
+					if (Z_TYPE_P(zv) == IS_OBJECT) {
+						zend_release_properties(myht);
 					}
 				}
 				if (Z_TYPE_P(zv) == IS_ARRAY) {
@@ -759,21 +756,25 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				return 1;
 			}
 
-			do {
+			cur = &op_array->opcodes[catch];
+			while (1) {
 				zend_class_entry *ce;
-				cur = &op_array->opcodes[catch];
 
-				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1))))) {
-					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(cur->op1)), EX_CONSTANT(cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1)), ce);
+				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
+					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), Z_STR_P(RT_CONSTANT(cur, cur->op1) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
 				}
 
 				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {
 					return 1;
 				}
 
-				catch += cur->extended_value / sizeof(zend_op);
-			} while (!cur->result.num);
+				if (cur->extended_value & ZEND_LAST_CATCH) {
+					return 0;
+				}
+
+				cur = OP_JMP_ADDR(cur, cur->op2);
+			}
 
 			return 0;
 		}
@@ -819,7 +820,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			break;
 		case IS_STRING: {
 			int i;
-			zend_string *str = php_addcslashes(Z_STR_P(zv), 0, "\\\"\n\t\0", 5);
+			zend_string *str = php_addcslashes(Z_STR_P(zv), "\\\"\n\t\0", 5);
 			for (i = 0; i < ZSTR_LEN(str); i++) {
 				if (ZSTR_VAL(str)[i] < 32) {
 					ZSTR_VAL(str)[i] = ' ';
@@ -843,12 +844,17 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
 			break;
 		}
-		case IS_CONSTANT:
-			decode = estrdup("<constant>");
+		case IS_CONSTANT_AST: {
+			zend_ast *ast = Z_ASTVAL_P(zv);
+
+			if (ast->kind == ZEND_AST_CONSTANT
+			 || ast->kind == ZEND_AST_CONSTANT_CLASS) {
+				decode = estrdup("<constant>");
+			} else {
+				decode = estrdup("<ast>");
+			}
 			break;
-		case IS_CONSTANT_AST:
-			decode = estrdup("<ast>");
-			break;
+		}
 		default:
 			spprintf(&decode, 0, "unknown type: %d", Z_TYPE_P(zv));
 			break;

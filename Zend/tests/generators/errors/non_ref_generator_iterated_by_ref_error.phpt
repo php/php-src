@@ -14,4 +14,3 @@ Fatal error: Uncaught Exception: You can only iterate a generator by-reference i
 Stack trace:
 #0 {main}
   thrown in %s on line %d
-

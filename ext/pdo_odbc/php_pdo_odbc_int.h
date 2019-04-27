@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef PHP_WIN32
 # define PDO_ODBC_TYPE	"Win32"
@@ -164,8 +162,8 @@ typedef struct {
 	unsigned _spare:31;
 } pdo_odbc_param;
 
-extern pdo_driver_t pdo_odbc_driver;
-extern struct pdo_stmt_methods odbc_stmt_methods;
+extern const pdo_driver_t pdo_odbc_driver;
+extern const struct pdo_stmt_methods odbc_stmt_methods;
 
 void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line);
 #define pdo_odbc_drv_error(what)	pdo_odbc_error(dbh, NULL, SQL_NULL_HSTMT, what, __FILE__, __LINE__)
@@ -184,12 +182,3 @@ enum {
 	PDO_ODBC_ATTR_USE_CURSOR_LIBRARY = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_ODBC_ATTR_ASSUME_UTF8 /* assume that input strings are UTF-8 when feeding data to unicode columns */
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,17 +1,14 @@
 --TEST--
 Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling curl_exec)
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-    die('skip not for Windows');
-}
 ?>
 --FILE--
 <?php
 
 function checkForClosedFilePointer($host, $curl_option, $description) {
-	$fp = fopen(dirname(__FILE__) . '/bug54798.tmp', 'w+');
+	$fp = fopen(__DIR__ . '/bug54798.tmp', 'w+');
 
 	$ch = curl_init();
 
@@ -25,7 +22,7 @@ function checkForClosedFilePointer($host, $curl_option, $description) {
     }
 
 	curl_setopt($ch, $curl_option, $fp);
-	
+
 	curl_setopt($ch, CURLOPT_URL, $host);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
@@ -54,11 +51,14 @@ foreach($options_to_check as $option) {
 ?>
 ===DONE===
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug54798.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug54798.tmp'); ?>
 --EXPECTF--
-%a
-%aOk for CURLOPT_STDERR
-%aOk for CURLOPT_WRITEHEADER
-%aOk for CURLOPT_FILE
-%aOk for CURLOPT_INFILE
+%AOk for CURLOPT_STDERR
+
+%AOk for CURLOPT_WRITEHEADER
+
+%AHello World!
+Hello World!Ok for CURLOPT_FILE
+
+%AOk for CURLOPT_INFILE
 ===DONE===

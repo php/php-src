@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -81,4 +80,3 @@ bc_int2num (num, val)
   while (ix-- > 0)
     *vptr++ = *--bptr;
 }
-

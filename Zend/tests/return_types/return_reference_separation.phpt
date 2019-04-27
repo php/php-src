@@ -1,6 +1,5 @@
 --TEST--
 Return value separation
-
 --FILE--
 <?php
 function test1(&$abc) : string {
@@ -25,7 +24,7 @@ var_dump(test3($a));
 var_dump($a);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "123"
 int(123)
 string(3) "123"

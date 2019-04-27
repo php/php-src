@@ -25,7 +25,6 @@ $arr[1] = null;
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing array_map() : references ***
 string(2) "v1"

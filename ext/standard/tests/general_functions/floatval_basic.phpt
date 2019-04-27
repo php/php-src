@@ -8,7 +8,7 @@ precision = 14
  * Description: Returns the float value of var.
  */
 
-// different valid  float values 
+// different valid  float values
 $valid_floats = array(
        "0.0"  => 0.0,
        "1.0"  => 1.0,
@@ -33,7 +33,7 @@ $valid_floats = array(
 	   "-.5e+7" =>-.5e+7
 );
 
-/* loop to check that floatval() recognizes different 
+/* loop to check that floatval() recognizes different
    float values, expected output:float value for valid floating point number */
 echo "*** Testing floatval() with valid float values ***\n";
 foreach ($valid_floats as $key => $value ) {
@@ -41,7 +41,7 @@ foreach ($valid_floats as $key => $value ) {
    var_dump( floatval($value) );
 }
 
-/* loop to check that doubleval() also recognizes different 
+/* loop to check that doubleval() also recognizes different
    float values, expected output:float value for valid floating point number */
 echo "\n*** Testing doubleval() with valid float values ***\n";
 foreach ($valid_floats as $key => $value ) {

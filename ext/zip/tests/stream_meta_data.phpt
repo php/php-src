@@ -2,12 +2,11 @@
 stream_get_meta_data() on zip stream
 --SKIPIF--
 <?php
-/* $Id: oo_stream.phpt 260091 2008-05-21 09:27:41Z pajoye $ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
@@ -24,7 +23,7 @@ fclose($fp);
 $zip->close();
 
 
-$fp = fopen('zip://' . dirname(__FILE__) . '/test_with_comment.zip#foo', 'rb');
+$fp = fopen('zip://' . __DIR__ . '/test_with_comment.zip#foo', 'rb');
 if (!$fp) {
   exit("cannot open\n");
 }

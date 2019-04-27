@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -422,10 +420,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_data_seek,							arginfo_mysqli_data_seek)
 	PHP_FE(mysqli_dump_debug_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_debug,								arginfo_mysqli_debug)
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FE(mysqli_embedded_server_end,					NULL)
-	PHP_FE(mysqli_embedded_server_start,				NULL)
-#endif
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
@@ -436,7 +430,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_fetch_field_direct,					arginfo_mysqli_result_and_fieldnr)
 	PHP_FE(mysqli_fetch_lengths,						arginfo_mysqli_only_result)
 #ifdef MYSQLI_USE_MYSQLND
-	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_only_result)
+	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_fetch_array)
 #endif
 	PHP_FE(mysqli_fetch_array,							arginfo_mysqli_fetch_array)
 	PHP_FE(mysqli_fetch_assoc,							arginfo_mysqli_only_result)
@@ -616,7 +610,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_fields, mysqli_fetch_fields, arginfo_mysqli_no_params)
 	PHP_FALIAS(fetch_field_direct, mysqli_fetch_field_direct, arginfo_class_mysqli_result_and_fieldnr)
 #if defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_mysqli_no_params)
+	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_class_mysqli_fetch_array)
 #endif
 	PHP_FALIAS(fetch_array, mysqli_fetch_array, arginfo_class_mysqli_fetch_array)
 	PHP_FALIAS(fetch_assoc, mysqli_fetch_assoc, arginfo_mysqli_no_params)
@@ -660,12 +654,3 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FE_END
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

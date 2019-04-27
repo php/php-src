@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
+static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
 	PHP_FE_END
 };
 /* }}} */
@@ -87,12 +87,3 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 	php_info_print_table_end();
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -5,7 +5,7 @@ Test ctype_upper() function : usage variations - different strings
 --FILE--
 <?php
 /* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s) 
+ * Description: Checks for uppercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -56,7 +56,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_upper() : usage variations ***
 
 -- Iteration 1 --

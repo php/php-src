@@ -1,20 +1,22 @@
 --TEST--
 Bug #73037 SoapServer reports Bad Request when gzipped, var 0
+--CONFLICTS--
+server
 --SKIPIF--
-<?php 
+<?php
 	require_once('skipif.inc');
 	if (!extension_loaded("zlib")) {
 		echo "skip zlib is required for this test";
 	}
 
-	if (!file_exists(dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+	if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
 		echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
 	}
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
 function get_data($max)
 {
@@ -92,7 +94,7 @@ Expect: 100-continue
 Content-Length: ${len}
 HDRS;
 		if ($b) {
-			$hdrs .="\nContent-Encoding: gzip";		
+			$hdrs .="\nContent-Encoding: gzip";
 		}
 		//echo "Headers sent:\n$hdrs\n\n";
 		$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT, $errno, $errstr, 5);
@@ -132,7 +134,7 @@ cleanup:
 ==DONE==
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73037_server.php");
+unlink(__DIR__ . DIRECTORY_SEPARATOR . "bug73037_server.php");
 ?>
 --EXPECT--
 Iteration 0

@@ -7,11 +7,10 @@ phar.readonly=0
 --FILE--
 <?php
 Phar::interceptFileFuncs();
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-readfile(array());
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 file_put_contents($fname, "blah\n");
 file_put_contents("foob", "test\n");
 readfile($fname);
@@ -21,7 +20,7 @@ file_put_contents($pname . '/foo/hi', '<?php
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
 readfile("foob");
-set_include_path("' . addslashes(dirname(__FILE__)) . '");
+set_include_path("' . addslashes(__DIR__) . '");
 readfile("foob", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
@@ -31,11 +30,10 @@ include $pname . '/foo/hi';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(dirname(__FILE__) . '/poo'); ?>
-<?php unlink(dirname(__FILE__) . '/foob'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php rmdir(__DIR__ . '/poo'); ?>
+<?php unlink(__DIR__ . '/foob'); ?>
 --EXPECTF--
-Warning: readfile() expects parameter 1 to be a valid path, array given in %sreadfile_edgecases.php on line %d
 blah
 <?php
 readfile("foo/" . basename(__FILE__));

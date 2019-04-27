@@ -10,5 +10,5 @@ date.timezone=UTC
 <?php
 var_dump(jdtounix(2440579)) . PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

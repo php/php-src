@@ -1,8 +1,7 @@
 --TEST--
 gif in/out
 --SKIPIF--
-<?php 
-// $Id$
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
@@ -14,7 +13,7 @@ gif in/out
 <?php
 
 function check_box($r,$g,$b, $error=0) {
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 	$im2 = imagecreatefromgif($cwd . '/test_gif.gif');
 
 	$c = imagecolorsforindex($im2, imagecolorat($im2, 8,8));
@@ -43,7 +42,7 @@ function check_box($r,$g,$b, $error=0) {
 		}
 	}
 }
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 
 $im = imagecreate(10,10);
 $c = imagecolorallocate($im, 255,255,255);

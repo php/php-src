@@ -1,9 +1,9 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension calendar
 
-PHP_ARG_ENABLE(calendar,whether to enable calendar conversion support,
-[  --enable-calendar       Enable support for calendar conversion])
+PHP_ARG_ENABLE([calendar],
+  [whether to enable calendar conversion support],
+  [AS_HELP_STRING([--enable-calendar],
+    [Enable support for calendar conversion])])
 
 if test "$PHP_CALENDAR" = "yes"; then
   AC_DEFINE(HAVE_CALENDAR,1,[ ])

@@ -10,24 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link	= NULL;
-
-	if (!is_null($tmp = @mysqli_change_user()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_change_user($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_change_user($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_change_user($link, $link, $link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_change_user($link, $link, $link, $link, $link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -105,8 +87,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = @mysqli_change_user($link, $user, $passwd, $db)))
-		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_change_user($link, $user, $passwd, $db)))
+		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[019] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -144,5 +126,5 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -1,6 +1,4 @@
-dnl $Id$
 dnl config.m4 for extension pdo_oci
-dnl vim:et:sw=2:ts=2:
 
 if test -z "$SED"; then
   PHP_PDO_OCI_SED="sed";
@@ -32,15 +30,15 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
 ])
 
 AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
-  AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([if we're on a 64-bit platform])
-  if test "$ac_cv_sizeof_long_int" = "4" ; then
+  AC_CHECK_SIZEOF([long])
+  AC_MSG_CHECKING([if we're at 64-bit platform])
+  AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
     AC_MSG_RESULT([no])
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib32"
-  else
+  ],[
     AC_MSG_RESULT([yes])
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib"
-  fi
+  ])
 
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$PDO_OCI_DIR/lib" && test ! -d "$PDO_OCI_DIR/lib32"; then
@@ -55,10 +53,12 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
   AC_MSG_RESULT($PDO_OCI_LIB_DIR)
 ])
 
-PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
-[  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to [$]ORACLE_HOME.
-                          Use --with-pdo-oci=instantclient,/path/to/instant/client/lib 
-                          for an Oracle Instant Client installation.])
+PHP_ARG_WITH([pdo-oci],
+  [Oracle OCI support for PDO],
+  [AS_HELP_STRING([[--with-pdo-oci[=DIR]]],
+    [PDO: Oracle OCI support. DIR defaults to $ORACLE_HOME. Use
+    --with-pdo-oci=instantclient,/path/to/instant/client/lib for an Oracle
+    Instant Client installation.])])
 
 if test "$PHP_PDO_OCI" != "no"; then
 
@@ -82,12 +82,16 @@ if test "$PHP_PDO_OCI" != "no"; then
   fi
 
   if test "instantclient" = "`echo $PDO_OCI_DIR | cut -d, -f1`" ; then
-    AC_CHECK_SIZEOF(long int, 4)
-    if test "$ac_cv_sizeof_long_int" = "4" ; then
+    AC_CHECK_SIZEOF([long])
+    AC_MSG_CHECKING([if we're at 64-bit platform])
+    AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
+      AC_MSG_RESULT([no])
       PDO_OCI_CLIENT_DIR="client"
-    else
+    ],[
+      AC_MSG_RESULT([yes])
       PDO_OCI_CLIENT_DIR="client64"
-    fi
+    ])
+
     PDO_OCI_LIB_DIR="`echo $PDO_OCI_DIR | cut -d, -f2`"
     AC_PDO_OCI_VERSION($PDO_OCI_LIB_DIR)
 
@@ -97,11 +101,11 @@ if test "$PHP_PDO_OCI" != "no"; then
 
     dnl Header directory for manual installation
     OCISDKMANINC=`echo "$PDO_OCI_LIB_DIR" | $PHP_PDO_OCI_SED -e 's!^\(.*\)/lib[/]*$!\1/include!'`
-    
+
     dnl Header directory for Instant Client SDK zip file install
     OCISDKZIPINC=$PDO_OCI_LIB_DIR/sdk/include
 
-    
+
     if test -f "$OCISDKRPMINC/oci.h" ; then
       PHP_ADD_INCLUDE($OCISDKRPMINC)
       AC_MSG_RESULT($OCISDKRPMINC)
@@ -170,7 +174,7 @@ if test "$PHP_PDO_OCI" != "no"; then
   ])
 
   dnl
-  dnl Check if we need to add -locijdbc8 
+  dnl Check if we need to add -locijdbc8
   dnl
   PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
   [
@@ -235,4 +239,3 @@ if test "$PHP_PDO_OCI" != "no"; then
 
   AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
 fi
-

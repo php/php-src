@@ -8,5 +8,5 @@ bcmath.scale=-2
 <?php
 echo bcadd("-4.27", "7.3");
 ?>
---EXPECTF--
+--EXPECT--
 3

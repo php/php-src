@@ -11,12 +11,12 @@ Test token_get_all() function : usage variations - with class/object constructs
 
 /*
  * Testing token_get_all() with different class/object keywords
- *   scope related : 
+ *   scope related :
  *     static - T_STATIC(346), global - T_GLOBAL(340),
  *     private - T_PRIVATE(343), public - T_PUBLIC(341),
  *     protected - T_PROTECTED(342)
- *   class/object related : 
- *     var - T_VAR(347), abstract - T_ABSTRACT(345), 
+ *   class/object related :
+ *     var - T_VAR(347), abstract - T_ABSTRACT(345),
  *     interface - T_INTERFACE(353), class - T_CLASS(352),
  *     extends - T_EXTENDS(354), implements - T_IMPLEMENTS(355), new - T_NEW(299)
 */

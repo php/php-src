@@ -1,7 +1,5 @@
 --TEST--
-md2 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: md2 algorithm
 --FILE--
 <?php
 echo hash('md2', '') . "\n";

@@ -28,7 +28,7 @@ class C5 extends C4 implements I7 {}
 class C6 implements I1, I2, I3, I4, I5, I6, I7 {}
 
 
-$classes = array( 	'A0', 'A1', 'B0', 'B1', 
+$classes = array( 	'A0', 'A1', 'B0', 'B1',
 					'I0', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7',
 					'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6'	);
 
@@ -42,7 +42,7 @@ foreach ($classes as $class) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 ---( Interfaces implemented by A0 )---
  Array
 (

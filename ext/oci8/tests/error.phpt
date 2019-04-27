@@ -3,12 +3,12 @@ oci_error() error message for parsing error
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error messages from TimesTen
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
     var_dump(oci_connect($user, $password, $dbase));

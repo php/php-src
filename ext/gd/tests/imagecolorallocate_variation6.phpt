@@ -18,12 +18,12 @@ if(!function_exists('imagecreatetruecolor')) {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $values = array(
-      //Decimal integera data  
+      //Decimal integera data
       "Decimal 256" => 256,
-      
+
       // octal integer data
       "Octal 0400" => 0400,
-     
+
       // hexa-decimal integer data
       "Hexa-decimal 0x100" => 0x100
 );
@@ -39,7 +39,7 @@ foreach($values as $key => $value) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--

@@ -1,5 +1,5 @@
 --TEST--
-casting different variables to null using settype() 
+casting different variables to null using settype()
 --FILE--
 <?php
 
@@ -36,7 +36,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 NULL
 NULL
 NULL

@@ -4,7 +4,7 @@ Test strcspn() function : usage variations - with heredoc strings, varying start
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [,int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -86,7 +86,7 @@ $start_array = array(
 		    2147483647,  // max positive integer
 		    -2147483648,  // min negative integer
                    );
-		
+
 
 // loop through each element of the arrays for str, mask and start arguments
 
@@ -103,7 +103,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different start values ***
 
 -- Iteration 1 --

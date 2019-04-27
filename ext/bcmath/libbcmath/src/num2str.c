@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -51,7 +50,7 @@ zend_string
 	int  index, signch;
 
 	/* Allocate the string memory. */
-	signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
+	signch = num->n_sign != PLUS;  /* Number of sign chars. */
 	if (scale > 0)
 		str = zend_string_alloc(num->n_len + scale + signch + 1, 0);
 	else

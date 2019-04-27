@@ -85,7 +85,3 @@ int xsm_is_system_method(XMLRPC_Callback cb);
 
 
 #endif /* __SYSTEM_METHODS_PRIVATE_H */
-
-
-
-

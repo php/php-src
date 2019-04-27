@@ -12,7 +12,7 @@ function test($map) {
 	var_dump($map, $map[1], $map[2]);die;
 }
 
-$y = new SoapServer(dirname(__FILE__) . '/bug48557.wsdl');
+$y = new SoapServer(__DIR__ . '/bug48557.wsdl');
 $y->addfunction("test");
 $request = <<<XML
 <?xml version="1.0"?>
@@ -54,12 +54,12 @@ $y->handle($request);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(6) {
   [1]=>
   int(123)
   [-1000]=>
-  %string|unicode%(3) "123"
+  string(3) "123"
   [2]=>
   float(123.5)
   [-2000]=>

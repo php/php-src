@@ -51,7 +51,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_update"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(15) "Rasmus is No. 1"

@@ -52,8 +52,6 @@ echo '
 <form action="" method="post">
 </form>
 ';
-
-
 --EXPECT--
 *** Testing basic session functionality : variation4 use_trans_sid ***
 *** Test trans sid ***

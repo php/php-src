@@ -18,7 +18,7 @@ class Derived extends Test
         echo __METHOD__ . "()\n";
 		parent::__construct();
 	}
-	
+
 	static function f()
 	{
 		new Derived;
@@ -49,7 +49,7 @@ class DerivedPriv extends TestPriv
         echo __METHOD__ . "()\n";
 		parent::__construct();
 	}
-	
+
 	static function f()
 	{
 		new DerivedPriv;

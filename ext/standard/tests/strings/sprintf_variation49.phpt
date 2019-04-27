@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - scientific formats with array value
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : scientific formats with array values ***\n";
 
-// array of array values 
+// array of array values
 $array_values = array(
   array(),
   array(0),
@@ -29,17 +29,17 @@ $array_values = array(
 );
 
 // array of scientific formats
-$scientific_formats = array( 
+$scientific_formats = array(
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
-  "\t%e", "\n%e", "%4e", 
+  "\t%e", "\n%e", "%4e",
   "%30e", "%[0-1]", "%*e"
 );
 
 $count = 1;
 foreach($array_values as $array_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($scientific_formats as $format) {
     var_dump( sprintf($format, $array_value) );
   }
@@ -48,7 +48,7 @@ foreach($array_values as $array_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : scientific formats with array values ***
 
 -- Iteration 1 --

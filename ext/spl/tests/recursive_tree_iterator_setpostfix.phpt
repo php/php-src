@@ -55,7 +55,7 @@ foreach($it as $k => $v) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ----
 
 

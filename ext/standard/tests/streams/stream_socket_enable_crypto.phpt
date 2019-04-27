@@ -7,9 +7,6 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 if (!extension_loaded('openssl')) {
 	die('skip ext/openssl required');
 }
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip not for windows');
-}
 ?>
 --FILE--
 <?php
@@ -22,7 +19,7 @@ if (is_resource($sock)) {
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv23_CLIENT));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv3_CLIENT));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv2_CLIENT));
-  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT));  
+  var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv2_SERVER));
   var_dump(stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_SSLv3_SERVER));
@@ -44,7 +41,7 @@ bool(false)
 Warning: stream_socket_enable_crypto(): When enabling encryption you must specify the crypto type in %s on line %d
 bool(false)
 
-Warning: stream_socket_enable_crypto(): SSL: Broken pipe in %s on line %d
+Warning: stream_socket_enable_crypto(): SSL: %a in %s on line %d
 bool(false)
 
 Warning: stream_socket_enable_crypto(): SSL/TLS already set-up for this stream in %s on line %d

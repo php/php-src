@@ -29,7 +29,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 
 -- Initial test --

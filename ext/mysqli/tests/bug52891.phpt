@@ -114,7 +114,7 @@ if (!mysqli_query($link, 'DROP TABLE IF EXISTS tsint')) {
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 tsint:
 array(1) {
   ["a"]=>

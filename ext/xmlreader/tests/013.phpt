@@ -4,8 +4,7 @@ XMLReader: Schema validation
 <?php if (!extension_loaded('xmlreader')) die('skip');?>
 <?php if (!method_exists('XMLReader','setSchema')) die('skip XMLReader::setSchema() not supported');?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xml =<<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -17,7 +16,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read()) {
 	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
 		$reader->read();
@@ -37,7 +36,7 @@ EOF;
 
 $reader = new XMLReader();
 $reader->XML($xml);
-$reader->setSchema(dirname(__FILE__) . '/013.xsd');
+$reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 

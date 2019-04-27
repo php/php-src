@@ -51,7 +51,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_fetch_null"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(11) {
   [0]=>
   int(1)

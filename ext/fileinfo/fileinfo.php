@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 if(!extension_loaded('fileinfo')) {
 	dl('fileinfo.' . PHP_SHLIB_SUFFIX);

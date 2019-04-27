@@ -26,7 +26,7 @@ class b {
         $this->a = &$a;
     }
 }
- 
+
 $a = new a();
 $b = new b($a);
 

@@ -10,7 +10,7 @@ foreach ($sun_info as $key => $elem )
 }
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 2007-04-13 06:13:31 CEST sunrise
 2007-04-13 20:30:51 CEST sunset
 2007-04-13 13:22:11 CEST transit

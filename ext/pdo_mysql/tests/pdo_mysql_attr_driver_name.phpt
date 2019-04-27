@@ -2,14 +2,14 @@
 PDO::ATTR_DRIVER_NAME
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	assert(('' == $db->errorCode()) || ('00000' == $db->errorCode()));
@@ -26,6 +26,6 @@ $db = MySQLPDOTest::factory();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "mysql"
 done!

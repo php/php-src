@@ -36,7 +36,7 @@ foreach ($vars as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

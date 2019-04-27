@@ -3,14 +3,14 @@ PDO_OCI: stream_get_contents length & offset test
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for WE8MSWIN1252 character set');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
+require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 $dbh = PDOTest::factory();
 
@@ -84,7 +84,7 @@ foreach ($stmtarray as $stmt) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1
 Read b$
 Read cd$

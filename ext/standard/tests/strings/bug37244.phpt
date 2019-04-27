@@ -15,4 +15,3 @@ foreach($strings as $string) {
 string(93) "Implementations MUST reject the encoding if it contains characters outside the base alphabet."
 bool(false)
 string(92) "Implemem][ÛœÈUTÕ™Z™XİH[˜ÛÙ[™ÈYˆ]ÛÛZ[œÈÚ\˜Xİ\œÈİ]ÚYHH˜\ÙH[X™]"
-

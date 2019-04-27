@@ -5,6 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
+opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -19,13 +20,13 @@ function foo(string $s1, string $s2, string $s3, string $s4) {
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %sdce_001.php:1-8
-L0:     RETURN int(1)
+L0 (8):     RETURN int(1)
 
 foo: ; (lines=5, args=4, vars=4, tmps=0)
     ; (after optimizer)
     ; %sdce_001.php:2-6
-L0:     CV0($s1) = RECV 1
-L1:     CV1($s2) = RECV 2
-L2:     CV2($s3) = RECV 3
-L3:     CV3($s4) = RECV 4
-L4:     RETURN int(0)
+L0 (2):     CV0($s1) = RECV 1
+L1 (2):     CV1($s2) = RECV 2
+L2 (2):     CV2($s3) = RECV 3
+L3 (2):     CV3($s4) = RECV 4
+L4 (5):     RETURN int(0)

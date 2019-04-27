@@ -30,7 +30,7 @@ $broker = enchant_broker_init();
 if (is_resource($broker)) {
     echo("OK\n");
     $brokerListDicts = enchant_broker_list_dicts($broker);
-    
+
     if (is_array($brokerListDicts)) {
         echo("OK\n");
     } else {

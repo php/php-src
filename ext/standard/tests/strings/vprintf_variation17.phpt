@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - scientific formats with scientific
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -16,9 +16,9 @@ echo "*** Testing vprintf() : scientific formats and scientific values ***\n";
 
 // defining array of scientific formats
 $formats = array(
-  '%e %+e %-e', 
+  '%e %+e %-e',
   '%le %Le %4e %-4e',
-  '%10.4e %-10.4e %.4e', 
+  '%10.4e %-10.4e %.4e',
   '%\'#20e %\'20e %\'$20e %\'_20e',
   '%3$e %4$e %1$e %2$e'
 );
@@ -32,7 +32,7 @@ $args_array = array(
   array(1e1, +1e2, -1e3, "1e2_"),
   array(3e3, 4e3, 1e3, 2e3)
 );
- 
+
 // looping to test vprintf() with different scientific formats from the above $format array
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;

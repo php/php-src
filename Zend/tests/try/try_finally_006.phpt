@@ -21,6 +21,6 @@ label:
 
 foo();
 ?>
---EXPECTF--
+--EXPECT--
 label
 okey

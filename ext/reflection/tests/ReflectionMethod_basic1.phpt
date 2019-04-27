@@ -31,17 +31,17 @@ class TestClass
     public function foo() {
         echo "Called foo()\n";
     }
-    
+
     static function stat() {
         echo "Called stat()\n";
     }
-    
+
     private function priv() {
         echo "Called priv()\n";
     }
-    
+
     protected function prot() {}
-    
+
     public function __destruct() {}
 }
 
@@ -294,5 +294,3 @@ isDestructor():
 bool(true)
 
 **********************************
-
-

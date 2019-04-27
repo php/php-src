@@ -80,7 +80,7 @@ function ut_main()
         	$scr = ut_loc_get_display_language( $locale ,$disp_locale );
         	$res_str .= "disp_locale=$disp_locale :  display_language=$scr";
         	$res_str .= "\n";
-		} 
+		}
         $res_str .= "-----------------\n";
     }
 

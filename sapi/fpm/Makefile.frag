@@ -18,7 +18,7 @@ install-fpm: $(SAPI_FPM_PATH)
 		$(INSTALL_DATA) sapi/fpm/php-fpm.conf $(INSTALL_ROOT)$(sysconfdir)/php-fpm.conf.default; \
 		$(INSTALL_DATA) sapi/fpm/www.conf $(INSTALL_ROOT)$(sysconfdir)/php-fpm.d/www.conf.default; \
 	fi
-	
+
 	@echo "Installing PHP FPM man page:      $(INSTALL_ROOT)$(mandir)/man8/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(mandir)/man8
 	@$(INSTALL_DATA) sapi/fpm/php-fpm.8 $(INSTALL_ROOT)$(mandir)/man8/php-fpm$(program_suffix).8

@@ -1,5 +1,5 @@
 --TEST--
-Bug #26927 (preg_quote() does not escape \0) 
+Bug #26927 (preg_quote() does not escape \0)
 --FILE--
 <?php
 	$str = "a\000b";

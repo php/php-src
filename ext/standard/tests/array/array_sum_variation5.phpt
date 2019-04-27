@@ -3,7 +3,7 @@ Test array_sum() function : usage variations - array with reference variables as
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
@@ -31,7 +31,7 @@ var_dump( array_sum($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with elements as reference ***
 int(305)
 Done

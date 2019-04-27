@@ -9,6 +9,6 @@ phpinfo();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: phpinfo() has been disabled for security reasons in %s on line %d
 Done

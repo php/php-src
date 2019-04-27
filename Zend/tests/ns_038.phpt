@@ -15,4 +15,3 @@ Fatal error: Uncaught Error: Call to undefined method Exception::bar() in %sns_0
 Stack trace:
 #0 {main}
   thrown in %sns_038.php on line 7
-

@@ -47,7 +47,7 @@ else
   echo "Actually loaded from get: $read_title\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing setting the process title ***
 Successfully set title
 Successfully verified title using ps

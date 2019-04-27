@@ -12,18 +12,18 @@ xpm --> gd1/gd2 conversion test
 ?>
 --FILE--
 <?php
-	$cwd = dirname(__FILE__);
+	$cwd = __DIR__;
 
 	echo "XPM to GD1 conversion: ";
-	echo imagegd(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test.gd1") ? 'ok' : 'failed';
+	echo imagegd(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.gd1") ? 'ok' : 'failed';
 	echo "\n";
 
 	echo "XPM to GD2 conversion: ";
-	echo imagegd2(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test.gd2") ? 'ok' : 'failed';
+	echo imagegd2(imagecreatefromxpm($cwd . "/conv_test.xpm"), $cwd . "/test_xpm.gd2") ? 'ok' : 'failed';
 	echo "\n";
 
-	@unlink($cwd . "/test.gd1");
-	@unlink($cwd . "/test.gd2");
+	@unlink($cwd . "/test_xpm.gd1");
+	@unlink($cwd . "/test_xpm.gd2");
 ?>
 --EXPECT--
 XPM to GD1 conversion: ok

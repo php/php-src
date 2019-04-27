@@ -23,7 +23,7 @@ var_dump($db->querySingle('SELECT strtoupper("tEst")'));
 
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(4) "TEST"
 bool(true)

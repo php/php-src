@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 /* test the effects on the stats of dir/file for changing permissions of dir/file */
 
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -43,7 +43,7 @@ var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
 $affected_members = array( 10, 'ctime');
-var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 // clear the stat
 clearstatcache();  // clear statement cache
 
@@ -60,22 +60,20 @@ var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
 $affected_members = array( 10, 'ctime');
-var_dump( compare_stats($old_stat, $new_stat, $affected_members, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 // clear the stat
 clearstatcache();  // clear statement cache
 
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation6.tmp");
 rmdir("$file_path/stat_variation6");
 ?>
---EXPECTF--
-
+--EXPECT--
 *** Testing stat() on file with miscelleneous file permission and content ***
 bool(true)
 bool(true)
@@ -89,4 +87,3 @@ bool(true)
 bool(true)
 
 *** Done ***
-

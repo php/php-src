@@ -5,7 +5,7 @@ Bug #36096 (oci_result() returns garbage after oci_fetch() failed)
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $sql = "SELECT 'ABC' FROM DUAL WHERE 1<>1";
 $stmt = oci_parse($c, $sql);

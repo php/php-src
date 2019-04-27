@@ -1,6 +1,5 @@
 --TEST--
 Return type covariance works with generators
-
 --FILE--
 <?php
 interface Collection extends IteratorAggregate {
@@ -17,7 +16,6 @@ class SomeCollection implements Collection {
 
 $some = new SomeCollection();
 var_dump($some->getIterator());
-
 --EXPECTF--
 object(Generator)#%d (%d) {
 }

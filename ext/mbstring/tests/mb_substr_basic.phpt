@@ -1,16 +1,16 @@
 --TEST--
-Test mb_substr() function : basic functionality 
+Test mb_substr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_substr') or die("skip mb_substr() is not available in this build");
 ?>
 --INI--
-mbstring.internal_encoding=ISO-8859-1
+internal_encoding=ISO-8859-1
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -40,7 +40,7 @@ var_dump(base64_encode($result_2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr() : basic functionality ***
 
 -- ASCII string 1 --

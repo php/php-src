@@ -6,9 +6,9 @@ InterBase: array handling
 <?php
 
 	require("interbase.inc");
-	
+
 	ibase_connect($test_base);
-	
+
 	ibase_query(
 		"create table test7 (
 			iter		integer,
@@ -29,7 +29,7 @@ InterBase: array handling
 	ini_set('ibase.timestampformat',"%m/%d/%Y %H:%M:%S");
 
 	echo "insert\n";
-	
+
 	for ($i = 1; $i <= 10; ++$i) {
 		for ($j = 1; $j <= 10; ++$j) {
 			for ($k = 1; $k <= 10; ++$k) {
@@ -37,7 +37,7 @@ InterBase: array handling
 			}
 		}
 	}
-				
+
 	for($iter = 0; $iter < 3; $iter++) {
 
 		/* prepare data  */
@@ -62,7 +62,7 @@ InterBase: array handling
 			$v_smallint[$i] = rand_number(5) % 32767;
 			$v_varchar[$i] = rand_str(1000);
 		}
-		
+
 		ibase_query("insert into test7
 			(iter,v_multi,v_char,v_date,v_decimal,v_double,v_float,
 			v_integer,v_numeric,v_smallint,v_varchar)
@@ -73,7 +73,7 @@ InterBase: array handling
 
 		$row = ibase_fetch_object($sel,IBASE_FETCH_ARRAYS);
 		for ($i = 1; $i <= 10; ++$i) {
-			
+
 			if(strncmp($row->V_CHAR[$i],$v_char[$i],strlen($v_char[$i])) != 0) {
 				echo " CHAR[$i] fail:\n";
 				echo " in:  ".$v_char[$i]."\n";
@@ -124,7 +124,7 @@ InterBase: array handling
 	}/* for($iter) */
 
 	echo "select\n";
-	
+
 	$sel = ibase_query("SELECT v_multi[5,5,5],v_multi[10,10,10] FROM test7 WHERE iter = 0");
 	print_r(ibase_fetch_row($sel));
 	ibase_free_result($sel);

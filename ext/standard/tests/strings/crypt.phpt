@@ -1,11 +1,5 @@
 --TEST--
 crypt() function
---SKIPIF--
-<?php
-if (!function_exists('crypt')) {
-	die("SKIP crypt() is not available");
-}
-?> 
 --FILE--
 <?php
 
@@ -25,8 +19,6 @@ echo (CRYPT_MD5)      ? ((crypt($str, $salt3) === $res_3) ? 'MD5' : 'MD5 - ERROR
 echo (CRYPT_BLOWFISH) ? ((crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR') : 'BLO', "\n";
 
 var_dump(crypt($str));
-var_dump(crypt());
-var_dump(crypt("", "", ""));
 
 ?>
 --EXPECTF--
@@ -37,9 +29,3 @@ BLO
 
 Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s on line %d
 string(%d) "%s"
-
-Warning: crypt() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: crypt() expects at most 2 parameters, 3 given in %s on line %d
-NULL

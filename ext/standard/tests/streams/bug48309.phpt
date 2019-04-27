@@ -24,7 +24,7 @@ echo "\n";
 var_dump(stream_get_contents($tmp));
 
 ?>
---EXPECTF--
+--EXPECT--
 -- stream_copy_to_stream() --
 te
 string(2) "st"

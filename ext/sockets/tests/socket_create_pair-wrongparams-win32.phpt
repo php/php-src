@@ -10,10 +10,6 @@ if (!extension_loaded('sockets')) {
 }
 --FILE--
 <?php
-var_dump(socket_create_pair(AF_INET, null, null));
-
-$domain = 'unknown';
-var_dump(socket_create_pair($domain, SOCK_STREAM, 0, $sockets));
 
 var_dump(socket_create_pair(AF_INET, null, null, $sockets));
 
@@ -21,11 +17,6 @@ var_dump(socket_create_pair(31337, null, null, $sockets));
 
 var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
 --EXPECTF--
-Warning: socket_create_pair() expects exactly 4 parameters, 3 given in %s on line %d
-NULL
-
-Warning: socket_create_pair() expects parameter 1 to be integer, string given in %s on line %d
-NULL
 bool(true)
 
 Warning: socket_create_pair(): invalid socket domain [31337] specified for argument 1, assuming AF_INET in %s on line %d

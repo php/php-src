@@ -227,11 +227,11 @@ _null
 _label_concat
 
 Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 
 Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 
 Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

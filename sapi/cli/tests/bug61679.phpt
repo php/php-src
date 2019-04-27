@@ -39,5 +39,5 @@ HEADER
 
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 HTTP/1.1 501 Not Implemented

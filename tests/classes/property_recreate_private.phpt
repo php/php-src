@@ -5,10 +5,10 @@ Unsetting and recreating private properties.
 class C {
 	private $p = 'test';
 	function unsetPrivate() {
-		unset($this->p);		
+		unset($this->p);
 	}
 	function setPrivate() {
-		$this->p = 'changed';		
+		$this->p = 'changed';
 	}
 }
 

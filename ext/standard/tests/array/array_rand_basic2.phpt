@@ -1,9 +1,9 @@
 --TEST--
-Test array_rand() function : basic functionality - with associative array for 'input' argument 
+Test array_rand() function : basic functionality - with associative array for 'input' argument
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -16,7 +16,7 @@ echo "*** Testing array_rand() : with associative array ***\n";
 
 // Initialise the 'input' and 'num_req' variables
 $input = array(
-  'one' => 1, 'two' => 2, 'three' => 3, 
+  'one' => 1, 'two' => 2, 'three' => 3,
   'FoUr' => 'four', '#5' => 5, 'SIX' => 'six',
   "seven" => 7, "#8" => "eight", "nine" => "NINE"
 );
@@ -55,4 +55,3 @@ array(6) {
 -- with default argument --
 string(%d) "%s"
 Done
-

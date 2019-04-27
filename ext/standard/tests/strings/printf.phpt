@@ -28,7 +28,11 @@ $strings          = array( NULL, "abc", 'aaa' );
 
 /* Zero argument */
 echo "\n*** Output for zero argument ***\n";
-printf();
+try {
+    printf();
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 /* Number of arguments not matching as specified in format field */
 echo "\n*** Output for insufficient number of arguments ***\n";
@@ -196,10 +200,10 @@ echo"\n\n*** Output for '%%' as the format parameter ***\n";
 printf("%%",1.23456789e10);
 
 echo"\n\n*** Output for precision value more than maximum ***\n";
-printf("%.988f",1.23456789e10);   
+printf("%.988f",1.23456789e10);
 
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
-printf("%030.-15s", $tempstring);  
+printf("%030.-15s", $tempstring);
 
 echo"\n\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
@@ -211,23 +215,22 @@ echo"\n\n*** Output  with no format parameter ***\n";
 printf($tempnum);
 
 echo"\n\n*** Output for multiple format parameters ***\n";
-printf("%d  %s  %d\n", $tempnum, $tempstring, $tempnum); 
+printf("%d  %s  %d\n", $tempnum, $tempstring, $tempnum);
 
 echo"\n\n*** Output for excess of mixed type arguments  ***\n";
-printf("%s", $tempstring, $tempstring, $tempstring);      
+printf("%s", $tempstring, $tempstring, $tempstring);
 
 echo"\n\n*** Output for string format parameter and integer type argument ***\n";
-printf("%s", $tempnum);          
+printf("%s", $tempnum);
 
 echo"\n\n*** Output for integer format parameter and string type argument ***\n";
-printf("%d", $tempstring);    
+printf("%d", $tempstring);
 
 
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-
-Warning: printf() expects at least %d parameter, %d given in %s on line %d
+printf() expects at least %d parameter, %d given
 
 *** Output for insufficient number of arguments ***
 

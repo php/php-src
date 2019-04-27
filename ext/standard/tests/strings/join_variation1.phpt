@@ -68,10 +68,10 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
-  
+
   // resource variable
   $fp,
 

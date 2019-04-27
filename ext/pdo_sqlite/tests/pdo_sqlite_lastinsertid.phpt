@@ -16,17 +16,17 @@ var_dump($db->lastInsertId());
 $db->query('DROP TABLE foo');
 
 ?>
---EXPECTF--
+--EXPECT--
 object(PDOStatement)#2 (1) {
   ["queryString"]=>
-  %string|unicode%(17) "SELECT * FROM foo"
+  string(17) "SELECT * FROM foo"
 }
 array(3) {
   [0]=>
-  %string|unicode%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
   [2]=>
   NULL
 }
-%string|unicode%(1) "2"
+string(1) "2"

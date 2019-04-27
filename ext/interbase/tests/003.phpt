@@ -7,7 +7,7 @@ InterBase: misc sql types (may take a while)
 
     require("interbase.inc");
     ibase_connect($test_base);
-    
+
     ibase_query(
     	"create table test3 (
             iter		integer not null,
@@ -129,7 +129,7 @@ InterBase: misc sql types (may take a while)
 	$q = ibase_query('SELECT 1 AS id, 2 AS id, 3 AS id, 4 AS id, 5 AS id, 6 AS id, 7 AS id, 8 AS id, 9 AS id,
 		10 AS id, 11 AS id, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 FROM rdb$database');
 	var_dump(ibase_fetch_assoc($q));
-	
+
     ibase_close();
     echo "end of test\n";
 ?>

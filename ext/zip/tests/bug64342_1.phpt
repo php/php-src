@@ -2,13 +2,12 @@
 Bug #64342 ZipArchive::addFile() has to check file existence (variation 2)
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_addfile.zip';
 
@@ -29,7 +28,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 }
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 failed
 0 bar
 1 foobar/

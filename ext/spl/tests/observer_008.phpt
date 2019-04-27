@@ -28,7 +28,7 @@ var_dump($a->count());
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(3)
 int(2)
 int(1)

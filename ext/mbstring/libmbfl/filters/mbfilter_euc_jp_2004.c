@@ -35,8 +35,6 @@
 #include "mbfilter_euc_jp_2004.h"
 #include "mbfilter_sjis_2004.h"
 
-#include "unicode_table_jis2004.h"
-
 extern int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_eucjp[];
 
@@ -77,4 +75,3 @@ const struct mbfl_convert_vtbl vtbl_wchar_eucjp2004 = {
 	mbfl_filt_conv_wchar_jis2004,
 	mbfl_filt_conv_jis2004_flush
 };
-

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,19 +13,22 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_CLOSURES_H
 #define ZEND_CLOSURES_H
 
 BEGIN_EXTERN_C()
 
+/* This macro depends on zend_closure structure layout */
+#define ZEND_CLOSURE_OBJECT(op_array) \
+	((zend_object*)((char*)(op_array) - sizeof(zend_object)))
+
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
+void zend_closure_bind_var_ex(zval *closure_zv, uint32_t offset, zval *val);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;
 
@@ -38,13 +41,3 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj);
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

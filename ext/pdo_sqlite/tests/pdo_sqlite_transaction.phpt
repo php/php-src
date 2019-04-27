@@ -24,5 +24,5 @@ var_dump($r->rowCount());
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)

@@ -1,6 +1,6 @@
 --TEST--
 timezone configuration [1]
---INI-- 		
+--INI--
 date.timezone=GMT
 --FILE--
 <?php

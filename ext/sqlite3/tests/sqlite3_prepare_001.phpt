@@ -15,5 +15,5 @@ test($foo);
 echo "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 done

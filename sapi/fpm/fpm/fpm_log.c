@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_status.c 312262 2011-06-18 17:41:56Z felipe $ */
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"

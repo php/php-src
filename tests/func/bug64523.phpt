@@ -6,5 +6,5 @@ error_reporting = E_ALL ^ E_NOTICE ^ E_STRICT ^ E_DEPRECATED
 <?php
 echo ini_get('error_reporting');
 ?>
---EXPECTF--
+--EXPECT--
 22519

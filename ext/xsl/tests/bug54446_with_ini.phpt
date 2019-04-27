@@ -6,9 +6,9 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 ?>
 --FILE--
 <?php
-include("prepare.inc"); 
+include("prepare.inc");
 
-$outputfile = dirname(__FILE__)."/bug54446test.txt";
+$outputfile = __DIR__."/bug54446test.txt";
 if (file_exists($outputfile)) {
     unlink($outputfile);
 }
@@ -30,11 +30,11 @@ EOT;
 
 $xsl->loadXML( $sXsl );
 
-# START XSLT 
-$proc->importStylesheet( $xsl ); 
+# START XSLT
+$proc->importStylesheet( $xsl );
 
-# TRASNFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+# TRASNFORM & PRINT
+print $proc->transformToXML( $dom );
 
 
 if (file_exists($outputfile)) {
@@ -46,8 +46,8 @@ if (file_exists($outputfile)) {
 #SET NO SECURITY PREFS
 $proc->setSecurityPrefs(XSL_SECPREF_NONE);
 
-# TRANSFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+# TRANSFORM & PRINT
+print $proc->transformToXML( $dom );
 
 
 if (file_exists($outputfile)) {
@@ -61,8 +61,8 @@ unlink($outputfile);
 #SET SECURITY PREFS AGAIN
 $proc->setSecurityPrefs(XSL_SECPREF_WRITE_FILE | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY);
 
-# TRANSFORM & PRINT 
-print $proc->transformToXML( $dom ); 
+# TRANSFORM & PRINT
+print $proc->transformToXML( $dom );
 
 if (file_exists($outputfile)) {
     print "$outputfile exists, but shouldn't!\n";
@@ -74,7 +74,7 @@ if (file_exists($outputfile)) {
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %s
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
@@ -84,7 +84,7 @@ OK, file exists
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %s
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
@@ -92,4 +92,3 @@ Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/
 OK, no file created
 --CREDITS--
 Christian Stocker, chregu@php.net
-

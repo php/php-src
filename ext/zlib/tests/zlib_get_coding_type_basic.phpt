@@ -1,6 +1,6 @@
 --TEST--
 zlib_get_coding_type() basic call without env
---CREDIT--
+--CREDITS--
 PHP TestFest 2017 - Bergfreunde, Florian Engelhardt <florian.engelhardt@bergfreunde.de>
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>

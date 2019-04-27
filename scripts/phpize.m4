@@ -1,12 +1,23 @@
 dnl This file becomes configure.ac for self-contained extensions.
 
-AC_PREREQ(2.59)
-AC_INIT(config.m4)
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
+dnl Include external macro definitions before the AC_INIT to also remove
+dnl comments starting with # and empty newlines from the included files.
+m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_gcc_func_attribute.m4])
+m4_include([build/libtool.m4])
+m4_include([build/php_cxx_compile_stdcxx.m4])
+m4_include([build/php.m4])
+m4_include([build/pkg.m4])
+
+AC_PREREQ([2.68])
+AC_INIT
+AC_CONFIG_SRCDIR([config.m4])
+AC_CONFIG_AUX_DIR([build])
+AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
-dnl 
+dnl
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
 AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir])dnl
@@ -25,18 +36,24 @@ abs_builddir=`pwd`
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
-AC_PROG_CC_C_O
 
 dnl Support systems with system libraries in e.g. /usr/lib64
-PHP_ARG_WITH(libdir, for system library directory,
-[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib], lib, no)
+PHP_ARG_WITH([libdir],
+  [for system library directory],
+  [AS_HELP_STRING([--with-libdir=NAME],
+    [Look for libraries in .../NAME rather than .../lib])],
+  [lib],
+  [no])
 
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
 
 dnl Find php-config script
-PHP_ARG_WITH(php-config,,
-[  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
+PHP_ARG_WITH([php-config],,
+  [AS_HELP_STRING([--with-php-config=PATH],
+    [Path to php-config [php-config]])],
+  [php-config],
+  [no])
 
 dnl For BC
 PHP_CONFIG=$PHP_PHP_CONFIG
@@ -45,7 +62,7 @@ phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
 INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
 EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
 PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
- 
+
 if test -z "$prefix"; then
   AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
 fi
@@ -130,7 +147,6 @@ dnl Always shared
 PHP_BUILD_SHARED
 
 dnl Required programs
-PHP_PROG_RE2C
 PHP_PROG_AWK
 
 sinclude(config.m4)
@@ -195,8 +211,7 @@ PHP_GEN_BUILD_DIRS
 PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || $php_shtool mkdir modules
-touch .deps
 
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
-AC_OUTPUT()
+AC_OUTPUT

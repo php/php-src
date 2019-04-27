@@ -2,12 +2,11 @@
 Rename entries
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_rename.zip';
 
@@ -48,7 +47,7 @@ $zip->close();
 
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 0 entry1.txt
 1 entry2.txt
 2 dir/entry2.txt

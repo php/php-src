@@ -1,6 +1,6 @@
 --TEST--
 A variable, which is referenced by another variable, is passed by value.
-During the call, the original variable is updated. This should not affect func_get_arg().  
+During the call, the original variable is updated. This should not affect func_get_arg().
 --FILE--
 <?php
 function refVal($x) {
@@ -14,6 +14,6 @@ $a = "original.a";
 $ref =& $a;
 refVal($a);
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "original.a"
 string(10) "original.a"

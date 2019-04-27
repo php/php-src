@@ -6,7 +6,7 @@ ZE2 An interface is inherited
 interface if_a {
 	function f_a();
 }
-	
+
 interface if_b extends if_a {
 	function f_b();
 }
@@ -59,7 +59,7 @@ $t = new derived_d();
 $t->test();
 
 ?>
---EXPECTF--
+--EXPECT--
 is_a(base, base) = yes
 is_a(base, derived_a) = no
 is_a(base, derived_b) = no

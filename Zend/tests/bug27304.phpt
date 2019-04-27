@@ -14,7 +14,7 @@ class Staticexample
 $b = new Staticexample();
 Staticexample::test();
 $b->test();
-        
+
 ?>
 ===DONE===
 --EXPECT--

@@ -123,5 +123,5 @@ mysqli.reconnect=0
 	mysqli_close($link2);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

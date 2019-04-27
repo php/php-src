@@ -52,7 +52,7 @@ var_dump(ini_set('default_charset', 'ISO-8859-1'),
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing default_charset handling ***
 --- Get php.ini values ---
 string(5) "UTF-8"

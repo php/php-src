@@ -20,7 +20,7 @@ function ut_main()
 		'US/Pacific',
 		'US/Central'
 	);
-	
+
 	$res_str = '';
 
 	foreach( $timezone_id_arr as $timezone_id_entry )

@@ -463,5 +463,3 @@ static int mbfl_filt_ident_utf7(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

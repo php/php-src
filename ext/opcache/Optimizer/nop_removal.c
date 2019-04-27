@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -31,7 +31,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-void zend_optimizer_nop_removal(zend_op_array *op_array)
+void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *end, *opline;
 	uint32_t new_count, i, shift;
@@ -81,12 +81,6 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 			zend_optimizer_shift_jump(op_array, opline, shiftlist);
 		}
 
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_live_range; j++) {
-			op_array->live_range[j].start -= shiftlist[op_array->live_range[j].start];
-			op_array->live_range[j].end   -= shiftlist[op_array->live_range[j].end];
-		}
-
 		/* update try/catch array */
 		for (j = 0; j < op_array->last_try_catch; j++) {
 			op_array->try_catch_array[j].try_op -= shiftlist[op_array->try_catch_array[j].try_op];
@@ -98,9 +92,10 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &op_array->opcodes[*opline_num].result.opline_num;

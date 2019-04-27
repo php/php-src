@@ -12,7 +12,7 @@ var_dump($it->getChildren());
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 ===DONE===

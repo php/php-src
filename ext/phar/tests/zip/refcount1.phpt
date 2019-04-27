@@ -2,14 +2,13 @@
 Phar: test that refcounting avoids problems with deleting a file zip-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -45,7 +44,7 @@ include $alias . '/b/c.php';
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {

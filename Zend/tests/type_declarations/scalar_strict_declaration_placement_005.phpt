@@ -10,5 +10,5 @@ namespace Foo;
 var_dump(strlen("abc"));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(3)

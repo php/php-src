@@ -19,7 +19,7 @@ var_dump(filter_var("", FILTER_SANITIZE_STRIPPED, FILTER_FLAG_STRIP_HIGH));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(40) "Let me see you Stripped down to the bone"
 string(11) "!@#$%^&*()>"
 string(0) ""

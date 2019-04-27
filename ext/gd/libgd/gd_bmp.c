@@ -708,7 +708,7 @@ static int bmp_read_direct(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, b
 		return 1;
 	}
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -805,7 +805,7 @@ static int bmp_read_1bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -813,8 +813,8 @@ static int bmp_read_1bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 		}
 	}
 
-	/* The line must be divisible by 4, else its padded with NULLs */
-	padding = ((int)ceil(0.1 * info->width)) % 4;
+	/* The line must be aligned on a 32 bits word, else it is padded with zeros */
+	padding = (info->width + 7) / 8 % 4;
 	if (padding) {
 		padding = 4 - padding;
 	}
@@ -875,7 +875,7 @@ static int bmp_read_4bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -962,7 +962,7 @@ static int bmp_read_8bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {

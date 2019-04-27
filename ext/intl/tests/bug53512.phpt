@@ -16,7 +16,7 @@ foreach ($badvals as $val) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(65) "numfmt_set_symbol: invalid symbol value: U_ILLEGAL_ARGUMENT_ERROR"
 bool(false)

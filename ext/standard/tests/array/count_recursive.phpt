@@ -1,7 +1,5 @@
 --TEST--
-Test count() function 
---SKIPIF--
-<?php if (!extension_loaded("spl")) die("skip no SPL extension"); ?>
+Test count() function
 --FILE--
 <?php
 /* Prototype: int count ( mixed $var [, int $mode] );
@@ -48,9 +46,9 @@ $count_array = array(
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
-  array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ", 
+  array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
 	 NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
-  array( NULL, 1.23 => "Hi", "string" => "hello", 
+  array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -58,14 +56,14 @@ $i = 0;
 foreach ($count_array as $count_value) {
   echo "\n-- Iteration $i --\n";
   print "COUNT_NORMAL is ".count($count_value, COUNT_NORMAL)."\n";
-  print "COUNT_RECURSIVE is ".count($count_value, COUNT_RECURSIVE)."\n";  
+  print "COUNT_RECURSIVE is ".count($count_value, COUNT_RECURSIVE)."\n";
   $i++;
 }
 
 
 /* Testing count() by passing constant with no second argument */
 print "\n-- Testing count() on constants with no second argument --\n";
-print "COUNT_NORMAL: should be 1, is ".count(100)."\n"; 
+print "COUNT_NORMAL: should be 1, is ".count(100)."\n";
 print "COUNT_NORMAL: should be 1, is ".count(-23.45)."\n";
 
 print "\n-- Testing count() on NULL and Unset variables --\n";
@@ -106,22 +104,12 @@ echo "\n-- Testing count() on arrays containing references --\n";
 $arr = array(1, array("a", "b", "c"));
 $arr[2] = &$arr[1];
 
-$mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE, 
+$mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
                    FALSE, NULL);
 for( $i =0; $i < count( $mode_arr ); $i++) {
   echo "For mode '$mode_arr[$i]' count is => ";
   var_dump(count($arr, $mode_arr[$i]));
 }
-  
-
-echo "\n-- Testing error conditions --";
-var_dump( count() );  // No. of args = 0
-var_dump( count(array(), COUNT_NORMAL, 100) );  // No. of args > expected
-
-/* Testing Invalid type arguments */
-var_dump( count("string", ABCD) );
-var_dump( count(100, "string") );
-var_dump( count(array(), "") );
 
 echo "\nDone";
 
@@ -231,23 +219,5 @@ For mode '2' count is => int(3)
 For mode '1' count is => int(9)
 For mode '' count is => int(3)
 For mode '' count is => int(3)
-
--- Testing error conditions --
-Warning: count() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: count() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
-
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
-NULL
-
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
-NULL
-
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
-NULL
 
 Done

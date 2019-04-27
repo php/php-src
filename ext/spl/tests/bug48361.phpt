@@ -11,4 +11,3 @@ var_dump($info->getPathInfo()->getRealPath());
 string(%d) "%stests%sbug48361.php"
 string(%d) "%stests"
 ===DONE===
-

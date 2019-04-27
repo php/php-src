@@ -135,11 +135,11 @@ array(7) refcount(2){
     ["field_count"]=>
     NULL
     ["lengths"]=>
-    NULL
+    bool(false)
     ["num_rows"]=>
     NULL
     ["type"]=>
-    NULL
+    bool(false)
   }
 }
 array(1) refcount(2){

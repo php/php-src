@@ -3,7 +3,6 @@ Phar and RecursiveDirectoryIterator
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 ?>
 --INI--
 phar.require_hash=0
@@ -29,8 +28,8 @@ foreach($it as $name => $ent)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_005.phar.php');
+<?php
+unlink(__DIR__ . '/files/phar_oo_005.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

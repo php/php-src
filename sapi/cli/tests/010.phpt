@@ -1,8 +1,8 @@
 --TEST--
-executing a file with -F 
+executing a file with -F
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
@@ -38,7 +38,7 @@ var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
 @unlink(__DIR__."/010.test.php");
 @unlink(__DIR__."/010.test.txt");
 ?>
---EXPECTF--	
+--EXPECT--
 string(25) "
 string(10) "test
 hello"

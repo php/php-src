@@ -8,7 +8,7 @@ class Test {
 	function __get($name) {
 		if (isset($this->x[$name])) {
 			return $this->x[$name];
-		} 
+		}
 		else
 		{
 			return NULL;
@@ -31,7 +31,7 @@ var_dump($foo->bar->baz);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(5) "Check"
 string(5) "Check"
 ===DONE===

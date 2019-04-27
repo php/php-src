@@ -20,5 +20,5 @@ if ($text !== str_repeat('a', ($IS_MYSQLND || mysqli_get_server_version($db) > 5
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Done

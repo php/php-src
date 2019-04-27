@@ -3,7 +3,7 @@ Test array_diff_key() function : usage variation - Passing unexpected values to 
 --FILE--
 <?php
 /* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -102,209 +102,209 @@ fclose($fp);
 
 --int 0--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 --int 1--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 --int 12345--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 --int -12345--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 --float .5--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
 --undefined var--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 --unset var--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 --resource--
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 
-Warning: array_diff_key(): Argument #1 is not an array in %s on line %d
+Warning: array_diff_key(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 ===DONE===

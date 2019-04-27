@@ -3,13 +3,13 @@ oci_lob_seek()/rewind()/append()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -56,7 +56,7 @@ $row = oci_fetch_array($s);
 
 var_dump(oci_lob_read($row[0], 10000));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -73,7 +73,7 @@ NULL
 bool(true)
 int(3)
 
-Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, integer given in %s on line %d
+Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, int%sgiven in %s on line %d
 NULL
 bool(true)
 array(2) {

@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() -- absolute 
+DateTime::diff() -- absolute
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

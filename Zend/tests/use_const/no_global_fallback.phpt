@@ -3,7 +3,7 @@ non-existent imported constants should not be looked up in the global table
 --FILE--
 <?php
 
-require 'includes/global_baz.php';
+require 'includes/global_baz.inc';
 
 use const foo\bar\baz;
 var_dump(baz);

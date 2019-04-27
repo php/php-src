@@ -9,5 +9,5 @@ class Foo {
 }
 echo (new Foo)->bar;
 ?>
---EXPECTF--
+--EXPECT--
 3

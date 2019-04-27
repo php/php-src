@@ -2,8 +2,8 @@
 MySQL PDOStatement->nextRowSet() with PDO::MYSQL_ATTR_MULTI_STATEMENTS either true or false
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
@@ -21,7 +21,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -83,10 +83,10 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 Native PS...
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to false

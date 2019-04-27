@@ -19,5 +19,5 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: ibase_close() expects parameter 1 to be resource,%string given in %s on line %d
+Warning: ibase_close() expects parameter 1 to be resource, string given in %s on line %d
 NULL

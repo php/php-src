@@ -8,9 +8,9 @@ function_exists('mb_substitute_character') or die("skip mb_substitute_character(
 --FILE--
 <?php
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
- * Description: Sets the current substitute_character or returns the current substitute_character 
+ * Description: Sets the current substitute_character or returns the current substitute_character
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_substitute_character() : variation ***\n";

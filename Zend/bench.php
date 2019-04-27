@@ -5,18 +5,18 @@ if (function_exists("date_default_timezone_set")) {
 
 function simple() {
   $a = 0;
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     $a++;
 
   $thisisanotherlongname = 0;
-  for ($thisisalongname = 0; $thisisalongname < 1000000; $thisisalongname++) 
+  for ($thisisalongname = 0; $thisisalongname < 1000000; $thisisalongname++)
     $thisisanotherlongname++;
 }
 
 /****/
 
 function simplecall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     strlen("hallo");
 }
 
@@ -26,14 +26,14 @@ function hallo($a) {
 }
 
 function simpleucall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     hallo("hallo");
 }
 
 /****/
 
 function simpleudcall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     hallo2("hallo");
 }
 
@@ -345,22 +345,22 @@ function strcat($n) {
 
 /*****/
 
-function getmicrotime()
+function gethrtime()
 {
-  $t = gettimeofday();
-  return ($t['sec'] + $t['usec'] / 1000000);
+  $hrtime = hrtime();
+  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
 }
 
 function start_test()
 {
 	ob_start();
-  return getmicrotime();
+  return gethrtime();
 }
 
 function end_test($start, $name)
 {
   global $total;
-  $end = getmicrotime();
+  $end = gethrtime();
   ob_end_clean();
   $total += $end-$start;
   $num = number_format($end-$start,3);
@@ -368,7 +368,7 @@ function end_test($start, $name)
 
   echo $name.$pad.$num."\n";
 	ob_start();
-  return getmicrotime();
+  return gethrtime();
 }
 
 function total()
@@ -418,5 +418,5 @@ sieve(30);
 $t = end_test($t, "sieve(30)");
 strcat(200000);
 $t = end_test($t, "strcat(200000)");
-total($t0, "Total");
+total();
 ?>

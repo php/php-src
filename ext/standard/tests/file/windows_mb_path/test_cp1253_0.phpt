@@ -1,8 +1,8 @@
 --TEST--
-Test fopen() for reading cp1253 path 
+Test fopen() for reading cp1253 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ internal_encoding=cp1253
 #vim: set encoding=cp1253
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "διαδρομή δοκιμής";
 $prefix = create_data("file_cp1253", $item, 1253);
@@ -31,13 +31,13 @@ if ($f) {
 	var_dump(fclose($f));
 } else {
 	echo "open utf8 failed\n";
-} 
+}
 
 remove_data("file_cp1253");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 string(37) "reading file wihh multibyte filename
 "

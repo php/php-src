@@ -5,21 +5,21 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __DIR__."/".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $allDirs = array(
   // absolute paths
@@ -29,14 +29,14 @@ $allDirs = array(
   "$absSubDir/../../".$mainDir."/./".$subDir,
   "$absSubDir/..///".$subDir."//..//../".$subDir,
   "$absSubDir/BADDIR",
-  
+
   // relative paths
   $mainDir."/".$subDir,
-  $mainDir."//".$subDir, 
-   $mainDir."///".$subDir, 
+  $mainDir."//".$subDir,
+   $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
 );
 
 $filename = 'FileGetContentsVar7.tmp';

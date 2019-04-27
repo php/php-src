@@ -22,7 +22,7 @@ var_dump($root->attributes->count());
 var_dump(count($root->attributes));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(5)
 int(5)
 int(5)

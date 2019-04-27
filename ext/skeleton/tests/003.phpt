@@ -7,7 +7,7 @@ if (!extension_loaded('%EXTNAME%')) {
 }
 ?>
 --FILE--
-<?php 
+<?php
 var_dump(%EXTNAME%_test2());
 var_dump(%EXTNAME%_test2('PHP'));
 ?>

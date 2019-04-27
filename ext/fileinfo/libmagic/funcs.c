@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.90 2016/10/19 20:51:17 christos Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.94 2017/11/02 20:25:39 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -56,22 +56,18 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.90 2016/10/19 20:51:17 christos Exp $")
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, int options);
-
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
-	int rv;
 	va_list ap;
-	int len;
 	char *buf = NULL, *newstr;
 
 	va_start(ap, fmt);
-	len = vspprintf(&buf, 0, fmt, ap);
+	vspprintf(&buf, 0, fmt, ap);
 	va_end(ap);
 
 	if (ms->o.buf != NULL) {
-		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
+		spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
 		if (buf) {
 			efree(buf);
 		}
@@ -178,14 +174,15 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
     size_t nb)
 {
 	int m = 0, rv = 0, looks_text = 0;
-	const unsigned char *ubuf = CAST(const unsigned char *, buf);
-	unichar *u8buf = NULL;
-	size_t ulen;
 	const char *code = NULL;
 	const char *code_mime = "binary";
 	const char *type = "application/octet-stream";
 	const char *def = "data";
 	const char *ftype = NULL;
+	struct buffer b;
+	int fd = -1;
+	
+	buffer_init(&b, fd, buf, nb);
 
 	if (nb == 0) {
 		def = "empty";
@@ -197,13 +194,13 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	}
 
 	if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
-		looks_text = file_encoding(ms, ubuf, nb, &u8buf, &ulen,
+		looks_text = file_encoding(ms, &b, NULL, 0,
 		    &code, &code_mime, &ftype);
 	}
 
 #ifdef __EMX__
 	if ((ms->flags & MAGIC_NO_CHECK_APPTYPE) == 0 && inname) {
-		m = file_os2_apptype(ms, inname, buf, nb);
+		m = file_os2_apptype(ms, inname, &b);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try os2_apptype %d]\n", m);
 		switch (m) {
@@ -219,7 +216,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 
 #if PHP_FILEINFO_UNCOMPRESS
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
-		m = file_zmagic(ms, stream, inname, ubuf, nb);
+		m = file_zmagic(ms, &b, inname);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try zmagic %d]\n", m);
 		if (m) {
@@ -229,7 +226,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 #endif
 	/* Check if we have a tar file */
 	if ((ms->flags & MAGIC_NO_CHECK_TAR) == 0) {
-		m = file_is_tar(ms, ubuf, nb);
+		m = file_is_tar(ms, &b);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try tar %d]\n", m);
 		if (m) {
@@ -239,23 +236,28 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	}
 
 	/* Check if we have a CDF file */
-	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
-		php_socket_t fd;
-		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
-		m = file_trycdf(ms, fd, ubuf, nb);
-		if ((ms->flags & MAGIC_DEBUG) != 0)
-			(void)fprintf(stderr, "[try cdf %d]\n", m);
-		if (m) {
-			if (checkdone(ms, &rv))
-				goto done;
+	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0 && stream) {
+#ifdef _WIN64
+		php_socket_t _fd = fd;
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&_fd, 0);
+		fd = (int)_fd;
+#else
+		int _ret = php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0);
+#endif
+		if (SUCCESS == _ret) {
+			m = file_trycdf(ms, &b);
+			if ((ms->flags & MAGIC_DEBUG) != 0)
+				(void)fprintf(stderr, "[try cdf %d]\n", m);
+			if (m) {
+				if (checkdone(ms, &rv))
+					goto done;
 			}
 		}
 	}
 
 	/* try soft magic tests */
 	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0) {
-		m = file_softmagic(ms, ubuf, nb, NULL, NULL, BINTEST,
-		    looks_text);
+		m = file_softmagic(ms, &b, NULL, NULL, BINTEST, looks_text);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try softmagic %d]\n", m);
 		if (m) {
@@ -271,7 +273,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 				 * ELF headers that cannot easily * be
 				 * extracted with rules in the magic file.
 				 */
-				m = file_tryelf(ms, fd, ubuf, nb);
+				m = file_tryelf(ms, &b);
 				if ((ms->flags & MAGIC_DEBUG) != 0)
 					(void)fprintf(stderr, "[try elf %d]\n",
 					    m);
@@ -285,7 +287,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	/* try text properties */
 	if ((ms->flags & MAGIC_NO_CHECK_TEXT) == 0) {
 
-		m = file_ascmagic(ms, ubuf, nb, looks_text);
+		m = file_ascmagic(ms, &b, looks_text);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try ascmagic %d]\n", m);
 		if (m) {
@@ -322,7 +324,7 @@ simple:
 #if PHP_FILEINFO_UNCOMPRESS
  done_encoding:
 #endif
-	free(u8buf);
+	buffer_fini(&b);
 	if (rv)
 		return rv;
 
@@ -330,9 +332,9 @@ simple:
 }
 
 protected int
-file_reset(struct magic_set *ms)
+file_reset(struct magic_set *ms, int checkloaded)
 {
-	if (ms->mlist[0] == NULL) {
+	if (checkloaded && ms->mlist[0] == NULL) {
 		file_error(ms, 0, "no magic files loaded");
 		return -1;
 	}
@@ -468,15 +470,15 @@ protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
 	zval patt;
-	int opts = 0;
+	uint32_t opts = 0;
 	pcre_cache_entry *pce;
 	zend_string *res;
 	zend_string *repl;
-	int  rep_cnt = 0;
+	size_t rep_cnt = 0;
 
 	(void)setlocale(LC_CTYPE, "C");
 
-	opts |= PCRE_MULTILINE;
+	opts |= PCRE2_MULTILINE;
 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
 	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
 		zval_ptr_dtor(&patt);
@@ -488,7 +490,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	repl = zend_string_init(rep, strlen(rep), 0);
 	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
 
-	zend_string_release(repl);
+	zend_string_release_ex(repl, 0);
 	if (NULL == res) {
 		rep_cnt = -1;
 		goto out;
@@ -497,7 +499,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
 	ms->o.buf[ZSTR_LEN(res)] = '\0';
 
-	zend_string_release(res);
+	zend_string_release_ex(res, 0);
 
 out:
 	(void)setlocale(LC_CTYPE, "");

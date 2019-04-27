@@ -11,21 +11,9 @@ require_once('skipifconnectfailure.inc');
 	require_once("connect.inc");
 	require_once("table.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_select_db()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_select_db($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
-
-	if (!is_null($tmp = @mysqli_select_db($link, $db, "foo")))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* does not make too much sense, unless we have access to at least one more database than $db */
 	if (!mysqli_select_db($link, $db))
@@ -67,7 +55,7 @@ require_once('skipifconnectfailure.inc');
 
 	$current_db = $row['dbname'];
 
-	mysqli_report(MYSQLI_REPORT_OFF);	  
+	mysqli_report(MYSQLI_REPORT_OFF);
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 	mysqli_report(MYSQLI_REPORT_ERROR);
 
@@ -91,7 +79,7 @@ require_once('skipifconnectfailure.inc');
 	if (strtolower($row['dbname']) != strtolower($current_db))
 		printf("[017] Current DB should not change if set fails\n");
 
-	
+
 	if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
 		printf("[018] [%d] %s\n");
 
@@ -100,8 +88,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_select_db($link, $db)))
-		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_select_db($link, $db)))
+		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!\n";
 ?>

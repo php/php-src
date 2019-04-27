@@ -18,5 +18,5 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 Cannot fetch information from a terminated Generator

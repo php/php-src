@@ -15,6 +15,6 @@ var_dump(getenv("HOME"));
 putenv("FOO=BAR");
 var_dump(getenv("FOO"));
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "/tmp"
 string(3) "BAR"

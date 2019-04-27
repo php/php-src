@@ -7,10 +7,10 @@ Test is_file() function: usage variations - diff. files
      Returns TRUE if the filename exists and is a regular file
 */
 
-/* Testing is_file() with file containing data, truncating its size 
+/* Testing is_file() with file containing data, truncating its size
      and the file created by touch() */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "-- Testing is_file() with file containing data --\n";
 $filename = $file_path."/is_file_variation1.tmp";
@@ -43,7 +43,7 @@ unlink($file_path."/is_file_variation1.tmp");
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing is_file() with file containing data --
 bool(true)
 

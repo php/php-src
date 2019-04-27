@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 
-$base = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73877";
+$base = __DIR__ . DIRECTORY_SEPARATOR . "bug73877";
 $dir0 = $base . DIRECTORY_SEPARATOR . "bug73877";
 $dir1 = $base . DIRECTORY_SEPARATOR . "Серёжка";
 $junk0 = $base . DIRECTORY_SEPARATOR . "Серёжка2";
@@ -31,7 +31,7 @@ var_dump(
 --CLEAN--
 <?php
 
-$base = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73877";
+$base = __DIR__ . DIRECTORY_SEPARATOR . "bug73877";
 $dir0 = $base . DIRECTORY_SEPARATOR . "bug73877";
 $dir1 = $base . DIRECTORY_SEPARATOR . "Серёжка";
 $junk0 = $base . DIRECTORY_SEPARATOR . "Серёжка2";
@@ -47,4 +47,3 @@ string(%d) "%sbug73877"
 string(%d) "%sСерёжка"
 string(%d) "%sbug73877"
 bool(true)
-

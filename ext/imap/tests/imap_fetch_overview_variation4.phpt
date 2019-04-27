@@ -7,8 +7,8 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 --FILE--
 <?php
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
- * Description: Read an overview of the information in the headers 
- * of the given message sequence 
+ * Description: Read an overview of the information in the headers
+ * of the given message sequence
  * Source code: ext/imap/php_imap.c
  */
 
@@ -24,7 +24,7 @@ var_dump(imap_fetch_overview($file_pointer, 1));
 fclose($file_pointer);
 
 echo "\n-- Directory Resource opened with opendir() --\n";
-var_dump($dir_handle = opendir(dirname(__FILE__)));
+var_dump($dir_handle = opendir(__DIR__));
 var_dump(imap_fetch_overview($dir_handle, 1));
 closedir($dir_handle);
 ?>

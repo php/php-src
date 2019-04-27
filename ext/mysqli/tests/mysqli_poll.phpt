@@ -25,29 +25,6 @@ if (!$IS_MYSQLND)
 	if (!$link = get_connection())
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (NULL !== ($tmp = @mysqli_poll()))
-		printf("[002] Expecting NULL got %s\n", var_export($tmp, true));
-
-	$l = array($link);
-	if (NULL !== ($tmp = @mysqli_poll($l)))
-		printf("[003] Expecting NULL got %s\n", var_export($tmp, true));
-
-	$l = array($link); $n = NULL;
-	if (NULL !== ($tmp = @mysqli_poll($l, $n)))
-		printf("[004] Expecting NULL got %s\n", var_export($tmp, true));
-
-	$l = array($link); $n = NULL;
-	if (NULL !== ($tmp = @mysqli_poll($l, $n, $n)))
-		printf("[005] Expecting NULL got %s\n", var_export($tmp, true));
-
-	$l = array($link); $e = NULL; $r = NULL;
-	if (NULL !== ($tmp = @mysqli_poll($l, $e, $r, -1)))
-		printf("[007] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
-
-	$l = array($link); $e = NULL; $r = NULL;
-	if (NULL !== ($tmp = @mysqli_poll($l, $e, $r, 0, -1)))
-		printf("[008] Expecting boolean/false got %s/%s\n", gettype($tmp), var_export($tmp, true));
-
 	$read = $error = $reject = array($link);
 	if (0 !== ($tmp = (mysqli_poll($read, $error, $reject, 0, 1))))
 		printf("[009] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
@@ -134,7 +111,6 @@ if (!$IS_MYSQLND)
 	print "done!";
 ?>
 --EXPECTF--
-
 Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
 
 Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d

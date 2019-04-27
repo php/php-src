@@ -1,20 +1,14 @@
 --TEST--
 Test getimagesize() function : usage variations  - unexpected type for arg 2
---SKIPIF--
-<?php
-	if (!defined("IMAGETYPE_JPEG")) {
-		die("skip jpeg format is not available");
-	}
-?>
 --FILE--
 <?php
 /* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array 
+ * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');
@@ -22,7 +16,7 @@ set_error_handler('test_error_handler');
 echo "*** Testing getimagesize() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$imagefile = dirname(__FILE__)."/test1pix.jpg";
+$imagefile = __DIR__."/test1pix.jpg";
 
 //get an unset variable
 $unset_var = 10;

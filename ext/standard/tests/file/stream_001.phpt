@@ -10,7 +10,7 @@ var_dump(fopen("file://".__FILE__, "r"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 
 Warning: fopen(): Unable to find the wrapper "file" - did you forget to enable it when you configured PHP? in %s on line %d

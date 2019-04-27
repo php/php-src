@@ -28,7 +28,7 @@ var_dump($class->newInstanceArgs(array('test')));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(ObjectOne)#%d (0) {
 }
 Exception: Too few arguments to function ObjectTwo::__construct(), 0 passed and exactly 1 expected

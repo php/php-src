@@ -3,24 +3,24 @@ serialization: arrays with references, nested
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized) 
+ * Description: Returns a string representation of variable (which can later be unserialized)
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function check(&$a) {
 	var_dump($a);
 	$ser = serialize($a);
 	var_dump($ser);
-	
+
 	$b = unserialize($ser);
-	
-	// Change each element and dump result. 
+
+	// Change each element and dump result.
 	foreach($b as $k=>$v) {
 		if (is_array($v)){
 			foreach($b[$k] as $sk=>$sv) {
@@ -78,7 +78,7 @@ $a[1] = &$c;
 check($c);
 
 ?>
---EXPECTF--
+--EXPECT--
 --- Nested array references 1 element in containing array:
 array(3) {
   [0]=>

@@ -3,7 +3,7 @@ Test array_shift() function : usage variations - position of internal pointer
 --FILE--
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -23,7 +23,7 @@ echo key($stack) . " => " . current ($stack) . "\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Call array_shift() --

@@ -64,7 +64,7 @@ var_dump($ai4->getChildren());
 ?>
 ==DONE==
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 int(4)

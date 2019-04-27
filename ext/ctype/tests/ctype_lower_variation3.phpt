@@ -5,7 +5,7 @@ Test ctype_lower() function : usage variations - different strings
 --FILE--
 <?php
 /* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)  
+ * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -57,7 +57,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_lower() : usage variations ***
 
 -- Iteration 1 --

@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (variation 8) 
+Test extract() function (variation 8)
 --FILE--
 <?php
 
@@ -17,8 +17,7 @@ var_dump ( extract($var1));
 
 echo "\nDone";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing for Numerical prefixes ***
 int(3)
 int(1)

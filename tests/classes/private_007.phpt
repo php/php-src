@@ -12,7 +12,7 @@ class Bar {
 	}
 }
 class Foo extends Bar {
-	public static function priv()	{ 
+	public static function priv()	{
 		echo "Foo::priv()\n";
 	}
 }
@@ -22,7 +22,7 @@ Foo::priv();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Bar::priv()
 Foo::priv()
 Done

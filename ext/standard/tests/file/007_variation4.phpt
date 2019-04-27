@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "w+" mode 
+Test fopen and fclose() functions - usage variations - "w+" mode
 --FILE--
 <?php
 /*
@@ -20,7 +20,7 @@ Test fopen and fclose() functions - usage variations - "w+" mode
    checking for the file truncation when trying to open an existing file in "w+" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 4, "bytes");
@@ -49,10 +49,10 @@ clearstatcache();
 unlink($file);  //Deleting the file
 fclose( fopen($file, "w+") );  //Opening the non-existing file in "w+" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation4.tmp");
+unlink(__DIR__."/007_variation4.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'w+' mode ***

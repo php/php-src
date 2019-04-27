@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_network.h"
@@ -1734,8 +1732,12 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
+	zend_string *key = zend_string_init(name, name_len, 1);
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
-	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
+	GC_MAKE_PERSISTENT_LOCAL(key);
+	GC_MAKE_PERSISTENT_LOCAL(Z_STR(zvalue));
+	zend_hash_add(&fcgi_mgmt_vars, key, &zvalue);
+	zend_string_release_ex(key, 1);
 }
 
 void fcgi_free_mgmt_var_cb(zval *zv)
@@ -1767,12 +1769,3 @@ const char *fcgi_get_last_client_ip()
 	/* Unix socket */
 	return NULL;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

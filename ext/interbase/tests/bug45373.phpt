@@ -6,7 +6,7 @@ Bug #45373 (php crash on query with errors in params)
 <?php
 
 	require("interbase.inc");
-    
+
 	$db = ibase_connect($test_base);
 
 
@@ -16,11 +16,11 @@ Bug #45373 (php crash on query with errors in params)
 	$r = ibase_execute($q, 1, 'test table not created with isql');
 	var_dump(ibase_fetch_assoc($r));
 	ibase_free_result($r);
-	
+
 	$r = ibase_execute($q, 1, 'test table not created with isql', 1);
 	var_dump(ibase_fetch_assoc($r));
 	ibase_free_result($r);
-	
+
 	$r = ibase_execute($q, 1);
 	var_dump(ibase_fetch_assoc($r));
 
@@ -43,5 +43,5 @@ array(2) {
 
 Warning: ibase_execute(): Statement expects 2 arguments, 1 given in %s on line %d
 
-Warning: ibase_fetch_assoc() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: ibase_fetch_assoc() expects parameter 1 to be resource, bool given in %s on line %d
 NULL

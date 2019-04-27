@@ -10,22 +10,10 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_query()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_query($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (false !== ($tmp = @mysqli_query($link, '')))
 		printf("[002a] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_query($link, "SELECT 1 AS a", MYSQLI_USE_RESULT, "foo")))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (false !== ($tmp = mysqli_query($link, 'THIS IS NOT SQL')))
 		printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -94,12 +82,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	mysqli_free_result($res);
 
-	$valid = array(MYSQLI_USE_RESULT, MYSQLI_STORE_RESULT);
-	do {
-		$mode = mt_rand(-1000, 1000);
-	} while (in_array($mode, $valid));
-
-	if (false !== ($res = @mysqli_query($link, "SELECT id FROM test ORDER BY id", $mode)))
+	if (false !== ($res = @mysqli_query($link, "SELECT id FROM test ORDER BY id", 1234)))
 		printf("[013] Invalid mode should return false got %s/%s, [%d] %s\n",
 			gettype($res), (is_object($res)) ? 'object' : $res,
 			mysqli_errno($link), mysqli_error($link));
@@ -107,8 +90,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
+		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

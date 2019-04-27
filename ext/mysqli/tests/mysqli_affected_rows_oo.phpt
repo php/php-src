@@ -11,8 +11,8 @@ mysqli->affected_rows
 	require_once("connect.inc");
 
 	$mysqli = new mysqli();
-	if (NULL !== ($tmp = @$mysqli->affected_rows))
-		printf("[000a] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->affected_rows))
+		printf("[000a] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -101,8 +101,8 @@ mysqli->affected_rows
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->affected_rows))
-		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->affected_rows))
+		printf("[026] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -110,5 +110,5 @@ mysqli->affected_rows
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

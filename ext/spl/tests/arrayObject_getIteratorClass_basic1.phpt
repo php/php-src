@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject::getIteratorClass and ArrayObject::setIteratorClass basic functionality 
+SPL: ArrayObject::getIteratorClass and ArrayObject::setIteratorClass basic functionality
 --FILE--
 <?php
 class MyIterator extends ArrayIterator {
@@ -9,31 +9,31 @@ class MyIterator extends ArrayIterator {
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 	}
 
-	function rewind() { 
+	function rewind() {
 		$args = func_get_args();
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 		return parent::rewind();
 	}
 
-	function valid() { 
+	function valid() {
 		$args = func_get_args();
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 		return parent::valid();
 	}
-	
-	function current() { 
+
+	function current() {
 		$args = func_get_args();
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 		return parent::current();
 	}
 
-	function next() { 
+	function next() {
 		$args = func_get_args();
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 		return parent::next();
 	}
-	
-	function key() { 
+
+	function key() {
 		$args = func_get_args();
 		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 		return parent::key();
@@ -58,7 +58,7 @@ foreach($ao as $key=>$value) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 --> Access using MyIterator:
 string(10) "MyIterator"
 object(MyIterator)#2 (1) {

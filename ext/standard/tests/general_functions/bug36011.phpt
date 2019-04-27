@@ -9,17 +9,17 @@ class TestClass
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function whee()
 	{
 		array_map(array('TestClass', 'test'), array('array_value'));
 	}
-	
+
 	function whee4()
 	{
 		call_user_func(array('TestClass', 'test'));
 	}
-	
+
 	static function whee5()
 	{
 		call_user_func(array('TestClass', 'test'));
@@ -37,7 +37,7 @@ TestClass::whee5();
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 TestClass::test()
 TestClass::test()
 TestClass::test()

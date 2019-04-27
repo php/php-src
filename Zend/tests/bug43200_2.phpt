@@ -21,5 +21,5 @@ $o = new C();
 $o->foo();
 
 ?>
---EXPECTF--
+--EXPECT--
 works

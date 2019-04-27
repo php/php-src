@@ -3,12 +3,12 @@ Test array_slice() function : usage variations - multidimensional arrays
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
 /*
- * Test array_slice when passed 
+ * Test array_slice when passed
  * 1. a two-dimensional array as $input argument
  * 2. a sub-array as $input argument
  */
@@ -25,8 +25,7 @@ var_dump(array_slice($input[2], 1, 2));
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Slice a two-dimensional array --

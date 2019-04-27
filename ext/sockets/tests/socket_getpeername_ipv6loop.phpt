@@ -1,17 +1,17 @@
 --TEST--
 ext/sockets - socket_getpeername_ipv6loop - basic test
 --CREDITS--
+Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
-# $Id: socket_getpeername_ipv6loop.phpt 494 2009-06-09 20:38:05Z tatjana.andersen@redpill-linpro.com $
 --SKIPIF--
-<?php   
+<?php
 if (!extension_loaded('sockets')) {
 	die('skip sockets extension not available.');
 }
 require 'ipv6_skipif.inc';
 ?>
 --FILE--
-<?php   
+<?php
 	/* Bind and connect sockets to localhost */
 	$localhost = '::1';
 
@@ -25,7 +25,7 @@ require 'ipv6_skipif.inc';
 	$maxport = 31356;
 	$bound = false;
 	for($port = $minport; $port <= $maxport; ++$port) {
-        	if (socket_bind($server, $localhost, $port)) {
+		if (@socket_bind($server, $localhost, $port)) {
 			$bound = true;
 			break;
 		}

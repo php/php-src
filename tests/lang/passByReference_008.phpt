@@ -1,5 +1,5 @@
 --TEST--
-Pass same variable by ref and by value. 
+Pass same variable by ref and by value.
 --FILE--
 <?php
 function valRef($x, &$y) {
@@ -25,9 +25,7 @@ $b = 'original.b';
 refVal($b, $b);
 var_dump($b);
 ?>
---EXPECTF--
-
-
+--EXPECT--
 -- Val, Ref --
 string(10) "original.a"
 string(10) "original.a"

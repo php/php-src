@@ -1,5 +1,5 @@
 --TEST--
-ZE2 A private member is 
+ZE2 A private member is
 --FILE--
 <?php
 
@@ -51,7 +51,7 @@ unset($t);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 derived::__construct(begin)
 base::__construct(begin)
 base::test

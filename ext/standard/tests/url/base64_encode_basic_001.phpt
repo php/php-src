@@ -1,11 +1,11 @@
 --TEST--
-Test base64_encode() function : basic functionality 
+Test base64_encode() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm 
+ * Description: Encodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -22,7 +22,7 @@ for ($i=0; $i<256; $i++) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing base64_encode() : basic functionality ***
 0x0: AA==
 0x1: AQ==

@@ -1,9 +1,10 @@
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,23 +31,91 @@ function error($message) {
 /* {{{ print_help
  */
 function print_help() {
-	printf('php ext_skel.php --ext <name> [--experimental] [--author <name>]%s', PHP_EOL);
-	printf('                 [--dir <path>] [--std] [--onlyunix]%s', PHP_EOL);
-	printf('                 [--onlywindows] [--help]%1$s%1$s', PHP_EOL);
-	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
-	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
-	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author <name>       Your name, this is used if --header is passed and%s', PHP_EOL);
-	printf('                        for the CREDITS file%s', PHP_EOL);
-	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
-	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
-	printf(' 			lives%s', PHP_EOL);
-	printf('  --std			If passed, the standard header and vim rules footer used%s', PHP_EOL);
-	printf(' 			in extensions that is included in the core, will be used%s', PHP_EOL);
-	printf('  --onlyunix		Only generate configure scripts for Unix%s', PHP_EOL);
-	printf('  --onlywindows		Only generate configure scripts for Windows%s', PHP_EOL);
-	printf('  --help                This help%s', PHP_EOL);
+    if (PHP_OS_FAMILY != 'Windows') {
+        $file_prefix = './';
+        $make_prefix = '';
+    } else {
+        $file_prefix = '';
+        $make_prefix = 'n';
+    }
 
+    echo <<<HELP
+WHAT IT IS
+
+  It's a tool for automatically creating the basic framework for a PHP extension.
+
+HOW TO USE IT
+
+  Very simple. First, change to the ext/ directory of the PHP sources. Then run
+  the following
+
+    php ext_skel.php --ext extension_name
+
+  and everything you need will be placed in directory ext/extension_name.
+
+  If you don't need to test the existence of any external header files,
+  libraries or functions in them, the extension is ready to be compiled in PHP.
+  To compile the extension run the following:
+
+    cd extension_name
+    phpize
+    {$file_prefix}configure
+    {$make_prefix}make
+
+  Don't forget to run tests once the compilation is done:
+
+    {$make_prefix}make test
+
+  Alternatively, to compile extension in the PHP:
+
+    cd /path/to/php-src
+    {$file_prefix}buildconf
+    {$file_prefix}configure --enable-extension_name
+    {$make_prefix}make
+    {$make_prefix}make test TESTS=ext/extension_name/tests
+
+  The definition of PHP_extension_NAME_VERSION will be present in the
+  php_extension_name.h and injected into the zend_extension_entry definition.
+  This is required by the PECL website for the version string conformity checks
+  against package.xml
+
+SOURCE AND HEADER FILE NAME
+
+  The ext_skel.php script generates 'extension_name.c' and 'php_extension_name.h'
+  as the main source and header files. Keep these names.
+
+  extension functions (User functions) must be named
+
+  extension_name_function()
+
+  When you need to expose extension functions to other extensions, expose
+  functions strictly needed by others. Exposed internal function must be named
+
+  php_extension_name_function()
+
+  See also CODING_STANDARDS.
+
+OPTIONS
+
+  php ext_skel.php --ext <name> [--experimental] [--author <name>]
+                   [--dir <path>] [--std] [--onlyunix]
+                   [--onlywindows] [--help]
+
+  --ext <name>          The name of the extension defined as <name>
+  --experimental        Passed if this extension is experimental, this creates
+                        the EXPERIMENTAL file in the root of the extension
+  --author <name>       Your name, this is used if --std is passed and for the
+                        CREDITS file
+  --dir <path>          Path to the directory for where extension should be
+                        created. Defaults to the directory of where this script
+                        lives
+  --std                 If passed, the standard header used in extensions that
+                        is included in the core, will be used
+  --onlyunix            Only generate configure scripts for Unix
+  --onlywindows         Only generate configure scripts for Windows
+  --help                This help
+
+HELP;
 	exit;
 }
 /* }}} */
@@ -75,14 +144,14 @@ function print_success() {
 		$make_prefix = 'n';
 	}
 
-	printf('%1$sSuccess. The extension is now ready to be compiled into PHP. To do so, use the%s', PHP_EOL);
+	printf('%1$sSuccess. The extension is now ready to be compiled. To do so, use the%s', PHP_EOL);
 	printf('following steps:%1$s%1$s', PHP_EOL);
-	printf('cd /path/to/php-src%s', PHP_EOL);
-	printf('%sbuildconf%s', $file_prefix, PHP_EOL);
-	printf('%sconfigure --enable-%s%s', $file_prefix, $options['ext'], PHP_EOL);
+	printf('cd /path/to/php-src/%s%s', $options['ext'], PHP_EOL);
+	printf('phpize%s', PHP_EOL);
+	printf('%sconfigure%s', $file_prefix, PHP_EOL);
 	printf('%smake%2$s%2$s', $make_prefix, PHP_EOL);
 	printf('Don\'t forget to run tests once the compilation is done:%s', PHP_EOL);
-	printf('%smake test TESTS=ext/%s/tests%3$s%3$s', $make_prefix, $options['ext'], PHP_EOL);
+	printf('%smake test%2$s%2$s', $make_prefix, PHP_EOL);
 	printf('Thank you for using PHP!%s', PHP_EOL);
 }
 /* }}} */
@@ -91,13 +160,13 @@ function print_success() {
  */
 function process_args($argv, $argc) {
 	$options = [
-			'unix'		=> true, 
-			'windows' 	=> true, 
-			'ext' 		=> '', 
-			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR, 
-			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR, 
-			'author'	=> false, 
-			'experimental'	=> false, 
+			'unix'		=> true,
+			'windows' 	=> true,
+			'ext' 		=> '',
+			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR,
+			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
+			'author'	=> false,
+			'experimental'	=> false,
 			'std'		=> false
 			];
 
@@ -137,10 +206,10 @@ function process_args($argv, $argc) {
 				if (!isset($argv[$i + 1]) || ($argv[$i + 1]{0} == '-' && $argv[$i + 1]{1} == '-')) {
 					error('Argument "' . $val . '" expects a value, none passed');
 				} else if ($opt == 'dir' && empty($argv[$i + 1])) {
-					continue;
+					continue 2;
 				}
 
-				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) : $argv[$i + 1]);
+				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
 			}
 			break;
 			default: {
@@ -178,11 +247,10 @@ function process_source_tags($file, $short_name) {
 	$source = str_replace('%EXTNAMECAPS%', strtoupper($options['ext']), $source);
 
 	if (strpos($short_name, '.c') !== false || strpos($short_name, '.h') !== false) {
-		static $header, $footer;
+		static $header;
 
 		if (!$header) {
 			if ($options['std']) {
-				$year = date('Y');
 				$author_len = strlen($options['author']);
 				$credits = $options['author'] . ($author_len && $author_len <= 60 ? str_repeat(' ', 60 - $author_len) : '');
 
@@ -191,7 +259,7 @@ function process_source_tags($file, $short_name) {
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-$year The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -205,27 +273,16 @@ function process_source_tags($file, $short_name) {
    +----------------------------------------------------------------------+
 */
 HEADER;
-				$footer = <<<'FOOTER'
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
-FOOTER;
 			} else {
 				if ($options['author']) {
 					$header = sprintf('/* %s extension for PHP (c) %d %s */', $options['ext'], date('Y'), $options['author']);
 				} else {
 					$header = sprintf('/* %s extension for PHP */', $options['ext']);
 				}
-
-				$footer = '';
 			}
 		}
 
-		$source = str_replace(['%HEADER%', '%FOOTER%'], [$header, $footer], $source);
+		$source = str_replace('%HEADER%', $header, $source);
 	}
 
 	if (!file_put_contents($file, $source)) {
@@ -249,9 +306,7 @@ function copy_config_scripts() {
 		$files[] = 'config.w32';
 	}
 
-	if (!$files) {
-		return;
-	}
+	$files[] = '.gitignore';
 
 	foreach($files as $config_script) {
 		$new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
@@ -271,7 +326,7 @@ function copy_sources() {
 	global $options;
 
 	$files = [
-			'skeleton.c'		=> $options['ext'] . '.c', 
+			'skeleton.c'		=> $options['ext'] . '.c',
 			'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
 			];
 
@@ -325,7 +380,7 @@ if ($argc < 1) {
 $options = process_args($argv, $argc);
 
 if (!$options['dir'] || !is_dir($options['dir'])) {
-	error('The selected output directory does not exists');
+	error('The selected output directory does not exist');
 } else if (is_dir($options['dir'] . $options['ext'])) {
 	error('There is already a folder named "' . $options['ext'] . '" in the output directory');
 } else if (!mkdir($options['dir'] . $options['ext'])) {
@@ -361,5 +416,3 @@ task('Copying sources', 'copy_sources');
 task('Copying tests', 'copy_tests');
 
 print_success();
-
-?>

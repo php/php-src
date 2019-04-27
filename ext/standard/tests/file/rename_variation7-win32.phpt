@@ -11,7 +11,7 @@ if (!function_exists("symlink")) die("skip symlinks are not supported");
 $tmp_link = __FILE__.".tmp.link";
 $tmp_link2 = __FILE__.".tmp.link2";
 
-if (symlink(dirname(__FILE__)."/there_is_no_such_file", $tmp_link)) {
+if (symlink(__DIR__."/there_is_no_such_file", $tmp_link)) {
 	rename($tmp_link, $tmp_link2);
 }
 
@@ -25,8 +25,8 @@ var_dump(readlink($tmp_link2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: symlink(): Could not fetch file information(error 2) in %srename_variation7-win32.php on line %d
+--EXPECTF--
+Warning: symlink(): No such file or directory in %srename_variation7-win32.php on line %d
 
 Warning: readlink(): readlink failed to read the symbolic link (%srename_variation7-win32.php.tmp.link), error 2) in %srename_variation7-win32.php on line %d
 bool(false)

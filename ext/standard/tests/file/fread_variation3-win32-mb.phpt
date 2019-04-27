@@ -10,9 +10,9 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 /*
  Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle. 
-   Reading stops when up to length bytes have been read, EOF (end of file) is 
-   reached, (for network streams) when a packet becomes available, or (after 
+ Description: reads up to length bytes from the file pointer referenced by handle.
+   Reading stops when up to length bytes have been read, EOF (end of file) is
+   reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
 
@@ -20,8 +20,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 include ("file.inc");
 
 /* Function : function check_read(resource $file_handle, int $read_size, int $expect_size)
-   Description : Read data from file of size $read_size and verifies that $expected_size no. of 
-                 bytes are read. 
+   Description : Read data from file of size $read_size and verifies that $expected_size no. of
+                 bytes are read.
      $file_handle : File Handle
      $read_size   : No. of bytes to be read.
      $expect_size : Expected data length
@@ -31,7 +31,7 @@ function check_read($file_handle, $read_size, $expect_size) {
   // print file pointer position before read
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
-  
+
   // read the data of size $read_size
   echo "Reading $read_size bytes from file, expecting $expect_size bytes ... ";
   $data_from_file = fread($file_handle, $read_size);
@@ -49,7 +49,7 @@ function check_read($file_handle, $read_size, $expect_size) {
 
   return $data_from_file;
 }
- 
+
 echo "*** Testing fread() : usage variations ***\n";
 
 $file_modes = array("a+","a+b","a+t",
@@ -65,10 +65,10 @@ foreach($file_content_types as $file_content_type) {
   foreach($file_modes as $file_mode) {
     if(!strstr($file_mode,"x")){
        /* create files with $file_content_type */
-       create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "私はガラスを食べられますfread_variation", 3);
+       create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "私はガラスを食べられますfread_variation", 3);
     }
-    
-    $filename = dirname(__FILE__)."/私はガラスを食べられますfread_variation3.tmp"; // this is name of the file created by create_files()
+
+    $filename = __DIR__."/私はガラスを食べられますfread_variation3.tmp"; // this is name of the file created by create_files()
     echo "-- File opened in mode ".$file_mode." --\n";
     $file_handle = fopen($filename, $file_mode);
     if (!$file_handle) {
@@ -109,7 +109,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo"Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fread() : usage variations ***
 
 -- Testing fread() with file having content of type numeric --

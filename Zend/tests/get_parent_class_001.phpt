@@ -4,7 +4,7 @@ Testing get_parent_class()
 <?php
 
 interface ITest {
-	function foo();	
+	function foo();
 }
 
 abstract class bar implements ITest {

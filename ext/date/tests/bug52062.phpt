@@ -13,7 +13,11 @@ var_dump($d->format('Y-m-d H:i:s U'));
 var_dump($d->getTimestamp());
 var_dump($d->format('U'));
 
-$d->setTimestamp(100000000000);
+try {
+    $d->setTimestamp(100000000000);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($d->format('Y-m-d H:i:s U'));
 var_dump($d->getTimestamp());
 
@@ -24,8 +28,7 @@ var_dump($i->format('%s'));
 string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(12) "100000000000"
-
-Warning: DateTime::setTimestamp() expects parameter 1 to be integer, float given in %s on line %d
+DateTime::setTimestamp() expects parameter 1 to be int, float given
 string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(10) "1215752192"

@@ -1,11 +1,5 @@
 --TEST--
 Bug #70232 (Incorrect bump-along behavior with \K and empty string match)
---SKIPIF--
-<?php
-if (version_compare(explode(' ', PCRE_VERSION)[0], '8.0', 'lt')) {
-    die("skip this test requires libpcre >= 8.0");
-}
-?>
 --FILE--
 <?php
 $pattern = '~(?: |\G)\d\B\K~';

@@ -142,7 +142,7 @@ foreach ($arr as $u => $v) {
     $res = html_entity_decode($ent, ENT_QUOTES, 'WINDOWS-1251');
     $d = unpack("H*", $res);
     echo sprintf("%s: %s => %s\n", $v[1], $ent, $d[1]);
-    
+
     $ent = sprintf("&#x%X;", $v[0]);
     $res = html_entity_decode($ent, ENT_QUOTES, 'WINDOWS-1251');
     if ($res[0] != "&" || $res[1] != "#")
@@ -533,5 +533,3 @@ CYRILLIC SMALL LETTER YU: &#x44E; => fe
 
 CYRILLIC SMALL LETTER YA: &#x44F; => ff
 &#xFF; => &#xFF;
-
-

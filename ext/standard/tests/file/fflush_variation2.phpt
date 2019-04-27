@@ -13,7 +13,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN')
 
 /* test fflush() with handle to symbollic link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require $file_path.'/file.inc';
 
 echo "*** Testing fflush(): with soft links to files opened in diff modes ***\n";
@@ -35,14 +35,14 @@ foreach( $file_types as $type ) {
     $file_handle = fopen($file_name, "w");
     if($file_handle == false)
       exit("Error:failed to open file $file_name");
-  
+
     //fill the file with some data if mode is append mode
-    if( substr($mode, 0, 1) == "a" ) 
-      fill_file($file_handle, $type, 10); 
-  
+    if( substr($mode, 0, 1) == "a" )
+      fill_file($file_handle, $type, 10);
+
     //close the file
     fclose($file_handle);
-  
+
     // creating the sym link
     var_dump( symlink($file_name, $symlink_name) );
     $file_handle = fopen($symlink_name, $mode);
@@ -50,10 +50,10 @@ foreach( $file_types as $type ) {
       exit("Error:failed to open link $symlink_name");
 
     // filling data into the file
-    var_dump( fill_file($file_handle, $type, 50) ); 
+    var_dump( fill_file($file_handle, $type, 50) );
     var_dump( fflush($file_handle) );
     fclose($file_handle);
-    
+
     // reading the data from the file
     var_dump( readfile($symlink_name) );
 
@@ -65,7 +65,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with soft links to files opened in diff modes ***
 -- Iteration 1 with file containing empty data --
 -- link opened in w mode --
@@ -440,4 +440,3 @@ bool(true)
 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 int(60)
 
 *** Done ***
-

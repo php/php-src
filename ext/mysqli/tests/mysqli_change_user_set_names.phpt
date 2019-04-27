@@ -153,5 +153,5 @@ if ($version[0] <= 4 && $version[1] < 1)
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

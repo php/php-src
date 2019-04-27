@@ -7,9 +7,9 @@ increment and add edge cases
 
 $notStr = 123;
 try {
-	sodium_increment($notStr);
+    sodium_increment($notStr);
 } catch (SodiumException $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 $str = "abc";
@@ -26,9 +26,9 @@ $addStr = "\2\0\0";
 
 $notStr = 123;
 try {
-	sodium_add($notStr, $addStr);
+    sodium_add($notStr, $addStr);
 } catch (SodiumException $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 $str = "abc";

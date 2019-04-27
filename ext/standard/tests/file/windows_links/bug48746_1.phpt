@@ -1,9 +1,7 @@
 --TEST--
 Bug#48746 - Junction not working properly
-
 --CREDITS--
 Venkat Raman Don (don.raman@microsoft.com)
-
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
@@ -13,7 +11,7 @@ include_once __DIR__ . '/common.inc';
 $cmd = "mklink /?";
 $ret = @exec($cmd, $output, $return_val);
 if (count($output) == 0) {
-    die("mklink.exe not found in PATH");
+    die("skip mklink.exe not found in PATH");
 }
 ?>
 --FILE--

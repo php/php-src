@@ -16,12 +16,12 @@ foreach ($classes as $class) {
 	$ro = new ReflectionObject(new $class);
 	foreach ($instances as $name => $instance) {
 		echo "is $name a $class? ";
-		var_dump($ro->isInstance($instance));	
+		var_dump($ro->isInstance($instance));
 	}
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 is myA a A? bool(true)
 is myB a A? bool(true)
 is myX a A? bool(false)

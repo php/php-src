@@ -1,5 +1,5 @@
 --TEST--
-Bug #75031: Append mode in php://temp and php://memory 
+Bug #75031: Append mode in php://temp and php://memory
 --FILE--
 <?php
 

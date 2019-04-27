@@ -2,24 +2,19 @@
 PDO::ATTR_CONNECTION_STATUS
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	$status = $db->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-	if (ini_get('unicode.semantics')) {
-		if (!is_unicode($status))
-			printf("[001] Expecting unicode, got '%s'\n", var_export($status, true));
-	} else {
-		if (!is_string($status))
-			printf("[002] Expecting string, got '%s'\n", var_export($status, true));
-	}
+    if (!is_string($status))
+        printf("[002] Expecting string, got '%s'\n", var_export($status, true));
 
 	if ('' == $status)
 		printf("[003] Connection status string must not be empty\n");
@@ -33,5 +28,5 @@ $db = MySQLPDOTest::factory();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

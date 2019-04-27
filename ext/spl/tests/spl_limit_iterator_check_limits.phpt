@@ -31,7 +31,7 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Parameter offset must be >= 0
 Parameter count must either be -1 or a value greater than or equal 0
 ===DONE===

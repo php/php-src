@@ -21,7 +21,7 @@ reflection::export(new reflectionmethod('snmp', 'getError'));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {
 
   - Parameters [5] {

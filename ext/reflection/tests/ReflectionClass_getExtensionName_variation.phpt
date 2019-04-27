@@ -7,7 +7,7 @@ Rein Velt <rein@velt.org>
 <?php
 
 	class myClass
-	{	
+	{
 		public $varX;
 		public $varY;
 	}

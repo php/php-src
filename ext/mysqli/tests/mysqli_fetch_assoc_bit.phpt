@@ -113,5 +113,5 @@ mysqli_fetch_assoc() - BIT
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

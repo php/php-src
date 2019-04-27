@@ -5,8 +5,6 @@ Interface of the class mysqli_driver - Reflection
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
-if (($tmp = substr(PHP_VERSION, 0, strpos(PHP_VERSION, '.'))) && ($tmp < 5))
-	die("skip Reflection not available before PHP 5 (found PHP $tmp)");
 
 /*
 Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.
@@ -42,7 +40,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'client_version'
 isPublic: yes
@@ -50,7 +48,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'driver_version'
 isPublic: yes
@@ -58,7 +56,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'embedded'
 isPublic: yes
@@ -66,7 +64,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'reconnect'
 isPublic: yes
@@ -74,7 +72,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'report_mode'
 isPublic: yes
@@ -82,7 +80,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 Default property 'client_info'
 Default property 'client_version'
 Default property 'driver_version'

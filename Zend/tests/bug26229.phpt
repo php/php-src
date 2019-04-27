@@ -5,7 +5,7 @@ Bug #26229 (getIterator() segfaults when it returns arrays or scalars)
 
 class array_iterator implements IteratorAggregate {
         public function getIterator() {
-                return array('foo', 'bar');     
+                return array('foo', 'bar');
         }
 }
 
@@ -24,6 +24,6 @@ catch(Exception $e)
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Objects returned by array_iterator::getIterator() must be traversable or implement interface Iterator
 ===DONE===

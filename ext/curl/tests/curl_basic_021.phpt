@@ -8,7 +8,7 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 <?php
   include 'server.inc';
   $host = curl_cli_server_start();
-  $url  = "{$host}/get.php?test=contenttype";
+  $url  = "{$host}/get.inc?test=contenttype";
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
@@ -17,6 +17,6 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_close($ch);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(24) "text/plain;charset=utf-8"
 ===DONE===

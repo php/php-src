@@ -25,16 +25,6 @@ if (!$IS_MYSQLND)
 	if (!$link = get_connection())
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	if (NULL !== ($tmp = @mysqli_reap_async_query()))
-		printf("[002] Expecting NULL got %s\n", var_export($tmp, true));
-
-	$l = array($link);
-	if (NULL !== ($tmp = @mysqli_reap_async_query($l)))
-		printf("[003] Expecting NULL got %s\n", var_export($tmp, true));
-
-	if (NULL !== ($tmp = @mysqli_reap_async_query($link, $link)))
-		printf("[004] Expecting NULL got %s\n", var_export($tmp, true));
-
 
 	function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
@@ -87,7 +77,7 @@ if (!$IS_MYSQLND)
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [012 + 2] array (
   '_one' => '1',
 )

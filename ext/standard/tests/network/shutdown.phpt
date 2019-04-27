@@ -6,7 +6,7 @@ stream_socket_shutdown() test on IPv4 TCP Loopback
 ?>
 --FILE--
 <?php
-  
+
   for ($i=0; $i<100; $i++) {
     $port = rand(10000, 65000);
     /* Setup socket server */
@@ -15,7 +15,7 @@ stream_socket_shutdown() test on IPv4 TCP Loopback
       break;
     }
   }
-	
+
 if (!$server) {
 		die('Unable to create AF_INET socket [server]');
 	}

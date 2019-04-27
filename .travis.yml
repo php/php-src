@@ -1,5 +1,9 @@
+git:
+  quiet: true
+
+dist: xenial
 language: c
-sudo: false
+sudo: required
 addons:
   apt:
     packages:
@@ -15,11 +19,18 @@ addons:
       - librecode-dev
       - libsasl2-dev
       - libxpm-dev
-      - libt1-dev
       - libzip-dev
+      - libsqlite3-dev
+      - libwebp-dev
+      - libonig-dev
+
+
+services:
+  - mysql
+  - postgresql
 
 notifications:
-    email: 
+    email:
        on_failure: change
     irc:
       template:
@@ -43,15 +54,17 @@ env:
       - PDO_MYSQL_TEST_HOST=127.0.0.1
       - REPORT_EXIT_STATUS=1
     matrix:
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+      - ENABLE_ZTS=0 ENABLE_DEBUG=0
+      - ENABLE_ZTS=1 ENABLE_DEBUG=1
 
 before_script:
     - ccache --version
     - ccache --zero-stats
     - export USE_CCACHE=1
+    # Enable IPv6
+    - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
     # Compile PHP
-    - ./travis/compile.sh
+    - travis_wait ./travis/compile.sh
     # Setup Extensions
     - . ./travis/ext/mysql/setup.sh
     - . ./travis/ext/mysqli/setup.sh
@@ -59,9 +72,10 @@ before_script:
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
 
-# Run PHPs run-tests.php 
+# Run PHPs run-tests.php
 script:
-    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
+    - ./sapi/cli/php run-tests.php -P -d extension=`pwd`/modules/zend_test.so $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120 -j2
+    - sapi/cli/php -d extension_dir=`pwd`/modules -r 'dl("zend_test");'
 
 after_success:
     - ccache --show-stats

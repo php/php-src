@@ -20,7 +20,7 @@ var_dump(putenv(""));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(false)
 bool(true)
 string(5) "value"

@@ -24,7 +24,6 @@ ibase_set_event_handler(NULL, 'foo', 1);
 
 ?>
 --EXPECTF--
-
 Warning: Wrong parameter count for ibase_set_event_handler() in %s on line %d
 
 Warning: ibase_set_event_handler(): supplied argument is not a valid InterBase link resource in %s on line %d

@@ -30,7 +30,6 @@ imagegif($image, $temp);
 var_dump(file_exists($tempdir. "/test1"));
 var_dump(file_exists($tempdir. "/test1.tmp"));
 foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
-
 --EXPECTF--
 imagegif TEST
 

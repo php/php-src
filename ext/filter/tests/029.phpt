@@ -9,7 +9,7 @@ filter_var() and FILTER_CALLBACK
 function test($var) {
 	return strtoupper($var);
 }
-	
+
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test")));
@@ -31,7 +31,7 @@ var_dump(filter_var("", FILTER_CALLBACK, array("options"=>array("test_class","te
 /* empty function without return value */
 function test1($var) {
 }
-	
+
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test1")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test1")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test1")));
@@ -40,7 +40,7 @@ var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test1")));
 function test2(&$var) {
 	$var = 1;
 }
-	
+
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test2")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test2")));
@@ -49,7 +49,7 @@ var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test2")));
 function test3(&$var) {
 	unset($var);
 }
-	
+
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test3")));
 var_dump(filter_var("~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?\"}{:", FILTER_CALLBACK, array("options"=>"test3")));
 var_dump(filter_var("", FILTER_CALLBACK, array("options"=>"test3")));
@@ -59,7 +59,7 @@ function test4(&$var) {
 	unset($var);
 	return 1;
 }
-	
+
 var_dump(filter_var("data", FILTER_CALLBACK, array("options"=>"test4")));
 
 /* thrown exception in the callback */
@@ -75,7 +75,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "DATA"
 string(46) "~!@#$%^&*()_QWERTYUIOPASDFGHJKLZXCVBNM<>>?"}{:"
 string(0) ""

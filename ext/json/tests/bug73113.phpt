@@ -20,5 +20,5 @@ try {
 } catch (\Exception $e) {
 	echo $e->getMessage();
 }
---EXPECTF--
+--EXPECT--
 This error is expected

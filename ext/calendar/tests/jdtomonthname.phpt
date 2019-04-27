@@ -9,7 +9,6 @@ $jd_days = Array(
     2453396,
     2440588,
     -1,
-    array(),
     10000000
     );
 
@@ -27,7 +26,7 @@ foreach ($jd_days as $jd_day) {
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 === 2453396
 string(3) "Jan"
 string(7) "January"
@@ -51,28 +50,6 @@ string(0) ""
 string(0) ""
 string(0) ""
 string(0) ""
-
-=== 
-Notice: Array to string conversion in %sjdtomonthname.php on line %d
-Array
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
-
-Warning: jdmonthname() expects parameter 1 to be integer, array given in %s on line %d
-bool(false)
 
 === 10000000
 string(3) "Dec"

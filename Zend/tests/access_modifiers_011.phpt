@@ -32,7 +32,7 @@ echo $a->func1(),"\n";
 echo $a->func2(),"\n";
 
 ?>
---EXPECTF--	
+--EXPECT--
 var1 value
 var2 value
 in func1

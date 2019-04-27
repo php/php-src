@@ -1,7 +1,5 @@
 --TEST--
 035: Name ambiguity in compile-time constant reference (php name)
---SKIPIF--
-<?php if (!extension_loaded("spl")) die("skip SPL is no available"); ?>
 --FILE--
 <?php
 namespace A;

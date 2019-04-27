@@ -4,7 +4,7 @@ SPL: Bug #66834
 <?php
 
 // overrides both offsetExists and offsetGet
-class ArrayObjectBoth extends ArrayObject 
+class ArrayObjectBoth extends ArrayObject
 {
 	public function offsetExists($offset) {
 		var_dump('Called: '.__METHOD__);
@@ -18,7 +18,7 @@ class ArrayObjectBoth extends ArrayObject
 }
 
 // overrides only offsetExists
-class ArrayObjectExists extends ArrayObject 
+class ArrayObjectExists extends ArrayObject
 {
 	public function offsetExists($offset) {
 		var_dump('Called: '.__METHOD__);
@@ -27,7 +27,7 @@ class ArrayObjectExists extends ArrayObject
 }
 
 // overrides only offsetGet
-class ArrayObjectGet extends ArrayObject 
+class ArrayObjectGet extends ArrayObject
 {
 	public function offsetGet($offset) {
 		var_dump('Called: '.__METHOD__);

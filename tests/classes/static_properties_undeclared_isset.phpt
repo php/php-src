@@ -5,5 +5,5 @@ Issetting a non-existent static property
 Class C {}
 var_dump(isset(C::$p));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

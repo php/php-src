@@ -31,9 +31,6 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id$";
-
-
 /****h* ABOUT/xmlrpc
  * NAME
  *   XMLRPC_VALUE

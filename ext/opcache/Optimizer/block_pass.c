@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -33,38 +33,29 @@
 /* Checks if a constant (like "true") may be replaced by its value */
 int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
-	zend_constant *c;
-	char *lookup_name;
-	int retval = 1;
-	ALLOCA_FLAG(use_heap);
-
-	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
-		lookup_name = do_alloca(ZSTR_LEN(name) + 1, use_heap);
-		memcpy(lookup_name, ZSTR_VAL(name), ZSTR_LEN(name) + 1);
-		zend_str_tolower(lookup_name, ZSTR_LEN(name));
-
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lookup_name, ZSTR_LEN(name))) != NULL) {
-			if (!(c->flags & CONST_CT_SUBST) || (c->flags & CONST_CS)) {
-				retval = 0;
-			}
-		} else {
-			retval = 0;
-		}
-		free_alloca(lookup_name, use_heap);
-	}
-
-	if (retval) {
-		if (c->flags & CONST_PERSISTENT) {
+	zval *zv;
+	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
+	if (c) {
+		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
+		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
+		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
-				zval_copy_ctor(result);
+				Z_TRY_ADDREF_P(result);
 			}
+			return 1;
 		} else {
-			retval = 0;
+			return 0;
 		}
 	}
 
-	return retval;
+	/* Special constants null/true/false can always be substituted. */
+	zv = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
+	if (zv) {
+		ZVAL_COPY_VALUE(result, zv);
+		return 1;
+	}
+	return 0;
 }
 
 /* CFG back references management */
@@ -79,37 +70,37 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 #define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
 #define SET_VAR_SOURCE(opline) Tsource[VAR_NUM(opline->result.var)] = opline
 
-#define convert_to_string_safe(v) \
-	if (Z_TYPE_P((v)) == IS_NULL) { \
-		ZVAL_STRINGL((v), "", 0); \
-	} else { \
-		convert_to_string((v)); \
-	}
-
 static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	zend_op *opcodes = op_array->opcodes;
 
-	while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP) {
+	do {
 	    /* check if NOP breaks incorrect smart branch */
 		if (b->len == 2
-		 && (op_array->opcodes[b->start + 1].opcode == ZEND_JMPZ
-		  || op_array->opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-		 && (op_array->opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
+		 && (opcodes[b->start + 1].opcode == ZEND_JMPZ
+		  || opcodes[b->start + 1].opcode == ZEND_JMPNZ)
+		 && (opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
 		 && b->start > 0
-		 && zend_is_smart_branch(op_array->opcodes + b->start - 1)) {
+		 && zend_is_smart_branch(opcodes + b->start - 1)) {
 			break;
 		}
 		b->start++;
 		b->len--;
-	}
+	} while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP);
 }
 
 static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 {
 	uint32_t i, j;
 
-	strip_leading_nops(op_array, b);
+	if (b->len == 0) {
+		return;
+	}
+
+	if (op_array->opcodes[b->start].opcode == ZEND_NOP) {
+		strip_leading_nops(op_array, b);
+	}
+
 	if (b->len == 0) {
 		return;
 	}
@@ -161,13 +152,19 @@ static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_
 	return cfg->map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
 }
 
-static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_cfg *cfg, zend_op **Tsource)
+static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array, zend_bitset used_ext, zend_cfg *cfg, zend_op **Tsource, uint32_t *opt_count)
 {
 	zend_op *opline, *src;
 	zend_op *end, *last_op = NULL;
 
-	/* remove leading NOPs */
-	strip_leading_nops(op_array, block);
+	if (block->len == 0) {
+		return;
+	}
+
+	if (op_array->opcodes[block->start].opcode == ZEND_NOP) {
+		/* remove leading NOPs */
+		strip_leading_nops(op_array, block);
+	}
 
 	opline = op_array->opcodes + block->start;
 	end = opline + block->len;
@@ -182,19 +179,19 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			) {
 				znode_op op1 = opline->op1;
 				if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-					zend_optimizer_remove_live_range(op_array, op1.var);
 					COPY_NODE(opline->result, opline->op1);
 					COPY_NODE(opline->op1, src->op1);
 					VAR_SOURCE(op1) = NULL;
 					MAKE_NOP(src);
+					++(*opt_count);
 				} else {
-					zval c = ZEND_OP1_LITERAL(src);
-					zval_copy_ctor(&c);
+					zval c;
+					ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
-						zend_optimizer_remove_live_range(op_array, op1.var);
 						VAR_SOURCE(op1) = NULL;
 						literal_dtor(&ZEND_OP1_LITERAL(src));
 						MAKE_NOP(src);
+						++(*opt_count);
 						switch (opline->opcode) {
 							case ZEND_JMPZ:
 								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
@@ -256,14 +253,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			    src->op1_type == IS_CONST) {
 
 				znode_op op2 = opline->op2;
-				zval c = ZEND_OP1_LITERAL(src);
+				zval c;
 
-				zval_copy_ctor(&c);
+				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
-					zend_optimizer_remove_live_range(op_array, op2.var);
 					VAR_SOURCE(op2) = NULL;
 					literal_dtor(&ZEND_OP1_LITERAL(src));
 					MAKE_NOP(src);
+					++(*opt_count);
 				} else {
 					zval_ptr_dtor_nogc(&c);
 				}
@@ -277,10 +274,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				    src->opcode == ZEND_CAST &&
 				    src->extended_value == IS_STRING) {
 					/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
-					zend_optimizer_remove_live_range(op_array, opline->op1.var);
 					VAR_SOURCE(opline->op1) = NULL;
 					COPY_NODE(opline->op1, src->op1);
 					MAKE_NOP(src);
+					++(*opt_count);
 				}
 			}
 
@@ -296,10 +293,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					int l, old_len;
 
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
-						convert_to_string_safe(&ZEND_OP1_LITERAL(opline));
+						convert_to_string(&ZEND_OP1_LITERAL(opline));
 					}
 					if (Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_STRING) {
-						convert_to_string_safe(&ZEND_OP1_LITERAL(last_op));
+						convert_to_string(&ZEND_OP1_LITERAL(last_op));
 					}
 					old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
 					l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
@@ -317,6 +314,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					ZVAL_STR(&ZEND_OP1_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op))));
 					ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
 					MAKE_NOP(last_op);
+					++(*opt_count);
 				}
 				last_op = opline;
 			} else {
@@ -337,6 +335,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						/* The remaining BOOL is removed by a separate optimization */
 						VAR_SOURCE(opline->op1) = NULL;
 						MAKE_NOP(opline);
+						++(*opt_count);
 					}
 				} else if (opline->op1_type == IS_VAR) {
 					src = VAR_SOURCE(opline->op1);
@@ -347,12 +346,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R &&
 					    src->opcode != ZEND_NEW) {
-						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-							/* mark as removed (empty live range) */
-							op_array->live_range[opline->op2.num].var = (uint32_t)-1;
-						}
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
+						++(*opt_count);
 					}
 				}
 				break;
@@ -410,7 +406,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 		}
 #endif
 
-			case ZEND_FETCH_LIST:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
@@ -437,8 +434,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				break;
 
 			case ZEND_CASE:
+			case ZEND_COPY_TMP:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-					/* CASE variable will be deleted later by FREE, so we can't optimize it */
+					/* Variable will be deleted later by FREE, so we can't optimize it */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
 					break;
 				}
@@ -468,6 +466,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						ZEND_BOOL : ZEND_BOOL_NOT;
 					COPY_NODE(opline->op1, opline->op2);
 					SET_UNUSED(opline->op2);
+					++(*opt_count);
 					goto optimize_bool;
 				} else if (opline->op2_type == IS_CONST &&
 				           (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_FALSE ||
@@ -479,6 +478,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 						ZEND_BOOL : ZEND_BOOL_NOT;
 					SET_UNUSED(opline->op2);
+					++(*opt_count);
 					goto optimize_bool;
 				}
 				break;
@@ -500,12 +500,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(opline->op1, src->op1);
 								opline->opcode = (opline->opcode == ZEND_BOOL) ? ZEND_BOOL_NOT : ZEND_BOOL;
 								MAKE_NOP(src);
+								++(*opt_count);
 								goto optimize_bool;
 							case ZEND_BOOL:
 								/* T = BOOL(X) + BOOL(T) -> NOP, BOOL(X) */
 								VAR_SOURCE(opline->op1) = NULL;
 								COPY_NODE(opline->op1, src->op1);
 								MAKE_NOP(src);
+								++(*opt_count);
 								goto optimize_bool;
 							case ZEND_IS_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -514,6 +516,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_IS_NOT_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -522,6 +525,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_IS_IDENTICAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -530,6 +534,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_IS_NOT_IDENTICAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -538,6 +543,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -555,6 +561,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_IS_SMALLER_OR_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
@@ -572,6 +579,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 							case ZEND_ISSET_ISEMPTY_VAR:
 							case ZEND_ISSET_ISEMPTY_DIM_OBJ:
@@ -587,6 +595,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
 								MAKE_NOP(opline);
+								++(*opt_count);
 								break;
 						}
 					}
@@ -634,12 +643,14 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								block->successors[1] = tmp;
 							}
 							MAKE_NOP(src);
+							++(*opt_count);
 							goto optimize_jmpznz;
 						} else if (src->opcode == ZEND_BOOL ||
 						           src->opcode == ZEND_QM_ASSIGN) {
 							VAR_SOURCE(opline->op1) = NULL;
 							COPY_NODE(opline->op1, src->op1);
 							MAKE_NOP(src);
+							++(*opt_count);
 							goto optimize_jmpznz;
 						}
 					}
@@ -665,10 +676,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						int l, old_len;
 
 						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
-							convert_to_string_safe(&ZEND_OP2_LITERAL(opline));
+							convert_to_string(&ZEND_OP2_LITERAL(opline));
 						}
 						if (Z_TYPE(ZEND_OP2_LITERAL(src)) != IS_STRING) {
-							convert_to_string_safe(&ZEND_OP2_LITERAL(src));
+							convert_to_string(&ZEND_OP2_LITERAL(src));
 						}
 
 						VAR_SOURCE(opline->op1) = NULL;
@@ -685,10 +696,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						Z_TYPE_INFO(ZEND_OP2_LITERAL(src)) = IS_STRING_EX;
 						memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 						Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
-						zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
+						zval_ptr_dtor_str(&ZEND_OP2_LITERAL(opline));
 						ZVAL_STR(&ZEND_OP2_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src))));
 						ZVAL_NULL(&ZEND_OP2_LITERAL(src));
 						MAKE_NOP(src);
+						++(*opt_count);
 					}
 				}
 
@@ -696,25 +708,27 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					src = VAR_SOURCE(opline->op1);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING) {
+					    src->extended_value == IS_STRING &&
+					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(T1, Y) to T2 = CONCAT(X,Y) */
-						zend_optimizer_remove_live_range(op_array, opline->op1.var);
 						VAR_SOURCE(opline->op1) = NULL;
 						COPY_NODE(opline->op1, src->op1);
 						MAKE_NOP(src);
+						++(*opt_count);
 					}
 	            }
 				if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 					src = VAR_SOURCE(opline->op2);
 					if (src &&
 					    src->opcode == ZEND_CAST &&
-					    src->extended_value == IS_STRING) {
+					    src->extended_value == IS_STRING &&
+					    src->op1_type != IS_CONST) {
 						/* convert T1 = CAST(STRING, X), T2 = CONCAT(Y, T1) to T2 = CONCAT(Y,X) */
-						zend_optimizer_remove_live_range(op_array, opline->op2.var);
 						zend_op *src = VAR_SOURCE(opline->op2);
 						VAR_SOURCE(opline->op2) = NULL;
 						COPY_NODE(opline->op2, src->op1);
 						MAKE_NOP(src);
+						++(*opt_count);
 					}
 				}
 				if (opline->op1_type == IS_CONST &&
@@ -727,6 +741,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					COPY_NODE(opline->op1, opline->op2);
 					opline->op2_type = IS_UNUSED;
 					opline->op2.var = 0;
+					++(*opt_count);
 				} else if (opline->op2_type == IS_CONST &&
 			           Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
 			           Z_STRLEN(ZEND_OP2_LITERAL(opline)) == 0) {
@@ -736,6 +751,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					opline->extended_value = IS_STRING;
 					opline->op2_type = IS_UNUSED;
 					opline->op2.var = 0;
+					++(*opt_count);
 				} else if (opline->opcode == ZEND_CONCAT &&
 				           (opline->op1_type == IS_CONST ||
 				            (opline->op1_type == IS_TMP_VAR &&
@@ -752,6 +768,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				              VAR_SOURCE(opline->op2)->opcode == ZEND_FETCH_CONSTANT ||
 				              VAR_SOURCE(opline->op2)->opcode == ZEND_FETCH_CLASS_CONSTANT)))) {
 					opline->opcode = ZEND_FAST_CONCAT;
+					++(*opt_count);
 				}
 				break;
 
@@ -782,6 +799,7 @@ optimize_constant_binary_op:
 						opline->opcode = ZEND_QM_ASSIGN;
 						SET_UNUSED(opline->op2);
 						zend_optimizer_update_op1_const(op_array, opline, &result);
+						++(*opt_count);
 					}
 				}
 				break;
@@ -796,6 +814,7 @@ optimize_const_unary_op:
 						literal_dtor(&ZEND_OP1_LITERAL(opline));
 						opline->opcode = ZEND_QM_ASSIGN;
 						zend_optimizer_update_op1_const(op_array, opline, &result);
+						++(*opt_count);
 					}
 				}
 				break;
@@ -810,6 +829,7 @@ optimize_const_unary_op:
 						opline->opcode = ZEND_QM_ASSIGN;
 						opline->extended_value = 0;
 						zend_optimizer_update_op1_const(op_array, opline, &result);
+						++(*opt_count);
 					}
 				}
 				break;
@@ -822,6 +842,7 @@ optimize_const_unary_op:
 						literal_dtor(&ZEND_OP1_LITERAL(opline));
 						opline->opcode = ZEND_QM_ASSIGN;
 						zend_optimizer_update_op1_const(op_array, opline, &result);
+						++(*opt_count);
 					}
 				}
 				break;
@@ -850,6 +871,7 @@ optimize_const_unary_op:
 							VAR_SOURCE(opline->op1) = NULL;
 							COPY_NODE(opline->op1, src->op1);
 							MAKE_NOP(src);
+							++(*opt_count);
 						}
 					}
 				}
@@ -860,6 +882,7 @@ optimize_const_unary_op:
 				    opline->op1.var == opline->result.var) {
 					/* strip T = QM_ASSIGN(T) */
 					MAKE_NOP(opline);
+					++(*opt_count);
 				}
 				break;
 		}
@@ -870,12 +893,10 @@ optimize_const_unary_op:
 		}
 		opline++;
 	}
-
-	strip_nops(op_array, block);
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
-static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
+static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
@@ -964,8 +985,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.var) {
-					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
@@ -1022,6 +1043,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 		if (i != j) {
 			op_array->last_try_catch = j;
+			if (j == 0) {
+				efree(op_array->try_catch_array);
+				op_array->try_catch_array = NULL;
+			}
+
 			if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 				zend_op *opline = new_opcodes;
 				zend_op *end = opline + len;
@@ -1038,74 +1064,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		free_alloca(map, use_heap);
 	}
 
-	/* adjust loop jump targets & remove unused live range entries */
-	if (op_array->last_live_range) {
-		int i, j;
-		uint32_t *map;
-		ALLOCA_FLAG(use_heap);
-
-		map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
-
-		for (i = 0, j = 0; i < op_array->last_live_range; i++) {
-			if (op_array->live_range[i].var == (uint32_t)-1) {
-				/* this live range already removed */
-				continue;
-			}
-			if (!(blocks[cfg->map[op_array->live_range[i].start]].flags & ZEND_BB_REACHABLE)) {
-				ZEND_ASSERT(!(blocks[cfg->map[op_array->live_range[i].end]].flags & ZEND_BB_REACHABLE));
-			} else {
-				uint32_t start_op = blocks[cfg->map[op_array->live_range[i].start]].start;
-				uint32_t end_op = blocks[cfg->map[op_array->live_range[i].end]].start;
-
-				if (start_op == end_op) {
-					/* skip empty live range */
-					continue;
-				}
-				op_array->live_range[i].start = start_op;
-				op_array->live_range[i].end = end_op;
-				map[i] = j;
-				if (i != j) {
-					op_array->live_range[j]  = op_array->live_range[i];
-				}
-				j++;
-			}
-		}
-
-		if (i != j) {
-			if ((op_array->last_live_range = j)) {
-				zend_op *opline = new_opcodes;
-				zend_op *end = opline + len;
-				while (opline != end) {
-					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-							opline->extended_value == ZEND_FREE_ON_RETURN) {
-						ZEND_ASSERT(opline->op2.num < (uint32_t) i);
-						opline->op2.num = map[opline->op2.num];
-					}
-					opline++;
-				}
-			} else {
-				efree(op_array->live_range);
-				op_array->live_range = NULL;
-			}
-		}
-		free_alloca(map, use_heap);
-	}
-
 	/* adjust early binding list */
-	if (op_array->early_binding != (uint32_t)-1) {
-		uint32_t *opline_num = &op_array->early_binding;
-		zend_op *end;
-
-		opline = op_array->opcodes;
-		end = opline + op_array->last;
-		while (opline < end) {
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				*opline_num = opline - op_array->opcodes;
-				opline_num = &opline->result.opline_num;
-			}
-			++opline;
-		}
-		*opline_num = -1;
+	if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+		ZEND_ASSERT(op_array == &ctx->script->main_op_array);
+		ctx->script->first_early_binding_opline =
+			zend_build_delayed_early_binding_list(op_array);
 	}
 
 	/* rebuild map (just for printing) */
@@ -1117,7 +1080,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	}
 }
 
-static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_array, zend_cfg *cfg, zend_uchar *same_t)
+static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_array, zend_cfg *cfg, zend_uchar *same_t, uint32_t *opt_count)
 {
 	/* last_op is the last opcode of the current block */
 	zend_basic_block *blocks = cfg->blocks;
@@ -1143,6 +1106,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 				/* JMP(next) -> NOP */
 				if (block->successors[0] == next) {
 					MAKE_NOP(last_op);
+					++(*opt_count);
 					block->len--;
 					break;
 				}
@@ -1155,13 +1119,14 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMPZNZ &&
 				           !(target_block->flags & ZEND_BB_PROTECTED)) {
 					/* JMP L, L: JMPZNZ L1,L2 -> JMPZNZ L1,L2 */
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
-						zval zv = ZEND_OP1_LITERAL(last_op);
-						zval_copy_ctor(&zv);
+						zval zv;
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
@@ -1170,6 +1135,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					block->successors[1] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
 					ADD_SOURCE(block, block->successors[1]);
+					++(*opt_count);
 				} else if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||
 				            target->opcode == ZEND_EXIT) &&
@@ -1177,12 +1143,13 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/* JMP L, L: RETURN to immediate RETURN */
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
-						zval zv = ZEND_OP1_LITERAL(last_op);
-						zval_copy_ctor(&zv);
+						zval zv;
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors_count = 0;
+					++(*opt_count);
 #if 0
 				/* Temporarily disabled - see bug #0025274 */
 				} else if (0&& block->op1_to != block &&
@@ -1263,6 +1230,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
 				}
+				++(*opt_count);
 				break;
 			}
 
@@ -1279,6 +1247,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					MAKE_NOP(last_op);
 				}
 				block->successors_count = 1;
+				++(*opt_count);
 				break;
 			}
 
@@ -1299,6 +1268,7 @@ next_target:
 				/* next block is only NOP's */
 				if (target == target_end) {
 					target_block = blocks + target_block->successors[0];
+					++(*opt_count);
 					goto next_target;
 				} else if (target->opcode == INV_COND(last_op->opcode) &&
 					/* JMPZ(X, L), L: JMPNZ(X, L2) -> JMPZ(X, L+1) */
@@ -1310,6 +1280,7 @@ next_target:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == INV_COND_EX(last_op->opcode) &&
 							(target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 				    		same_type == target->op1_type &&
@@ -1321,6 +1292,7 @@ next_target:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == last_op->opcode &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   same_type == target->op1_type &&
@@ -1330,12 +1302,14 @@ next_target:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMP &&
 				           !(target_block->flags & ZEND_BB_PROTECTED)) {
 					/* JMPZ(X, L), L: JMP(L2) -> JMPZ(X, L2) */
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMPZNZ &&
 				           (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 				           same_type == target->op1_type &&
@@ -1349,6 +1323,7 @@ next_target:
 						block->successors[0] = target_block->successors[1];
 					}
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				}
 			}
 
@@ -1370,6 +1345,7 @@ next_target:
 						DEL_SOURCE(block, block->successors[1]);
 						block->successors[1] = target_block->successors[0];
 						ADD_SOURCE(block, block->successors[1]);
+						++(*opt_count);
 					} else {
 						break;
 					}
@@ -1387,6 +1363,7 @@ next_target:
 						ADD_SOURCE(block, block->successors[0]);
 					}
 					last_op->opcode = ZEND_JMPZNZ;
+					++(*opt_count);
 				}
 			}
 			break;
@@ -1409,6 +1386,7 @@ next_target:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
+					++(*opt_count);
 				}
 				break;
 			}
@@ -1434,6 +1412,7 @@ next_target_ex:
  				/* next block is only NOP's */
 				if (target == target_end) {
 					target_block = blocks + target_block->successors[0];
+					++(*opt_count);
 					goto next_target_ex;
 				} else if (target->opcode == last_op->opcode-3 &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
@@ -1443,6 +1422,7 @@ next_target_ex:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == INV_EX_COND(last_op->opcode) &&
 					   	   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   (same_t[VAR_NUM_EX(target->op1)] & target->op1_type) != 0 &&
@@ -1451,6 +1431,7 @@ next_target_ex:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == INV_EX_COND_EX(last_op->opcode) &&
 					       (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   (same_t[VAR_NUM_EX(target->op1)] & target->op1_type) != 0 &&
@@ -1460,6 +1441,7 @@ next_target_ex:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == last_op->opcode &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   (same_t[VAR_NUM_EX(target->op1)] & target->op1_type) != 0 &&
@@ -1469,12 +1451,14 @@ next_target_ex:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMP &&
 						   !(target_block->flags & ZEND_BB_PROTECTED)) {
 					/* T = JMPZ_EX(X, L), L: JMP(L2) -> T = JMPZ(X, L2) */
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMPZNZ &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   (same_t[VAR_NUM_EX(target->op1)] & target->op1_type) != 0 &&
@@ -1487,6 +1471,7 @@ next_target_ex:
 						block->successors[0] = target_block->successors[1];
 					}
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				}
 			}
 			break;
@@ -1518,6 +1503,7 @@ next_target_ex:
 					block->successors_count = 1;
 					block->successors[0] = block->successors[1];
 				}
+				++(*opt_count);
 			} else if (block->successors[0] == block->successors[1]) {
 				/* both goto the same one - it's JMP */
 				if (!(last_op->op1_type & (IS_VAR|IS_TMP_VAR))) {
@@ -1526,6 +1512,7 @@ next_target_ex:
 					SET_UNUSED(last_op->op1);
 					SET_UNUSED(last_op->op2);
 					block->successors_count = 1;
+					++(*opt_count);
 				}
 			} else if (block->successors[0] == next) {
 				/* jumping to next on Z - can follow to it and jump only on NZ */
@@ -1533,11 +1520,13 @@ next_target_ex:
 				last_op->opcode = ZEND_JMPNZ;
 				block->successors[0] = block->successors[1];
 				block->successors[1] = next;
+				++(*opt_count);
 				/* no need to add source */
 			} else if (block->successors[1] == next) {
 				/* jumping to next on NZ - can follow to it and jump only on Z */
 				/* JMPZNZ(X,L1,L2) L2: -> JMPZ(X,L1) */
 				last_op->opcode = ZEND_JMPZ;
+				++(*opt_count);
 				/* no need to add source */
 			}
 
@@ -1557,6 +1546,7 @@ next_target_znz:
 				/* next block is only NOP's */
 				if (target == target_end) {
 					target_block = blocks + target_block->successors[0];
+					++(*opt_count);
 					goto next_target_znz;
 				} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
@@ -1567,6 +1557,7 @@ next_target_znz:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMPNZ &&
 						   (target->op1_type & (IS_TMP_VAR|IS_CV)) &&
 						   same_type == target->op1_type &&
@@ -1576,12 +1567,14 @@ next_target_znz:
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[1];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				} else if (target->opcode == ZEND_JMP &&
 					       !(target_block->flags & ZEND_BB_PROTECTED)) {
                     /* JMPZNZ(X, L1, L2), L1: JMP(L3) -> JMPZNZ(X, L3, L2) */
 					DEL_SOURCE(block, block->successors[0]);
 					block->successors[0] = target_block->successors[0];
 					ADD_SOURCE(block, block->successors[0]);
+					++(*opt_count);
 				}
 			}
 			break;
@@ -1818,7 +1811,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	zend_arena_release(&ctx->arena, checkpoint);
 }
 
-static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
+static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg, uint32_t *opt_count)
 {
 	int i;
 	zend_basic_block *b, *bb;
@@ -1868,6 +1861,7 @@ static void zend_merge_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				b->flags = 0;
 				b->len = 0;
 				b->successors_count = 0;
+				++(*opt_count);
 			} else {
 				prev = b;
 			}
@@ -1887,10 +1881,11 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	void *checkpoint;
 	zend_op **Tsource;
 	zend_uchar *same_t;
+	uint32_t opt_count;
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
@@ -1918,6 +1913,8 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	blocks = cfg.blocks;
 	end = blocks + cfg.blocks_count;
 	for (pass = 0; pass < PASSES; pass++) {
+		opt_count = 0;
+
 		/* Compute data dependencies */
 		zend_bitset_clear(usage, bitset_len);
 		zend_t_usage(&cfg, op_array, usage, ctx);
@@ -1933,13 +1930,20 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				/* Skip continuation of "extended" BB */
 				memset(Tsource, 0, (op_array->last_var + op_array->T) * sizeof(zend_op *));
 			}
-			zend_optimize_block(b, op_array, usage, &cfg, Tsource);
+			zend_optimize_block(b, op_array, usage, &cfg, Tsource, &opt_count);
+		}
+
+		/* Eliminate NOPs */
+		for (b = blocks; b < end; b++) {
+			if (b->flags & ZEND_BB_REACHABLE) {
+				strip_nops(op_array, b);
+			}
 		}
 
 		/* Jump optimization for each block */
 		for (b = blocks; b < end; b++) {
 			if (b->flags & ZEND_BB_REACHABLE) {
-				zend_jmp_optimization(b, op_array, &cfg, same_t);
+				zend_jmp_optimization(b, op_array, &cfg, same_t, &opt_count);
 			}
 		}
 
@@ -1947,12 +1951,16 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_cfg_remark_reachable_blocks(op_array, &cfg);
 
 		/* Merge Blocks */
-		zend_merge_blocks(op_array, &cfg);
+		zend_merge_blocks(op_array, &cfg, &opt_count);
+
+		if (opt_count == 0) {
+			break;
+		}
 	}
 
 	zend_bitset_clear(usage, bitset_len);
 	zend_t_usage(&cfg, op_array, usage, ctx);
-	assemble_code_blocks(&cfg, op_array);
+	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);

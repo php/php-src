@@ -46,13 +46,6 @@ class handler {
     }
 
     function gc() { return true; }
-
-    function __construct()
-    {
-        if (ini_get("unicode.semantics")) {
-            $this->data = str_replace('s:', 'U:', $this->data);
-        }
-    }
 }
 
 $hnd = new handler;

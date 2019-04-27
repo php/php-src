@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
@@ -34,9 +32,7 @@
 #include <utime.h>
 #endif
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 #ifdef ZTS
 #define VIRTUAL_DIR
@@ -118,15 +114,21 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
-CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
-CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_stat_ex php_win32_ioutil_stat_ex
+# define php_sys_stat php_win32_ioutil_stat
+# define php_sys_lstat php_win32_ioutil_lstat
+# define php_sys_fstat php_win32_ioutil_fstat
+# define php_sys_readlink php_win32_ioutil_readlink
+# define php_sys_symlink php_win32_ioutil_symlink
+# define php_sys_link php_win32_ioutil_link
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
+# define php_sys_fstat fstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 
@@ -160,21 +162,6 @@ CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
-#if defined(ZEND_WIN32)
-/* these are not defined in win32 headers */
-#ifndef W_OK
-#define W_OK 0x02
-#endif
-#ifndef R_OK
-#define R_OK 0x04
-#endif
-#ifndef X_OK
-#define X_OK 0x01
-#endif
-#ifndef F_OK
-#define F_OK 0x00
-#endif
-#endif
 
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
@@ -187,7 +174,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 /* One of the following constants must be used as the last argument
    in virtual_file_ex() call. */
 
-#define CWD_EXPAND   0 /* expand "." and ".." but dont resolve symlinks      */
+#define CWD_EXPAND   0 /* expand "." and ".." but don't resolve symlinks     */
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
@@ -225,7 +212,8 @@ typedef struct _virtual_cwd_globals {
 
 #ifdef ZTS
 extern ts_rsrc_id cwd_globals_id;
-# define CWDG(v) ZEND_TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
+extern size_t cwd_globals_offset;
+# define CWDG(v) ZEND_TSRMG_FAST(cwd_globals_offset, virtual_cwd_globals *, v)
 #else
 extern virtual_cwd_globals cwd_globals;
 # define CWDG(v) (cwd_globals.v)
@@ -378,13 +366,3 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #endif
 
 #endif /* VIRTUAL_CWD_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -123,7 +123,7 @@ void mysqlnd_local_infile_end(void * ptr)
 
 
 /* {{{ mysqlnd_local_infile_default */
-void
+PHPAPI void
 mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 {
 	conn->infile.local_infile_init = mysqlnd_local_infile_init;
@@ -216,8 +216,7 @@ infile_error:
 											PROT_OK_PACKET, FALSE, COM_QUERY, FALSE,
 											conn->error_info,
 											conn->upsert_status,
-											&conn->last_message,
-											conn->persistent)) {
+											&conn->last_message)) {
 		result = FAIL;
 	}
 
@@ -229,12 +228,3 @@ infile_error:
 	DBG_RETURN(result);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

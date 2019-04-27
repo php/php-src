@@ -16,11 +16,11 @@ Rein Velt (rein@velt.org)
 	//SET URL AND OTHER OPTIONS
     include 'server.inc';
     $host = curl_cli_server_start();
-	curl_setopt($ch1, CURLOPT_URL, "{$host}/get.php?test=getpost&get_param=Hello%20World");
-	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
+	curl_setopt($ch1, CURLOPT_URL, "{$host}/get.inc?test=getpost&get_param=Hello%20World");
+	curl_setopt($ch2, CURLOPT_URL, "file://".__DIR__. DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-	
+
 	//CREATE MULTIPLE CURL HANDLE
 	$mh=curl_multi_init();
 
@@ -40,13 +40,13 @@ Rein Velt (rein@velt.org)
 	//CLOSE
  	curl_multi_remove_handle($mh,$ch1);
 	curl_multi_remove_handle($mh,$ch2);
-	curl_multi_close($mh);	
+	curl_multi_close($mh);
 
 	echo $results1;
 	echo $results2;
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["test"]=>
   string(7) "getpost"

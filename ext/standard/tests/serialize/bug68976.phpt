@@ -14,7 +14,7 @@ $fakezval = pack(
     0x00100000,
     0x00000400,
     0x00000000,
-    0x00000006 
+    0x00000006
 );
 
 $data = unserialize('a:2:{i:0;O:9:"evilClass":1:{s:4:"name";a:2:{i:0;i:1;i:1;i:2;}}i:1;R:4;}');
@@ -26,7 +26,7 @@ for($i = 0; $i < 5; $i++) {
 var_dump($data);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   object(evilClass)#1 (0) {

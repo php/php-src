@@ -3,9 +3,9 @@ Test idate() function : usage variation - Checking return of year(1 or 2 digits)
 --FILE--
 <?php
 /* Prototype  : int idate(string format [, int timestamp])
- * Description: Format a local time/date as integer 
+ * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing idate() : usage variation ***\n";
@@ -23,7 +23,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing idate() : usage variation ***
 
 -- Testing idate() function for 2 digit year having no zero as starting number --

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Moriyoshi Koizumi <moriyoshi@php.net>                        |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef _PHP_MBREGEX_H
 #define _PHP_MBREGEX_H
@@ -43,21 +41,7 @@
 	PHP_FE(mb_ereg_search_init,		arginfo_mb_ereg_search_init) \
 	PHP_FE(mb_ereg_search_getregs,	arginfo_mb_ereg_search_getregs) \
 	PHP_FE(mb_ereg_search_getpos,	arginfo_mb_ereg_search_getpos) \
-	PHP_FE(mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos) \
-	PHP_FALIAS(mbregex_encoding,	mb_regex_encoding,	arginfo_mb_regex_encoding) \
-	PHP_FALIAS(mbereg,	mb_ereg,	arginfo_mb_ereg) \
-	PHP_FALIAS(mberegi,	mb_eregi,	arginfo_mb_eregi) \
-	PHP_FALIAS(mbereg_replace,	mb_ereg_replace,	arginfo_mb_ereg_replace) \
-	PHP_FALIAS(mberegi_replace,	mb_eregi_replace,	arginfo_mb_eregi_replace) \
-	PHP_FALIAS(mbsplit,	mb_split,	arginfo_mb_split) \
-	PHP_FALIAS(mbereg_match,	mb_ereg_match,	arginfo_mb_ereg_match) \
-	PHP_FALIAS(mbereg_search,	mb_ereg_search,	arginfo_mb_ereg_search) \
-	PHP_FALIAS(mbereg_search_pos,	mb_ereg_search_pos,	arginfo_mb_ereg_search_pos) \
-	PHP_FALIAS(mbereg_search_regs,	mb_ereg_search_regs,	arginfo_mb_ereg_search_regs) \
-	PHP_FALIAS(mbereg_search_init,	mb_ereg_search_init,	arginfo_mb_ereg_search_init) \
-	PHP_FALIAS(mbereg_search_getregs,	mb_ereg_search_getregs,	arginfo_mb_ereg_search_getregs) \
-	PHP_FALIAS(mbereg_search_getpos,	mb_ereg_search_getpos,	arginfo_mb_ereg_search_getpos) \
-	PHP_FALIAS(mbereg_search_setpos,	mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos)
+	PHP_FE(mb_ereg_search_setpos,	arginfo_mb_ereg_search_setpos)
 /* }}} */
 
 #define PHP_MBREGEX_MAXCACHE 50
@@ -97,13 +81,3 @@ PHP_FUNCTION(mb_regex_set_options);
 #endif /* HAVE_MBREGEX */
 
 #endif /* _PHP_MBREGEX_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
-

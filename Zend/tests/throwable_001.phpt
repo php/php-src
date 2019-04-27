@@ -7,7 +7,6 @@ Aaron Piotrowski <aaron@icicle.io>
 throw new Exception('Exception message', 0, new Error('Error message'));
 ?>
 --EXPECTF--
-
 Fatal error: Uncaught Error: Error message in %s:%d
 Stack trace:
 #0 {main}

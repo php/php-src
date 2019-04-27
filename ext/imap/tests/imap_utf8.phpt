@@ -12,7 +12,7 @@ var_dump(imap_utf8("test"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(0) ""
 string(1) "1"
 

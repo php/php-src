@@ -1,5 +1,5 @@
 --TEST--
-Test mb_stristr() function : error conditions 
+Test mb_stristr() function : error conditions
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_stristr') or die("skip mb_stristr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another, case insensitive 
+ * Description: Finds first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_stristr() : error conditions ***\n";

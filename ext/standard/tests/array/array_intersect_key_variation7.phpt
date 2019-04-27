@@ -3,14 +3,14 @@ Test array_intersect_key() function : usage variation - Passing null,unset and u
 --FILE--
 <?php
 /* Prototype  : array array_intersect_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
+ * Description: Returns the entries of arr1 that have keys which are present in all the other arguments.
  * Source code: ext/standard/array.c
  */
 
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(0 => '0', 1 => '1' , -10 => '-10' , null => 'null'); 
+$input_array = array(0 => '0', 1 => '1' , -10 => '-10' , null => 'null');
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -25,10 +25,10 @@ foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_intersect_key($input_array, $value) );
       var_dump( array_intersect_key($value,$input_array ) );
-}      
+}
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
 --null indexed--

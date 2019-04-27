@@ -9,7 +9,7 @@ class MyRecursiveIteratorIterator extends RecursiveIteratorIterator
 	{
 		echo __METHOD__ . "()\n";
 	}
-	
+
 	function endIteration()
 	{
 		echo __METHOD__ . "()\n";

@@ -5,7 +5,7 @@ Bind with SQLT_INT
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -216,7 +216,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 TEST141 wrong bind type SQLT_INT
 array(1) {
   ["VARCHAR2_T10"]=>

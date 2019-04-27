@@ -6,7 +6,7 @@ mb_strwidth()
 <?php
 // TODO: Add more encoding, strings.....
 //$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // EUC-JP
@@ -27,6 +27,5 @@ $str = mb_strwidth($euc_jp, -100, 10,'...','EUC-JP');
 ($str !== "") ?	print "6 OK: $str\n" : print "NG: $str\n";
 */
 ?>
-
 --EXPECT--
 1: 68

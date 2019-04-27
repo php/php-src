@@ -6,7 +6,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__) . "/opendir_root_check.tmp";
+$filename = __DIR__ . "/opendir_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
+ * Description: Open a directory and return a dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -29,7 +29,7 @@ unlink($filename);
 echo "*** Testing opendir() : usage variations ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path . "/opendir_variation7";
 mkdir($dir_path);
 
@@ -68,7 +68,7 @@ foreach ($permission_values as $perm) {
 	var_dump( chmod($dir_path, $perm) );
 
 	var_dump($dh = opendir($dir_path));
-	
+
 	if (is_resource($dh)) {
 		closedir($dh);
 	}
@@ -79,7 +79,7 @@ foreach ($permission_values as $perm) {
 --CLEAN--
 <?php
 // deleting temporary directory
-$dir_path = dirname(__FILE__) . "/opendir_variation7";
+$dir_path = __DIR__ . "/opendir_variation7";
 rmdir($dir_path);
 ?>
 --EXPECTF--

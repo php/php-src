@@ -57,4 +57,3 @@ Stack trace:
 #1 %s(%d): session_write_close()
 #2 {main}
   thrown in %s on line %d
-

@@ -3,7 +3,7 @@ Bug #65230 setting locale randomly broken
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-    die('skip');
+    die('skip Windows only test');
 }
 ?>
 --INI--
@@ -11,7 +11,7 @@ date.timezone=Europe/Berlin
 --FILE--
 <?php
 
-function test($locale, $value) 
+function test($locale, $value)
 {
 	$newlocale = setlocale(LC_ALL, $locale);
 	$conv      = localeconv();
@@ -57,4 +57,3 @@ German_Germany.1252
   %f: 3,410000
   %F: 3.410000
 date: 05.12.2014
-

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* Flags for stream_socket_client */
 #define PHP_STREAM_CLIENT_PERSISTENT	1
@@ -69,13 +67,3 @@ PHP_FUNCTION(sapi_windows_vt100_support);
 #if HAVE_SOCKETPAIR
 PHP_FUNCTION(stream_socket_pair);
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
-

@@ -3,11 +3,6 @@ cli_set_process_title() function : error conditions
 --CREDITS--
 Patrick Allaert patrickallaert@php.net
 @nephp #nephp17
---SKIPIF--
-<?php
-if (PHP_SAPI !== "cli")
-  die("skip");
-?>
 --FILE--
 <?php
 cli_set_process_title();

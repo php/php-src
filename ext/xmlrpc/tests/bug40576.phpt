@@ -19,7 +19,7 @@ var_dump(xmlrpc_encode("1.22222222222222222222222"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(125) "<?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>

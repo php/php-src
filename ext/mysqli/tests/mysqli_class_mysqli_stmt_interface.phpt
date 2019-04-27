@@ -123,16 +123,6 @@ printf("stmt->unknown = '%s'\n", @$stmt->unknown);
 @$stmt->unknown = 13;
 printf("stmt->unknown = '%s'\n", @$stmt->unknown);
 
-printf("\nPrepare using the constructor:\n");
-$stmt = new mysqli_stmt($link, 'SELECT id FROM test ORDER BY id');
-if (!$stmt->execute())
-printf("[002] [%d] %s\n", $stmt->errno, $stmt->error);
-$stmt->close();
-
-$obj = new stdClass();
-if (!is_object($stmt = new mysqli_stmt($link, $obj)))
-printf("[003] Expecting NULL got %s/%s\n", gettype($stmt), $stmt);
-
 print "done!";
 ?>
 --EXPECTF--
@@ -191,8 +181,4 @@ stmt->sqlstate = '00000'
 Access to undefined properties:
 stmt->unknown = ''
 stmt->unknown = '13'
-
-Prepare using the constructor:
-
-Warning: mysqli_stmt::__construct() expects parameter 2 to be string, object given in %s on line %d
 done!

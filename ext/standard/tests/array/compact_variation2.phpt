@@ -25,12 +25,16 @@ f();
 ==Done==
 --EXPECTF--
 *** Testing compact() : usage variations  - variables outside of current scope ***
+
+Notice: compact(): Undefined variable: a in %s on line %d
 array(2) {
   ["b"]=>
   string(3) "f.b"
   ["c"]=>
   string(3) "f.c"
 }
+
+Notice: compact(): Undefined variable: a in %s on line %d
 array(2) {
   ["b"]=>
   string(3) "f.b"

@@ -2,27 +2,27 @@
 Bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when using FETCH_CLASSTYPE)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
-<?php	
-	
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+<?php
+
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$pdoDb = MySQLPDOTest::factory();
-	
+
 
 	class myclass implements Serializable {
 		public function __construct() {
 			printf("%s()\n", __METHOD__);
 		}
-		
+
 		public function serialize() {
 			printf("%s()\n", __METHOD__);
 			return "any data from serialize()";
 		}
-		
+
 		public function unserialize($dat) {
 			printf("%s(%s)\n", __METHOD__, var_export($dat, true));
 			return $dat;
@@ -33,11 +33,11 @@ MySQLPDOTest::skip();
 
 	$pdoDb->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 	$pdoDb->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-	
+
 	$pdoDb->query('DROP TABLE IF EXISTS testz');
-	
+
 	$pdoDb->query('CREATE TABLE testz (name VARCHAR(20) NOT NULL, value INT)');
-	
+
 	$pdoDb->query("INSERT INTO testz VALUES ('myclass', 1), ('myclass2', 2), ('myclass', NULL), ('myclass3', NULL)");
 
 	$stmt = $pdoDb->prepare("SELECT * FROM testz");
@@ -51,7 +51,7 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS testz');
 ?>

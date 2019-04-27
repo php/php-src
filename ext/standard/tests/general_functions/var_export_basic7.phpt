@@ -3,14 +3,14 @@ Test var_export() function with valid null values
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() with valid null values ***\n";
 
-// different valid  null vlaues 
+// different valid  null values
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;

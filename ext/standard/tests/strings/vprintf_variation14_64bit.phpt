@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
-$formats = 
+$formats =
   '%x %+x %-x 
    %lx %Lx %4x %-4x
    %10.4x %-10.4x %.4x 
@@ -64,18 +64,18 @@ $args_array = array(
          true, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vprintf() with different hexa formats from the above $format array
 // and with non-hexa values from the above $args_array array
- 
+
 $counter = 1;
 foreach($args_array as $args) {
   echo "\n-- Iteration $counter --\n";
   $result = vprintf($formats, $args);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

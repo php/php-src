@@ -2,7 +2,7 @@
 SERVER_PROTOCOL header availability
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

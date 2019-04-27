@@ -1,8 +1,8 @@
 --TEST--
-CLI -a and libedit 
+CLI -a and libedit
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (!extension_loaded('readline') || readline_info('done') !== NULL) {
 	die ("skip need readline support using libedit");
 }
@@ -59,7 +59,7 @@ foreach ($codes as $key => $code) {
 
 echo "\nDone\n";
 ?>
---EXPECTF--
+--EXPECT--
 --------------
 Snippet no. 1:
 --------------

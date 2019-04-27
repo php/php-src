@@ -40,7 +40,6 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump(mysqli_stmt_execute($stmt));
 	var_dump($stmt = @mysqli_prepare($link, "SELECT * FROM test_store_result"), mysqli_error($link));
-	var_dump(mysqli_stmt_reset($stmt));
 
 	$stmt = mysqli_prepare($link, "SELECT * FROM test_store_result");
 	mysqli_stmt_execute($stmt);
@@ -102,9 +101,6 @@ object(mysqli_stmt)#%d (%d) {
 bool(true)
 bool(false)
 string(0) ""
-
-Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, boolean given in %s on line %d
-NULL
 Rows: 3
 array(1) {
   [0]=>

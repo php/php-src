@@ -8,4 +8,3 @@ IF NOT EXIST configure.bat (
 	echo Now run 'configure --help'
 )
 SET PHP_BUILDCONF_PATH=
-

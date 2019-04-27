@@ -28,7 +28,7 @@ echo "\n-- Testing array_intersect_uassoc() function when \$array2 is referencd 
 var_dump( array_intersect_uassoc($array1, $array2, "strcasecmp") );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
 -- Testing array_intersect_uassoc() function with referenced variable $ref_var has value 'a' --

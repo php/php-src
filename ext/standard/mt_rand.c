@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
@@ -23,7 +23,6 @@
    |                     Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include "php_rand.h"
@@ -34,7 +33,7 @@
 /*
 	The following php_mt_...() functions are based on a C++ class MTRand by
 	Richard J. Wagner. For more information see the web page at
-	http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
+	http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/MersenneTwister.h
 
 	Mersenne Twister random number generator -- a C++ class MTRand
 	Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
@@ -45,7 +44,7 @@
 	The period, 2^19937-1, and the order of equidistribution, 623 dimensions,
 	are far greater.  The generator is also fast; it avoids multiplication and
 	division, and it benefits from caches and pipelines.  For more information
-	see the inventors' web page at http://www.math.keio.ac.jp/~matumoto/emt.html
+	see the inventors' web page at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 
 	Reference
 	M. Matsumoto and T. Nishimura, "Mersenne Twister: A 623-Dimensionally
@@ -207,7 +206,7 @@ PHP_FUNCTION(mt_srand)
 		default:
 			BG(mt_rand_mode) = MT_RAND_MT19937;
 	}
-	
+
 	php_mt_srand(seed);
 }
 /* }}} */
@@ -244,7 +243,7 @@ static uint32_t rand_range32(uint32_t umax) {
 #if ZEND_ULONG_MAX > UINT32_MAX
 static uint64_t rand_range64(uint64_t umax) {
 	uint64_t result, limit;
-	
+
 	result = php_mt_rand();
 	result = (result << 32) | php_mt_rand();
 
@@ -294,7 +293,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	zend_long n;
+	int64_t n;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
@@ -302,7 +301,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 
 	/* Legacy mode deliberately not inside php_mt_rand_range()
 	 * to prevent other functions being affected */
-	n = (zend_long)php_mt_rand() >> 1;
+	n = (int64_t)php_mt_rand() >> 1;
 	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
 
 	return n;
@@ -359,13 +358,3 @@ PHP_MINIT_FUNCTION(mt_rand)
 
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
-

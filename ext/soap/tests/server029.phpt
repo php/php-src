@@ -1,5 +1,5 @@
 --TEST--
-SOAP Server 29-CGI: new/addfunction/handle 
+SOAP Server 29-CGI: new/addfunction/handle
 --POST--
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope
@@ -13,9 +13,9 @@ SOAP Server 29-CGI: new/addfunction/handle
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 --SKIPIF--
-<?php 
+<?php
 	if (php_sapi_name()=='cli') echo 'skip';
-	require_once('skipif.inc'); 
+	require_once('skipif.inc');
 ?>
 --FILE--
 <?php

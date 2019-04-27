@@ -10,5 +10,5 @@ $var67 = bcsqrt(false);
 $var414 = bcadd(false,null,10);
 die('ALIVE');
 ?>
---EXPECTF--
+--EXPECT--
 ALIVE

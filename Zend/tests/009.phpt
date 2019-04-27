@@ -16,9 +16,6 @@ class foo {
 class foo2 extends foo {
 }
 
-foo::bar();
-foo2::bar();
-
 $f1 = new foo;
 $f2 = new foo2;
 
@@ -35,12 +32,7 @@ $f1->testNull();
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Deprecated: Non-static method foo::bar() should not be called statically in %s on line %d
-string(3) "foo"
-
-Deprecated: Non-static method foo::bar() should not be called statically in %s on line %d
-string(3) "foo"
+--EXPECTF--
 string(3) "foo"
 string(3) "foo"
 

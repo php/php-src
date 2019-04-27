@@ -32,10 +32,6 @@ catch(Exception $e) {
     echo $e->getMessage();
 }
 
-echo "\n\nIncorrect number of args:\n";
-ReflectionProperty::export();
-ReflectionProperty::export('TestClass', "nonExistentProperty", true, false);
-
 ?>
 --EXPECTF--
 Non-existent class:
@@ -46,9 +42,3 @@ The parameter class is expected to be either a string or an object
 
 Non-existent property:
 Property TestClass::$nonExistentProperty does not exist
-
-Incorrect number of args:
-
-Warning: ReflectionProperty::export() expects at least 2 parameters, 0 given in %s on line %d
-
-Warning: ReflectionProperty::export() expects at most 3 parameters, 4 given in %s on line %d

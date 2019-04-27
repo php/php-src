@@ -5,14 +5,14 @@ openssl_private_encrypt() tests
 --FILE--
 <?php
 $data = "Testing openssl_private_encrypt()";
-$privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
-$pubkey = "file://" . dirname(__FILE__) . "/public.key";
+$privkey = "file://" . __DIR__ . "/private_rsa_1024.key";
+$pubkey = "file://" . __DIR__ . "/public.key";
 $wrong = "wrong";
 
 class test {
-	function __toString() {
-		return "test";
-	}
+    function __toString() {
+        return "test";
+    }
 }
 $obj = new test;
 

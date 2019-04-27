@@ -22,13 +22,13 @@ foreach ($classes as $class) {
 
 	foreach ($instances as $name => $instance) {
 		echo "is $name a $class? ";
-		var_dump($rc->isInstance($instance));	
+		var_dump($rc->isInstance($instance));
 	}
 
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 is myA a A? bool(true)
 is myB a A? bool(true)
 is myC a A? bool(false)

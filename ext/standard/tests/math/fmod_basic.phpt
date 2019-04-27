@@ -12,11 +12,11 @@ $values1 = array(234,
 				0352,
 				"234",
 				"234.5",
-				"23.45e1",				
+				"23.45e1",
 				null,
 				true,
-				false);	
-				
+				false);
+
 $values2 = array(2,
 				-2,
 				2.3e1,
@@ -25,21 +25,20 @@ $values2 = array(2,
 				02,
 				"2",
 				"2.3",
-				"2.3e1",				
+				"2.3e1",
 				null,
 				true,
-				false);	
+				false);
 for ($i = 0; $i < count($values1); $i++) {
-	echo "\niteration ", $i, "\n";	
-	
+	echo "\niteration ", $i, "\n";
+
 	for ($j = 0; $j < count($values2); $j++) {
 		$res = fmod($values1[$i], $values2[$j]);
 		var_dump($res);
-	}	
+	}
 }
 ?>
---EXPECTF--
-
+--EXPECT--
 iteration 0
 float(0)
 float(0)

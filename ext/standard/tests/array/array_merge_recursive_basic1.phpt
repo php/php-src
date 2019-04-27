@@ -1,9 +1,9 @@
 --TEST--
-Test array_merge_recursive() function : basic functionality - array with default keys 
+Test array_merge_recursive() function : basic functionality - array with default keys
 --FILE--
 <?php
 /* Prototype  : array array_merge_recursive(array $arr1[, array $...])
- * Description: Recursively merges elements from passed arrays into one array 
+ * Description: Recursively merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
 */
 
@@ -25,7 +25,7 @@ var_dump( array_merge_recursive($arr1,$arr2,$arr3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : array with default keys ***
 -- With default argument --
 array(2) {

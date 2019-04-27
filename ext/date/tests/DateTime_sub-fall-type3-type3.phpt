@@ -1,5 +1,5 @@
 --TEST--
-DateTime::sub() -- fall type3 type3 
+DateTime::sub() -- fall type3 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --XFAIL--

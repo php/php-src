@@ -10,5 +10,5 @@ $params = date("Ymd\TH:i:s", time());
 $rv = xmlrpc_set_type($params, 'datetime');
 var_dump($rv);
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)

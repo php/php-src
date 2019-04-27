@@ -1,11 +1,11 @@
 --TEST--
-Test trait_exists() function : basic functionality 
+Test trait_exists() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
- * Description: Checks if the trait exists 
+ * Description: Checks if the trait exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing trait_exists() : basic functionality ***\n";
@@ -33,7 +33,7 @@ var_dump( trait_exists('MyTrait') );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing trait_exists() : basic functionality ***
 Calling trait_exists() on non-existent trait with autoload explicitly enabled:
 In autoload(C)

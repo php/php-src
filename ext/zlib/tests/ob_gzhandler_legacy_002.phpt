@@ -19,6 +19,6 @@ if (false !== ob_gzhandler("", PHP_OUTPUT_HANDLER_START)) {
 }
 echo "hi\n";
 ?>
---EXPECTF--
+--EXPECT--
 hi
 --EXPECTHEADERS--

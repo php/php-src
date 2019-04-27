@@ -1,6 +1,5 @@
 --TEST--
 CURL file uploading
---INI--
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -22,7 +21,7 @@ function testcurl($ch, $name, $mime = '', $postname = '')
 include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "{$host}/get.php?test=file");
+curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=file");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 testcurl($ch, __DIR__ . '/curl_testdata1.txt');
@@ -53,7 +52,7 @@ $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));
 
-curl_setopt($ch, CURLOPT_URL, "{$host}/get.php?test=post");
+curl_setopt($ch, CURLOPT_URL, "{$host}/get.inc?test=post");
 $params = array('file' => '@' . __DIR__ . '/curl_testdata1.txt');
 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 var_dump(curl_exec($ch));

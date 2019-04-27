@@ -59,7 +59,6 @@ foreach ($functions as $type => $function) {
 echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
-
 Testing 'int' type:
 
 *** Trying int(1)
@@ -79,16 +78,16 @@ E_NOTICE: A non well formed numeric value encountered on line %d
 int(1)
 
 *** Trying string(1) "a"
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
 
 *** Trying int(%d)
 int(%d)
 
 *** Trying float(NAN)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, float given, called in %s on line %d
 
 *** Trying bool(true)
 int(1)
@@ -97,22 +96,22 @@ int(1)
 int(0)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
 *** Trying object(Stringable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -257,21 +256,21 @@ bool(true)
 bool(false)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
 *** Trying object(Stringable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, resource given, called in %s on line %d
 
 Done

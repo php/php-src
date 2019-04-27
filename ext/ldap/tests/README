@@ -63,7 +63,7 @@ export LDAP_TEST_HOST=192.168.33.10
 
 Now you can run the test-suite by calling "make test". To test only the LDAP-Tests, run "make test TESTS=ext/ldap"
 
-CAVEAT: The current setup does not (yet) test secure connections. 
+CAVEAT: The current setup does not (yet) test secure connections.
 
 
 ========

@@ -19,7 +19,7 @@ usort($list, function($a, $b) use ($comparator) {
 var_dump($list);
 echo "Alive\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(43) "Call to a member function compare() on null"
 int(0)

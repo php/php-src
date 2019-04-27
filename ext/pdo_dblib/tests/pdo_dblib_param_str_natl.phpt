@@ -3,11 +3,11 @@ PDO_DBLIB: national character set values are quoted correctly in queries
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
+require __DIR__ . '/config.inc';
 
 $stmt = $db->prepare('SELECT :value');
 $stmt->bindValue(':value', 'foo', PDO::PARAM_STR | PDO::PARAM_STR_NATL);

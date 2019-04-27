@@ -2,13 +2,13 @@
 PDOStatements and multi query
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	function mysql_stmt_multiquery_wrong_usage($db) {
 
@@ -53,7 +53,7 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
@@ -99,7 +99,7 @@ Native Prepared Statements...
 
 Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '%SSELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
 
-Fatal error: Uncaught Error: Call to a member function errorInfo() on boolean in %s:%d
+Fatal error: Uncaught Error: Call to a member function errorInfo() on bool in %s:%d
 Stack trace:
 #0 %s(%d): mysql_stmt_multiquery_wrong_usage(Object(PDO))
 #1 {main}

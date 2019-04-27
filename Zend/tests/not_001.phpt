@@ -16,7 +16,7 @@ var_dump(bin2hex($s1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(-24)
 string(8) "8c90929a"
 Done

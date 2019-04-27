@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,6 +35,8 @@ PHP_RSHUTDOWN_FUNCTION(sodium);
 PHP_MINFO_FUNCTION(sodium);
 
 PHP_FUNCTION(sodium_add);
+PHP_FUNCTION(sodium_base642bin);
+PHP_FUNCTION(sodium_bin2base64);
 PHP_FUNCTION(sodium_bin2hex);
 PHP_FUNCTION(sodium_compare);
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt);
@@ -81,12 +83,19 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256);
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str);
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify);
 PHP_FUNCTION(sodium_crypto_pwhash_str);
+PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash);
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify);
 PHP_FUNCTION(sodium_crypto_scalarmult);
 PHP_FUNCTION(sodium_crypto_scalarmult_base);
 PHP_FUNCTION(sodium_crypto_secretbox);
 PHP_FUNCTION(sodium_crypto_secretbox_keygen);
 PHP_FUNCTION(sodium_crypto_secretbox_open);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_keygen);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_push);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_pull);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_pull);
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey);
 PHP_FUNCTION(sodium_crypto_shorthash);
 PHP_FUNCTION(sodium_crypto_shorthash_keygen);
 PHP_FUNCTION(sodium_crypto_sign);
@@ -112,12 +121,3 @@ PHP_FUNCTION(sodium_pad);
 PHP_FUNCTION(sodium_unpad);
 
 #endif	/* PHP_LIBSODIUM_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

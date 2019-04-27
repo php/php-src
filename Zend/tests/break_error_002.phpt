@@ -1,5 +1,5 @@
 --TEST--
-'break' error (operator with non-constant operand)
+'break' error (operator with non-integer operand)
 --FILE--
 <?php
 function foo () {
@@ -7,4 +7,4 @@ function foo () {
 }
 ?>
 --EXPECTF--
-Fatal error: 'break' operator with non-constant operand is no longer supported in %sbreak_error_002.php on line 3
+Fatal error: 'break' operator with non-integer operand is no longer supported in %sbreak_error_002.php on line 3

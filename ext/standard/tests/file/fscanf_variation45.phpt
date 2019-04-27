@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - scientific formats with integer values 
+Test fscanf() function: usage variations - scientific formats with integer values
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ Test fscanf() function: usage variations - scientific formats with integer value
 
 /* Test fscanf() to scan different integer values using different scientific format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different scientific format types with different integer values ***\n"; 
+echo "*** Test fscanf(): different scientific format types with different integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation45.tmp";
@@ -20,7 +20,7 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 
-// different valid  integer vlaues
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
@@ -76,7 +76,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation45.tmp";
 unlink($filename);
 ?>
@@ -1005,4 +1005,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

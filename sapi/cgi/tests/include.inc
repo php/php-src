@@ -38,7 +38,7 @@ function get_cgi_path() /* {{{ */
 				}
 			}
 
-			if ($php_path && is_dir($php_path) && file_exists($php_path."/cgi/php-cgi") && is_executable($php_path."/cgi/php-cgi")) { 
+			if ($php_path && is_dir($php_path) && file_exists($php_path."/cgi/php-cgi") && is_executable($php_path."/cgi/php-cgi")) {
 				/* gotcha */
 				return $php_path."/cgi/php-cgi";
 			}

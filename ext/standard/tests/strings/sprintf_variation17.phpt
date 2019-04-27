@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - string formats with resource values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -11,7 +11,7 @@ echo "*** Testing sprintf() : string formats with resource values ***\n";
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // array of resource values
 $resource_values = array (
@@ -20,9 +20,9 @@ $resource_values = array (
 );
 
 // array of string formats
-$string_formats = array( 
-  "%s", "%hs", "%ls", 
-  "%Ls"," %s", "%s ", 
+$string_formats = array(
+  "%s", "%hs", "%ls",
+  "%Ls"," %s", "%s ",
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
 );
@@ -30,7 +30,7 @@ $string_formats = array(
 $count = 1;
 foreach($resource_values as $resource_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($string_formats as $format) {
     var_dump( sprintf($format, $resource_value) );
   }

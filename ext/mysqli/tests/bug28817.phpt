@@ -38,5 +38,5 @@ array(2) {
   [1]=>
   %s(3) "bar"
 }
-NULL
+bool(false)
 bool(true)

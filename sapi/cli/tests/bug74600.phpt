@@ -33,6 +33,6 @@ proc_close($proc);
 <?php
 unlink(__DIR__ . "/bug74600.ini");
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "okey"
 string(0) ""

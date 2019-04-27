@@ -4,7 +4,7 @@ JSON (http://www.crockford.com/JSON/JSON_checker/test/pass3.json)
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
-    
+
 $test = '
 {
     "JSON Test Pattern pass3": {

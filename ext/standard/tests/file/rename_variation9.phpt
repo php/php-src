@@ -7,7 +7,7 @@ Test rename() function: basic functionality
 */
 
 echo "\n*** Testing rename() by giving stream context as third argument ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $context = stream_context_create();
 
@@ -38,8 +38,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/rename_variation9_new.tmp");
-rmdir(dirname(__FILE__)."/rename_variation_dir9_new");
+unlink(__DIR__."/rename_variation9_new.tmp");
+rmdir(__DIR__."/rename_variation_dir9_new");
 ?>
 --EXPECT--
 *** Testing rename() by giving stream context as third argument ***
@@ -50,4 +50,3 @@ bool(true)
 bool(false)
 bool(true)
 Done
-

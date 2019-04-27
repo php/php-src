@@ -46,7 +46,7 @@ var_dump( array_map('callback_cat', $arr1, $arr1) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : array with references for 'arr1' argument ***
 -- with one array --
 array(6) {

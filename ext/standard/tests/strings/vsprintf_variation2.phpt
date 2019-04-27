@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - unexpected values for args argumen
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 

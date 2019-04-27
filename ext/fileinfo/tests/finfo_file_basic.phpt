@@ -1,16 +1,16 @@
 --TEST--
-Test finfo_file() function : basic functionality 
+Test finfo_file() function : basic functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_file(resource finfo, char *file_name [, int options [, resource context]])
- * Description: Return information about a file. 
+ * Description: Return information about a file.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 $finfo = finfo_open( FILEINFO_MIME );
 
 echo "*** Testing finfo_file() : basic functionality ***\n";

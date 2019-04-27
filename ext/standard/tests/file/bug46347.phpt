@@ -17,7 +17,7 @@ var_dump(parse_ini_file($file));
 <?php
 unlink(__DIR__.'/parse.ini');
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["part1.*.part2"]=>
   string(1) "1"

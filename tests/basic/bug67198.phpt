@@ -2,9 +2,11 @@
 php://input is empty when enable_post_data_reading=Off
 --INI--
 allow_url_fopen=1
+--CONFLICTS--
+server
 --SKIPIF--
 <?php
-include __DIR__."/../../sapi/cli/tests/skipif.inc"; 
+include __DIR__."/../../sapi/cli/tests/skipif.inc";
 ?>
 --FILE--
 <?php

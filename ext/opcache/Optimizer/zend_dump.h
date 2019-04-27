@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -26,6 +26,7 @@
 #define ZEND_DUMP_RC_INFERENCE         (1<<1)
 #define ZEND_DUMP_CFG                  (1<<2)
 #define ZEND_DUMP_SSA                  (1<<3)
+#define ZEND_DUMP_LIVE_RANGES          (1<<4)
 #define ZEND_DUMP_RT_CONSTANTS         ZEND_RT_CONSTANTS
 
 BEGIN_EXTERN_C()
@@ -44,11 +45,3 @@ void zend_dump_ht(HashTable *ht);
 END_EXTERN_C()
 
 #endif /* ZEND_DUMP_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

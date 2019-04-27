@@ -1,5 +1,5 @@
 --TEST--
-Bug #51791 (constant() failed to check undefined constant and php interpreter stoped)
+Bug #51791 (constant() failed to check undefined constant and php interpreter stopped)
 --FILE--
 <?php
 

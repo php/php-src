@@ -5,8 +5,8 @@ Bug #69900 Commandline input/output weird behaviour with STDIO
 
 error_reporting(E_ALL);
 
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
-$max_ms = ((bool)getenv('TRAVIS')) ? 10 : 1;
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
+$max_ms = 10;
 
 $test_content = '<?php
 
@@ -33,8 +33,14 @@ for($i = 0; $i < 10; $i++){
 	$s = fgets($pipes[1]);
 	$t1 = microtime(1);
 
-	echo $s;		
-	echo "fgets() took ", (($t1 - $t0)*1000 > $max_ms ? 'more' : 'less'), " than $max_ms ms\n";
+	echo $s;
+
+	$dt_ms = ($t1 - $t0)*1000;
+	if ($dt_ms > $max_ms) {
+		echo "fgets() took more than $max_ms ms ($dt_ms ms)\n";
+	} else {
+		echo "fgets() took less than $max_ms ms\n";
+	}
 }
 
 fclose($pipes[0]);
@@ -46,12 +52,12 @@ proc_close($process);
 ===DONE===
 --CLEAN--
 <?php
-$fl = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test69900.php";
+$fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 @unlink($fl);
 ?>
 --EXPECTF--
 hello0
-fgets() took more than %d ms
+fgets() took more than %d ms (%s ms)
 hello1
 fgets() took less than %d ms
 hello2

@@ -1,9 +1,10 @@
+#!/usr/bin/env php
 <?php
 /*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2007 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +17,6 @@
   | Author: Nuno Lopes <nlopess@php.net>                                 |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 define('REPORT_LEVEL', 1); // 0 reports less false-positives. up to level 5.
 define('VERSION', '7.0');  // minimum is 7.0

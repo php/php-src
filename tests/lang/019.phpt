@@ -1,7 +1,7 @@
 --TEST--
 eval() test
 --FILE--
-<?php 
+<?php
 
 eval("function test() { echo \"hey, this is a function inside an eval()!\\n\"; }");
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -131,7 +129,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ dba_functions[]
  */
-const zend_function_entry dba_functions[] = {
+static const zend_function_entry dba_functions[] = {
 	PHP_FE(dba_open, arginfo_dba_open)
 	PHP_FE(dba_popen, arginfo_dba_popen)
 	PHP_FE(dba_close, arginfo_dba_close)
@@ -162,11 +160,7 @@ ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
 
-#ifdef ZTS
-#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
-#else
-#define DBA_G(v) (dba_globals.v)
-#endif
+#define DBA_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dba, v)
 
 static PHP_GINIT_FUNCTION(dba);
 
@@ -188,6 +182,9 @@ zend_module_entry dba_module_entry = {
 };
 
 #ifdef COMPILE_DL_DBA
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(dba)
 #endif
 
@@ -517,6 +514,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(dba)
 {
+#if defined(COMPILE_DL_DBA) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	dba_globals->default_handler = "";
 	dba_globals->default_hptr    = NULL;
 }
@@ -695,7 +695,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			info = (dba_info *)le->ptr;
 
-			GC_REFCOUNT(le)++;
+			GC_ADDREF(le);
 			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}
@@ -891,7 +891,7 @@ restart:
 			spprintf(&lock_name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
 				/* when in read only mode try to use existing .lck file first */
-				/* do not log errors for .lck file while in read ony mode on .lck file */
+				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
 				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
 			}
@@ -901,7 +901,7 @@ restart:
 			} else {
 				if (opened_path) {
 					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-					zend_string_release(opened_path);
+					zend_string_release_ex(opened_path, 0);
 				}
 			}
 		}
@@ -915,7 +915,7 @@ restart:
 				}
 				/* now store the name of the lock */
 				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			}
 		}
 		if (!lock_dbf) {
@@ -997,10 +997,7 @@ restart:
 	info->argv = NULL;
 
 	if (persistent) {
-		zval new_le;
-
-		ZVAL_NEW_PERSISTENT_RES(&new_le, -1, info, le_pdb);
-		if (zend_hash_str_update(&EG(persistent_list), key, keylen, &new_le) == NULL) {
+		if (zend_register_persistent_resource(key, keylen, info, le_pdb) == NULL) {
 			dba_close(info);
 			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
@@ -1324,12 +1321,3 @@ PHP_FUNCTION(dba_list)
 /* }}} */
 
 #endif /* HAVE_DBA */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

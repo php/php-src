@@ -40,4 +40,3 @@ string(%d) "/**
  */"
 bool(false)
 bool(false)
-

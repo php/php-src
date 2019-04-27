@@ -38,7 +38,7 @@ foreach($hex_values as $c) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 
 -- Octal Values --

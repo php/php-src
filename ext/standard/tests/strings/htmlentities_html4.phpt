@@ -6,7 +6,7 @@ function utf32_utf8($k) {
 	if ($k < 0x80) {
 		$retval = pack('C', $k);
 	} else if ($k < 0x800) {
-		$retval = pack('C2', 
+		$retval = pack('C2',
             0xc0 | ($k >> 6),
             0x80 | ($k & 0x3f));
 	} else if ($k < 0x10000) {

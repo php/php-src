@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ void _php_ibase_free_event(ibase_event *event) /* {{{ */
 	}
 
 	if (Z_TYPE(event->callback) != IS_UNDEF) {
-		zval_dtor(&event->callback);
+		zval_ptr_dtor(&event->callback);
 		ZVAL_UNDEF(&event->callback);
 
 		_php_ibase_event_free(event->event_buffer,event->result_buffer);
@@ -201,7 +201,10 @@ static isc_callback  _php_ibase_callback(ibase_event *event, /* {{{ */
 #endif
 {
 	/* this function is called asynchronously by the Interbase client library. */
-	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+//	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+#ifdef ZTS
+	void ***tsrm_ls = (void ***) ctx;
+#endif
 
 	/**
 	 * The callback function is called when the event is first registered and when the event
@@ -232,7 +235,7 @@ static isc_callback  _php_ibase_callback(ibase_event *event, /* {{{ */
 			}
 
 			/* call the callback provided by the user */
-			if (SUCCESS != call_user_function(EG(function_table), NULL,
+			if (SUCCESS != call_user_function(NULL, NULL,
 					&event->callback, &return_value, 2, args)) {
 				_php_ibase_module_error("Error calling callback %s", Z_STRVAL(event->callback));
 				break;
@@ -320,15 +323,18 @@ PHP_FUNCTION(ibase_set_event_handler)
 	if (!zend_is_callable(cb_arg, 0, NULL)) {
 		zend_string *cb_name = zend_get_callable_name(cb_arg);
 		_php_ibase_module_error("Callback argument %s is not a callable function", ZSTR_VAL(cb_name));
-		zend_string_release(cb_name);
+		zend_string_release_ex(cb_name, 0);
 		RETURN_FALSE;
 	}
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
-	TSRMLS_SET_CTX(event->thread_ctx);
+//	TSRMLS_SET_CTX(event->thread_ctx);
+#if ZTS
+	event->thread_ctx = (void ***) tsrm_get_ls_cache()
+#endif
 	event->link_res = link_res;
-	GC_REFCOUNT(link_res)++;
+	GC_ADDREF(link_res);
 	event->link = ib_link;
 	event->event_count = 0;
 	event->state = NEW;
@@ -390,12 +396,3 @@ PHP_FUNCTION(ibase_free_event_handler)
 /* }}} */
 
 #endif /* HAVE_IBASE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

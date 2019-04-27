@@ -58,7 +58,7 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -- flags = BYPASS_KEY --
 [0] => |-Array
 [0] => | |-a

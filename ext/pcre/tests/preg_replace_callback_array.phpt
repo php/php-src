@@ -42,7 +42,7 @@ var_dump(preg_replace_callback_array(
 
 var_dump($count);
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "ok"
 string(2) "ok"
 string(2) "ok"

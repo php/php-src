@@ -36,16 +36,13 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset( NULL );
 
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "ss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 );
 		return FAILURE;
 	}
 
@@ -105,7 +102,7 @@ PHP_FUNCTION( msgfmt_create )
 }
 /* }}} */
 
-/* {{{ proto void MessageFormatter::__construct( string $locale, string $pattern )
+/* {{{ proto MessageFormatter::__construct( string $locale, string $pattern )
  * MessageFormatter object constructor.
  */
 PHP_METHOD( MessageFormatter, __construct )
@@ -113,7 +110,7 @@ PHP_METHOD( MessageFormatter, __construct )
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
-	return_value = getThis();
+	return_value = ZEND_THIS;
 	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
@@ -137,9 +134,6 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_code: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -165,9 +159,6 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_message: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -178,12 +169,3 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	RETURN_STR(message);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

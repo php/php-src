@@ -6,7 +6,7 @@ class Test implements Iterator
 {
 	public $arr = array(1, 2, 3);
 	public $x = 0;
-	
+
 	public function rewind()    { if ($this->x == 0) throw new Exception(__METHOD__); reset($this->arr); }
 	public function current()   { if ($this->x == 1) throw new Exception(__METHOD__); return current($this->arr); }
 	public function key()       { if ($this->x == 2) throw new Exception(__METHOD__); return key($this->arr); }

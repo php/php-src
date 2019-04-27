@@ -7,7 +7,7 @@ class foo {
         return __METHOD__;
     }
 }
-$file = dirname(__FILE__)."/file_put_contents.txt";
+$file = __DIR__."/file_put_contents.txt";
 
 $context = stream_context_create();
 
@@ -21,7 +21,7 @@ var_dump(file_put_contents($file, "string", 0, $fp));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: file_put_contents(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 bool(false)

@@ -33,5 +33,5 @@ require_once('skipifconnectfailure.inc');
 	$mysql->close();
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

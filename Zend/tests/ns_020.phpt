@@ -1,5 +1,5 @@
 --TEST--
-020: Accesing internal namespace function
+020: Accessing internal namespace function
 --FILE--
 <?php
 namespace X;

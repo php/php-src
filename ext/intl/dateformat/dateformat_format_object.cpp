@@ -33,6 +33,12 @@ extern "C" {
 #include "../common/common_date.h"
 }
 
+using icu::Locale;
+using icu::DateFormat;
+using icu::GregorianCalendar;
+using icu::StringPiece;
+using icu::SimpleDateFormat;
+
 static const DateFormat::EStyle valid_styles[] = {
 		DateFormat::kNone,
 		DateFormat::kFull,
@@ -169,7 +175,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 			goto cleanup;
 		}
 		cal = obj_cal->clone();
-	} else if (instanceof_function(instance_ce, php_date_get_date_ce())) {
+	} else if (instanceof_function(instance_ce, php_date_get_interface_ce())) {
 		if (intl_datetime_decompose(object, &date, &timeZone, NULL,
 				"datefmt_format_object") == FAILURE) {
 			RETURN_FALSE;

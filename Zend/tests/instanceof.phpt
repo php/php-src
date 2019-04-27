@@ -1,5 +1,5 @@
 --TEST--
-instanceof shouldn't call __autoload
+instanceof shouldn't call autoloader
 --FILE--
 <?php
 spl_autoload_register(function ($name) {

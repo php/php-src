@@ -41,6 +41,6 @@ proc_close($proc);
 <?php
 unlink(__DIR__ . "/023.ini");
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "40M"
 string(0) ""

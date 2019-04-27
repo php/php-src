@@ -16,7 +16,7 @@ class myclass
 	{
 		return isset($this->_data[$field_name]);
 	}
-	
+
 	function __get($var) {
 		var_dump(empty($this->_data[$var]));
 		return $this->_data[$var];

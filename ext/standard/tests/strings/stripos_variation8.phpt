@@ -8,7 +8,7 @@ Test stripos() function : usage variations - repetitive chars for 'haystack' arg
 */
 
 /* Test stripos() function with strings containing repetitive chars for haystak
- *  and with various needles & offsets 
+ *  and with various needles & offsets
 */
 
 echo "*** Testing stripos() function: strings repetitive chars ***\n";
@@ -35,7 +35,7 @@ for($index = 0; $index < count($needles); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: strings repetitive chars ***
 
 -- Iteration 1 --

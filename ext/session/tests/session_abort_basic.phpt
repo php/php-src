@@ -37,7 +37,7 @@ var_dump($_SESSION); // Should only have 'foo'
 echo "Done".PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_abort() : basic functionality ***
 array(2) {
   ["foo"]=>

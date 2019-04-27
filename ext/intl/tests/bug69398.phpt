@@ -13,10 +13,7 @@ echo IntlDateFormatter::formatObject($date, array(IntlDateFormatter::SHORT, Intl
 echo IntlDateFormatter::formatObject ($date, array(IntlDateFormatter::SHORT, IntlDateFormatter::NONE), 'ko_KR'), "\n";
 ?>
 ==DONE==
-
---EXPECTF--
+--EXPECT--
 04/04/2015
 15. 4. 4.
 ==DONE==
-
-

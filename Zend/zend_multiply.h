@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Ard Biesheuvel <ard.biesheuvel@linaro.org>                  |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend_portability.h"
 
@@ -161,11 +159,18 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	size_t res = nmemb;
 	size_t m_overflow = 0;
 
-	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
+	if (ZEND_CONST_COND(offset == 0, 0)) {
+		__asm__ ("mull %3\n\tadcl $0,%1"
+	     : "=&a"(res), "=&d" (m_overflow)
+	     : "%0"(res),
+	       "rm"(size));
+	} else {
+		__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
 	       "rm"(size),
 	       "rm"(offset));
+	}
 
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;
@@ -188,14 +193,21 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 # define LP_SUFF "q"
 #endif
 
-	__asm__ ("mul" LP_SUFF  " %3\n\t"
-		"add %4,%0\n\t"
-		"adc $0,%1"
-		: "=&a"(res), "=&d" (m_overflow)
-		: "%0"(res),
-		  "rm"(size),
-		  "rm"(offset));
-
+	if (ZEND_CONST_COND(offset == 0, 0)) {
+		__asm__ ("mul" LP_SUFF  " %3\n\t"
+			"adc $0,%1"
+			: "=&a"(res), "=&d" (m_overflow)
+			: "%0"(res),
+			  "rm"(size));
+	} else {
+		__asm__ ("mul" LP_SUFF  " %3\n\t"
+			"add %4,%0\n\t"
+			"adc $0,%1"
+			: "=&a"(res), "=&d" (m_overflow)
+			: "%0"(res),
+			  "rm"(size),
+			  "rm"(offset));
+	}
 #undef LP_SUFF
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;
@@ -329,13 +341,3 @@ static zend_always_inline size_t zend_safe_addmult(size_t nmemb, size_t size, si
 }
 
 #endif /* ZEND_MULTIPLY_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

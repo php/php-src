@@ -1,10 +1,10 @@
 --TEST--
-imap_timeout() function : basic functionality 
+imap_timeout() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -44,7 +44,7 @@ Checking with no parameters
 Warning: imap_timeout() expects at least 1 parameter, 0 given in %s on line %d
 Checking with incorrect parameter type
 
-Warning: imap_timeout() expects parameter 1 to be integer, %s given in %s on line %d
+Warning: imap_timeout() expects parameter 1 to be int, %s given in %s on line %d
 GET values:
 int(%d)
 int(%d)

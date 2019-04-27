@@ -49,9 +49,7 @@ void Collator_objects_free(zend_object *object )
 /* {{{ Collator_object_create */
 zend_object *Collator_object_create(zend_class_entry *ce )
 {
-	Collator_object*     intern;
-
-	intern = ecalloc(1, sizeof(Collator_object) + zend_object_properties_size(ce));
+	Collator_object *intern = zend_object_alloc(sizeof(Collator_object), ce);
 	intl_error_init(COLLATOR_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -98,8 +96,8 @@ ZEND_END_ARG_INFO()
  * Every 'Collator' class method has an entry in this table
  */
 
-zend_function_entry Collator_class_functions[] = {
-	PHP_ME( Collator, __construct, collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+static const zend_function_entry Collator_class_functions[] = {
+	PHP_ME( Collator, __construct, collator_1_arg, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY( create, ZEND_FN( collator_create ), collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( compare, ZEND_FN( collator_compare ), collator_2_args )
 	PHP_NAMED_FE( sort, ZEND_FN( collator_sort ), collator_sort_args )
@@ -129,7 +127,7 @@ void collator_register_Collator_class( void )
 	ce.create_object = Collator_object_create;
 	Collator_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&Collator_handlers, zend_get_std_object_handlers(),
+	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);
 	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer
 	   for which we don't have the place to keep */
@@ -178,12 +176,3 @@ void collator_object_destroy( Collator_object* co )
 	intl_error_reset( COLLATOR_ERROR_P( co ) );
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

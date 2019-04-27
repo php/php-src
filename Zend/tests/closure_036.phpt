@@ -5,11 +5,11 @@ Closure 036: Rebinding closures, keep calling scope
 
 class A {
 	private $x;
-	
+
 	public function __construct($v) {
 		$this->x = $v;
 	}
-	
+
 	public function getIncrementor() {
 		return function() { return ++$this->x; };
 	}
@@ -27,7 +27,7 @@ var_dump($cb());
 var_dump($cb2());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(11)
 int(12)

@@ -2,7 +2,6 @@
 fopencookie detected and working (or cast mechanism works)
 --FILE--
 <?php
-# vim600:syn=php:
 
 /* This test verifies that the casting mechanism is working correctly.
  * On systems with fopencookie, a FILE* is created around the user
@@ -20,12 +19,12 @@ fopencookie detected and working (or cast mechanism works)
 class userstream {
 	public $position = 0;
 	public $data = "If you can read this, it worked";
-	
+
 	function stream_open($path, $mode, $options, &$opened_path)
 	{
 		return true;
 	}
-	
+
 	function stream_read($count)
 	{
 		$ret = substr($this->data, $this->position, $count);

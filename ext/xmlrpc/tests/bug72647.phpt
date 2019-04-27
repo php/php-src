@@ -13,7 +13,7 @@ unset($v);
 
 echo xmlrpc_encode($ar);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>

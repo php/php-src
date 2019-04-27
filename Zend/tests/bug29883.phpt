@@ -4,10 +4,18 @@ Bug #29883 (isset gives invalid values on strings)
 <?php
 $x = "bug";
 var_dump(isset($x[-10]));
+var_dump(isset($x[1]));
 var_dump(isset($x["1"]));
-echo $x["1"]."\n";
+var_dump($x[-10])."\n";
+var_dump($x[1])."\n";
+var_dump($x["1"])."\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(true)
-u
+bool(true)
+
+Notice: Uninitialized string offset: -10 in %s on line 6
+string(0) ""
+string(1) "u"
+string(1) "u"

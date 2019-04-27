@@ -5,9 +5,6 @@ Bug #71523 (Copied handle with new option CURLOPT_HTTPHEADER crashes while curl_
 if (!extension_loaded("curl")) {
 	exit("skip curl extension not loaded");
 }
-if (getenv("SKIP_ONLINE_TESTS")) {
-	die("skip online test");
-}
 ?>
 --FILE--
 <?php
@@ -27,5 +24,5 @@ do {
 } while ($active);
 ?>
 okey
---EXPECTF--
+--EXPECT--
 okey

@@ -49,7 +49,7 @@ mysqli_float_handling - ensure 4 byte float is handled correctly
 	if (json_encode($rows[0][0]) != json_encode($jsfield_data)) {
 		printf("[006] Data differs");
 		var_dump(json_encode($rows[0][0]) != json_encode($jsfield_data));
-		die();	
+		die();
 	}
 	mysqli_close($link);
 	echo "OK";
@@ -58,5 +58,5 @@ mysqli_float_handling - ensure 4 byte float is handled correctly
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 OK

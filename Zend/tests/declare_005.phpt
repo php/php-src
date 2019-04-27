@@ -1,6 +1,5 @@
 --TEST--
 Testing declare statement with ticks
---SKIPIF--
 --FILE--
 <?php
 register_tick_function(function () { echo "tick\n"; });
@@ -13,6 +12,6 @@ foo();
 
 }
 ?>
---EXPECTF--
+--EXPECT--
 tick
 tick

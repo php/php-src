@@ -1,7 +1,7 @@
 --TEST--
 General function test
 --FILE--
-<?php 
+<?php
 
 function a()
 {
@@ -288,4 +288,3 @@ factorial(4) = 24
 3
 4
 5
-

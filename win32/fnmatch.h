@@ -33,7 +33,6 @@
  *	@(#)fnmatch.h	8.1 (Berkeley) 6/2/93
  *
  * From FreeBSD fnmatch.h 1.7
- * $Id$
  */
 
 #ifndef	_FNMATCH_H_
@@ -52,12 +51,3 @@
 PHPAPI int fnmatch(const char *pattern, const char *string, int flags);
 
 #endif /* !_FNMATCH_H_ */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,9 +1,9 @@
 --TEST--
-Test asort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR 
+Test asort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as default/SORT_REGULAR
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association. 
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -29,7 +29,7 @@ $various_arrays = array (
   "array[2]" => array("data[2,0]" => 44, "data[2,1]" => 11, "sub_array[2][0] " => array(64,61) ),
 
   // array contains sub arrays
-  "array[3]" => array ( "sub_array[3][0]" => array(33,-5,6), "sub_array[3][1]" => array(11), 
+  "array[3]" => array ( "sub_array[3][0]" => array(33,-5,6), "sub_array[3][1]" => array(11),
                         "sub_array[3][2]" => array(22,-55), "sub_array[3][3]" => array() )
 );
 
@@ -39,8 +39,8 @@ echo "\n-- Testing asort() by supplying various arrays containing sub arrays --\
 
 // loop through to test asort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   // testing asort() function by supplying different arrays, flag value is default
   echo "- With default sort_flag -\n";
   $temp_array = $array;
@@ -57,7 +57,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying various arrays containing sub arrays --

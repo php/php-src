@@ -42,5 +42,3 @@ type 1 string(0) ""
 type 2 string(0) ""
 type 3 string(3) "42
 "
-
-

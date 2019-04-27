@@ -16,7 +16,6 @@ class Collator2 extends Collator{
 $c = new Collator2();
 $c->getSortKey('h');
 --EXPECTF--
-
 Fatal error: Uncaught Error: Object not initialized in %s:%d
 Stack trace:
 #0 %s(%d): Collator->getSortKey('h')

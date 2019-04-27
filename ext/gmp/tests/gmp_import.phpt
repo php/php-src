@@ -47,9 +47,6 @@ foreach ($import as $k => $test) {
 
 var_dump($passed);
 
-// Invalid arguments (zpp failure)
-var_dump(gmp_import());
-
 // Invalid word sizes
 var_dump(gmp_import('a', -1));
 var_dump(gmp_import('a', 0));
@@ -62,12 +59,8 @@ var_dump(gmp_import(str_repeat('a', 100), 64));
 // Invalid options
 var_dump(gmp_import('a', 1, GMP_MSW_FIRST | GMP_LSW_FIRST));
 var_dump(gmp_import('a', 1, GMP_BIG_ENDIAN | GMP_LITTLE_ENDIAN));
-
 --EXPECTF--
 bool(true)
-
-Warning: gmp_import() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: gmp_import(): Word size must be positive, -1 given in %s on line %d
 bool(false)

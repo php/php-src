@@ -25,7 +25,7 @@ $foo = new Foo;
 $foo->testBAR();
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(7) "testBAR"
 string(7) "testBAR"
 ===DONE===

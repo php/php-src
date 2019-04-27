@@ -11,10 +11,10 @@ session.save_handler=files
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_name([string $name])
  * Description : Get and/or set the current session name
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_name() : error functionality ***\n";
@@ -29,7 +29,7 @@ var_dump(session_name());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_name() : error functionality ***
 string(9) "PHPSESSID"
 string(9) "PHPSESSID"
@@ -38,4 +38,3 @@ string(4) "blah"
 bool(true)
 string(4) "blah"
 Done
-

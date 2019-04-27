@@ -16,7 +16,7 @@ get_error_code()
 function check_rc( $rc, $expected )
 {
     return ( $rc === $expected ? "ok" : "failed" ) . "\n";
-} 
+}
 
 function ut_main()
 {

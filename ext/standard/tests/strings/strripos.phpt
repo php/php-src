@@ -15,9 +15,6 @@ strripos() function
 	var_dump(@strripos("a", ""));
 	var_dump(@strripos("", "a"));
 	var_dump(@strripos("\\\\a", "\\a"));
-
-	$fp = fopen(__FILE__, "r");
-	var_dump(@strripos("", $fp));
 ?>
 --EXPECT--
 int(5)
@@ -33,5 +30,3 @@ bool(false)
 bool(false)
 bool(false)
 int(1)
-bool(false)
-

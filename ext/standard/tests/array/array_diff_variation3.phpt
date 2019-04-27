@@ -3,8 +3,8 @@ Test array_diff() function : usage variations  - array with different data types
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -50,7 +50,7 @@ $values = array(
        .5),
 
 /*4*/
-"null" => array(      
+"null" => array(
       // null data
       NULL,
       null),
@@ -64,7 +64,7 @@ $values = array(
       FALSE),
 
 /*6*/
-"empty" => array(      
+"empty" => array(
       // empty data
       "",
       ''),
@@ -75,20 +75,20 @@ $values = array(
       "string",
       'string',
       $heredoc),
-      
-/*8*/      
+
+/*8*/
 "binary" => array(
        // binary data
        b"binary",
 	   (binary)"binary"),
-	   
-/*9*/	   
+
+/*9*/
 "undefined" => array(
       // undefined data
       @$undefined_var),
 
 /*10*/
-"unset" => array(      
+"unset" => array(
       // unset data
       @$unset_var)
 );
@@ -103,7 +103,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 
  Iteration: 1 

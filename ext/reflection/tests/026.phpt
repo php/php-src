@@ -15,7 +15,6 @@ echo "\nDone!\n";
 Reflection
 
 Reflection => enabled
-Version => %s
 
 date
 

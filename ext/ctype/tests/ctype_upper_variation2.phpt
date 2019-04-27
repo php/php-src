@@ -5,7 +5,7 @@ Test ctype_upper() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_upper(mixed $c)
- * Description: Checks for uppercase character(s) 
+ * Description: Checks for uppercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -26,7 +26,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_upper() : usage variations ***
 character code 65 is a uppercase character
 character code 66 is a uppercase character

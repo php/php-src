@@ -50,7 +50,7 @@ try{
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Too few arguments:
 Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
 
@@ -59,4 +59,3 @@ Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
 Ok - Class InvalidClassName does not exist
 Ok - The parameter class is expected to be either a string or an object
 Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 2 given
-

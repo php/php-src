@@ -1,7 +1,7 @@
 --TEST--
 Userstream unlink, rename, mkdir, rmdir, and url_stat.
 --FILE--
-<?php # vim:ft=php:
+<?php
 class test {
     function unlink($file) {
         print "Unlinking file: $file\n";
@@ -80,4 +80,3 @@ Array
 )
 Filesize = 31337
 filemtime = 1231231231
-

@@ -3,7 +3,7 @@ DRCP: privileged connect
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 if (!$test_drcp) die("skip requires DRCP connection");
 // Looked for :pooled in EZ connect string
 if (strpos($dbase, "/") !== false && stripos($dbase, ":pooled") === false)
@@ -36,7 +36,7 @@ oci8.privileged_connect=1
 
 // Connecting as SYSDBA or SYSOPER through DRCP will give ORA-1031
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 var_dump(oci_connect($user,$password,$dbase,false,OCI_SYSDBA));
 var_dump(oci_connect($user,$password,$dbase,false,OCI_SYSOPER));
 var_dump(oci_new_connect($user,$password,$dbase,false,OCI_SYSDBA));
@@ -66,4 +66,3 @@ bool(false)
 Warning: oci_pconnect(): ORA-01031: %s in %s on line %d
 bool(false)
 Done
-

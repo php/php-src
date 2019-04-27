@@ -66,7 +66,7 @@ print_r(imagecolorsforindex($im, $c));
 
 
 ?>
---EXPECTF--
+--EXPECT--
 FF00FF
 Array
 (
