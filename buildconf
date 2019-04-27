@@ -7,7 +7,7 @@ PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
 debug=0
-# Stamp file to run build check only on first run.
+# Stamp file to run build check only on the first run.
 stamp=autom4te.cache/php_buildcheck.stamp
 
 # Go to project root.
@@ -133,7 +133,8 @@ if ! test -f "$stamp"; then
     exit 1
   fi
 
-  test -n "$stamp" && (mkdir -p autom4te.cache; touch $stamp)
+  mkdir -p autom4te.cache
+  touch $stamp
 fi
 
 $MAKE -s -f build/build.mk \
