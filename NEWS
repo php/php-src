@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
 
+- PDO_MySQL:
+  . Fixed bug #77944 (Wrong meta pdo_type for bigint on LLP64). (cmb)
+
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
