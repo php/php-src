@@ -7,6 +7,8 @@ PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
 debug=0
+# Stamp file to run build check only on first run.
+stamp=autom4te.cache/php_buildcheck.stamp
 
 # Go to project root.
 cd $(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
@@ -78,17 +80,10 @@ if test "$dev" = "0" -a "$force" = "0"; then
   fi
 fi
 
-# Check if make exists.
-if ! test -x "$(command -v $MAKE)"; then
-  echo "buildconf: make not found." >&2
-  echo "           You need to have make installed to build PHP." >&2
-  exit 1
-fi
-
 if test "$force" = "1"; then
   echo "buildconf: Forcing buildconf"
   echo "buildconf: Removing configure caches"
-  rm -rf autom4te.cache config.cache
+  rm -rf autom4te.cache config.cache $stamp
 fi
 
 echo "buildconf: Building configure files"
@@ -97,6 +92,48 @@ if test "$debug" = "1"; then
   autoconf_flags="-f -Wall"
 else
   autoconf_flags="-f"
+fi
+
+# Check PHP build system tools such as autoconf and their versions.
+if ! test -f "$stamp"; then
+  echo "buildconf: checking installation..."
+
+  # Get minimum required autoconf version from the configure.ac file.
+  min_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
+
+  # Check if autoconf exists.
+  ac_version=$($PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//')
+
+  if test -z "$ac_version"; then
+    echo "buildconf: autoconf not found." >&2
+    echo "           You need autoconf version $min_version or newer installed" >&2
+    echo "           to build PHP from Git." >&2
+    exit 1
+  fi
+
+  # Check autoconf version.
+  set -f; IFS='.'; set -- $ac_version; set +f; IFS=' '
+  ac_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+  set -f; IFS='.'; set -- $min_version; set +f; IFS=' '
+  min_version_num="$(expr ${1} \* 10000 + ${2} \* 100)"
+
+  if test "$ac_version_num" -lt "$min_version_num"; then
+    echo "buildconf: autoconf version $ac_version found." >&2
+    echo "           You need autoconf version $min_version or newer installed" >&2
+    echo "           to build PHP from Git." >&2
+    exit 1
+  else
+    echo "buildconf: autoconf version $ac_version (ok)"
+  fi
+
+  # Check if make exists.
+  if ! test -x "$(command -v $MAKE)"; then
+    echo "buildconf: make not found." >&2
+    echo "           You need to have make installed to build PHP." >&2
+    exit 1
+  fi
+
+  test -n "$stamp" && (mkdir -p autom4te.cache; touch $stamp)
 fi
 
 $MAKE -s -f build/build.mk \

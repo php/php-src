@@ -78,10 +78,6 @@ done
 set -x
 ./buildconf --force
 
-# remove buildmk.stamp. Otherwise, buildcheck.sh might not be run,
-# when a user runs buildconf in the distribution.
-rm -f buildmk.stamp
-
 # Generate lexer and parser files
 ./scripts/dev/genfiles
 exit_code=$?
