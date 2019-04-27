@@ -60,9 +60,19 @@
 #define STREAM_CRYPTO_METHOD_TLSv1_2       (1<<5)
 #define STREAM_CRYPTO_METHOD_TLSv1_3       (1<<6)
 
+#ifndef OPENSSL_NO_TLS1_METHOD
+#define HAVE_TLS1 1
+#endif
+
+#ifndef OPENSSL_NO_TLS1_1_METHOD
 #define HAVE_TLS11 1
+#endif
+
+#ifndef OPENSSL_NO_TLS1_2_METHOD
 #define HAVE_TLS12 1
-#if OPENSSL_VERSION_NUMBER >= 0x10101000
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10101000 && !defined(OPENSSL_NO_TLS1_3)
 #define HAVE_TLS13 1
 #endif
 
@@ -992,9 +1002,11 @@ static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 		ssl_ctx_options |= SSL_OP_NO_SSLv3;
 	}
 #endif
+#ifdef HAVE_TLS1
 	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_0)) {
 		ssl_ctx_options |= SSL_OP_NO_TLSv1;
 	}
+#endif
 #ifdef HAVE_TLS11
 	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_1)) {
 		ssl_ctx_options |= SSL_OP_NO_TLSv1_1;
