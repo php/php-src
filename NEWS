@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
+- SPL:
+  . Fixed bug #77024 (SplFileObject::__toString() may return array). (Craig
+    Duncan)
+
 - Standard:
   . Fixed bug #77931 (Warning for array_map mentions wrong type). (Nikita)
 
