@@ -83,7 +83,7 @@ fi
 if test "$force" = "1"; then
   echo "buildconf: Forcing buildconf"
   echo "buildconf: Removing configure caches"
-  rm -rf autom4te.cache config.cache $stamp
+  rm -rf autom4te.cache config.cache
 fi
 
 echo "buildconf: Building configure files"
