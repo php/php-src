@@ -157,6 +157,10 @@ phpize_replace_prefix()
 
 phpize_autotools()
 {
+  # Remove aclocal.m4 if present. It is automatically included by autoconf but
+  # not used by the PHP build system since PHP 7.4.
+  rm -f aclocal.m4
+
   $PHP_AUTOCONF   || exit 1
   $PHP_AUTOHEADER || exit 1
 
