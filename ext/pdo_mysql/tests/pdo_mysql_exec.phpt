@@ -75,7 +75,7 @@ MySQLPDOTest::skip();
 			exec_and_count(19, $db, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(255)) BEGIN SELECT VERSION() INTO ver_param; END;', 0);
 			// we got this far without problems. If there's an issue from now on, its a failure
 			$ignore_exception = false;
-			exec_and_count(20, $db, 'CALL p(@version)', 0);
+			exec_and_count(20, $db, 'CALL p(@version)', 1);
 			$stmt = $db->query('SELECT @version AS p_version');
 			$tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			if (count($tmp) > 1 || !isset($tmp[0]['p_version'])) {
