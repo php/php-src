@@ -21,7 +21,7 @@ MySQLPDOTest::skip();
 			$dsn = MySQLPDOTest::getDSN();
 			$user = PDO_MYSQL_TEST_USER;
 			$pass = PDO_MYSQL_TEST_PASS;
-			$uri = sprintf('uri:file:%s', $file);
+			$uri = sprintf('uri:file://%s', str_replace('\\', '/', $file));
 
 			if ($fp = @fopen($file, 'w')) {
 				// ok, great we can create a file with a DSN in it
@@ -71,9 +71,5 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-Warning: PDO::__construct(file:%spdomuri.tst): failed to open stream: Invalid argument in %s on line %d
-[002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI
-
-Warning: PDO::__construct(file:%spdomuri.tst): failed to open stream: Invalid argument in %s on line %d
-[003] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, invalid data source URI
+[003] URI=uri:file://%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'
 done!
