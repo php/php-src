@@ -107,7 +107,7 @@ class MySQLPDOTest extends PDOTest {
 
 		// stinky string which we need to parse
 		$parts = explode('.', $version_string);
-		if (count($parts) != 3)
+		if (count($parts) < 3)
 			return -1;
 
 		$version = (int)$parts[0] * 10000;
