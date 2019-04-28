@@ -67,6 +67,8 @@ PHP                                                                        NEWS
   . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
 
 - OpenSSL:
+  . Added TLS 1.3 support to streams including new tlsv1.3 stream.
+    (Codarren Velvindron, Jakub Zelenka)
   . Added openssl_x509_verify function. (Ben Scholzen)
   . openssl_random_pseudo_bytes() now throws in error conditions.
     (Sammy Kaye Powers)
