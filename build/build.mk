@@ -19,16 +19,12 @@
 #
 
 subdirs = Zend TSRM
-stamp = buildmk.stamp
 config_h_in = main/php_config.h.in
 PHP_AUTOCONF = autoconf
 PHP_AUTOHEADER = autoheader
 PHP_AUTOCONF_FLAGS = -f
 
-all: $(stamp) configure $(config_h_in)
-
-$(stamp): build/buildcheck.sh
-	@build/buildcheck.sh $@
+all: configure $(config_h_in)
 
 configure: configure.ac $(PHP_M4_FILES)
 # Remove aclocal.m4 if present. It is automatically included by autoconf but
