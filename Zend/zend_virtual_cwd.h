@@ -49,7 +49,7 @@
 #endif
 
 #ifdef ZEND_WIN32
-#include "readdir.h"
+#include "win32/readdir.h"
 #include <sys/utime.h>
 #include "win32/ioutil.h"
 /* mode_t isn't defined on Windows */
