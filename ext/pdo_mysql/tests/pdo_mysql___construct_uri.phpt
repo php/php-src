@@ -71,5 +71,5 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-[003] URI=uri:file://%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'
+[003] URI=uri:file://%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, SQLSTATE[HY000] [2002] No such file or directory
 done!
