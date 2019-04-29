@@ -2,9 +2,6 @@
 MySQL PDO->__construct() - URI
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not for Windows');
-}
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
@@ -21,7 +18,7 @@ MySQLPDOTest::skip();
 			$dsn = MySQLPDOTest::getDSN();
 			$user = PDO_MYSQL_TEST_USER;
 			$pass = PDO_MYSQL_TEST_PASS;
-			$uri = sprintf('uri:file:%s', $file);
+			$uri = sprintf('uri:file://%s', (substr(PHP_OS, 0, 3) == 'WIN' ? str_replace('\\', '/', $file) : $file));
 
 			if ($fp = @fopen($file, 'w')) {
 				// ok, great we can create a file with a DSN in it
@@ -49,10 +46,14 @@ MySQLPDOTest::skip();
 				try {
 					$db = new PDO($uri, $user, $pass);
 				} catch (PDOException $e) {
+					$expected = array(
+						"SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'",
+						"SQLSTATE[HY000] [2002] No such file or directory"
+					);
 					printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), chr(0) test, %s\n",
 					$uri, $dsn,
 					$file, filesize($file), file_get_contents($file),
-					$e->getMessage());
+					(in_array($e->getMessage(), $expected) ? 'EXPECTED ERROR' : $e->getMessage()));
 				}
 				unlink($file);
 			}
@@ -71,9 +72,5 @@ MySQLPDOTest::skip();
 	print "done!";
 ?>
 --EXPECTF--
-Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
-[002] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=%s'), invalid data source URI
-
-Warning: PDO::__construct(file:/tmp/pdomuri.tst): failed to open stream: No such file or directory in %s on line %d
-[003] URI=uri:file:%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, invalid data source URI
+[003] URI=uri:file://%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, EXPECTED ERROR
 done!
