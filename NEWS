@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
     (Nikita)
 
+- cURL:
+  . Add missing CURLE_* constants. (Javier Spagnoletti)
+
 - DOM:
   . Fixed bug #78025 (segfault when accessing properties of DOMDocumentType).
     (cmb)

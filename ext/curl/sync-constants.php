@@ -17,7 +17,7 @@ const IGNORED_CONSTANTS = [
     'CURLOPT_PROGRESSDATA'
 ];
 
-const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:E|OPT|_VERSION)_[A-Z0-9_]+$~';
 
 $curlConstants   = getCurlConstants();
 $sourceConstants = getSourceConstants();
