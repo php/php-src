@@ -3171,6 +3171,7 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 			if (copy) {
 				zend_function *function;
 
+				ce->ce_flags |= ZEND_ACC_PRELOADED;
 				_zend_hash_append_ptr(dst, p->key, ce);
 				ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
 					if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
