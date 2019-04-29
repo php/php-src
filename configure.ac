@@ -1624,9 +1624,6 @@ fi
 # Create configuration headers
 #
 
-test -d TSRM || $php_shtool mkdir TSRM
-echo '#include <../main/php_config.h>' > TSRM/tsrm_config.h
-
 test -d Zend || $php_shtool mkdir Zend
 
 cat >Zend/zend_config.h <<FEO

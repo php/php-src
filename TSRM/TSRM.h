@@ -17,7 +17,7 @@
 # define TSRM_WIN32
 # include "tsrm_config.w32.h"
 #else
-# include <tsrm_config.h>
+# include <../main/php_config.h>
 #endif
 
 #include "main/php_stdint.h"
