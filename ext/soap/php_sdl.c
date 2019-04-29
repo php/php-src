@@ -1173,7 +1173,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0f
+#define WSDL_CACHE_VERSION 0x10
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1188,13 +1188,15 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 #define WSDL_CACHE_PUT_1(val,buf)      smart_str_appendc(buf,val);
 #define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,(char*)val,n);
 
+#define WSDL_NO_STRING_MARKER 0x7fffffff
+
 static char* sdl_deserialize_string(char **in)
 {
 	char *s;
 	int len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (len == 0x7fffffff) {
+	if (len == WSDL_NO_STRING_MARKER) {
 		return NULL;
 	} else {
 		s = emalloc(len+1);
@@ -1209,7 +1211,7 @@ static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 	int len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (len == 0) {
+	if (len == WSDL_NO_STRING_MARKER) {
 		zend_hash_next_index_insert_ptr(ht, data);
 	} else {
 		zend_hash_str_add_ptr(ht, *in, len, data);
@@ -1777,16 +1779,14 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 
 static void sdl_serialize_string(const char *str, smart_str *out)
 {
-	int i;
-
 	if (str) {
-		i = strlen(str);
+		int i = strlen(str);
 		WSDL_CACHE_PUT_INT(i, out);
 		if (i > 0) {
 			WSDL_CACHE_PUT_N(str, i, out);
 		}
 	} else {
-		WSDL_CACHE_PUT_INT(0x7fffffff, out);
+		WSDL_CACHE_PUT_INT(WSDL_NO_STRING_MARKER, out);
 	}
 }
 
@@ -1797,7 +1797,7 @@ static void sdl_serialize_key(zend_string *key, smart_str *out)
 		WSDL_CACHE_PUT_INT(ZSTR_LEN(key), out);
 		WSDL_CACHE_PUT_N(ZSTR_VAL(key), ZSTR_LEN(key), out);
 	} else {
-		WSDL_CACHE_PUT_INT(0, out);
+		WSDL_CACHE_PUT_INT(WSDL_NO_STRING_MARKER, out);
 	}
 }
 
