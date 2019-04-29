@@ -591,9 +591,6 @@ if test "$PHP_FPM" != "no"; then
     [no])
 
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
-    if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-    fi
     unset SYSTEMD_LIBS
     unset SYSTEMD_INCS
 

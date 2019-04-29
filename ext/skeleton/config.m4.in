@@ -22,7 +22,6 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl Write more examples of tests here...
 
   dnl # get library FOO build options from pkg-config output
-  dnl AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
   dnl AC_MSG_CHECKING(for libfoo)
   dnl if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists foo; then
   dnl   if $PKG_CONFIG foo --atleast-version 1.2.3; then
