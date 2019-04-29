@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
+  . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
 
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
