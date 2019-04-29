@@ -677,6 +677,7 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 							zval_ptr_dtor_nogc(result);
 							return FAILURE;
 						}
+						zval_ptr_dtor_nogc(&op1);
 						continue;
 					}
 					if (elem->child[1]) {
