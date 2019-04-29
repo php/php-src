@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #77921 (static.php.net doesn't work anymore). (Peter Kokot)
 
+- GD:
+  . Fixed bug #77943 (imageantialias($image, false); does not work). (cmb)
+
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
 
