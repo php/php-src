@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.14
 
+- CURL:
+  . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
+
 - GD:
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)
