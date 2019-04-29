@@ -58,6 +58,10 @@ PHP                                                                        NEWS
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
   . Fixed bug #77882 (Different behavior: always calls destructor). (Nikita)
 
+- SOAP:
+  . Fixed bug #77945 (Segmentation fault when constructing SoapClient with
+    WSDL_CACHE_BOTH). (Nikita)
+
 - Standard:
   . Fixed bug #77680 (recursive mkdir on ftp stream wrapper is incorrect).
     (Vlad Temian)
