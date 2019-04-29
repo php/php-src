@@ -2641,7 +2641,6 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
 				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-				Z_INDIRECT_P(variable_ptr), value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			variable_ptr = &EG(uninitialized_zval);
 		}
 	} else {
