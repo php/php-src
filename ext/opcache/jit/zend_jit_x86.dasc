@@ -6621,7 +6621,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|	jmp =>true_label;
 			}
 		} else {
-			/* Always FASLE */
+			/* Always FALSE */
 			if (set_bool) {
 				if (set_bool_not) {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
@@ -6657,7 +6657,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 			}
 		} else {
 			if (!(op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE)))) {
-				/* Always FASLE */
+				/* Always FALSE */
 				if (set_bool) {
 					if (set_bool_not) {
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
