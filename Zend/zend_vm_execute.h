@@ -1775,6 +1775,9 @@ add_again:
 				zval_ptr_dtor(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			} else {
+				if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
+					val = Z_REFVAL_P(val);
+				}
 				Z_TRY_ADDREF_P(val);
 				if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), val)) {
 					zend_cannot_add_element();
