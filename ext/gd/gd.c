@@ -4597,7 +4597,11 @@ PHP_FUNCTION(imageantialias)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
-	gdImageSetAntiAliased(im, 0);
+
+	if (im->trueColor) {
+		im->AA = alias;
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
