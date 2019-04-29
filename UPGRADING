@@ -457,6 +457,13 @@ The following extensions are affected:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
 
+- Sodium:
+  . --with-sodium no longer accepts a directory.
+
+- Zip:
+  . --with-libzip has been removed.
+  . --enable-zip becomes --with-zip.
+
 ========================================
 14. Other Changes
 ========================================
