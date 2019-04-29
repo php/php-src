@@ -711,7 +711,7 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_FALSE(_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_FASLE(zv) \
+#define ZEND_TRY_ASSIGN_FALSE(zv) \
 	_ZEND_TRY_ASSIGN_FALSE(zv, 0)
 
 #define ZEND_TRY_ASSIGN_REF_FALSE(zv) do { \
