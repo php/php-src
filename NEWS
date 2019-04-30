@@ -2,13 +2,20 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.1.29
 
+- EXIF
+. Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
+  (CVE-2019-11036) (Stas)
 
+- Mail
+. Fixed bug #77821 (Potential heap corruption in TSendMail()). (cmb)
 
 04 Apr 2019, PHP 7.1.28
 
 - EXIF:
-  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
-  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). (Stas)
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
+    (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
+	(CVE-2019-11035) (Stas)
 
 - SQLite3:
   . Added sqlite3.defensive INI directive. (BohwaZ)
