@@ -1136,7 +1136,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
 		int _num_args = EX_NUM_ARGS(); \
-		int _i; \
+		int _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
 		char *_error = NULL; \
@@ -1165,7 +1165,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 				_error_code = ZPP_ERROR_FAILURE; \
 				break; \
 			} \
-			_i = 0; \
 			_real_arg = ZEND_CALL_ARG(execute_data, 0);
 
 #define ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
