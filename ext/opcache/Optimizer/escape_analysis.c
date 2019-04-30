@@ -437,7 +437,7 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 	}
 
 
-	/* 1. Build EES (Equi-Esape Sets) */
+	/* 1. Build EES (Equi-Escape Sets) */
 	ees = do_alloca(sizeof(int) * ssa_vars_count, use_heap);
 	if (!ees) {
 		return FAILURE;
