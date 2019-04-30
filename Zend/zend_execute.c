@@ -1551,7 +1551,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		zend_string *tmp = zval_get_string_func(value);
 		if (UNEXPECTED(EG(exception))) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
 			return;
 		}

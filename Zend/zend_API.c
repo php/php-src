@@ -334,8 +334,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 		*pce = NULL;
 		return 1;
 	}
-	convert_to_string_ex(arg);
-	if (EG(exception)) {
+	if (!try_convert_to_string(arg)) {
 		*pce = NULL;
 		return 0;
 	}
@@ -736,8 +735,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					*pce = NULL;
 					break;
 				}
-				convert_to_string_ex(arg);
-				if (EG(exception)) {
+				if (!try_convert_to_string(arg)) {
 					*pce = NULL;
 					return "valid class name";
 				}

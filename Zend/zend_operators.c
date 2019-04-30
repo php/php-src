@@ -605,7 +605,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_bool ZEND_FASTCALL try_convert_to_string(zval *op)
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op)
 {
 	if (Z_TYPE_P(op) != IS_STRING) {
 		zend_string *str = zval_get_string_func(op);

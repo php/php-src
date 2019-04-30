@@ -251,7 +251,6 @@ ZEND_API void ZEND_FASTCALL convert_to_null(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
-ZEND_API zend_bool ZEND_FASTCALL try_convert_to_string(zval *op);
 ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
@@ -293,6 +292,16 @@ static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_st
 	} else {
 		return *tmp = zval_try_get_string_func(op);
 	}
+}
+
+/* Like convert_to_string(), but returns whether the conversion succeeded and does not modify the
+ * zval in-place if it fails. */
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op);
+static zend_always_inline zend_bool try_convert_to_string(zval *op) {
+	if (Z_TYPE_P(op) == IS_STRING) {
+		return 1;
+	}
+	return _try_convert_to_string(op);
 }
 
 /* Compatibility macros for 7.2 and below */
