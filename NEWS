@@ -2,12 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.18
 
-
-18 Apr 2019, PHP 7.2.18RC1
-
 - CLI:
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
     (kelunik)
+
+- EXIF
+  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG).
+    (CVE-2019-11036) (Stas)
 
 - Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
@@ -20,6 +21,9 @@ PHP                                                                        NEWS
 - litespeed:
   . LiteSpeed SAPI 7.3.1, better process management, new API function
     litespeed_finish_request(). (George Wang)
+
+- Mail
+  . Fixed bug #77821 (Potential heap corruption in TSendMail()). (cmb)
 
 - PCRE:
   . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
