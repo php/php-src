@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #77909 (DatePeriod::__construct() with invalid recurrence count
     value). (Ignace Nyamagana Butera)
 
+- EXIF
+  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
+    (CVE-2019-11036) (Stas)
+
 - Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
@@ -42,6 +46,9 @@ PHP                                                                        NEWS
 - litespeed:
   . LiteSpeed SAPI 7.3.1, better process management, new API function
     litespeed_finish_request(). (George Wang)
+
+- Mail
+  . Fixed bug #77821 (Potential heap corruption in TSendMail()). (cmb)
 
 - PCRE:
   . Fixed bug #77827 (preg_match does not ignore \r in regex flags). (requinix,
@@ -95,6 +102,12 @@ PHP                                                                        NEWS
     (Derick)
   . Fixed bug #75113 (Added DatePeriod::getRecurrences() method). (Ignace
     Nyamagana Butera)
+
+- EXIF:
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
+    (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
+    (CVE-2019-11035) (Stas)
 
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
