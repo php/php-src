@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77135 (Extract with EXTR_SKIP should skip $this).
     (Craig Duncan, Dmitry)
+  . Fixed bug ##77937	(preg_match failed). (cmb, Anatol)
 
 - Zip:
   . Fixed bug #76345 (zip.h not found). (Michael Maroszek)

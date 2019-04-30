@@ -4513,7 +4513,28 @@ PHP_FUNCTION(setlocale)
 			}
 		}
 
+# ifndef PHP_WIN32
 		retval = php_my_setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+# else
+		if (loc) {
+			/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
+			char *locp = ZSTR_VAL(loc);
+			if (ZSTR_LEN(loc) >= 5 && locp[2] == '_'
+				&& locp[0] >= 'a' && locp[0] <= 'z' && locp[1] >= 'a' && locp[1] <= 'z'
+				&& locp[3] >= 'A' && locp[3] <= 'Z' && locp[4] >= 'A' && locp[4] <= 'Z'
+				&& (locp[5] == '\0' || locp[5] == '.')
+				&& !(locp[0] == 'u' && (locp[1] == 'k' || locp[1] == 's')
+					&& locp[3] == 'U' && (locp[4] == 'K' || locp[4] == 'S')
+					&& locp[5] == '\0')
+			) {
+				retval = NULL;
+			} else {
+				retval = php_my_setlocale(cat, ZSTR_VAL(loc));
+			}
+		} else {
+			retval = php_my_setlocale(cat, NULL);
+		}
+# endif
 		zend_update_current_locale();
 		if (retval) {
 			if (loc) {
