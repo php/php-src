@@ -674,7 +674,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	/* Exception during string conversion */
 	if (EG(exception)) {
-		efree(args);
+		FREENOW;
 		return;
 	}
 
