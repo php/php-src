@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
     (kelunik)
 
+- EXIF
+  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
+    (CVE-2019-11036) (Stas)
+
 - Interbase:
   . Fixed bug #72175 (Impossibility of creating multiple connections to
     Interbase with php 7.x). (Nikita)
@@ -48,6 +52,9 @@ PHP                                                                        NEWS
 
 - LDAP:
   . Fixed bug #77869 (Core dump when using server controls) (mcmic)
+
+- Mail
+  . Fixed bug #77821 (Potential heap corruption in TSendMail()). (cmb)
 
 - mbstring:
   . Implemented FR #72777 (Implement regex stack limits for mbregex functions).
@@ -110,8 +117,10 @@ PHP                                                                        NEWS
   . Fixed bug #77578 (Crash when php unload). (cmb)
 
 - EXIF:
-  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (Stas)
-  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). (Stas)
+  . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
+    (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
+    (CVE-2019-11035) (Stas)
 
 - FPM:
   . Fixed bug #77677 (FPM fails to build on AIX due to missing WCOREDUMP).
