@@ -8698,6 +8698,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = zval_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(EG(exception))) {
 
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -16231,6 +16232,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 		name = zval_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(EG(exception))) {
 			zval_ptr_dtor_nogc(free_op1);
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -49625,6 +49627,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 		name = zval_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(EG(exception))) {
 
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
 	}

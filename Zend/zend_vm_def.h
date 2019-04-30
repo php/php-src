@@ -1651,6 +1651,7 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 		name = zval_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(EG(exception))) {
 			FREE_OP1();
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
 	}
