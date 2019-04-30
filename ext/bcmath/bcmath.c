@@ -198,11 +198,15 @@ static void php_str2num(bc_num *num, char *str)
 	char *p;
 
 	if (!(p = strchr(str, '.'))) {
-		bc_str2num(num, str, 0);
+		if (!bc_str2num(num, str, 0)) {
+			php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+		}
 		return;
 	}
 
-	bc_str2num(num, str, strlen(p+1));
+	if (!bc_str2num(num, str, strlen(p+1))) {
+		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
 }
 /* }}} */
 
@@ -527,8 +531,12 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&first);
 	bc_init_num(&second);
 
-	bc_str2num(&first, ZSTR_VAL(left), scale);
-	bc_str2num(&second, ZSTR_VAL(right), scale);
+	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
+		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
+	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
+	    php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+	}
 	RETVAL_LONG(bc_compare(first, second));
 
 	bc_free_num(&first);

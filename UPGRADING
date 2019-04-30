@@ -41,6 +41,10 @@ PHP 7.4 UPGRADE NOTES
     consistently disallowed now. Previously this worked if the right hand side
     was a simple (CV) variable and did not occur as part of the list().
 
+- BCMath:
+  . BCMath functions will now warn if a non well-formed number is passed, such
+    as "32foo". The argument will be interpreted as zero (as before).
+
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
     Previously the exception was only thrown on unserialization.
