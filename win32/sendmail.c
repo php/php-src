@@ -261,8 +261,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		}
 
 		if (!found) {
-			if (headers_lc) {
-				zend_string_free(headers_lc);
+			if (headers) {
+				zend_string_release(headers_trim);
+				zend_string_release(headers_lc);
 			}
 			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 			return FAILURE;
@@ -276,8 +277,8 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_trim);
-			zend_string_free(headers_lc);
+			zend_string_release(headers_trim);
+			zend_string_release(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
@@ -293,8 +294,8 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_trim);
-			zend_string_free(headers_lc);
+			zend_string_release(headers_trim);
+			zend_string_release(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
