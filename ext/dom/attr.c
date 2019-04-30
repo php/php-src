@@ -160,13 +160,13 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	if (attrp->children) {
-		node_list_unlink(attrp->children);
-	}
-
 	str = zval_get_string(newval);
 	if (EG(exception)) {
 		return FAILURE;
+	}
+
+	if (attrp->children) {
+		node_list_unlink(attrp->children);
 	}
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
