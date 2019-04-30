@@ -221,8 +221,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 		*alenp = -1;
 	} else if (!P->thing) {
 		/* regular string bind */
-		convert_to_string(parameter);
-		if (EG(exception)) {
+		if (!try_convert_to_string(parameter)) {
 			return OCI_ERROR;
 		}
 		*bufpp = Z_STRVAL_P(parameter);

@@ -179,8 +179,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		UnicodeString	id,
 						gottenId;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
-		convert_to_string_ex(zv_timezone);
-		if (EG(exception)) {
+		if (!try_convert_to_string(zv_timezone)) {
 			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}

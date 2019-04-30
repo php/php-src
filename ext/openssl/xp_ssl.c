@@ -98,8 +98,7 @@
 	(PHP_STREAM_CONTEXT(stream) && (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", name)) != NULL)
 #define GET_VER_OPT_STRING(name, str) \
 	if (GET_VER_OPT(name)) { \
-		convert_to_string_ex(val); \
-		if (!EG(exception)) str = Z_STRVAL_P(val); \
+		if (try_convert_to_string(val)) str = Z_STRVAL_P(val); \
 	}
 #define GET_VER_OPT_LONG(name, num) \
 	if (GET_VER_OPT(name)) { num = zval_get_long(val); }
@@ -1254,8 +1253,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return SUCCESS;
 	}
 
-	convert_to_string_ex(zdhpath);
-	if (EG(exception)) {
+	if (!try_convert_to_string(zdhpath)) {
 		return FAILURE;
 	}
 
@@ -1302,8 +1300,7 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 		curve_nid = NID_X9_62_prime256v1;
 #endif
 	} else {
-		convert_to_string_ex(zvcurve);
-		if (EG(exception)) {
+		if (!try_convert_to_string(zvcurve)) {
 			return FAILURE;
 		}
 

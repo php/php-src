@@ -177,8 +177,7 @@ double_offset:
 	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
 		zend_long lval;
 		double dval;
-		convert_to_string_ex(arg);
-		if (EG(exception)) {
+		if (!try_convert_to_string(arg)) {
 			return;
 		}
 		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {

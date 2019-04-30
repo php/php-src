@@ -679,8 +679,7 @@ static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, vo
 	char           *name;
 	SXE_ITER        type;
 
-	convert_to_string(member);
-	if (EG(exception)) {
+	if (!try_convert_to_string(member)) {
 		return NULL;
 	}
 

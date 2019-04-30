@@ -899,8 +899,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			if (!(stmt->param.is_null[i] = (Z_ISNULL_P(param)))) {
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
-						convert_to_string_ex(param);
-						if (EG(exception)) {
+						if (!try_convert_to_string(param)) {
 							return;
 						}
 
@@ -1785,8 +1784,7 @@ PHP_FUNCTION(mysqli_options)
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
-				convert_to_string_ex(mysql_value);
-				if (EG(exception)) {
+				if (!try_convert_to_string(mysql_value)) {
 					return;
 				}
 				break;

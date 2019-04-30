@@ -1725,8 +1725,7 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 	}
 
 	/* force it to be a string and check if it refers to a file */
-	convert_to_string_ex(val);
-	if (EG(exception)) {
+	if (!try_convert_to_string(val)) {
 		return NULL;
 	}
 
@@ -3817,8 +3816,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 			passphrase_len = Z_STRLEN_P(zphrase);
 		} else {
 			ZVAL_COPY(&tmp, zphrase);
-			convert_to_string(&tmp);
-			if (EG(exception)) {
+			if (!try_convert_to_string(&tmp)) {
 				return NULL;
 			}
 
@@ -3882,8 +3880,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 		if (!(Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_OBJECT)) {
 			TMP_CLEAN;
 		}
-		convert_to_string_ex(val);
-		if (EG(exception)) {
+		if (!try_convert_to_string(val)) {
 			TMP_CLEAN;
 		}
 

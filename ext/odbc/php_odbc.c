@@ -1343,8 +1343,7 @@ PHP_FUNCTION(odbc_execute)
 			}
 
 			otype = Z_TYPE_P(tmp);
-			convert_to_string_ex(tmp);
-			if (EG(exception)) {
+			if (!try_convert_to_string(tmp)) {
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
 					if (params[i].fp != -1) {

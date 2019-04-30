@@ -2373,8 +2373,7 @@ static PHP_FUNCTION(session_cache_expire)
 	RETVAL_LONG(PS(cache_expire));
 
 	if (expires) {
-		convert_to_string_ex(expires);
-		if (EG(exception)) {
+		if (!try_convert_to_string(expires)) {
 			return;
 		}
 

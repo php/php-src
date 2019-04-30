@@ -400,8 +400,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 	int always_sign;
 	size_t format_len;
 
-	convert_to_string_ex(z_format);
-	if (EG(exception)) {
+	if (!try_convert_to_string(z_format)) {
 		return NULL;
 	}
 

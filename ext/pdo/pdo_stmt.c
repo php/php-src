@@ -913,8 +913,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 					fetch_value(stmt, &val, i++, NULL);
 					if (Z_TYPE(val) != IS_NULL) {
-						convert_to_string(&val);
-						if (EG(exception)) {
+						if (!try_convert_to_string(&val)) {
 							return 0;
 						}
 						if ((cep = zend_lookup_class(Z_STR(val))) == NULL) {
@@ -2185,8 +2184,7 @@ static zval *dbstmt_prop_write(zval *object, zval *member, zval *value, void **c
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
-	convert_to_string(member);
-	if (EG(exception)) {
+	if (!try_convert_to_string(member)) {
 		return value;
 	}
 
@@ -2202,8 +2200,7 @@ static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot)
 {
 	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
 
-	convert_to_string(member);
-	if (EG(exception)) {
+	if (!try_convert_to_string(member)) {
 		return;
 	}
 
@@ -2470,8 +2467,7 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 				fetch_value(stmt, rv, lval, NULL);
 			}
 		} else {
-			convert_to_string(member);
-			if (EG(exception)) {
+			if (!try_convert_to_string(member)) {
 				return &EG(uninitialized_zval);
 			}
 
@@ -2526,8 +2522,7 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 				return lval >=0 && lval < stmt->column_count;
 			}
 		} else {
-			convert_to_string(member);
-			if (EG(exception)) {
+			if (!try_convert_to_string(member)) {
 				return 0;
 			}
 		}

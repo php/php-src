@@ -2347,8 +2347,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		uint32_t i;
 
 		position = -1;
-		convert_to_string_ex(parameter);
-		if (EG(exception)) {
+		if (!try_convert_to_string(parameter)) {
 			goto failure;
 		}
 
@@ -3701,8 +3700,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 			ZVAL_COPY(&intern->obj, argument);
 		}
 	} else {
-		convert_to_string_ex(argument);
-		if (EG(exception)) {
+		if (!try_convert_to_string(argument)) {
 			return;
 		}
 

@@ -1091,8 +1091,7 @@ PHP_FUNCTION(base_convert)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_string_ex(number);
-	if (EG(exception)) {
+	if (!try_convert_to_string(number)) {
 		return;
 	}
 

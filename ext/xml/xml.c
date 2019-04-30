@@ -1629,8 +1629,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
-			convert_to_string_ex(val);
-			if (EG(exception)) {
+			if (!try_convert_to_string(val)) {
 				return;
 			}
 

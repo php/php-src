@@ -1576,8 +1576,7 @@ PHP_FUNCTION(stream_is_local)
 		}
 		wrapper = stream->wrapper;
 	} else {
-		convert_to_string_ex(zstream);
-		if (EG(exception)) {
+		if (!try_convert_to_string(zstream)) {
 			return;
 		}
 

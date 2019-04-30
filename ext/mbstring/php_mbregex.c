@@ -924,8 +924,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		if (Z_TYPE_P(arg_pattern) == IS_DOUBLE) {
 			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
 		}
-		convert_to_string_ex(arg_pattern);
-		if (EG(exception)) {
+		if (!try_convert_to_string(arg_pattern)) {
 			return;
 		}
 		/* don't bother doing an extended regex with just a number */

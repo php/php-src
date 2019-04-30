@@ -2060,8 +2060,7 @@ PHP_FUNCTION(imap_delete)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(sequence);
-	if (EG(exception)) {
+	if (!try_convert_to_string(sequence)) {
 		return;
 	}
 
@@ -2087,8 +2086,7 @@ PHP_FUNCTION(imap_undelete)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(sequence);
-	if (EG(exception)) {
+	if (!try_convert_to_string(sequence)) {
 		return;
 	}
 
@@ -2509,8 +2507,7 @@ PHP_FUNCTION(imap_savebody)
 		break;
 
 		default:
-			convert_to_string_ex(out);
-			if (EG(exception)) {
+			if (!try_convert_to_string(out)) {
 				return;
 			}
 			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS, NULL);

@@ -657,8 +657,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 			RETURN_NULL();
 		}
 	} else {
-		convert_to_string(z_in_cp);
-		if (EG(exception)) {
+		if (!try_convert_to_string(z_in_cp)) {
 			return;
 		}
 
@@ -681,8 +680,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 			RETURN_NULL();
 		}
 	} else {
-		convert_to_string(z_out_cp);
-		if (EG(exception)) {
+		if (!try_convert_to_string(z_out_cp)) {
 			return;
 		}
 

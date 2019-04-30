@@ -142,8 +142,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		}
 		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_P(format);
 	} else {
-		convert_to_string_ex(format);
-		if (EG(exception)) {
+		if (!try_convert_to_string(format)) {
 			return;
 		}
 		if (Z_STRLEN_P(format) == 0) {

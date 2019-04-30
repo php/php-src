@@ -669,8 +669,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_string(&retval);
-		if (EG(exception)) {
+		if (!try_convert_to_string(&retval)) {
 			return -1;
 		}
 

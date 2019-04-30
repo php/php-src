@@ -3522,8 +3522,7 @@ PHP_FUNCTION(strtr)
 			php_strtr_array(return_value, str, pats);
 		}
 	} else {
-		convert_to_string_ex(from);
-		if (EG(exception)) {
+		if (!try_convert_to_string(from)) {
 			return;
 		}
 

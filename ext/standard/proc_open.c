@@ -552,8 +552,7 @@ PHP_FUNCTION(proc_open)
 		} else {
 
 			if ((ztype = zend_hash_index_find(Z_ARRVAL_P(descitem), 0)) != NULL) {
-				convert_to_string_ex(ztype);
-				if (EG(exception)) {
+				if (!try_convert_to_string(ztype)) {
 					goto exit_fail;
 				}
 			} else {
@@ -566,8 +565,7 @@ PHP_FUNCTION(proc_open)
 				zval *zmode;
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					convert_to_string_ex(zmode);
-					if (EG(exception)) {
+					if (!try_convert_to_string(zmode)) {
 						goto exit_fail;
 					}
 				} else {
@@ -608,8 +606,7 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].mode = DESC_FILE;
 
 				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
-					convert_to_string_ex(zfile);
-					if (EG(exception)) {
+					if (!try_convert_to_string(zfile)) {
 						goto exit_fail;
 					}
 				} else {
@@ -618,8 +615,7 @@ PHP_FUNCTION(proc_open)
 				}
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 2)) != NULL) {
-					convert_to_string_ex(zmode);
-					if (EG(exception)) {
+					if (!try_convert_to_string(zmode)) {
 						goto exit_fail;
 					}
 				} else {

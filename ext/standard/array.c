@@ -2458,8 +2458,7 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		convert_to_string(prefix);
-		if (EG(exception)) {
+		if (!try_convert_to_string(prefix)) {
 			return;
 		}
 
@@ -4138,8 +4137,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		case IS_OBJECT:
-			convert_to_string_ex(param);
-			if (EG(exception)) {
+			if (!try_convert_to_string(param)) {
 				return 0;
 			}
 			/* fallthrough */

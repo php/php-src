@@ -297,8 +297,7 @@ PHP_FUNCTION(pack)
 				}
 
 				if (arg < 0) {
-					convert_to_string(&argv[currentarg]);
-					if (EG(exception)) {
+					if (!try_convert_to_string(&argv[currentarg])) {
 						efree(formatcodes);
 						efree(formatargs);
 						return;

@@ -2298,8 +2298,7 @@ PHP_FUNCTION(imagecreatefromstring)
 		return;
 	}
 
-	convert_to_string_ex(data);
-	if (EG(exception)) {
+	if (!try_convert_to_string(data)) {
 		return;
 	}
 

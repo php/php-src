@@ -976,8 +976,7 @@ PHP_FUNCTION(pcntl_exec)
 		current_arg = argv+1;
 		ZEND_HASH_FOREACH_VAL(args_hash, element) {
 			if (argi >= argc) break;
-			convert_to_string_ex(element);
-			if (EG(exception)) {
+			if (!try_convert_to_string(element)) {
 				efree(argv);
 				return;
 			}
@@ -1008,8 +1007,7 @@ PHP_FUNCTION(pcntl_exec)
 				zend_string_addref(key);
 			}
 
-			convert_to_string_ex(element);
-			if (EG(exception)) {
+			if (!try_convert_to_string(element)) {
 				zend_string_release(key);
 				efree(argv);
 				efree(envp);

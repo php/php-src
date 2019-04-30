@@ -411,8 +411,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 					break;
 
 				default:
-					convert_to_string_ex(&retval);
-					if (EG(exception)) {
+					if (!try_convert_to_string(&retval)) {
 						ret = FAILURE;
 						break;
 					}
