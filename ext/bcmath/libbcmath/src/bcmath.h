@@ -108,7 +108,7 @@ _PROTOTYPE(bc_num bc_copy_num, (bc_num num));
 
 _PROTOTYPE(void bc_init_num, (bc_num *num));
 
-_PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale));
+_PROTOTYPE(int bc_str2num, (bc_num *num, char *str, int scale));
 
 _PROTOTYPE(zend_string *bc_num2str_ex, (bc_num num, int scale));
 
