@@ -17,6 +17,8 @@ const IGNORED_CONSTANTS = [
     'CURLOPT_PROGRESSDATA'
 ];
 
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';
+
 $curlConstants   = getCurlConstants();
 $sourceConstants = getSourceConstants();
 
@@ -157,13 +159,8 @@ function getCurlConstants() : array
         $deprecated = $match[3] ?? null;
         $removed    = $match[4] ?? null;
 
-        if (strpos($name, 'CURLOPT_') !== 0) {
-            // not a CURLOPT_* constant
-            continue;
-        }
-
-        if (in_array($name, IGNORED_CONSTANTS)) {
-            // purposefully ignored constant
+        if (in_array($name, IGNORED_CONSTANTS, true) || !preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
+            // not a wanted constant
             continue;
         }
 
@@ -197,8 +194,8 @@ function getSourceConstants() : array
             continue;
         }
 
-        if (strpos($name, 'CURLOPT_') !== 0) {
-            // not a CURLOPT_* constant
+        if (!preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
+            // not a wanted constant
             continue;
         }
 
