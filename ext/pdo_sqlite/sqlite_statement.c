@@ -153,8 +153,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							pdo_sqlite_error_stmt(stmt);
 							return 0;
 						} else {
-							convert_to_string(parameter);
-							if (EG(exception)) {
+							if (!try_convert_to_string(parameter)) {
 								return 0;
 							}
 						}
@@ -179,8 +178,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								return 1;
 							}
 						} else {
-							convert_to_string(parameter);
-							if (EG(exception)) {
+							if (!try_convert_to_string(parameter)) {
 								return 0;
 							}
 							if (SQLITE_OK == sqlite3_bind_text(S->stmt, param->paramno + 1,

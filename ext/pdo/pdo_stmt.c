@@ -307,8 +307,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			ZVAL_STRINGL(parameter, p, len);
 			efree(p);
 		} else {
-			convert_to_string(parameter);
-			if (EG(exception)) {
+			if (!try_convert_to_string(parameter)) {
 				return 0;
 			}
 		}

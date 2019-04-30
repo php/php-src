@@ -605,6 +605,19 @@ try_again:
 }
 /* }}} */
 
+ZEND_API zend_bool ZEND_FASTCALL try_convert_to_string(zval *op)
+{
+	if (Z_TYPE_P(op) != IS_STRING) {
+		zend_string *str = zval_get_string_func(op);
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
+		zval_ptr_dtor(op);
+		ZVAL_STR(op, str);
+	}
+	return 1;
+}
+
 static void convert_scalar_to_array(zval *op) /* {{{ */
 {
 	HashTable *ht = zend_new_array(1);
