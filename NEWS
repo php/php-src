@@ -53,7 +53,7 @@ PHP                                                                        NEWS
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
   . Implemented FR #71890 (crc32c checksum algorithm). (Andrew Brampton)
 
-- Intl:
+- InterBase:
   . Unbundled the InterBase extension and moved it to PECL. (Kalle)
 
 - Intl:
