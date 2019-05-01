@@ -76,11 +76,6 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
-EXTENSION:           interbase
-PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu> (2003 - 2005)
-MAINTENANCE:         Odd fixes
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           mysqli
 PRIMARY MAINTAINER:  Georg Richter <georg@php.net> (2003 - 2006)
                      Andrey Hristov <andrey@php.net> (2003 - 2016)
