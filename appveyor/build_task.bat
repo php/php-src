@@ -59,7 +59,6 @@ cmd /c configure.bat ^
 	--disable-debug-pack ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
-	--without-interbase ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
