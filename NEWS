@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.1.29
+02 May 2019, PHP 7.1.29
 
 - EXIF
 . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
