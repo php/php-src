@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Implemented FR #71890 (crc32c checksum algorithm). (Andrew Brampton)
 
 - Intl:
+  . Unbundled the InterBase extension and moved it to PECL. (Kalle)
+
+- Intl:
   . Raised requirements to ICU ≥ 50.1. (cmb)
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)

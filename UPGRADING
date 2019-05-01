@@ -274,6 +274,12 @@ PHP 7.4 UPGRADE NOTES
 8. Removed Extensions and SAPIs
 ========================================
 
+- Interbase:
+  . The interbase extension has been moved to PECL. Access to an InterBase 
+    and/or FireBird based database is still available with the PDO_Firebird 
+    extension. For more details see the RFC:
+    https://wiki.php.net/rfc/deprecate-and-remove-ext-interbase
+
 ========================================
 9. Other Changes to Extensions
 ========================================
