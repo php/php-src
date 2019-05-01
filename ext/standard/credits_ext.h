@@ -32,7 +32,6 @@ CREDIT_LINE("GNU GMP support", "Stanislav Malyshev");
 CREDIT_LINE("Iconv", "Rui Hirokawa, Stig Bakken, Moriyoshi Koizumi");
 CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski, Chuck Hagenbuch, Daniel R Kalowsky");
 CREDIT_LINE("Input Filter", "Rasmus Lerdorf, Derick Rethans, Pierre-Alain Joye, Ilia Alshanetsky");
-CREDIT_LINE("InterBase", "Jouni Ahto, Andrew Avdeev, Ard Biesheuvel");
 CREDIT_LINE("Internationalization", "Ed Batutis, Vladimir Iordanov, Dmitry Lakhtyuk, Stanislav Malyshev, Vadim Savchuk, Kirti Velankar");
 CREDIT_LINE("JSON", "Jakub Zelenka, Omar Kilani, Scott MacVicar");
 CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson, Stig Venaas");
