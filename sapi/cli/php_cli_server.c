@@ -1120,7 +1120,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 #endif
 
 	/* basic */
-	spprintf(&basic_buf, 0, "%s [%d]: %s", client->addr_str, status, client->request.request_uri);
+	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, SG(request_info).request_method, client->request.request_uri);
 	if (!basic_buf) {
 		return;
 	}
