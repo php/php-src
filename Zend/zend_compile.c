@@ -5500,11 +5500,10 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 typedef struct {
 	HashTable uses;
-	zend_bool this_used;
 	zend_bool varvars_used;
 } closure_info;
 
-static void _find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
+static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	if (!ast) {
 		return;
 	}
@@ -5519,20 +5518,20 @@ static void _find_implicit_binds_recursively(closure_info *info, zend_ast *ast) 
 			}
 
 			if (zend_string_equals_literal(name, "this")) {
-				info->this_used = 1;
+				/* $this does not need to be explicitly imported. */
 				return;
 			}
 
 			zend_hash_add_empty_element(&info->uses, name);
 		} else {
 			info->varvars_used = 1;
-			_find_implicit_binds_recursively(info, name_ast);
+			find_implicit_binds_recursively(info, name_ast);
 		}
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		uint32_t i;
 		for (i = 0; i < list->children; i++) {
-			_find_implicit_binds_recursively(info, list->child[i]);
+			find_implicit_binds_recursively(info, list->child[i]);
 		}
 	} else if (ast->kind == ZEND_AST_CLOSURE) {
 		/* For normal closures add the use() list. */
@@ -5548,23 +5547,23 @@ static void _find_implicit_binds_recursively(closure_info *info, zend_ast *ast) 
 	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
 		/* For arrow functions recursively check the expression. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
-		_find_implicit_binds_recursively(info, closure_ast->child[2]);
+		find_implicit_binds_recursively(info, closure_ast->child[2]);
 	} else if (!zend_ast_is_special(ast)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
-			_find_implicit_binds_recursively(info, ast->child[i]);
+			find_implicit_binds_recursively(info, ast->child[i]);
 		}
 	}
 }
 
-static void _find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast)
+static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast)
 {
 	zend_ast_list *param_list = zend_ast_get_list(params_ast);
 	uint32_t i;
 
 	zend_hash_init(&info->uses, param_list->children, NULL, NULL, 0); 
 
-	_find_implicit_binds_recursively(info, stmt_ast);
+	find_implicit_binds_recursively(info, stmt_ast);
 
 	/* Remove variables that are parameters */
 	for (i = 0; i < param_list->children; i++) {
@@ -5573,14 +5572,13 @@ static void _find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_
 	}
 }
 
-static void _compile_implicit_lexical_binds(
+static void compile_implicit_lexical_binds(
 		closure_info *info, znode *closure, zend_op_array *op_array)
 {
 	zend_string *var_name;
 	zend_op *opline;
 
-	// TODO $this
-	// TODO What to do with info.varvars_used?
+	/* TODO We might want to use a special binding mode if varvars_used is set. */
 	if (zend_hash_num_elements(&info->uses) == 0) {
 		return;
 	}
@@ -5590,23 +5588,21 @@ static void _compile_implicit_lexical_binds(
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
-		if (!zend_is_auto_global(var_name)) {
-			zval *value = zend_hash_add(
-				op_array->static_variables, var_name, &EG(uninitialized_zval));
-			uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
+		zval *value = zend_hash_add(
+			op_array->static_variables, var_name, &EG(uninitialized_zval));
+		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
 
-			opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
-			opline->op2_type = IS_CV;
-			opline->op2.var = lookup_cv(var_name);
-			opline->extended_value = offset | ZEND_BIND_IMPLICIT;
-		}
+		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
+		opline->op2_type = IS_CV;
+		opline->op2.var = lookup_cv(var_name);
+		opline->extended_value = offset | ZEND_BIND_IMPLICIT;
 	ZEND_HASH_FOREACH_END();
 }
 
-static void zend_compile_closure_uses(zend_ast *uses_ast) /* {{{ */
+static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 {
 	zend_op_array *op_array = CG(active_op_array);
-	zend_ast_list *list = zend_ast_get_list(uses_ast);
+	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 
 	for (i = 0; i < list->children; ++i) {
@@ -5919,8 +5915,8 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	} else {
 		zend_begin_func_decl(result, op_array, decl, toplevel);
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
-			_find_implicit_binds(&info, params_ast, stmt_ast);
-			_compile_implicit_lexical_binds(&info, result, op_array);
+			find_implicit_binds(&info, params_ast, stmt_ast);
+			compile_implicit_lexical_binds(&info, result, op_array);
 		} else if (uses_ast) {
 			zend_compile_closure_binding(result, op_array, uses_ast);
 		}
