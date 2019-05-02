@@ -594,15 +594,20 @@ PHP_FUNCTION(bccomp)
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
-	zend_long new_scale;
+	zend_long old_scale, new_scale;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(new_scale)
 	ZEND_PARSE_PARAMETERS_END();
 
-	BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	old_scale = BCG(bc_precision);
 
-	RETURN_TRUE;
+	if (ZEND_NUM_ARGS() == 1) {
+		BCG(bc_precision) = ((int)new_scale < 0) ? 0 : new_scale;
+	}
+
+	RETURN_LONG(old_scale);
 }
 /* }}} */
 
