@@ -198,7 +198,10 @@ void fpm_children_bury() /* {{{ */
 				restart_child = 0;
 			}
 
-			if (WEXITSTATUS(status) != FPM_EXIT_OK) {
+			/* Don't restart processes for pm.ondemand if pm.max_requests has been reached. */
+			if (child && child->wp->config->pm == PM_STYLE_ONDEMAND && WEXITSTATUS(status) == FPM_EXIT_MAX_REQUESTS) {
+				restart_child = 0;
+			} else if (WEXITSTATUS(status) != FPM_EXIT_OK) {
 				severity = ZLOG_WARNING;
 			}
 
@@ -250,6 +253,8 @@ void fpm_children_bury() /* {{{ */
 					severity = ZLOG_DEBUG;
 				}
 				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
+			} else if (WEXITSTATUS(status) == FPM_EXIT_MAX_REQUESTS) {
+				zlog(ZLOG_DEBUG, "[pool %s] child %d served pm.max_requests after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
 				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			}

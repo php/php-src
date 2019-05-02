@@ -34,6 +34,7 @@
 #define FPM_EXIT_CONFIG 78
 #endif
 
+#define FPM_EXIT_MAX_REQUESTS 2
 
 int fpm_run(int *max_requests);
 int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon, int force_stderr);
