@@ -186,6 +186,15 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/spread_operator_for_array
 
+  . Added support for underscore separators in numeric literals. Some examples:
+
+        6.674_083e-11; // float
+        299_792_458;   // decimal
+        0xCAFE_F00D;   // hexadecimal
+        0b0101_1111;   // binary
+
+    RFC: https://wiki.php.net/rfc/numeric_literal_separator
+
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
 
