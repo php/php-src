@@ -35,6 +35,7 @@ krb4 => No
 Largefile => Yes
 libz => Yes
 NTLM => Yes
+TrackMemory => No
 NTLMWB => No
 SPNEGO => Yes
 SSL => Yes
