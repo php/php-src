@@ -25,6 +25,10 @@ class Test {
 
         $fn = fn() => self::class;
         var_dump($fn());
+
+        // static can be used to unbind $this
+        $fn = static fn() => isset($this);
+        var_dump($fn());
     }
 
     public function method2() {
@@ -47,3 +51,4 @@ object(Test)#1 (0) {
 object(Test)#1 (0) {
 }
 string(4) "Test"
+bool(false)
