@@ -1,12 +1,20 @@
 --TEST--
-Check libcurl config on windows
+Check libcurl features list
 --SKIPIF--
 <?php
-if (!extension_loaded("curl")) {
-	die('skip - curl extension not available in this build');
+
+include 'skipif.inc';
+
+if (substr(PHP_OS, 0, 3) !== 'WIN') {
+    exit('skip: test only works with Windows');
 }
-if(substr(PHP_OS, 0, 3) != 'WIN' )
-  die("skip for windows only");
+
+$version = curl_version();
+
+if ($version['version_number'] < 0x071306) {
+    exit('skip: test works only with curl >= 7.19.6');
+}
+
 ?>
 --FILE--
 <?php
@@ -19,7 +27,6 @@ if(substr(PHP_OS, 0, 3) != 'WIN' )
 	echo $m[1], "\n";
 
 ?>
-DONE
 --EXPECTF--
 cURL support => enabled
 cURL Information => %s
@@ -54,4 +61,3 @@ Host => %s-pc-win32
 SSL Version => OpenSSL/%s
 ZLib Version => %s
 libSSH Version => libssh2/%s
-DONE

@@ -547,6 +547,9 @@ PHP_MINFO_FUNCTION(curl)
 			{"Largefile", CURL_VERSION_LARGEFILE},
 			{"libz", CURL_VERSION_LIBZ},
 			{"NTLM", CURL_VERSION_NTLM},
+#if LIBCURL_VERSION_NUM >= 0x071306 /* 7.19.6 */
+			{"TrackMemory", CURL_VERSION_CURLDEBUG},
+#endif
 #if LIBCURL_VERSION_NUM >= 0x071600 /* 7.22.0 */
 			{"NTLMWB", CURL_VERSION_NTLM_WB},
 #endif
@@ -577,6 +580,9 @@ PHP_MINFO_FUNCTION(curl)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073900 /* 7.57.0 */
 			{"BROTLI", CURL_VERSION_BROTLI},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074001 /* 7.64.1 */
+			{"Alt-Svc", CURL_VERSION_ALTSVC},
 #endif
 			{NULL, 0}
 		};
