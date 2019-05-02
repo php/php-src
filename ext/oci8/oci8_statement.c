@@ -1772,7 +1772,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 
 	for (i = 0; i < bind->array.current_length; i++) {
 		if ((entry = zend_hash_get_current_data(hash)) != NULL) {
-			ZEND_ASSERT(Z_TYPE_P(entry) == IS_STRING);
+			if (!try_convert_to_string(entry)) {
+				efree(bind->array.elements);
+				efree(bind->array.element_lengths);
+				efree(bind->array.indicators);
+				efree(bind);
+				return NULL;
+			}
+
 			bind->array.element_lengths[i] = (ub2) Z_STRLEN_P(entry);
 			if (Z_STRLEN_P(entry) == 0) {
 				bind->array.indicators[i] = -1;
@@ -1787,8 +1794,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 	for (i = 0; i < max_table_length; i++) {
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
 			int element_length;
+			if (!try_convert_to_string(entry)) {
+				efree(bind->array.elements);
+				efree(bind->array.element_lengths);
+				efree(bind->array.indicators);
+				efree(bind);
+				return NULL;
+			}
 
-			ZEND_ASSERT(Z_TYPE_P(entry) == IS_STRING);
 			element_length = ((size_t) maxlength > Z_STRLEN_P(entry)) ? (int) Z_STRLEN_P(entry) : (int) maxlength;
 
 			memcpy((text *)bind->array.elements + i*maxlength, Z_STRVAL_P(entry), element_length);
