@@ -1,7 +1,7 @@
 --TEST--
 Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindColumn()
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 require 'testdb.inc';

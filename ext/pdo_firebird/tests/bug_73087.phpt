@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: bug 73087 segfault binding blob parameter
 --SKIPIF--
-<?php if if(!extension_loaded('pdo_firebird')) die('skip'); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 require 'testdb.inc';

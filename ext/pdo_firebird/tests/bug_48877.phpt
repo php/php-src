@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: bug 48877 The "bindValue" and "bindParam" do not work for PDO Firebird if we use named parameters (:parameter).
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 

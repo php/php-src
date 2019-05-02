@@ -1,7 +1,7 @@
 --TEST--
 Bug #62024 Cannot insert second row with null using parametrized query (Firebird PDO)
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 

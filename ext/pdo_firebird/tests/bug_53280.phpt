@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
