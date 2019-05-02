@@ -51,9 +51,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
-%right T_ARROW_FUNCTION
+%precedence T_ARROW_FUNCTION
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
-%left ','
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
 %left T_LOGICAL_AND
@@ -999,9 +998,9 @@ inline_function:
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 				  $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
 	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $12, $1, $7,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-				  $4, zend_ast_create_list(0, ZEND_AST_CLOSURE_USES), zend_ast_create(ZEND_AST_RETURN, $11), $6);
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $7,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $4, NULL,
+				  zend_ast_create(ZEND_AST_RETURN, $11), $6);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
 ;

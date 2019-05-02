@@ -5455,9 +5455,14 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array, zend_ast_list *list) /* {{{ */
+static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array, zend_ast *uses_ast) /* {{{ */
 {
+	zend_ast_list *list = zend_ast_get_list(uses_ast);
 	uint32_t i;
+
+	if (!list->children) {
+		return;
+	}
 
 	if (!op_array->static_variables) {
 		op_array->static_variables = zend_new_array(8);
@@ -5530,20 +5535,20 @@ static void _find_implicit_binds_recursively(closure_info *info, zend_ast *ast) 
 			_find_implicit_binds_recursively(info, list->child[i]);
 		}
 	} else if (ast->kind == ZEND_AST_CLOSURE) {
+		/* For normal closures add the use() list. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
 		zend_ast *uses_ast = closure_ast->child[1];
-		zend_ast *stmt_ast = closure_ast->child[2];
 		if (uses_ast) {
 			zend_ast_list *uses_list = zend_ast_get_list(uses_ast);
-			if (uses_list->children) {
-				uint32_t i;
-				for (i = 0; i < uses_list->children; i++) {
-					zend_hash_add_empty_element(&info->uses, zend_ast_get_str(uses_list->child[i]));
-				}
-			} else {
-				_find_implicit_binds_recursively(info, stmt_ast);
+			uint32_t i;
+			for (i = 0; i < uses_list->children; i++) {
+				zend_hash_add_empty_element(&info->uses, zend_ast_get_str(uses_list->child[i]));
 			}
 		}
+	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
+		/* For arrow functions recursively check the expression. */
+		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
+		_find_implicit_binds_recursively(info, closure_ast->child[2]);
 	} else if (!zend_ast_is_special(ast)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
@@ -5904,7 +5909,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 	if (decl->doc_comment) {
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
-	if (decl->kind == ZEND_AST_CLOSURE) {
+	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
@@ -5913,14 +5918,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl, toplevel);
-		if (uses_ast) {
-			zend_ast_list *uses_list = zend_ast_get_list(uses_ast);
-			if (uses_list->children) {
-				zend_compile_closure_binding(result, op_array, uses_list);
-			} else {
-				_find_implicit_binds(&info, params_ast, stmt_ast);
-				_compile_implicit_lexical_binds(&info, result, op_array);
-			}
+		if (decl->kind == ZEND_AST_ARROW_FUNC) {
+			_find_implicit_binds(&info, params_ast, stmt_ast);
+			_compile_implicit_lexical_binds(&info, result, op_array);
+		} else if (uses_ast) {
+			zend_compile_closure_binding(result, op_array, uses_ast);
 		}
 	}
 
@@ -5957,13 +5959,11 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
 	}
-	if (uses_ast) {
-		if (zend_ast_get_list(uses_ast)->children == 0) {
-			zend_compile_implicit_closure_uses(&info);
-			zend_hash_destroy(&info.uses);
-		} else {
-			zend_compile_closure_uses(uses_ast);
-		}
+	if (decl->kind == ZEND_AST_ARROW_FUNC) {
+		zend_compile_implicit_closure_uses(&info);
+		zend_hash_destroy(&info.uses);
+	} else if (uses_ast) {
+		zend_compile_closure_uses(uses_ast);
 	}
 	zend_compile_stmt(stmt_ast);
 
@@ -8528,6 +8528,7 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_magic_const(result, ast);
 			return;
 		case ZEND_AST_CLOSURE:
+		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
 			return;
 		default:

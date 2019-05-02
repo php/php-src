@@ -42,6 +42,7 @@ enum _zend_ast_kind {
 	ZEND_AST_CLOSURE,
 	ZEND_AST_METHOD,
 	ZEND_AST_CLASS,
+	ZEND_AST_ARROW_FUNC,
 
 	/* list nodes */
 	ZEND_AST_ARG_LIST = 1 << ZEND_AST_IS_LIST_SHIFT,
