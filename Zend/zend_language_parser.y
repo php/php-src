@@ -51,6 +51,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
+%precedence PREC_ARROW_FUNCTION
 %precedence T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE
 %left T_LOGICAL_OR
 %left T_LOGICAL_XOR
@@ -164,6 +165,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_CONTINUE   "continue (T_CONTINUE)"
 %token T_GOTO       "goto (T_GOTO)"
 %token T_FUNCTION   "function (T_FUNCTION)"
+%token T_FN         "fn (T_FN)"
 %token T_CONST      "const (T_CONST)"
 %token T_RETURN     "return (T_RETURN)"
 %token T_TRY        "try (T_TRY)"
@@ -251,11 +253,13 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
+%type <ast> inline_function
 
-%type <num> returns_ref function is_reference is_variadic variable_modifiers
+%type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
+%type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
 
 %% /* Rules */
@@ -271,7 +275,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN
 ;
 
 semi_reserved:
@@ -982,16 +986,27 @@ expr:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
+	|	inline_function { $$ = $1; }
+	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+;
+
+
+inline_function:
+		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
-	|	T_STATIC function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars
-		return_type backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $3 | $14 | ZEND_ACC_STATIC, $2, $4,
-			      zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-			      $6, $8, $12, $9); CG(extra_fn_flags) = $10; }
+				  $5, $7, $11, $8); CG(extra_fn_flags) = $9; }
+	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $7,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $4, NULL,
+				  zend_ast_create(ZEND_AST_RETURN, $11), $6);
+				  ((zend_ast_decl *) $$)->lex_pos = $10;
+				  CG(extra_fn_flags) = $9; }
+;
+
+fn:
+	T_FN { $$ = CG(zend_lineno); }
 ;
 
 function:
@@ -1003,7 +1018,11 @@ backup_doc_comment:
 ;
 
 backup_fn_flags:
-	/* empty */ { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
+	%prec PREC_ARROW_FUNCTION /* empty */ { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
+;
+
+backup_lex_pos:
+	/* empty */ { $$ = LANG_SCNG(yy_text); }
 ;
 
 returns_ref:
