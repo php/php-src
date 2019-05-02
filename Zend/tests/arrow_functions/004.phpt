@@ -1,13 +1,13 @@
 --TEST--
-Arrow functions implicit use must be throwing notices only upon actual use
+Auto-globals in arrow functions
 --FILE--
 <?php
 
-$b = 1;
-
-var_dump((fn() => $b + $c)());
+// This should work, but *not* generate a binding for $GLOBALS
+$a = 123;
+$fn = fn() => $GLOBALS['a'];
+var_dump($fn());
 
 ?>
---EXPECTF--
-Notice: Undefined variable: c in %s on line %d
-int(1)
+--EXPECT--
+int(123)

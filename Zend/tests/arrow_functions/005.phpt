@@ -1,13 +1,49 @@
 --TEST--
-Arrow function closing over variable by value
+Arrow function $this binding
 --FILE--
 <?php
 
-$b = 2;
+class Test {
+    public function method() {
+        // It would be okay if this is NULL, but the rest should work
+        $fn = fn() => 42;
+        $r = new ReflectionFunction($fn);
+        var_dump($r->getClosureThis());
 
-var_dump((fn() => ++$b)());
-var_dump($b);
+        $fn = fn() => $this;
+        var_dump($fn());
+
+        $fn = fn() => Test::method2();
+        $fn();
+
+        $fn = fn() => call_user_func('Test::method2');
+        $fn();
+
+        $thisName = "this";
+        $fn = fn() => $$thisName;
+        var_dump($fn());
+
+        $fn = fn() => self::class;
+        var_dump($fn());
+    }
+
+    public function method2() {
+        var_dump($this);
+    }
+}
+
+(new Test)->method();
+
 ?>
 --EXPECT--
-int(3)
-int(2)
+object(Test)#1 (0) {
+}
+object(Test)#1 (0) {
+}
+object(Test)#1 (0) {
+}
+object(Test)#1 (0) {
+}
+object(Test)#1 (0) {
+}
+string(4) "Test"

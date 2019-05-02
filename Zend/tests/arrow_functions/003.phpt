@@ -1,12 +1,21 @@
 --TEST--
-Arrow function closing over variable
+Variable-variables inside arrow functions
 --FILE--
 <?php
 
-$b = 1;
+$a = 1;
+$var = "a";
+$fn = fn() => $$var;
+var_dump($fn());
 
-var_dump((fn() => $b)());
+${5} = 2;
+$fn = fn() => ${5};
+var_dump($fn());
 
 ?>
---EXPECT--
-int(1)
+--EXPECTF--
+Notice: Undefined variable: a in %s on line %d
+NULL
+
+Notice: Undefined variable: 5 in %s on line %d
+NULL
