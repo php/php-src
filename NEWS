@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
     created on the fly). (David Walker)
 
+- CLI:
+  . The built-in CLI server now reports the request method in log files.
+    (Simon Welsh)
+
 - COM:
   . Deprecated registering of case-insensitive constants from typelibs. (cmb)
 
