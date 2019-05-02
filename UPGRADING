@@ -24,6 +24,9 @@ PHP 7.4 UPGRADE NOTES
 - Core:
   . get_declared_classes() no longer returns anonymous classes that haven't
     been instantiated yet.
+  . "fn" is now a reserved keyword. In particular it can no longer be used as a
+    function or class name. It can still be used as a method or class constant
+    name.
 
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
@@ -115,6 +118,14 @@ PHP 7.4 UPGRADE NOTES
     This will enforce that $user->id can only be assigned integer and
     $user->name can only be assigned strings. For more information see the
     RFC: https://wiki.php.net/rfc/typed_properties_v2
+
+  . Added support for arrow functions with implicit by-value scope binding.
+    For example:
+
+        $factor = 10;
+        $nums = array_map(fn($num) => $num * $factor, $nums);
+
+    RFC: https://wiki.php.net/rfc/arrow_functions_v2
 
   . Added support for coalesce assign (??=) operator. For example:
 

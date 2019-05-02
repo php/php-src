@@ -56,6 +56,7 @@ class Obj
     var $switch = 'switch';
     var $yield = 'yield';
     var $function = 'function';
+    var $fn = 'fn';
     var $if = 'if';
     var $endswitch = 'endswitch';
     var $finally = 'finally';
@@ -136,6 +137,7 @@ echo $obj->continue, PHP_EOL;
 echo $obj->switch, PHP_EOL;
 echo $obj->yield, PHP_EOL;
 echo $obj->function, PHP_EOL;
+echo $obj->fn, PHP_EOL;
 echo $obj->if, PHP_EOL;
 echo $obj->endswitch, PHP_EOL;
 echo $obj->finally, PHP_EOL;
@@ -217,6 +219,7 @@ continue
 switch
 yield
 function
+fn
 if
 endswitch
 finally
