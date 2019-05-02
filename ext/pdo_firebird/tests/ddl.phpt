@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: DDL/transactions
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 

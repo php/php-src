@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: prepare/execute/binding
 --SKIPIF--
-<?php extension_loaded('pdo_firebird') or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 	require("testdb.inc");
