@@ -1,10 +1,11 @@
 --TEST--
 PDO_Firebird: Bug #76488 PDO Firebird does not support boolean datatype in input parameters
 --SKIPIF--
-<?php if (!extension_loaded('interbase') || !extension_loaded('pdo_firebird')) die('skip');
-?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
+
+require 'testdb.inc';
 
 $sql = <<<SQL
 with t(b, s) as (
@@ -17,12 +18,10 @@ with t(b, s) as (
 select trim(s) as s from t where b is not distinct from :p
 SQL;
 
-require 'testdb.inc';
-$db = new PDO('firebird:dbname='.$test_base, $user, $password) or die;
 try { 
   // PDO::PARAM_BOOL
 
-  $query = $db->prepare($sql);
+  $query = $dbh->prepare($sql);
   
   $query->bindValue('p', 0, PDO::PARAM_BOOL);
   $query->execute();
