@@ -566,7 +566,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 #endif
 			error = curl_multi_setopt(mh->multi, option, zval_get_long(zvalue));
 			break;
-#if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.46.0 */
+#if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.45.0 */
 		case CURLMOPT_PUSHFUNCTION:
 			if (mh->handlers->server_push == NULL) {
 				mh->handlers->server_push = ecalloc(1, sizeof(php_curlm_server_push));
