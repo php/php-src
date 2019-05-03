@@ -4,14 +4,14 @@ SOAP customized Content-Type, eg. SwA use case
 <?php
 	require_once('skipif.inc');
 
-	if (!file_exists(dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+	if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
 		echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
 	}
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
 $router = "custh_stubserver.php";
 $args = substr(PHP_OS, 0, 3) == 'WIN' ? "-d extension_dir=" . ini_get("extension_dir") . " -d extension=php_soap.dll" : "";
@@ -23,7 +23,6 @@ $vars = serialize($_SERVER);
 
 /* record the headers */
 file_put_contents("custh_dump.log", $vars);
-//file_put_contents("custh_dump.log", $content, FILE_APPEND);
 PHP;
 
 php_cli_server_start($code, $router, $args);
@@ -43,9 +42,7 @@ $client = new soapclient(NULL, [
 
 $client->__soapCall("foo", [ 'arg1' => "XXXbar"]);
 
-$headers = unserialize(file_get_contents(dirname(__FILE__) . "/../../../sapi/cli/tests/" . "custh_dump.log"));
-
-//var_dump($headers);
+$headers = unserialize(file_get_contents(__DIR__ . "/../../../sapi/cli/tests/custh_dump.log"));
 
 if ($headers['CONTENT_TYPE'] === 'Multipart/Related; action="misc-uri#foo"')
   echo "Content-Type OK" . PHP_EOL;
@@ -60,8 +57,7 @@ if ($headers['HTTP_MIME_VERSION'] == '1.0')
 ==DONE==
 --CLEAN--
 <?php
-//unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "custh_stubserver.php");
-unlink(dirname(__FILE__) . "/../../../sapi/cli/tests/" . "custh_dump.log");
+unlink(__DIR__ . "/../../../sapi/cli/tests/custh_dump.log");
 ?>
 --EXPECT--
 Content-Type OK
