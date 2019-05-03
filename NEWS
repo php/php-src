@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.6
 
+- cURL:
+  . Implemented FR #72189 (Add missing CURL_VERSION_* constants). (Javier
+    Spagnoletti)
+
 - FPM:
   . Fixed bug #77921 (static.php.net doesn't work anymore). (Peter Kokot)
 
@@ -39,7 +43,7 @@ PHP                                                                        NEWS
     (kelunik)
 
 - EXIF
-  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
+  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG).
     (CVE-2019-11036) (Stas)
 
 - Interbase:
@@ -119,7 +123,7 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
     (Stas)
-  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value).
     (CVE-2019-11035) (Stas)
 
 - FPM:
