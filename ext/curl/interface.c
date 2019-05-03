@@ -1830,14 +1830,20 @@ static void curl_free_slist(zval *el)
 PHP_FUNCTION(curl_version)
 {
 	curl_version_info_data *d;
-	zend_long uversion = CURLVERSION_NOW;
+	zend_long uversion = -1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(uversion)
 	ZEND_PARSE_PARAMETERS_END();
 
-	d = curl_version_info(uversion);
+	if (uversion == CURLVERSION_NOW) {
+		php_error_docref(NULL, E_DEPRECATED, "the $version parameter is deprecated");
+	} else if (uversion != -1) {
+		php_error_docref(NULL, E_WARNING, "$version argument ignored");
+	}
+
+	d = curl_version_info(CURLVERSION_NOW);
 	if (d == NULL) {
 		RETURN_FALSE;
 	}
