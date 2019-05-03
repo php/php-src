@@ -1,0 +1,20 @@
+--TEST--
+bccomp() with non-numeric values and numeric values
+--SKIPIF--
+<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--INI--
+bcmath.scale=0
+--FILE--
+<?php
+echo bccomp("2", "!@@#$%^&*(()")."\n";
+echo bccomp("!@@#$%^&*(()", "2")."\n";
+echo bccomp("!@@#$%^&*(()", "-2")."\n";
+echo bccomp("1@#$%%%^&*", "2.1")."\n";
+echo bccomp("-2.1", "1@#$%%%^&*");
+?>
+--EXPECT--
+1
+-1
+1
+-1
+-1
