@@ -313,6 +313,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		struct fpm_child_s *child;
 		struct fpm_child_s *last_idle_child = NULL;
+		struct timeval last_idle_child_activity, child_activity;
 		int idle = 0;
 		int active = 0;
 		int children_to_fork;
@@ -324,9 +325,12 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			if (fpm_request_is_idle(child)) {
 				if (last_idle_child == NULL) {
 					last_idle_child = child;
+					fpm_request_last_activity(last_idle_child, &last_idle_child_activity);
 				} else {
-					if (timercmp(&child->started, &last_idle_child->started, <)) {
+					fpm_request_last_activity(child, &child_activity);
+					if (timercmp(&child_activity, &last_idle_child_activity, <)) {
 						last_idle_child = child;
+						last_idle_child_activity = child_activity;
 					}
 				}
 				idle++;
@@ -356,15 +360,14 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		/* this is specific to PM_STYLE_ONDEMAND */
 		if (wp->config->pm == PM_STYLE_ONDEMAND) {
-			struct timeval last, now;
+			struct timeval now;
 
 			zlog(ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children", wp->config->name, active, idle);
 
 			if (!last_idle_child) continue;
 
-			fpm_request_last_activity(last_idle_child, &last);
 			fpm_clock_get(&now);
-			if (last.tv_sec < now.tv_sec - wp->config->pm_process_idle_timeout) {
+			if (last_idle_child_activity.tv_sec < now.tv_sec - wp->config->pm_process_idle_timeout) {
 				last_idle_child->idle_kill = 1;
 				fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_QUIT);
 			}
