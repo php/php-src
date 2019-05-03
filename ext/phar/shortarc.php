@@ -265,7 +265,7 @@ class Extract_Phar
 
         if (strlen($data) != $entry[0]) {
             die("Invalid internal .phar file (size error " . strlen($data) . " != " .
-                $stat[7] . ")");
+                $entry[0] . ")");
         }
 
         if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
