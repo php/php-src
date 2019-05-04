@@ -65,10 +65,4 @@ snapshot:
 	md5sum $$distname.tar.bz2; \
 	bzip2 -t $$distname.tar.bz2
 
-gitclean-work:
-	@if (test ! -f '.git/info/exclude' || grep -s "git-ls-files" .git/info/exclude); then \
-		(echo "Rebuild .git/info/exclude" && echo '*.o' > .git/info/exclude && git svn propget svn:ignore | grep -v config.nice >> .git/info/exclude); \
-	fi; \
-	git clean -X -f -d;
-
 .PHONY: snapshot
