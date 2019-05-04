@@ -6,24 +6,16 @@
 // Password:	phpfi
 // Database:	<nothing>
 //
-// A path to a database must be specified by using PDO_FIREBIRD_TEST_DATABASE
+// A DSN must be specified by using PDO_FIREBIRD_TEST_DSN
 
-define('PDO_FIREBIRD_TEST_USERNAME', getenv('PDO_FIREBIRD_TEST_USERNAME') ?: 'SYSDBA');
-define('PDO_FIREBIRD_TEST_PASSWORD', getenv('PDO_FIREBIRD_TEST_PASSWORD') ?: 'phpfi');
-define('PDO_FIREBIRD_TEST_HOSTNAME', getenv('PDO_FIREBIRD_TEST_HOSTNAME') ?: 'localhost');
-define('PDO_FIREBIRD_TEST_DATABASE', getenv('PDO_FIREBIRD_TEST_DATABASE') ?: '');
+define('PDO_FIREBIRD_TEST_USER', getenv('PDO_FIREBIRD_TEST_USER') ?: 'SYSDBA');
+define('PDO_FIREBIRD_TEST_PASS', getenv('PDO_FIREBIRD_TEST_PASS') ?: 'phpfi');
+define('PDO_FIREBIRD_TEST_DSN', getenv('PDO_FIREBIRD_TEST_DSN') ?: '');
 
-if(!PDO_FIREBIRD_TEST_DATABASE)
+if(!PDO_FIREBIRD_TEST_DSN)
 {
-        die('Error: PDO_FIREBIRD_TEST_DATABASE must be set');
+        die('Error: PDO_FIREBIRD_TEST_DSN must be set');
 }
 
-if(PDO_FIREBIRD_TEST_HOSTNAME)
-{
-        $dbh = new PDO('firebird:dbname=' . PDO_FIREBIRD_TEST_HOSTNAME . ':' . PDO_FIREBIRD_TEST_DATABASE, PDO_FIREBIRD_TEST_USERNAME, PDO_FIREBIRD_TEST_PASSWORD) or die;
-}
-else
-{
-        $dbh = new PDO('firebird:dbname=' . PDO_FIREBIRD_TEST_DATABASE, PDO_FIREBIRD_TEST_USERNAME, PDO_FIREBIRD_TEST_PASSWORD) or die;
-}
+$dbh = new PDO(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS) or die;
 ?>
