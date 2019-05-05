@@ -2926,7 +2926,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 	size_t code_size, scope_name_len;
 	zend_ffi *ffi;
 	zend_bool preload = (CG(compiler_options) & ZEND_COMPILE_PRELOAD) != 0;
-	DL_HANDLE handle;
+	DL_HANDLE handle = NULL;
 	zend_ffi_scope *scope = NULL;
 	zend_string *name;
 	zend_ffi_symbol *sym;
