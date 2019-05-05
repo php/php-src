@@ -286,10 +286,14 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - Interbase:
-  . The interbase extension has been moved to PECL. Access to an InterBase 
-    and/or FireBird based database is still available with the PDO_Firebird 
+  . The interbase extension has been moved to PECL. Access to an InterBase
+    and/or FireBird based database is still available with the PDO_Firebird
     extension. For more details see the RFC:
     https://wiki.php.net/rfc/deprecate-and-remove-ext-interbase
+
+- WDDX:
+  . The WDDX extension has been deprecated and moved to PECL.
+    RFC: https://wiki.php.net/rfc/deprecate-and-remove-ext-wddx
 
 ========================================
 9. Other Changes to Extensions
@@ -343,9 +347,6 @@ PHP 7.4 UPGRADE NOTES
     forbidden. Formerly, serialization of instances of these classes was
     possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
-
-- WDDX:
-  . The WDDX extension has been deprecated and moved to PECL.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
