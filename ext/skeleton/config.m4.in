@@ -3,14 +3,14 @@ dnl config.m4 for extension %EXTNAME%
 dnl Comments in this file start with the string 'dnl'.
 dnl Remove where necessary.
 
-dnl If your extension references something external, use with:
+dnl If your extension references something external, use 'with':
 
 dnl PHP_ARG_WITH([%EXTNAME%],
 dnl   [for %EXTNAME% support],
 dnl   [AS_HELP_STRING([--with-%EXTNAME%],
 dnl     [Include %EXTNAME% support])])
 
-dnl Otherwise use enable:
+dnl Otherwise use 'enable':
 
 PHP_ARG_ENABLE([%EXTNAME%],
   [whether to enable %EXTNAME% support],
@@ -21,23 +21,18 @@ PHP_ARG_ENABLE([%EXTNAME%],
 if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl Write more examples of tests here...
 
-  dnl # get library FOO build options from pkg-config output
-  dnl AC_MSG_CHECKING(for libfoo)
-  dnl if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists foo; then
-  dnl   if $PKG_CONFIG foo --atleast-version 1.2.3; then
-  dnl     LIBFOO_CFLAGS=\`$PKG_CONFIG foo --cflags\`
-  dnl     LIBFOO_LIBDIR=\`$PKG_CONFIG foo --libs\`
-  dnl     LIBFOO_VERSON=\`$PKG_CONFIG foo --modversion\`
-  dnl     AC_MSG_RESULT(from pkgconfig: version $LIBFOO_VERSON)
-  dnl   else
-  dnl     AC_MSG_ERROR(system libfoo is too old: version 1.2.3 required)
-  dnl   fi
-  dnl else
-  dnl   AC_MSG_ERROR(pkg-config not found)
-  dnl fi
-  dnl PHP_EVAL_LIBLINE($LIBFOO_LIBDIR, %EXTNAMECAPS%_SHARED_LIBADD)
+  dnl Remove this code block if the library does not support pkg-config.
+  dnl PKG_CHECK_MODULES([LIBFOO], [foo])
   dnl PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
+  dnl PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
 
+  dnl If you need to check for a particular library version using PKG_CHECK_MODULES,
+  dnl you can use comparison operators. For example:
+  dnl PKG_CHECK_MODULES([LIBFOO], [foo >= 1.2.3])
+  dnl PKG_CHECK_MODULES([LIBFOO], [foo < 3.4])
+  dnl PKG_CHECK_MODULES([LIBFOO], [foo = 1.2.3])
+
+  dnl Remove this code block if the library supports pkg-config.
   dnl # --with-%EXTNAME% -> check with-path
   dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
   dnl SEARCH_FOR="/include/%EXTNAME%.h"  # you most likely want to change this
@@ -58,14 +53,29 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl   AC_MSG_ERROR([Please reinstall the %EXTNAME% distribution])
   dnl fi
 
+  dnl Remove this code block if the library supports pkg-config.
   dnl # --with-%EXTNAME% -> add include path
   dnl PHP_ADD_INCLUDE($%EXTNAMECAPS%_DIR/include)
 
+  dnl Remove this code block if the library supports pkg-config.
   dnl # --with-%EXTNAME% -> check for lib and symbol presence
   dnl LIBNAME=%EXTNAMECAPS% # you may want to change this
   dnl LIBSYMBOL=%EXTNAMECAPS% # you most likely want to change this
 
-  dnl PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
+  dnl If you need to check for a particular library function
+  dnl and you are using pkg-config:
+  PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
+  [
+    PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
+    PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
+    AC_DEFINE(HAVE_%EXTNAMECAPS%LIB, 1, [ ])
+  ],[
+    AC_MSG_ERROR([wrong %EXTNAME% lib version or lib not found])
+  ])
+
+  dnl If you need to check for a particular library function
+  dnl and you are not using pkg-config:
+  dnl PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
   dnl [
   dnl   PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $%EXTNAMECAPS%_DIR/$PHP_LIBDIR, %EXTNAMECAPS%_SHARED_LIBADD)
   dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%LIB,1,[ ])
