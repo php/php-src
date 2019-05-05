@@ -318,7 +318,6 @@ Internal change: Convert some parameter parsing to the Fast Parameter Parsing AP
     <file name="fetch_object_2.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
     <file name="field_funcs.phpt" role="test" />
-    <file name="field_funcs0.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
     <file name="field_funcs2.phpt" role="test" />
     <file name="field_funcs3.phpt" role="test" />
