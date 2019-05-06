@@ -245,7 +245,7 @@ included.
 
 ## Checklist for submitting contribution
 
-- Read [CODING_STANDARDS](/CODING_STANDARDS) before you start working.
+- Read [CODING_STANDARDS.md](/CODING_STANDARDS.md) before you start working.
 - Update git source just before running your final `diff` and before testing.
 - Add in-line comments and/or have external documentation ready. Use only
   `/* */` style comments, not `//`.

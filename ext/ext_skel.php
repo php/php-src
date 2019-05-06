@@ -93,7 +93,7 @@ SOURCE AND HEADER FILE NAME
 
   php_extension_name_function()
 
-  See also CODING_STANDARDS.
+  See also CODING_STANDARDS.md.
 
 OPTIONS
 
