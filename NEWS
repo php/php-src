@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #77943 (imageantialias($image, false); does not work). (cmb)
+  . Fixed bug #77973 (Uninitialized read in gdImageCreateFromXbm).
+    (CVE-2019-11038) (cmb)
 
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
