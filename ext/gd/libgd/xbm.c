@@ -135,7 +135,11 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			}
 			h[3] = ch;
 		}
-		sscanf(h, "%x", &b);
+		if (sscanf(h, "%x", &b) != 1) {
+			php_gd_error("invalid XBM");
+			gdImageDestroy(im);
+			return 0;
+		}
 		for (bit = 1; bit <= max_bit; bit = bit << 1) {
 			gdImageSetPixel(im, x++, y, (b & bit) ? 1 : 0);
 			if (x == im->sx) {
