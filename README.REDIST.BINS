@@ -14,7 +14,7 @@
 14. libgd see ext/gd/libgd/COPYING
 15. ext/phar portions of tar implementations
 16. ext/phar/zip.c portion extracted from libzip
-17. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
+17. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/LICENSE
 18. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 
 
