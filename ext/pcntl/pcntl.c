@@ -46,6 +46,10 @@
 #include <sched.h>
 #endif
 
+#ifdef HAVE_CAP_ENTER
+#include <sys/capsicum.h>
+#endif
+
 #ifndef NSIG
 # ifdef SIGRTMAX
 #  define NSIG (SIGRTMAX + 1)
@@ -1449,6 +1453,57 @@ PHP_FUNCTION(pcntl_unshare)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_CAP_ENTER
+/* {{{ proto bool pcntl_cap_enter()
+   current process enter in capability mode */
+PHP_FUNCTION(pcntl_cap_enter)
+{
+	int ret;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	ret = cap_enter();
+	if (ret == -1) {
+		// ENOSYS is the only reason
+		// Captured at configure time but in case the support was removed afterwards.
+		PCNTL_G(last_error) = errno;
+		php_error_docref(NULL, E_WARNING, "Error %d: capability mode unsupported", errno);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_cap_enabled()
+   checks current process capability mode */
+PHP_FUNCTION(pcntl_cap_enabled)
+{
+	int ret;
+	unsigned int mode;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	ret = cap_getmode(&mode);
+	if (ret == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ENOSYS:
+				php_error_docref(NULL, E_WARNING, "Error %d: capability mode unsupported", errno);
+				RETURN_FALSE;
+			case EFAULT:
+				php_error_docref(NULL, E_WARNING, "Error %d: capability mode set", errno);
+				RETURN_FALSE;
+		}
+	}
+	RETURN_BOOL(mode != 0);
 }
 /* }}} */
 #endif

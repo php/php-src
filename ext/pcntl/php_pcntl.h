@@ -71,6 +71,10 @@ PHP_FUNCTION(pcntl_async_signals);
 #ifdef HAVE_UNSHARE
 PHP_FUNCTION(pcntl_unshare);
 #endif
+#ifdef HAVE_CAP_ENTER
+PHP_FUNCTION(pcntl_cap_enter);
+PHP_FUNCTION(pcntl_cap_enabled);
+#endif
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;

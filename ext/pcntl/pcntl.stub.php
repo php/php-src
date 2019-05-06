@@ -79,3 +79,8 @@ function pcntl_async_signals(?bool $enable = null): bool {}
 #ifdef HAVE_UNSHARE
 function pcntl_unshare(int $flags): bool {}
 #endif
+
+#ifdef HAVE_CAP_ENTER
+function pcntl_cap_enter(): bool {}
+function pcntl_cap_enabled(): bool {}
+#endif

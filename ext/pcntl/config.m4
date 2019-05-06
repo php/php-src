@@ -24,5 +24,23 @@ if test "$PHP_PCNTL" != "no"; then
     AC_MSG_RESULT([no])
   ])
 
+  AC_MSG_CHECKING([for capsicum support])
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <sys/capsicum.h>
+
+    int main() {
+      int ret;
+
+      ret = cap_enter();
+      if (ret == -1) {
+        return 1;
+      }
+      return 0;
+    }
+  ]])],[dnl
+	AC_DEFINE(HAVE_CAP_ENTER, 1, [Define capsicum support])
+	msg=yes],[msg=no],[msg=no])
+    AC_MSG_RESULT([$msg])
+
   PHP_NEW_EXTENSION(pcntl, pcntl.c php_signal.c, $ext_shared, cli, $PCNTL_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
