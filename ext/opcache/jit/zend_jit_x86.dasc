@@ -5530,8 +5530,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
-				| jp => target_label
 				| jne => target_label
+				| jp => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
@@ -5541,20 +5541,18 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jp => target_label
 					| jbe => target_label
 				} else {
-					| jp => target_label
 					| jae => target_label
+					| jp => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
-					| jp => target_label
 					| jb => target_label
 				} else {
-					| jp => target_label
 					| ja => target_label
+					| jp => target_label
 				}
 				break;
 			default:
@@ -5574,8 +5572,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
-				| jp => target_label
 				| jne => target_label
+				| jp => target_label
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
@@ -5608,8 +5606,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
-				| jp => target_label
 				| jne => target_label
+				| jp => target_label
 				break;
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
@@ -5618,20 +5616,18 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 				break;
 			case ZEND_IS_SMALLER:
 				if (swap) {
-					| jp => target_label
 					| jbe => target_label
 				} else {
-					| jp => target_label
 					| jae => target_label
+					| jp => target_label
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
-					| jp => target_label
 					| jb => target_label
 				} else {
-					| jp => target_label
 					| ja => target_label
+					| jp => target_label
 				}
 				break;
 			default:
@@ -5649,8 +5645,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_IDENTICAL:
 			case ZEND_CASE:
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				|	jp => target_label
 				|	jne => target_label
+				|	jp => target_label
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				break;
 			case ZEND_IS_NOT_EQUAL:
@@ -5664,26 +5660,24 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_SMALLER:
 				if (swap) {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jp => target_label
 					|	jbe => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jp => target_label
 					|	jae => target_label
+					|	jp => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				}
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				if (swap) {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jp => target_label
 					|	jb => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jp => target_label
 					|	ja => target_label
+					|	jp => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 				}
 				break;
@@ -5709,8 +5703,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 			case ZEND_IS_NOT_EQUAL:
 			case ZEND_IS_NOT_IDENTICAL:
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|	jp => target_label
 				|	jne => target_label
+				|	jp => target_label
 				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 				break;
 			case ZEND_IS_SMALLER:
