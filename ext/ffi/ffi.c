@@ -780,7 +780,6 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 		for (n = 0; n < callback_data->arg_count; n++) {
 			zval_ptr_dtor(&fci.params[n]);
-			n++;
 		}
 	}
 	free_alloca(fci.params, use_heap);
