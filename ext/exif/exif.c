@@ -4660,7 +4660,7 @@ PHP_FUNCTION(exif_imagetype)
 		RETURN_FALSE;
 	}
 
-	itype = php_getimagetype(stream, NULL);
+	itype = php_getimagetype(stream, imagefile, NULL);
 
 	php_stream_close(stream);
 
