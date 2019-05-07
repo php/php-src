@@ -532,50 +532,6 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 #endif
 }
 
-static zend_always_inline int zend_mm_bitset_find_zero(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != (zend_mm_bitset)-1) {
-			return i * ZEND_MM_BITSET_LEN + zend_mm_bitset_nts(tmp);
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
-static zend_always_inline int zend_mm_bitset_find_one(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != 0) {
-			return i * ZEND_MM_BITSET_LEN + zend_ulong_ntz(tmp);
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
-static zend_always_inline int zend_mm_bitset_find_zero_and_set(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != (zend_mm_bitset)-1) {
-			int n = zend_mm_bitset_nts(tmp);
-			bitset[i] |= Z_UL(1) << n;
-			return i * ZEND_MM_BITSET_LEN + n;
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
 static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int bit)
 {
 	return ZEND_BIT_TEST(bitset, bit);

@@ -3541,15 +3541,6 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(uint32_t arg_num, zend_function *func) /* {{{ */
-{
-	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
-		return QUICK_ARG_SHOULD_BE_SENT_BY_REF(func, arg_num);
-	}
-	return ARG_SHOULD_BE_SENT_BY_REF(func, arg_num);
-}
-/* }}} */
-
 static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
 {
 	zend_execute_data *new_call;
