@@ -604,6 +604,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"adds	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
 #elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
@@ -690,6 +710,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		  "n"(IS_LONG),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"subs	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
