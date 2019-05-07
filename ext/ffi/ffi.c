@@ -2980,6 +2980,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 		ZEND_FFI_ATTR_STORED;
 
 	scope_name = NULL;
+	scope_name_len = 0;
 	lib = NULL;
 	code_pos = zend_ffi_parse_directives(filename, code, &scope_name, &lib, preload);
 	if (!code_pos) {
@@ -3382,7 +3383,7 @@ static void zend_ffi_tags_cleanup(zend_ffi_dcl *dcl) /* {{{ */
 ZEND_METHOD(FFI, new) /* {{{ */
 {
 	zend_string *type_def = NULL;
-	zval *ztype;
+	zval *ztype = NULL;
 	zend_ffi_type *type, *type_ptr;
 	zend_ffi_cdata *cdata;
 	void *ptr;
@@ -3533,7 +3534,7 @@ ZEND_METHOD(FFI, free) /* {{{ */
 ZEND_METHOD(FFI, cast) /* {{{ */
 {
 	zend_string *type_def = NULL;
-	zval *ztype;
+	zval *ztype = NULL;
 	zend_ffi_type *old_type, *type, *type_ptr;
 	zend_ffi_cdata *old_cdata, *cdata;
 	zend_bool is_const = 0;
