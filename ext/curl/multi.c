@@ -567,11 +567,13 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 		{
 			zend_long lval = zval_get_long(zvalue);
 
-#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
 			if (option == CURLMOPT_PIPELINING && (lval & 1)) {
-				php_error_docref(NULL, E_DEPRECATED, "CURLPIPE_HTTP1 is deprecated and has no effect");
-			}
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+				php_error_docref(NULL, E_WARNING, "CURLPIPE_HTTP1 is no longer supported");
+#else
+				php_error_docref(NULL, E_DEPRECATED, "CURLPIPE_HTTP1 is deprecated");
 #endif
+			}
 			error = curl_multi_setopt(mh->multi, option, lval);
 			break;
 		}
