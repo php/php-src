@@ -25,13 +25,3 @@ Since PHP 5.3.11 it is possible to prevent shared extensions from unloading so
 that valgrind can correctly track the memory leaks in shared extensions. For
 this there is the ZEND_DONT_UNLOAD_MODULES environment variable. If set, then
 DL_UNLOAD() is skipped during the shutdown of shared extensions.
-
-
-Tweaking:
----------
-
-The Zend MM can be tweaked using ZEND_MM_MEM_TYPE and ZEND_MM_SEG_SIZE environment
-variables.  Default values are "malloc" and "256K". Dependent on target system you
-can also use "mmap_anon", "mmap_zero" and "win32" storage managers.
-
-	$ ZEND_MM_MEM_TYPE=mmap_anon ZEND_MM_SEG_SIZE=1M sapi/cli/php ..etc.
