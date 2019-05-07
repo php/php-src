@@ -1686,21 +1686,8 @@ X
       fi
     fi
 
-  # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
+  # Warn about Apache if oci8 extension is enabled on linux.
   if test "$PHP_OCI8" != "no"; then
-    if test "$PHP_SAPI" = "apache"; then
-      if test `uname` = "Linux"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| Please check that your Apache (httpd) is linked with libpthread.   |
-| If not, you have to recompile Apache with pthread. For more        |
-| details, see this page: http://www.php.net/manual/ref.oci8.php     |
-X
-      fi
-    fi
-
     if test "$PHP_SIGCHILD" != "yes"; then
       if test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
 cat <<X
