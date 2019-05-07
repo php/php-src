@@ -1016,7 +1016,9 @@ static zend_always_inline zend_bool i_zend_check_property_type(zend_property_inf
 		return 1;
 	} else if (ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
 		return zend_is_iterable(property);
-	} else {
+	} else if (ZEND_TYPE_CODE(info->type) == IS_ARRAYKEY && EXPECTED(Z_TYPE_P(property) == IS_STRING || Z_TYPE_P(property) == IS_LONG)) {
+        return 1;
+    } else {
 		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(info->type), property, strict);
 	}
 }
@@ -1098,7 +1100,9 @@ static zend_always_inline zend_bool zend_check_type(
 	} else if (ZEND_TYPE_CODE(type) == _IS_BOOL &&
 			   EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1;
-	} else if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
+	} else if (ZEND_TYPE_CODE(type) == IS_ARRAYKEY && EXPECTED(Z_TYPE_P(arg) == IS_STRING || Z_TYPE_P(arg) == IS_LONG)) {
+        return 1;
+    } else if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
 		return 0; /* we cannot have conversions for typed refs */
 	} else {
 		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(type), arg,

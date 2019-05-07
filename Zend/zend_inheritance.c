@@ -183,6 +183,20 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 }
 /* }}} */
 
+static zend_always_inline zend_bool zend_arraykey_compatibility_check(zend_arg_info *arg_info) /* {{{ */
+{
+    if (ZEND_TYPE_CODE(arg_info->type) == IS_STRING) {
+        return 1;
+    }
+
+    if (ZEND_TYPE_CODE(arg_info->type) == IS_LONG) {
+        return 1;
+    }
+
+    return 0;
+}
+/* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_IS_SET(proto_arg_info->type));
@@ -238,7 +252,9 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		}
 		zend_string_release(proto_class_name);
 		zend_string_release(fe_class_name);
-	} else if (ZEND_TYPE_CODE(fe_arg_info->type) != ZEND_TYPE_CODE(proto_arg_info->type)) {
+	} else if (ZEND_TYPE_CODE(fe_arg_info->type) == IS_ARRAYKEY && (ZEND_TYPE_CODE(proto_arg_info->type) == IS_STRING || ZEND_TYPE_CODE(proto_arg_info->type) == IS_LONG)) {
+        return  1;
+    } else if (ZEND_TYPE_CODE(fe_arg_info->type) != ZEND_TYPE_CODE(proto_arg_info->type)) {
 		/* Incompatible built-in types */
 		return 0;
 	}
@@ -338,7 +354,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 						return 0;
 					}
 					break;
-
+                case IS_ARRAYKEY:
+                    if (!zend_arraykey_compatibility_check(proto_arg_info)) {
+                        return 0;
+                    }
+                    break;
 				default:
 					return 0;
 			}
@@ -371,7 +391,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 						return 0;
 					}
 					break;
-
+                case IS_ARRAYKEY:
+                    if (!zend_arraykey_compatibility_check(fe->common.arg_info - 1)) {
+                        return 0;
+                    }
+                    break;
 				default:
 					return 0;
 			}
