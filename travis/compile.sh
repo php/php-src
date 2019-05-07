@@ -73,6 +73,7 @@ $TS \
 --with-enchant=/usr \
 --with-kerberos \
 --enable-sysvmsg \
+--with-ffi \
 --enable-zend-test=shared \
 --enable-werror \
 > "$CONFIG_LOG_FILE"
