@@ -564,8 +564,19 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 		case CURLMOPT_MAX_PIPELINE_LENGTH:
 		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
 #endif
-			error = curl_multi_setopt(mh->multi, option, zval_get_long(zvalue));
+		{
+			zend_long lval = zval_get_long(zvalue);
+
+			if (option == CURLMOPT_PIPELINING && (lval & 1)) {
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+				php_error_docref(NULL, E_WARNING, "CURLPIPE_HTTP1 is no longer supported");
+#else
+				php_error_docref(NULL, E_DEPRECATED, "CURLPIPE_HTTP1 is deprecated");
+#endif
+			}
+			error = curl_multi_setopt(mh->multi, option, lval);
 			break;
+		}
 #if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.45.0 */
 		case CURLMOPT_PUSHFUNCTION:
 			if (mh->handlers->server_push == NULL) {

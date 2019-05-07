@@ -41,6 +41,8 @@ PHP 7.4 UPGRADE NOTES
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
     Previously the exception was only thrown on unserialization.
+  . Using CURLPIPE_HTTP1 is deprecated, and is no longer supported as of cURL
+    7.62.0.
 
 - Date:
   . Calling var_dump() or similar on a DateTime(Immutable) instance will no
