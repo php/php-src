@@ -22,6 +22,7 @@
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
+#include "zend_execute.h"
 #include "tsrm_win32.h"
 #include <winbase.h>
 #include <process.h>
@@ -144,6 +145,8 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	char *mmap_base_file = get_mmap_base_file();
 	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
+	void *execute_ex_base;
+	int execute_ex_moved;
 
 	if (!fp) {
 		err = GetLastError();
@@ -159,6 +162,13 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		fclose(fp);
 		return ALLOC_FAILURE;
 	}
+	if (!fscanf(fp, "%p", &execute_ex_base)) {
+		err = GetLastError();
+		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read execute_ex base address", err);
+		*error_in="read execute_ex base";
+		fclose(fp);
+		return ALLOC_FAILURE;
+	}
 	fclose(fp);
 
 	if (0 > win32_utime(mmap_base_file, NULL)) {
@@ -166,8 +176,11 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 	}
 
-	/* Check if the requested address space is free */
-	if (VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
+	execute_ex_moved = (void *)execute_ex != execute_ex_base;
+
+	/* Check if execute_ex is at the same address and if the requested address space is free */
+	if (execute_ex_moved ||
+	    VirtualQuery(wanted_mapping_base, &info, sizeof(info)) == 0 ||
 	    info.State != MEM_FREE ||
 	    info.RegionSize < requested_size) {
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -176,8 +189,13 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 
 			wanted_mb_save = (size_t)wanted_mapping_base;
 
-			err = ERROR_INVALID_ADDRESS;
-			zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
+			if (execute_ex_moved) {
+				err = ERROR_INVALID_ADDRESS;
+				zend_win_error_message(ACCEL_LOG_WARNING, "execute_ex address does not match (fall-back to file cache)", err);
+			} else {
+				err = ERROR_INVALID_ADDRESS;
+				zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
+			}
 
 			pre_size = ZEND_ALIGNED_SIZE(sizeof(zend_smm_shared_globals)) + ZEND_ALIGNED_SIZE(sizeof(zend_shared_segment)) + ZEND_ALIGNED_SIZE(sizeof(void *)) + ZEND_ALIGNED_SIZE(sizeof(int));
 			/* Map only part of SHM to have access opcache shared globals */
@@ -192,10 +210,15 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 			return ALLOC_FALLBACK;
 		}
 #endif
-	    err = ERROR_INVALID_ADDRESS;
-		zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
+		if (execute_ex_moved) {
+			err = ERROR_INVALID_ADDRESS;
+			zend_win_error_message(ACCEL_LOG_FATAL, "execute_ex address does not match. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
+		} else {
+			err = ERROR_INVALID_ADDRESS;
+			zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
+		}
 		return ALLOC_FAILURE;
-   	}
+	}
 
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
 
@@ -326,6 +349,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		return ALLOC_FAILURE;
 	} else {
 		char *mmap_base_file = get_mmap_base_file();
+		void *execute_ex_base = (void *)execute_ex;
 		FILE *fp = fopen(mmap_base_file, "w");
 		if (!fp) {
 			err = GetLastError();
@@ -335,6 +359,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			return ALLOC_FAILURE;
 		}
 		fprintf(fp, "%p\n", mapping_base);
+		fprintf(fp, "%p\n", execute_ex_base);
 		fclose(fp);
 	}
 
