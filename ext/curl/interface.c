@@ -1839,7 +1839,7 @@ PHP_FUNCTION(curl_version)
 
 	if (uversion == CURLVERSION_NOW) {
 		php_error_docref(NULL, E_DEPRECATED, "the $version parameter is deprecated");
-	} else if (uversion != -1) {
+	} else if (ZEND_NUM_ARGS() > 0) {
 		php_error_docref(NULL, E_WARNING, "$version argument ignored");
 	}
 
