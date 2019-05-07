@@ -33,8 +33,8 @@ PHP                                                                        NEWS
   . Added FFI extension. (Dmitry)
 
 - Filter:
-  . The filter extension no longer have the --with-pcre-dir on Unix builds, 
-    allowing the extension to be once more compiled as shared using 
+  . The filter extension no longer have the --with-pcre-dir on Unix builds,
+    allowing the extension to be once more compiled as shared using
     ./configure. (Kalle)
 
 - FPM:
@@ -108,7 +108,7 @@ PHP                                                                        NEWS
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
-  
+
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
@@ -132,6 +132,8 @@ PHP                                                                        NEWS
   . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
   . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
   . Implemented FR #77377 (No way to handle CTRL+C in Windows). (Anatol)
+  . Implemented password hashing registry RFC:
+    https://wiki.php.net/rfc/password_registry. (Sara)
 
 - Reflection:
   . Fixed bug #76737 (Unserialized reflection objects are broken, they

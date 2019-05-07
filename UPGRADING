@@ -102,6 +102,17 @@ PHP 7.4 UPGRADE NOTES
 - Standard:
   . The "o" serialization format has been removed. As it is never produced by
     PHP, this may only break unserialization of manually crafted strings.
+  . Password hashing algorithm identifiers are now nullable strings rather
+    than integers.
+
+     * PASSWORD_DEFAULT was int 1; now is null
+     * PASSWORD_BCRYPT was int 1; now is string '2y'
+     * PASSWORD_ARGON2I was int 2; now is string 'argon2i'
+     * PASSWORD_ARGON2ID was int 3; now is string 'argon2id'
+
+    Applications correctly using the constants PASSWORD_DEFAULT,
+    PASSWORD_BCRYPT, PASSWORD_ARGON2I, and PASSWORD_ARGON2ID will continue to
+    function correctly.
 
 ========================================
 2. New Features
@@ -243,6 +254,9 @@ PHP 7.4 UPGRADE NOTES
     identical to using the default).
   . proc_open() on Windows can be passed a "create_process_group" option. It
     is required, if the child process is supposed to handle CTRL events.
+  . password_hash() now accepts nullable string and int as $algo argument.
+  . password_needs_rehash() now accepts nullable string and int as $algo
+    argument.
 
 ========================================
 6. New Functions
@@ -271,6 +285,9 @@ PHP 7.4 UPGRADE NOTES
     function is expected have a signature "function handler(int $event)".
   . bool sapi_windows_generate_ctrl_event(int type, int pid) - send a CTRL event
     to another process.
+  . array password_algos() - return a complete list of all registered password
+    hashing algorithms. For more details see the RFC:
+    https://wiki.php.net/rfc/password_registry
 
 ========================================
 7. New Classes and Interfaces
@@ -343,9 +360,9 @@ PHP 7.4 UPGRADE NOTES
   . The bundled libsqlite has been removed.  To build the SQLite3 extension
     a system libsqlite3 ≥ 3.7.4 is now required. To build the PDO_SQLite
     extension a system libsqlite3 ≥ 3.5.0 is now required.
-  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now explicitly
-    forbidden. Formerly, serialization of instances of these classes was
-    possible, but unserialization yielded unusable objects.
+  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now
+    explicitly forbidden. Formerly, serialization of instances of these classes
+    was possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
 
 - Zip:
