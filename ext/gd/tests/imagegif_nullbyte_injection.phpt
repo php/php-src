@@ -3,10 +3,6 @@ Testing null byte injection in imagegif
 --SKIPIF--
 <?php
 if(!extension_loaded('gd')){ die('skip gd extension not available'); }
-$support = gd_info();
-if (!isset($support['GIF Create Support']) || $support['GIF Create Support'] === false) {
-	print 'skip gif support not available';
-}
 ?>
 --CLEAN--
 $tempdir = sprintf("%s/%s", sys_get_temp_dir(), preg_replace("~\.php$~", null, __FILE__));

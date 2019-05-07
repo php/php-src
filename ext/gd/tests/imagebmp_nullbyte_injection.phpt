@@ -3,6 +3,7 @@ Testing null byte injection in imagebmp
 --SKIPIF--
 <?php
 if(!extension_loaded('gd')) die('skip gd extension not available');
+if (!gd_info()['BMP Support']) die('skip BMP support not available');
 ?>
 --FILE--
 <?php
