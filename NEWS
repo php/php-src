@@ -53,6 +53,10 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- Standard:
+  . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
+    (peter279k)
+
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
     (cmb)
