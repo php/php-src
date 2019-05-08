@@ -169,61 +169,34 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_info *arg_info) /* {{{ */
-{
-	if (ZEND_TYPE_CODE(arg_info->type) == IS_ARRAY) {
-		return 1;
+static zend_string *resolve_class_name(const zend_function *fe, zend_string *name) {
+	ZEND_ASSERT(fe->common.scope);
+	if (zend_string_equals_literal_ci(name, "parent") && fe->common.scope->parent) {
+		return fe->common.scope->parent->name;
+	} else if (zend_string_equals_literal_ci(name, "self")) {
+		return fe->common.scope->name;
+	} else {
+		return name;
 	}
-
-	if (ZEND_TYPE_IS_CLASS(arg_info->type) && zend_string_equals_literal_ci(ZEND_TYPE_NAME(arg_info->type), "Traversable")) {
-		return 1;
-	}
-
-	return 0;
 }
-/* }}} */
 
 static int zend_perform_covariant_type_check(
 		const zend_function *fe, zend_arg_info *fe_arg_info,
 		const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
-	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_IS_SET(proto_arg_info->type));
+	zend_type fe_type = fe_arg_info->type, proto_type = proto_arg_info->type;
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
 
-	if (ZEND_TYPE_ALLOW_NULL(fe_arg_info->type) && !ZEND_TYPE_ALLOW_NULL(proto_arg_info->type)) {
+	if (ZEND_TYPE_ALLOW_NULL(fe_type) && !ZEND_TYPE_ALLOW_NULL(proto_type)) {
 		return 0;
 	}
 
-	if (ZEND_TYPE_IS_CLASS(fe_arg_info->type) && ZEND_TYPE_IS_CLASS(proto_arg_info->type)) {
-		zend_string *fe_class_name, *proto_class_name;
-		const char *class_name;
-		size_t class_name_len;
-
-		fe_class_name = ZEND_TYPE_NAME(fe_arg_info->type);
-		class_name = ZSTR_VAL(fe_class_name);
-		class_name_len = ZSTR_LEN(fe_class_name);
-		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && fe->common.scope && fe->common.scope->parent) {
-			fe_class_name = zend_string_copy(fe->common.scope->parent->name);
-		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && fe->common.scope) {
-			fe_class_name = zend_string_copy(fe->common.scope->name);
-		} else {
-			zend_string_addref(fe_class_name);
-		}
-
-		proto_class_name = ZEND_TYPE_NAME(proto_arg_info->type);
-		class_name = ZSTR_VAL(proto_class_name);
-		class_name_len = ZSTR_LEN(proto_class_name);
-		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
-			proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && proto->common.scope) {
-			proto_class_name = zend_string_copy(proto->common.scope->name);
-		} else {
-			zend_string_addref(proto_class_name);
-		}
+	if (ZEND_TYPE_IS_CLASS(fe_type) && ZEND_TYPE_IS_CLASS(proto_type)) {
+		zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
+		zend_string *proto_class_name = resolve_class_name(proto, ZEND_TYPE_NAME(proto_type));
 
 		if (fe_class_name != proto_class_name && strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
 			if (fe->common.type != ZEND_USER_FUNCTION) {
-				zend_string_release(proto_class_name);
-				zend_string_release(fe_class_name);
 				return 0;
 			} else {
 				zend_class_entry *fe_ce, *proto_ce;
@@ -236,17 +209,20 @@ static int zend_perform_covariant_type_check(
 						fe_ce->type == ZEND_INTERNAL_CLASS ||
 						proto_ce->type == ZEND_INTERNAL_CLASS ||
 						fe_ce != proto_ce) {
-					zend_string_release(proto_class_name);
-					zend_string_release(fe_class_name);
 					return 0;
 				}
 			}
 		}
-		zend_string_release(proto_class_name);
-		zend_string_release(fe_class_name);
-	} else if (ZEND_TYPE_CODE(fe_arg_info->type) != ZEND_TYPE_CODE(proto_arg_info->type)) {
-		if (ZEND_TYPE_CODE(proto_arg_info->type) == IS_ITERABLE) {
-			return zend_iterable_compatibility_check(fe_arg_info);
+	} else if (ZEND_TYPE_CODE(fe_type) != ZEND_TYPE_CODE(proto_type)) {
+		if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
+			if (ZEND_TYPE_CODE(fe_type) == IS_ARRAY) {
+				return 1;
+			}
+
+			if (ZEND_TYPE_IS_CLASS(fe_type) &&
+					zend_string_equals_literal_ci(ZEND_TYPE_NAME(fe_type), "Traversable")) {
+				return 1;
+			}
 		}
 
 		/* Incompatible built-in types */
