@@ -4,17 +4,7 @@ PHP_ARG_WITH([ffi],
     [Include FFI support])])
 
 if test "$PHP_FFI" != "no"; then
-  PKG_CHECK_MODULES([FFI], [libffi])
-
-  AC_MSG_CHECKING([libffi version])
-  m4_define([PHP_LIBFFI_MIN_VERSION], [3.2.1])
-  libffi_version=`$PKG_CONFIG libffi --modversion`
-  if `$PKG_CONFIG libffi --atleast-version=PHP_LIBFFI_MIN_VERSION`; then
-    AC_MSG_RESULT([$libffi_version (ok)])
-  else
-    AC_MSG_RESULT([$libffi_version])
-    AC_MSG_ERROR([libffi is too old: version ]PHP_LIBFFI_MIN_VERSION[ or greater required])
-  fi
+  PKG_CHECK_MODULES([FFI], [libffi >= 3.2.1])
 
   AC_CHECK_TYPES(long double)
 
