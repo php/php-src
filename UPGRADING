@@ -522,6 +522,9 @@ The following extensions and SAPIs are affected:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
 
+- ODBC:
+  . --with-iodbc no longer accepts a directory.
+
 - Sodium:
   . --with-sodium no longer accepts a directory.
 
