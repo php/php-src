@@ -16,4 +16,4 @@ var_dump(
 --EXPECT--
 bool(false)
 bool(true)
-int(201)
+bool(false)

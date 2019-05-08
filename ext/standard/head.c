@@ -411,7 +411,10 @@ PHP_FUNCTION(http_response_code)
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
-		SG(sapi_headers).http_response_code = (int)response_code;
+
+		if (strcmp(sapi_module.name, "cli") != 0) {
+			SG(sapi_headers).http_response_code = (int)response_code;
+		}
 
 		if (old_response_code) {
 			RETURN_LONG(old_response_code);
