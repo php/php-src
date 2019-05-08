@@ -1593,9 +1593,8 @@ TEST $file
 	// Any special ini settings
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
-		if (strpos($section_text['INI'], '{PWD}') !== false) {
-			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
-		}
+		$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
+		$section_text['INI'] = str_replace('{TMP}', sys_get_temp_dir(), $section_text['INI']);
 		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 
