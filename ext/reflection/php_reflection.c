@@ -3669,13 +3669,13 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	zend_class_entry *ce;
 
 	if (is_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &argument) == FAILURE) {
-			return;
-		}
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_OBJECT(argument)
+		ZEND_PARSE_PARAMETERS_END();
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &argument) == FAILURE) {
-			return;
-		}
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_ZVAL(argument)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	object = ZEND_THIS;
