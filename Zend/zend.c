@@ -149,7 +149,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	val = ZEND_STRTOL(ZSTR_VAL(new_value), NULL, 0);
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -828,7 +828,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	{
 		char *tmp = getenv("USE_ZEND_DTRACE");
 
-		if (tmp && zend_atoi(tmp, 0)) {
+		if (tmp && ZEND_STRTOL(tmp, NULL, 0)) {
 			zend_dtrace_enabled = 1;
 			zend_compile_file = dtrace_compile_file;
 			zend_execute_ex = dtrace_execute_ex;

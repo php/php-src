@@ -1436,7 +1436,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else if (!strncasecmp(ZSTR_VAL(new_value), "on", sizeof("on"))) {
 		int_value = 1;
 	} else {
-		int_value = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		int_value = ZEND_STRTOL(ZSTR_VAL(new_value), NULL, 0);
 	}
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
 
