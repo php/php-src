@@ -193,8 +193,8 @@ static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_inf
 		fe_class_name = ZEND_TYPE_NAME(fe_arg_info->type);
 		class_name = ZSTR_VAL(fe_class_name);
 		class_name_len = ZSTR_LEN(fe_class_name);
-		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && proto->common.scope) {
-			fe_class_name = zend_string_copy(proto->common.scope->name);
+		if (class_name_len == sizeof("parent")-1 && !strcasecmp(class_name, "parent") && fe->common.scope && fe->common.scope->parent) {
+			fe_class_name = zend_string_copy(fe->common.scope->parent->name);
 		} else if (class_name_len == sizeof("self")-1 && !strcasecmp(class_name, "self") && fe->common.scope) {
 			fe_class_name = zend_string_copy(fe->common.scope->name);
 		} else {
