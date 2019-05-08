@@ -22,6 +22,7 @@
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_inheritance.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 
@@ -235,48 +236,53 @@ static inheritance_status zend_perform_covariant_type_check(
 		return INHERITANCE_ERROR;
 	}
 
-	if (ZEND_TYPE_IS_CLASS(fe_type) && ZEND_TYPE_IS_CLASS(proto_type)) {
-		zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
-		zend_string *proto_class_name = resolve_class_name(proto, ZEND_TYPE_NAME(proto_type));
-
-		if (fe_class_name != proto_class_name && strcasecmp(ZSTR_VAL(fe_class_name), ZSTR_VAL(proto_class_name)) != 0) {
-			if (fe->common.type != ZEND_USER_FUNCTION) {
-				return INHERITANCE_ERROR;
-			} else {
-				/* Check for class alias */
-				zend_class_entry *fe_ce, *proto_ce;
-
-				fe_ce = lookup_class(fe, fe_class_name);
-				proto_ce = lookup_class(proto, proto_class_name);
-
-				if (!fe_ce || !proto_ce) {
-					return INHERITANCE_UNRESOLVED;
-				}
-
-				if (fe_ce->type == ZEND_INTERNAL_CLASS ||
-					proto_ce->type == ZEND_INTERNAL_CLASS ||
-					fe_ce != proto_ce) {
-					return INHERITANCE_ERROR;
-				}
-			}
-		}
-	} else if (ZEND_TYPE_CODE(fe_type) != ZEND_TYPE_CODE(proto_type)) {
-		if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
-			if (ZEND_TYPE_CODE(fe_type) == IS_ARRAY) {
-				return INHERITANCE_SUCCESS;
-			}
-
-			if (ZEND_TYPE_IS_CLASS(fe_type) &&
-					zend_string_equals_literal_ci(ZEND_TYPE_NAME(fe_type), "Traversable")) {
-				return INHERITANCE_SUCCESS;
-			}
+	if (ZEND_TYPE_IS_CLASS(proto_type)) {
+		zend_string *fe_class_name, *proto_class_name;
+		zend_class_entry *fe_ce, *proto_ce;
+		if (!ZEND_TYPE_IS_CLASS(fe_type)) {
+			return INHERITANCE_ERROR;
 		}
 
-		/* Incompatible built-in types */
-		return INHERITANCE_ERROR;
+		fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
+		proto_class_name = resolve_class_name(proto, ZEND_TYPE_NAME(proto_type));
+		if (zend_string_equals_ci(fe_class_name, proto_class_name)) {
+			return INHERITANCE_SUCCESS;
+		}
+
+		fe_ce = lookup_class(fe, fe_class_name);
+		proto_ce = lookup_class(proto, proto_class_name);
+		if (!fe_ce || !proto_ce) {
+			return INHERITANCE_UNRESOLVED;
+		}
+		return instanceof_function(fe_ce, proto_ce) ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+	} else if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
+		if (ZEND_TYPE_IS_CLASS(fe_type)) {
+			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
+			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
+			if (!fe_ce) {
+				return INHERITANCE_UNRESOLVED;
+			}
+			return instanceof_function(fe_ce, zend_ce_traversable)
+				? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+		}
+
+		return ZEND_TYPE_CODE(fe_type) == IS_ITERABLE || ZEND_TYPE_CODE(fe_type) == IS_ARRAY
+			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+	} else if (ZEND_TYPE_CODE(proto_type) == IS_OBJECT) {
+		if (ZEND_TYPE_IS_CLASS(fe_type)) {
+			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
+			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
+			if (!fe_ce) {
+				return INHERITANCE_UNRESOLVED;
+			}
+			return INHERITANCE_SUCCESS;
+		}
+
+		return ZEND_TYPE_CODE(fe_type) == IS_OBJECT ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+	} else {
+		return ZEND_TYPE_CODE(fe_type) == ZEND_TYPE_CODE(proto_type)
+			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
-
-	return INHERITANCE_SUCCESS;
 }
 /* }}} */
 
