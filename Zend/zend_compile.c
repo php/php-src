@@ -1131,14 +1131,16 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 	if (first_early_binding_opline != (uint32_t)-1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
 		uint32_t opline_num = first_early_binding_opline;
-		zend_class_entry *ce;
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
 			const zend_op *opline = &op_array->opcodes[opline_num];
+			zval *lcname = RT_CONSTANT(opline, opline->op1);
 			zval *parent_name = RT_CONSTANT(opline, opline->op2);
-			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0)) != NULL) {
-				do_bind_class(RT_CONSTANT(&op_array->opcodes[opline_num], op_array->opcodes[opline_num].op1), ce);
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname + 1));
+			zend_class_entry *parent_ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0);
+			if (ce && parent_ce && zend_can_early_bind(ce, parent_ce)) {
+				do_bind_class(lcname, parent_ce);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
 		}
@@ -6392,6 +6394,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD) /* delay inheritance till preloading */
 			 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
 			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))
+			 && zend_can_early_bind(ce, parent_ce)
 				) {
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;
