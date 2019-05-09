@@ -32,6 +32,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent_
 void zend_verify_abstract_class(zend_class_entry *ce);
 void zend_check_deprecated_constructor(const zend_class_entry *ce);
 void zend_build_properties_info_table(zend_class_entry *ce);
+zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce);
 
 END_EXTERN_C()
 
