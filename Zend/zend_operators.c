@@ -39,6 +39,8 @@ static _locale_t current_locale = NULL;
 #define zend_tolower(c) tolower(c)
 #endif
 
+#define ZEND_IS_WHITESPACE(c) (((c) == ' ') || ((c) == '\t') || ((c) == '\n') || ((c) == '\r') || ((c) == '\v') || ((c) == '\f'))
+
 #define TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
 
 static const unsigned char tolower_map[256] = {
@@ -80,56 +82,64 @@ static const unsigned char tolower_map[256] = {
 
 ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len) /* {{{ */
 {
-	int retval;
-
-	if (!str_len) {
-		str_len = strlen(str);
-	}
-	retval = ZEND_STRTOL(str, NULL, 0);
-	if (str_len>0) {
-		switch (str[str_len-1]) {
-			case 'g':
-			case 'G':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'm':
-			case 'M':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'k':
-			case 'K':
-				retval *= 1024;
-				break;
-		}
-	}
-	return retval;
+	return (int)zend_atol(str, str_len);
 }
 /* }}} */
 
 ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {{{ */
 {
 	zend_long retval;
+	char *end = NULL;
 
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOL(str, NULL, 0);
-	if (str_len>0) {
-		switch (str[str_len-1]) {
-			case 'g':
-			case 'G':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'm':
-			case 'M':
-				retval *= 1024;
-				/* break intentionally missing */
-			case 'k':
-			case 'K':
-				retval *= 1024;
-				break;
-		}
+
+	/* Ignore trailing whitespace */
+	while (str_len && ZEND_IS_WHITESPACE(str[str_len-1])) --str_len;
+	if (!str_len) return 0;
+
+	/* Parse integral portion */
+	retval = ZEND_STRTOL(str, &end, 0);
+
+	if (!(end - str)) {
+		zend_error(E_WARNING, "Invalid numeric string '%.*s', no valid leading digits, interpreting as '0'",
+						(int)str_len, str);
+		return 0;
 	}
+
+	/* Allow for whitespace between integer portion and any suffix character */
+	while (ZEND_IS_WHITESPACE(*end)) ++end;
+
+	/* No exponent suffix. */
+	if (!*end) return retval;
+
+	switch (str[str_len-1]) {
+		case 'g':
+		case 'G':
+			retval *= 1024;
+			/* break intentionally missing */
+		case 'm':
+		case 'M':
+			retval *= 1024;
+			/* break intentionally missing */
+		case 'k':
+		case 'K':
+			retval *= 1024;
+			break;
+		default:
+			/* Unknown suffix */
+			zend_error(E_WARNING, "Invalid numeric string '%.*s', interpreting as '%.*s'",
+						(int)str_len, str, (int)(end - str), str);
+			return retval;
+	}
+
+	if (end < (str + str_len - 1)) {
+		/* More than one character in suffix */
+		zend_error(E_WARNING, "Invalid numeric string '%.*s', interpreting as '%.*s%c'",
+						(int)str_len, str, (int)(end - str), str, str[str_len-1]);
+	}
+
 	return retval;
 }
 /* }}} */
@@ -3007,7 +3017,7 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 
 	/* Skip any whitespace
 	 * This is much faster than the isspace() function */
-	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\v' || *str == '\f') {
+	while (ZEND_IS_WHITESPACE(*str)) {
 		str++;
 		length--;
 	}
