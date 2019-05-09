@@ -66,7 +66,7 @@ __forceinline static wchar_t *php_win32_cp_to_w_int(const char* in, size_t in_le
 	}
 
 	assert(ret ? tmp_len == ret_len : 1);
-	assert(ret ? wcslen(ret) == ret_len - 1 : 1);
+	assert(ret && !in_len ? wcslen(ret) == ret_len - 1 : 1);
 
 	ret[ret_len-1] = L'\0';
 
@@ -107,6 +107,10 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	const char *idx = in, *end;
 	char ch_err = 0;
 
+#if PHP_DEBUG
+	size_t save_in_len = in_len;
+#endif
+ 
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {
@@ -195,7 +199,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 	ret[in_len] = L'\0';
 
-	assert(ret ? wcslen(ret) == in_len : 1);
+	assert(ret && !save_in_len ? wcslen(ret) == in_len : 1);
 
 	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
 		*out_len = in_len;
@@ -239,7 +243,7 @@ __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_
 	}
 
 	assert(target ? r == target_len : 1);
-	assert(target ? strlen(target) == target_len - 1 : 1);
+	assert(target && !in_len ? strlen(target) == target_len - 1 : 1);
 
 	target[target_len-1] = '\0';
 
