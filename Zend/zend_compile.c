@@ -2631,53 +2631,6 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ *
 }
 /* }}} */
 
-/* Detects if list($a, $b, $c) contains variable with given name */
-zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(list_ast);
-	uint32_t i;
-	for (i = 0; i < list->children; i++) {
-		zend_ast *elem_ast = list->child[i];
-		zend_ast *var_ast;
-
-		if (!elem_ast) {
-			continue;
-		}
-		var_ast = elem_ast->child[0];
-
-		/* Recursively check nested list()s */
-		if (var_ast->kind == ZEND_AST_ARRAY && zend_list_has_assign_to(var_ast, name)) {
-			return 1;
-		}
-
-		if (var_ast->kind == ZEND_AST_VAR && var_ast->child[0]->kind == ZEND_AST_ZVAL) {
-			zend_string *var_name = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
-			zend_bool result = zend_string_equals(var_name, name);
-			zend_string_release_ex(var_name, 0);
-			if (result) {
-				return 1;
-			}
-		}
-	}
-
-	return 0;
-}
-/* }}} */
-
-/* Detects patterns like list($a, $b, $c) = $a */
-zend_bool zend_list_has_assign_to_self(zend_ast *list_ast, zend_ast *expr_ast) /* {{{ */
-{
-	/* Only check simple variables on the RHS, as only CVs cause issues with this. */
-	if (expr_ast->kind == ZEND_AST_VAR && expr_ast->child[0]->kind == ZEND_AST_ZVAL) {
-		zend_string *name = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
-		zend_bool result = zend_list_has_assign_to(list_ast, name);
-		zend_string_release_ex(name, 0);
-		return result;
-	}
-	return 0;
-}
-/* }}} */
-
 void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -2754,12 +2707,9 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 				/* MAKE_REF is usually not necessary for CVs. However, if there are
 				 * self-assignments, this forces the RHS to evaluate first. */
-				if (expr_node.op_type != IS_CV
-						|| zend_list_has_assign_to_self(var_ast, expr_ast)) {
-					zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
-				}
+				zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
 			} else {
-				if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+				if (expr_ast->kind == ZEND_AST_VAR) {
 					/* list($a, $b) = $a should evaluate the right $a first */
 					znode cv_node;
 

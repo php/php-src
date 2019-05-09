@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     (Ryan McCullagh, Nikita)
   . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
     created on the fly). (David Walker)
+  . Fixed bug #71030 (Self-assignment in list() may have inconsistent behavior).
+    (Nikita)
 
 - CLI:
   . The built-in CLI server now reports the request method in log files.

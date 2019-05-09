@@ -37,6 +37,9 @@ PHP 7.4 UPGRADE NOTES
         $a ? $b : ($c ? $d : $e)
 
     RFC: https://wiki.php.net/rfc/ternary_associativity
+  . Passing the result of a (non-reference) list() assignment by reference is
+    consistently disallowed now. Previously this worked if the right hand side
+    was a simple (CV) variable and did not occur as part of the list().
 
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
