@@ -64,14 +64,14 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
 
   dnl If you need to check for a particular library function
   dnl and you are using pkg-config:
-  PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
-  [
-    PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
-    PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
-    AC_DEFINE(HAVE_%EXTNAMECAPS%LIB, 1, [ ])
-  ],[
-    AC_MSG_ERROR([wrong %EXTNAME% lib version or lib not found])
-  ])
+  dnl PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
+  dnl [
+  dnl   PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
+  dnl   PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
+  dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%LIB, 1, [ ])
+  dnl ],[
+  dnl   AC_MSG_ERROR([wrong %EXTNAME% lib version or lib not found])
+  dnl ])
 
   dnl If you need to check for a particular library function
   dnl and you are not using pkg-config:
