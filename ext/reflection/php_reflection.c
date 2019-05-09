@@ -6166,7 +6166,8 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 		return;
 	}
 
-	if (Z_TYPE_P(item) != IS_REFERENCE) {
+	/* Treat singleton reference as non-reference. */
+	if (Z_TYPE_P(item) != IS_REFERENCE || Z_REFCOUNT_P(item) == 1) {
 		RETURN_NULL();
 	}
 
