@@ -112,7 +112,8 @@ int overflow2(int a, int b);
 #define IMAGE_FILTER_MEAN_REMOVAL   9
 #define IMAGE_FILTER_SMOOTH         10
 #define IMAGE_FILTER_PIXELATE       11
-#define IMAGE_FILTER_MAX            11
+#define IMAGE_FILTER_SCATTER		12
+#define IMAGE_FILTER_MAX            12
 #define IMAGE_FILTER_MAX_ARGS       6
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS);
@@ -126,6 +127,7 @@ static void php_image_filter_selective_blur(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_mean_removal(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
+static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 
 /* End Section filters declarations */
 static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)());
@@ -1157,6 +1159,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FILTER_SCATTER", IMAGE_FILTER_SCATTER, CONST_CS | CONST_PERSISTENT);
 	/* End Section Filters */
 
 #ifdef GD_VERSION_STRING
@@ -4201,6 +4204,50 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_FALSE;
 }
 
+static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
+{
+	zval *IM;
+	zval *hash_colors = NULL;
+	gdImagePtr im;
+	zend_long tmp;
+	zend_long scatter_sub, scatter_plus;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlll|a", &IM, &tmp, &scatter_sub, &scatter_plus, &hash_colors) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (hash_colors) {
+		uint32_t i = 0;
+		uint32_t num_colors = zend_hash_num_elements(Z_ARRVAL_P(hash_colors));
+		zval *color;
+		int *colors;
+
+		if (num_colors == 0) {
+			RETURN_BOOL(gdImageScatter(im, (int)scatter_sub, (int)scatter_plus));
+		}
+
+		colors = emalloc(num_colors * sizeof(int));
+
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(hash_colors));
+
+		while ((color = zend_hash_get_current_data(Z_ARRVAL_P(hash_colors))) != NULL) {
+			zend_hash_move_forward(Z_ARRVAL_P(hash_colors));
+
+			*(colors + i++) = (int) zval_get_long(color);
+		}
+
+		RETVAL_BOOL(gdImageScatterColor(im, (int)scatter_sub, (int)scatter_plus, colors, num_colors));
+
+		efree(colors);
+	} else {
+		RETURN_BOOL(gdImageScatter(im, (int) scatter_sub, (int) scatter_plus))
+	}
+}
+
 /* {{{ proto bool imagefilter(resource src_im, int filtertype[, int arg1 [, int arg2 [, int arg3 [, int arg4 ]]]] )
    Applies Filter an image using a custom angle */
 PHP_FUNCTION(imagefilter)
@@ -4222,7 +4269,8 @@ PHP_FUNCTION(imagefilter)
 		php_image_filter_selective_blur,
 		php_image_filter_mean_removal,
 		php_image_filter_smooth,
-		php_image_filter_pixelate
+		php_image_filter_pixelate,
+		php_image_filter_scatter
 	};
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > IMAGE_FILTER_MAX_ARGS) {

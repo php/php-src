@@ -82,6 +82,16 @@ $SOURCE_IMG = $SAVE_DIR . "/test.png";
 	} else {
 		echo "IMG_FILTER_PIXELATE failed\n";
 	}
+
+	$im = imagecreatefrompng($SOURCE_IMG);
+
+	if (imagefilter($im, IMG_FILTER_SCATTER, 3, 5)) {
+		imagepng($im, $SAVE_DIR . "/IMG_FILTER_SCATTER.png");
+		echo "IMG_FILTER_SCATTER success\n";
+		unlink($SAVE_DIR . "/IMG_FILTER_SCATTER.png");
+	} else {
+		echo "IMG_FILTER_SCATTER failed\n";
+	}
 ?>
 --EXPECT--
 IMG_FILTER_NEGATE success
@@ -96,3 +106,4 @@ IMG_FILTER_COLORIZE success
 IMG_FILTER_CONTRAST success
 IMG_FILTER_BRIGHTNESS success
 IMG_FILTER_PIXELATE success
+IMG_FILTER_SCATTER success
