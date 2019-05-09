@@ -717,6 +717,18 @@ enum gdPixelateMode {
 
 int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
 
+typedef struct {
+	int sub;
+	int plus;
+	unsigned int num_colors;
+	int *colors;
+	unsigned int seed;
+} gdScatter, *gdScatterPtr;
+
+int gdImageScatter(gdImagePtr im, int sub, int plus);
+int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned int num_colors);
+int gdImageScatterEx(gdImagePtr im, gdScatterPtr s);
+
 /* Macros to access information about images. */
 
 /* Returns nonzero if the image is a truecolor image,
