@@ -811,7 +811,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplPriorityQueue::compare(mixed $value1, mixed $value2)
 	   compare the priorities */
 SPL_METHOD(SplPriorityQueue, compare)
 {
@@ -854,7 +854,7 @@ SPL_METHOD(SplHeap, top)
 }
 /* }}} */
 
-/* {{{ proto bool SplMinHeap::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplMinHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
 SPL_METHOD(SplMinHeap, compare)
 {
@@ -868,7 +868,7 @@ SPL_METHOD(SplMinHeap, compare)
 }
 /* }}} */
 
-/* {{{ proto bool SplMaxHeap::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplMaxHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
 SPL_METHOD(SplMaxHeap, compare)
 {
@@ -1135,8 +1135,8 @@ ZEND_BEGIN_ARG_INFO(arginfo_heap_insert, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_heap_compare, 0)
-	ZEND_ARG_INFO(0, a)
-	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, value1)
+	ZEND_ARG_INFO(0, value2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_pqueue_insert, 0)
