@@ -44,6 +44,7 @@ PHP                                                                        NEWS
   . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 
 - GD:
+  . Implemented the scatter filter (IMG_FILTER_SCATTER). (Kalle)
   . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
     (cmb)
   . Fixed bug #76324 (cannot detect recent versions of freetype with

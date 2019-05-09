@@ -180,6 +180,17 @@ PHP 7.4 UPGRADE NOTES
     native variables and create/access data structures defined in C libraries.
     RFC: https://wiki.php.net/rfc/ffi
 
+- GD:
+  . Added the "scatter" image filter (IMG_FILTER_SCATTER) to apply a scatter
+    filter to images. This filter has the following prototype:
+
+        imagefilter($im, IMG_FILTER_SCATTER, int $sub, int $plus, array $colors = []);
+
+    The $colors array can be populated with a set of indexed colors where to
+    apply the scatter pixel shifting on.
+
+    Note, the result of this filter is always random.
+
 - Hash:
   . Added "crc32c" hash using Castagnoli's polynomial. This crc32 variant is
     used by storage systems, such as iSCSI, SCTP, Btrfs and ext4.
