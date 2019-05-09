@@ -1,8 +1,7 @@
 PHP_ARG_WITH([pdo-sqlite],
   [for sqlite 3 support for PDO],
-  [AS_HELP_STRING([[--without-pdo-sqlite[=DIR]]],
-    [PDO: sqlite 3 support. DIR is the sqlite base install directory
-    [BUNDLED]])],
+  [AS_HELP_STRING([--without-pdo-sqlite],
+    [PDO: sqlite 3 support.])],
   [$PHP_PDO])
 
 if test "$PHP_PDO_SQLITE" != "no"; then
@@ -28,56 +27,32 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     AC_MSG_RESULT($pdo_cv_inc_path)
   ])
 
-  php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
+  PKG_CHECK_MODULES([SQLITE], [sqlite3 > 3.7.4])
 
-  dnl you might want to change this
-  SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr"
-  dnl you most likely want to change this
-  SEARCH_FOR="/include/sqlite3.h"
-  if test -r $PHP_PDO_SQLITE/$SEARCH_FOR; then
-    dnl path given as parameter
-    PDO_SQLITE_DIR=$PHP_PDO_SQLITE
-  else
-    dnl search default path list
-    AC_MSG_CHECKING([for sqlite3 files in default path])
-    for i in $SEARCH_PATH ; do
-      if test -r $i/$SEARCH_FOR; then
-        PDO_SQLITE_DIR=$i
-        AC_MSG_RESULT(found in $i)
-      fi
-    done
-  fi
-  if test -z "$PDO_SQLITE_DIR"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please reinstall the sqlite3 distribution])
-  fi
-
-  PHP_ADD_INCLUDE($PDO_SQLITE_DIR/include)
-
-  LIBNAME=sqlite3
-  LIBSYMBOL=sqlite3_open_v2
-
-  PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_open_v2,
   [
-    PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $PDO_SQLITE_DIR/$PHP_LIBDIR, PDO_SQLITE_SHARED_LIBADD)
-    AC_DEFINE(HAVE_PDO_SQLITELIB,1,[ ])
-  ],[
-    AC_MSG_ERROR([wrong sqlite lib version (< 3.5.0) or lib not found])
-  ],[
-    -L$PDO_SQLITE_DIR/$PHP_LIBDIR -lm
+    PHP_EVAL_INCLINE($SQLITE_CFLAGS)
+    PHP_EVAL_LIBLINE($SQLITE_LIBS, PDO_SQLITE_SHARED_LIBADD)
+    AC_DEFINE(HAVE_PDO_SQLITELIB, 1, [Define to 1 if you have the pdo_sqlite extension enabled.])
+  ], [
+    AC_MSG_ERROR([Please install SQLite 3.7.4 first or check libsqlite3 is present])
   ])
-  PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
-    AC_DEFINE(HAVE_SQLITE3_KEY,1, [have commercial sqlite3 with crypto support])
+
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_key, [
+    AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
   ])
-  PHP_CHECK_LIBRARY(sqlite3,sqlite3_close_v2,[
+
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_close_v2, [
     AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
   ])
-  PHP_CHECK_LIBRARY(sqlite3,sqlite3_column_table_name,[
+
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_column_table_name, [
     AC_DEFINE(HAVE_SQLITE3_COLUMN_TABLE_NAME, 1, [have sqlite3_column_table_name])
   ])
 
   PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(pdo_sqlite, $php_pdo_sqlite_sources_core, $ext_shared,,-I$pdo_cv_inc_path)
+  PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
+    $ext_shared,,-I$pdo_cv_inc_path)
 
   dnl Solaris fix
   PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
