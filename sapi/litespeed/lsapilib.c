@@ -3172,9 +3172,6 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         *s_avail_pages = sysconf(_SC_AVPHYS_PAGES);
-//        lsapi_log("Memory total: %zd, free: %zd, free %%%zd\n",
-//                  s_total_pages, *s_avail_pages, *s_avail_pages * 100 / s_total_pages);
-
 #endif
         FD_ZERO( &readfds );
         FD_SET( pServer->m_fd, &readfds );
