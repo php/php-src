@@ -4097,19 +4097,10 @@ ZEND_METHOD(reflection_class, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter, zval *obj)
+static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter)
 {
-	zval method;
-	zend_function *closure;
 	if (mptr->common.fn_flags & filter) {
-		if (obj && is_closure_invoke(ce, mptr->common.function_name)
-			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
-		{
-			mptr = closure;
-		}
-		/* don't assign closure_object since we only reflect the invoke handler
-		   method and not the closure definition itself, even if we have a
-		   closure */
+		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
 		add_next_index_zval(retval, &method);
 	}
@@ -4138,14 +4129,25 @@ ZEND_METHOD(reflection_class, getMethods)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
-		_addmethod(mptr, ce, return_value, filter, &intern->obj);
+		_addmethod(mptr, ce, return_value, filter);
 	} ZEND_HASH_FOREACH_END();
 
-	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure)) {
-		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj));
+	if (instanceof_function(ce, zend_ce_closure)) {
+		zend_bool has_obj = Z_TYPE(intern->obj) != IS_UNDEF;
+		zval obj_tmp;
+		zend_object *obj;
+		if (!has_obj) {
+			object_init_ex(&obj_tmp, ce);
+			obj = Z_OBJ(obj_tmp);
+		} else {
+			obj = Z_OBJ(intern->obj);
+		}
+		zend_function *closure = zend_get_closure_invoke_method(obj);
 		if (closure) {
-			_addmethod(closure, ce, return_value, filter, &intern->obj);
-			_free_function(closure);
+			_addmethod(closure, ce, return_value, filter);
+		}
+		if (!has_obj) {
+			zval_ptr_dtor(&obj_tmp);
 		}
 	}
 }
