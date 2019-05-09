@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - PDO_MySQL:
   . Fixed bug #77944 (Wrong meta pdo_type for bigint on LLP64). (cmb)
 
+- Reflection:
+  . Fixed bug #75186 (Inconsistent reflection of Closure:::__invoke()). (Nikita)
+
 - Session:
   . Fixed bug #77911 (Wrong warning for session.sid_bits_per_character). (cmb)
 
