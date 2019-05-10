@@ -18,11 +18,6 @@ $args = substr(PHP_OS, 0, 3) == 'WIN' ? "-d extension_dir=" . ini_get("extension
 $code = <<<'PHP'
 /* Receive */
 $content = trim(file_get_contents("php://input")) . PHP_EOL;
-
-$vars = serialize($_SERVER);
-
-/* record the headers */
-file_put_contents("custh_dump.log", $vars);
 PHP;
 
 php_cli_server_start($code, $router, $args);
@@ -32,6 +27,7 @@ $client = new soapclient(NULL, [
   'uri' => 'misc-uri',
   'soap_version' => SOAP_1_2,
   'user_agent' => 'Vincent JARDIN, test headers',
+  'trace' => true, /* record the headers before sending */
   'stream_context' => stream_context_create([
     'http' => [
       'header' => sprintf("MIME-Version: 1.0\r\n"),
@@ -42,25 +38,15 @@ $client = new soapclient(NULL, [
 
 $client->__soapCall("foo", [ 'arg1' => "XXXbar"]);
 
-$headers = unserialize(file_get_contents(__DIR__ . "/../../../sapi/cli/tests/custh_dump.log"));
+$headers = $client->__getLastRequestHeaders();
 
-if ($headers['CONTENT_TYPE'] === 'Multipart/Related; action="misc-uri#foo"')
-  echo "Content-Type OK" . PHP_EOL;
-
-if ($headers['HTTP_CONTENT_TYPE'] === 'Multipart/Related; action="misc-uri#foo"')
-  echo "Content-Type OK" . PHP_EOL;
-
-if ($headers['HTTP_MIME_VERSION'] == '1.0')
-  echo "Mime OK" . PHP_EOL;
+if (strpos($headers, 'Multipart/Related; action="misc-uri#foo"') === FALSE)
+  printf("Content-Type NOK %s" . PHP_EOL, $headers);
+else
+  printf("Content-Type OK" . PHP_EOL);
 
 ?>
 ==DONE==
---CLEAN--
-<?php
-unlink(__DIR__ . "/../../../sapi/cli/tests/custh_dump.log");
-?>
 --EXPECT--
 Content-Type OK
-Content-Type OK
-Mime OK
 ==DONE==
