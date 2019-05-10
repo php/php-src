@@ -573,6 +573,7 @@ static void emit_live_range(
 	switch (def_opline->opcode) {
 		/* These should never be the first def. */
 		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_ADD_ARRAY_UNPACK:
 		case ZEND_ROPE_ADD:
 			ZEND_ASSERT(0);
 			return;
@@ -699,7 +700,8 @@ static void emit_live_range(
 static zend_bool is_fake_def(zend_op *opline) {
 	/* These opcodes only modify the result, not create it. */
 	return opline->opcode == ZEND_ROPE_ADD
-		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT;
+		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT
+		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK;
 }
 
 static zend_bool keeps_op1_alive(zend_op *opline) {
