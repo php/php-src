@@ -58,7 +58,7 @@ rem set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for Opcache
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enabled=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1
 
 rem prepare for enchant
 mkdir c:\enchant_plugins
