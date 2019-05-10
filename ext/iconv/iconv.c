@@ -540,7 +540,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	char *out_p;
 	iconv_t cd;
 	size_t result;
-	zend_string *ret, *out_buffer;
+	zend_string *out_buffer;
 
 	*out = NULL;
 
