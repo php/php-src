@@ -142,12 +142,6 @@ typedef struct
     char  m_chServiceAddress[SUN_PATH_MAX];
 } criu_native_dump_t;
 
-typedef struct
-{
-    int   m_iDumpResult;
-    char  m_chDumpResponseMessage[1024];
-} criu_native_dump_response_t;
-
 typedef sem_t * (*psem_open_t) (const char *__name, int __oflag, ...);
 typedef int (*psem_post_t) (sem_t *__sem);
 typedef int (*psem_close_t) (sem_t *__sem);
@@ -421,7 +415,6 @@ static int LSCRIU_Native_Dump(pid_t iPid,
                               int   iFdNative) {
     criu_native_dump_t criu_native_dump;
     char *pchLastSlash;
-    criu_native_dump_response_t criu_native_dump_response;
 
     memset(&criu_native_dump, 0, sizeof(criu_native_dump));
     criu_native_dump.m_iPidToDump = iPid;
@@ -441,18 +434,6 @@ static int LSCRIU_Native_Dump(pid_t iPid,
         return(-1);
     }
     return 0;
-    /* do not wait response.
-    //while (sleep(7200));
-    if (read(iFdNative,
-             &criu_native_dump_response,
-             sizeof(criu_native_dump_response)) == -1) {
-        // The test will actually fail it!
-        //LSCRIU_Restored_Error(1, "Error reading dump socket #%d from parent: %s",
-        //                      iFdNative, strerror(errno));
-        //return(-1);
-    }
-    return(-1);
-    */
 }
 
 
