@@ -476,7 +476,7 @@ paths can be specified either by adding additional directories to
 PKG_CONFIG_PATH or by explicitly specifying compilation options through
 FOO_CFLAGS and FOO_LIBS.
 
-The following extensions are affected:
+The following extensions and SAPIs are affected:
 
 - Curl:
   . --with-curl no longer accepts a directory.
@@ -502,6 +502,10 @@ The following extensions are affected:
 
 - Readline:
   . --with-libedit no longer accepts a directory.
+
+- FPM:
+  . --with-fpm-systemd now uses only pkg-config for libsystem checks. The
+    libsystemd minimum required version is 209.
 
 - GD:
   . --with-gd becomes --enable-gd (whether to enable the extension at all) and
