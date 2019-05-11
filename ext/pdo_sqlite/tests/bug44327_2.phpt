@@ -7,7 +7,7 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $x = $db->query('select 1 as queryString');
 var_dump($x, $x->queryString);
