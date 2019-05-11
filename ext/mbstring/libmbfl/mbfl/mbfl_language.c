@@ -35,10 +35,6 @@
 #include <stddef.h>
 #include <string.h>
 
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
 #include "mbfl_encoding.h"
 #include "mbfl_language.h"
 
