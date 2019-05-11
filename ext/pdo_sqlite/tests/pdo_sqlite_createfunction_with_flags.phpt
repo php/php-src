@@ -8,7 +8,7 @@ if (!defined('PDO::SQLITE_DETERMINISTIC')) die('skip system sqlite is too old');
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
 
