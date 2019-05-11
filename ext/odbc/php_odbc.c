@@ -856,7 +856,7 @@ PHP_MINFO_FUNCTION(odbc)
 	php_info_print_table_row(2, "ODBCVER", buf);
 #endif
 #ifndef PHP_WIN32
-	php_info_print_table_row(2, "ODBC_INCLUDE", PHP_ODBC_INCLUDE);
+	php_info_print_table_row(2, "ODBC_CFLAGS", PHP_ODBC_CFLAGS);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
 	php_info_print_table_row(2, "ODBC_LIBS", PHP_ODBC_LIBS);
 #endif
