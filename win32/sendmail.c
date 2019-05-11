@@ -26,7 +26,6 @@
 #include <string.h>
 #include <math.h>
 #include <malloc.h>
-#include <memory.h>
 #include <winbase.h>
 #include "sendmail.h"
 #include "php_ini.h"
