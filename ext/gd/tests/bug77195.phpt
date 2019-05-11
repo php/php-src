@@ -7,7 +7,7 @@ if (!gd_info()['JPEG Support']) die('skip JPEG support not available');
 ?>
 --FILE--
 <?php
-$filename = __DIR__ . '/bug77195.jpeg';
+$filename = __DIR__ . '/bug77195.jpg';
 @imagecreatefromjpeg($filename);
 imagecreatefromjpeg($filename);
 ?>

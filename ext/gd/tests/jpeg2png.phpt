@@ -26,7 +26,7 @@ jpeg <--> png conversion test
 	echo "\n";
 
 	echo "JPEG to PNG conversion: ";
-	echo imagepng(imagecreatefromjpeg($cwd . "/conv_test.jpeg"), $cwd . "/test_png.png") ? 'ok' : 'failed';
+	echo imagepng(imagecreatefromjpeg($cwd . "/conv_test.jpg"), $cwd . "/test_png.png") ? 'ok' : 'failed';
 	echo "\n";
 
 	echo "Generated PNG to JPEG conversion: ";
