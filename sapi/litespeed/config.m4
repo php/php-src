@@ -2,8 +2,8 @@ dnl config.m4 for sapi litespeed
 
 AC_MSG_CHECKING(for LiteSpeed support)
 
-PHP_ARG_WITH([litespeed],,
-  [AS_HELP_STRING([--with-litespeed],
+PHP_ARG_ENABLE([litespeed],,
+  [AS_HELP_STRING([--enable-litespeed],
     [Build PHP as litespeed module])],
   [no])
 
