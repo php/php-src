@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<wsdl:definitions name="SOAPBuilders" 
-    xmlns="http://soapinterop.org/attachments/wsdl" 
-    xmlns:types="http://soapinterop.org/attachments/xsd" 
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" 
-    xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" 
+<wsdl:definitions name="SOAPBuilders"
+    xmlns="http://soapinterop.org/attachments/wsdl"
+    xmlns:types="http://soapinterop.org/attachments/xsd"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+    xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
     targetNamespace="http://soapinterop.org/attachments/wsdl">
 	<wsdl:types>
-		<schema 
-			xmlns="http://www.w3.org/2001/XMLSchema" 
-			targetNamespace="http://soapinterop.org/attachments/xsd" 
+		<schema
+			xmlns="http://www.w3.org/2001/XMLSchema"
+			targetNamespace="http://soapinterop.org/attachments/xsd"
 			elementFormDefault="qualified"
 			attributeFormDefault="qualified">
-		
+
 		<complexType name="binary">
 			<simpleContent>
 				<extension base="xsd:base64Binary">
@@ -22,7 +22,7 @@
 				</extension>
 			</simpleContent>
 		</complexType >
-		
+
 		<element name="EchoAttachment" type="types:EchoAttachment"/>
 		<element name="EchoAttachmentResponse" type="types:EchoAttachmentResponse"/>
 		<complexType name="EchoAttachment">
@@ -35,7 +35,7 @@
 				<element name="Out" type="types:binary"/>
 			</sequence>
 		</complexType>
-		
+
 		<element name="EchoAttachments" type="types:Attachments"/>
 		<element name="EchoAttachmentsResponse" type="types:Attachments"/>
 		<complexType name="Attachments">
@@ -44,15 +44,15 @@
 				</element>
 			</sequence>
 		</complexType>
-		
+
 		<element name="EchoAttachmentAsBase64" type="types:EchoAttachment"/>
 		<element name="EchoAttachmentAsBase64Response" type="types:EchoAttachmentResponse"/>
-		
+
 		<element name="EchoBase64AsAttachment" type="types:EchoAttachment"/>
 		<element name="EchoBase64AsAttachmentResponse" type="types:EchoAttachmentResponse"/>
 		</schema>
 	</wsdl:types>
-	
+
 	<wsdl:message name="EchoAttachmentIn">
 		<wsdl:part name="In" element="types:EchoAttachment"/>
 	</wsdl:message>
@@ -77,7 +77,7 @@
 	<wsdl:message name="EchoBase64AsAttachmentOut">
 		<wsdl:part name="Out" element="types:EchoBase64AsAttachmentResponse"/>
 	</wsdl:message>
-	
+
 	<wsdl:portType name="AttachmentsPortType">
 		<wsdl:operation name="EchoAttachment">
 			<wsdl:input name="EchoAttachmentInput" message="EchoAttachmentIn"/>
@@ -182,4 +182,4 @@
       <soap:address location="test://" />
     </wsdl:port>
   </wsdl:service>
-</wsdl:definitions>	
+</wsdl:definitions>
