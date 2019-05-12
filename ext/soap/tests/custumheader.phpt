@@ -45,8 +45,34 @@ if (strpos($headers, 'Multipart/Related; action="misc-uri#foo"') === FALSE)
 else
   printf("Content-Type OK" . PHP_EOL);
 
+/*
+ * In case of an empty content-type, let's fallback to the default content.
+ */
+$client2 = new soapclient(NULL, [
+  'location' => 'http://' . PHP_CLI_SERVER_ADDRESS,
+  'uri' => 'misc-uri',
+  'soap_version' => SOAP_1_2,
+  'user_agent' => 'Vincent JARDIN, test headers',
+  'trace' => true, /* record the headers before sending */
+  'stream_context' => stream_context_create([
+    'http' => [
+      'header' => sprintf("MIME-Version: 1.0\r\n"),
+      'content_type' => sprintf("")
+    ],
+  ]),
+]);
+
+$client2->__soapCall("foo", [ 'arg1' => "XXXbar"]);
+
+$headers = $client2->__getLastRequestHeaders();
+
+if (strpos($headers, 'Content-Type: application/soap+xml; charset=utf-8; action="misc-uri#foo"') === FALSE)
+  printf("Content-Type Default NOK %s" . PHP_EOL, $headers);
+else
+  printf("Content-Type Default OK" . PHP_EOL);
 ?>
 ==DONE==
 --EXPECT--
 Content-Type OK
+Content-Type Default OK
 ==DONE==

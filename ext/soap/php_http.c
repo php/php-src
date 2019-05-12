@@ -619,7 +619,8 @@ try_again:
 		if (soap_version == SOAP_1_2) {
 			if (context &&
 		           (tmp = php_stream_context_get_option(context, "http", "content_type")) != NULL &&
-		           Z_TYPE_P(tmp) == IS_STRING) {
+		           Z_TYPE_P(tmp) == IS_STRING &&
+		           Z_STRLEN_P(tmp) > 0) {
 				if (Z_STRLEN_P(tmp) > 0) {
 					smart_str_append_const(&soap_headers,"Content-Type: ");
 					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
@@ -636,7 +637,8 @@ try_again:
 		} else {
 			if (context &&
 		           (tmp = php_stream_context_get_option(context, "http", "content_type")) != NULL &&
-		           Z_TYPE_P(tmp) == IS_STRING) {
+		           Z_TYPE_P(tmp) == IS_STRING &&
+		           Z_STRLEN_P(tmp) > 0) {
 				if (Z_STRLEN_P(tmp) > 0) {
 					smart_str_append_const(&soap_headers,"Content-Type: ");
 					smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
