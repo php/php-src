@@ -1,5 +1,3 @@
-dnl config.m4 for extension xml
-
 PHP_ARG_ENABLE([xml],
   [whether to enable XML support],
   [AS_HELP_STRING([--disable-xml],

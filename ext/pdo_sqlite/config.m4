@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_sqlite
-
 PHP_ARG_WITH([pdo-sqlite],
   [for sqlite 3 support for PDO],
   [AS_HELP_STRING([[--without-pdo-sqlite[=DIR]]],
@@ -32,11 +30,15 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   php_pdo_sqlite_sources_core="pdo_sqlite.c sqlite_driver.c sqlite_statement.c"
 
-  SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr"     # you might want to change this
-  SEARCH_FOR="/include/sqlite3.h"  # you most likely want to change this
-  if test -r $PHP_PDO_SQLITE/$SEARCH_FOR; then # path given as parameter
+  dnl you might want to change this
+  SEARCH_PATH="$PHP_PDO_SQLITE /usr/local /usr"
+  dnl you most likely want to change this
+  SEARCH_FOR="/include/sqlite3.h"
+  if test -r $PHP_PDO_SQLITE/$SEARCH_FOR; then
+    dnl path given as parameter
     PDO_SQLITE_DIR=$PHP_PDO_SQLITE
-  else # search default path list
+  else
+    dnl search default path list
     AC_MSG_CHECKING([for sqlite3 files in default path])
     for i in $SEARCH_PATH ; do
       if test -r $i/$SEARCH_FOR; then

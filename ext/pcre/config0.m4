@@ -1,8 +1,5 @@
-dnl config.m4 for extension pcre
-
-dnl By default we'll compile and link against the bundled PCRE library
-dnl if DIR is supplied, we'll use that for linking
-
+dnl By default we'll compile and link against the bundled PCRE library. If
+dnl --with-external-pcre is supplied, we'll use that for linking.
 PHP_ARG_WITH([external-pcre],,
   [AS_HELP_STRING([--with-external-pcre],
     [Use external library for PCRE support])],

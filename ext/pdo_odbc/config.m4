@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_odbc
-
 define([PDO_ODBC_HELP_TEXT],[[
   The include and lib dirs are looked for under 'dir'. The 'flavour' can be one
   of: ibm-db2, iODBC, unixODBC, generic. If ',dir' part is omitted, default for
@@ -141,8 +139,8 @@ if test "$PHP_PDO_ODBC" != "no"; then
   dnl Check first for an ODBC 1.0 function to assert that the libraries work
   PHP_CHECK_LIBRARY($pdo_odbc_def_lib, SQLBindCol,
   [
-    dnl And now check for an ODBC 3.0 function to assert that they're
-    dnl *good* libraries.
+    dnl And now check for an ODBC 3.0 function to assert that they're *good*
+    dnl libraries.
     PHP_CHECK_LIBRARY($pdo_odbc_def_lib, SQLAllocHandle,
     [], [
       AC_MSG_ERROR([

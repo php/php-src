@@ -1,5 +1,3 @@
-dnl config.m4 for extension phar
-
 PHP_ARG_ENABLE([phar],
   [for phar archive support],
   [AS_HELP_STRING([--disable-phar],

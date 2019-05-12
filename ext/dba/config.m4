@@ -1,7 +1,4 @@
-dnl config.m4 for extension dba
-
 dnl Suppose we need FlatFile if no support or only CDB is used.
-
 AC_DEFUN([PHP_DBA_STD_BEGIN],[
   unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
 ])
@@ -136,7 +133,7 @@ dnl
 dnl Library checks
 dnl
 
-# QDBM
+dnl QDBM
 if test "$PHP_QDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_QDBM /usr/local /usr; do
@@ -166,7 +163,7 @@ if test "$PHP_QDBM" != "no"; then
 fi
 PHP_DBA_STD_RESULT(qdbm)
 
-# GDBM
+dnl GDBM
 if test "$PHP_GDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_QDBM" = "1"; then
@@ -194,7 +191,7 @@ if test "$PHP_GDBM" != "no"; then
 fi
 PHP_DBA_STD_RESULT(gdbm)
 
-# NDBM
+dnl NDBM
 if test "$PHP_NDBM" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_NDBM /usr/local /usr; do
@@ -368,7 +365,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
   PHP_DBA_STD_ATTACH
 ])
 
-# DB4
+dnl DB4
 if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
@@ -432,7 +429,7 @@ if test "$PHP_DB4" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db4,Berkeley DB4)
 
-# DB3
+dnl DB3
 if test "$PHP_DB3" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_DB4" = "1"; then
@@ -465,7 +462,7 @@ if test "$PHP_DB3" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db3,Berkeley DB3)
 
-# DB2
+dnl DB2
 if test "$PHP_DB2" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_DB3" = "1" || test "$HAVE_DB4" = "1"; then
@@ -498,7 +495,7 @@ if test "$PHP_DB2" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db2, Berkeley DB2)
 
-# DB1
+dnl DB1
 if test "$PHP_DB1" != "no"; then
   PHP_DBA_STD_BEGIN
   AC_MSG_CHECKING([for DB1 in library])
@@ -565,7 +562,7 @@ if test "$PHP_DB1" != "no"; then
 fi
 PHP_DBA_STD_RESULT(db1, DB1)
 
-# DBM
+dnl DBM
 if test "$PHP_DBM" != "no"; then
   PHP_DBA_STD_BEGIN
   if test "$HAVE_QDBM" = "1"; then
@@ -610,9 +607,8 @@ if test "$PHP_DBM" != "no"; then
 fi
 PHP_DBA_STD_RESULT(dbm)
 
-dnl
-dnl Bundled modules that should be enabled by default if any other option is enabled
-dnl
+dnl Bundled modules that should be enabled by default if any other option is
+dnl enabled
 if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
   php_dba_enable=yes
 else
@@ -637,7 +633,7 @@ PHP_ARG_ENABLE([flatfile],,
   [$php_dba_enable],
   [no])
 
-# CDB
+dnl CDB
 if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
@@ -673,7 +669,7 @@ elif test "$PHP_CDB" != "no"; then
 fi
 PHP_DBA_STD_RESULT(cdb)
 
-# INIFILE
+dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then
   AC_DEFINE(DBA_INIFILE, 1, [ ])
   ini_sources="libinifile/inifile.c"
@@ -681,7 +677,7 @@ if test "$PHP_INIFILE" != "no"; then
 fi
 PHP_DBA_STD_RESULT(inifile, [INI File])
 
-# FLATFILE
+dnl FLATFILE
 if test "$PHP_FLATFILE" != "no"; then
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
   flat_sources="libflatfile/flatfile.c"

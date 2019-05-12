@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo
-
 PHP_ARG_ENABLE([pdo],
   [whether to enable PDO support],
   [AS_HELP_STRING([--disable-pdo],

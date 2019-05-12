@@ -1,12 +1,10 @@
-dnl config.m4 for sapi fpm
-
 PHP_ARG_ENABLE([fpm],,
   [AS_HELP_STRING([--enable-fpm],
     [Enable building of the fpm SAPI executable])],
   [no],
   [no])
 
-dnl configure checks {{{
+dnl Configure checks.
 AC_DEFUN([AC_FPM_STDLIBS],
 [
   AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
@@ -341,7 +339,6 @@ AC_DEFUN([AC_FPM_LQ],
     fi
   fi
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_SYSCONF],
 [
@@ -354,7 +351,6 @@ AC_DEFUN([AC_FPM_SYSCONF],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_TIMES],
 [
@@ -367,7 +363,6 @@ AC_DEFUN([AC_FPM_TIMES],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_KQUEUE],
 [
@@ -390,7 +385,6 @@ AC_DEFUN([AC_FPM_KQUEUE],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_PORT],
 [
@@ -412,7 +406,6 @@ AC_DEFUN([AC_FPM_PORT],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_DEVPOLL],
 [
@@ -436,7 +429,6 @@ AC_DEFUN([AC_FPM_DEVPOLL],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_EPOLL],
 [
@@ -471,7 +463,6 @@ AC_DEFUN([AC_FPM_EPOLL],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_POLL],
 [
@@ -496,7 +487,6 @@ AC_DEFUN([AC_FPM_POLL],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_SELECT],
 [
@@ -526,7 +516,6 @@ AC_DEFUN([AC_FPM_SELECT],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_APPARMOR],
 [
@@ -543,7 +532,6 @@ AC_DEFUN([AC_FPM_APPARMOR],
 		AC_MSG_RESULT([no])
 	])
 ])
-
 
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
@@ -609,7 +597,7 @@ if test "$PHP_FPM" != "no"; then
 
   if test "$PHP_FPM_ACL" != "no" ; then
     AC_CHECK_HEADERS([sys/acl.h])
-    dnl *BSD has acl_* built into libc
+    dnl *BSD has acl_* built into libc.
     AC_CHECK_FUNC(acl_free, [
       AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
     ],[

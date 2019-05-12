@@ -1,5 +1,3 @@
-dnl config.m4 for extension zip
-
 PHP_ARG_WITH([zip],
   [for zip archive read/write support],
   [AS_HELP_STRING([--with-zip],

@@ -33,7 +33,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl PKG_CHECK_MODULES([LIBFOO], [foo = 1.2.3])
 
   dnl Remove this code block if the library supports pkg-config.
-  dnl # --with-%EXTNAME% -> check with-path
+  dnl --with-%EXTNAME% -> check with-path
   dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
   dnl SEARCH_FOR="/include/%EXTNAME%.h"  # you most likely want to change this
   dnl if test -r $PHP_%EXTNAMECAPS%/$SEARCH_FOR; then # path given as parameter
@@ -54,11 +54,11 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl fi
 
   dnl Remove this code block if the library supports pkg-config.
-  dnl # --with-%EXTNAME% -> add include path
+  dnl --with-%EXTNAME% -> add include path
   dnl PHP_ADD_INCLUDE($%EXTNAMECAPS%_DIR/include)
 
   dnl Remove this code block if the library supports pkg-config.
-  dnl # --with-%EXTNAME% -> check for lib and symbol presence
+  dnl --with-%EXTNAME% -> check for lib and symbol presence
   dnl LIBNAME=%EXTNAMECAPS% # you may want to change this
   dnl LIBSYMBOL=%EXTNAMECAPS% # you most likely want to change this
 
@@ -87,7 +87,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl
   dnl PHP_SUBST(%EXTNAMECAPS%_SHARED_LIBADD)
 
-  dnl # In case of no dependencies
+  dnl In case of no dependencies
   AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [ Have %EXTNAME% support ])
 
   PHP_NEW_EXTENSION(%EXTNAME%, %EXTNAME%.c, $ext_shared)

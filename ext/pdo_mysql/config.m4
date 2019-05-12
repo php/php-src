@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_mysql
-
 PHP_ARG_WITH([pdo-mysql],
   [for MySQL support for PDO],
   [AS_HELP_STRING([[--with-pdo-mysql[=DIR]]],
@@ -16,8 +14,8 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
-  dnl This depends on ext/mysqli/config.m4 providing the
-  dnl PHP_MYSQL_SOCKET_SEARCH macro and --with-mysql-sock configure option.
+  dnl This depends on ext/mysqli/config.m4 providing the PHP_MYSQL_SOCKET_SEARCH
+  dnl macro and --with-mysql-sock configure option.
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK

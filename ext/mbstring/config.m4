@@ -1,5 +1,3 @@
-dnl config.m4 for extension mbstring
-
 AC_DEFUN([PHP_MBSTRING_ADD_SOURCES], [
   PHP_MBSTRING_SOURCES="$PHP_MBSTRING_SOURCES $1"
 ])

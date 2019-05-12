@@ -1,5 +1,3 @@
-dnl config.m4 for date extension
-
 dnl Check for headers needed by timelib
 AC_CHECK_HEADERS([ \
 strings.h \

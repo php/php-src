@@ -1,5 +1,3 @@
-dnl config.m4 for extension enchant
-
 PHP_ARG_WITH([enchant],
   [for ENCHANT support],
   [AS_HELP_STRING([[--with-enchant[=DIR]]],

@@ -1,5 +1,3 @@
-dnl config.m4 for extension hash
-
 PHP_ARG_WITH([mhash],
   [for mhash support],
   [AS_HELP_STRING([[--with-mhash[=DIR]]],

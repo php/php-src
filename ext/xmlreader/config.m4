@@ -1,5 +1,3 @@
-dnl config.m4 for extension xmlreader
-
 PHP_ARG_ENABLE([xmlreader],
   [whether to enable XMLReader support],
   [AS_HELP_STRING([--disable-xmlreader],
