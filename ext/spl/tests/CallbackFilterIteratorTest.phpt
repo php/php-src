@@ -55,6 +55,20 @@ foreach($tests as $name => $test) {
         echo "=> $value\n";
     }
 }
+
+class C implements IteratorAggregate {
+    public function getIterator() {
+        return new ArrayIterator(array(1));
+    }
+}
+
+$filtered = new CallbackFilterIterator(new C(), function ($current, $key, $iterator) {
+    return true;
+});
+
+foreach($filtered as $key => $value) {
+    echo "=> $value\n";
+}
 --EXPECT--
 = instance method =
 1 / 0 / 1 / 1
@@ -131,3 +145,4 @@ foreach($tests as $name => $test) {
 4 / 3 / 1 / 1
 => 4
 5 / 4 / 1 / 1
+=> 1

@@ -1390,6 +1390,30 @@ static inline int spl_cit_check_flags(zend_long flags)
 	return cnt <= 1 ? SUCCESS : FAILURE;
 }
 
+static zend_class_entry* get_ce_or_aggregate_ce(zval **zobject_dst, zval *zobject_buffer, int *inc_refcount)
+{
+	zend_class_entry *ce = NULL;
+
+	ce = Z_OBJCE_P(*zobject_dst);
+	if (!instanceof_function(ce, zend_ce_iterator)) {
+		if (instanceof_function(ce, zend_ce_aggregate)) {
+			zend_call_method_with_0_params(Z_OBJ_P(*zobject_dst), ce, &ce->iterator_funcs_ptr->zf_new_iterator, "getiterator", zobject_buffer);
+			if (EG(exception)) {
+				zval_ptr_dtor(zobject_buffer);
+				return NULL;
+			}
+			if (Z_TYPE_P(zobject_buffer) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zobject_buffer), zend_ce_traversable)) {
+				zend_throw_exception_ex(spl_ce_LogicException, 0, "%s::getIterator() must return an object that implements Traversable", ZSTR_VAL(ce->name));
+				return NULL;
+			}
+			*zobject_dst = zobject_buffer;
+			ce = Z_OBJCE_P(*zobject_dst);
+			*inc_refcount = 0;
+		}
+	}
+	return ce;
+}
+
 static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_base, zend_class_entry *ce_inner, dual_it_type dit_type)
 {
 	zval                 *zobject, retval;
@@ -1521,6 +1545,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			cfi->object = cfi->fcc.object;
 			if (cfi->object) GC_ADDREF(cfi->object);
 			intern->u.cbfilter = cfi;
+
+			ce = get_ce_or_aggregate_ce(&zobject, &retval, &inc_refcount);
 			break;
 		}
 		default:
@@ -1553,7 +1579,7 @@ SPL_METHOD(FilterIterator, __construct)
    Create an Iterator from another iterator */
 SPL_METHOD(CallbackFilterIterator, __construct)
 {
-	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_CallbackFilterIterator, zend_ce_iterator, DIT_CallbackFilterIterator);
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_CallbackFilterIterator, zend_ce_traversable, DIT_CallbackFilterIterator);
 } /* }}} */
 
 /* {{{ proto Iterator FilterIterator::getInnerIterator()
@@ -2316,7 +2342,7 @@ static const zend_function_entry spl_funcs_FilterIterator[] = {
 };
 
 ZEND_BEGIN_ARG_INFO(arginfo_callback_filter_it___construct, 0)
-	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO();
 
