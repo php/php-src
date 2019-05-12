@@ -1,5 +1,3 @@
-dnl config.m4 for extension shmop
-
 PHP_ARG_ENABLE([shmop],
   [whether to enable shmop support],
   [AS_HELP_STRING([--enable-shmop],

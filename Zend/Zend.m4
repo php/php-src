@@ -1,9 +1,11 @@
-dnl
-dnl This file contains Zend specific autoconf functions.
-dnl
+dnl This file contains Zend specific autoconf macros.
 
+dnl
+dnl ZEND_CHECK_FLOAT_PRECISION
+dnl
 dnl x87 floating point internal precision control checks
 dnl See: http://wiki.php.net/rfc/rounding
+dnl
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   AC_MSG_CHECKING([for usable _FPU_SETCW])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[
@@ -116,6 +118,11 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
   fi
 ])
 
+dnl
+dnl LIBZEND_BASIC_CHECKS
+dnl
+dnl Basic checks specific for the Zend engine library.
+dnl
 AC_DEFUN([LIBZEND_BASIC_CHECKS],[
 AC_REQUIRE([AC_PROG_CC])
 
@@ -130,10 +137,12 @@ unix.h \
 cpuid.h \
 dlfcn.h)
 
-AC_DEFUN([LIBZEND_DLSYM_CHECK],[
+dnl
+dnl LIBZEND_DLSYM_CHECK
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
+AC_DEFUN([LIBZEND_DLSYM_CHECK],[
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
 _LT_AC_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
@@ -152,7 +161,7 @@ AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 
 ZEND_CHECK_FLOAT_PRECISION
 
-dnl test whether double cast to long preserves least significant bits
+dnl Test whether double cast to long preserves least significant bits.
 AC_MSG_CHECKING(whether double cast to long preserves least significant bits)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -186,6 +195,9 @@ int main()
 
 ])
 
+dnl
+dnl LIBZEND_OTHER_CHECKS
+dnl
 AC_DEFUN([LIBZEND_OTHER_CHECKS],[
 
 AC_ARG_ENABLE([zts],
@@ -247,8 +259,8 @@ else
   AC_MSG_RESULT(no)
 fi
 
-dnl test and set the alignment define for ZEND_MM
-dnl this also does the logarithmic test for ZEND_MM.
+dnl Test and set the alignment define for ZEND_MM. This also does the
+dnl logarithmic test for ZEND_MM.
 AC_MSG_CHECKING(for MM alignment and log values)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -289,7 +301,7 @@ int main()
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
 ], [], [
-  dnl cross-compile needs something here
+  dnl Cross compilation needs something here.
   LIBZEND_MM_ALIGN=8
 ])
 
@@ -392,9 +404,7 @@ else
 fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
 
-dnl
-dnl Check if atof() accepts NAN
-dnl
+dnl Check if atof() accepts NAN.
 AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
@@ -423,9 +433,7 @@ if test "$ac_cv_atof_accept_nan" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
 fi
 
-dnl
-dnl Check if atof() accepts INF
-dnl
+dnl Check if atof() accepts INF.
 AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
@@ -457,9 +465,7 @@ if test "$ac_cv_atof_accept_inf" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
 fi
 
-dnl
-dnl Check if HUGE_VAL == INF
-dnl
+dnl Check if HUGE_VAL == INF.
 AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
@@ -492,9 +498,7 @@ if test "$ac_cv_huge_val_inf" = "yes"; then
   AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
 fi
 
-dnl
-dnl Check if HUGE_VAL + -HUGEVAL == NAN
-dnl
+dnl Check if HUGE_VAL + -HUGEVAL == NAN.
 AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
@@ -529,9 +533,7 @@ if test "$ac_cv_huge_val_nan" = "yes"; then
   AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
 fi
 
-dnl
-dnl Check whether __cpuid_count is available
-dnl
+dnl Check whether __cpuid_count is available.
 AC_CACHE_CHECK(whether __cpuid_count is available, ac_cv_cpuid_count_available, [
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
   #include <cpuid.h>

@@ -1,5 +1,3 @@
-dnl config.m4 for extension sqlite3
-
 PHP_ARG_WITH([sqlite3],
   [whether to enable the SQLite3 extension],
   [AS_HELP_STRING([[--without-sqlite3[=DIR]]],

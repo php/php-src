@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_dblib
-
 PHP_ARG_WITH([pdo-dblib],
   [for PDO_DBLIB support via FreeTDS],
   [AS_HELP_STRING([[--with-pdo-dblib[=DIR]]],

@@ -1,5 +1,3 @@
-dnl config.m4 for extension bcmath
-
 PHP_ARG_ENABLE([bcmath],
   [whether to enable bc style precision math functions],
   [AS_HELP_STRING([--enable-bcmath],

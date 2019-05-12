@@ -1,5 +1,3 @@
-dnl config.m4 for extension simplexml
-
 PHP_ARG_ENABLE([simplexml],
   [whether to enable SimpleXML support],
   [AS_HELP_STRING([--disable-simplexml],

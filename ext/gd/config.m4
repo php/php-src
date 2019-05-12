@@ -1,9 +1,6 @@
-dnl config.m4 for extension gd
-
 dnl
 dnl Configure options
 dnl
-
 PHP_ARG_ENABLE([gd],
   [for GD support],
   [AS_HELP_STRING([--enable-gd],

@@ -1,5 +1,3 @@
-dnl config.m4 for extension odbc
-
 AC_DEFUN([PHP_ODBC_CHECK_HEADER],[
 if ! test -f "$ODBC_INCDIR/$1"; then
   AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])
@@ -48,14 +46,10 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
     ac_solid_prefix=scl
   fi
 
-#
-# Check for the library files, and setup the ODBC_LIBS path...
-#
+dnl Check for the library files, and setup the ODBC_LIBS path.
 if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
   ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
-  #
-  # we have an error and should bail out, as we can't find the libs!
-  #
+  dnl we have an error and should bail out, as we can't find the libs!
   echo ""
   echo "*********************************************************************"
   echo "* Unable to locate $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so or $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a"
@@ -393,10 +387,10 @@ PHP_ARG_WITH([dbmaker],,
   AC_MSG_CHECKING(for DBMaker support)
   if test "$PHP_DBMAKER" != "no"; then
     if test "$PHP_DBMAKER" = "yes"; then
-      # find dbmaker's home directory
+      dnl Find dbmaker's home directory
       DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | $AWK -F: '{print $6}'`
 
-      # check DBMaker version (from 5.0 to 2.0)
+      dnl check DBMaker version (from 5.0 to 2.0)
       DBMAKER_VERSION=5.0
 
       while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
@@ -445,10 +439,7 @@ else
   AC_DEFINE(ODBCVER, 0x0300, [ The highest supported ODBC version ])
 fi
 
-
-dnl
 dnl Extension setup
-dnl
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)

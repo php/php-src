@@ -1,5 +1,3 @@
-dnl config.m4 for extension sysvmsg
-
 PHP_ARG_ENABLE([sysvmsg],
   [whether to enable System V IPC support],
   [AS_HELP_STRING([--enable-sysvmsg],

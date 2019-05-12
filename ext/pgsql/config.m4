@@ -1,5 +1,3 @@
-dnl config.m4 for extension pgsql
-
 PHP_ARG_WITH([pgsql],
   [for PostgreSQL support],
   [AS_HELP_STRING([[--with-pgsql[=DIR]]],

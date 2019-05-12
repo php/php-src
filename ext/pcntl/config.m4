@@ -1,5 +1,3 @@
-dnl config.m4 for extension pcntl
-
 PHP_ARG_ENABLE([pcntl],
   [whether to enable pcntl support],
   [AS_HELP_STRING([--enable-pcntl],

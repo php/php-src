@@ -1,5 +1,3 @@
-dnl config.m4 for extension recode
-
 dnl Check for extensions with which Recode can not work
 if test "$PHP_RECODE" != "no"; then
   test "$PHP_IMAP"  != "no" && recode_conflict="$recode_conflict imap"

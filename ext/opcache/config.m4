@@ -1,5 +1,3 @@
-dnl config.m4 for extension opcache
-
 PHP_ARG_ENABLE([opcache],
   [whether to enable Zend OPcache support],
   [AS_HELP_STRING([--disable-opcache],

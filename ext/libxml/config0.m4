@@ -1,5 +1,3 @@
-dnl config.m4 for extension libxml
-
 PHP_ARG_WITH([libxml],
   [whether to build with LIBXML support],
   [AS_HELP_STRING([--without-libxml],

@@ -1,5 +1,3 @@
-dnl config.m4 for extension ldap
-
 AC_DEFUN([PHP_LDAP_CHECKS], [
   if test -f $1/include/ldap.h; then
     LDAP_DIR=$1
@@ -15,7 +13,8 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
     LDAP_LIBDIR=$1/$PHP_LIBDIR
   else
 
-    dnl Find Oracle Instant Client RPM header location corresponding to the given lib path e.g. for --with-ldap=/usr/lib/oracle/12.1/client64/lib
+    dnl Find Oracle Instant Client RPM header location corresponding to the
+    dnl given lib path e.g. for --with-ldap=/usr/lib/oracle/12.1/client64/lib
     AC_CHECK_SIZEOF([long])
     AC_MSG_CHECKING([if we're at 64-bit platform])
     AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
@@ -114,9 +113,8 @@ if test "$PHP_LDAP" != "no"; then
     AC_MSG_ERROR(Cannot find ldap.h)
   fi
 
-  dnl The Linux version of the SDK need -lpthread
-  dnl I have tested Solaris, and it doesn't, but others may.  Add
-  dnl these here if necessary.   -RL
+  dnl The Linux version of the SDK needs -lpthread. Solaris tested, and it
+  dnl doesn't, but others may. Add these here if necessary. -RL
   dnl Is this really necessary? -Troels Arvin
 
   if test `uname` = "Linux"; then
@@ -212,20 +210,16 @@ if test "$PHP_LDAP" != "no"; then
     AC_DEFINE(HAVE_3ARG_SETREBINDPROC,1,[Whether 3 arg set_rebind_proc()])
   fi
 
-  dnl Solaris 2.8 claims to be 2004 API, but doesn't have
-  dnl ldap_parse_reference() nor ldap_start_tls_s()
+  dnl Solaris 2.8 claims to be 2004 API, but doesn't have ldap_parse_reference()
+  dnl nor ldap_start_tls_s()
   AC_CHECK_FUNCS([ldap_parse_result ldap_parse_reference ldap_start_tls_s ldap_control_find ldap_parse_extended_result ldap_extended_operation ldap_extended_operation_s ldap_passwd ldap_whoami_s ldap_refresh_s])
 
-  dnl
   dnl SASL check
-  dnl
   if test "$PHP_LDAP_SASL" != "no"; then
     PHP_LDAP_SASL_CHECKS([$PHP_LDAP_SASL])
   fi
 
-  dnl
   dnl Sanity check
-  dnl
   AC_CHECK_FUNC(ldap_bind_s, [], [
     AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.])
   ])

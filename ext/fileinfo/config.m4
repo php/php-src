@@ -1,5 +1,3 @@
-dnl config.m4 for extension fileinfo
-
 PHP_ARG_ENABLE([fileinfo],
   [for fileinfo support],
   [AS_HELP_STRING([--disable-fileinfo],

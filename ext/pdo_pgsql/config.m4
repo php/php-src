@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_pgsql
-
 PHP_ARG_WITH([pdo-pgsql],
   [for PostgreSQL support for PDO],
   [AS_HELP_STRING([[--with-pdo-pgsql[=DIR]]],

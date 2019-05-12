@@ -1,5 +1,3 @@
-dnl config.m4 for extension FFI
-
 PHP_ARG_WITH([ffi],
   [for FFI support],
   [AS_HELP_STRING([--with-ffi],

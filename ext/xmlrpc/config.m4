@@ -1,5 +1,3 @@
-dnl config.m4 for extension xmlrpc
-
 PHP_ARG_WITH([xmlrpc],
   [for XMLRPC-EPI support],
   [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
@@ -91,9 +89,9 @@ elif test "$PHP_XMLRPC" != "no"; then
   if test -r $PHP_XMLRPC/include/xmlrpc.h; then
     XMLRPC_DIR=$PHP_XMLRPC/include
   elif test -r $PHP_XMLRPC/include/xmlrpc-epi/xmlrpc.h; then
-dnl some xmlrpc-epi header files have generic file names like
-dnl queue.h or base64.h. Distributions have to create dir
-dnl for xmlrpc-epi because of this.
+    dnl Some xmlrpc-epi header files have generic file names like queue.h or
+    dnl base64.h. Distributions have to create dir for xmlrpc-epi because of
+    dnl this.
     XMLRPC_DIR=$PHP_XMLRPC/include/xmlrpc-epi
   else
     AC_MSG_CHECKING(for XMLRPC-EPI in default path)

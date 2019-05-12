@@ -1,5 +1,3 @@
-dnl config.m4 for extension sodium
-
 PHP_ARG_WITH([sodium],
   [for sodium support],
   [AS_HELP_STRING([--with-sodium],
