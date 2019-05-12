@@ -226,6 +226,13 @@ function process_args($argv, $argc) {
 		error('The skeleton directory was not found');
 	}
 
+	// Validate extension name
+	if (!preg_match('/^[a-z][a-z0-9_]+$/i', $options['ext'])) {
+		error('Invalid extension name. Name must start with a letter and'
+			.' preferably include only lower case letters. Optionally, numbers'
+			.' and underscores are also allowed.');
+	}
+
 	$options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));
 
 	return $options;
