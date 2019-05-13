@@ -2891,7 +2891,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					zend_string_release_ex(string_key, 0);
 				} ZEND_HASH_FOREACH_END();
 
-				SAVE_CURL_ERROR(ch, error);
+				SAVE_CURL_ERROR(ch, error)
 				if (error != CURLE_OK) {
 					return FAILURE;
 				}
@@ -3057,7 +3057,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 
 	}
 
-	SAVE_CURL_ERROR(ch, error);
+	SAVE_CURL_ERROR(ch, error)
 	if (error != CURLE_OK) {
 		return FAILURE;
 	} else {
@@ -3167,7 +3167,7 @@ PHP_FUNCTION(curl_exec)
 	_php_curl_cleanup_handle(ch);
 
 	error = curl_easy_perform(ch->cp);
-	SAVE_CURL_ERROR(ch, error);
+	SAVE_CURL_ERROR(ch, error)
 
 	if (error != CURLE_OK) {
 		smart_str_free(&ch->handlers->write->buf);
