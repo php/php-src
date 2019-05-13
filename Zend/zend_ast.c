@@ -457,18 +457,19 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 				zend_throw_error(NULL, "Cannot unpack array with string keys");
 				return FAILURE;
 			} else {
-				Z_TRY_ADDREF_P(val);
 				if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
 					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-					zval_ptr_dtor_nogc(val);
+					break;
 				}
+				Z_TRY_ADDREF_P(val);
 			}
 		} ZEND_HASH_FOREACH_END();
-	} else { //objects or refernces cannot occur in a constant expression
-		zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
-		return FAILURE;
+		return SUCCESS;
 	}
-	return SUCCESS;
+
+	/* Objects or references cannot occur in a constant expression. */
+	zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+	return FAILURE;
 }
 
 ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
