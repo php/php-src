@@ -280,7 +280,8 @@ END_EXTERN_C()
 #define ZEND_POST_INC_STATIC_PROP            205
 #define ZEND_POST_DEC_STATIC_PROP            206
 #define ZEND_COPY_TMP                        207
+#define ZEND_ADD_ARRAY_UNPACK                208
 
-#define ZEND_VM_LAST_OPCODE                  207
+#define ZEND_VM_LAST_OPCODE                  208
 
 #endif

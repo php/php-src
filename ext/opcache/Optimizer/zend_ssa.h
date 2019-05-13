@@ -219,7 +219,9 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 	if (opline->opcode == ZEND_FE_FETCH_R) {
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
-	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+	if (ssa_op->result_use == var
+			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+			&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
 		return ssa_op->op1_use != var && ssa_op->op2_use != var;
 	}
 	return 0;

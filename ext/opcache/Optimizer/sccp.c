@@ -515,6 +515,27 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 	return SUCCESS;
 }
 
+static inline int ct_eval_add_array_unpack(zval *result, zval *array) {
+	zend_string *key;
+	zval *value;
+	if (Z_TYPE_P(array) != IS_ARRAY) {
+		return FAILURE;
+	}
+
+	SEPARATE_ARRAY(result);
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
+		if (key) {
+			return FAILURE;
+		}
+		value = zend_hash_next_index_insert(Z_ARR_P(result), value);
+		if (!value) {
+			return FAILURE;
+		}
+		Z_TRY_ADDREF_P(value);
+	} ZEND_HASH_FOREACH_END();
+	return SUCCESS;
+}
+
 static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 	switch (Z_TYPE_P(result)) {
 		case IS_NULL:
@@ -1327,6 +1348,31 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 				zval_ptr_dtor_nogc(&zv);
 			}
+			return;
+		}
+		case ZEND_ADD_ARRAY_UNPACK: {
+			zval *result = &ctx->values[ssa_op->result_use];
+			if (IS_BOT(result) || IS_BOT(op1)) {
+				SET_RESULT_BOT(result);
+				return;
+			}
+			SKIP_IF_TOP(result);
+			SKIP_IF_TOP(op1);
+
+			/* See comment for ADD_ARRAY_ELEMENT. */
+			if (Z_TYPE(ctx->values[ssa_op->result_def]) == IS_NULL) {
+				SET_RESULT_BOT(result);
+				return;
+			}
+			ZVAL_COPY_VALUE(&zv, result);
+			ZVAL_NULL(result);
+
+			if (ct_eval_add_array_unpack(&zv, op1) == SUCCESS) {
+				SET_RESULT(result, &zv);
+			} else {
+				SET_RESULT_BOT(result);
+			}
+			zval_ptr_dtor_nogc(&zv);
 			return;
 		}
 		case ZEND_NEW:
@@ -2165,7 +2211,8 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
-						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
+						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+						&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
 					/* Replace with QM_ASSIGN */
 					zend_uchar old_type = opline->result_type;
 					uint32_t old_var = opline->result.var;
