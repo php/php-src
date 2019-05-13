@@ -46,6 +46,9 @@ PHP 7.4 UPGRADE NOTES
     Previously the exception was only thrown on unserialization.
   . Using CURLPIPE_HTTP1 is deprecated, and is no longer supported as of cURL
     7.62.0.
+  . The $version parameter of curl_version() is deprecated. If any value not
+    equal to the default CURLVERSION_NOW is passed, a warning is raised and the
+    parameter is ignored.
 
 - Date:
   . Calling var_dump() or similar on a DateTime(Immutable) instance will no
