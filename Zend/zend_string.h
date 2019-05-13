@@ -364,7 +364,7 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 #if defined(_WIN32) || defined(__i386__) || defined(__x86_64__) || defined(__aarch64__)
 	/* Version with multiplication works better on modern CPU */
 	for (; len >= 8; len -= 8, str += 8) {
-# if defined(__aarch64__)
+# if defined(__aarch64__) && !defined(WORDS_BIGENDIAN)
 		/* On some architectures it is beneficial to load 8 bytes at a
 		   time and extract each byte with a bit field extract instr. */
 		uint64_t chunk;
