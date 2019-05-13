@@ -5643,33 +5643,37 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args) /* {{{ */
 		case ZEND_FFI_ABI_CDECL:
 			type->func.abi = FFI_DEFAULT_ABI;
 			break;
-#ifndef _WIN64
+#ifdef HAVE_FFI_FASTCALL
 		case ZEND_FFI_ABI_FASTCALL:
 			type->func.abi = FFI_FASTCALL;
 			break;
+#endif
+#ifdef HAVE_FFI_THISCALL
 		case ZEND_FFI_ABI_THISCALL:
 			type->func.abi = FFI_THISCALL;
 			break;
+#endif
+#ifdef HAVE_FFI_STDCALL
 		case ZEND_FFI_ABI_STDCALL:
 			type->func.abi = FFI_STDCALL;
 			break;
 #endif
-#if 0
+#ifdef HAVE_FFI_PASCAL
 		case ZEND_FFI_ABI_PASCAL:
 			type->func.abi = FFI_PASCAL;
 			break;
 #endif
-#if 0
+#ifdef HAVE_FFI_REGISTER
 		case ZEND_FFI_ABI_REGISTER:
 			type->func.abi = FFI_REGISTER;
 			break;
 #endif
-#ifdef X86_WIN32
+#ifdef HAVE_FFI_MS_CDELC
 		case ZEND_FFI_ABI_MS:
 			type->func.abi = FFI_MS_CDECL;
 			break;
 #endif
-#ifndef _WIN32
+#ifdef HAVE_FFI_SYSV
 		case ZEND_FFI_ABI_SYSV:
 			type->func.abi = FFI_SYSV;
 			break;
