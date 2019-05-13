@@ -5573,7 +5573,6 @@ ZEND_VM_C_LABEL(add_again):
 			if (key) {
 				zend_throw_error(NULL, "Cannot unpack array with string keys");
 				FREE_OP1();
-				zval_ptr_dtor(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
 			} else {
 				if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
@@ -5650,10 +5649,6 @@ ZEND_VM_C_LABEL(add_again):
 			}
 
 			zend_iterator_dtor(iter);
-			
-		}
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 	} else if (EXPECTED(Z_ISREF_P(op1))) {
 		op1 = Z_REFVAL_P(op1);
