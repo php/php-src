@@ -228,9 +228,9 @@ function process_args($argv, $argc) {
 
 	// Validate extension name
 	if (!preg_match('/^[a-z][a-z0-9_]+$/i', $options['ext'])) {
-		error('Invalid extension name. Name must start with a letter and'
-			.' preferably include only lower case letters. Optionally, numbers'
-			.' and underscores are also allowed.');
+		error('Invalid extension name. Valid names start with a letter,'
+			.' followed by any number of letters, numbers, or underscores.'
+			.' Using only lower case letters is preferred.');
 	}
 
 	$options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));
