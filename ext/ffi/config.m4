@@ -4,7 +4,7 @@ PHP_ARG_WITH([ffi],
     [Include FFI support])])
 
 if test "$PHP_FFI" != "no"; then
-  PKG_CHECK_MODULES([FFI], [libffi >= 3.2.1])
+  PKG_CHECK_MODULES([FFI], [libffi >= 3.0.11])
 
   AC_CHECK_TYPES(long double)
 
