@@ -5051,6 +5051,10 @@ state_2:
 			}
 			break;
 		case '>':
+			if (depth) {
+				depth--;
+				break;
+			}
 			if (in_q) {
 				break;
 			}
@@ -5108,6 +5112,10 @@ state_3:
 	c = *p;
 	switch (c) {
 		case '>':
+			if (depth) {
+				depth--;
+				break;
+			}
 			if (in_q) {
 				break;
 			}
