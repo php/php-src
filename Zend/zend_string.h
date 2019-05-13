@@ -364,6 +364,25 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 #if defined(_WIN32) || defined(__i386__) || defined(__x86_64__) || defined(__aarch64__)
 	/* Version with multiplication works better on modern CPU */
 	for (; len >= 8; len -= 8, str += 8) {
+# if defined(__aarch64__)
+		/* On some architectures it is beneficial to load 8 bytes at a
+		   time and extract each byte with a bit field extract instr. */
+		uint64_t chunk;
+
+		memcpy(&chunk, str, sizeof(chunk));
+		hash =
+			hash                        * 33 * 33 * 33 * 33 +
+			((chunk >> (8 * 0)) & 0xff) * 33 * 33 * 33 +
+			((chunk >> (8 * 1)) & 0xff) * 33 * 33 +
+			((chunk >> (8 * 2)) & 0xff) * 33 +
+			((chunk >> (8 * 3)) & 0xff);
+		hash =
+			hash                        * 33 * 33 * 33 * 33 +
+			((chunk >> (8 * 4)) & 0xff) * 33 * 33 * 33 +
+			((chunk >> (8 * 5)) & 0xff) * 33 * 33 +
+			((chunk >> (8 * 6)) & 0xff) * 33 +
+			((chunk >> (8 * 7)) & 0xff);
+# else
 		hash =
 			hash   * 33 * 33 * 33 * 33 +
 			str[0] * 33 * 33 * 33 +
@@ -376,6 +395,7 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 			str[5] * 33 * 33 +
 			str[6] * 33 +
 			str[7];
+# endif
 	}
 	if (len >= 4) {
 		hash =
