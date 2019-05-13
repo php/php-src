@@ -6,5 +6,5 @@ Spread operator is not supported in destructuring assignments
 [$head, ...$tail] = [1, 2, 3];
 
 ?>
---EXPECT--
+--EXPECTF--
 Fatal error: Spread operator is not supported in assignments in %s on line %d

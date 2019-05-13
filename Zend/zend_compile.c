@@ -6934,7 +6934,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 
 		zval *value = zend_ast_get_zval(value_ast);
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
-			if (EXPECTED(Z_TYPE_P(value) == IS_ARRAY)) {
+			if (Z_TYPE_P(value) == IS_ARRAY) {
 				HashTable *ht = Z_ARRVAL_P(value);
 				zval *val;
 				zend_string *key;
@@ -6943,12 +6943,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					if (key) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Cannot unpack array with string keys");
 					}
-					Z_TRY_ADDREF_P(val);
 					if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
-						zval_ptr_dtor_nogc(val);
 						zval_ptr_dtor(result);
 						return 0;
 					}
+					Z_TRY_ADDREF_P(val);
 				} ZEND_HASH_FOREACH_END();
 		
 				continue;
