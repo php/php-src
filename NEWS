@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #77931 (Warning for array_map mentions wrong type). (Nikita)
+  . Fixed bug #78003 (strip_tags output change since PHP 7.3). (cmb)
 
 02 May 2019, PHP 7.3.5
 
