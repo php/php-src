@@ -5227,6 +5227,10 @@ state_2:
 			}
 			break;
 		case '>':
+			if (depth) {
+				depth--;
+				break;
+			}
 			if (in_q) {
 				break;
 			}
