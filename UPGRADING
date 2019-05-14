@@ -492,28 +492,6 @@ The following extensions and SAPIs are affected:
 - Curl:
   . --with-curl no longer accepts a directory.
 
-- IMAP:
-  . --with-kerberos no longer accepts a directory.
-
-- Intl:
-  . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
-    always required.
-
-- Mbstring:
-  . --with-onig has been removed. Unless --disable-mbregex has been passed,
-    libonig is required.
-
-- OpenSSL:
-  . --with-openssl no longer accepts a directory.
-  . --with-kerberos no longer accepts a directory.
-
-- PCRE:
-  . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
-    to opt into using an external PCRE library, rather than the bundled one.
-
-- Readline:
-  . --with-libedit no longer accepts a directory.
-
 - FPM:
   . --with-fpm-systemd now uses only pkg-config for libsystem checks. The
     libsystemd minimum required version is 209.
@@ -529,15 +507,43 @@ The following extensions and SAPIs are affected:
   . --with-webp-dir becomes --with-webp.
   . --with-xpm-dir becomes --with-xpm.
 
+- IMAP:
+  . --with-kerberos no longer accepts a directory.
+
+- Intl:
+  . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
+    always required.
+
 - Libxml:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
 
+- Mbstring:
+  . --with-onig has been removed. Unless --disable-mbregex has been passed,
+    libonig is required.
+
 - ODBC:
   . --with-iodbc no longer accepts a directory.
 
+- OpenSSL:
+  . --with-openssl no longer accepts a directory.
+  . --with-kerberos no longer accepts a directory.
+
+- PCRE:
+  . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
+    to opt into using an external PCRE library, rather than the bundled one.
+
+- PDO_SQLite:
+  . --with-pdo-sqlite no longer accepts a directory.
+
+- Readline:
+  . --with-libedit no longer accepts a directory.
+
 - Sodium:
   . --with-sodium no longer accepts a directory.
+
+- SQLite3:
+  . --with-sqlite3 no longer accepts a directory.
 
 - Zip:
   . --with-libzip has been removed.
