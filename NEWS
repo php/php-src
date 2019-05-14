@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.19
+16 May 2019, PHP 7.2.19RC1
 
 - FPM:
   . Fixed bug #77934 (php-fpm kill -USR2 not working). (Jakub Zelenka)
