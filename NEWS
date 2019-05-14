@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
 
+- Opcache:
+  . Fixed possible crashes, because of inconsistent PCRE cache and opcache
+    SHM reset. (Alexey Kalinin, Dmitry)
+
 - PDO_MySQL:
   . Fixed bug #77944 (Wrong meta pdo_type for bigint on LLP64). (cmb)
 
