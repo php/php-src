@@ -566,7 +566,7 @@ ZEND_FUNCTION(func_get_args)
 		} ZEND_HASH_FILL_END();
 		Z_ARRVAL_P(return_value)->nNumOfElements = arg_count;
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */

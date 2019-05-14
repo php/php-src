@@ -1360,7 +1360,7 @@ SXE_METHOD(xpath)
 			}
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETVAL_EMPTY_ARRAY();
 	}
 
 	xmlXPathFreeObject(retval);

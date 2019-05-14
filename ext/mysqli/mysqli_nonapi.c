@@ -422,7 +422,7 @@ PHP_FUNCTION(mysqli_error_list)
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #else
 	if (mysql_errno(mysql->mysql)) {
@@ -434,7 +434,7 @@ PHP_FUNCTION(mysqli_error_list)
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
 		add_next_index_zval(return_value, &single_error);
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #endif
 }
@@ -468,7 +468,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #else
 	if (mysql_stmt_errno(stmt->stmt)) {
@@ -480,7 +480,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
 		add_next_index_zval(return_value, &single_error);
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #endif
 }

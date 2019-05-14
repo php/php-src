@@ -679,7 +679,7 @@ PHP_METHOD(sqlite3, querySingle)
 			if (!entire_row) {
 				RETVAL_NULL();
 			} else {
-				ZVAL_EMPTY_ARRAY(return_value);
+				RETVAL_EMPTY_ARRAY();
 			}
 			break;
 		}

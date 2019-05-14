@@ -2665,8 +2665,7 @@ PHP_FUNCTION(array_fill)
 			}
 		}
 	} else if (EXPECTED(num == 0)) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	} else {
 		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
 		RETURN_FALSE;
@@ -3503,8 +3502,7 @@ PHP_FUNCTION(array_slice)
 
 	/* Clamp the offset.. */
 	if (offset > num_in) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
 		offset = 0;
 	}
@@ -3517,8 +3515,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	if (length <= 0) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	/* Initialize returned array */
@@ -4050,8 +4047,7 @@ PHP_FUNCTION(array_values)
 	/* Return empty input as is */
 	arrlen = zend_hash_num_elements(arrval);
 	if (!arrlen) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	/* Return vector-like packed arrays as-is */
@@ -5456,8 +5452,7 @@ PHP_FUNCTION(array_diff)
 				RETURN_NULL();
 			}
 		}
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	} else if (num == 1) {
 		int found = 0;
 		zend_string *search_str, *tmp_search_str;
@@ -5474,8 +5469,7 @@ PHP_FUNCTION(array_diff)
 					RETURN_NULL();
 				}
 			}
-			ZVAL_EMPTY_ARRAY(return_value);
-			return;
+			RETURN_EMPTY_ARRAY();
 		}
 
 		search_str = zval_get_tmp_string(value, &tmp_search_str);
@@ -5501,7 +5495,7 @@ PHP_FUNCTION(array_diff)
 		zend_tmp_string_release(tmp_search_str);
 
 		if (found) {
-			ZVAL_EMPTY_ARRAY(return_value);
+			RETVAL_EMPTY_ARRAY();
 		} else {
 			ZVAL_COPY(return_value, &args[0]);
 		}
@@ -6435,8 +6429,7 @@ PHP_FUNCTION(array_combine)
 	}
 
 	if (!num_keys) {
-		ZVAL_EMPTY_ARRAY(return_value);
-		return;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	array_init_size(return_value, num_keys);
