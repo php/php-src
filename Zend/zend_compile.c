@@ -6946,6 +6946,8 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 	zend_ast *last_elem_ast = NULL;
 	uint32_t i;
 	zend_bool is_constant = 1;
+	zend_bool has_explicit_keys = 0;
+	uint32_t unpack_lineno = (uint32_t)-1;
 
 	if (ast->attr == ZEND_ARRAY_SYNTAX_LIST) {
 		zend_error(E_COMPILE_ERROR, "Cannot use list() as standalone expression");
@@ -6972,7 +6974,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 			) {
 				is_constant = 0;
 			}
+			if (elem_ast->child[1]) {
+				has_explicit_keys = 1;
+			}
 		} else {
+			unpack_lineno = zend_ast_get_lineno(elem_ast);
 			zend_eval_const_expr(&elem_ast->child[0]);
 			
 			if (elem_ast->child[0]->kind != ZEND_AST_ZVAL) {
@@ -6981,6 +6987,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		}
 
 		last_elem_ast = elem_ast;
+	}
+
+	if (has_explicit_keys && unpack_lineno != (uint32_t) -1) {
+		CG(zend_lineno) = unpack_lineno;
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use unpacking in arrays with explicit keys");
 	}
 
 	if (!is_constant) {
