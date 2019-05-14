@@ -638,7 +638,7 @@ SPL_METHOD(SplFixedArray, toArray)
 			}
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */

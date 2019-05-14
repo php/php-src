@@ -1060,7 +1060,7 @@ static PHP_FUNCTION(libxml_get_errors)
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */
