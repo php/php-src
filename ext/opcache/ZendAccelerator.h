@@ -191,6 +191,8 @@ typedef struct _zend_accel_globals {
 	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */
+	zend_bool               accelerator_enabled; /* accelerator enabled for current request */
+	zend_bool               pcre_reseted;
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	zend_string            *cwd;                  /* current working directory or NULL */
