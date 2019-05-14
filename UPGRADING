@@ -181,6 +181,8 @@ PHP 7.4 UPGRADE NOTES
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
 
+  . The eval() can be now disabled via disable_functions INI directive.
+
 - CURL:
   . CURLFile now supports stream wrappers in addition to plain file names, if
     the extension has been built against libcurl >= 7.56.0.  The streams may
