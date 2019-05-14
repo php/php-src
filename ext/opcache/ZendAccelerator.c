@@ -429,7 +429,7 @@ static zend_always_inline zend_string *accel_find_interned_string(zend_string *s
 	}
 
 	if (!ZCG(counted)) {
-		if (accel_activate_add() == FAILURE) {
+		if (!ZCG(accelerator_enabled) || accel_activate_add() == FAILURE) {
 			return str;
 		}
 		ZCG(counted) = 1;
@@ -1145,7 +1145,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 			cwd_len = ZSTR_LEN(cwd_str);
 			if (ZCG(cwd_check)) {
 				ZCG(cwd_check) = 0;
-				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
+				if (ZCG(accelerator_enabled)) {
 
 					zend_string *str = accel_find_interned_string(cwd_str);
 					if (!str) {
@@ -1185,7 +1185,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 
 			if (ZCG(include_path_check)) {
 				ZCG(include_path_check) = 0;
-				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
+				if (ZCG(accelerator_enabled)) {
 
 					zend_string *str = accel_find_interned_string(ZCG(include_path));
 					if (!str) {
@@ -1268,7 +1268,7 @@ int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool f
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
+	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -1872,7 +1872,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		return accelerator_orig_compile_file(file_handle, type);
 	} else if (file_cache_only) {
 		return file_cache_compile_file(file_handle, type);
-	} else if ((!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
+	} else if (!ZCG(accelerator_enabled) ||
 	           (ZCSG(restart_in_progress) && accel_restart_is_active())) {
 		if (ZCG(accel_directives).file_cache) {
 			return file_cache_compile_file(file_handle, type);
@@ -2159,10 +2159,8 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 /* zend_resolve_path() replacement for PHP 5.3 and above */
 static zend_string* persistent_zend_resolve_path(const char *filename, size_t filename_len)
 {
-	if (ZCG(enabled) && accel_startup_ok &&
-		!file_cache_only &&
-	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-	    !ZCSG(restart_in_progress)) {
+	if (!file_cache_only &&
+	    ZCG(accelerator_enabled)) {
 
 		/* check if callback is called from include_once or it's a main request */
 		if ((!EG(current_execute_data) &&
@@ -2304,6 +2302,7 @@ int accel_activate(INIT_FUNC_ARGS)
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
+					ZCG(accelerator_enabled) = 0;
 					return SUCCESS;
 				}
 			}
@@ -2365,11 +2364,14 @@ int accel_activate(INIT_FUNC_ARGS)
 				}
 				accel_restart_leave();
 			}
-		} else {
+		}
+		if (!ZCG(pcre_reseted)) {
 			reset_pcre = 1;
 		}
 		zend_shared_alloc_unlock();
 	}
+
+	ZCG(accelerator_enabled) = ZCSG(accelerator_enabled);
 
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -2382,8 +2384,10 @@ int accel_activate(INIT_FUNC_ARGS)
 		realpath_cache_clean();
 
 		accel_reset_pcre_cache();
+		ZCG(pcre_reseted) = 0;
 	} else if (reset_pcre) {
 		accel_reset_pcre_cache();
+		ZCG(pcre_reseted) = 1;
 	}
 
 

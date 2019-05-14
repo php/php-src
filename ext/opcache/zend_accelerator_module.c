@@ -442,9 +442,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (ZCG(enabled) && accel_startup_ok &&
-		((ZCG(counted) || ZCSG(accelerator_enabled)) || file_cache_only)
-	) {
+	if (ZCG(accelerator_enabled) || file_cache_only) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
@@ -553,7 +551,7 @@ static int accelerator_get_scripts(zval *return_value)
 	struct timeval exec_time;
 	struct timeval fetch_time;
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
+	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return 0;
 	}
 
@@ -615,7 +613,7 @@ static ZEND_FUNCTION(opcache_get_status)
 	array_init(return_value);
 
 	/* Trivia */
-	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && (ZCG(counted) || ZCSG(accelerator_enabled)));
+	add_assoc_bool(return_value, "opcache_enabled", ZCG(accelerator_enabled));
 
 	if (ZCG(accel_directives).file_cache) {
 		add_assoc_string(return_value, "file_cache", ZCG(accel_directives).file_cache);
@@ -900,7 +898,7 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if (!ZCG(accelerator_enabled)) {
 		RETURN_FALSE;
 	}
 
