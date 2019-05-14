@@ -56,6 +56,7 @@ static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(is_a);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
+static ZEND_FUNCTION(get_mangled_object_vars);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
@@ -142,6 +143,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_object_vars, 0, 0, 1)
+	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_mangled_object_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
@@ -264,6 +269,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(is_a,			arginfo_is_subclass_of)
 	ZEND_FE(get_class_vars,		arginfo_get_class_vars)
 	ZEND_FE(get_object_vars,	arginfo_get_object_vars)
+	ZEND_FE(get_mangled_object_vars,	arginfo_get_mangled_object_vars)
 	ZEND_FE(get_class_methods,	arginfo_get_class_methods)
 	ZEND_FE(trigger_error,		arginfo_trigger_error)
 	ZEND_FALIAS(user_error,		trigger_error,		arginfo_trigger_error)
@@ -1234,6 +1240,31 @@ ZEND_FUNCTION(get_object_vars)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
+}
+/* }}} */
+
+/* {{{ proto array get_mangled_object_vars(object obj)
+   Returns an array of mangled object properties. Does not respect property visibility. */
+ZEND_FUNCTION(get_mangled_object_vars)
+{
+	zval *obj;
+	HashTable *properties;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	properties = Z_OBJ_HT_P(obj)->get_properties(obj);
+	if (!properties) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
+
+	properties = zend_proptable_to_symtable(properties,
+		(Z_OBJCE_P(obj)->default_properties_count ||
+		 Z_OBJ_P(obj)->handlers != &std_object_handlers ||
+		 GC_IS_RECURSIVE(properties)));
+	RETURN_ARR(properties);
 }
 /* }}} */
 
