@@ -2,6 +2,8 @@
 Phar: Phar::extractTo()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--CONFLICTS--
+tempmanifest1.phar.php
 --INI--
 phar.readonly=0
 --FILE--
