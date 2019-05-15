@@ -216,6 +216,15 @@ static zend_class_entry *lookup_class(const zend_function *fe, zend_string *name
 	return NULL;
 }
 
+/* Instanceof that's safe to use on unlinked classes. For the unlinked case, we only handle
+ * class identity here. */
+static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+	if ((ce1->ce_flags & ZEND_ACC_LINKED) && (ce2->ce_flags & ZEND_ACC_LINKED)) {
+		return instanceof_function(ce1, ce2);
+	}
+	return ce1 == ce2;
+}
+
 /* Unresolved means that class declarations that are currently not available are needed to
  * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
  * as an ERROR. */
@@ -254,7 +263,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		if (!fe_ce || !proto_ce) {
 			return INHERITANCE_UNRESOLVED;
 		}
-		return instanceof_function(fe_ce, proto_ce) ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+		return unlinked_instanceof(fe_ce, proto_ce) ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
@@ -262,7 +271,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			if (!fe_ce) {
 				return INHERITANCE_UNRESOLVED;
 			}
-			return instanceof_function(fe_ce, zend_ce_traversable)
+			return unlinked_instanceof(fe_ce, zend_ce_traversable)
 				? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 		}
 
