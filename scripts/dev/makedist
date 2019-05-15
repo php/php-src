@@ -1,143 +1,175 @@
 #!/bin/sh
 #
-# Distribution generator for git
-#
-# Usage: makedist version
-# Example: makedist 5.4.1
-# Example: makedist 5.3.5RC1
-#
-# To work, this script needs a consistent tagging of all releases.
-# Each release of a package should have a tag of the form
-#
-#  php-X.Y.Z[sub]
-#
-# The distribution ends up in a .tar.gz file that contains the distribution
-# in a directory called php-<version>.
-# A .tar.bz2 file is also created.
+# PHP distribution generator for creating PHP release packages.
 #
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to git by Stanislav Malyshev <stas@php.net>
+#
+# TODO:
+# - Fix remote repo option
+# - Check if Zend parsers need fixes
+#
+# tweak zendparse to be exported through ZEND_API
+# NOTE this has to be revisited once bison supports foreign skeletons
+#      and that bison version is used. Read /usr/share/bison/README for more
+#sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.c
+#sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
+#sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
 
 # Go to project root directory.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
-if test "$#" != "1"; then
-  echo "Usage: makedist <version>" >&2
-  exit 1
+# Process options and arguments
+while test $# -gt 0; do
+  if test "$1" = "-h" || test "$1" = "--help"; then
+    cat << HELP
+PHP distribution generator for creating PHP release packages.
+
+Creates a PHP release package (tar.gz, tar.bz2, tar.xz) from the current Git
+php-src repository files.
+
+Beside the source code files present in the Git repository, the snapshot archive
+also includes generated configure script, configuration headers, PHP parsers,
+PHP lexers, and similar generated files to simplify the installation on *nix
+systems.
+
+This script needs a consistent tagging of all releases. Each release of a
+package should have a tag of the form:
+
+  php-X.Y.Z[alpha|beta|RC]
+
+Where:
+- X is major version number
+- Y is minor version number
+- Z is patch version number
+- last part is optional and can be one of RC, alpha, beta and belonging number.
+
+SYNOPSIS:
+  makedist [option] <tree-ish>
+
+OPTIONS:
+  -h, --help       Display this help.
+  --remote <repo>  Instead of using a local repository, retrieve a tar archive
+                   from a remote repository.
+  <tree-ish>       The Git tree or Git commit to produce an archive for.
+
+EXAMPLES:
+
+  Creates nightly snapshot of the master branch:
+    makedist
+
+  Creates release packages:
+    makedist php-7.4.0
+
+  Creates a release candidate 1 packages:
+    makedist php-7.4.0RC1
+
+  Creates release packages from a remote Git repository:
+    makedist --remote git@git.php.net:php-src.git php-7.4.0RC1
+HELP
+    exit 0
+  elif test "$1" = "--remote" && test -n "$2"; then
+    remote=$2
+    shift
+    shift
+  elif test -n "$1"; then
+    treeish="$1"
+    prefix="$treeish"
+    shift
+  fi
+done
+
+if test -z "$treeish"; then
+  treeish="master"
+  prefix="php-snapshot-master-"$(date +"%Y-%m-%d-%H-%M")
 fi
 
-VER=$1 ; shift
-
-if test "x$PHPROOT" = "x"; then
-  PHPROOT=git@git.php.net:php-src.git;
-fi
-
-LT_TARGETS='build/ltmain.sh build/config.guess build/config.sub'
-
-if echo '\c' | grep -s c >/dev/null 2>&1
-then
-  ECHO_N="echo -n"
-  ECHO_C=""
-else
-  ECHO_N="echo"
-  ECHO_C='\c'
-fi
-
-MY_OLDPWD=`pwd`
-
-# the destination .tar.gz file
-ARCHIVE=$MY_OLDPWD/php-$VER.tar
-
-# temporary directory used to check out files from SVN
-DIR=php-$VER
-DIRPATH=$MY_OLDPWD/$DIR
-
-if test -d "$DIRPATH"; then
-  echo "The directory $DIR" >&2
+if test -d "$prefix"; then
+  echo "The directory $prefix" >&2
   echo "already exists, rename or remove it and run makedist again." >&2
   exit 1
 fi
 
-# Export PHP
-$ECHO_N "makedist: exporting tag 'php-$VER' from '$PHPROOT'...$ECHO_C"
-git archive --format=tar --remote=$PHPROOT refs/tags/php-$VER --prefix=php-$VER/ | (cd $MY_OLDPWD; tar xvf -) || exit 4
+if test -n "$remote"; then
+  remote="--remote=$remote"
+else
+  echo "makedist: Verifying that tree-ish $treeish exists in Git repository..."
+  git rev-parse --verify $treeish
+  exit_code=$?
+  if test "$exit_code" != "0"; then
+    echo "          $treeish is not found in the Git repository" >&2
+    exit $exit_code
+  else
+    echo "          OK"
+  fi
+fi
+
+# Export PHP.
+echo "makedist: exporting '$treeish' from '$git'..."
+git archive --format=tar $remote --prefix=$prefix/ $treeish | tar xvf - || exit 4
 echo ""
 
-cd $DIR || exit 5
+cd $prefix || exit 5
 
-# hide away our own versions of libtool-generated files
-for i in $LT_TARGETS; do
-  if test -f "$i"; then
-    mv $i $i.bak
-    cp $i.bak $i
-  fi
-done
-
-# generate some files so people don't need bison, re2c and autoconf
-# to install
-set -x
+# Generate configure script so autoconf is not required to install.
 ./buildconf --force
 
-# Generate lexer and parser files
+# Generate lexer and parser files so bison and re2c aren't required to install.
 ./scripts/dev/genfiles
 exit_code=$?
 if test "$exit_code" != "0"; then
   exit $exit_code
 fi
 
-# now restore our versions of libtool-generated files
-for i in $LT_TARGETS; do
-  test -f "$i" && mv $i.bak $i
-done
+# Remove not needed files.
+rm -rf autom4te.cache/
 
-# removing junk files
-rm -fr autom4te.cache/
-
-# touching everything to be packaged
-find $MY_OLDPWD/php-$VER -exec touch -c {} \;
-
-# tweak zendparse to be exported through ZEND_API
-# NOTE this has to be revisited once bison supports foreign skeletons
-#      and that bison version is used. Read /usr/share/bison/README for more
-sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.c
-sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
-sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
-
-# download pear
-$ECHO_N "makedist: Attempting to download PEAR's phar archive"
+# Download pear
+echo ""
+echo "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
   wget https://pear.php.net/install-pear-nozlib.phar -nd -P pear/
-  if [ "x$?" != "x0" ]
-  then
-    $ECHO_N "Pear download failed";
-      exit 7
+  if [ "x$?" != "x0" ]; then
+    echo "makedist: Pear download failed" >&2
+    exit 1
   fi
 else
-  $ECHO_N "Missing wget binary needed for pear download";
-  exit 7
+  echo "makedist: Missing wget binary needed for pear download" >&2
+  exit 1
 fi
 
-cd $MY_OLDPWD
-$ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
-rm -f $ARCHIVE.gz
-tar cf $ARCHIVE php-$VER || exit 8
-gzip -9 $ARCHIVE || exit 9
-echo ""
+# Touch everything to be packaged.
+echo "makedist: Touching all files..."
+find . -exec touch -c {} \;
 
-$ECHO_N "makedist: making bz2zipped tar archive...$ECHO_C"
-rm -f $ARCHIVE.bz2
-tar cf $ARCHIVE php-$VER || exit 10
-bzip2 -9 $ARCHIVE || exit 11
-echo ""
+cd ..
 
-$ECHO_N "makedist: making xz2zipped tar archive...$ECHO_C"
-rm -f $ARCHIVE.xz
-tar cf $ARCHIVE php-$VER || exit 10
-xz -9 $ARCHIVE || exit 12
-echo ""
+echo "makedist: Creating tar archive"
+tar cf "$prefix".tar "$prefix"
+rm -rf "$prefix" "$prefix".tar.*
 
-$ECHO_N "makedist: cleaning up...$ECHO_C"
-rm -rf $DIRPATH || exit 13
-echo ""
+echo "makedist: Creating tar.gz archive"
+gzip -9 -k "$prefix".tar || exit 6
+md5sum "$prefix".tar.gz
+gzip -t "$prefix".tar.gz
 
-exit 0
+sync
+sleep 2
+
+echo "makedist: Creating tar.bz2 archive"
+bzip2 -9 -k $prefix.tar || exit 7
+md5sum $prefix.tar.bz2
+bzip2 -t $prefix.tar.bz2
+
+sync
+sleep 2
+
+echo "makedist: Creating tar.xz archive"
+xz -9 -k "$prefix".tar || exit 9
+md5sum "$prefix".tar.xz
+xz -t "$prefix".tar.xz
+
+echo "makedist: cleaning up."
+rm -f "$prefix".tar || exit 13
+echo ""
+echo "makedist: All done."
