@@ -46,17 +46,6 @@ require_once('skipifconnectfailure.inc');
 
 	if ($IS_MYSQLND) {
 		$expected = array(
-			'mysqlnd statistics',
-			'bytes_sent', 'bytes_received', 'packets_sent', 'packets_received',
-			'protocol_overhead_in', 'protocol_overhead_out', 'result_set_queries',
-			'non_result_set_queries', 'no_index_used', 'bad_index_used',
-			'buffered_sets', 'unbuffered_sets', 'ps_buffered_sets', 'ps_unbuffered_sets',
-			'flushed_normal_sets', 'flushed_ps_sets', 'rows_fetched_from_server',
-			'rows_fetched_from_client', 'rows_skipped', 'copy_on_write_saved',
-			'copy_on_write_performed', 'command_buffer_too_small', 'connect_success',
-			'connect_failure', 'connection_reused', 'explicit_close', 'implicit_close',
-			'disconnect_close', 'in_middle_of_command_close', 'explicit_free_result',
-			'implicit_free_result', 'explicit_stmt_close', 'implicit_stmt_close',
 			'size',
 			'mysqli.allow_local_infile',
 			'mysqli.allow_persistent', 'mysqli.max_persistent'
