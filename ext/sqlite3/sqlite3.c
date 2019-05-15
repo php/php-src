@@ -287,6 +287,51 @@ PHP_METHOD(sqlite3, lastErrorCode)
 }
 /* }}} */
 
+/* {{{ proto int SQLite3::lastExtendedErrorCode()
+   Returns the numeric extnded result code of the most recent failed sqlite API call for the database connection. */
+PHP_METHOD(sqlite3, lastExtendedErrorCode)
+{
+	php_sqlite3_db_object *db_obj;
+	zval *object = ZEND_THIS;
+	db_obj = Z_SQLITE3_DB_P(object);
+
+	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (db_obj->initialised) {
+		RETURN_LONG(sqlite3_extended_errcode(db_obj->db));
+	} else {
+		RETURN_LONG(0);
+	}
+}
+/* }}} */
+
+/* {{{ proto int SQLite3::toggleExtendedResultCodes(bool enable)
+    Turns on or off the the extended result codes feature of SQLite. */
+PHP_METHOD(sqlite3, toggleExtendedResultCodes)
+{
+	php_sqlite3_db_object *db_obj;
+	zval *object = ZEND_THIS;
+	zend_bool enable;
+	db_obj = Z_SQLITE3_DB_P(object);
+
+	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &enable) == FAILURE) {
+		return;
+	}
+
+	if (db_obj->initialised) {
+		RETURN_LONG(sqlite3_extended_result_codes(db_obj->db, enable ? 1 : 0));
+	} else {
+		RETURN_LONG(-1);
+	}
+}
+/* }}} */
+
 /* {{{ proto string SQLite3::lastErrorMsg()
    Returns english text describing the most recent failed sqlite API call for the database connection. */
 PHP_METHOD(sqlite3, lastErrorMsg)
