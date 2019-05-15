@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
+- mysqlnd:
+  . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
+
 - PDO:
   . Implemented FR #78033 (PDO - support username & password specified in
     DSN). (sjon)
