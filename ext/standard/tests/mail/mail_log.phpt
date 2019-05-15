@@ -2,7 +2,7 @@
 Test mail() function : mail.log ini setting
 --INI--
 sendmail_path=tee /tmp/mail.out >/dev/null
-mail.log = /tmp/mail.log
+mail.log = {TMP}/mail.log
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == "WIN")
