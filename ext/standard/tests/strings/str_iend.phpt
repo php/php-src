@@ -2,13 +2,13 @@
 str_iend() function - unit tests for str_iend()
 --FILE--
 <?php
-/* Prototype: boolean str_iend (string $search_value string $str );
-   Description: Performs case insensitive check to Determine if $str ends with $search_value
+/* Prototype: boolean str_iend (string $haystack string $needle );
+   Description: Performs case insensitive check to Determine if $haystack ends with $needle
 */
 $testStr = "beginningMiddleEnd";
-var_dump(str_iend("End", $testStr));
-var_dump(str_iend("end", $testStr));
-var_dump(str_iend("en", $testStr));
+var_dump(str_iend($testStr, "End"));
+var_dump(str_iend($testStr, "end"));
+var_dump(str_iend($testStr, "en"));
 ?>
 --EXPECT--
 bool(true)

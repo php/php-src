@@ -2445,62 +2445,62 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
-/* {{{ proto boolean str_begin(string search_value, string str)
-   Checks if str begins with search_value */
+/* {{{ proto boolean str_begin(string haystack, string needle)
+   Checks if haystack begins with needle */
 PHP_FUNCTION(str_begin) {
-	zend_string *str, *search_value;
+	zend_string *haystack, *needle;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = 0; i < search_value->len; i++) 
-		if (str->val[i] != search_value->val[i]) 
+	for (i = 0; i < needle->len; i++) 
+		if (haystack->val[i] != needle->val[i]) 
 			RETURN_BOOL(0);
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_ibegin(string search_value, string str)
-   Performs case insensitive check to determine if str begins with search_value */
+/* {{{ proto boolean str_ibegin(string haystack, string needle)
+   Performs case insensitive check to determine if haystack begins with needle */
 PHP_FUNCTION(str_ibegin) {
-	zend_string *str, *search_value;
+	zend_string *haystack, *needle;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = 0; i < search_value->len; i++) 
-		if (tolower(str->val[i]) != tolower(search_value->val[i])) 
+	for (i = 0; i < needle->len; i++) 
+		if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
 			RETURN_BOOL(0); 
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_end(string search_value, string str)
-   Checks if str ends with search_value */
+/* {{{ proto boolean str_end(string haystack, string needle)
+   Checks if haystack ends with needle */
 PHP_FUNCTION(str_end) {
-	zend_string *str, *search_value;
+	zend_string *haystack, *needle;
 	int i, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) 
-		if (str->val[i] != search_value->val[j]) 
+	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
+		if (haystack->val[i] != needle->val[j]) 
 			RETURN_BOOL(0);
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_iend(string search_value, string str)
-   Performs case insensitive check to determine if str ends with search_value */
+/* {{{ proto boolean str_iend(string haystack, string needle)
+   Performs case insensitive check to determine if haystack ends with needle */
 PHP_FUNCTION(str_iend) {
-	zend_string *str, *search_value;
+	zend_string *haystack, *needle;
 	int i, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &search_value, &str) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
 		RETURN_NULL();
 
-	for (i = str->len - 1, j = search_value->len - 1; j >= 0; i--, j--) 
-		if (tolower(str->val[i]) != tolower(search_value->val[j])) 	
+	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
+		if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
 			RETURN_BOOL(0);
 	RETURN_BOOL(1);
 }
