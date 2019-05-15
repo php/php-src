@@ -660,7 +660,13 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 }
 
 static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op1) {
-	ZVAL_BOOL(result, (type_mask >> Z_TYPE_P(op1)) & 1);
+	uint32_t type = Z_TYPE_P(op1);
+	if (type == PARTIAL_ARRAY) {
+		type = IS_ARRAY;
+	} else if (type == PARTIAL_OBJECT) {
+		type = IS_OBJECT;
+	}
+	ZVAL_BOOL(result, (type_mask >> type) & 1);
 }
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
@@ -1359,6 +1365,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
+			/* TODO: We could implement support for evaluation of + on partial arrays. */
+			if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_ARRAY(op2)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
+
 			if (zend_optimizer_eval_binary_op(&zv, opline->opcode, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1540,6 +1552,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_BW_NOT:
 		case ZEND_BOOL_NOT:
 			SKIP_IF_TOP(op1);
+			if (IS_PARTIAL_ARRAY(op1)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
 			if (zend_optimizer_eval_unary_op(&zv, opline->opcode, op1) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1549,6 +1565,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			break;
 		case ZEND_CAST:
 			SKIP_IF_TOP(op1);
+			if (IS_PARTIAL_ARRAY(op1)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
 			if (zend_optimizer_eval_cast(&zv, opline->extended_value, op1) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1560,6 +1580,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			SKIP_IF_TOP(op1);
+			if (IS_PARTIAL_ARRAY(op1)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
 			ZVAL_BOOL(&zv, zend_is_true(op1));
 			SET_RESULT(result, &zv);
 			break;
@@ -1679,6 +1703,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			break;
 		case ZEND_ROPE_INIT:
 			SKIP_IF_TOP(op2);
+			if (IS_PARTIAL_ARRAY(op2)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
 			if (zend_optimizer_eval_cast(&zv, IS_STRING, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
@@ -1693,6 +1721,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			// string for all SSA vars with some extra checks
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
+			if (IS_PARTIAL_ARRAY(op2)) {
+				SET_RESULT_BOT(result);
+				break;
+			}
 			if (zend_optimizer_eval_binary_op(&zv, ZEND_CONCAT, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
