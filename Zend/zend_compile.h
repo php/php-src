@@ -55,11 +55,9 @@ typedef struct _zend_op zend_op;
 #if SIZEOF_SIZE_T == 4
 # define ZEND_USE_ABS_JMP_ADDR      1
 # define ZEND_USE_ABS_CONST_ADDR    1
-# define ZEND_EX_USE_RUN_TIME_CACHE 1
 #else
 # define ZEND_USE_ABS_JMP_ADDR      0
 # define ZEND_USE_ABS_CONST_ADDR    0
-# define ZEND_EX_USE_RUN_TIME_CACHE 1
 #endif
 
 typedef union _znode_op {
@@ -491,9 +489,7 @@ struct _zend_execute_data {
 	zval                 This;             /* this + call_info + num_args    */
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
-#if ZEND_EX_USE_RUN_TIME_CACHE
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
-#endif
 };
 
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
@@ -684,25 +680,6 @@ struct _zend_execute_data {
 
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
 	((void**)RUN_TIME_CACHE(op_array))[handle]
-
-#if ZEND_EX_USE_RUN_TIME_CACHE
-
-# define EX_RUN_TIME_CACHE() \
-	EX(run_time_cache)
-
-# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
-		EX(run_time_cache) = RUN_TIME_CACHE(op_array); \
-	} while (0)
-
-#else
-
-# define EX_RUN_TIME_CACHE() \
-	RUN_TIME_CACHE(&EX(func)->op_array)
-
-# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
-	} while (0)
-
-#endif
 
 #define IS_UNUSED	0		/* Unused operand */
 #define IS_CONST	(1<<0)

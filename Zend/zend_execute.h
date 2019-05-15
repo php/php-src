@@ -365,22 +365,22 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret);
 
 #define CACHE_ADDR(num) \
-	((void**)((char*)EX_RUN_TIME_CACHE() + (num)))
+	((void**)((char*)EX(run_time_cache) + (num)))
 
 #define CACHED_PTR(num) \
-	((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0]
+	((void**)((char*)EX(run_time_cache) + (num)))[0]
 
 #define CACHE_PTR(num, ptr) do { \
-		((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] = (ptr); \
+		((void**)((char*)EX(run_time_cache) + (num)))[0] = (ptr); \
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR(num, ce) \
-	(EXPECTED(((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] == (void*)(ce)) ? \
-		((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[1] : \
+	(EXPECTED(((void**)((char*)EX(run_time_cache) + (num)))[0] == (void*)(ce)) ? \
+		((void**)((char*)EX(run_time_cache) + (num)))[1] : \
 		NULL)
 
 #define CACHE_POLYMORPHIC_PTR(num, ce, ptr) do { \
-		void **slot = (void**)((char*)EX_RUN_TIME_CACHE() + (num)); \
+		void **slot = (void**)((char*)EX(run_time_cache) + (num)); \
 		slot[0] = (ce); \
 		slot[1] = (ptr); \
 	} while (0)
