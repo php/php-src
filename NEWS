@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.20
 
+- Core:
+  . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
+    (Nikita)
 
 30 May 2019, PHP 7.2.19
 
