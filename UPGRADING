@@ -206,6 +206,11 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+- Standard:
+  . When array_merge() or array_merge_recursive() are called without any
+    arguments, they will return an empty array. Previously, both functions would
+    generate a warning and return null. This change is particularly convenient
+    wrt. the spread operator.
 
 ========================================
 3. Changes in SAPI modules
