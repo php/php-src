@@ -6,7 +6,6 @@
 # Adapted to git by Stanislav Malyshev <stas@php.net>
 #
 # TODO:
-# - Fix remote repo option
 # - Check if Zend parsers need fixes
 #
 # tweak zendparse to be exported through ZEND_API
@@ -19,39 +18,39 @@
 # Go to project root directory.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
-# Process options and arguments
-while test $# -gt 0; do
-  if test "$1" = "-h" || test "$1" = "--help"; then
-    cat << HELP
+# Process options and arguments.
+while :; do
+  case $1 in
+    -h|--help)
+      cat << HELP
 PHP distribution generator for creating PHP release packages.
 
-Creates a PHP release package (tar.gz, tar.bz2, tar.xz) from the current Git
-php-src repository files.
-
-Beside the source code files present in the Git repository, the snapshot archive
-also includes generated configure script, configuration headers, PHP parsers,
-PHP lexers, and similar generated files to simplify the installation on *nix
-systems.
-
-This script needs a consistent tagging of all releases. Each release of a
-package should have a tag of the form:
-
-  php-X.Y.Z[alpha|beta|RC]
-
-Where:
-- X is major version number
-- Y is minor version number
-- Z is patch version number
-- last part is optional and can be one of RC, alpha, beta and belonging number.
+Creates a PHP release packages (tar.gz, tar.bz2, tar.xz) from the php-src Git
+repository. The snapshot archive also includes generated configure script,
+configuration headers, PHP parsers, PHP lexers, and similar generated files to
+simplify the installation on *nix systems.
 
 SYNOPSIS:
-  makedist [option] <tree-ish>
+  makedist [options] <tree-ish>
 
 OPTIONS:
-  -h, --help       Display this help.
-  --remote <repo>  Instead of using a local repository, retrieve a tar archive
-                   from a remote repository.
-  <tree-ish>       The Git tree or Git commit to produce an archive for.
+  -h, --help        Display this help.
+  --remote=<repo>   Instead of using a local repository, retrieve a tar archive
+                    from a remote repository.
+  <tree-ish>        The Git tree or Git commit to produce an archive for. This
+                    script needs a consistent tagging of releases. Each release
+                    of a package should have a tag of the form:
+                      php-X.Y.Z[alpha|beta|RC]
+
+                    or branch:
+                       PHP-X.Y[.Z]
+
+                    Where:
+                      - X is major version number
+                      - Y is minor version number
+                      - Z is patch version number
+                      - last part of tag is optional and is one of RC, alpha, or
+                        beta and belonging number.
 
 EXAMPLES:
 
@@ -61,32 +60,58 @@ EXAMPLES:
   Creates release packages:
     makedist php-7.4.0
 
-  Creates a release candidate 1 packages:
+  Creates the first release candidate packages:
     makedist php-7.4.0RC1
 
   Creates release packages from a remote Git repository:
-    makedist --remote git@git.php.net:php-src.git php-7.4.0RC1
+    makedist --remote=git@git.php.net:php-src.git php-7.4.0RC1
+
+  Creates the ightly snapshot of the PHP-7.4 branch:
+    makedist PHP-7.4
 HELP
-    exit 0
-  elif test "$1" = "--remote" && test -n "$2"; then
-    remote=$2
-    shift
-    shift
-  elif test -n "$1"; then
-    treeish="$1"
-    prefix="$treeish"
-    shift
-  fi
+      exit
+      ;;
+    --remote)
+      # Check for an option argument.
+      if test -n "$2"; then
+        remote=$2
+        shift
+      else
+        echo "makedist: '--remote' requires a non-empty option argument." >&2
+        exit 1
+      fi
+      ;;
+    --remote=?*)
+      # Set everything after the "=".
+      remote=${1#*=}
+      ;;
+    --remote=)
+      # When passing empty "--remote=" option.
+      echo "makedist: '--remote' requires a non-empty option argument." >&2
+      exit 1
+      ;;
+    -?*)
+      echo "WARN: Unknown option (ignored): '$1'" >&2
+      ;;
+    *)
+      # When no more options, check for an argument and break out of the loop.
+      if test -n "$1"; then
+        treeish="$1"
+        prefix="$treeish"
+      elif test -z "$treeish"; then
+        treeish="master"
+        prefix="php-master-"$(date +"%Y-%m-%d-%H-%M")
+      fi
+      break
+  esac
+
+  shift
 done
 
-if test -z "$treeish"; then
-  treeish="master"
-  prefix="php-snapshot-master-"$(date +"%Y-%m-%d-%H-%M")
-fi
-
+# Verify the directory for package files doesn't already exist.
 if test -d "$prefix"; then
-  echo "The directory $prefix" >&2
-  echo "already exists, rename or remove it and run makedist again." >&2
+  echo "makedist: The directory $prefix" >&2
+  echo "          already exists. Rename or remove it and run makedist again." >&2
   exit 1
 fi
 
@@ -124,7 +149,7 @@ fi
 # Remove not needed files.
 rm -rf autom4te.cache/
 
-# Download pear
+# Download pear.
 echo ""
 echo "makedist: Attempting to download PEAR's phar archive"
 if test ! -x wget; then
