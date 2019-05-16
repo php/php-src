@@ -7069,6 +7069,16 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *right_ast = ast->child[1];
 	uint32_t opcode = ast->attr;
 
+	if ((opcode == ZEND_ADD || opcode == ZEND_SUB) && left_ast->kind == ZEND_AST_BINARY_OP && left_ast->attr == ZEND_CONCAT) {
+		zend_error(E_DEPRECATED, "The behavior of unparenthesized expressions containing both '.' and '+'/'-' will change in PHP 8: '+'/'-' will take a higher precedence");
+	}
+	if ((opcode == ZEND_SL || opcode == ZEND_SR) && ((left_ast->kind == ZEND_AST_BINARY_OP && left_ast->attr == ZEND_CONCAT) || (right_ast->kind == ZEND_AST_BINARY_OP && right_ast->attr == ZEND_CONCAT))) {
+		zend_error(E_DEPRECATED, "The behavior of unparenthesized expressions containing both '.' and '>>'/'<<' will change in PHP 8: '<<'/'>>' will take a higher precedence");
+	}
+	if (opcode == ZEND_PARENTHESIZED_CONCAT) {
+		opcode = ZEND_CONCAT;
+	}
+
 	znode left_node, right_node;
 	zend_compile_expr(&left_node, left_ast);
 	zend_compile_expr(&right_node, right_ast);

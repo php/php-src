@@ -1733,6 +1733,7 @@ simple_list:
 				case ZEND_MOD:                 BINARY_OP(" % ",   210, 210, 211);
 				case ZEND_SL:                  BINARY_OP(" << ",  190, 190, 191);
 				case ZEND_SR:                  BINARY_OP(" >> ",  190, 190, 191);
+				case ZEND_PARENTHESIZED_CONCAT: /* fallthrough */
 				case ZEND_CONCAT:              BINARY_OP(" . ",   200, 200, 201);
 				case ZEND_BW_OR:               BINARY_OP(" | ",   140, 140, 141);
 				case ZEND_BW_AND:              BINARY_OP(" & ",   160, 160, 161);

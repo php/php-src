@@ -964,6 +964,7 @@ expr:
 	|	'(' expr ')' {
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
+			if ($$->kind == ZEND_AST_BINARY_OP && $$->attr == ZEND_CONCAT) $$->attr = ZEND_PARENTHESIZED_CONCAT;
 		}
 	|	new_expr { $$ = $1; }
 	|	expr '?' expr ':' expr
