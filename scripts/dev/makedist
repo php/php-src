@@ -66,7 +66,7 @@ EXAMPLES:
   Creates release packages from a remote Git repository:
     makedist --remote=git@git.php.net:php-src.git php-7.4.0RC1
 
-  Creates the ightly snapshot of the PHP-7.4 branch:
+  Creates the nightly snapshot of the PHP-7.4 branch:
     makedist PHP-7.4
 HELP
       exit
