@@ -259,6 +259,10 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/custom_object_serialization
 
+  . array_merge() and array_merge_recursive() may now be called without any
+    arguments, in which case they will return an empty array. This is useful
+    in conjunction with the spread operator, e.g. array_merge(...$arrays).
+
 ========================================
 3. Changes in SAPI modules
 ========================================

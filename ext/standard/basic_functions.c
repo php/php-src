@@ -379,13 +379,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_slice, 0, 0, 2)
 	ZEND_ARG_INFO(0, preserve_keys)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 0)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 0)
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 

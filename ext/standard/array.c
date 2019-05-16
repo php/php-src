@@ -3789,9 +3789,13 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 	HashTable *src, *dest;
 	uint32_t count = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, -1)
+	ZEND_PARSE_PARAMETERS_START(0, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (argc == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
 
 	for (i = 0; i < argc; i++) {
 		zval *arg = args + i;
@@ -3882,7 +3886,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 }
 /* }}} */
 
-/* {{{ proto array array_merge(array arr1 [, array ...])
+/* {{{ proto array array_merge([array ...])
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
@@ -3890,7 +3894,7 @@ PHP_FUNCTION(array_merge)
 }
 /* }}} */
 
-/* {{{ proto array array_merge_recursive(array arr1 [, array ...])
+/* {{{ proto array array_merge_recursive([array ...])
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
