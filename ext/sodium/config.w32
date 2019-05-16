@@ -1,0 +1,14 @@
+// vim:ft=javascript
+
+ARG_WITH("sodium", "for libsodium support", "no");
+
+if (PHP_SODIUM != "no") {
+	if (CHECK_LIB("libsodium.lib", "sodium", PHP_SODIUM) && CHECK_HEADER_ADD_INCLUDE("sodium.h", "CFLAGS_SODIUM")) {
+		EXTENSION("sodium", "libsodium.c");
+		AC_DEFINE('HAVE_LIBSODIUMLIB', 1 , 'Have the Sodium library');
+		AC_DEFINE("HAVE_CRYPTO_AEAD_AES256GCM", 1, "");
+		PHP_INSTALL_HEADERS("ext/sodium/", "php_libsodium.h");
+	} else {
+		WARNING("libsodium not enabled; libraries and headers not found");
+	}
+}

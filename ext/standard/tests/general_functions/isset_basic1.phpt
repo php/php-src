@@ -1,10 +1,10 @@
 --TEST--
-Test isset() function : basic functionality 
+Test isset() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool isset  ( mixed $var  [, mixed $var  [,  $...  ]] )
  * Description:  Determine if a variable is set and is not NULL
- */		
+ */
 
 class foo {}
 

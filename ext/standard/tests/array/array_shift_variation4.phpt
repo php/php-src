@@ -3,7 +3,7 @@ Test array_shift() function : usage variations - multi-dimensional arrays
 --FILE--
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -36,7 +36,7 @@ var_dump($stack_last);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Before shift: --

@@ -5,8 +5,8 @@ Bug #38406 (crash when assigning objects to SimpleXML attributes)
 --FILE--
 <?php
 
-$item = new SimpleXMLElement(b'<something />');
-$item->attribute = b'something';
+$item = new SimpleXMLElement('<something />');
+$item->attribute = 'something';
 var_dump($item->attribute);
 
 $item->otherAttribute = $item->attribute;
@@ -17,7 +17,7 @@ $item->$a = new stdclass;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "something"

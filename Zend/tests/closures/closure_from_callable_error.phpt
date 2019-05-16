@@ -195,7 +195,6 @@ echo "OK\n";
 ?>
 ===DONE===
 --EXPECT--
-
 Cannot access privateInstance method statically
 Cannot access privateInstance method statically with colon scheme
 Cannot access privateInstance method

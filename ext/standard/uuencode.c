@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Ilia Alshanetsky <ilia@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /*
  * Portions of this code are based on Berkeley's uuencode/uudecode
@@ -71,8 +69,10 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
-	/* encoded length is ~ 38% greater than the original */
-	dest = zend_string_alloc((size_t)ceil(src_len * 1.38) + 46, 0);
+	/* encoded length is ~ 38% greater than the original
+       Use 1.5 for easier calculation.
+    */
+	dest = zend_string_safe_alloc(src_len/2, 3, 46, 0);
 	p = ZSTR_VAL(dest);
 	s = src;
 	e = src + src_len;
@@ -139,7 +139,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	e = src + src_len;
 
 	while (s < e) {
-		if ((len = PHP_UU_DEC(*s++)) <= 0) {
+		if ((len = PHP_UU_DEC(*s++)) == 0) {
 			break;
 		}
 		/* sanity check */
@@ -190,7 +190,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	return dest;
 
 err:
-	zend_string_free(dest);
+	zend_string_efree(dest);
 
 	return NULL;
 }
@@ -202,9 +202,10 @@ PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || ZSTR_LEN(src) < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
@@ -217,9 +218,10 @@ PHP_FUNCTION(convert_uudecode)
 	zend_string *src;
 	zend_string *dest;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || ZSTR_LEN(src) < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");
@@ -229,12 +231,3 @@ PHP_FUNCTION(convert_uudecode)
 	RETURN_STR(dest);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

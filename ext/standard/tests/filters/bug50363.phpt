@@ -12,6 +12,6 @@ rewind($b);
 fpassthru($b);
 
 ?>
---EXPECTF--
+--EXPECT--
 Sauvegarderéussi(e) não NÃO
 Sauvegarderéussi(e) não NÃO

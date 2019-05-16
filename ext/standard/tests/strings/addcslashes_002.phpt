@@ -21,10 +21,10 @@ class string1
 $obj = new string1;
 var_dump( addcslashes($obj, "b") );
 
-echo "Done\n"; 
+echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing addcslashes() with ASCII code between 0 and 31 ***
 string(44) "goodyear12345NULL\000truefalse\a\v\f\b\n\r\t"
 

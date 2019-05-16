@@ -13,8 +13,7 @@ var_dump($recItIt->endIteration());
 var_dump($recItIt->nextElement());
 
 ?>
-
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

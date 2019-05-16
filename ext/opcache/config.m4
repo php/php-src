@@ -1,25 +1,88 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_ENABLE([opcache],
+  [whether to enable Zend OPcache support],
+  [AS_HELP_STRING([--disable-opcache],
+    [Disable Zend OPcache support])],
+  [yes])
 
-PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
-[  --disable-opcache       Disable Zend OPcache support], yes)
+PHP_ARG_ENABLE([huge-code-pages],
+  [whether to enable copying PHP CODE pages into HUGE PAGES],
+  [AS_HELP_STRING([--disable-huge-code-pages],
+    [Disable copying PHP CODE pages into HUGE PAGES])],
+  [yes],
+  [no])
 
-PHP_ARG_ENABLE(opcache-file, whether to enable file based caching,
-[  --disable-opcache-file  Disable file based caching], yes, no)
-
-PHP_ARG_ENABLE(huge-code-pages, whether to enable copying PHP CODE pages into HUGE PAGES,
-[  --disable-huge-code-pages
-                          Disable copying PHP CODE pages into HUGE PAGES], yes, no)
+PHP_ARG_ENABLE([opcache-jit],
+  [whether to enable JIT],
+  [AS_HELP_STRING([--disable-opcache-jit],
+    [Disable JIT])],
+  [yes],
+  [no])
 
 if test "$PHP_OPCACHE" != "no"; then
 
-  if test "$PHP_OPCACHE_FILE" = "yes"; then
-    AC_DEFINE(HAVE_OPCACHE_FILE_CACHE, 1, [Define to enable file based caching (experimental)])
-  fi
+  dnl Always build as shared extension
+  ext_shared=yes
 
   if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
+  fi
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    case $host_cpu in
+      x86*)
+        ;;
+      *)
+        AC_MSG_WARN([JIT not supported by host architecture])
+        PHP_OPCACHE_JIT=no
+        ;;
+    esac
+  fi
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c"
+
+    dnl Find out which ABI we are using.
+    echo 'int i;' > conftest.$ac_ext
+    if AC_TRY_EVAL(ac_compile); then
+      case `/usr/bin/file conftest.o` in
+        *64-bit*)
+          DASM_FLAGS="-D X64=1"
+        ;;
+      esac
+    fi
+    rm -rf conftest*
+
+    if test "$enable_zts" = "yes"; then
+      DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
+    fi
+
+    PHP_SUBST(DASM_FLAGS)
+
+    AC_MSG_CHECKING(for opagent in default path)
+    for i in /usr/local /usr; do
+      if test -r $i/include/opagent.h; then
+        OPAGENT_DIR=$i
+        AC_MSG_RESULT(found in $i)
+        break
+      fi
+    done
+    if test -z "$OPAGENT_DIR"; then
+      AC_MSG_RESULT(not found)
+    else
+      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
+      [
+        AC_DEFINE(HAVE_OPROFILE,1,[ ])
+        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
+        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
+        PHP_SUBST(OPCACHE_SHARED_LIBADD)
+      ],[
+        AC_MSG_RESULT(not found)
+      ],[
+        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
+      ])
+    fi
+
   fi
 
   AC_CHECK_FUNC(mprotect,[
@@ -29,7 +92,7 @@ if test "$PHP_OPCACHE" != "no"; then
   AC_CHECK_HEADERS([unistd.h sys/uio.h])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
@@ -93,13 +156,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -145,13 +208,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using /dev/zero shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -200,13 +263,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_ZERO, 1, [Define if you have mmap("/dev/zero") SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -228,7 +291,7 @@ int main() {
   char *shm;
   char tmpname[4096];
 
-  sprintf(tmpname,"test.shm.%dXXXXXX", getpid());
+  sprintf(tmpname,"/opcache.test.shm.%dXXXXXX", getpid());
   if (mktemp(tmpname) == NULL) {
     return 1;
   }
@@ -269,13 +332,13 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
   AC_MSG_CHECKING(for mmap() using regular file shared memory support)
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -297,7 +360,7 @@ int main() {
   char *shm;
   char tmpname[4096];
 
-  sprintf(tmpname,"test.shm.%dXXXXXX", getpid());
+  sprintf(tmpname,"opcache.test.shm.%dXXXXXX", getpid());
   if (mktemp(tmpname) == NULL) {
     return 1;
   }
@@ -338,47 +401,10 @@ int main() {
   }
   return 0;
 }
-],dnl
+]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
-    msg=yes,msg=no,msg=no)
+    msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
-
-flock_type=unknown
-AC_MSG_CHECKING("whether flock struct is linux ordered")
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
-    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
-		return 0;
-    }
-    return 1;
-  } 
-], [
-	flock_type=linux
-    AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
-    AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
-
-AC_MSG_CHECKING("whether flock struct is BSD ordered")
-AC_TRY_RUN([
-  #include <fcntl.h>
-  struct flock lock = { 1, 2, 3, 4, 5 };
-  int main() { 
-    if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
-		return 0;
-    }
-    return 1;
-  } 
-], [
-	flock_type=bsd
-    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type]) 
-    AC_MSG_RESULT("yes")
-], AC_MSG_RESULT("no") )
-
-if test "$flock_type" = "unknown"; then
-	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
-fi
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
@@ -410,9 +436,20 @@ fi
 	Optimizer/zend_inference.c \
 	Optimizer/zend_func_info.c \
 	Optimizer/zend_call_graph.c \
-	Optimizer/zend_dump.c,
+	Optimizer/sccp.c \
+	Optimizer/scdf.c \
+	Optimizer/dce.c \
+	Optimizer/escape_analysis.c \
+	Optimizer/compact_vars.c \
+	Optimizer/zend_dump.c \
+	$ZEND_JIT_SRC,
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+
+  if test "$PHP_OPCACHE_JIT" = "yes"; then
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
+    PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
+  fi
 fi

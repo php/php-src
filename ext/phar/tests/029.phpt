@@ -6,19 +6,19 @@ Phar::loadPhar overloading alias names
 phar.require_hash=0
 --FILE--
 <?php
-$fname1 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname1 = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $fname = $fname1;
 $alias = '';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
-$files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';      
-$files['b.php']   = '<?php echo "This is b\n"; include "'.$pname.'/b/c.php"; ?>';    
-$files['b/c.php'] = '<?php echo "This is b/c\n"; include "'.$pname.'/b/d.php"; ?>';  
-$files['b/d.php'] = '<?php echo "This is b/d\n"; include "'.$pname.'/e.php"; ?>';    
-$files['e.php']   = '<?php echo "This is e\n"; ?>';                                  
+$files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
+$files['b.php']   = '<?php echo "This is b\n"; include "'.$pname.'/b/c.php"; ?>';
+$files['b/c.php'] = '<?php echo "This is b/c\n"; include "'.$pname.'/b/d.php"; ?>';
+$files['b/d.php'] = '<?php echo "This is b/d\n"; include "'.$pname.'/e.php"; ?>';
+$files['e.php']   = '<?php echo "This is e\n"; ?>';
 
 include 'files/phar_test.inc';
 
@@ -39,9 +39,9 @@ catch (Exception $e)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
 ?>
 --EXPECTF--
 bool(true)

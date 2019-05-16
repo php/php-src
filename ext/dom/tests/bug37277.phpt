@@ -19,7 +19,5 @@ print $dom2->saveXML();
 
 ?>
 --EXPECT--
-
 <?xml version="1.0" encoding="UTF-8"?>
 <foo/>
-

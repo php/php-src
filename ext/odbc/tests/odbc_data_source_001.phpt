@@ -1,7 +1,12 @@
 --TEST--
 odbc_data_source(): Basic test
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php
+	include 'skipif.inc';
+	if (odbc_data_source($conn, SQL_FETCH_FIRST) === NULL) {
+		die("skip no data sources defined on this system");
+	}
+?>
 --FILE--
 <?php
 
@@ -18,7 +23,7 @@ var_dump(odbc_data_source($conn, SQL_FETCH_FIRST));
 Warning: odbc_data_source(): Invalid fetch type (0) in %s on line %d
 bool(false)
 
-Warning: odbc_data_source() expects parameter 2 to be integer, string given in %s on line %d
+Warning: odbc_data_source() expects parameter 2 to be int, string given in %s on line %d
 NULL
 array(%d) {
 %a

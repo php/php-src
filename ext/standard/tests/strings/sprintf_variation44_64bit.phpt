@@ -5,13 +5,13 @@ Test sprintf() function : usage variations - unsigned formats with string values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : unsigned formats with string values ***\n";
 
-// array of string values 
+// array of string values
 $string_values = array(
   "",
   '',
@@ -36,10 +36,10 @@ $string_values = array(
 );
 
 // array of unsigned formats
-$unsigned_formats = array( 
+$unsigned_formats = array(
   "%u", "%hu", "%lu",
-  "%Lu", " %u", "%u ",   
-  "\t%u", "\n%u", "%4u", 
+  "%Lu", " %u", "%u ",
+  "\t%u", "\n%u", "%4u",
    "%30u", "%[0-9]", "%*u"
 );
 
@@ -47,7 +47,7 @@ $unsigned_formats = array(
 $count = 1;
 foreach($string_values as $string_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($unsigned_formats as $format) {
     var_dump( sprintf($format, $string_value) );
   }
@@ -56,7 +56,7 @@ foreach($string_values as $string_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : unsigned formats with string values ***
 
 -- Iteration 1 --

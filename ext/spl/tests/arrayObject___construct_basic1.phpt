@@ -16,7 +16,7 @@ var_dump(new ArrayObject(array('key1' => 'val1')));
 echo "--> Nested ArrayObject argument:\n";
 var_dump(new ArrayObject(new ArrayObject($a)));
 ?>
---EXPECTF--
+--EXPECT--
 --> No arguments:
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>

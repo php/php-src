@@ -129,14 +129,6 @@ if ($version[0] <= 4 && $version[1] < 1)
 		var_dump($defaults);
 	}
 
-	if ((version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-		// charsets cannot take any other value but utf8 in unicode mode
-		$defaults['charset_client'] = 'utf8';
-		$defaults['charset_connection'] = 'utf8';
-		$defaults['charset_results'] = 'utf8';
-		$defaults['collation_connection'] = 'utf8_general_ci';
-	}
-
 	if ($new != $defaults) {
 		printf("[012] Charsets/collations have not been reset to their defaults.\n");
 		printf("Got:\n");
@@ -161,5 +153,5 @@ if ($version[0] <= 4 && $version[1] < 1)
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

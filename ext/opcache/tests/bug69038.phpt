@@ -9,7 +9,7 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function a($a = "bad") {
-	
+
 	switch (PHP_OS) {
 	case "LALALALA" : return "LALALAL";
 	case PHP_OS: return "okey";

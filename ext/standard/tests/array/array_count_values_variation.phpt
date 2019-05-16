@@ -1,11 +1,11 @@
 --TEST--
-Test array_count_values() function : Test all normal parameter variations 
+Test array_count_values() function : Test all normal parameter variations
 --FILE--
 <?php
 /* Prototype  : proto array array_count_values(array input)
- * Description: Return the value as key and the frequency of that value in input as value 
+ * Description: Return the value as key and the frequency of that value in input as value
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -32,12 +32,11 @@ echo "\n";
 
 echo "Done";
 ?>
-
 --CLEAN--
 <?php
 unlink("array_count_file");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_count_values() : parameter variations ***
 array(3) {
   ["bobv"]=>

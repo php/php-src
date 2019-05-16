@@ -1,19 +1,18 @@
 --TEST--
 Test array_diff_assoc() function : usage variations - arrays with different data types as keys
 --FILE--
-
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
- * Source code: ext/standard/array.c 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
+ * Source code: ext/standard/array.c
  */
 
 /*
  * Test how array_diff_assoc() compares arrays containing different data types
  * as keys
  */
- 
+
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);
@@ -32,7 +31,7 @@ $inputs = array(
 
        // int data
 /*1*/
-'int' => array(       
+'int' => array(
        0 => 'zero',
        1 => 'one',
        12345 => 'positive',
@@ -40,7 +39,7 @@ $inputs = array(
 
        // float data
 /*2*/
-'float' => array(       
+'float' => array(
        10.5 => 'float 1',
        -10.5 => 'float 2',
        .5 => 'float 3'),
@@ -58,7 +57,7 @@ $inputs = array(
        false => 'boolf',
        TRUE => 'boolT',
        FALSE => 'boolF'),
-       
+
        // empty data
 /*5*/
 'empty' => array(
@@ -71,7 +70,7 @@ $inputs = array(
       "string" => 'stringd',
       'string' => 'strings',
       $heredoc => 'stringh'),
-       
+
        // binary data
 /*7*/
 'binary' => array(
@@ -100,9 +99,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
-
---EXPECTF--
-
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --

@@ -41,7 +41,7 @@ foreach( $strings_with_nulls as $string )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with embedded nulls in the strings ***
 
 --- Iteration 1 ---

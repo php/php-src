@@ -30,7 +30,6 @@ echo get_class($attr), "\n";
 print $attr->testit()."\n";
 ?>
 --EXPECTF--
-
 myElement
 HELLO Element
 myAttribute

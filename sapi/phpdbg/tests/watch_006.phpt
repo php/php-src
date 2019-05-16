@@ -54,8 +54,7 @@ New value (reference): Array ([0] => 2,[1] => 3)
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed
 New value (reference): Array ([0] => 1)
->00009: $b = &$c;
- 00010: 
+>00010: 
 prompt> [$b has been removed, removing watchpoint recursively]
 [$a[0] has been removed, removing watchpoint]
 [Script ended normally]

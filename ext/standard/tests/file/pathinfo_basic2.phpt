@@ -31,7 +31,7 @@ $paths = array (
 			'..',
 			'...',
 			'/usr/lib/.../afile'
-						
+
 );
 
 $counter = 1;
@@ -48,226 +48,225 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
-%unicode|string%(1) "."
-%unicode|string%(10) "c:\..\dir1"
-%unicode|string%(5) "\dir1"
-%unicode|string%(4) "c:\."
+string(1) "."
+string(10) "c:\..\dir1"
+string(5) "\dir1"
+string(4) "c:\."
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(10) "c:\..\dir1"
-  [%u|b%"extension"]=>
-  %unicode|string%(5) "\dir1"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "c:\."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(10) "c:\..\dir1"
+  ["extension"]=>
+  string(5) "\dir1"
+  ["filename"]=>
+  string(4) "c:\."
 }
 -- Iteration 2 --
-%unicode|string%(1) "."
-%unicode|string%(33) "c:\test\..\test2\.\adir\afile.txt"
-%unicode|string%(3) "txt"
-%unicode|string%(29) "c:\test\..\test2\.\adir\afile"
+string(1) "."
+string(33) "c:\test\..\test2\.\adir\afile.txt"
+string(3) "txt"
+string(29) "c:\test\..\test2\.\adir\afile"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(33) "c:\test\..\test2\.\adir\afile.txt"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "txt"
-  [%u|b%"filename"]=>
-  %unicode|string%(29) "c:\test\..\test2\.\adir\afile"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(33) "c:\test\..\test2\.\adir\afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(29) "c:\test\..\test2\.\adir\afile"
 }
 -- Iteration 3 --
-%unicode|string%(22) "/usr/include/../arpa/."
-%unicode|string%(6) "inet.h"
-%unicode|string%(1) "h"
-%unicode|string%(4) "inet"
+string(22) "/usr/include/../arpa/."
+string(6) "inet.h"
+string(1) "h"
+string(4) "inet"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(22) "/usr/include/../arpa/."
-  [%u|b%"basename"]=>
-  %unicode|string%(6) "inet.h"
-  [%u|b%"extension"]=>
-  %unicode|string%(1) "h"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "inet"
+  ["dirname"]=>
+  string(22) "/usr/include/../arpa/."
+  ["basename"]=>
+  string(6) "inet.h"
+  ["extension"]=>
+  string(1) "h"
+  ["filename"]=>
+  string(4) "inet"
 }
 -- Iteration 4 --
-%unicode|string%(1) "."
-%unicode|string%(23) "c:\test\adir\afile..txt"
-%unicode|string%(3) "txt"
-%unicode|string%(19) "c:\test\adir\afile."
+string(1) "."
+string(23) "c:\test\adir\afile..txt"
+string(3) "txt"
+string(19) "c:\test\adir\afile."
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(23) "c:\test\adir\afile..txt"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "txt"
-  [%u|b%"filename"]=>
-  %unicode|string%(19) "c:\test\adir\afile."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(23) "c:\test\adir\afile..txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(19) "c:\test\adir\afile."
 }
 -- Iteration 5 --
-%unicode|string%(17) "/usr/include/arpa"
-%unicode|string%(7) "inet..h"
-%unicode|string%(1) "h"
-%unicode|string%(5) "inet."
+string(17) "/usr/include/arpa"
+string(7) "inet..h"
+string(1) "h"
+string(5) "inet."
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(17) "/usr/include/arpa"
-  [%u|b%"basename"]=>
-  %unicode|string%(7) "inet..h"
-  [%u|b%"extension"]=>
-  %unicode|string%(1) "h"
-  [%u|b%"filename"]=>
-  %unicode|string%(5) "inet."
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(7) "inet..h"
+  ["extension"]=>
+  string(1) "h"
+  ["filename"]=>
+  string(5) "inet."
 }
 -- Iteration 6 --
-%unicode|string%(1) "."
-%unicode|string%(19) "c:\test\adir\afile."
-%unicode|string%(0) ""
-%unicode|string%(18) "c:\test\adir\afile"
+string(1) "."
+string(19) "c:\test\adir\afile."
+string(0) ""
+string(18) "c:\test\adir\afile"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(19) "c:\test\adir\afile."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(18) "c:\test\adir\afile"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(19) "c:\test\adir\afile."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(18) "c:\test\adir\afile"
 }
 -- Iteration 7 --
-%unicode|string%(17) "/usr/include/arpa"
-%unicode|string%(5) "inet."
-%unicode|string%(0) ""
-%unicode|string%(4) "inet"
+string(17) "/usr/include/arpa"
+string(5) "inet."
+string(0) ""
+string(4) "inet"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(17) "/usr/include/arpa"
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "inet."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "inet"
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(5) "inet."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(4) "inet"
 }
 -- Iteration 8 --
-%unicode|string%(17) "/usr/include/arpa"
-%unicode|string%(6) "inet,h"
-%unicode|string%(0) ""
-%unicode|string%(6) "inet,h"
+string(17) "/usr/include/arpa"
+string(6) "inet,h"
+string(0) ""
+string(6) "inet,h"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(17) "/usr/include/arpa"
-  [%u|b%"basename"]=>
-  %unicode|string%(6) "inet,h"
-  [%u|b%"filename"]=>
-  %unicode|string%(6) "inet,h"
+  ["dirname"]=>
+  string(17) "/usr/include/arpa"
+  ["basename"]=>
+  string(6) "inet,h"
+  ["filename"]=>
+  string(6) "inet,h"
 }
 -- Iteration 9 --
-%unicode|string%(1) "."
-%unicode|string%(11) "c:afile.txt"
-%unicode|string%(3) "txt"
-%unicode|string%(7) "c:afile"
+string(1) "."
+string(11) "c:afile.txt"
+string(3) "txt"
+string(7) "c:afile"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(11) "c:afile.txt"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "txt"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "c:afile"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(11) "c:afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(7) "c:afile"
 }
 -- Iteration 10 --
-%unicode|string%(1) "."
-%unicode|string%(22) "..\.\..\test\afile.txt"
-%unicode|string%(3) "txt"
-%unicode|string%(18) "..\.\..\test\afile"
+string(1) "."
+string(22) "..\.\..\test\afile.txt"
+string(3) "txt"
+string(18) "..\.\..\test\afile"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(22) "..\.\..\test\afile.txt"
-  [%u|b%"extension"]=>
-  %unicode|string%(3) "txt"
-  [%u|b%"filename"]=>
-  %unicode|string%(18) "..\.\..\test\afile"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(22) "..\.\..\test\afile.txt"
+  ["extension"]=>
+  string(3) "txt"
+  ["filename"]=>
+  string(18) "..\.\..\test\afile"
 }
 -- Iteration 11 --
-%unicode|string%(12) ".././../test"
-%unicode|string%(5) "afile"
-%unicode|string%(0) ""
-%unicode|string%(5) "afile"
+string(12) ".././../test"
+string(5) "afile"
+string(0) ""
+string(5) "afile"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(12) ".././../test"
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "afile"
-  [%u|b%"filename"]=>
-  %unicode|string%(5) "afile"
+  ["dirname"]=>
+  string(12) ".././../test"
+  ["basename"]=>
+  string(5) "afile"
+  ["filename"]=>
+  string(5) "afile"
 }
 -- Iteration 12 --
-%unicode|string%(1) "."
-%unicode|string%(1) "."
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(1) "."
+string(1) "."
+string(0) ""
+string(0) ""
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) "."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
 -- Iteration 13 --
-%unicode|string%(1) "."
-%unicode|string%(2) ".."
-%unicode|string%(0) ""
-%unicode|string%(1) "."
+string(1) "."
+string(2) ".."
+string(0) ""
+string(1) "."
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(2) ".."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(1) "."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(2) ".."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(1) "."
 }
 -- Iteration 14 --
-%unicode|string%(1) "."
-%unicode|string%(3) "..."
-%unicode|string%(0) ""
-%unicode|string%(2) ".."
+string(1) "."
+string(3) "..."
+string(0) ""
+string(2) ".."
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "..."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(2) ".."
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(3) "..."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(2) ".."
 }
 -- Iteration 15 --
-%unicode|string%(12) "/usr/lib/..."
-%unicode|string%(5) "afile"
-%unicode|string%(0) ""
-%unicode|string%(5) "afile"
+string(12) "/usr/lib/..."
+string(5) "afile"
+string(0) ""
+string(5) "afile"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(12) "/usr/lib/..."
-  [%u|b%"basename"]=>
-  %unicode|string%(5) "afile"
-  [%u|b%"filename"]=>
-  %unicode|string%(5) "afile"
+  ["dirname"]=>
+  string(12) "/usr/lib/..."
+  ["basename"]=>
+  string(5) "afile"
+  ["filename"]=>
+  string(5) "afile"
 }
 Done
-

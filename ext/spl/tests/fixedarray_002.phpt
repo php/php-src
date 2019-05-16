@@ -68,7 +68,7 @@ var_dump($a[0], $a[2], $a[3], $a[4]);
 var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 A::offsetSet
 Exception: Index invalid or out of range
 A::offsetGet

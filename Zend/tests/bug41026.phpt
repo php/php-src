@@ -20,7 +20,7 @@ try_class::main ();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 Done
 
 Warning: (Registered shutdown functions) Unable to call self::on_shutdown() - function does not exist in Unknown on line 0

@@ -36,4 +36,3 @@ extern const struct mbfl_convert_vtbl vtbl_uuencode_8bit;
 int mbfl_filt_conv_uudec(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_UUENCODE_H */
-

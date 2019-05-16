@@ -3,7 +3,7 @@ Bug #41815 (Concurrent read/write fails when EOF is reached)
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/concur_rw.txt";
+$filename = __DIR__."/concur_rw.txt";
 
 @unlink($filename);
 $writer = fopen($filename, "wt");
@@ -22,6 +22,6 @@ fclose($reader);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 OK
 Done

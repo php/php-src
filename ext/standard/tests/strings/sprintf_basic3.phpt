@@ -3,7 +3,7 @@ Test sprintf() function : basic functionality - float format
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -41,7 +41,7 @@ var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using float format ***
 string(6) "format"
 string(9) "11.110000"

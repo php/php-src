@@ -15,27 +15,27 @@ foreach($urls as $url) {
 	var_dump(file($url, FILE_IGNORE_NEW_LINES));
 }
 ?>
---EXPECTF--
+--EXPECT--
 data://text/plain,foo\r\nbar\r\n
 array(2) {
   [0]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
   [1]=>
-  %unicode|string%(3) "bar"
+  string(3) "bar"
 }
 data://text/plain,\r\nfoo\r\nbar\r\n
 array(3) {
   [0]=>
-  %unicode|string%(0) ""
+  string(0) ""
   [1]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
   [2]=>
-  %unicode|string%(3) "bar"
+  string(3) "bar"
 }
 data://text/plain,foo\r\nbar
 array(2) {
   [0]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
   [1]=>
-  %unicode|string%(3) "bar"
+  string(3) "bar"
 }

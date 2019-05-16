@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Martin Jansen <mj@php.net>                                   |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* Implements Jenkins's one-at-a-time hashing algorithm as presented on
  * http://www.burtleburtle.net/bob/hash/doobs.html.
@@ -32,7 +30,8 @@ const php_hash_ops php_hash_joaat_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_JOAAT_CTX)
+	sizeof(PHP_JOAAT_CTX),
+	0
 };
 
 PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
@@ -40,7 +39,7 @@ PHP_HASH_API void PHP_JOAATInit(PHP_JOAAT_CTX *context)
 	context->state = 0;
 }
 
-PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_JOAATUpdate(PHP_JOAAT_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	context->state = joaat_buf((void *)input, inputLen, context->state);
 }
@@ -88,12 +87,3 @@ joaat_buf(void *buf, size_t len, uint32_t hval)
 
     return hval;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

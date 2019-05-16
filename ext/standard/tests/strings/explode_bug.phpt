@@ -8,7 +8,7 @@ memory_limit=256M
 $res = explode(str_repeat("A",145999999),1);
 var_dump($res);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(1) "1"

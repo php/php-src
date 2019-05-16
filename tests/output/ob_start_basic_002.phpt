@@ -36,7 +36,7 @@ foreach ($callbacks as $callback) {
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 --> Use callback 'return_empty_string':
 
 

@@ -42,5 +42,10 @@ int overflow2(int a, int b);
 #define gdMutexUnlock(x)
 #endif
 
+#define DPCM2DPI(dpcm) (unsigned int)((dpcm)*2.54 + 0.5)
+#define DPM2DPI(dpm)   (unsigned int)((dpm)*0.0254 + 0.5)
+#define DPI2DPCM(dpi)  (unsigned int)((dpi)/2.54 + 0.5)
+#define DPI2DPM(dpi)   (unsigned int)((dpi)/0.0254 + 0.5)
+
 #endif /* GDHELPERS_H */
 

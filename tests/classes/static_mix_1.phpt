@@ -1,7 +1,5 @@
 --TEST--
 ZE2 You cannot overload a static method with a non static method
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -21,6 +19,6 @@ pass::show();
 fail::show();
 
 echo "Done\n"; // shouldn't be displayed
-?>                                                            
+?>
 --EXPECTF--
-Fatal error: Cannot make static method pass::show() non static in class fail in %s on line %d
+Fatal error: Cannot make static method pass::show() non static in class fail in %s on line 10

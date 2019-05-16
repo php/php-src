@@ -1,12 +1,12 @@
 --TEST--
 SPL: SimpleXMLIterator and overridden iterator methods()
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -74,7 +74,7 @@ class SXETest extends SimpleXMLIterator
 	}
 }
 
-$sxe = new SXETest((binary)$xml);
+$sxe = new SXETest($xml);
 $rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
 
 foreach($rit as $data) {
@@ -84,7 +84,7 @@ foreach($rit as $data) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren

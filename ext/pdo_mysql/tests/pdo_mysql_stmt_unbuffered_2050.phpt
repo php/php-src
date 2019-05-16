@@ -2,8 +2,8 @@
 MySQL PDO:query() vs. PDO::prepare() and MySQL error 2050
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (MYSQLPDOTest::isPDOMySQLnd())
@@ -11,7 +11,7 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	try {
@@ -112,7 +112,7 @@ if (MYSQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
@@ -121,19 +121,19 @@ Buffered...
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 Unbuffered...
@@ -148,37 +148,37 @@ array(0) {
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 done!

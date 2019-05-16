@@ -24,5 +24,5 @@ $method->invokeArgs(null, array());
 $method = new ReflectionMethod("A::call");
 $method->invoke(null);
 $method->invokeArgs(null, array());
---EXPECTF--
+--EXPECT--
 BBAA

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Authors: Gregory Beaver <cellog@php.net>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "phar_internal.h"
 
@@ -33,8 +31,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -44,7 +42,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -106,8 +104,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -119,7 +117,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
 		zend_string *entry_str = NULL;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 
 		fname = (char*)zend_get_executed_filename();
@@ -190,7 +188,7 @@ phar_it:
 			}
 			stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
 			if (entry_str) {
-				zend_string_release(entry_str);
+				zend_string_release_ex(entry_str, 0);
 			} else {
 				efree(name);
 			}
@@ -210,7 +208,7 @@ phar_it:
 			if (contents && ZSTR_LEN(contents) > 0) {
 				RETVAL_STR(contents);
 			} else if (contents) {
-				zend_string_release(contents);
+				zend_string_release_ex(contents, 0);
 				RETVAL_EMPTY_STRING();
 			} else {
 				RETVAL_FALSE;
@@ -239,8 +237,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
@@ -249,7 +247,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
 		zend_string *entry_str = NULL;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -308,7 +306,7 @@ notfound:
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
 		if (entry_str) {
-			zend_string_release(entry_str);
+			zend_string_release_ex(entry_str, 0);
 		} else {
 			efree(name);
 		}
@@ -339,8 +337,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
@@ -350,7 +348,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
 		zend_string *entry_str = NULL;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -410,7 +408,7 @@ notfound:
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, mode, 0 | REPORT_ERRORS, NULL, context);
 		if (entry_str) {
-			zend_string_release(entry_str);
+			zend_string_release_ex(entry_str, 0);
 		} else {
 			efree(name);
 		}
@@ -446,7 +444,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(stat_sb->st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -476,7 +473,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 			}
 		}
 	}
-#endif
 
 	switch (type) {
 	case FS_PERMS:
@@ -490,23 +486,11 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 	case FS_GROUP:
 		RETURN_LONG((zend_long)stat_sb->st_gid);
 	case FS_ATIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_atime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_atime);
-#endif
 	case FS_MTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_mtime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_mtime);
-#endif
 	case FS_CTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_ctime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_ctime);
-#endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
 			RETURN_STRING("link");
@@ -542,27 +526,21 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
 #else
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
 		ZVAL_LONG(&stat_size, stat_sb->st_size);
-#ifdef NETWARE
-		ZVAL_LONG(&stat_atime, (stat_sb->st_atime).tv_sec);
-		ZVAL_LONG(&stat_mtime, (stat_sb->st_mtime).tv_sec);
-		ZVAL_LONG(&stat_ctime, (stat_sb->st_ctime).tv_sec);
-#else
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#endif
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
@@ -605,7 +583,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 }
 /* }}} */
 
-static void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void phar_file_stat(const char *filename, size_t filename_length, int type, zif_handler orig_stat_func, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -613,7 +591,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		zend_stat_t sb = {0};
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
@@ -632,7 +610,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			arch_len = PHAR_G(last_phar_name_len);
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			entry_len = (int) filename_length;
+			entry_len = filename_length;
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
@@ -641,7 +619,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			efree(entry);
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			entry_len = (int) filename_length;
+			entry_len = filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				efree(arch);
 				efree(entry);
@@ -669,19 +647,13 @@ splitted:
 				sb.st_size = 0;
 				sb.st_mode = 0777;
 				sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = phar->max_timestamp;
-				sb.st_atime.tv_sec = phar->max_timestamp;
-				sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 				sb.st_mtime = phar->max_timestamp;
 				sb.st_atime = phar->max_timestamp;
 				sb.st_ctime = phar->max_timestamp;
-#endif
 				goto statme_baby;
 			} else {
 				char *save;
-				int save_len;
+				size_t save_len;
 
 notfound:
 				efree(entry);
@@ -715,15 +687,9 @@ notfound:
 					sb.st_size = 0;
 					sb.st_mode = 0777;
 					sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-					sb.st_mtime.tv_sec = phar->max_timestamp;
-					sb.st_atime.tv_sec = phar->max_timestamp;
-					sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 					sb.st_mtime = phar->max_timestamp;
 					sb.st_atime = phar->max_timestamp;
 					sb.st_ctime = phar->max_timestamp;
-#endif
 					goto statme_baby;
 				}
 				PHAR_G(cwd) = save;
@@ -747,15 +713,9 @@ stat_entry:
 					sb.st_mode |= S_IFREG; /* regular file */
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			} else {
 				sb.st_size = 0;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
@@ -764,15 +724,9 @@ stat_entry:
 					sb.st_mode |= S_IFLNK;
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			}
 
 statme_baby:
@@ -803,7 +757,7 @@ skip_phar:
 /* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
-void fname(INTERNAL_FUNCTION_PARAMETERS) { \
+ZEND_NAMED_FUNCTION(fname) { \
 	if (!PHAR_G(intercepted)) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
@@ -814,7 +768,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 			return; \
 		} \
 		\
-		phar_file_stat(filename, (php_stat_len) filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} \
 }
 /* }}} */
@@ -898,8 +852,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
@@ -907,7 +861,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -965,8 +919,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_IS_INITIALIZED(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_IS_INITIALIZED(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
@@ -974,7 +928,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		int arch_len, entry_len, fname_len;
+		size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -1124,28 +1078,28 @@ void phar_intercept_functions_shutdown(void)
 /* }}} */
 
 static struct _phar_orig_functions {
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 } phar_orig_functions = {NULL};
 
 void phar_save_orig_functions(void) /* {{{ */
@@ -1201,13 +1155,3 @@ void phar_restore_orig_functions(void) /* {{{ */
 	PHAR_G(orig_stat)              = phar_orig_functions.orig_stat;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
-

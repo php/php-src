@@ -8,7 +8,7 @@ Test strripos() function : usage variations - heredoc string containing special 
 */
 
 /* Test strripos() function by passing heredoc string containing special chars for haystack
- *  and with various needles & offets 
+ *  and with various needles & offets
 */
 
 echo "*** Testing strripos() function: with heredoc strings ***\n";
@@ -28,7 +28,7 @@ var_dump( strripos($special_chars_str, "(speCIal)") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
 int(0)

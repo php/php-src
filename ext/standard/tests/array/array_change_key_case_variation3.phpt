@@ -3,7 +3,7 @@ Test array_change_key_case() function : usage variations - different data types 
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Returns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -40,7 +40,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
        'extreme floats' => array(
        12.3456789000e6 => 'large',
        12.3456789000E-10 => 'small',
@@ -49,7 +49,7 @@ $inputs = array(
        // null data
 /*3*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
        'null lowercase' => array(
        null => 'null 2',
        ),
@@ -63,7 +63,7 @@ $inputs = array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*5*/ 'empty double quotes' => array(
        "" => 'emptyd',
@@ -100,7 +100,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- Iteration 1 : int data --

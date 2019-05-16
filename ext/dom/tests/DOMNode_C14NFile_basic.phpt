@@ -20,7 +20,7 @@ $xml = <<< XML
 </books>
 XML;
 
-$output = dirname(__FILE__).'/DOMNode_C14NFile_basic.tmp';
+$output = __DIR__.'/DOMNode_C14NFile_basic.tmp';
 $doc = new DOMDocument();
 $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);
@@ -30,9 +30,9 @@ var_dump($content);
 ?>
 --CLEAN--
 <?php
-$output = dirname(__FILE__).'/DOMNode_C14NFile_basic.tmp';
+$output = __DIR__.'/DOMNode_C14NFile_basic.tmp';
 unlink($output);
 ?>
---EXPECTF--
+--EXPECT--
 int(34)
 string(34) "<title>The Grapes of Wrath</title>"

@@ -5,7 +5,6 @@ bzopen() and invalid parameters
 --FILE--
 <?php
 
-var_dump(bzopen());
 var_dump(bzopen("", ""));
 var_dump(bzopen("", "r"));
 var_dump(bzopen("", "w"));
@@ -18,10 +17,7 @@ var_dump(bzopen($fp, "r"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
+--EXPECTF--
 Warning: bzopen(): '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
 bool(false)
 

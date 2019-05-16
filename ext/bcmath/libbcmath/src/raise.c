@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -55,10 +54,10 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
 
    /* Check the exponent for scale digits and convert to a long. */
    if (num2->n_scale != 0)
-     bc_rt_warn ("non-zero scale in exponent");
+     php_error_docref (NULL, E_WARNING, "non-zero scale in exponent");
    exponent = bc_num2long (num2);
    if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0))
-       bc_rt_error ("exponent too large in raise");
+       php_error_docref (NULL, E_WARNING, "exponent too large");
 
    /* Special case if exponent is a zero. */
    if (exponent == 0)
@@ -121,4 +120,3 @@ bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
      }
    bc_free_num (&power);
 }
-

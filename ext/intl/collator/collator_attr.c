@@ -41,9 +41,6 @@ PHP_FUNCTION( collator_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_attribute: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -72,9 +69,6 @@ PHP_FUNCTION( collator_set_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_set_attribute: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -102,9 +96,6 @@ PHP_FUNCTION( collator_get_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_get_strength: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -131,9 +122,6 @@ PHP_FUNCTION( collator_set_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_set_strength: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -146,12 +134,3 @@ PHP_FUNCTION( collator_set_strength )
 	RETURN_TRUE;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

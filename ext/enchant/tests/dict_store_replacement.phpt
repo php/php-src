@@ -18,11 +18,11 @@ $rightWord = "java";
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         echo("OK\n");
         $AddtoPersonalDict = enchant_dict_store_replacement($requestDict,$wrongWord,$rightWord);
-        
+
         if (NULL === $AddtoPersonalDict) {
             var_dump($AddtoPersonalDict);
         } else {

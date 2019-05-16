@@ -11,7 +11,7 @@ function foo($arg) {
 function bar() {
 	throw new Exception("test");
 }
-	
+
 try {
 	@foo(@bar());
 } catch (Exception $e) {
@@ -21,6 +21,6 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(32767)
 Done

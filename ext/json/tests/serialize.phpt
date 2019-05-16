@@ -1,5 +1,7 @@
 --TEST--
 json_encode() Serialization tests
+--INI--
+serialize_precision=-1
 --SKIPIF--
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
@@ -76,5 +78,3 @@ foreach(array('NonSerializingTest','SerializingTest','ValueSerializingTest','Sel
 {"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
 {"data":["foo",1,2.3,false,null,[1,2,3],{}]}
 {"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
-
-

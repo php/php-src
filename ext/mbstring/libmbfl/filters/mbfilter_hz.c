@@ -44,7 +44,9 @@ const mbfl_encoding mbfl_encoding_hz = {
 	"HZ-GB-2312",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_hz_wchar,
+	&vtbl_wchar_hz
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_hz = {
@@ -274,11 +276,3 @@ static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

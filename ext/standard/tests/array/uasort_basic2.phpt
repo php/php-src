@@ -3,7 +3,7 @@ Test uasort() function : basic functionality - duplicate values
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -49,7 +49,7 @@ var_dump($int_values3);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : basic functionality with duplicate values ***
 -- Numeric array with increasing values --
 bool(true)

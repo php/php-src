@@ -30,5 +30,5 @@ echo $r->getPregFlags();
 
 
 ?>
---EXPECTF--
+--EXPECT--
 256

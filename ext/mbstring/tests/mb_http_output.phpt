@@ -1,12 +1,11 @@
 --TEST--
-mb_http_output()  
+mb_http_output()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
 //TODO: Add more encoding. Wrong parameter type test.
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // Set HTTP output encoding to ASCII
@@ -48,19 +47,8 @@ $r = mb_http_output('BAD_NAME');
 $enc = mb_http_output();
 print "$enc\n";
 
-$r = mb_http_output($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
-$r = mb_http_output($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
-$enc = mb_http_output();
-print "$enc\n";
-
 ?>
-
---EXPECT--
+--EXPECTF--
 OK_ASCII_SET
 ASCII
 OK_SJIS_SET
@@ -72,13 +60,7 @@ UTF-8
 OK_EUC-JP_SET
 EUC-JP
 == INVALID PARAMETER ==
-ERR: Warning
+
+Warning: mb_http_output(): Unknown encoding "BAD_NAME" in %s on line %d
 OK_BAD_SET
 EUC-JP
-ERR: Warning
-OK_BAD_ARY_SET
-EUC-JP
-ERR: Warning
-OK_BAD_OBJ_SET
-EUC-JP
-

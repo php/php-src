@@ -20,7 +20,7 @@ for ($i=0; $i<256; $i++) {
 	if ($c['red']!=$i || $c['green']!=$i || $c['blue']!=$i) {
 		$failed = true;
 		break;
-	} 
+	}
 }
 echo "copy palette 255 colors: ";
 echo $failed ? 'failed' : 'ok';
@@ -34,7 +34,7 @@ imagepalettecopy($im2, $im);
 $c = imagecolorsforindex($im2, 0);
 if ($c['red']!=0 || $c['green']!=0 || $c['blue']!=0 || $c['alpha']!=100) {
 	$failed = true;
-} 
+}
 echo 'copy palette 1 color and alpha: ';
 echo $failed ? 'failed' : 'ok';
 echo "\n";

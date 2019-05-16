@@ -67,9 +67,6 @@ if (!function_exists('mysqli_stmt_get_result'))
 	if (false !== ($tmp = $res->data_seek($res->num_rows + 1)))
 		printf("[012] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-	if (NULL !== ($tmp = $res->data_seek(PHP_INT_MAX + 1)))
-		printf("[013] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
-
 	for ($i = 0; $i < 100; $i++) {
 		/* intentionally out of range! */
 		$pos = mt_rand(-1, 4);
@@ -97,19 +94,19 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	mysqli_free_result($res);
 
-	if (NULL !== ($tmp = mysqli_data_seek($res, 0)))
-		printf("[017] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_data_seek($res, 0)))
+		printf("[017] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 
-	if (NULL !== ($row = $res->fetch_array(MYSQLI_NUM)))
-		printf("[018] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($row = $res->fetch_array(MYSQLI_NUM)))
+		printf("[018] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_data_seek($res, 0)))
-		printf("[019] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_data_seek($res, 0)))
+		printf("[019] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 
-	if (NULL !== ($row = $res->fetch_array(MYSQLI_NUM)))
-		printf("[020] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($row = $res->fetch_array(MYSQLI_NUM)))
+		printf("[020] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -118,8 +115,6 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_result::data_seek() expects parameter 1 to be integer, float given in %s on line %d
-
 Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
 
 Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d

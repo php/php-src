@@ -1,17 +1,17 @@
 --TEST--
 DBA GDBM handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'gdbm';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'gdbm';
-	require_once dirname(__FILE__) .'/test.inc';
+	require_once __DIR__ .'/test.inc';
 	$lock_flag = ''; // lock in library
-	require_once dirname(__FILE__) .'/dba_handler.inc';
-	
+	require_once __DIR__ .'/dba_handler.inc';
+
 	// Read during write is system dependent. Important is that there is no deadlock
 ?>
 ===DONE===

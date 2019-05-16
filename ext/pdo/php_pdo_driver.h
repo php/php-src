@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_PDO_DRIVER_H
 #define PHP_PDO_DRIVER_H
@@ -46,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20150127
+#define PDO_DRIVER_API	20170320
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -77,7 +75,15 @@ enum pdo_param_type {
 	PDO_PARAM_ZVAL,
 
 	/* magic flag to denote a parameter as being input/output */
-	PDO_PARAM_INPUT_OUTPUT = 0x80000000
+	PDO_PARAM_INPUT_OUTPUT = 0x80000000,
+
+	/* magic flag to denote a string that uses the national character set
+	   see section 4.2.1 of SQL-92: http://www.contrib.andrew.cmu.edu/~shadow/sql/sql1992.txt
+	 */
+	PDO_PARAM_STR_NATL = 0x40000000,
+
+	/* magic flag to denote a string that uses the regular character set */
+	PDO_PARAM_STR_CHAR = 0x20000000,
 };
 
 #define PDO_PARAM_FLAGS			0xFFFF0000
@@ -140,6 +146,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_MAX_COLUMN_LEN,	/* make database calculate maximum length of data found in a column */
 	PDO_ATTR_DEFAULT_FETCH_MODE, /* Set the default fetch mode */
 	PDO_ATTR_EMULATE_PREPARES,  /* use query emulation rather than native */
+	PDO_ATTR_DEFAULT_STR_PARAM, /* set the default string parameter type (see the PDO::PARAM_STR_* magic flags) */
 
 	/* this defines the start of the range for driver specific options.
 	 * Drivers should define their own attribute constants beginning with this
@@ -426,7 +433,7 @@ enum pdo_placeholder_support {
 
 struct _pdo_dbh_t {
 	/* driver specific methods */
-	struct pdo_dbh_methods *methods;
+	const struct pdo_dbh_methods *methods;
 	/* driver specific data */
 	void *driver_data;
 
@@ -529,9 +536,6 @@ struct pdo_column_data {
 	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-
-	/* don't touch this unless your name is dbdo */
-	void *dbdo_data;
 };
 
 /* describes a bound parameter */
@@ -557,7 +561,7 @@ struct pdo_bound_param_data {
 /* represents a prepared statement */
 struct _pdo_stmt_t {
 	/* driver specifics */
-	struct pdo_stmt_methods *methods;
+	const struct pdo_stmt_methods *methods;
 	void *driver_data;
 
 	/* if true, we've already successfully executed this statement at least
@@ -655,9 +659,9 @@ struct _pdo_row_t {
 };
 
 /* call this in MINIT to register your PDO driver */
-PDO_API int php_pdo_register_driver(pdo_driver_t *driver);
+PDO_API int php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
-PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver);
+PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
@@ -688,11 +692,3 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt);
 
 
 #endif /* PHP_PDO_DRIVER_H */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

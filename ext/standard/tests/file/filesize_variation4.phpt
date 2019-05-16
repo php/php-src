@@ -7,17 +7,17 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 }
 --FILE--
 <?php
-/* 
+/*
  Prototype   : int filesize ( string $filename );
- Description : Returns the size of the file in bytes, or FALSE 
+ Description : Returns the size of the file in bytes, or FALSE
    (and generates an error of level E_WARNING) in case of an error.
 */
 
 /* Testing filesize() with data written using different file modes and by creating holes in file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Testing filesize(): usage variations ***\n"; 
+echo "*** Testing filesize(): usage variations ***\n";
 echo "\n*** Testing filesize() with data written using different file modes and by creating holes in file ***\n";
 
 $filename = $file_path."/filesize_variation4.tmp";
@@ -73,7 +73,7 @@ var_dump( filesize($filename) );  //0 bytes
 clearstatcache();
 
 echo "-- with empty file --\n";
-$filename = dirname(__FILE__)."/filesize_variation4_empty.tmp";
+$filename = __DIR__."/filesize_variation4_empty.tmp";
 fclose( fopen($filename, "w") );
 var_dump( filesize($filename) );  //0 bytes
 
@@ -81,11 +81,11 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/filesize_variation4.tmp");
 unlink($file_path."/filesize_variation4_empty.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 
 *** Testing filesize() with data written using different file modes and by creating holes in file ***

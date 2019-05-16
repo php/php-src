@@ -37,15 +37,15 @@ NULL
 Notice: Undefined variable: b in %s on line %d
 int(1)
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property '1' of non-object in %s on line %d
 NULL
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property '1' of non-object in %s on line %d
 NULL
 
 Notice: Undefined variable: c in %s on line %d
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property '1' of non-object in %s on line %d
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property '' of non-object in %s on line %d
 NULL

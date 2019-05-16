@@ -20,7 +20,7 @@ var_dump($foo->getConstant("no such const"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(10)
 string(0) ""
 string(4) "test"

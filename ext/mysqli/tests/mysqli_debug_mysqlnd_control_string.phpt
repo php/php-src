@@ -20,7 +20,7 @@ if (!$IS_MYSQLND)
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');;
+	require_once('connect.inc');
 	require_once('table.inc');
 
 	function try_control_string($link, $control_string, $trace_file, $offset) {
@@ -207,8 +207,8 @@ if (!$IS_MYSQLND)
 		// mysqlnd only option
 		// m - trace memory allocations
 		$trace = try_control_string($link, 't:O,' . $trace_file . ':m', $trace_file, 120);
-		if (!preg_match("@^[|\s]*>\_mysqlnd_pefree@ismU", $trace, $matches) &&
-				!preg_match("@^[|\s]*>\_mysqlnd_pemalloc@ismU", $trace, $matches)) {
+		if (!preg_match("@^[|\s]*>\_mysqlnd_p?efree@ismU", $trace, $matches) &&
+				!preg_match("@^[|\s]*>\_mysqlnd_p?emalloc@ismU", $trace, $matches)) {
 			printf("[125] Memory dump does neither contain _mysqlnd_pefree nor _mysqlnd_pemalloc calls - check manually.\n");
 			var_dump($trace);
 		}

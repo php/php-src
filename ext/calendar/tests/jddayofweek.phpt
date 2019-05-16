@@ -127,4 +127,3 @@ Sat
 Sun
 Mon
 Tue
-

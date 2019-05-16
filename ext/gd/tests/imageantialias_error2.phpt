@@ -4,9 +4,8 @@ Testing wrong parameter passing in imageantialias() of GD library
 Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
-if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php
@@ -20,5 +19,5 @@ $image = imagecreatetruecolor(180, 30);
 
 var_dump(imageantialias($image, 'wrong param')); // 'wrogn param' is converted to true
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

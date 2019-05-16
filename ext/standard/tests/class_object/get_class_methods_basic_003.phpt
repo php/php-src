@@ -1,11 +1,11 @@
 --TEST--
-Test get_class_methods() function : basic functionality 
+Test get_class_methods() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -23,10 +23,10 @@ class C implements I {
 	private function privC() {}
 	protected function protC() {}
 	public function pubC() {}
-	
+
 	public static function testFromC() {
 		echo "Accessing I from C:\n";
-		var_dump(get_class_methods("I"));	
+		var_dump(get_class_methods("I"));
 		echo "Accessing C from C:\n";
 		var_dump(get_class_methods("C"));
 	}
@@ -40,7 +40,7 @@ var_dump(get_class_methods("C"));
 C::testFromC();
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Accessing I from global scope:
 array(1) {
   [0]=>

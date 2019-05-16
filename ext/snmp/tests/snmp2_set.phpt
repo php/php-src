@@ -1,14 +1,14 @@
---TEST--                                 
+--TEST--
 Function snmp2_set
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
@@ -188,25 +188,25 @@ bool(true)
 More error handing
 Single OID, single type in array, single value
 
-Warning: snmp2_set(): Single objid and multiple type or values are not supported in %s on line %s
+Warning: snmp2_set(): Single objid and multiple type or values are not supported in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Single OID, single type, single value in array
 
-Warning: snmp2_set(): Single objid and multiple type or values are not supported in %s on line %s
+Warning: snmp2_set(): Single objid and multiple type or values are not supported in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Multiple OID, 1st wrong type
 
-Warning: snmp2_set(): '%s': bogus type 'sw', should be single char, got 2 in %s on line %s
+Warning: snmp2_set(): '%s': bogus type 'sw', should be single char, got 2 in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Multiple OID, 2nd wrong type
 
-Warning: snmp2_set(): '%s': bogus type 'sb', should be single char, got 2 in %s on line %s
+Warning: snmp2_set(): '%s': bogus type 'sb', should be single char, got 2 in %s on line %d
 bool(false)
 bool(true)
 bool(true)

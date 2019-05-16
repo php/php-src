@@ -2,7 +2,7 @@
 Bug #32134 (Overloading offsetGet/offsetSet)
 --FILE--
 <?php
-	
+
 class myArray extends ArrayIterator
 {
 

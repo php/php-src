@@ -1,9 +1,9 @@
 --TEST--
 Bug #41069 (Oracle crash with certain data over a DB-link when prefetch memory limit used - Oracle bug 6039623)
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (empty($dbase)) die ("skip requires network connection alias for DB link loopback");
 if ($test_drcp) die("skip DRCP does not support shared database links");
 ?>
@@ -12,7 +12,7 @@ oci8.default_prefetch=5
 --FILE--
 	<?php
 
-	require(dirname(__FILE__).'/connect.inc');
+	require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -51,7 +51,7 @@ $stmtarray = array(
 	"insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c15)	values
 	(113, 'aaaaaaa', 'bbbbbbbbbb', 'cccccc', 'e', 'f', 'dddd', '12/04/2006', '12/04/2006', 2224, 'zzzzzzz')"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #25378 (unserialize() crashes with invalid data)
 --FILE--
-<?php 
+<?php
 var_dump(unserialize("s:-1:\"\";"));
 var_dump(unserialize("i:823"));
 var_dump(unserialize("O:8:\"stdClass :0:{}"));
@@ -42,7 +42,7 @@ bool(false)
 Notice: unserialize(): Error at offset 17 of 33 bytes in %sbug25378.php on line %d
 bool(false)
 
-Notice: unserialize(): Error at offset 33 of 32 bytes in %sbug25378.php on line %d
+Notice: unserialize(): Error at offset 32 of 32 bytes in %sbug25378.php on line %d
 bool(false)
 
 Notice: unserialize(): Error at offset 2 of 13 bytes in %sbug25378.php on line %d

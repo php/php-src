@@ -5,11 +5,11 @@ Reflection and inheriting static properties
 
 class base {
 	static protected $prop = 2;
-	
+
 	static function show() {
 		echo __METHOD__ . '(' . self::$prop . ")\n";
 	}
-	
+
 	static function inc() {
 		base::$prop++;
 		echo __METHOD__ . "()\n";
@@ -18,7 +18,7 @@ class base {
 
 class derived extends base {
 	static public $prop = 2;
-	
+
 	static function show() {
 		echo __METHOD__ . '(' . self::$prop . ")\n";
 	}
@@ -47,7 +47,7 @@ echo 'Number of properties: '. count($r->getStaticProperties()) . "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 base::show(2)
 derived::show(2)
 base::inc()

@@ -117,8 +117,10 @@ memory_limit=83886080
 				return false;
 			}
 
-			reset($expected);
-			while ((list($k, $v) = each($expected)) && mysqli_stmt_fetch($stmt)) {
+			foreach ($expected as $k => $v) {
+				if (!mysqli_stmt_fetch($stmt)) {
+					break;
+				}
 				if ($result !== $v) {
 					printf("[%03d] Row %d - expecting %s/%s got %s/%s [%s] with %s - %s.\n",
 						$offset + 8,
@@ -208,11 +210,11 @@ memory_limit=83886080
 	if (mysqli_query($link, "CREATE TABLE `test` (
   `targetport` int(11) NOT NULL default '0',
   `sources` double(17,4) default NULL,
-  `current_sources` double(17,0) default NULL,
+  `current_sources` double(17,4) default NULL,
   `reports` double(17,4) default NULL,
-  `current_reports` double(17,0) default NULL,
+  `current_reports` double(17,4) default NULL,
   `targets` double(17,4) default NULL,
-  `current_targets` double(17,0) default NULL,
+  `current_targets` double(17,4) default NULL,
   `maxsources` int(11) default NULL,
   `maxtargets` int(11) default NULL,
   `maxreports` int(11) default NULL,
@@ -237,7 +239,7 @@ memory_limit=83886080
 					printf("[301] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 					break 2;
 				}
-				if ($current_targets > 0 && $trend != 'NULL')
+				if ($current_targets > 0 && $trend !== 'NULL')
 					$values[$trend] = $i;
 			}
 			krsort($values);
@@ -269,9 +271,10 @@ memory_limit=83886080
 				break;
 			}
 
-			reset($values);
-			while (mysqli_stmt_fetch($stmt)) {
-				list($exp_trend, $exp_targetport) = each($values);
+			foreach ($values as $exp_trend => $exp_targetport) {
+				if (!mysqli_stmt_fetch($stmt)) {
+					break;
+				}
 				if ($targetport != $exp_targetport) {
 					printf("[306] Values fetched from MySQL seem to be wrong, check manually\n");
 					printf("%s/%s - %s/%s - '%s'\n", $trend, $exp_trend, $targetport, $exp_targetport, $format);
@@ -308,9 +311,10 @@ memory_limit=83886080
 				break;
 			}
 
-			reset($values);
-			while ($stmt->fetch()) {
-				list($exp_trend, $exp_targetport) = each($values);
+			foreach ($values as $exp_trend => $exp_targetport) {
+				if (!$stmt->fetch()) {
+					break;
+				}
 				if ($targetport != $exp_targetport) {
 					printf("[312] Values fetched from MySQL seem to be wrong, check manually\n");
 					printf("%s/%s - %s/%s - '%s'\n", $trend, $exp_trend, $targetport, $exp_targetport, $format);
@@ -333,5 +337,5 @@ memory_limit=83886080
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

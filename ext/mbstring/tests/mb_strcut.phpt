@@ -7,7 +7,7 @@ output_handler=
 --FILE--
 <?php
 // TODO: Add more encodings
-ini_set('include_path', dirname(__FILE__));
+ini_set('include_path', __DIR__);
 include_once('common.inc');
 
 // EUC-JP
@@ -24,11 +24,8 @@ $str = mb_strcut($euc_jp, -100, 10,'EUC-JP');
 
 
 ?>
-
 --EXPECT--
 の文
 0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。
 OK
 OK: 0123この文
-
-

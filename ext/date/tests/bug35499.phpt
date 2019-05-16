@@ -42,7 +42,7 @@ array(16) {
   ["zone_type"]=>
   int(2)
   ["zone"]=>
-  int(-60)
+  int(3600)
   ["is_dst"]=>
   bool(false)
   ["tz_abbr"]=>

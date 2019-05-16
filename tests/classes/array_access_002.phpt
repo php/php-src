@@ -2,7 +2,7 @@
 ZE2 ArrayAccess::offsetSet without return
 --FILE--
 <?php
-class object implements ArrayAccess {
+class ObjectOne implements ArrayAccess {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 
@@ -24,7 +24,7 @@ class object implements ArrayAccess {
 	}
 }
 
-$obj = new Object;
+$obj = new ObjectOne;
 
 var_dump($obj->a);
 
@@ -95,75 +95,75 @@ array(4) {
   int(4)
 }
 ===EMPTY===
-object::offsetExists(0)
-object::offsetGet(0)
+ObjectOne::offsetExists(0)
+ObjectOne::offsetGet(0)
 bool(false)
-object::offsetExists(1)
-object::offsetGet(1)
+ObjectOne::offsetExists(1)
+ObjectOne::offsetGet(1)
 bool(false)
-object::offsetExists(2)
-object::offsetGet(2)
+ObjectOne::offsetExists(2)
+ObjectOne::offsetGet(2)
 bool(false)
-object::offsetExists(4th)
-object::offsetGet(4th)
+ObjectOne::offsetExists(4th)
+ObjectOne::offsetGet(4th)
 bool(false)
-object::offsetExists(5th)
+ObjectOne::offsetExists(5th)
 bool(true)
-object::offsetExists(6)
+ObjectOne::offsetExists(6)
 bool(true)
 ===isset===
-object::offsetExists(0)
+ObjectOne::offsetExists(0)
 bool(true)
-object::offsetExists(1)
+ObjectOne::offsetExists(1)
 bool(true)
-object::offsetExists(2)
+ObjectOne::offsetExists(2)
 bool(true)
-object::offsetExists(4th)
+ObjectOne::offsetExists(4th)
 bool(true)
-object::offsetExists(5th)
+ObjectOne::offsetExists(5th)
 bool(false)
-object::offsetExists(6)
+ObjectOne::offsetExists(6)
 bool(false)
 ===offsetGet===
-object::offsetGet(0)
+ObjectOne::offsetGet(0)
 string(3) "1st"
-object::offsetGet(1)
+ObjectOne::offsetGet(1)
 int(1)
-object::offsetGet(2)
+ObjectOne::offsetGet(2)
 string(3) "3rd"
-object::offsetGet(4th)
+ObjectOne::offsetGet(4th)
 int(4)
-object::offsetGet(5th)
+ObjectOne::offsetGet(5th)
 
 Notice: Undefined index: 5th in %sarray_access_002.php on line %d
 NULL
-object::offsetGet(6)
+ObjectOne::offsetGet(6)
 
 Notice: Undefined offset: 6 in %sarray_access_002.php on line %d
 NULL
 ===offsetSet===
 WRITE 1
-object::offsetSet(1,Changed 1)
-object::offsetGet(1)
+ObjectOne::offsetSet(1,Changed 1)
+ObjectOne::offsetGet(1)
 string(9) "Changed 1"
 WRITE 2
-object::offsetSet(4th,Changed 4th)
-object::offsetGet(4th)
+ObjectOne::offsetSet(4th,Changed 4th)
+ObjectOne::offsetGet(4th)
 string(11) "Changed 4th"
 WRITE 3
-object::offsetSet(5th,Added 5th)
-object::offsetGet(5th)
+ObjectOne::offsetSet(5th,Added 5th)
+ObjectOne::offsetGet(5th)
 string(9) "Added 5th"
 WRITE 4
-object::offsetSet(6,Added 6)
-object::offsetGet(6)
+ObjectOne::offsetSet(6,Added 6)
+ObjectOne::offsetGet(6)
 string(7) "Added 6"
-object::offsetGet(0)
+ObjectOne::offsetGet(0)
 string(3) "1st"
-object::offsetGet(2)
+ObjectOne::offsetGet(2)
 string(3) "3rd"
-object::offsetSet(6,changed 6)
-object::offsetGet(6)
+ObjectOne::offsetSet(6,changed 6)
+ObjectOne::offsetGet(6)
 string(9) "changed 6"
 string(9) "changed 6"
 ===unset===
@@ -181,10 +181,10 @@ array(6) {
   [6]=>
   string(9) "changed 6"
 }
-object::offsetUnset(2)
-object::offsetUnset(4th)
-object::offsetUnset(7)
-object::offsetUnset(8th)
+ObjectOne::offsetUnset(2)
+ObjectOne::offsetUnset(4th)
+ObjectOne::offsetUnset(7)
+ObjectOne::offsetUnset(8th)
 array(4) {
   [0]=>
   string(3) "1st"

@@ -9,7 +9,7 @@ class MyRecursiveArrayIterator extends ArrayIterator implements RecursiveIterato
 	{
 		return is_array($this->current());
 	}
-	
+
 	function getChildren()
 	{
 		return new MyRecursiveArrayIterator($this->current());

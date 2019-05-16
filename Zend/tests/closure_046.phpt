@@ -38,8 +38,7 @@ echo "After binding, with different instance for the bound one", "\n";
 $d = $nonstaticScoped->bindTo(new B, "static"); $d(); echo "\n";
 
 echo "Done.\n";
-
---EXPECTF--
+--EXPECT--
 Before binding
 bool(false)
 bool(false)

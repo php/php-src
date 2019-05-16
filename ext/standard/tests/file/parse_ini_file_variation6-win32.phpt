@@ -10,21 +10,21 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : array parse_ini_file(string filename [, bool process_sections])
- * Description: Parse configuration file 
+ * Description: Parse configuration file
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
-$absMainDir = dirname(__FILE__)."\\".$mainDir;
+$absMainDir = __DIR__."\\".$mainDir;
 mkdir($absMainDir);
 $absSubDir = $absMainDir."\\".$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 $unixifiedDir = '/'.substr(str_replace('\\','/',$absSubDir),3);
 
 $allDirs = array(
@@ -35,14 +35,14 @@ $allDirs = array(
   "$absSubDir\\..\\..\\".$mainDir."\\.\\".$subDir,
   "$absSubDir\\..\\\\\\".$subDir."\\\\..\\\\..\\".$subDir,
   "$absSubDir\\BADDIR",
-  
+
   // relative paths
   $mainDir."\\".$subDir,
-  $mainDir."\\\\".$subDir, 
-   $mainDir."\\\\\\".$subDir, 
+  $mainDir."\\\\".$subDir,
+   $mainDir."\\\\\\".$subDir,
   ".\\".$mainDir."\\..\\".$mainDir."\\".$subDir,
-  "BADDIR",  
-  
+  "BADDIR",
+
   // unixifed path
   $unixifiedDir,
 );

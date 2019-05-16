@@ -1,17 +1,17 @@
 --TEST--
-Test gzopen() function : variation: relative/absolute file 
+Test gzopen() function : variation: relative/absolute file
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
+ * Description: Open a .gz-file and return a .gz-file pointer
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gzopen() : variation ***\n";
@@ -40,7 +40,7 @@ unlink($absfile);
 unlink($relfile);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gzopen() : variation ***
 This is an absolute file
 This is a relative file

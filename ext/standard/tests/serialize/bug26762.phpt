@@ -1,12 +1,11 @@
 --TEST--
 Bug #26762 (unserialize() produces lowercase classnames)
 --SKIPIF--
-<?php 
-	if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); 
+<?php
 	if (class_exists('autoload_root')) die('skip Autoload test classes exist already');
 ?>
 --FILE--
-<?php 
+<?php
 
 ini_set('unserialize_callback_func','check');
 
@@ -23,5 +22,5 @@ catch (Exception $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "FOO"

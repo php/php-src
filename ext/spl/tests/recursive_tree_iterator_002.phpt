@@ -11,6 +11,6 @@ try {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 InvalidArgumentException thrown
 ===DONE===

@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::ftruncate function - truncating with stream that does not support truncation 
+SplFileObject::ftruncate function - truncating with stream that does not support truncation
 --FILE--
 <?php
 
@@ -21,7 +21,7 @@ $ftruncate_test = "";
 //end creating stream
 
 //open an SplFileObject using the above test stream
-$obj = New SplFileObject("SPLtest://ftruncate_test"); 
+$obj = New SplFileObject("SPLtest://ftruncate_test");
 try {
 	$obj->ftruncate(1);
 } catch (LogicException $e) {

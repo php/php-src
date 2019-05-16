@@ -4,7 +4,7 @@ SQLite3::createAggregate() Test whether a supplied PHP function is valid when us
 James Cauwelier
 # Belgium PHP TestFest (2009)
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

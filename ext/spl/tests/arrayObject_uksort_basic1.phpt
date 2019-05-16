@@ -1,12 +1,12 @@
 --TEST--
-Test ArrayObject::uksort() function : basic functionality 
+Test ArrayObject::uksort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::uksort(callback cmp_function)
  * Description: proto int ArrayIterator::uksort(callback cmp_function)
- * Sort the entries by key using user defined function. 
+ * Sort the entries by key using user defined function.
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::uksort() : basic functionality ***\n";
@@ -27,7 +27,7 @@ $ao->uksort('cmp');
 var_dump($ao);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::uksort() : basic functionality ***
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>

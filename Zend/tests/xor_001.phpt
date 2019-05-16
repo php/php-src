@@ -11,6 +11,6 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(1)
 Done

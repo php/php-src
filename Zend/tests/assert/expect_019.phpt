@@ -12,7 +12,7 @@ var_dump(\assert(true));
 var_dump(assert(false));
 var_dump(assert(true));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

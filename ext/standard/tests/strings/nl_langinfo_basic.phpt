@@ -1,8 +1,8 @@
 --TEST--
-Test nl_langinfo() function : basic functionality 
+Test nl_langinfo() function : basic functionality
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) == 'WIN'){  
+if( substr(PHP_OS, 0, 3) == 'WIN'){
   die('skip Not for Windows');
 }
 ?>
@@ -24,10 +24,10 @@ var_dump(nl_langinfo(ABMON_7));
 var_dump(nl_langinfo(MON_4));
 var_dump(nl_langinfo(RADIXCHAR));
 
-setlocale(LC_ALL, $original); 
+setlocale(LC_ALL, $original);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing nl_langinfo() : basic functionality ***
 string(3) "Mon"
 string(9) "Wednesday"

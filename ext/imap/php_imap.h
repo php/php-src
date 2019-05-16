@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,11 +23,9 @@
    |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <sniper@iki.fi>                         |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
-   | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
+   | PHP 4.0 updates:  Zeev Suraski <zeev@php.net>                        |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_IMAP_H
 #define PHP_IMAP_H
@@ -35,6 +33,21 @@
 #if HAVE_IMAP
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+
+ /* For now these appear on Windows, remove this check if it appears outside */
+# ifdef PHP_WIN32
+ /* Undefine these LOG defines to avoid warnings */
+#  undef LOG_EMERG
+#  undef LOG_CRIT
+#  undef LOG_ERR
+#  undef LOG_WARNING
+#  undef LOG_NOTICE
+#  undef LOG_DEBUG
+
+ /* c-client also redefines its own ftruncate */
+#  undef ftruncate
+# endif
+
  /* these are used for quota support */
 # include "c-client.h"	/* includes mail.h and rfc822.h */
 # include "imap4r1.h"	/* location of c-client quota functions */
@@ -216,13 +229,15 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 #endif
 	/* php_stream for php_mail_gets() */
 	php_stream *gets_stream;
+	zend_bool enable_rsh;
 ZEND_END_MODULE_GLOBALS(imap)
 
-#ifdef ZTS
-# define IMAPG(v) TSRMG(imap_globals_id, zend_imap_globals *, v)
-#else
-# define IMAPG(v) (imap_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_IMAP)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(imap)
+#define IMAPG(v) ZEND_MODULE_GLOBALS_ACCESSOR(imap, v)
 
 #else
 

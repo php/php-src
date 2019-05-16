@@ -18,7 +18,7 @@ try {
   echo $e->getMessage() . "(" . $e->getLine() .  ")\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Bad iterator type:
 ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'Exception' given(6)
 Non-existent class:

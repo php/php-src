@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,33 +45,33 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 		}
 		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
 	} else { /* no error */
-		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(*pdo_err));
 		return 0;
 	}
 	switch (einfo->errcode) {
 		case SQLITE_NOTFOUND:
-			strncpy(*pdo_err, "42S02", sizeof("42S02"));
+			strncpy(*pdo_err, "42S02", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_INTERRUPT:
-			strncpy(*pdo_err, "01002", sizeof("01002"));
+			strncpy(*pdo_err, "01002", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_NOLFS:
-			strncpy(*pdo_err, "HYC00", sizeof("HYC00"));
+			strncpy(*pdo_err, "HYC00", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_TOOBIG:
-			strncpy(*pdo_err, "22001", sizeof("22001"));
+			strncpy(*pdo_err, "22001", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_CONSTRAINT:
-			strncpy(*pdo_err, "23000", sizeof("23000"));
+			strncpy(*pdo_err, "23000", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_ERROR:
 		default:
-			strncpy(*pdo_err, "HY000", sizeof("HY000"));
+			strncpy(*pdo_err, "HY000", sizeof(*pdo_err));
 			break;
 	}
 
@@ -161,7 +159,11 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 		pdo_sqlite_cleanup_callbacks(H);
 		if (H->db) {
+#ifdef HAVE_SQLITE3_CLOSE_V2
+			sqlite3_close_v2(H->db);
+#else
 			sqlite3_close(H->db);
+#endif
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {
@@ -193,7 +195,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return 0;
 	}
 
-	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
 	}
@@ -342,7 +344,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 			ZVAL_NULL(&zargs[0]);
 		} else {
 			if (Z_ISUNDEF(agg_context->val)) {
-				GC_REFCOUNT(agg_context) = 1;
+				GC_SET_REFCOUNT(agg_context, 1);
 				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
 				ZVAL_NULL(&agg_context->val);
 			}
@@ -505,7 +507,7 @@ static int php_sqlite3_collation_callback(void *context,
 	return ret;
 }
 
-/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount])
+/* {{{ bool SQLite::sqliteCreateFunction(string name, mixed callback [, int argcount, int flags])
    Registers a UDF with the sqlite db handle */
 static PHP_METHOD(SQLite, sqliteCreateFunction)
 {
@@ -514,31 +516,34 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
-	zend_string *cbname = NULL;
+	zend_long flags = 0;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz|l",
-			&func_name, &func_name_len, &callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL(callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
+	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8,
 			func, php_sqlite3_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
@@ -584,31 +589,34 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
-			&func_name, &func_name_len, &step_callback, &fini_callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL(step_callback)
+		Z_PARAM_ZVAL(fini_callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(step_callback, 0, &cbname)) {
+	if (!zend_is_callable(step_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(step_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
-	if (!zend_is_callable(fini_callback, 0, &cbname)) {
+
+	if (!zend_is_callable(fini_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(fini_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -644,25 +652,24 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	zval *callback;
 	char *collation_name;
 	size_t collation_name_len;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz",
-		&collation_name, &collation_name_len, &callback)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_ZVAL(callback)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-		zend_string_release(cbname);
+		zend_string_release_ex(cbname, 0);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -713,7 +720,7 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 	}
 }
 
-static struct pdo_dbh_methods sqlite_methods = {
+static const struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
 	sqlite_handle_doer,
@@ -782,7 +789,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
-	zend_long timeout = 60;
+	zend_long timeout = 60, flags;
 	char *filename;
 
 	H = pecalloc(1, sizeof(pdo_sqlite_db_handle), dbh->is_persistent);
@@ -800,7 +807,10 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 		goto cleanup;
 	}
 
-	i = sqlite3_open(filename, &H->db);
+	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+
+	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
+
 	efree(filename);
 
 	if (i != SQLITE_OK) {
@@ -829,16 +839,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_sqlite_driver = {
+const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),
 	pdo_sqlite_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

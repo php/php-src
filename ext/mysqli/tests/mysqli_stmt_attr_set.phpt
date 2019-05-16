@@ -8,22 +8,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
-
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_set($link, $link, $link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+require_once("connect.inc");
 
 	require('table.inc');
 
@@ -41,8 +26,8 @@ require_once('skipifconnectfailure.inc');
 
 
 	$stmt = mysqli_stmt_init($link);
-	if (!is_null($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	$stmt->prepare("SELECT * FROM test");
 
@@ -273,5 +258,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

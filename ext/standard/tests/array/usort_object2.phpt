@@ -3,12 +3,12 @@ Test usort() function : object functionality - Different types of classes
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
 /*
- * Pass an array of objects which are either: 
+ * Pass an array of objects which are either:
  * 1. Empty
  * 2. Static
  * 2. Inherited

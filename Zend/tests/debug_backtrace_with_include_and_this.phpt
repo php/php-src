@@ -1,5 +1,5 @@
 --TEST--
-debug_backtrace segmentation fault with include and error handler 
+debug_backtrace segmentation fault with include and error handler
 --FILE--
 <?php
 class CLWrapper {
@@ -36,4 +36,3 @@ Stack trace:
 #0 %s(%d): CL->load('class://non.exi...')
 #1 {main}
   thrown in %s on line %d
-

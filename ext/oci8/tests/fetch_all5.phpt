@@ -5,7 +5,7 @@ Test oci_fetch_all with 0 and -1 skip & maxrows
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -58,7 +58,7 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 int(3)
 array(2) {

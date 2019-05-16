@@ -8,8 +8,8 @@ Test strtr() function : usage variations - unexpected inputs for 'replace_pairs'
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'replace_pairs' 
- *  and expected type for 'str' arguments 
+/* Test strtr() function: with unexpected inputs for 'replace_pairs'
+ *  and expected type for 'str' arguments
 */
 
 echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
@@ -22,7 +22,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -55,7 +55,7 @@ $replace_pairs_arr =  array (
   TRUE,
   FALSE,
 
-  // null vlaues
+  // null values
   NULL,
   null,
 

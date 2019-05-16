@@ -2,8 +2,8 @@
 MySQL PDO->__construct() - URI
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 /* TODO - fix this limitation */
 if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysql.sock")
@@ -13,7 +13,7 @@ if (getenv('PDO_MYSQL_TEST_DSN') !== "mysql:dbname=phptest;unix_socket=/tmp/mysq
 pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	$found = false;
 	$values = ini_get_all();
@@ -51,6 +51,6 @@ pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 pdo.dsn.mysql cannot be accessed through ini_get_all()/ini_get()
 done!

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Wez Furlong <wez@php.net>                                    |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -333,7 +331,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 		add_assoc_string(return_value, "sqlite:decl_type", (char *)str);
 	}
 
-#ifdef SQLITE_ENABLE_COLUMN_METADATA
+#ifdef HAVE_SQLITE3_COLUMN_TABLE_NAME
 	str = sqlite3_column_table_name(S->stmt, colno);
 	if (str) {
 		add_assoc_string(return_value, "table", (char *)str);
@@ -352,7 +350,29 @@ static int pdo_sqlite_stmt_cursor_closer(pdo_stmt_t *stmt)
 	return 1;
 }
 
-struct pdo_stmt_methods sqlite_stmt_methods = {
+static int pdo_sqlite_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val)
+{
+	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
+
+	switch (attr) {
+		case PDO_SQLITE_ATTR_READONLY_STATEMENT:
+			ZVAL_FALSE(val);
+
+#if SQLITE_VERSION_NUMBER >= 3007004
+				if (sqlite3_stmt_readonly(S->stmt)) {
+					ZVAL_TRUE(val);
+				}
+#endif
+			break;
+
+		default:
+			return 0;
+	}
+
+	return 1;
+}
+
+const struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_dtor,
 	pdo_sqlite_stmt_execute,
 	pdo_sqlite_stmt_fetch,
@@ -360,17 +380,8 @@ struct pdo_stmt_methods sqlite_stmt_methods = {
 	pdo_sqlite_stmt_get_col,
 	pdo_sqlite_stmt_param_hook,
 	NULL, /* set_attr */
-	NULL, /* get_attr */
+	pdo_sqlite_stmt_get_attribute, /* get_attr */
 	pdo_sqlite_stmt_col_meta,
 	NULL, /* next_rowset */
 	pdo_sqlite_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

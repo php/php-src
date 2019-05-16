@@ -2,29 +2,27 @@
 Bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when using FETCH_CLASSTYPE)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (version_compare(PHP_VERSION, '5.1.0', '<'))
-	die("skip Needs 5.1.0 and Interface Serializable");
 ?>
 --FILE--
-<?php	
-	
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+<?php
+
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$pdoDb = MySQLPDOTest::factory();
-	
+
 
 	class myclass implements Serializable {
 		public function __construct() {
 			printf("%s()\n", __METHOD__);
 		}
-		
+
 		public function serialize() {
 			printf("%s()\n", __METHOD__);
 			return "any data from serialize()";
 		}
-		
+
 		public function unserialize($dat) {
 			printf("%s(%s)\n", __METHOD__, var_export($dat, true));
 			return $dat;
@@ -35,11 +33,11 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 
 	$pdoDb->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 	$pdoDb->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-	
+
 	$pdoDb->query('DROP TABLE IF EXISTS testz');
-	
+
 	$pdoDb->query('CREATE TABLE testz (name VARCHAR(20) NOT NULL, value INT)');
-	
+
 	$pdoDb->query("INSERT INTO testz VALUES ('myclass', 1), ('myclass2', 2), ('myclass', NULL), ('myclass3', NULL)");
 
 	$stmt = $pdoDb->prepare("SELECT * FROM testz");
@@ -53,7 +51,7 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS testz');
 ?>
@@ -61,24 +59,24 @@ $db->exec('DROP TABLE IF EXISTS testz');
 bool(true)
 myclass::__construct()
 object(myclass)#%d (1) {
-  [%u|b%"value"]=>
-  %unicode|string%(1) "1"
+  ["value"]=>
+  string(1) "1"
 }
 myclass::__construct()
 object(myclass2)#%d (1) {
-  [%u|b%"value"]=>
-  %unicode|string%(1) "2"
+  ["value"]=>
+  string(1) "2"
 }
 myclass::__construct()
 array(2) {
   [0]=>
   object(myclass)#%d (1) {
-    [%u|b%"value"]=>
+    ["value"]=>
     NULL
   }
   [1]=>
   object(stdClass)#%d (1) {
-    [%u|b%"value"]=>
+    ["value"]=>
     NULL
   }
 }

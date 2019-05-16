@@ -42,7 +42,6 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value );
 
 	/* Normalization form constants */
-	NORMALIZER_EXPOSE_CLASS_CONST( NONE );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_D );
 	NORMALIZER_EXPOSE_CLASS_CONST( NFD );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_KD );
@@ -51,18 +50,13 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 	NORMALIZER_EXPOSE_CLASS_CONST( NFC );
 	NORMALIZER_EXPOSE_CLASS_CONST( FORM_KC );
 	NORMALIZER_EXPOSE_CLASS_CONST( NFKC );
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	NORMALIZER_EXPOSE_CLASS_CONST( FORM_KC_CF );
+	NORMALIZER_EXPOSE_CLASS_CONST( NFKC_CF );
+#endif
 
 	#undef NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST
 	#undef NORMALIZER_EXPOSE_CLASS_CONST
 	#undef NORMALIZER_EXPOSE_CONST
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

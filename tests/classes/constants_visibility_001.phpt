@@ -17,7 +17,7 @@ A::staticConstDump();
 (new A())->constDump();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "publicConst"
 string(11) "publicConst"
 string(11) "publicConst"

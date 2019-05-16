@@ -7,7 +7,7 @@ oci8.default_prefetch=100
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -44,7 +44,7 @@ $stmtarray = array(
 );
 
 oci8_test_sql_execute($c, $stmtarray);
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

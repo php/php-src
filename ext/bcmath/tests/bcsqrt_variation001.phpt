@@ -8,5 +8,5 @@ bcmath.scale=0
 <?php
 echo bcsqrt("0");
 ?>
---EXPECTF--
+--EXPECT--
 0

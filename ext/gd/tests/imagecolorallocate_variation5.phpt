@@ -28,7 +28,7 @@ $values = array(
       "Octal 012" => 012,
       "Octal -012" => -012,
       "Octal 0377" => 0377,
-     
+
       // hexa-decimal integer data
       "Hexa-decimal 0x0" => 0x0,
       "Hexa-decimal 0xA" => 0xA,
@@ -45,7 +45,7 @@ foreach($values as $key => $value) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Octal 000--

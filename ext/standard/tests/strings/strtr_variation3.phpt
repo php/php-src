@@ -65,7 +65,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() : string containing escape sequences for 'str' arg ***
 -- Iteration 1 --
 string(9) "SesSTsttE"

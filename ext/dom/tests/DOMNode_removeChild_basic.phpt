@@ -28,7 +28,7 @@ $xml = <<< EOXML
 EOXML;
 
 function dumpcourse($current) {
-	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title"; 
+	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
 	echo "Course: $title:";echo get_class($current), "\n";
 	echo "~";var_dump($current->textContent);
 }
@@ -56,8 +56,7 @@ for ($index = 0; $index < $children->length; $index++) {
 	$current = $children->item($index);
 	dumpcourse($current);
 }
-
---EXPECTF--
+--EXPECT--
 original has 5 nodes
 node 4
 Course: no title:DOMText

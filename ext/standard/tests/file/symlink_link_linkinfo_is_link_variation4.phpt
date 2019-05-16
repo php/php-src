@@ -22,11 +22,11 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 /* Variation 4 : Create file and a hard link to the file
-                 Access data of the file through the hard link 
+                 Access data of the file through the hard link
                  Update the file through hard link
                  Check size of file and hard link
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Accessing and updating data of file through hard link ***\n";
 // Creating file and inserting data into it
@@ -45,7 +45,7 @@ $data_from_link = file_get_contents($linkname);  // data read from $filename
 var_dump( $data_from_link );
 
 echo "\n-- Check size of hard link and file --\n";
-if( filesize($filename) == filesize($linkname) ) 
+if( filesize($filename) == filesize($linkname) )
   echo "\nSize of file and hard link are same\n";
 else
   echo "\nWarning: Size of file and hard link differ\n";
@@ -61,7 +61,7 @@ $data_from_file = file_get_contents($filename);
 var_dump( $data_from_file );
 
 echo "\n-- Check size of hard link and file --\n";
-if( filesize($filename) == filesize($linkname) ) 
+if( filesize($filename) == filesize($linkname) )
   echo "\nSize of file and hard link are same\n";
 else
   echo "\nWarning: Size of file and hard link differ\n";
@@ -79,7 +79,7 @@ var_dump( $data_from_link );
 echo "\n-- Check size of hard link and file --\n";
 var_dump( filesize($filename) );
 var_dump( filesize($linkname) );
-if( filesize($filename) == filesize($linkname) ) 
+if( filesize($filename) == filesize($linkname) )
   echo "\nSize of file and hard link are same\n";
 else
   echo "\nWarning: Size of file and hard link differ\n";
@@ -91,7 +91,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through hard link ***
 
 -- Access data of the file through the hard link --

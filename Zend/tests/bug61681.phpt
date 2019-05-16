@@ -4,7 +4,7 @@ Bug #61681: Malformed grammar
 <?php
 $la = "ooxx";
 
-echo "${substr('laruence', 0, 2)}"; 
+echo "${substr('laruence', 0, 2)}";
 
 ?>
 --EXPECT--

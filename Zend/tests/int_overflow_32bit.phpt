@@ -20,7 +20,7 @@ foreach ($doubles as $d) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(-2147483648)
 int(-2147483647)
 int(-2147483638)

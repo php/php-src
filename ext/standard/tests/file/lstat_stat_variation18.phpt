@@ -17,7 +17,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test for stats of dir/file when their names are stored in objects */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -38,23 +38,22 @@ class names {
 // directory name stored in an object
 $dir_name = new names("$file_path/lstat_stat_variation18");
 
-// file name stored in an object 
+// file name stored in an object
 $file_name = new names("$file_path/lstat_stat_variation18.tmp");
 
 echo "\n-- Testing stat() on filename stored inside an object --\n";
-// dump the stat returned value 
+// dump the stat returned value
 var_dump( stat($file_name->var_name) );
 
 echo "\n-- Testing stat() on directory name stored inside an object --\n";
-// dump the stat returned value 
+// dump the stat returned value
 var_dump( stat($dir_name->var_name) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation18.tmp");
 rmdir("$file_path/lstat_stat_variation18");
 ?>

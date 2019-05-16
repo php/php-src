@@ -14,6 +14,7 @@ var_dump($$test);
 
 ?>
 --EXPECTF--
+Warning: Creating default object from empty value in %sobjects_020.php on line 7
 object(stdClass)#%d (2) {
   ["a"]=>
   *RECURSION*

@@ -2,7 +2,7 @@
 htmlentities() test 14 (default_charset / Shift_JIS)
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+internal_encoding=pass
 default_charset=Shift_JIS
 filter.default=unsafe_raw
 --FILE--

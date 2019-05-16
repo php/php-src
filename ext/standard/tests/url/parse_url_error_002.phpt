@@ -3,9 +3,9 @@ Test parse_url() function: url component specifier out of range
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components 
+ * Description: Parse a URL and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing parse_url() : error conditions: url component specifier out of range ***\n";

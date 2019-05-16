@@ -4,11 +4,12 @@ Test mb_ereg() function : usage variations - pass different character classes to
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
+version_compare(MB_ONIGURUMA_VERSION, '6.1.0', '>=') or die("skip requires oniguruma >= 6.1.0");
 ?>
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -21,18 +22,18 @@ echo "*** Testing mb_ereg() : variation ***\n";
 
 mb_regex_encoding('utf-8'); // have to set otherwise won't match $mb properly
 $mb = base64_decode('5pel5pys6Kqe');
-$character_classes = array (b'aB1'    => b'[[:alnum:]]+', /*1*/
-                            b'aBcD'   => b'[[:alpha:]]+',
-                            b'ab/='   => b'[[:ascii:]]+',
-                            b" \t"    => b'[[:blank:]]+',
-                            b'234'    => b'[[:digit:]]+', /*5*/
-                            "$mb"    => b'[[:graph:]]+',
-                            b'fjds'   => b'[[:lower:]]+',
-                            b"$mb\t"  => b'[[:print:]]+',
-                            b'.!"*@'  => b'[[:punct:]]+',
-                            b"\t"     => b'[[:space:]]+', /*10*/
-                            b'IDSJV'  => b'[[:upper:]]+',
-                            b'3b5D'   => b'[[:xdigit:]]+'); /*12*/
+$character_classes = array ('aB1'    => '[[:alnum:]]+', /*1*/
+                            'aBcD'   => '[[:alpha:]]+',
+                            'ab/='   => '[[:ascii:]]+',
+                            " \t"    => '[[:blank:]]+',
+                            '234'    => '[[:digit:]]+', /*5*/
+                            "$mb"    => '[[:graph:]]+',
+                            'fjds'   => '[[:lower:]]+',
+                            "$mb\t"  => '[[:print:]]+',
+                            '.!"*@'  => '[[:punct:]]+',
+                            "\t"     => '[[:space:]]+', /*10*/
+                            'IDSJV'  => '[[:upper:]]+',
+                            '3b5D'   => '[[:xdigit:]]+'); /*12*/
 
 $iterator = 1;
 foreach($character_classes as $string => $pattern) {
@@ -69,7 +70,6 @@ function base64_encode_var_dump($regs) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing mb_ereg() : variation ***
 
@@ -123,10 +123,10 @@ array(1) {
 }
 
 -- Iteration 8 --
-int(10)
+int(9)
 array(1) {
   [0]=>
-  string(16) "5pel5pys6KqeCQ=="
+  string(12) "5pel5pys6Kqe"
 }
 
 -- Iteration 9 --

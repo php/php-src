@@ -2,8 +2,8 @@
 MySQL PDO->exec(), affected rows
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
@@ -29,7 +29,7 @@ MySQLPDOTest::skip();
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
@@ -75,7 +75,7 @@ MySQLPDOTest::skip();
 			exec_and_count(19, $db, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(255)) BEGIN SELECT VERSION() INTO ver_param; END;', 0);
 			// we got this far without problems. If there's an issue from now on, its a failure
 			$ignore_exception = false;
-			exec_and_count(20, $db, 'CALL p(@version)', 0);
+			exec_and_count(20, $db, 'CALL p(@version)', 1);
 			$stmt = $db->query('SELECT @version AS p_version');
 			$tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			if (count($tmp) > 1 || !isset($tmp[0]['p_version'])) {
@@ -174,7 +174,7 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 @$db->exec('DROP TABLE IF EXISTS test');
 ?>

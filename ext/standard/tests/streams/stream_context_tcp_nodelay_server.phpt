@@ -38,8 +38,8 @@ $clientCode = <<<'CODE'
 CODE;
 
 include sprintf(
-	"%s/../../../openssl/tests/ServerClientTestCase.inc", 
-	dirname(__FILE__));
+	"%s/../../../openssl/tests/ServerClientTestCase.inc",
+	__DIR__);
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
 ?>
 --EXPECT--

@@ -3,11 +3,11 @@ Test array_walk_recursive() function : object functionality
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
-/* Passing object in place of an 'input' argument to test object functionality 
+/* Passing object in place of an 'input' argument to test object functionality
  */
 echo "*** Testing array_walk_recursive() : object functionality ***\n";
 
@@ -38,10 +38,10 @@ class MyClass
     $this->pub_value = $setVal;
     $this->pro_value = $setVal;
   }
-};    
+};
 
 // object for 'input' argument
-$input = new MyClass(10); 
+$input = new MyClass(10);
 
 var_dump( array_walk_recursive($input, "callback", 1));
 
@@ -49,15 +49,15 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_walk_recursive() : object functionality ***
-%unicode|string%(18) "%r\0%rMyClass%r\0%rpri_value"
+string(18) "%r\0%rMyClass%r\0%rpri_value"
 int(10)
 int(1)
 
-%unicode|string%(9) "pub_value"
+string(9) "pub_value"
 int(10)
 int(1)
 
-%unicode|string%(12) "%r\0%r*%r\0%rpro_value"
+string(12) "%r\0%r*%r\0%rpro_value"
 int(10)
 int(1)
 

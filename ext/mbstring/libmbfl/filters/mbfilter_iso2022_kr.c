@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	"ISO-2022-KR",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_2022kr_wchar,
+	&vtbl_wchar_2022kr
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_2022kr = {
@@ -355,5 +357,3 @@ retry:
 
 	return c;
 }
-
-

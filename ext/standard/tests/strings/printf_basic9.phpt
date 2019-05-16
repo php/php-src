@@ -25,12 +25,12 @@ $arg1 = 11;
 $arg2 = 132;
 $arg3 = 177;
 
-echo "\n-- Calling printf() with no arguments --\n"; 
+echo "\n-- Calling printf() with no arguments --\n";
 $result = printf($format);
 echo "\n";
 var_dump($result);
 
-echo "\n-- Calling printf() with one arguments --\n"; 
+echo "\n-- Calling printf() with one arguments --\n";
 $result = printf($format1, $arg1);
 echo "\n";
 var_dump($result);
@@ -38,7 +38,7 @@ $result = printf($format11, $arg1);
 echo "\n";
 var_dump($result);
 
-echo "\n-- Calling printf() with two arguments --\n"; 
+echo "\n-- Calling printf() with two arguments --\n";
 $result = printf($format2, $arg1, $arg2);
 echo "\n";
 var_dump($result);
@@ -46,7 +46,7 @@ $result = printf($format22, $arg1, $arg2);
 echo "\n";
 var_dump($result);
 
-echo "\n-- Calling printf() with three arguments --\n"; 
+echo "\n-- Calling printf() with three arguments --\n";
 $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
@@ -56,7 +56,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using hexadecimal format ***
 
 -- Calling printf() with no arguments --

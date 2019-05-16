@@ -3,13 +3,13 @@ Bug #42496 (LOB fetch leaks cursors, eventually failing with ORA-1000 maximum op
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-?> 
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 // Initialization
 
@@ -50,6 +50,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 2
 Done

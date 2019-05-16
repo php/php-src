@@ -1,5 +1,5 @@
 --TEST--
-Test mb_stristr() function : basic functionality 
+Test mb_stristr() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,19 +8,19 @@ function_exists('mb_stristr') or die("skip mb_stristr() is not available in this
 --FILE--
 <?php
 /* Prototype  : string mb_stristr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another, case insensitive 
+ * Description: Finds first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_stristr() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
 
-$string_ascii = b'abcdef';
-$needle_ascii_upper = b"BCD";
-$needle_ascii_mixed = b"bCd";
-$needle_ascii_lower = b"bcd";
+$string_ascii = 'abcdef';
+$needle_ascii_upper = "BCD";
+$needle_ascii_mixed = "bCd";
+$needle_ascii_lower = "bcd";
 
 //Greek string in lower case UTF-8
 $string_mb = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');

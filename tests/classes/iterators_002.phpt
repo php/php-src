@@ -1,7 +1,5 @@
 --TEST--
 ZE2 iterators and break
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class c_iter implements Iterator {
@@ -43,7 +41,7 @@ class c_iter implements Iterator {
 		echo __METHOD__ . "\n";
 	}
 }
-	
+
 class c implements IteratorAggregate {
 
 	public $max = 3;

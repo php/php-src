@@ -20,5 +20,5 @@ unset($gen1);
 foreach ($gen2 as $v) { var_dump($v); }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)

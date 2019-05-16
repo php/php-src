@@ -9,7 +9,7 @@ $types_arr = array(
   FALSE => FALSE,
   1 => 1,
   0 => 0,
-  -1 => -1, 
+  -1 => -1,
   "1" => "1",
   "0" => "0",
   "-1" => "-1",
@@ -21,12 +21,12 @@ $types_arr = array(
 $values = array(TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL, array(), "php", "");
 foreach ($values as $value){
 	var_dump($value);
-	var_dump(array_keys($types_arr, $value)); 
+	var_dump(array_keys($types_arr, $value));
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() on all the types other than arrays ***
 bool(true)
 array(3) {

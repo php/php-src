@@ -4,7 +4,7 @@ Test open_basedir configuration
 open_basedir=.
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
+if(PHP_OS_FAMILY !== "Windows") {
     die('skip Windows only variation');
 }
 ?>
@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 require_once "open_basedir.inc";
 test_open_basedir_before("parse_ini_file");
-$directory = dirname(__FILE__);
+$directory = __DIR__;
 
 var_dump(parse_ini_file("../bad"));
 var_dump(parse_ini_file("../bad/bad.txt"));
@@ -72,4 +72,3 @@ Warning: parse_ini_file(): open_basedir restriction in effect. File(%stest) is n
 Warning: parse_ini_file(%stest): failed to open stream: Operation not permitted in %sopen_basedir_parse_ini_file.php on line 12
 bool(false)
 *** Finished testing open_basedir configuration [parse_ini_file] ***
-

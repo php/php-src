@@ -10,18 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (NULL !== ($tmp = @mysqli_data_seek()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_data_seek($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_data_seek($link, $link)))
-		printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 	if (!$res = mysqli_query($link, 'SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -56,8 +44,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (NULL !== ($tmp = mysqli_data_seek($res, 1)))
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_data_seek($res, 1)))
+		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 

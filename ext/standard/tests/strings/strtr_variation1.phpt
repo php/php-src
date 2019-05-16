@@ -56,7 +56,7 @@ for($index = 0; $index < count($str_arr); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() : numeric & regular double quoted strings ***
 -- Iteration 1 --
 string(3) "abc"

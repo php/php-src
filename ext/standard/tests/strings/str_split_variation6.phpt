@@ -7,9 +7,9 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -22,7 +22,7 @@ echo "*** Testing str_split() : different intger values for 'split_length' ***\n
 //Initialise variables
 $str = 'This is a string with 123 & escape char \t';
 
-//different values for 'split_length' 
+//different values for 'split_length'
 $values = array (
   0,
   1,
@@ -30,7 +30,6 @@ $values = array (
   0234,  //octal number
   0x1A,  //hexadecimal number
   2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
   -2147483648,  //min negative integer
 );
 
@@ -156,10 +155,6 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-
-Warning: str_split() expects parameter 2 to be integer, float given in %s line %d
-NULL
--- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
 bool(false)

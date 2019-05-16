@@ -22,7 +22,7 @@ require_once('skipifconnectfailure.inc');
 	if (!$link->query("CREATE PROCEDURE p123() BEGIN SELECT id+12, CONCAT_WS('-',label,'ahoi') FROM test ORDER BY id LIMIT 1; SELECT id + 42, CONCAT_WS('---',label, label) FROM test ORDER BY id LIMIT 1; END")) {
 		printf("[002] [%d] %s\n", $link->error, $link->errno);
 	}
-	
+
 	if (!($stmt = $link->prepare("CALL p123"))) {
 		printf("[003] [%d] %s\n", $stmt->error, $stmt->errno);
 	}
@@ -99,7 +99,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[001] [%d] %s\n", $link->error, $link->errno);
 	}
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "pre:"
 NULL
 NULL

@@ -6,7 +6,7 @@ Testing parameter type-hinted with interface
 namespace foo;
 
 interface foo {
-	
+
 }
 
 class bar {
@@ -16,7 +16,7 @@ class bar {
 }
 
 class test implements foo {
-	
+
 }
 
 
@@ -30,7 +30,7 @@ object(foo\test)#%d (0) {
 }
 NULL
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo, instance of stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to foo\bar::__construct() must implement interface foo\foo or be null, instance of stdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo\bar->__construct(Object(stdClass))
 #1 {main}

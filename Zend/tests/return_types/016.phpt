@@ -1,6 +1,5 @@
 --TEST--
 Fully qualified classes are allowed in return types
-
 --FILE--
 <?php
 
@@ -14,7 +13,6 @@ class Foo {
 
 $foo = new Foo;
 var_dump($foo->foo(new \EmptyIterator()));
-
 --EXPECTF--
 object(EmptyIterator)#%d (0) {
 }

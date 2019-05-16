@@ -3,13 +3,13 @@ Fetching two different lobs and using them after fetch
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 /* insert the first LOB */
 $ora_sql = "INSERT INTO
@@ -58,7 +58,7 @@ $rows[1] = oci_fetch_assoc($s);
 var_dump($rows[0]['BLOB']->read(1000));
 var_dump($rows[1]['BLOB']->read(1000));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 

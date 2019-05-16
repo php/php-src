@@ -1,7 +1,7 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 --INI--
-precision=14
+serialize_precision=-1
 --SKIPIF--
 <?php
 if (!extension_loaded('json')) die('skip');
@@ -14,8 +14,6 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
  * Modified to test empty string values.
  * Modified to test a mix of integers and strings as keys.
  */
-// Expect warnings about INF.
-ini_set("error_reporting", E_ALL & ~E_WARNING);
 
 $test = "
 [

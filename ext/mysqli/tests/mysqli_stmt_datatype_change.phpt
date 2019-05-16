@@ -65,8 +65,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS type_change"))
 
 mysqli_close($link);
 ?>
-
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 ---- Row 1
@@ -81,7 +80,7 @@ NULL
 ALTER
 bool(true)
 bool(false)
-%unicode|string%(34) "Unknown column 'a' in 'field list'"
+string(34) "Unknown column 'a' in 'field list'"
 ---- Row 1
 bool(false)
 int(2)

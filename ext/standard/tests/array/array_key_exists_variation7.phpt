@@ -3,7 +3,7 @@ Test array_key_exists() function : usage variations - position of internal array
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -24,8 +24,7 @@ echo key($input) . " => " . current ($input) . "\n";
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Call array_key_exists() --

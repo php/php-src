@@ -1,9 +1,9 @@
 --TEST--
 mysqli_connect()
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
-require_once('skipifemb.inc'); 
+require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -18,10 +18,6 @@ require_once('skipifconnectfailure.inc');
 	$anon_allow = (gettype($tmp) == "object");
 
 	$exptype = ($anon_allow) ? "mysqli_object" : "false";
-
-	$obj = new stdClass();
-	if (!is_null($tmp = @mysqli_connect($obj)))
-		printf("[001] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 	$tmp = @mysqli_connect($link);
 	if (($anon_allow && gettype($tmp) != "object") || (!$anon_allow && $tmp != false)) {
@@ -151,25 +147,25 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(21) "mysqli.default_socket"
+  ["testing"]=>
+  string(21) "mysqli.default_socket"
 }
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(19) "mysqli.default_port"
+  ["testing"]=>
+  string(19) "mysqli.default_port"
 }
 array(1) {
-  [%u|b%"testing"]=>
-  %unicode|string%(17) "mysqli.default_pw"
+  ["testing"]=>
+  string(17) "mysqli.default_pw"
 }
 array(2) {
   [0]=>
-  %unicode|string%(19) "mysqli.default_user"
-  [%u|b%"testing"]=>
-  %unicode|string%(19) "mysqli.default_user"
+  string(19) "mysqli.default_user"
+  ["testing"]=>
+  string(19) "mysqli.default_user"
 }
 array(1) {
   [0]=>
-  %unicode|string%(19) "mysqli.default_host"
+  string(19) "mysqli.default_host"
 }
 done!

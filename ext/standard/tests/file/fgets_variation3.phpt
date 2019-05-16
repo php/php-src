@@ -12,13 +12,13 @@ include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
                     "a+", "a+b", "a+t",
-                    "x+", "x+b", "x+t"); 
+                    "x+", "x+b", "x+t");
 
 $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumeric");
 
 echo "*** Testing fgets() : usage variations ***\n";
 
-$filename = dirname(__FILE__)."/fgets_variation3.tmp";
+$filename = __DIR__."/fgets_variation3.tmp";
 
 foreach($file_modes as $file_mode) {
   echo "\n-- Testing fgets() with file opened using mode $file_mode --\n";
@@ -29,7 +29,7 @@ foreach($file_modes as $file_mode) {
     /* create files with $file_content_type */
     $file_handle = fopen($filename, $file_mode);
     $data = fill_file($file_handle, $file_content_type, 50);
- 
+
     if ( !$file_handle ) {
       echo "Error: failed to open file $filename!";
       exit();
@@ -40,7 +40,7 @@ foreach($file_modes as $file_mode) {
     rewind($file_handle);
 
     var_dump( ftell($file_handle) );
-    var_dump( fgets($file_handle) ); // with default length 
+    var_dump( fgets($file_handle) ); // with default length
     var_dump( ftell($file_handle) ); // ensure the file pointer position
     var_dump( feof($file_handle) );  // enusre if eof set
 
@@ -63,7 +63,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --

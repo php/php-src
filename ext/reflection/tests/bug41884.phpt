@@ -15,7 +15,7 @@ var_dump($class->getDefaultProperties());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 array(2) {
   ["fooStatic"]=>
   string(3) "foo"

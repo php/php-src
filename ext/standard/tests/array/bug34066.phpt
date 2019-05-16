@@ -265,7 +265,7 @@ function gen_xml($val, $key, $prefix)
 }
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 gen_xml(prefix=/Docs/)
 gen_xml(prefix=/Docs/@)
 /Docs/@Version=1.0

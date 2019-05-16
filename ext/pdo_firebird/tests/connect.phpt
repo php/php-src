@@ -1,17 +1,14 @@
 --TEST--
 PDO_Firebird: connect/disconnect
 --SKIPIF--
-<?php include("skipif.inc"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
-<?php /* $Id$ */
-
+<?php
 	require("testdb.inc");
-    
-	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
-	unset($db);
+
+	unset($dbh);
 	echo "done\n";
-	
+
 ?>
 --EXPECT--
 done

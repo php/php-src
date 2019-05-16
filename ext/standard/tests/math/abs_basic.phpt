@@ -1,5 +1,5 @@
 --TEST--
-Test abs() function : basic functionality 
+Test abs() function : basic functionality
 --INI--
 precision = 14
 --FILE--
@@ -20,11 +20,11 @@ $values = array(23,
 				"23",
 				"-23",
 				"23.45",
-				"2.345e1",		
-				"-2.345e1",			
+				"2.345e1",
+				"-2.345e1",
 				null,
 				true,
-				false);	
+				false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = abs($values[$i]);
@@ -32,7 +32,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing abs() : basic functionality ***
 int(23)
 int(23)

@@ -6,10 +6,6 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
-if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
-
 if (!function_exists('mysqli_set_charset'))
  	die("skip Function not available");
 
@@ -51,18 +47,6 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 --FILE--
 <?php
 	require_once("connect.inc");
-
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_set_charset()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_set_charset($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_set_charset($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 
@@ -120,8 +104,8 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_set_charset($link, $new_charset)))
-		printf("[016] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_set_charset($link, $new_charset)))
+		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

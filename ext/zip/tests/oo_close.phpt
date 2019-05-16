@@ -2,13 +2,12 @@
 zip::close() function
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $zip = new ZipArchive;
 if (!$zip->open($dirname . 'test.zip')) {
 	exit('failed');
@@ -21,5 +20,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 	echo "failed\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 ok

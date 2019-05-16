@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Arpad Ray <arpad@php.net>                                    |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_session.h"
@@ -148,7 +146,7 @@ PHP_METHOD(SessionHandler, destroy)
 PHP_METHOD(SessionHandler, gc)
 {
 	zend_long maxlifetime;
-	int nrdels;
+	zend_long nrdels = -1;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -156,7 +154,10 @@ PHP_METHOD(SessionHandler, gc)
 		return;
 	}
 
-	RETURN_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels));
+	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(nrdels);
 }
 /* }}} */
 

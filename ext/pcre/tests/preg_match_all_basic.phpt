@@ -1,5 +1,5 @@
 --TEST--
-Test preg_match_all() function : basic functionality 
+Test preg_match_all() function : basic functionality
 --FILE--
 <?php
 /*
@@ -24,7 +24,7 @@ var_dump(preg_match_all('/this isn\'t in the string/', $string));
 var_dump(preg_match_all('/world/', $string));
 var_dump(preg_match_all('/[0-9]/', $string));
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(1) {
   [0]=>

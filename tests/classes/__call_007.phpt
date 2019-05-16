@@ -1,5 +1,5 @@
 --TEST--
-Ensure exceptions are handled properly when thrown in a statically declared __call.  
+Ensure exceptions are handled properly when thrown in a statically declared __call.
 --FILE--
 <?php
 class A {

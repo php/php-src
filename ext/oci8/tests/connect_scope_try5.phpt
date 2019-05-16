@@ -7,7 +7,7 @@ oci8.old_oci_close_semantics=0
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Initialization
 
@@ -20,7 +20,7 @@ if (!empty($dbase))
 	$c1 = oci_new_connect($user,$password,$dbase);
 else
 	$c1 = oci_new_connect($user,$password);
-						 
+
 oci8_test_sql_execute($c1, $stmtarray);
 
 // Run Test
@@ -29,7 +29,7 @@ echo "Test 1\n";
 
 // Make errors throw exceptions
 
-set_error_handler(create_function('$x, $y', 'throw new Exception($y, $x);'));
+set_error_handler(function($x, $y) { throw new Exception($y, $x); });
 
 try
 {

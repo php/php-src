@@ -5,7 +5,7 @@ this is an indirect test for bug 60591, since mem leak is reproted in the server
 and require php compiled with --enable-debug
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -42,5 +42,5 @@ HEADER
 
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 HTTP/1.1 404 Not Found

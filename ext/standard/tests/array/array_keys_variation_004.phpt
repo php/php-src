@@ -9,7 +9,7 @@ $types_arr = array(
   FALSE => FALSE,
   1 => 1,
   0 => 0,
-  -1 => -1, 
+  -1 => -1,
   "1" => "1",
   "0" => "0",
   "-1" => "-1",
@@ -25,7 +25,7 @@ foreach ($values as $value){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() on all the types other than arrays ***
 array(0) {
 }

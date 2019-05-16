@@ -1,18 +1,18 @@
 --TEST--
-Test str_split() function : usage variations - different heredoc strings as 'str' argument 
+Test str_split() function : usage variations - different heredoc strings as 'str' argument
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length] )
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the str_split() 
-* with 'split_length' 10 
+* Passing different heredoc strings as 'str' argument to the str_split()
+* with 'split_length' 10
 */
 
 echo "*** Testing str_split() : heredoc strings as 'str' argument ***\n";
@@ -83,10 +83,10 @@ foreach($heredoc_array as $str) {
   var_dump( str_split($str, $split_length) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
 array(1) {

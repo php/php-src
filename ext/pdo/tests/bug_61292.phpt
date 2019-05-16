@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 class Database_SQL extends PDO
@@ -38,6 +38,6 @@ class Database_SQL extends PDO
 
 (new Database_SQL)->foo();
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

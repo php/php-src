@@ -26,7 +26,7 @@ require __DIR__.'/../../../sapi/cgi/tests/include.inc';
 $php = get_cgi_path();
 reset_env_vars();
 
-$file = dirname(__FILE__)."/session_regenerate_id_cookie.test.php";
+$file = __DIR__."/session_regenerate_id_cookie.test.php";
 
 file_put_contents($file, '<?php
 ob_start();
@@ -64,7 +64,7 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing session_regenerate_id() : basic functionality for cookie ***
-string(%d) "X-Powered-By: PHP/7.%s
+string(%d) "X-Powered-By: PHP/%d.%d.%s
 Expires: %s
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
@@ -82,4 +82,3 @@ string(32) "%s"
 bool(true)
 "
 Done
-

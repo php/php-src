@@ -4,10 +4,10 @@ Test variations in usage of acosh()
 precision = 10
 --FILE--
 <?php
-/* 
+/*
  * proto float acosh(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test acosh with a different input values
@@ -21,12 +21,11 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",				
 		"1000",
 		"1000ABC",
 		null,
 		true,
-		false);	
+		false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = acosh($values[$i]);
@@ -44,9 +43,6 @@ float(3.828168471)
 float(3.828168471)
 float(3.847562739)
 float(3.847562739)
-
-Warning: acosh() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(7.60090221)
 
 Notice: A non well formed numeric value encountered in %s on line %d

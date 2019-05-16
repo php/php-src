@@ -3,15 +3,14 @@ Phar with meta-data (write) zip-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
-$f2name = dirname(__FILE__) . '/files/metadata.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
+$f2name = __DIR__ . '/files/metadata.phar.zip';
 $pname = 'phar://' . $fname;
 $p2name = 'phar://' . $f2name;
 
@@ -56,7 +55,7 @@ var_dump($phar->getMetadata());
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 --EXPECT--
 string(1) "a"
 string(1) "b"

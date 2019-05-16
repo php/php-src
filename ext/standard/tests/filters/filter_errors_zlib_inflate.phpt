@@ -5,7 +5,7 @@ Filter errors: zlib.inflate
 --FILE--
 <?php
 require 'filter_errors.inc';
-filter_errors_test('zlib.inflate', gzencode(b'42'));
+filter_errors_test('zlib.inflate', gzencode('42'));
 ?>
 --EXPECTF--
 test filtering of buffered data

@@ -25,7 +25,7 @@ $ref  =& $arr2[0];
 array_map("callback", $arr2);
 var_dump($arr2);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(10) "original.0"

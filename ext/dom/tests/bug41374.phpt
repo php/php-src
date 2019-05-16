@@ -4,7 +4,7 @@ Bug #41374 (wholetext concats values of wrong nodes)
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$xml = (binary)<<<EOXML
+$xml = <<<EOXML
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <root>foo<child />baz</root>
 EOXML;

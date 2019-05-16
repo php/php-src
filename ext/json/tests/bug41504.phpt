@@ -11,7 +11,7 @@ var_dump(json_decode('{"key":"value", "":"value"}', true));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   [""]=>
   string(5) "value"

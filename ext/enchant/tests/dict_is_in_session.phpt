@@ -17,11 +17,11 @@ $newWord = "aspell";
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         echo("OK\n");
         $AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord);
-        
+
         if (NULL === $AddtoPersonalDict) {
             var_dump(enchant_dict_is_in_session($requestDict,$newWord));
         } else {

@@ -36,8 +36,8 @@ var_dump(realpath(__FILE__ . "_link2"));
 @unlink(__FILE__ . "_link2");
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%s_dir1"
-%unicode|string%(%d) "%s_dir1"
-%unicode|string%(%d) "%s_dir1"
-%unicode|string%(%d) "%s_dir1"
+string(%d) "%s_dir1"
+string(%d) "%s_dir1"
+string(%d) "%s_dir1"
+string(%d) "%s_dir1"
 bool(false)

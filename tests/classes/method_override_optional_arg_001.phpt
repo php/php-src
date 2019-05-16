@@ -1,7 +1,5 @@
 --TEST--
 Method override allows optional default argument
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -28,6 +26,4 @@ $b->foo(1);
 
 ?>
 --EXPECTF--
-Warning: Declaration of C::foo() should be compatible with A::foo($arg1 = 1) in %s on line %d
-int(1)
-int(3)
+Fatal error: Declaration of C::foo() must be compatible with A::foo($arg1 = 1) in %s on line %d

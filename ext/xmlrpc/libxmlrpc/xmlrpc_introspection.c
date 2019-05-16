@@ -51,9 +51,6 @@
  *******/
 
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include "queue.h"
 #include "xmlrpc.h"
 #include "xmlrpc_private.h"
@@ -578,7 +575,7 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
    int bSuccess = 0;
    if(server && cb) {
 
-      doc_method* dm = calloc(1, sizeof(doc_method));
+      doc_method* dm = ecalloc(1, sizeof(doc_method));
 
       if(dm) {
          dm->method = cb;
@@ -592,13 +589,10 @@ int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_Intr
          }
       }
    }
-   return 0;
+   return bSuccess;
 }
 /*******/
 
 /*-**********************
 * End Introspection API *
 ************************/
-
-
-

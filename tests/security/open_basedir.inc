@@ -3,7 +3,7 @@
 // This file contains helper functions for testing open_basedir configuration
 // Care must be taken with where the directories are created because different
 // SAPIs set the working directory differently. So simply creating a directory
-// relative to the current working directory like this: mkdir("blah") might 
+// relative to the current working directory like this: mkdir("blah") might
 // actually create it in several different places depending on the SAPI..!
 //
 // Note also depending on the version of php being tested, so the open_basedir
@@ -26,7 +26,7 @@ function recursive_delete_directory($directory) {
     // Make sure the directory is valid
     if (is_dir($directory) == FALSE) {
         return FALSE;
-    } 
+    }
 
     // Check we can access the directory
     if (is_readable($directory) == FALSE) {
@@ -110,7 +110,7 @@ function test_open_basedir_array($function) {
     global $savedDirectory;
 
     test_open_basedir_before($function);
-    test_open_basedir_error($function); 
+    test_open_basedir_error($function);
     var_dump(is_array($function("./../.")));
     var_dump(is_array($function("../ok")));
     var_dump(is_array($function("ok.txt")));
@@ -124,7 +124,7 @@ function test_open_basedir_array($function) {
 function test_open_basedir($function) {
     global $savedDirectory;
     test_open_basedir_before($function);
-    test_open_basedir_error($function);     
+    test_open_basedir_error($function);
     var_dump($function("./../."));
     var_dump($function("../ok"));
     var_dump($function("ok.txt"));
@@ -136,4 +136,3 @@ function test_open_basedir($function) {
 }
 
 ?>
-

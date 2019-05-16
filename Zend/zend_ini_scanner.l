@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,15 +12,13 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Zeev Suraski <zeev@php.net>                                 |
    |          Jani Taskinen <jani@php.net>                                |
    |          Marcus Boerger <helly@php.net>                              |
    |          Nuno Lopes <nlopess@php.net>                                |
    |          Scott MacVicar <scottmac@php.net>                           |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include <errno.h>
 #include "zend.h"
@@ -106,9 +104,12 @@
 #define SCNG	INI_SCNG
 #ifdef ZTS
 ZEND_API ts_rsrc_id ini_scanner_globals_id;
+ZEND_API size_t ini_scanner_globals_offset;
 #else
 ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #endif
+
+#define ZEND_SYSTEM_INI CG(ini_parser_unbuffered_errors)
 
 /* Eat leading whitespace */
 #define EAT_LEADING_WHITESPACE()                     \
@@ -137,7 +138,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
 #define zend_ini_copy_value(retval, str, len)	\
-	ZVAL_NEW_STR(retval, zend_string_init(str, len, 1))
+	ZVAL_NEW_STR(retval, zend_string_init(str, len, ZEND_SYSTEM_INI))
 
 
 #define RETURN_TOKEN(type, str, len) {                       \
@@ -406,9 +407,9 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <INITIAL>"[" { /* Section start */
 	/* Enter section data lookup state */
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW) {
-		yy_push_state(ST_SECTION_RAW);
+		BEGIN(ST_SECTION_RAW);
 	} else {
-		yy_push_state(ST_SECTION_VALUE);
+		BEGIN(ST_SECTION_VALUE);
 	}
 	return TC_SECTION;
 }
@@ -436,7 +437,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	EAT_TRAILING_WHITESPACE_EX('[');
 
 	/* Enter offset lookup state */
-	yy_push_state(ST_OFFSET);
+	BEGIN(ST_OFFSET);
 
 	RETURN_TOKEN(TC_OFFSET, yytext, yyleng);
 }
@@ -490,15 +491,16 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <INITIAL>{TABS_AND_SPACES}*[=]{TABS_AND_SPACES}* { /* Start option value */
 	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW) {
-		yy_push_state(ST_RAW);
+		BEGIN(ST_RAW);
 	} else {
-		yy_push_state(ST_VALUE);
+		BEGIN(ST_VALUE);
 	}
 	return '=';
 }
 
 <ST_RAW>{RAW_VALUE_CHARS} { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
 	unsigned char *sc = NULL;
+	EAT_LEADING_WHITESPACE();
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR) {
 			case '\n':
@@ -509,28 +511,34 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 				if (sc == NULL) {
 					sc = YYCURSOR;
 				}
-				/* no break */
+				YYCURSOR++;
+				break;
+			case '"':
+				if (yytext[0] == '"') {
+					sc = NULL;
+				}
+				YYCURSOR++;
+				break;
 			default:
 				YYCURSOR++;
 				break;
 		}
 	}
 end_raw_value_chars:
-	yyleng = YYCURSOR - SCNG(yy_text);
-
-	/* Eat trailing semicolons */
-	while (yytext[yyleng - 1] == ';') {
-		yyleng--;
+	if (sc) {
+		yyleng = sc - SCNG(yy_text);
+	} else {
+		yyleng = YYCURSOR - SCNG(yy_text);
 	}
+
+	EAT_TRAILING_WHITESPACE();
 
 	/* Eat leading and trailing double quotes */
 	if (yyleng > 1 && yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
-	} else if (sc) {
-		YYCURSOR = sc;
-		yyleng = YYCURSOR - SCNG(yy_text);
 	}
+
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
 

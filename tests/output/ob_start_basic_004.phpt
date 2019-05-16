@@ -1,13 +1,13 @@
 --TEST--
-ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size. 
+ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size.
 --INI--
 opcache.optimization_level=0
 --FILE--
 <?php
-/* 
+/*
  * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
-*/ 
+*/
 // In HEAD, $chunk_size value of 1 should not have any special behaviour (http://marc.info/?l=php-internals&m=123476465621346&w=2).
 function callback($string) {
 	global $callback_invocations;
@@ -33,8 +33,7 @@ for ($cs=-1; $cs<10; $cs++) {
 }
 
 ?>
---EXPECTF--
-
+--EXPECT--
 ----( chunk_size: -1, output append size: 1 )----
 f[call:1; len:8]12345678
 

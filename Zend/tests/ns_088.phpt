@@ -14,4 +14,4 @@ namespace Fiz\Biz\Buz {
 }
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '{', expecting ',' or '}' in %sns_088.php on line 5
+Parse error: syntax error, unexpected '{', expecting '}' in %sns_088.php on line 5

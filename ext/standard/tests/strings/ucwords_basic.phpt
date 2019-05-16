@@ -1,5 +1,5 @@
 --TEST--
-Test ucwords() function : basic functionality 
+Test ucwords() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string ucwords ( string $str )
@@ -31,7 +31,7 @@ $str_array = array(
  "testing\fucwords"
 );
 
-// loop through the $strings array to test ucwords on each element 
+// loop through the $strings array to test ucwords on each element
 $iteration = 1;
 for($index = 0; $index < count($str_array); $index++) {
   echo "-- Iteration $iteration --\n";
@@ -41,7 +41,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ucwords() : basic functionality ***
 -- Iteration 1 --
 string(15) "Testing Ucwords"

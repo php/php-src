@@ -1,10 +1,8 @@
-dnl
-dnl $Id$
-dnl
-
-PHP_ARG_WITH(pgsql,for PostgreSQL support,
-[  --with-pgsql[=DIR]        Include PostgreSQL support.  DIR is the PostgreSQL
-                          base install directory or the path to pg_config])
+PHP_ARG_WITH([pgsql],
+  [for PostgreSQL support],
+  [AS_HELP_STRING([[--with-pgsql[=DIR]]],
+    [Include PostgreSQL support. DIR is the PostgreSQL base install directory or
+    the path to pg_config])])
 
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
@@ -31,7 +29,7 @@ if test "$PHP_PGSQL" != "no"; then
     else
       PGSQL_SEARCH_PATHS=$PHP_PGSQL
     fi
-  
+
     for i in $PGSQL_SEARCH_PATHS; do
       for j in include include/pgsql include/postgres include/postgresql ""; do
         if test -r "$i/$j/libpq-fe.h"; then
@@ -44,7 +42,7 @@ if test "$PHP_PGSQL" != "no"; then
       done
 
       for j in lib $PHP_LIBDIR/pgsql $PHP_LIBDIR/postgres $PHP_LIBDIR/postgresql ""; do
-        if test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"; then 
+        if test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"; then
           PGSQL_LIBDIR=$i/$j
         fi
       done
@@ -107,5 +105,3 @@ if test "$PHP_PGSQL" != "no"; then
 
   PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
-
-

@@ -3,7 +3,7 @@ enchant_broker_init() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
-<?php 
+<?php
 if(!extension_loaded('enchant')) die('skip, enchant not loader');
 if (!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
  ?>
@@ -12,7 +12,7 @@ if (!is_resource(enchant_broker_init())) {die("skip, resource dont load\n");}
 $broker = enchant_broker_init();
 if (is_resource($broker)) {
     echo("OK\n");
-} else {    
+} else {
     echo("failure, its not a resource\n");
 }
 ?>

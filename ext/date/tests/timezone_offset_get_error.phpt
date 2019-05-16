@@ -13,40 +13,7 @@ date_default_timezone_set("GMT");
 $tz = timezone_open("Europe/London");
 $date = date_create("GMT");
 
-set_error_handler('err');
-
-function err($errno, $errstr) {
-	if ($errno === E_RECOVERABLE_ERROR) {
-		var_dump($errstr);
-	}
-}
-
 echo "*** Testing timezone_offset_get() : error conditions ***\n";
-
-echo "\n-- Testing timezone_offset_get() function with zero arguments --\n";
-try {
-	var_dump( timezone_offset_get() );
-} catch (Error $ex) {
-	var_dump($ex->getMessage());
-	echo "\n";
-}
-
-echo "\n-- Testing timezone_offset_get() function with less than expected no. of arguments --\n";
-try {
-	var_dump( timezone_offset_get($tz) );
-} catch (Error $ex) {
-	var_dump($ex->getMessage());
-	echo "\n";
-}
-
-echo "\n-- Testing timezone_offset_get() function with more than expected no. of arguments --\n";
-$extra_arg = 99;
-try {
-	var_dump( timezone_offset_get($tz, $date, $extra_arg) );
-} catch (Error $ex) {
-	var_dump($ex->getMessage());
-	echo "\n";
-}
 
 echo "\n-- Testing timezone_offset_get() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
@@ -98,19 +65,10 @@ try {
 --EXPECTF--
 *** Testing timezone_offset_get() : error conditions ***
 
--- Testing timezone_offset_get() function with zero arguments --
-bool(false)
-
--- Testing timezone_offset_get() function with less than expected no. of arguments --
-bool(false)
-
--- Testing timezone_offset_get() function with more than expected no. of arguments --
-bool(false)
-
 -- Testing timezone_offset_get() function with an invalid values for $object argument --
 string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of stdClass given"
 
-string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given"
+string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given"
 
 string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given"
 
@@ -118,7 +76,7 @@ string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of Da
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
 string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, instance of stdClass given"
 
-string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given"
+string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given"
 
 string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given"
 

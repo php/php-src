@@ -1,10 +1,8 @@
 --TEST--
-ReflectionClass::setStaticPropertyValue() 
+ReflectionClass::setStaticPropertyValue()
 --CREDITS--
 Robin Fernandes <robinf@php.net>
 Steve Seear <stevseea@php.net>
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 class A {
@@ -45,7 +43,7 @@ try {
 
 try {
 	var_dump($rcA->setStaticPropertyValue("privateOverridden", "new value 9"));
-	echo "you should not see this";	
+	echo "you should not see this";
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }
@@ -53,27 +51,9 @@ try {
 ?>
 --EXPECTF--
 Set static values in A:
-Array
-(
-    [privateOverridden] => new value 1
-    [protectedOverridden] => new value 2
-    [publicOverridden] => new value 3
-)
 
-Set static values in B:
-Array
-(
-    [privateOverridden] => new value 4
-    [protectedOverridden] => new value 2
-    [publicOverridden] => new value 3
-)
-Array
-(
-    [privateOverridden] => new value 5
-    [protectedOverridden] => new value 6
-    [publicOverridden] => new value 7
-)
-
-Set non-existent values from A with no default value:
-Class A does not have a property named protectedOverridden
-Class A does not have a property named privateOverridden
+Fatal error: Uncaught ReflectionException: Class A does not have a property named  in %s:%d
+Stack trace:
+#0 %s(%d): ReflectionClass->setStaticPropertyValue('\x00A\x00privateOverr...', 'new value 1')
+#1 {main}
+  thrown in %s on line %d

@@ -8,7 +8,7 @@ phar.readonly=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.zip';
 
 echo "=================== new PharData() ==================\n";
 $phar = new PharData($fname);
@@ -74,17 +74,19 @@ try {
 } catch(Exception $e) {
 	echo $e->getMessage()."\n";
 }
-
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
+<?php
+echo __DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz' . "\n";
+
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.2.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
+
 ?>
 --EXPECT--
 =================== new PharData() ==================

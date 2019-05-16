@@ -228,5 +228,5 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

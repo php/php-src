@@ -1,9 +1,8 @@
 --TEST--
 imagedashedline()
 --SKIPIF--
-<?php 
-	if (!function_exists('imagedashedline')) die('skip imagedashedline() not available'); 
-	if (!(imagetype() & IMG_PNG)) die('skip PNG Support is not enabled');
+<?php
+	if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
 ?>
 --FILE--
 <?php
@@ -12,7 +11,7 @@ imagedashedline()
  * Description: Draws a dashed line.
  * This function is deprecated. Use combination of imagesetstyle() and imageline() instead.
  * Source code: ext/standard/image.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -23,15 +22,15 @@ $dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
 // create a blank image
 $image = imagecreatetruecolor(250, 250);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image, 0, 0, 0);
 
 // red dashed lines
 $col_line = imagecolorallocate($image, 255, 0, 0);
 
 // draw a couple of vertical dashed lines
-imagedashedline($image, 100, 20, 100, 230, $col_line );	
-imagedashedline($image, 150, 20, 150, 230, $col_line );	
+imagedashedline($image, 100, 20, 100, 230, $col_line );
+imagedashedline($image, 150, 20, 150, 230, $col_line );
 
 // output the picture to a file
 imagepng($image, $dest);
@@ -45,11 +44,11 @@ $color1 = imagecolorsforindex($image, $col1);
 $color2 = imagecolorsforindex($image, $col2);
 var_dump($color1, $color2);
 
-imagedestroy($image); 
-echo "Done\n"; 
+imagedestroy($image);
+echo "Done\n";
 ?>
 --CLEAN--
-<?php 
+<?php
 	$dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
 	@unlink($dest);
 ?>

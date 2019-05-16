@@ -12,7 +12,7 @@ foreach ($a as $k => $v) {
 	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "1 => 1"
 string(6) "3 => 3"
 string(6) "5 => 5"

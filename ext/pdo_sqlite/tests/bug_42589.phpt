@@ -18,6 +18,6 @@ $meta2 = $result->getColumnMeta(1);
 var_dump(!empty($meta1['table']) && $meta1['table'] == 'test');
 var_dump(!empty($meta2['table']) && $meta2['table'] == 'test');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)

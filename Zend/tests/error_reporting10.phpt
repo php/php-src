@@ -8,7 +8,6 @@ error_reporting(E_ALL);
 function make_exception()
 {
 	@$blah;
-	str_replace();
 	error_reporting(0);
 	throw new Exception();
 }
@@ -29,7 +28,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(32767)
 int(32759)
 Done

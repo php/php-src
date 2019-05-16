@@ -173,16 +173,15 @@ mysqli_query($link, "DROP PROCEDURE IF EXISTS p");
 
 mysqli_close($link);
 ?>
-
 --EXPECTF--
 [003] 'SELECT' caused 1064
 [003] 'UPDATE test SET id = 101 WHERE id > 3' caused 1062
 [003] 'UPDATE_FIX test SET id = 101 WHERE id > 3' caused 1064
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(3) "100"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "z"
+  ["id"]=>
+  string(3) "100"
+  ["label"]=>
+  string(1) "z"
 }
 [009] [2014] %s
 done!

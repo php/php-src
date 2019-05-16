@@ -7,7 +7,7 @@ Test strrpos() function : usage variations - multi line heredoc string for 'hays
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function by passing multi-line heredoc string for haystack and 
+/* Test strrpos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
 
@@ -26,7 +26,7 @@ var_dump( strrpos($multi_line_str, " ") );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 int(44)

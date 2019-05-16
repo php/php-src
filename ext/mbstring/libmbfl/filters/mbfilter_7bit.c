@@ -41,7 +41,9 @@ const mbfl_encoding mbfl_encoding_7bit = {
 	"7bit",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_7bit = {
@@ -78,5 +80,3 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	}
 	return c;
 }
-
-

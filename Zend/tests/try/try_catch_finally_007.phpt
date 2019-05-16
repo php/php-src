@@ -16,10 +16,10 @@ function foo($ret = FALSE) {
         } finally {
             var_dump("finally1");
             throw new Exception("exception");
-        } 
+        }
     } catch (Exception $e) {
         goto local;
-local: 
+local:
         var_dump("catched");
         if ($ret) return "return";
     } finally {
@@ -34,7 +34,7 @@ var_dump(foo());
 var_dump(foo(true));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "finally1"
 string(7) "catched"
 string(8) "finally2"

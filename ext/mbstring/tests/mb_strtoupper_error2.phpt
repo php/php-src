@@ -25,7 +25,6 @@ var_dump( mb_strtoupper($sourcestring, $encoding) );
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_strtoupper() : error conditions ***
 

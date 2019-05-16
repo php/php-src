@@ -1,11 +1,11 @@
 --TEST--
-Bug #26698 (Thrown exceptions while evaluting argument to pass as parameter crash PHP)
+Bug #26698 (Thrown exceptions while evaluating argument to pass as parameter crash PHP)
 --FILE--
 <?php
 
 ini_set("report_memleaks", 0);  // the exception thrown in this test results in a memory leak, which is fine
 
-class Object
+class ObjectOne
 {
 	function getNone()
 	{
@@ -23,7 +23,7 @@ class Proxy
 	{
 		try
 		{
-			$res = new Object();
+			$res = new ObjectOne();
 			$this->three($res->getNone());
 		}
 		catch(Exception $e)
@@ -36,7 +36,7 @@ class Proxy
 	{
 		try
 		{
-			$res = new Object();
+			$res = new ObjectOne();
 			$this->three(1, $res->getNone());
 		}
 		catch(Exception $e)
@@ -49,7 +49,7 @@ class Proxy
 	{
 		try
 		{
-			$res = new Object();
+			$res = new ObjectOne();
 			$this->three(1, 2, $res->getNone());
 		}
 		catch(Exception $e)

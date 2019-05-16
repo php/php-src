@@ -8,7 +8,7 @@ Test array_unshift() function : usage variations - different array values for 'a
 */
 
 /*
- * Testing the behavior of array_unshift() by passing different types of arrays 
+ * Testing the behavior of array_unshift() by passing different types of arrays
  * to $array argument to which the $var arguments will be prepended
 */
 
@@ -72,7 +72,7 @@ foreach($arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : different arrays for $array argument ***
 -- Iteration 1 --
 int(3)

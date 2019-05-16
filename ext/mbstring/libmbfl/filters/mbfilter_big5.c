@@ -65,7 +65,9 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	"BIG5",
 	(const char *(*)[])&mbfl_encoding_big5_aliases,
 	mblen_table_big5,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_big5_wchar,
+	&vtbl_wchar_big5
 };
 
 const mbfl_encoding mbfl_encoding_cp950 = {
@@ -74,7 +76,9 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	"BIG5",
 	NULL,
 	mblen_table_big5,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_cp950_wchar,
+	&vtbl_wchar_cp950
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_big5 = {
@@ -138,6 +142,17 @@ static unsigned short cp950_pua_tbl[][4] = {
 	{0xf70f,0xf848,0xc740,0xc8fe},
 };
 
+static inline int is_in_cp950_pua(int c1, int c) {
+	if ((c1 >= 0xfa && c1 <= 0xfe) || (c1 >= 0x8e && c1 <= 0xa0) ||
+			(c1 >= 0x81 && c1 <= 0x8d) || (c1 >= 0xc7 && c1 <= 0xc8)) {
+		return (c > 0x39 && c < 0x7f) || (c > 0xa0 && c < 0xff);
+	}
+	if (c1 == 0xc6) {
+		return c > 0xa0 && c < 0xff;
+	}
+	return 0;
+}
+
 /*
  * Big5 => wchar
  */
@@ -186,11 +201,7 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 
 			if (filter->from->no_encoding == mbfl_no_encoding_cp950) {
 				/* PUA for CP950 */
-				if (w <= 0 &&
-					(((c1 >= 0xfa && c1 <= 0xfe) || (c1 >= 0x8e && c1 <= 0xa0) ||
-					  (c1 >= 0x81 && c1 <= 0x8d) ||(c1 >= 0xc7 && c1 <= 0xc8))
-					 && ((c > 0x39 && c < 0x7f) || (c > 0xa0 && c < 0xff))) ||
-					((c1 == 0xc6) && (c > 0xa0 && c < 0xff))) {
+				if (w <= 0 && is_in_cp950_pua(c1, c)) {
 					c2 = c1 << 8 | c;
 					for (k = 0; k < sizeof(cp950_pua_tbl)/(sizeof(unsigned short)*4); k++) {
 						if (c2 >= cp950_pua_tbl[k][2] && c2 <= cp950_pua_tbl[k][3]) {
@@ -340,5 +351,3 @@ static int mbfl_filt_ident_big5(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

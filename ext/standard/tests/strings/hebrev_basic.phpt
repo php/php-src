@@ -1,5 +1,5 @@
 --TEST--
-Test hebrev() function : basic functionality 
+Test hebrev() function : basic functionality
 --FILE--
 <?php
 
@@ -17,7 +17,7 @@ var_dump(hebrev($hebrew_text, 15));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing hebrev() : basic functionality ***
 string(109) ".The hebrev function converts logical Hebrew text to visual text
 .The function tries to avoid breaking words

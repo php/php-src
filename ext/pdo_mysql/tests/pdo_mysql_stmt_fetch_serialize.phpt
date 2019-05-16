@@ -2,15 +2,13 @@
 MySQL PDOStatement->fetch(), PDO::FETCH_SERIALIZE
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (version_compare(PHP_VERSION, '5.1.0', '<'))
-	die("skip Needs 5.1.0 and Interface Serializable");
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	try {
@@ -117,7 +115,7 @@ if (version_compare(PHP_VERSION, '5.1.0', '<'))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
@@ -130,24 +128,24 @@ myclass::serialize()
 Unserializing the previously serialized object...
 myclass::unserialize('Data from serialize')
 object(myclass)#4 (1) {
-  [%u|b%"myprotected":protected]=>
-  %unicode|string%(19) "a protected propery"
+  ["myprotected":protected]=>
+  string(19) "a protected propery"
 }
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
 myclass::unserialize('C:7:"myclass":19:{Data from serialize}')
 object(myclass)#%d (1) {
-  [%u|b%"myprotected":protected]=>
-  %unicode|string%(19) "a protected propery"
+  ["myprotected":protected]=>
+  string(19) "a protected propery"
 }
 
 Using PDO::FETCH_CLASS to fetch the object from DB and unserialize it...
 myclass::__set(myobj, 'C:7:"myclass":19:{Data from serialize}')
 myclass::__construct(PDO shall call __construct())
 object(myclass)#%d (2) {
-  [%u|b%"myprotected":protected]=>
-  %unicode|string%(19) "a protected propery"
-  [%u|b%"myobj"]=>
-  %unicode|string%(38) "C:7:"myclass":19:{Data from serialize}"
+  ["myprotected":protected]=>
+  string(19) "a protected propery"
+  ["myobj"]=>
+  string(38) "C:7:"myclass":19:{Data from serialize}"
 }
 done!

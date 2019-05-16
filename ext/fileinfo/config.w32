@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_ENABLE("fileinfo", "fileinfo support", "no");
@@ -8,7 +7,8 @@ if (PHP_FILEINFO != 'no') {
 			cdf.c cdf_time.c compress.c \
 			encoding.c fsmagic.c funcs.c \
 			is_tar.c magic.c print.c \
-			readcdf.c softmagic.c";
+			readcdf.c softmagic.c der.c \
+			strcasestr.c buffer.c";
 
 	EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
 	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");

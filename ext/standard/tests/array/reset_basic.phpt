@@ -3,7 +3,7 @@ Test reset() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed reset(array $array_arg)
- * Description: Set array argument's internal pointer to the first element and return it 
+ * Description: Set array argument's internal pointer to the first element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -28,7 +28,7 @@ echo "\n-- Call to reset() --\n";
 var_dump(reset($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : basic functionality ***
 
 -- Initial Position: --

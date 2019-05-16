@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - scientific formats with float value
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : scientific formats with float values ***\n";
 
-// array of float values 
+// array of float values
 $float_values = array(
   -2147483649,
   2147483648,
@@ -44,7 +44,7 @@ $scientific_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($scientific_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }
@@ -53,7 +53,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : scientific formats with float values ***
 
 -- Iteration 1 --

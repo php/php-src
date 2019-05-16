@@ -3,7 +3,7 @@ SimpleXML: getName()
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <people>
   <person>Jane</person>
@@ -32,7 +32,7 @@ traverse_xml($people);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 <people>
   <person>Jane
   </person>

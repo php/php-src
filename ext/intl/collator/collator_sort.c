@@ -59,8 +59,12 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	zval norm1, norm2;
 	zval *num1_p = NULL, *num2_p = NULL;
 	zval *norm1_p = NULL, *norm2_p = NULL;
-	zval* str1_p  = collator_convert_object_to_string( op1, &str1 );
-	zval* str2_p  = collator_convert_object_to_string( op2, &str2 );
+	zval *str1_p, *str2_p;
+
+	ZVAL_NULL(&str1);
+	str1_p  = collator_convert_object_to_string( op1, &str1 );
+	ZVAL_NULL(&str2);
+	str2_p  = collator_convert_object_to_string( op2, &str2 );
 
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */
@@ -299,9 +303,6 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_sort_internal: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -393,9 +394,6 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, Collator_ce_ptr, &array ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_sort_with_sort_keys: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -559,9 +557,6 @@ PHP_FUNCTION( collator_get_sort_key )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_get_sort_key: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -613,12 +608,3 @@ PHP_FUNCTION( collator_get_sort_key )
 	RETVAL_NEW_STR(key_str);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

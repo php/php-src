@@ -1,5 +1,5 @@
 --TEST--
-adding strings to arrays 
+adding strings to arrays
 --FILE--
 <?php
 
@@ -18,8 +18,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
+--EXPECTF--
 Warning: A non-numeric value encountered in %s on line %d
 
 Exception: Unsupported operand types

@@ -12,12 +12,12 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	   echo "--- testing: '$strVal' & '$otherVal' ---\n";   
+	   echo "--- testing: '$strVal' & '$otherVal' ---\n";
       var_dump(bin2hex($strVal&$otherVal));
    }
 }
 
-   
+
 ?>
 ===DONE===
 --EXPECT--

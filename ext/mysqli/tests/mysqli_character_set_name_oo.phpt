@@ -18,9 +18,6 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!is_null($tmp = @$mysqli->character_set_name($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$res = $mysqli->query('SELECT version() AS server_version'))
 		printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	$tmp = $res->fetch_assoc();
@@ -57,14 +54,14 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->character_set_name()))
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->character_set_name()))
+		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
-	if (!is_null($tmp = @$mysqli->character_set_name()))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->character_set_name()))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

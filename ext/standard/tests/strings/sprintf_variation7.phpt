@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - int formats with boolean values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -21,14 +21,14 @@ $boolean_values = array (
 $int_formats = array(
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
-  "\t%d", "\n%d", "%4d", 
+  "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($boolean_values as $boolean_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $boolean_value) );
   }
@@ -37,7 +37,7 @@ foreach($boolean_values as $boolean_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with boolean values ***
 
 -- Iteration 1 --

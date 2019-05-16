@@ -18,7 +18,7 @@ echo $cc(10)."\n";
 
 echo "Done.\n";
 ?>
---EXPECTF--
+--EXPECT--
 11
 11
 12

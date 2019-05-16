@@ -3,7 +3,6 @@ Phar::buildFromIterator() iterator, too many files for open file handles (Bug #4
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --INI--
@@ -11,8 +10,8 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.txt';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.txt';
 file_put_contents($fname2, 'a');
 class myIterator implements Iterator
 {
@@ -40,7 +39,7 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(dirname(__FILE__));
+	chdir(__DIR__);
 	$phar = new Phar($fname);
 	$ret = $phar->buildFromIterator(new myIterator);
 	foreach ($ret as $a => $val) {
@@ -54,9 +53,9 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.txt');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.txt');
 __halt_compiler();
 ?>
 --EXPECT--

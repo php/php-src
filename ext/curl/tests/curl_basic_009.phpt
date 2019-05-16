@@ -18,6 +18,6 @@ curl_close($ch);
 
 
 ?>
---EXPECTF--
-%unicode|string%(%d) "%Srotocol%s"
-int(1)
+--EXPECTREGEX--
+string\(\d+\) "([^\r\n]*rotocol[^\r\n]+|Could not resolve host: .+)"
+int\(\d\)

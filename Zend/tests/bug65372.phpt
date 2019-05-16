@@ -10,7 +10,7 @@ class ParentClass
     public static function Get()
     {
         self::$_OBJECTS[1] = new ChildClass();
-        return self::$_OBJECTS[1];    
+        return self::$_OBJECTS[1];
     }
 }
 

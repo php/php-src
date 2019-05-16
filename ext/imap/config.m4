@@ -1,16 +1,12 @@
-dnl
-dnl $Id$
-dnl
-
 AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i
     IMAP_INC_DIR=$i$1
     break
-  elif test -r "$i$1/rfc822.h"; then 
-    IMAP_DIR=$i; 
+  elif test -r "$i$1/rfc822.h"; then
+    IMAP_DIR=$i;
     IMAP_INC_DIR=$i$1
-	break
+    break
 ])
 
 AC_DEFUN([IMAP_LIB_CHK],[
@@ -50,18 +46,15 @@ AC_DEFUN([PHP_IMAP_TEST_BUILD], [
 
 AC_DEFUN([PHP_IMAP_KRB_CHK], [
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(IMAP_SHARED_LIBADD,
-    [
-      AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    ], [
-      AC_MSG_ERROR([Kerberos libraries not found. 
-      
-      Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
-      ])
-    ])
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
+
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, IMAP_SHARED_LIBADD)
+
+    AC_DEFINE(HAVE_IMAP_KRB, 1, [Whether IMAP extension has Kerberos support])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
-      AC_MSG_ERROR([This c-client library is built with Kerberos support. 
+      AC_MSG_ERROR([This c-client library is built with Kerberos support.
 
       Add --with-kerberos to your configure line. Check config.log for details.
       ])
@@ -78,14 +71,14 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
     [
       AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
     ], [
-      AC_MSG_ERROR([OpenSSL libraries not found. 
-      
+      AC_MSG_ERROR([OpenSSL libraries not found.
+
       Check the path given to --with-openssl-dir and output in config.log)
       ])
     ])
   elif test -f "$IMAP_INC_DIR/linkage.c"; then
     AC_EGREP_HEADER(ssl_onceonlyinit, $IMAP_INC_DIR/linkage.c, [
-      AC_MSG_ERROR([This c-client library is built with SSL support. 
+      AC_MSG_ERROR([This c-client library is built with SSL support.
 
       Add --with-imap-ssl to your configure line. Check config.log for details.
       ])
@@ -93,20 +86,28 @@ AC_DEFUN([PHP_IMAP_SSL_CHK], [
   fi
 ])
 
+PHP_ARG_WITH([imap],
+  [for IMAP support],
+  [AS_HELP_STRING([[--with-imap[=DIR]]],
+    [Include IMAP support. DIR is the c-client install prefix])])
 
-PHP_ARG_WITH(imap,for IMAP support,
-[  --with-imap[=DIR]         Include IMAP support. DIR is the c-client install prefix])
+PHP_ARG_WITH([kerberos],
+  [for IMAP Kerberos support],
+  [AS_HELP_STRING([--with-kerberos],
+    [IMAP: Include Kerberos support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(kerberos,for IMAP Kerberos support,
-[  --with-kerberos[=DIR]     IMAP: Include Kerberos support. DIR is the Kerberos install prefix], no, no)
+PHP_ARG_WITH([imap-ssl],
+  [for IMAP SSL support],
+  [AS_HELP_STRING([[--with-imap-ssl[=DIR]]],
+    [IMAP: Include SSL support. DIR is the OpenSSL install prefix])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(imap-ssl,for IMAP SSL support,
-[  --with-imap-ssl[=DIR]     IMAP: Include SSL support. DIR is the OpenSSL install prefix], no, no)
-
-
-if test "$PHP_IMAP" != "no"; then  
+if test "$PHP_IMAP" != "no"; then
     PHP_SUBST(IMAP_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared)
+    PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     AC_DEFINE(HAVE_IMAP,1,[ ])
 
     for i in $PHP_IMAP /usr/local /usr; do
@@ -128,13 +129,13 @@ if test "$PHP_IMAP" != "no"; then
     old_CFLAGS=$CFLAGS
     CFLAGS="-I$IMAP_INC_DIR"
     AC_CACHE_CHECK(for utf8_mime2text signature, ac_cv_utf8_mime2text,
-      AC_TRY_COMPILE([
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <stdio.h>
 #include <c-client.h>
-      ],[
+      ]],[[
         SIZEDTEXT *src, *dst;
         utf8_mime2text(src, dst);
-      ],[
+      ]])],[
         ac_cv_utf8_mime2text=old
       ],[
         ac_cv_utf8_mime2text=new
@@ -147,12 +148,12 @@ if test "$PHP_IMAP" != "no"; then
 
     old_CFLAGS=$CFLAGS
     CFLAGS="-I$IMAP_INC_DIR"
-    AC_CACHE_CHECK(for U8T_DECOMPOSE, ac_cv_u8t_canonical,
-      AC_TRY_COMPILE([
+    AC_CACHE_CHECK(for U8T_DECOMPOSE, ac_cv_u8t_decompose,
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <c-client.h>
-      ],[
+      ]],[[
          int i = U8T_CANONICAL;
-      ],[
+      ]])],[
          ac_cv_u8t_decompose=yes
       ],[
          ac_cv_u8t_decompose=no
@@ -180,18 +181,18 @@ if test "$PHP_IMAP" != "no"; then
     ],[])
     CPPFLAGS=$old_CPPFLAGS
 
-    PHP_CHECK_LIBRARY(pam, pam_start, 
+    PHP_CHECK_LIBRARY(pam, pam_start,
     [
       PHP_ADD_LIBRARY(pam,, IMAP_SHARED_LIBADD)
       AC_DEFINE(HAVE_LIBPAM,1,[ ])
     ])
 
-    PHP_CHECK_LIBRARY(crypt, crypt, 
+    PHP_CHECK_LIBRARY(crypt, crypt,
     [
       PHP_ADD_LIBRARY(crypt,, IMAP_SHARED_LIBADD)
       AC_DEFINE(HAVE_LIBCRYPT,1,[ ])
     ])
-	    
+
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
     if test -z "$IMAP_DIR"; then

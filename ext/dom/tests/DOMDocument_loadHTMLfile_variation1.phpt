@@ -11,8 +11,8 @@ assert.bail=true
 --FILE--
 <?php
 $doc = new DOMDocument();
-$result = $doc->loadHTMLFile(dirname(__FILE__) . "/empty.html");
-assert('$result === true');
+$result = $doc->loadHTMLFile(__DIR__ . "/empty.html");
+assert($result === true);
 ?>
 --EXPECTF--
 %r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Document is empty %s

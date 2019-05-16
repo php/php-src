@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Sascha Schumann <sascha@schumann.cx>                         |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_APACHE_H
 #define PHP_APACHE_H
@@ -31,11 +29,11 @@
 
 /* Enable per-module logging in Apache 2.4+ */
 #ifdef APLOG_USE_MODULE
-APLOG_USE_MODULE(php7);
+APLOG_USE_MODULE(php);
 #endif
 
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
-extern module AP_MODULE_DECLARE_DATA php7_module;
+extern module AP_MODULE_DECLARE_DATA php_module;
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 extern char *apache2_php_ini_path_override;
@@ -46,11 +44,7 @@ typedef struct php_struct {
 	request_rec *r;
 	apr_bucket_brigade *brigade;
 	/* stat structure of the current file */
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	struct stat_libc finfo;
-#else
 	zend_stat_t finfo;
-#endif
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;
 	/* final content type */

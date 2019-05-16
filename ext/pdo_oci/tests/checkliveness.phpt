@@ -3,7 +3,7 @@ PDO OCI checkliveness (code coverage)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
+require __DIR__.'/../../pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
@@ -19,7 +19,7 @@ $attr = getenv('PDOTEST_ATTR');
 
 try {
     $db = new PDO($dsn, $user, $pass, array(PDO::ATTR_PERSISTENT => true));
-} 
+}
 catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
     exit;
@@ -28,7 +28,7 @@ catch (PDOException $e) {
 // This triggers the call to check liveness
 try {
     $db = new PDO($dsn, $user, $pass, array(PDO::ATTR_PERSISTENT => true));
-} 
+}
 catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage();
     exit;
@@ -46,7 +46,7 @@ try {
 }
 
 $db = null;
---EXPECTF--
+--EXPECT--
 array(2) {
   ["DUMMY"]=>
   string(1) "X"

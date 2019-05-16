@@ -75,7 +75,9 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	"CP51932",
 	(const char *(*)[])&mbfl_encoding_cp51932_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_cp51932_wchar,
+	&vtbl_wchar_cp51932
 };
 
 const struct mbfl_convert_vtbl vtbl_cp51932_wchar = {
@@ -341,5 +343,3 @@ static int mbfl_filt_ident_cp51932(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

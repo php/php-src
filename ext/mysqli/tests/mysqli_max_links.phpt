@@ -25,14 +25,6 @@ mysqli.max_links=1
 				$i, mysqli_connect_errno(), mysqli_connect_error(),
 				mysqli_errno($links[$i]), mysqli_error($links[$i]));
 
-	for ($i = 1; $i <= 5; $i++) {
-		if ($res = mysqli_query($links[$i], 'SELECT id FROM test LIMIT 1')) {
-			printf("[%03d] Can run query on link %d\n", 5 + $i, $i);
-			mysqli_free_result($res);
-		}
-		mysqli_close($links[$i]);
-	}
-
 	mysqli_close($link);
 	print "done!";
 ?>
@@ -53,24 +45,4 @@ Warning: mysqli_%sonnect(): Too many open links (1) in %s on line %d
 Warning: mysqli_%sonnect(): Too many open links (1) in %s on line %d
 
 Warning: mysqli_%sonnect(): Too many open links (1) in %s on line %d
-
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
-
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
 done!

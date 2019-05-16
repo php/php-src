@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: extending PDO
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,20 +10,20 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 class PDOStatementX extends PDOStatement
 {
     public $test1 = 1;
-    
+
     protected function __construct()
     {
     	$this->test2 = 2;
     	$this->test2 = 22;
     	echo __METHOD__ . "()\n";
     }
-    
+
     function __destruct()
     {
     	echo __METHOD__ . "()\n";
@@ -33,12 +33,12 @@ class PDOStatementX extends PDOStatement
 class PDODatabaseX extends PDO
 {
     public $test1 = 1;
-    
+
     function __destruct()
     {
     	echo __METHOD__ . "()\n";
     }
-    
+
     function test()
     {
     	$this->test2 = 2;
@@ -46,7 +46,7 @@ class PDODatabaseX extends PDO
         var_dump($this->test2);
     	$this->test2 = 22;
     }
-    
+
     function query($sql)
     {
     	echo __METHOD__ . "()\n";

@@ -8,7 +8,7 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -20,7 +20,7 @@ echo "*** Testing mb_substr() : usage variations ***\n";
 
 mb_internal_encoding('UTF-8');
 
-$string_ascii = b'+Is an English string'; //21 chars
+$string_ascii = '+Is an English string'; //21 chars
 
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII='); //21 chars
 
@@ -41,7 +41,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	}
 	else {
 	   var_dump($a);
-	}		
+	}
 	echo "--Multibyte String --\n";
 	$b = mb_substr($string_mb, $i, 4, 'UTF-8');
 	if (strlen($a) == mb_strlen($b, 'UTF-8')) { // should return same length
@@ -49,7 +49,7 @@ for ($i = -60; $i <= 60; $i += 10) {
 	} else {
 		echo "Difference in length of ASCII string and multibyte string\n";
 	}
-	
+
 }
 
 echo "Done";

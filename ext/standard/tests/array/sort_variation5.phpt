@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -23,10 +23,10 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing sort() : usage variations ***\n";
 
 $various_arrays = array (
-  // group of escape sequences 
+  // group of escape sequences
   array(null, NULL, "\a", "\cx", "\e", "\f", "\n", "\r", "\t", "\xhh", "\ddd", "\v"),
 
-  // array contains combination of capital/small letters 
+  // array contains combination of capital/small letters
   array("lemoN", "Orange", "banana", "apple", "Test", "TTTT", "ttt", "ww", "x", "X", "oraNGe", "BANANA")
 );
 
@@ -56,7 +56,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various string arrays --

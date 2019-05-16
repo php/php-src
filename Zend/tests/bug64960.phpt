@@ -21,7 +21,7 @@ set_error_handler(function()
 {
 	$e = new Exception;
 	$e->_trace = debug_backtrace();
-	
+
 	throw $e;
 });
 
@@ -33,7 +33,7 @@ Notice: ob_end_flush(): failed to delete and flush buffer. No buffer to delete o
 
 Fatal error: Uncaught Exception in %sbug64960.php:19
 Stack trace:
-#0 [internal function]: {closure}(8, 'ob_end_clean():...', '%s', 9, Array)
+#0 [internal function]: {closure}(8, 'ob_end_clean():...', '%s', 9)
 #1 %sbug64960.php(9): ob_end_clean()
 #2 [internal function]: ExceptionHandler->__invoke(Object(Exception))
 #3 {main}

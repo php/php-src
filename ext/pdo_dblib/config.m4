@@ -1,9 +1,7 @@
-dnl
-dnl $Id$
-dnl
-
-PHP_ARG_WITH(pdo-dblib, for PDO_DBLIB support via FreeTDS,
-[  --with-pdo-dblib[=DIR]    PDO: DBLIB-DB support.  DIR is the FreeTDS home directory])
+PHP_ARG_WITH([pdo-dblib],
+  [for PDO_DBLIB support via FreeTDS],
+  [AS_HELP_STRING([[--with-pdo-dblib[=DIR]]],
+    [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
 
@@ -40,7 +38,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     else
       AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
     fi
-  fi  
+  fi
 
   if test "x$PHP_LIBDIR" = "x" ; then
     PHP_LIBDIR=lib
@@ -71,7 +69,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   ])
 
   PDO_DBLIB_DEFS="-DPDO_DBLIB_FLAVOUR=\\\"freetds\\\""
-  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS)
+  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   AC_CHECK_LIB(dnet_stub, dnet_addr,
      [ PHP_ADD_LIBRARY_WITH_PATH(dnet_stub,,PDO_DBLIB_SHARED_LIBADD)
         AC_DEFINE(HAVE_LIBDNET_STUB,1,[ ])

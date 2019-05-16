@@ -1,5 +1,5 @@
 --TEST--
-Abstract Trait Methods should behave like common abstract methods and 
+Abstract Trait Methods should behave like common abstract methods and
 implementstion may be provided by other traits. Sorting order shouldn't influence result.
 --FILE--
 <?php
@@ -17,7 +17,7 @@ trait THelloImpl {
 
 class TraitsTest1 {
 	use THello;
-	use THelloImpl;  
+	use THelloImpl;
 }
 
 $test = new TraitsTest1();
@@ -25,12 +25,12 @@ $test->hello();
 
 class TraitsTest2 {
 	use THelloImpl;
-	use THello;  
+	use THello;
 }
 
 $test = new TraitsTest2();
 $test->hello();
 
 ?>
---EXPECTF--	
+--EXPECT--
 HelloHello

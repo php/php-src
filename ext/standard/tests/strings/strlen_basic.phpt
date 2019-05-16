@@ -1,5 +1,5 @@
 --TEST--
-Test strlen() function : basic functionality 
+Test strlen() function : basic functionality
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ var_dump(strlen(""));
 var_dump(strlen("\x90\x91\x00\x93\x94\x90\x91\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strlen() : basic functionality ***
 int(6)
 int(7)

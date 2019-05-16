@@ -12,7 +12,7 @@ Test file_put_contents() and file_get_contents() functions : basic functionality
  *  Description: Write a string to a file
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 include($file_path."/file.inc");
 
 echo "*** Testing the basic functionality of file_put_contents() and file_get_contents() functions ***\n";
@@ -35,11 +35,11 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/file_put_contents.tmp");
 unlink($file_path."/file_put_contents1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing the basic functionality of file_put_contents() and file_get_contents() functions ***
 -- Testing with simple valid data file --
 string(100) "text text text text text text text text text text text text text text text text text text text text "

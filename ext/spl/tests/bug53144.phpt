@@ -15,6 +15,6 @@ $b->removeAll($b);
 var_dump(count($b));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 int(0)

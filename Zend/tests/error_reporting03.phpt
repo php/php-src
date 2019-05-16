@@ -29,7 +29,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Undefined variable: undef2 in %s on line %d
 int(32767)
 Done

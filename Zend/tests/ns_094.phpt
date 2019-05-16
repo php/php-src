@@ -10,6 +10,5 @@ use const Foo\Bar\{
     const B,
     function C
 };
-
 --EXPECTF--
-Parse error: syntax error, unexpected 'const' (T_CONST), expecting identifier (T_STRING) in %s on line 7
+Parse error: syntax error, unexpected 'const' (T_CONST), expecting '}' in %s on line 7

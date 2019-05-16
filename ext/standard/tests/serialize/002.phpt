@@ -1,7 +1,7 @@
 --TEST--
 Bug #25378 (unserialize() crashes with invalid data)
 --FILE--
-<?php 
+<?php
 var_dump(unserialize('b:0;'));
 var_dump(unserialize('b:1;'));
 var_dump(unserialize('i:823;'));

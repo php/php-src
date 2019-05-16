@@ -1,12 +1,14 @@
 --TEST--
 SQLite3 open_basedir checks
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --INI--
 open_basedir=.
 --FILE--
 <?php
-$directory = dirname(__FILE__) . '/';
+chdir(__DIR__);
+
+$directory = __DIR__ . '/';
 $file = uniqid() . '.db';
 
 echo "Within test directory\n";

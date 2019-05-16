@@ -6,7 +6,7 @@ SPL: RegexIterator::ALL_MATCHES
 class MyRegexIterator extends RegexIterator
 {
 	public $uk, $re;
-	
+
 	function __construct($it, $re, $mode, $flags = 0)
 	{
 		$this->uk = $flags & self::USE_KEY;
@@ -22,7 +22,7 @@ class MyRegexIterator extends RegexIterator
 			var_dump($v);
 		}
 	}
-	
+
 	function accept()
 	{
 		@preg_match_all($this->re, (string)($this->uk ? $this->key() : $this->current()), $sub);
@@ -50,7 +50,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
@@ -124,7 +124,20 @@ array(2) {
     string(1) "4"
   }
 }
-bool(false)
+bool(true)
+int(5)
+array(2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    string(1) "5"
+  }
+}
 bool(true)
 int(6)
 array(2) {

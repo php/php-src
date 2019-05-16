@@ -2,12 +2,12 @@
 Bug #64264 (SPLFixedArray toArray problem)
 --FILE--
 <?php
-class MyFixedArray extends \SplFixedArray {                                                                                                                                 
-    protected $foo;                                                                                                                                                         
-    protected $bar;                                                                                                                                                         
-}                                                                                                                                                                           
+class MyFixedArray extends \SplFixedArray {
+    protected $foo;
+    protected $bar;
+}
 
-$myFixedArr = new MyFixedArray(1);                                                                                                                                          
+$myFixedArr = new MyFixedArray(1);
 $myFixedArr[0] = 'foo';
 $myFixedArr->setSize(2);
 $myFixedArr[1] = 'bar';
@@ -21,7 +21,7 @@ $myFixedArr->setSize(2);
 
 print_r($myFixedArr->toArray());
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => foo

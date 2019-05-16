@@ -1,18 +1,18 @@
 --TEST--
-Test interface_exists() function : autoloaded interface 
+Test interface_exists() function : autoloaded interface
 --FILE--
 <?php
 /* Prototype  : bool interface_exists(string classname [, bool autoload])
- * Description: Checks if the class exists 
+ * Description: Checks if the class exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing interface_exists() : autoloaded interface ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
+});
 
 echo "\n-- no autoloading --\n";
 var_dump(interface_exists("AutoInterface", false));
@@ -23,7 +23,7 @@ var_dump(interface_exists("AutoInterface", true));
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing interface_exists() : autoloaded interface ***
 
 -- no autoloading --

@@ -8,7 +8,7 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE_EXTERNAL--
 files/write10.phar
---EXPECTF--
+--EXPECT--
 string(214) "<?php
 $p = new Phar(__FILE__);
 var_dump($p->getStub());

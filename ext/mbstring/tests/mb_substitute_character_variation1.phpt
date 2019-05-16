@@ -1,5 +1,5 @@
 --TEST--
-Test mb_substitute_character() function : usage variation 
+Test mb_substitute_character() function : usage variation
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,16 +8,16 @@ function_exists('mb_substitute_character') or die("skip mb_substitute_character(
 --FILE--
 <?php
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
- * Description: Sets the current substitute_character or returns the current substitute_character 
+ * Description: Sets the current substitute_character or returns the current substitute_character
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_substitute_character() : usage variation ***\n";
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+	if (error_reporting() & $err_no) {
 		// report non-silenced errors
 		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 	}
@@ -123,7 +123,7 @@ fclose($fp);
 *** Testing mb_substitute_character() : usage variation ***
 
 --int 0--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --int 1--
@@ -133,30 +133,30 @@ bool(true)
 bool(true)
 
 --int -12345--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float 10.5--
 bool(true)
 
 --float -10.5--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float 12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float -12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float .5--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --int indexed array--
@@ -169,25 +169,25 @@ bool(true)
 bool(true)
 
 --uppercase NULL--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --lowercase true--
 bool(true)
 
 --lowercase false--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --uppercase TRUE--
 bool(true)
 
 --uppercase FALSE--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --empty string DQ--
@@ -197,19 +197,19 @@ bool(true)
 bool(true)
 
 --string DQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --string SQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --mixed case string--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --heredoc--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --instance of classWithToString--
@@ -221,11 +221,10 @@ Error: 8 - Object of class classWithoutToString could not be converted to int, %
 bool(true)
 
 --undefined var--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 ===DONE===
-

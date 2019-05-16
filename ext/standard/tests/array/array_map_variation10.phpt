@@ -3,7 +3,7 @@ Test array_map() function : usage variations - anonymous callback function
 --FILE--
 <?php
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays 
+ * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
 
@@ -17,23 +17,23 @@ $array1 = array(1, 2, 3);
 $array2 = array(3, 4, 5);
 
 echo "-- anonymous function with all parameters and body --\n";
-var_dump( array_map( create_function('$a, $b', 'return array($a, $b);'), $array1, $array2));
+var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1, $array2));
 
 echo "-- anonymous function with two parameters and passing one array --\n";
 try {
-	var_dump( array_map( create_function('$a, $b', 'return array($a, $b);'), $array1));
+	var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- anonymous function with NULL parameter --\n";
-var_dump( array_map( create_function(NULL, 'return NULL;'), $array1));
+var_dump( array_map( function() { return NULL; }, $array1));
 
 echo "-- anonymous function with NULL body --\n";
-var_dump( array_map( create_function('$a', NULL), $array1));
+var_dump( array_map( function($a) { }, $array1));
 
 echo "-- passing NULL as 'arr1' --\n";
-var_dump( array_map( create_function('$a', 'return array($a);'), NULL));
+var_dump( array_map( function($a) { return array($a); }, NULL));
 
 echo "Done";
 ?>
@@ -64,7 +64,7 @@ array(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-Exception: Too few arguments to function __lambda_func(), 1 passed and exactly 2 expected
+Exception: Too few arguments to function {closure}(), 1 passed and exactly 2 expected
 -- anonymous function with NULL parameter --
 array(3) {
   [0]=>
@@ -85,6 +85,6 @@ array(3) {
 }
 -- passing NULL as 'arr1' --
 
-Warning: array_map(): Argument #2 should be an array in %s on line %d
+Warning: array_map(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 Done

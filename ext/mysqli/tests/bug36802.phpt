@@ -17,7 +17,7 @@ Bug #36802 (crashes with with mysqli_set_charset())
 	if (method_exists($mysql, 'set_charset')) {
 		$x[0] = @$mysql->set_charset('utf8');
 	} else {
-		$x[0] = NULL;
+		$x[0] = false;
 	}
 	$x[1] = @$mysql->query("SELECT 'foo' FROM DUAL");
 
@@ -31,9 +31,9 @@ Bug #36802 (crashes with with mysqli_set_charset())
 --EXPECT--
 array(4) {
   [0]=>
-  NULL
+  bool(false)
   [1]=>
-  NULL
+  bool(false)
   [2]=>
   bool(true)
   [3]=>

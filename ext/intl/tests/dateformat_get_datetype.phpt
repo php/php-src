@@ -19,7 +19,7 @@ function ut_main()
 		IntlDateFormatter::SHORT,
 		IntlDateFormatter::NONE
 	);
-	
+
 	$res_str = '';
 
 	foreach( $datetype_arr as $datetype_entry )

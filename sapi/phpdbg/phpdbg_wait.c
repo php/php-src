@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 static void phpdbg_rebuild_http_globals_array(int type, const char *name) {
 	zval *zvp;
 	if (Z_TYPE(PG(http_globals)[type]) != IS_UNDEF) {
-		zval_dtor(&PG(http_globals)[type]);
+		zval_ptr_dtor_nogc(&PG(http_globals)[type]);
 	}
 	if ((zvp = zend_hash_str_find(&EG(symbol_table), name, strlen(name)))) {
 		Z_ADDREF_P(zvp);
@@ -243,18 +243,21 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		zend_extension *extension;
 		zend_llist_position pos;
 		zval *name = NULL;
-		zend_string *strkey;
+		zend_string *strkey = NULL;
 
 		extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 		while (extension) {
 			extension = (zend_extension *) zend_llist_get_next_ex(&zend_extensions, &pos);
+			if (extension == NULL){
+				break;
+			}
 
-			/* php_serach_array() body should be in some ZEND_API function... */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(Z_ARRVAL_P(zvp), strkey, name) {
 				if (Z_TYPE_P(name) == IS_STRING && !zend_binary_strcmp(extension->name, strlen(extension->name), Z_STRVAL_P(name), Z_STRLEN_P(name))) {
 					break;
 				}
 				name = NULL;
+				strkey = NULL;
 			} ZEND_HASH_FOREACH_END();
 
 			if (name) {
@@ -281,6 +284,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				pefree(elm, zend_extensions.persistent);
 				zend_extensions.count--;
 			} else {
+				ZEND_ASSERT(strkey);
 				zend_hash_del(Z_ARRVAL_P(zvp), strkey);
 			}
 		}
@@ -325,7 +329,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	zval_dtor(&zv);
+	zval_ptr_dtor(&zv);
 	if (free_zv) {
 		/* separate freeing to not dtor the symtable too, just the container zval... */
 		efree(free_zv);
@@ -344,9 +348,16 @@ PHPDBG_COMMAND(wait) /* {{{ */
 	if (PHPDBG_G(socket_server_fd) == -1) {
 		int len;
 		PHPDBG_G(socket_server_fd) = sl = socket(AF_UNIX, SOCK_STREAM, 0);
+		if (sl == -1) {
+			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to open a socket to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+			return FAILURE;
+		}
 
 		local.sun_family = AF_UNIX;
-		strcpy(local.sun_path, PHPDBG_G(socket_path));
+		if (strlcpy(local.sun_path, PHPDBG_G(socket_path), sizeof(local.sun_path)) > sizeof(local.sun_path)) {
+			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Socket at %s defined by phpdbg.path ini setting is too long", PHPDBG_G(socket_path));
+			return FAILURE;
+		}
 		len = strlen(local.sun_path) + sizeof(local.sun_family);
 		if (bind(sl, (struct sockaddr *)&local, len) == -1) {
 			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
@@ -362,22 +373,31 @@ PHPDBG_COMMAND(wait) /* {{{ */
 
 	rlen = sizeof(remote);
 	sr = accept(sl, (struct sockaddr *) &remote, (socklen_t *) &rlen);
+	if (sr == -1) {
+		phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to create a connection to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+		close(PHPDBG_G(socket_server_fd));
+		return FAILURE;
+	}
 
-	char msglen[5];
-	int recvd = 4;
-
-	do {
-		recvd -= recv(sr, &(msglen[4 - recvd]), recvd, 0);
-	} while (recvd > 0);
-
-	recvd = *(size_t *) msglen;
-	char *data = emalloc(recvd);
+	unsigned char msglen_buf[4];
+	int needed = 4;
 
 	do {
-		recvd -= recv(sr, &(data[(*(int *) msglen) - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &msglen_buf[4 - needed], needed, 0);
+	} while (needed > 0);
 
-	phpdbg_webdata_decompress(data, *(int *) msglen);
+	uint32_t msglen = (msglen_buf[3] << 24)
+					| (msglen_buf[2] << 16)
+					| (msglen_buf[1] <<  8)
+					| (msglen_buf[0] <<  0);
+	char *data = emalloc(msglen);
+	needed = msglen;
+
+	do {
+		needed -= recv(sr, &(data[msglen - needed]), needed, 0);
+	} while (needed > 0);
+
+	phpdbg_webdata_decompress(data, msglen);
 
 	if (PHPDBG_G(socket_fd) != -1) {
 		close(PHPDBG_G(socket_fd));

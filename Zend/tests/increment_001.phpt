@@ -32,7 +32,7 @@ foreach ($a as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {
   [0]=>
   int(1)

@@ -2,13 +2,13 @@
 PDO::ATTR_ORACLE_NULLS
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db);
 
@@ -87,35 +87,35 @@ MySQLPDOTest::skip();
 array(1) {
   [0]=>
   array(6) {
-    [%u|b%"z"]=>
+    ["z"]=>
     NULL
-    [%u|b%"a"]=>
+    ["a"]=>
     NULL
-    [%u|b%"b"]=>
-    %unicode|string%(1) " "
-    [%u|b%"c"]=>
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
     NULL
-    [%u|b%"d"]=>
-    %unicode|string%(2) " d"
-    [%u|b%"e"]=>
-    %unicode|string%(3) "%se"
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(3) "%se"
   }
 }
 array(1) {
   [0]=>
   array(6) {
-    [%u|b%"z"]=>
+    ["z"]=>
     NULL
-    [%u|b%"a"]=>
-    %unicode|string%(0) ""
-    [%u|b%"b"]=>
-    %unicode|string%(1) " "
-    [%u|b%"c"]=>
-    %unicode|string%(0) ""
-    [%u|b%"d"]=>
-    %unicode|string%(2) " d"
-    [%u|b%"e"]=>
-    %unicode|string%(3) "%se"
+    ["a"]=>
+    string(0) ""
+    ["b"]=>
+    string(1) " "
+    ["c"]=>
+    string(0) ""
+    ["d"]=>
+    string(2) " d"
+    ["e"]=>
+    string(3) "%se"
   }
 }
 done!

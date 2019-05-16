@@ -2,12 +2,12 @@
 Test imap_fetchbody() function : usage variations - $msg_no arg
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 /* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
- * Description: Get a specific body section 
+ * Description: Get a specific body section
  * Source code: ext/imap/php_imap.c
  */
 
@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 //Initialise required variables
 $stream_id = setup_test_mailbox('', 3); // set up temp mailbox with  simple msgs
@@ -39,7 +39,7 @@ foreach($sequences as $msg_no) {
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : usage variations ***
@@ -61,10 +61,10 @@ bool(false)
 -- $msg_no is 1,3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
 
 -- $msg_no is 1:3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
 ===DONE===

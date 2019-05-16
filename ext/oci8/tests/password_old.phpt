@@ -3,7 +3,8 @@ ocipasswordchange()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on thes
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/skipif.inc');
+require(__DIR__.'/connect.inc');
 if (empty($dbase)) die ("skip requires database connection string be set");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");
 
@@ -32,7 +33,7 @@ if (isset($matches_sv[0]) && $matches_sv[1] >= 12) {
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $new_password = "test";
 var_dump(ocipasswordchange($dbase, $user, $password, $new_password));

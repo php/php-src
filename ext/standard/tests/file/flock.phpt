@@ -3,10 +3,7 @@ flock() tests
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/flock.dat";
-
-var_dump(flock());
-var_dump(flock("", "", $var));
+$file = __DIR__."/flock.dat";
 
 $fp = fopen($file, "w");
 fclose($fp);
@@ -33,16 +30,14 @@ var_dump($would);
 var_dump(flock($fp, -1));
 var_dump(flock($fp, 0));
 
-@unlink($file);
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
-NULL
-
+--CLEAN--
+<?php
+$file = __DIR__."/flock.dat";
+unlink($file);
+?>
+--EXPECTF--
 Warning: flock(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 bool(true)

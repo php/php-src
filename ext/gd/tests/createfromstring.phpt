@@ -7,14 +7,14 @@ imagecreatefromstring
 ?>
 --FILE--
 <?php
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 
 $im = imagecreatetruecolor(5,5);
 imagefill($im, 0,0, 0xffffff);
 imagesetpixel($im, 3,3, 0x0);
 imagepng($im, $dir . '/tc.png');
 
-$im_string = file_get_contents(dirname(__FILE__) . '/tc.png');
+$im_string = file_get_contents(__DIR__ . '/tc.png');
 $im = imagecreatefromstring($im_string);
 echo 'createfromstring truecolor png: ';
 if (imagecolorat($im, 3,3) != 0x0) {
@@ -34,7 +34,7 @@ imagefill($im, 0,0, $c1);
 imagesetpixel($im, 3,3, $c2);
 imagepng($im, $dir . '/p.png');
 
-$im_string = file_get_contents(dirname(__FILE__) . '/p.png');
+$im_string = file_get_contents(__DIR__ . '/p.png');
 $im = imagecreatefromstring($im_string);
 
 echo'createfromstring palette png: ';
@@ -52,8 +52,8 @@ unlink($dir . '/p.png');
 
 //empty string
 $im = imagecreatefromstring('');
-//random string > 8
-$im = imagecreatefromstring(' asdf jklp');
+//random string > 12
+$im = imagecreatefromstring(' asdf jklp foo');
 ?>
 --EXPECTF--
 createfromstring truecolor png: ok

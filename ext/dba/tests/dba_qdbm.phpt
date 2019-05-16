@@ -3,16 +3,20 @@ DBA QDBM handler test
 --SKIPIF--
 <?php
 	$handler = 'qdbm';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'qdbm';
-	require_once dirname(__FILE__) .'/test.inc';
+	require_once __DIR__ .'/test.inc';
 	$lock_flag = ''; // lock in library
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+	require_once __DIR__ .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php
+	require(__DIR__ .'/clean.inc');
+?>
 --EXPECTF--
 database handler: qdbm
 3NYNYY
@@ -31,6 +35,4 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-
-Warning: dba_popen(%stest0.dbm,r-): Locking cannot be disabled for handler qdbm in %sdba_handler.inc on line %d
 ===DONE===

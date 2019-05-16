@@ -3,10 +3,10 @@ Bug #55007 (compiler fail after previous fail)
 --FILE--
 <?php
 
-function __autoload($classname) {
+spl_autoload_register(function ($classname) {
   if ('CompileErrorClass'==$classname) eval('class CompileErrorClass { function foo() { $a[]; } }');
   if ('MyErrorHandler'==$classname) eval('class MyErrorHandler { function __construct() { print "My error handler runs.\n"; } }');
-}
+});
 
 function shutdown() {
   new MyErrorHandler();
@@ -14,7 +14,7 @@ function shutdown() {
 
 
 register_shutdown_function('shutdown');
-	
+
 new CompileErrorClass();
 
 ?>

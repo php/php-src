@@ -3,7 +3,7 @@ Test array_diff_uassoc() function : usage variation - Comparing integers with st
 --FILE--
 <?php
 /* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a 
+ * Description: Computes the difference of arrays with additional index check which is performed by a
  * 				user supplied callback function
  * Source code: ext/standard/array.c
  */
@@ -33,7 +33,7 @@ var_dump( array_diff_uassoc($arr_string_float, $arr_default_int, "key_compare_fu
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Result of comparing integers and strings containing an integers --

@@ -2,8 +2,8 @@
 Test session_set_save_handler() : basic class wrapping existing handler
 --INI--
 session.use_strict_mode=1
-session.save_handler=files
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -11,10 +11,10 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() : basic class wrapping existing handler ***\n";
@@ -91,7 +91,6 @@ var_dump($_SESSION);
 session_write_close();
 session_unset();
 var_dump($handler->i);
-
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 

@@ -1,5 +1,5 @@
 --TEST--
-Test strrchr() function : usage variations - unexpected inputs for needle 
+Test strrchr() function : usage variations - unexpected inputs for needle
 --FILE--
 <?php
 /* Prototype  : string strrchr(string $haystack, string $needle);
@@ -7,8 +7,8 @@ Test strrchr() function : usage variations - unexpected inputs for needle
  * Source code: ext/standard/string.c
 */
 
-/* Test strrchr() function: with unexpected inputs for needle 
- *  and expected type for haystack 
+/* Test strrchr() function: with unexpected inputs for needle
+ *  and expected type for haystack
 */
 
 echo "*** Testing strrchr() function with unexpected inputs for needle ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -96,7 +96,7 @@ $needles =  array (
   TRUE,
   FALSE,
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -121,7 +121,11 @@ $needles =  array (
 $count = 1;
 for($index = 0; $index < count($haystacks); $index++) {
   echo "-- Iteration $count --\n";
-  var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  try {
+    var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count ++;
 }
 
@@ -129,46 +133,36 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function with unexpected inputs for needle ***
 -- Iteration 1 --
-bool(false)
+string(1) "0"
 -- Iteration 2 --
-bool(false)
+string(1) "1"
 -- Iteration 3 --
 bool(false)
 -- Iteration 4 --
-bool(false)
+string(2) "-2"
 -- Iteration 5 --
-bool(false)
+string(4) "10.5"
 -- Iteration 6 --
-bool(false)
+string(5) "-10.5"
 -- Iteration 7 --
-bool(false)
+string(2) "10"
 -- Iteration 8 --
-bool(false)
+string(2) "10"
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 11 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 12 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 13 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 14 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -182,17 +176,13 @@ bool(false)
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
+string(6) "object"
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

@@ -25,5 +25,5 @@ var_dump($zip->close());
 @unlink(__DIR__ . '/bug70322.zip');
 ?>
 --EXPECTF--
-Warning: ZipArchive::close(): Read error: No such file or directory in %s%ebug70322.php on line %d
+Warning: ZipArchive::close(): %s: No such file or directory in %s%ebug70322.php on line %d
 bool(false)

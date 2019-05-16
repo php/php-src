@@ -1,14 +1,14 @@
---TEST--                                 
+--TEST--
 Bug #60749: SNMP module should not strip non-standard SNMP port from hostname
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 $hostname = "php.net";
 $ip = gethostbyname($hostname);
@@ -24,5 +24,5 @@ if (strcmp($info["hostname"], "$ip:$port") !== 0) {
 }
 var_dump($session->close());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

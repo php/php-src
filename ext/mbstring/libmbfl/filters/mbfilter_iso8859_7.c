@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_8859_7 = {
 	"ISO-8859-7",
 	(const char *(*)[])&mbfl_encoding_8859_7_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_8859_7_wchar,
+	&vtbl_wchar_8859_7
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
@@ -135,5 +137,3 @@ int mbfl_filt_conv_wchar_8859_7(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-
-

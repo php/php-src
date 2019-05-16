@@ -25,13 +25,10 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
-#ifndef INFINITY
-#define INFINITY (DBL_MAX+DBL_MAX)
-#endif
+using icu::TimeZone;
+using icu::UnicodeString;
 
-#ifndef NAN
-#define NAN (INFINITY-INFINITY)
-#endif
+#include "zend_portability.h"
 
 /* {{{ timezone_convert_datetimezone
  *      The timezone in DateTime and DateTimeZone is not unified. */
@@ -56,8 +53,8 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int offset_mins = is_datetime
-				? -((php_date_obj*)object)->time->z
-				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
+				? ((php_date_obj*)object)->time->z / 60
+				: (int)((php_timezone_obj*)object)->tzi.utc_offset / 60,
 				hours = offset_mins / 60,
 				minutes = offset_mins - hours * 60;
 			minutes *= minutes > 0 ? 1 : -1;
@@ -86,14 +83,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 
 	UnicodeString s = UnicodeString(id, id_len, US_INV);
 	timeZone = TimeZone::createTimeZone(s);
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	if (*timeZone == TimeZone::getUnknown()) {
-#else
-	UnicodeString resultingId;
-	timeZone->getID(resultingId);
-	if (resultingId == UnicodeString("Etc/Unknown", -1, US_INV)
-			|| resultingId == UnicodeString("GMT", -1, US_INV)) {
-#endif
 		spprintf(&message, 0, "%s: time zone id '%s' "
 			"extracted from ext/date DateTimeZone not recognized", func, id);
 		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
@@ -118,13 +108,15 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
-		*millis = NAN;
+		*millis = ZEND_NAN;
 	}
 	if (tz) {
 		*tz = NULL;
 	}
 
 	if (millis) {
+		php_date_obj *datetime;
+
 		ZVAL_STRING(&zfuncname, "getTimestamp");
 		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
@@ -137,7 +129,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			return FAILURE;
 		}
 
-		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
+		datetime = Z_PHPDATE_P(z);
+		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
 		zval_ptr_dtor(&zfuncname);
 	}
 
@@ -145,8 +138,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		php_date_obj *datetime;
 		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
-			spprintf(&message, 0, "%s: the DateTime object is not properly "
-					"initialized", func);
+			spprintf(&message, 0, "%s: the %s object is not properly "
+					"initialized", func, ZSTR_VAL(Z_OBJCE_P(z)->name));
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				message, 1);
 			efree(message);
@@ -173,13 +166,13 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 {
-	double	rv = NAN;
+	double	rv = ZEND_NAN;
 	zend_long	lv;
 	int		type;
 	char	*message;
 
 	if (err && U_FAILURE(err->code)) {
-		return NAN;
+		return ZEND_NAN;
 	}
 
 	switch (Z_TYPE_P(z)) {
@@ -205,7 +198,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
 		break;
 	case IS_OBJECT:
-		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce())) {
+		if (instanceof_function(Z_OBJCE_P(z), php_date_get_interface_ce())) {
 			intl_datetime_decompose(z, &rv, NULL, err, func);
 		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr)) {
 			Calendar_object *co = Z_INTL_CALENDAR_P(z);
@@ -228,7 +221,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		} else {
 			/* TODO: try with cast(), get() to obtain a number */
 			spprintf(&message, 0, "%s: invalid object type for date/time "
-					"(only IntlCalendar and DateTime permitted)", func);
+					"(only IntlCalendar and DateTimeInterface permitted)", func);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,
 				message, 1);
 			efree(message);
@@ -244,4 +237,3 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 
 	return rv;
 }
-

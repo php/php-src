@@ -1,7 +1,7 @@
 --TEST--
 Testing dynamic call with undefined variables
 --FILE--
-<?php 
+<?php
 
 $a::$b();
 

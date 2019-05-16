@@ -6,7 +6,7 @@ imagewbmp
 ?>
 --FILE--
 <?php
-$file = dirname(__FILE__) . '/im.wbmp';
+$file = __DIR__ . '/im.wbmp';
 
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);

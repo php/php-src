@@ -9,5 +9,5 @@ try {
 	echo "Exception: ".$e->getMessage()."\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Exception: Offset invalid or out of range

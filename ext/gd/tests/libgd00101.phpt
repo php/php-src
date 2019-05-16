@@ -7,11 +7,11 @@ libgd #101 (imagecreatefromgd can crash if gdImageCreate fails)
 ?>
 --FILE--
 <?php
-$im = imagecreatefromgd(dirname(__FILE__) . '/libgd00101.gd');
+$im = imagecreatefromgd(__DIR__ . '/libgd00101.gd');
 var_dump($im);
 ?>
 --EXPECTF--
-Warning: imagecreatefromgd(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecreatefromgd(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %slibgd00101.php on line %d
 
 Warning: imagecreatefromgd(): '%slibgd00101.gd' is not a valid GD file in %slibgd00101.php on line %d

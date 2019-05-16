@@ -2,7 +2,6 @@
 Phar object: array access
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--
@@ -24,7 +23,7 @@ try
 {
 	$phar->setFileClass('SplFileInfo');
 }
-catch (UnexpectedValueException $e)
+catch (TypeError $e)
 {
 	echo $e->getMessage() . "\n";
 }
@@ -37,8 +36,8 @@ echo $phar['b.php']->getFilename() . "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_006.phar.php');
+<?php
+unlink(__DIR__ . '/files/phar_oo_006.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--

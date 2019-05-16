@@ -2,14 +2,14 @@
 MySQL PDOStatement->errorCode();
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	$db->exec('DROP TABLE IF EXISTS ihopeitdoesnotexist');
@@ -56,7 +56,7 @@ Testing native PS...
 
 Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
 
-Fatal error: Uncaught Error: Call to a member function execute() on boolean in %s:%d
+Fatal error: Uncaught Error: Call to a member function execute() on bool in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,12 +17,10 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_JSON_H
 #define PHP_JSON_H
 
-#define PHP_JSON_VERSION "1.4.0"
+#define PHP_JSON_VERSION "1.7.0"
 #include "zend_smart_str_public.h"
 
 extern zend_module_entry json_module_entry;
@@ -55,23 +53,28 @@ typedef enum {
 	PHP_JSON_ERROR_UTF16
 } php_json_error_code;
 
+/* json_decode() options */
+#define PHP_JSON_OBJECT_AS_ARRAY            (1<<0)
+#define PHP_JSON_BIGINT_AS_STRING           (1<<1)
+
 /* json_encode() options */
-#define PHP_JSON_HEX_TAG                 (1<<0)
-#define PHP_JSON_HEX_AMP                 (1<<1)
-#define PHP_JSON_HEX_APOS                (1<<2)
-#define PHP_JSON_HEX_QUOT                (1<<3)
-#define PHP_JSON_FORCE_OBJECT            (1<<4)
-#define PHP_JSON_NUMERIC_CHECK           (1<<5)
-#define PHP_JSON_UNESCAPED_SLASHES       (1<<6)
-#define PHP_JSON_PRETTY_PRINT            (1<<7)
-#define PHP_JSON_UNESCAPED_UNICODE       (1<<8)
-#define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR (1<<9)
-#define PHP_JSON_PRESERVE_ZERO_FRACTION  (1<<10)
+#define PHP_JSON_HEX_TAG                    (1<<0)
+#define PHP_JSON_HEX_AMP                    (1<<1)
+#define PHP_JSON_HEX_APOS                   (1<<2)
+#define PHP_JSON_HEX_QUOT                   (1<<3)
+#define PHP_JSON_FORCE_OBJECT               (1<<4)
+#define PHP_JSON_NUMERIC_CHECK              (1<<5)
+#define PHP_JSON_UNESCAPED_SLASHES          (1<<6)
+#define PHP_JSON_PRETTY_PRINT               (1<<7)
+#define PHP_JSON_UNESCAPED_UNICODE          (1<<8)
+#define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR    (1<<9)
+#define PHP_JSON_PRESERVE_ZERO_FRACTION     (1<<10)
 #define PHP_JSON_UNESCAPED_LINE_TERMINATORS (1<<11)
 
-/* json_decode() options */
-#define PHP_JSON_OBJECT_AS_ARRAY         (1<<0)
-#define PHP_JSON_BIGINT_AS_STRING        (1<<1)
+/* json_decode() and json_encode() common options */
+#define PHP_JSON_INVALID_UTF8_IGNORE        (1<<20)
+#define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
+#define PHP_JSON_THROW_ON_ERROR             (1<<22)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0
@@ -93,6 +96,7 @@ PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth);
 PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API int php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth);
 
@@ -101,14 +105,4 @@ static inline int php_json_decode(zval *return_value, char *str, int str_len, ze
 	return php_json_decode_ex(return_value, str, str_len, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0, depth);
 }
 
-
 #endif  /* PHP_JSON_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -39,6 +39,10 @@
 #endif
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX	((size_t)~0)
+#endif
+
 #ifdef WIN32
 #ifdef MBFL_DLL_EXPORT
 #define MBFLAPI __declspec(dllexport)

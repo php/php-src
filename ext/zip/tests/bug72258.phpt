@@ -2,13 +2,12 @@
 Bug #72258 ZipArchive converts filenames to unrecoverable form
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug72258.zip";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "bug72258.zip";
 
 $zip = new \ZipArchive();
 $res = $zip->open($fn);

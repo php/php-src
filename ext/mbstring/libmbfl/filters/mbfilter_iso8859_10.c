@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_8859_10 = {
 	"ISO-8859-10",
 	(const char *(*)[])&mbfl_encoding_8859_10_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_8859_10_wchar,
+	&vtbl_wchar_8859_10
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
@@ -134,5 +136,3 @@ int mbfl_filt_conv_wchar_8859_10(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-
-

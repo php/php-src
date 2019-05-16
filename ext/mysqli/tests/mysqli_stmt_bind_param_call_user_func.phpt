@@ -5,10 +5,6 @@ mysqli_stmt_bind_param used with call_user_func_array() (see also bug #43568)
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
-
-// TODO remove once a decision has been made on call_user_func_array()
-if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
-	die("skip needs PHP 5.3.0-dev+, see http://bugs.php.net/bug.php?id=43568");
 ?>
 --FILE--
 <?php
@@ -332,35 +328,35 @@ if (version_compare(PHP_VERSION, '5.3.0-dev') == -1)
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 Regular, procedural, using variables
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for everything
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, object oriented, using references for everything
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, object oriented, using variable for types. using references for bound parameter
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, object oriented, using constant for types. using references for bound parameter
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for everything but using variable for types
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for bound parameter, using variables for resource and types
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for bound parameter, using variables for resource and types
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 Call user func, procedural, using references for bound parameter, using variable for resource, using constant for types, array
 int(1)
-%unicode|string%(1) "a"
+string(1) "a"
 done!

@@ -10,13 +10,8 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 
@@ -28,23 +23,14 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 
-	if (!is_null($tmp = @$res->fetch_field_direct()))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_field_direct($link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$res->fetch_field_direct($link, $link)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	var_dump($res->fetch_field_direct(-1));
 	var_dump($res->fetch_field_direct(0));
 	var_dump($res->fetch_field_direct(2));
 
 	$res->free_result();
 
-	if (NULL !== ($tmp = $res->fetch_field_direct(0)))
-		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = $res->fetch_field_direct(0)))
+		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	$mysqli->close();
 	print "done!";
@@ -57,31 +43,31 @@ require_once('skipifconnectfailure.inc');
 Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
 object(stdClass)#%d (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(2) "ID"
-  [%u|b%"orgname"]=>
-  %unicode|string%(2) "id"
-  [%u|b%"table"]=>
-  %unicode|string%(4) "TEST"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(2) "ID"
+  ["orgname"]=>
+  string(2) "id"
+  ["table"]=>
+  string(4) "TEST"
+  ["orgtable"]=>
+  string(%d) "%s"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(%d)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(11)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(%d)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(%d)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(%d)
 }
 

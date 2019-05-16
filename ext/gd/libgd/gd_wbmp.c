@@ -53,6 +53,7 @@
 
 #include <gd.h>
 #include <gdfonts.h>
+#include <gd_errors.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -81,6 +82,7 @@ int gd_getin (void *in)
 	return (gdGetC((gdIOCtx *) in));
 }
 
+static int _gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out);
 
 /*      gdImageWBMPCtx
    **  --------------
@@ -93,12 +95,19 @@ int gd_getin (void *in)
  */
 void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
 {
+	_gdImageWBMPCtx(image, fg, out);
+}
+
+/* returns 0 on success, 1 on failure */
+static int _gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out)
+{
 	int x, y, pos;
 	Wbmp *wbmp;
 
 	/* create the WBMP */
 	if ((wbmp = createwbmp (gdImageSX (image), gdImageSY (image), WBMP_WHITE)) == NULL) {
-		php_gd_error("Could not create WBMP");
+		gd_error("Could not create WBMP");
+		return 1;
 	}
 
 	/* fill up the WBMP structure */
@@ -114,10 +123,15 @@ void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
 
 	/* write the WBMP to a gd file descriptor */
 	if (writewbmp (wbmp, &gd_putout, out)) {
-		php_gd_error("Could not save WBMP");
+		freewbmp(wbmp);
+		gd_error("Could not save WBMP");
+		return 1;
 	}
+
 	/* des submitted this bugfix: gdFree the memory. */
 	freewbmp(wbmp);
+
+	return 0;
 }
 
 /* gdImageCreateFromWBMPCtx
@@ -202,8 +216,11 @@ void * gdImageWBMPPtr (gdImagePtr im, int *size, int fg)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImageWBMPCtx(im, fg, out);
-	rv = gdDPExtractData(out, size);
+	if (!_gdImageWBMPCtx(im, fg, out)) {
+		rv = gdDPExtractData(out, size);
+	} else {
+		rv = NULL;
+	}
 	out->gd_free(out);
 
 	return rv;

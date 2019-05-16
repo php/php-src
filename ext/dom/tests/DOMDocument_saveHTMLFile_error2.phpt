@@ -5,7 +5,7 @@ Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
 --SKIPIF--
 <?php
-require_once dirname(__FILE__) .'/skipif.inc';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

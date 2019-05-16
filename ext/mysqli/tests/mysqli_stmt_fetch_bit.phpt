@@ -72,5 +72,5 @@ Fetching BIT column values using the PS API
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

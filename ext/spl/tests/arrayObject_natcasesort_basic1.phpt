@@ -1,12 +1,12 @@
 --TEST--
-SPL: Test ArrayObject::natcasesort() function : basic functionality 
+SPL: Test ArrayObject::natcasesort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::natcasesort()
  * Description: proto int ArrayIterator::natcasesort()
- Sort the entries by values using case insensitive "natural order" algorithm. 
+ Sort the entries by values using case insensitive "natural order" algorithm.
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::natcasesort() : basic functionality ***\n";
@@ -19,7 +19,7 @@ var_dump($ao2->natcasesort('blah'));
 var_dump($ao2);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::natcasesort() : basic functionality ***
 bool(true)
 object(ArrayObject)#1 (1) {

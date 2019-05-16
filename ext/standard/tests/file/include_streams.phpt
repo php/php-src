@@ -8,7 +8,7 @@ $data1 = $data2 = $data3 = $data4 = $data5 = $data6 = <<<'EOD'
 EOD;
 /*<?*/
 
-class mystream 
+class mystream
 {
 	public $path;
 	public $mode;
@@ -20,7 +20,7 @@ class mystream
 	function url_stat($path, $flags) {
 		return array();
 	}
-	
+
 	function stream_stat() {
 		return array();
 	}
@@ -32,7 +32,7 @@ class mystream
 		$this->options = $options;
 
 		$split = parse_url($path);
-		if ($split["host"] !== b"GLOBALS" || 
+		if ($split["host"] !== "GLOBALS" ||
 		    empty($split["path"]) ||
 		    empty($GLOBALS[substr($split["path"],1)])) {
 		    return false;
@@ -43,7 +43,7 @@ class mystream
 			$this->position = strlen($GLOBALS[$this->varname]);
 		else
 			$this->position = 0;
-		
+
 		return true;
 	}
 

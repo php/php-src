@@ -12,7 +12,7 @@ var_dump(filter_var("!@#$%^&*()QWERTYUIOP{ASDFGHJKL:\"ZXCVBNM<>?", FILTER_SANITI
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(26) "%22%3Cbr%3Eblah%3C%2Fph%3E"
 string(0) ""
 string(23) "%20%20text%20here%20%20"

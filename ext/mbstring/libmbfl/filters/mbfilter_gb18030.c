@@ -47,7 +47,9 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	"GB18030",
 	(const char *(*)[])&mbfl_encoding_gb18030_aliases,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_gb18030_wchar,
+	&vtbl_wchar_gb18030
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_gb18030 = {
@@ -469,5 +471,3 @@ static int mbfl_filt_ident_gb18030(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

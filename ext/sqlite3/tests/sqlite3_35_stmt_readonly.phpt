@@ -1,7 +1,7 @@
 --TEST--
 SQLite3_stmt::readOnly check
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc');
+<?php require_once(__DIR__ . '/skipif.inc');
 $version = SQLite3::version();
 if ($version['versionNumber'] < 3007004) {
   die("skip");
@@ -10,7 +10,7 @@ if ($version['versionNumber'] < 3007004) {
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 define('TIMENOW', time());
 
 echo "Creating Table\n";
@@ -36,7 +36,7 @@ echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Creating Table
 bool(true)
 INSERT into table

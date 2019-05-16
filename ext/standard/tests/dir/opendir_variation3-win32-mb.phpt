@@ -1,9 +1,15 @@
 --TEST--
 Test opendir() function : usage variations - open a directory twice
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
+ * Description: Open a directory and return a dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -13,7 +19,7 @@ Test opendir() function : usage variations - open a directory twice
 
 echo "*** Testing opendir() : usage variation ***\n";
 
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation3";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
 mkdir($path);
 
 echo "\n-- Open directory first time: --\n";
@@ -34,7 +40,7 @@ closedir($dh2);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . "/私はガラスを食べられますopendir_variation3";
+$path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
 rmdir($path);
 ?>
 --EXPECTF--

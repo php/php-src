@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -209,6 +209,26 @@ static int get_command(
 
 } /* }}} */
 
+void phpdbg_do_help_cmd(char *type) { /* {{{ */
+	char *help;
+
+	if (!type) {
+		pretty_print(get_help("overview!"));
+		return;
+	}
+
+	help = get_help(type);
+
+	if (!help || memcmp(help, "", sizeof("")) == SUCCESS) {
+		pretty_print(get_help("overview!"));
+		pretty_print(
+			"\nrequested help page could not be found");
+		return;
+	}
+
+	pretty_print(help);
+} /* }}} */
+
 PHPDBG_COMMAND(help) /* {{{ */
 {
 	phpdbg_command_t const *cmd;
@@ -329,39 +349,41 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "It supports the following commands:" CR CR
 
 "**Information**" CR
-"  **list**     list PHP source" CR
-"  **info**     displays information on the debug session" CR
-"  **print**    show opcodes" CR
-"  **frame**    select a stack frame and print a stack frame summary" CR
-"  **back**     shows the current backtrace" CR
-"  **help**     provide help on a topic" CR CR
+"  **list**      list PHP source" CR
+"  **info**      displays information on the debug session" CR
+"  **print**     show opcodes" CR
+"  **frame**     select a stack frame and print a stack frame summary" CR
+"  **generator** show active generators or select a generator frame" CR
+"  **back**      shows the current backtrace" CR
+"  **help**      provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
-"  **exec**     set execution context" CR
-"  **run**      attempt execution" CR
-"  **step**     continue execution until other line is reached" CR
-"  **continue** continue execution" CR
-"  **until**    continue execution up to the given location" CR
-"  **next**     continue execution up to the given location and halt on the first line after it" CR
-"  **finish**   continue up to end of the current execution frame" CR
-"  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
-"  **break**    set a breakpoint at the specified target" CR
-"  **watch**    set a watchpoint on $variable" CR
-"  **clear**    clear one or all breakpoints" CR
-"  **clean**    clean the execution environment" CR CR
+"  **exec**      set execution context" CR
+"  **stdin**     set executing script from stdin" CR
+"  **run**       attempt execution" CR
+"  **step**      continue execution until other line is reached" CR
+"  **continue**  continue execution" CR
+"  **until**     continue execution up to the given location" CR
+"  **next**      continue execution up to the given location and halt on the first line after it" CR
+"  **finish**    continue up to end of the current execution frame" CR
+"  **leave**     continue up to end of the current execution frame and halt after the calling instruction" CR
+"  **break**     set a breakpoint at the specified target" CR
+"  **watch**     set a watchpoint on $variable" CR
+"  **clear**     clear one or all breakpoints" CR
+"  **clean**     clean the execution environment" CR CR
 
 "**Miscellaneous**" CR
-"  **set**      set the phpdbg configuration" CR
-"  **source**   execute a phpdbginit script" CR
-"  **register** register a phpdbginit function as a command alias" CR
-"  **sh**       shell a command" CR
-"  **ev**       evaluate some code" CR
-"  **quit**     exit phpdbg" CR CR
+"  **set**       set the phpdbg configuration" CR
+"  **source**    execute a phpdbginit script" CR
+"  **register**  register a phpdbginit function as a command alias" CR
+"  **sh**        shell a command" CR
+"  **ev**        evaluate some code" CR
+"  **quit**      exit phpdbg" CR CR
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
 "for example **help list** or **h l**.  Note that help will also match partial commands if unique "
-"(and list out options if not unique), so **help clea** will give help on the **clean** command, "
-"but **help cl** will list the summary for **clean** and **clear**." CR CR
+"(and list out options if not unique), so **help exp** will give help on the **export** command, "
+"but **help ex** will list the summary for **exec** and **export**." CR CR
 
 "Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
 "Type **help syntax** for a general introduction to the command syntax." CR
@@ -386,6 +408,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-rr**                         Run execution context and quit after execution (not respecting breakpoints)" CR
 "  **-e**                          Generate extended information for debugger/profiler" CR
 "  **-E**                          Enable step through eval, careful!" CR
+"  **-s**      **-s=**, **-s**=foo         Read code to execute from stdin with an optional delimiter" CR
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
@@ -395,6 +418,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
+
+"**Reading from stdin**" CR CR
+
+"The **-s** option allows inputting a script to execute directly from stdin. The given delimiter "
+"(\"foo\" in the example) needs to be specified at the end of the input on its own line, followed by "
+"a line break. If **-rr** has been specified, it is allowed to omit the delimiter (**-s=**) and "
+"it will read until EOF. See also the help entry for the **stdin** command." CR CR
 
 "**Remote Console Mode**" CR CR
 
@@ -514,8 +544,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **at**       **A**     specify breakpoint by location and condition" CR
-"  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
+"  **at**       **@**     specify breakpoint by location and condition" CR
+"  **del**      **~**     delete breakpoint by breakpoint identifier number" CR CR
 
 "**Break at** takes two arguments. The first is any valid target. The second "
 "is a valid PHP expression which will trigger the break in "
@@ -634,6 +664,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Set the execution context to **/tmp/script.php**"
 },
 
+{"stdin",
+"The **stdin** command takes a string serving as delimiter. It will then read all the input from "
+"stdin until encountering the given delimiter on a standalone line. It can also be passed at "
+"startup using the **-s=** command line option (the delimiter then is optional if **-rr** is "
+"also passed - in that case it will just read until EOF)." CR
+"This input will be then compiled as PHP code and set as execution context." CR CR
+
+"**Example**" CR CR
+
+"    $P stdin foo" CR
+"    <?php" CR
+"    echo \"Hello, world!\\n\";" CR
+"    foo"
+},
+
 //*********** Does F skip any breakpoints lower stack frames or only the current??
 {"finish",
 "The **finish** command causes control to be passed back to the vm, continuing execution.  Any "
@@ -648,8 +693,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"frame",
-"The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
-"If specified then the current scope is set to the corresponding frame listed in a **back** trace. "
+"The **frame** takes an optional integer argument. If omitted, then the current frame is displayed. "
+"If specified, then the current scope is set to the corresponding frame listed in a **back** trace. "
 "This can be used to allowing access to the variables in a higher stack frame than that currently being executed." CR CR
 
 "**Examples**" CR CR
@@ -658,7 +703,25 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Go to frame 2 and print out variable **$count** in that frame" CR CR
 
 "Note that this frame scope is discarded when execution continues, with the execution frame "
-"then reset to the lowest executiong frame."
+"then reset to the lowest executing frame."
+},
+
+{"generator",
+"The **generator** command takes an optional integer argument. If omitted, then a list of the "
+"currently active generators is displayed. If specified then the current scope is set to the frame "
+"of the generator with the corresponding object handle. This can be used to inspect any generators "
+"not in the current **back** trace." CR CR
+
+"**Examples**" CR CR
+"    $P generator" CR
+"    List of generators, with the #id being the object handle, e.g.:" CR
+"    #3: my_generator(argument=\"value\") at test.php:5" CR
+"    $P g 3" CR
+"    $P ev $i" CR
+"    Go to frame of generator with object handle 3 and print out variable **$i** in that frame" CR CR
+
+"Note that this frame scope is discarded when execution continues, with the execution frame "
+"then reset to the lowest executing frame."
 },
 
 {"info",
@@ -810,21 +873,19 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, starting execution. Execution will then continue until the next breakpoint "
-"or completion of the script. Add parameters you want to use as $argv" CR CR
+"or completion of the script. Add parameters you want to use as $argv. Add a trailing "
+"**< filename** for reading STDIN from a file." CR CR
 
 "**Examples**" CR CR
 
 "    $P run" CR
 "    $P r" CR
 "    Will cause execution of the context, if it is set" CR CR
-"    $P r test" CR
-"    Will execute with $argv[1] == \"test\"" CR CR
+"    $P r test < foo.txt" CR
+"    Will execute with $argv[1] == \"test\" and read from the foo.txt file for STDIN" CR CR
 
 "Note that the execution context must be set. If not previously compiled, then the script will "
-"be compiled before execution." CR CR
-
-"Note that attempting to run a script that is already executing will result in an \"execution "
-"in progress\" error."
+"be compiled before execution."
 },
 
 {"set",
@@ -863,7 +924,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
-"     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." CR
+"     Temporarily disable breakpoint 4.  This can be subsequently re-enabled by a **S b 4 on**." CR
 //*********** check oplog syntax
 },
 

@@ -10,7 +10,7 @@ Jacopo Romei <jacopo@sviluppoagile.it>
 #Test Fest Cesena (Italy) on 2009-06-20
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms");
+if (PHP_OS_FAMILY === 'Windows') { die('SKIP Testing file inodes, not available for Windows'); }
 ?>
 --FILE--
 <?php
@@ -19,7 +19,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getInode());
 ?>
-
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getInode(): stat failed for %s in %s
 Stack trace:

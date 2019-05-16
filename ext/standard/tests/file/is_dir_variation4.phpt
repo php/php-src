@@ -9,7 +9,7 @@ Test is_dir() function: usage variations - diff. path notations
 
 /* Passing dir names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing is_dir() with different notations of dir names ***";
 $dir_name = "/is_dir_variation4";
@@ -38,7 +38,11 @@ $count = 1;
 /* loop through to test each element the above array */
 foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
-  var_dump( is_dir($file_path."/".$dir ) );
+  try {
+    var_dump( is_dir($file_path."/".$dir ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count++;
 }
 
@@ -46,7 +50,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/is_dir_variation4";
 rmdir($dir_name);
 ?>
@@ -77,13 +81,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-
-Warning: is_dir() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_dir() expects parameter 1 to be a valid path, string given
 
 -- Iteration 10 --
-
-Warning: is_dir() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_dir() expects parameter 1 to be a valid path, string given
 
 *** Done ***

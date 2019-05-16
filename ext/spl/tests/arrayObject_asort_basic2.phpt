@@ -4,9 +4,9 @@ SPL: Test ArrayObject::asort() function : basic functionality with object based 
 <?php
 /* Prototype  : int ArrayObject::asort()
  * Description: proto int ArrayIterator::asort()
- * Sort the entries by values. 
+ * Sort the entries by values.
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::asort() : basic functionality ***\n";
@@ -23,7 +23,7 @@ var_dump($ao1->asort());
 var_dump($ao1, $c);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {

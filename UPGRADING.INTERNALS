@@ -1,87 +1,57 @@
-PHP 7.1 INTERNALS UPGRADE NOTES
+PHP 8.0 INTERNALS UPGRADE NOTES
 
-0. Wiki Examples
 1. Internal API changes
-  e. Codepage handling on Windows
-  f. Path handling on Windows
-  g. SAPI logging
+  a. Object Handlers API
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+  c. TSRM changes
 
 2. Build system changes
-  a. Unix build system changes
-  b. Windows build system changes
+  a. Abstract
+  b. Unix build system changes
+  c. Windows build system changes
 
 3. Module changes
 
-================
-0. Wiki Examples
-================
-
-The wiki contains multiple examples and further explanations of the internal
-changes. See: https://wiki.php.net/phpng-upgrading
-
-
 ========================
 1. Internal API changes
 ========================
 
-  e. Codepage handling on Windows
-     
-    A set of new APIs was introduced, which allows to handle codepage
-    conversions. The corresponding prototypes and macros are contained
-    in win32/codepage.h.
+  a. Object Handlers API and some related functions, e.g. zend_call_method() and
+     zend_objects_clone_obj() were changed to receive zend_object* instead of
+     zval* and zend_string* instead of zval* for property names.
 
-    Functions with php_win32_cp_* signatures provide handling for various
-    codepage aspects. Primarily they are in use at various places in the
-    I/O utils code and directly in the core where necessary, providing
-    conversions to/from UTF-16. Arbitrary conversions between codepages
-    are possible as well, whereby UTF-16 will be always an intermediate
-    state in this case.
-
-    For input length arguments, the macro PHP_WIN32_CP_IGNORE_LEN can be
-    passed, then the API will calculate the length.  For output length
-    arguments, the macro PHP_WIN32_CP_IGNORE_LEN_P can be passed, then
-    the API won't set the output length.
-
-    The mapping between encodings and codepages is provided by the predefined
-    array of data contained in win32/cp_enc_map.c. To change the data,
-    a generator win32/cp_enc_map_gen.c needs to be edited and run.
-
-  f. Path handling on Windows
-
-    A set of new APIs was introduced, which allows to handle UTF-8 paths. The
-    corresponding prototypes and macros are contained in win32/ioutil.h.
-
-    Functions with php_win32_ioutil_* signatures provide POSIX I/O analogues.
-    These functions are integrated in various places across the code base to
-    support Unicode filenames. While accepting char * arguments, internally 
-    the conversion to wchar_t * happens. Internally almost no ANSI APIs are
-    used, but directly their wide equivalents. The string conversion rules
-    correspond to those already present in the core and depend on the current
-    encoding settings. Doing so allows to move away from the ANSI Windows API
-    with its dependency on the system OEM/ANSI codepage.
-
-    Thanks to the wide API usage, the long paths are now supported as well. The
-    PHP_WIN32_IOUTIL_MAXPATHLEN macro is defined to 2048 bytes and will override
-    the MAXPATHLEN in files where the header is included.
-
-    The most optimal use case for scripts is utilizing UTF-8 for any I/O
-    related functions. UTF-8 filenames are supported on any system disregarding
-    the system OEM/ANSI codepage.
-
-  g. SAPI logging
-    The log_message callback in the SAPI struct was extended with the severity
-    argument. This allows SAPI modules to implement mapping between PHP and
-    corresponding server error levels. A reference mapping implementation
-    can be found in apache2handler.
-
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+     were removed. ZEND_INTERNAL_FUNCTION with ZEND_ACC_CALL_VIA_HANDLER and
+     defined "handler" callback should be used instead. This "handler" callback
+     should also take care about function cleanup. See ext/zend_test/test.c
+     for example.
+  
+  c. The following things have been removed from TSRM:
+      - TSRMLS_DC
+      - TSRMLS_D
+      - TSRMLS_CC
+      - TSRMLS_C
+      - TSRMLS_FETCH
+      - TSRMLS_FETCH_FROM_CTX
+      - TSRMLS_SET_CTX
+      - tsrm_new_interpreter_context
+      - tsrm_set_interpreter_context
+      - tsrm_free_interpreter_context
+      - support for GNUPTH, SGI ST, and BETHREADS
+                       
 
 ========================
 2. Build system changes
 ========================
 
-  a. Unix build system changes
+  a. Abstract
 
-  b. Windows build system changes
+  b. Unix build system changes
+  
+    1.  --enable-maintainer-zts is renamed --enable-zts for parity with Windows
+        and as recognition that ZTS is not a "maintainer" or experimental feature.
+
+  c. Windows build system changes
 
 ========================
 3. Module changes

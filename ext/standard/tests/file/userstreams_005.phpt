@@ -55,6 +55,8 @@ bool(true)
 truncation with new_size=10
 bool(true)
 ------ stream_truncate negative size: -------
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 ------ stream_truncate bad return: -------
 truncation with new_size=0

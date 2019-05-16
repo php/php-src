@@ -4,7 +4,7 @@ XML parser case folding test
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $xp = xml_parser_create();
 xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
@@ -27,7 +27,7 @@ function start_element($xp, $elem, $attribs)
 {
 	print "<$elem";
 	if (sizeof($attribs)) {
-		while (list($k, $v) = each($attribs)) {
+        foreach ($attribs as $k => $v) {
 			print " $k=\"$v\"";
 		}
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
 
 #include "zend.h"
 #include "zend_compile.h"
@@ -156,16 +153,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 		int c = '*';
 		size_t n;
 
-#ifdef NETWARE
-		/*
-			c != 4 check is there as fread of a character in NetWare LibC gives 4 upon ^D character.
-			Ascii value 4 is actually EOT character which is not defined anywhere in the LibC
-			or else we can use instead of hardcoded 4.
-		*/
-		for (n = 0; n < len && (c = zend_stream_getc(file_handle)) != EOF && c != 4 && c != '\n'; ++n) {
-#else
 		for (n = 0; n < len && (c = zend_stream_getc(file_handle)) != EOF && c != '\n'; ++n)  {
-#endif
 			buf[n] = (char)c;
 		}
 		if (c == '\n') {
@@ -198,7 +186,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 				return FAILURE;
 			}
 			memset(&file_handle->handle.stream.mmap, 0, sizeof(zend_mmap));
-			file_handle->handle.stream.isatty     = isatty(fileno((FILE *)file_handle->handle.stream.handle)) ? 1 : 0;
+			file_handle->handle.stream.isatty     = isatty(fileno((FILE *)file_handle->handle.stream.handle));
 			file_handle->handle.stream.reader     = (zend_stream_reader_t)zend_stream_stdio_reader;
 			file_handle->handle.stream.closer     = (zend_stream_closer_t)zend_stream_stdio_closer;
 			file_handle->handle.stream.fsizer     = (zend_stream_fsizer_t)zend_stream_stdio_fsizer;
@@ -322,7 +310,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 			break;
 	}
 	if (fh->opened_path) {
-		zend_string_release(fh->opened_path);
+		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {

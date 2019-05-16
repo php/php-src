@@ -26,6 +26,6 @@ mysqli.reconnect = Off
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 done!

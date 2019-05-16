@@ -15,6 +15,5 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
-
---EXPECTF--
+--EXPECT--
 string(42) "Cannot clone unconstructed NumberFormatter"

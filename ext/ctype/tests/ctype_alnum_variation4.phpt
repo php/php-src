@@ -5,7 +5,7 @@ Test ctype_alnum() function : usage variations  - octal and hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_alnum(mixed $c)
- * Description: Checks for alphanumeric character(s) 
+ * Description: Checks for alphanumeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -15,7 +15,7 @@ Test ctype_alnum() function : usage variations  - octal and hexadecimal values
 
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 $octal_values = array (060, 061, 062, 063);
 $hex_values = array(0x30, 0x31, 0x32, 0x33);
@@ -39,7 +39,7 @@ foreach($hex_values as $c) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 
 -- Octal Values --

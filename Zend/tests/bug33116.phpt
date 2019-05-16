@@ -1,12 +1,11 @@
 --TEST--
-Bug #33116 (crash when assigning class name to global variable in __autoload)
+Bug #33116 (crash when assigning class name to global variable in autoloader)
 --FILE--
 <?php
-function __autoload($class)
-{
+spl_autoload_register(function ($class) {
   $GLOBALS['include'][] = $class;
   eval("class DefClass{}");
-}
+});
 
 $a = new DefClass;
 print_r($a);

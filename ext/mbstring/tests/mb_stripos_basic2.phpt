@@ -8,9 +8,9 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 --FILE--
 <?php
 /* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of first occurrence of a string within another, case insensitive 
+ * Description: Finds position of first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -23,17 +23,17 @@ mb_internal_encoding('UTF-8');
 
 //ascii strings
 $ascii_haystacks = array(
-   b'abc defabc   def',
-   b'ABC DEFABC   DEF',
-   b'Abc dEFaBC   Def',
+   'abc defabc   def',
+   'ABC DEFABC   DEF',
+   'Abc dEFaBC   Def',
 );
 
 $ascii_needles = array(
    // 4 good ones
-   b'DE',
-   b'de',
-   b'De',
-   b'dE',
+   'DE',
+   'de',
+   'De',
+   'dE',
 );
 
 //greek strings in UTF-8
@@ -56,7 +56,7 @@ $greek_needles = array(
 echo "\n -- ASCII Strings --\n";
 foreach ($ascii_needles as $needle) {
    foreach ($ascii_haystacks as $haystack) {
-      var_dump(mb_stripos($haystack, $needle));      
+      var_dump(mb_stripos($haystack, $needle));
       var_dump(mb_stripos($haystack, $needle, 6));
    }
 }
@@ -65,13 +65,13 @@ echo "\n -- Greek Strings --\n";
 foreach ($greek_needles as $needle) {
    foreach ($greek_haystacks as $haystack) {
       var_dump(mb_stripos($haystack, $needle));
-      var_dump(mb_stripos($haystack, $needle, 4));         
+      var_dump(mb_stripos($haystack, $needle, 4));
    }
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_stripos() : basic functionality***
 
  -- ASCII Strings --
@@ -126,4 +126,3 @@ int(11)
 int(2)
 int(11)
 Done
-

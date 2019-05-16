@@ -35,12 +35,12 @@ function addToArray(&$arr, $strToAdd) {
 }
 
 addToArray(getArray(), "xx1");
-$a = getArray();	
+$a = getArray();
 addToArray($a, "xx2");
 $b = &$arrTheArray;
 addToArray($b, "xx3");
 addToArray(getArray(), "xx4");
-$a = getArray();	
+$a = getArray();
 addToArray($a, "xx5");
 echo "arrTheArray = " . print_r($arrTheArray, 1);
 
@@ -51,7 +51,7 @@ class RefTest {
 
 	function Add($strToAdd) {
 		$this->addToArray($this->getArray(), $strToAdd);
-	}	
+	}
 
 	function &getArray() {
 		if (!$this->arr)

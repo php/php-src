@@ -1,7 +1,5 @@
 --TEST--
-ZE2 An abstract class cannot be instanciated
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+ZE2 An abstract class cannot be instantiated
 --FILE--
 <?php
 

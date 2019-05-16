@@ -2,14 +2,14 @@
 Test flock() function: Basic functionality
 --FILE--
 <?php
-/* 
+/*
 Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
+Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
 
-echo "*** Testing flock() fun with file and dir ***\n"; 
-$file_path = dirname(__FILE__);
+echo "*** Testing flock() fun with file and dir ***\n";
+$file_path = __DIR__;
 
 $file_handle = fopen("$file_path/lock.tmp", "w");
 var_dump(flock($file_handle, LOCK_SH|LOCK_NB));
@@ -30,7 +30,7 @@ rmdir("$file_path/dir");
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--	
+--EXPECT--
 *** Testing flock() fun with file and dir ***
 bool(true)
 bool(true)

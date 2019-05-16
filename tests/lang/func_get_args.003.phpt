@@ -3,7 +3,7 @@ func_get_args() outside of a function declaration
 --FILE--
 <?php
 
-var_dump(func_get_args());	
+var_dump(func_get_args());
 
 ?>
 --EXPECTREGEX--

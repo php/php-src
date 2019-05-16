@@ -8,12 +8,9 @@ if (!class_exists('finfo'))
 USE_ZEND_ALLOC=0
 --FILE--
 <?php
-	$finfo = finfo_open(FILEINFO_NONE, dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug71527私はガラスを食べられます.magic");
-	$info = finfo_file($finfo, __FILE__);
-	var_dump($info);
+	$finfo = finfo_open(FILEINFO_NONE, __DIR__ . DIRECTORY_SEPARATOR . "bug71527私はガラスを食べられます.magic");
+    var_dump($finfo);
 ?>
 --EXPECTF--
 Warning: finfo_open(): Failed to load magic database at '%sbug71527私はガラスを食べられます.magic'. in %sbug71527-mb.php on line %d
-
-Warning: finfo_file() expects parameter 1 to be resource, boolean given in %sbug71527-mb.php on line %d
 bool(false)

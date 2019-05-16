@@ -4,7 +4,7 @@ Bug #48309 (stream_copy_to_stream() and fpasstru() do not update stream position
 <?php
 
 $tmp = tmpfile();
-fwrite($tmp, b'test');
+fwrite($tmp, 'test');
 fseek($tmp, 0, SEEK_SET);
 
 echo "-- stream_copy_to_stream() --\n";
@@ -24,7 +24,7 @@ echo "\n";
 var_dump(stream_get_contents($tmp));
 
 ?>
---EXPECTF--
+--EXPECT--
 -- stream_copy_to_stream() --
 te
 string(2) "st"

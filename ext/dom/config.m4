@@ -1,19 +1,13 @@
-dnl
-dnl $Id$
-dnl
-
-PHP_ARG_ENABLE(dom, whether to enable DOM support,
-[  --disable-dom           Disable DOM support], yes)
-
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir[=DIR]   DOM: libxml2 install prefix], no, no)
-fi
+PHP_ARG_ENABLE([dom],
+  [whether to enable DOM support],
+  [AS_HELP_STRING([--disable-dom],
+    [Disable DOM support])],
+  [yes])
 
 if test "$PHP_DOM" != "no"; then
 
-  if test "$PHP_LIBXML" = "no"; then   
-    AC_MSG_ERROR([DOM extension requires LIBXML extension, add --enable-libxml])
+  if test "$PHP_LIBXML" = "no"; then
+    AC_MSG_ERROR([DOM extension requires LIBXML extension, add --with-libxml])
   fi
 
   PHP_SETUP_LIBXML(DOM_SHARED_LIBADD, [
@@ -27,12 +21,10 @@ if test "$PHP_DOM" != "no"; then
                             nodelist.c text.c comment.c domconfiguration.c \
                             domimplementationsource.c entityreference.c \
                             notation.c xpath.c dom_iterators.c \
-                            typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c], 
+                            typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c],
                             $ext_shared)
     PHP_SUBST(DOM_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/dom/xml_common.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
-  ], [
-    AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
   ])
 fi

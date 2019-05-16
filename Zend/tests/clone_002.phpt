@@ -1,7 +1,7 @@
 --TEST--
 Testing multiple clone statements
 --FILE--
-<?php 
+<?php
 
 $a = clone clone $b = new stdClass;
 var_dump($a == $b);

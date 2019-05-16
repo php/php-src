@@ -85,7 +85,6 @@ for ($x = 0; $x < $mylen; $x++) {
 echo 'Element Name: '.(($elem = $dom->getElementByID('n3'))?$elem->nodeName:'Not Found')."\n";
 ?>
 --EXPECT--
-
 Tag Name: chapter
 Chapter: 1
 Attribute num exists?: Yes

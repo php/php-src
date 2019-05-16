@@ -35,7 +35,6 @@
 #include "mbfilter_iso2022jp_2004.h"
 #include "mbfilter_sjis_2004.h"
 
-#include "unicode_table_jis2004.h"
 #include "unicode_table_jis.h"
 
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
@@ -47,7 +46,9 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	"ISO-2022-JP-2004",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_2022jp_2004_wchar,
+	&vtbl_wchar_2022jp_2004
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_2022jp_2004 = {
@@ -164,5 +165,3 @@ retry:
 
 	return c;
 }
-
-

@@ -16,7 +16,7 @@ var_dump($test->current());
 try {
   $output = $test->callGetChildren();
 } catch (InvalidArgumentException $ilae){
-  $output = null;  
+  $output = null;
   print "invalid argument exception\n";
 }
 var_dump($output);
@@ -24,7 +24,7 @@ var_dump($output);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
   array(3) {
   [0]=>
   int(7)

@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff() function : usage variation 
+Test array_udiff() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff() : usage variation ***\n";
@@ -38,7 +38,7 @@ var_dump(array_udiff($arr1, $arr2, 'too_few_parameters'));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_udiff() : usage variation ***
 
 -- comparison function with an incorrect return value --

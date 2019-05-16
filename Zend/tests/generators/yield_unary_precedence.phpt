@@ -14,7 +14,6 @@ for ($gen = gen(); $gen->valid(); $gen->send(1)) {
 }
 ?>
 --EXPECT--
-
 int(1)
 int(1)
 
@@ -23,4 +22,3 @@ int(1)
 
 NULL
 int(-1)
-

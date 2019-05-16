@@ -21,5 +21,8 @@
 
 PHP_FUNCTION( normalizer_normalize );
 PHP_FUNCTION( normalizer_is_normalized );
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+PHP_FUNCTION( normalizer_get_raw_decomposition );
+#endif
 
 #endif // NORMALIZER_NORMALIZE_H

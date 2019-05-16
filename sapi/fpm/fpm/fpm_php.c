@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_php.c,v 1.22.2.4 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -38,9 +36,12 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 			|| ini_entry->on_modify(ini_entry, duplicate,
 				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
 		ini_entry->value = duplicate;
-		ini_entry->modifiable = mode;
+		/* when mode == ZEND_INI_USER keep unchanged to allow ZEND_INI_PERDIR (.user.ini) */
+		if (mode == ZEND_INI_SYSTEM) {
+			ini_entry->modifiable = mode;
+		}
 	} else {
-		zend_string_release(duplicate);
+		zend_string_release_ex(duplicate, 1);
 	}
 
 	return SUCCESS;
@@ -283,4 +284,3 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	return NULL;
 }
 /* }}} */
-

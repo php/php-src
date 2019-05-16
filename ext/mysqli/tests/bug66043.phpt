@@ -22,5 +22,5 @@ $stmt->execute();
 $stmt->bind_result($testArg);
 echo "Okey";
 ?>
---EXPECTF--
+--EXPECT--
 Okey

@@ -23,7 +23,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Variation 5 : Creating link, deleting it and checking linkinfo(), is_link() on it */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing linkinfo() and is_link() on deleted link ***\n";
 // link name used here
@@ -58,7 +58,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation5";
 $filename = "$dirname/symlink_link_linkinfo_is_link_variation5.tmp";
 unlink($filename);

@@ -6,17 +6,17 @@ w/Kenzo over the shoulder
 #phptek Chicago 2014
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 if(!defined("GLOB_BRACE")) die ('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
-include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_addglob.zip';
+include __DIR__ . '/utils.inc';
+$dirname = __DIR__ . '/oo_addglob_dir/';
+$file = $dirname . 'tmp.zip';
 
-copy($dirname . 'test.zip', $file);
+@mkdir($dirname);
+copy(__DIR__ . '/test.zip', $file);
 touch($dirname . 'foo.txt');
 touch($dirname . 'bar.baz');
 
@@ -37,12 +37,13 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__) . '/';
-unlink($dirname . '__tmp_oo_addglob.zip');
+$dirname = __DIR__ . '/oo_addglob_dir/';
+unlink($dirname . 'tmp.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.baz');
+rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 0 bar
 1 foobar/
 2 foobar/baz

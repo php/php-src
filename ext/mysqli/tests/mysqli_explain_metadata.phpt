@@ -130,7 +130,8 @@ if (!$IS_MYSQLND)
 			}
 			reset($fields);
 			foreach ($fields_stmt as $fields_stmt_val) {
-				list(,$fields_val) = each($fields);
+				$fields_val = current($fields);
+				next($fields);
 				unset($fields_stmt_val->max_length);
 				unset($fields_val->max_length);
 				if ($fields_stmt_val != $fields_val) {
@@ -158,5 +159,5 @@ if (!$IS_MYSQLND)
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

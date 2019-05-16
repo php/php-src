@@ -12,10 +12,10 @@ assert.bail=true
 <?php
 $doc = new DOMDocument();
 $result = $doc->loadHTMLFile("");
-assert('$result === false');
+assert($result === false);
 $doc = new DOMDocument();
 $result = $doc->loadHTMLFile("text.html\0something");
-assert('$result === false');
+assert($result === false);
 ?>
 --EXPECTF--
 %r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Empty string supplied as input %s

@@ -56,6 +56,7 @@ class Obj
     function switch(){ echo __METHOD__, PHP_EOL; }
     function yield(){ echo __METHOD__, PHP_EOL; }
     function function(){ echo __METHOD__, PHP_EOL; }
+    function fn(){ echo __METHOD__, PHP_EOL; }
     function if(){ echo __METHOD__, PHP_EOL; }
     function endswitch(){ echo __METHOD__, PHP_EOL; }
     function finally(){ echo __METHOD__, PHP_EOL; }
@@ -135,6 +136,7 @@ $obj->continue();
 $obj->switch();
 $obj->yield();
 $obj->function();
+$obj->fn();
 $obj->if();
 $obj->endswitch();
 $obj->finally();
@@ -161,8 +163,7 @@ $obj->__DIR__();
 $obj->__NAMESPACE__();
 
 echo "\nDone\n";
-
---EXPECTF--
+--EXPECT--
 Obj::empty
 Obj::callable
 Obj::class
@@ -214,6 +215,7 @@ Obj::continue
 Obj::switch
 Obj::yield
 Obj::function
+Obj::fn
 Obj::if
 Obj::endswitch
 Obj::finally

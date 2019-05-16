@@ -22,7 +22,7 @@ var_dump(json_last_error(), json_last_error_msg());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 object(stdClass)#%d (1) {
   ["prop"]=>
   *RECURSION*
@@ -32,7 +32,7 @@ bool(false)
 int(6)
 string(%d) "Recursion detected"
 
-string(22) "{"prop":{"prop":null}}"
+string(13) "{"prop":null}"
 int(6)
 string(%d) "Recursion detected"
 Done

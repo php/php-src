@@ -23,7 +23,7 @@ foreach($it as $key=>$val)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===Current===
 0=>A
 ===Next===

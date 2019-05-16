@@ -3,7 +3,7 @@ Test rsort() function : usage variations - mixed associative arrays
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -35,8 +35,8 @@ $various_arrays = array(
 
 $count = 1;
 
-// loop through to test rsort() with different arrays, 
-// to test the new keys for the elements in the sorted array 
+// loop through to test rsort() with different arrays,
+// to test the new keys for the elements in the sorted array
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
@@ -54,7 +54,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
 -- Iteration 1 --

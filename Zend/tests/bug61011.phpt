@@ -1,11 +1,12 @@
 --TEST--
-Bug #61011 (Crash when an exception is thrown by __autoload accessing a static property)
+Bug #61011 (Crash when an exception is thrown by autoloader accessing a static property)
 --FILE--
 <?php
-function __autoload($name) {
+spl_autoload_register(function ($name) {
 	throw new Exception($name);
-}
-try { 
+});
+
+try {
 	echo AAA::$a; //zend_fetch_var_address_helper
 } catch (Exception $e) {
 	try {
@@ -21,7 +22,7 @@ try {
 					isset(AAAA::$a); // ZEND_ISSET_ISEMPTY_VAR
 				} catch (Exception $e) {
 					try  {
-						$a = array("AAA", "foo"); 
+						$a = array("AAA", "foo");
 						$a(); //ZEND_INIT_FCALL_BY_NAME
 					} catch (Exception $e) {
 					}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,18 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <signal.h>
 #ifndef PHP_SIGNAL_H
 #define PHP_SIGNAL_H
-
-#ifndef NSIG
-# define NSIG 32
-#endif
-#ifndef SIGRTMAX
-# define SIGRTMAX 64
-#endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 typedef void Sigfunc(int, siginfo_t*, void*);

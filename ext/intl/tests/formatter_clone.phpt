@@ -24,7 +24,7 @@ $res_str .= "Formatted(clone) number: " . ut_nfmt_format( $fmt_clone, $test_valu
 echo $res_str;
 
 ?>
---EXPECTF--
+--EXPECT--
 Formatted number: 12345.123456
 Formatted number: 12345.1
 Formatted(clone) number: 12345.123456

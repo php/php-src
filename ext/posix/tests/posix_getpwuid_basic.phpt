@@ -1,18 +1,18 @@
 --TEST--
-Test posix_getpwuid() function : basic functionality 
+Test posix_getpwuid() function : basic functionality
 --SKIPIF--
-<?php 
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+<?php
+	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
-<?php 
+<?php
   echo "Basic test of POSIX getpwuid\n";
-   
-  	
+
+
   $pwuid = posix_getpwuid(posix_getuid());
-  
+
   print_r($pwuid);
-  
+
 ?>
 ===DONE====
 --EXPECTREGEX--

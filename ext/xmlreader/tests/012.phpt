@@ -1,10 +1,9 @@
 --TEST--
-XMLReader: accessing empty and non existing attributes 
+XMLReader: accessing empty and non existing attributes
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xmlstring =<<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -24,7 +23,7 @@ $xmlstring =<<<EOF
 <foo bar=""/>
 EOF;
 
-$xmlstring = str_replace('012.dtd', dirname(__FILE__).'/012.dtd', $xmlstring);
+$xmlstring = str_replace('012.dtd', __DIR__.'/012.dtd', $xmlstring);
 if (DIRECTORY_SEPARATOR == '\\') {
 	$xmlstring = str_replace('\\',"/", $xmlstring);
 }
@@ -38,7 +37,7 @@ $reader->close();
 
 echo "\nUsing URI:\n";
 $reader = new XMLReader();
-$file = dirname(__FILE__) . '/012.xml';
+$file = __DIR__ . '/012.xml';
 if (DIRECTORY_SEPARATOR == '\\') {
 	$file = str_replace('\\',"/", $file);
 }
@@ -52,7 +51,7 @@ var_dump($reader->getAttribute('baz'));
 $reader->close();
 
 $reader = new XMLReader();
-$reader->open(dirname(__FILE__) . '/012.xml');
+$reader->open(__DIR__ . '/012.xml');
 $reader->setParserProperty(XMLReader::DEFAULTATTRS, true);
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 var_dump($reader->getAttribute('bar'));

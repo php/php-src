@@ -23,10 +23,8 @@ for ($index = 0; $index < $children->length; $index++) {
 	echo get_class($current), "\n";
 	var_dump($current->textContent);
 }
-
---EXPECTF--
+--EXPECT--
 bool(true)
 --- child 0 ---
 DOMComment
 string(14) " Hello World! "
-

@@ -10,13 +10,13 @@ if( substr(PHP_OS, 0, 3) == 'WIN' && extension_loaded('sockets')) {
 	// imap uses tcp port 143
 	socket_connect($socket, "localhost", 143) or die ("skip can't socket to mail server");
 }
- 
+
 // Change these to make tests run successfully
 $mailbox  = '{localhost}';
 $username = 'webmaster@example.com';
 $password = 'p4ssw0rd';
 $options = OP_HALFOPEN; // this should be enough to verify server present
-$retries = 0; // dont retry connect on failure
+$retries = 0; // don't retry connect on failure
 
 $mbox = imap_open($mailbox, $username, $password, $options, $retries);
 if (!$mbox) {

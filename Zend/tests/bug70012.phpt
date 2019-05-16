@@ -15,7 +15,7 @@ try {
 			echo "    Inner finally\n";
 		}
 	}
-	echo "Outer shouldnt get here\n";
+	echo "Outer shouldn't get here\n";
 } catch (Exception $e) {
 	echo "Outer catch\n";
 } finally {

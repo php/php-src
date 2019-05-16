@@ -3,9 +3,9 @@ method_exists() on internal classes
 --FILE--
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo " ---(Internal classes, using string class name)---\n";
@@ -22,7 +22,7 @@ var_dump(method_exists(new stdclass, "nonexistent"));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
  ---(Internal classes, using string class name)---
 Does exception::getmessage exist? bool(true)
 Does stdclass::nonexistent exist? bool(false)

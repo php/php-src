@@ -13,7 +13,7 @@ require_once('skipif.inc');
 require_once('dom_test.inc');
 
 chdir(__DIR__);
-$XMLStringGood = file_get_contents(dirname(__FILE__).'/note.xml');
+$XMLStringGood = file_get_contents(__DIR__.'/note.xml');
 
 $dom = new DOMDocument;
 $dom->resolveExternals = TRUE;
@@ -43,4 +43,3 @@ Warning: DOMDocument::loadXML(): No declaration for element NYPHP in Entity, lin
 
 Warning: DOMDocument::loadXML(): Element from was declared #PCDATA but contains non text nodes in Entity, line: %d in %s on line %d
 Error Report Above
-

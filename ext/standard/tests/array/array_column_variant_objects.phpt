@@ -78,7 +78,7 @@ var_dump(array_column($records, 'last_name', 'first_name'));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_column() : object property fetching (numeric property names) ***
 -- first_name column from recordset --
 array(3) {

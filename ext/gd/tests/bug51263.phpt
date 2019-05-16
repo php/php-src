@@ -7,7 +7,7 @@ Bug #51263 (imagettftext and rotated text uses wrong baseline)
 ?>
 --FILE--
 <?php
-$cwd = dirname(__FILE__);
+$cwd = __DIR__;
 $ttf = "$cwd/Tuffy.ttf";
 $w = 23;
 $h = 70;
@@ -28,5 +28,5 @@ for ($j=0; $j<30; $j++) {
 }
 echo "OK\n";
 ?>
---EXPECTF--
+--EXPECT--
 OK

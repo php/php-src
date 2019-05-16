@@ -1,12 +1,10 @@
 --TEST--
 Test popen() and pclose function: basic functionality
-
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip Not Valid for Linux");
 ?>
-
 --FILE--
 <?php
 /*
@@ -19,7 +17,7 @@ if(substr(PHP_OS, 0, 3) != 'WIN' )
 
 echo "*** Testing popen(): reading from the pipe ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $string = "Sample String";
 $file_handle = popen(" echo $string", "r");
@@ -36,8 +34,8 @@ $arr = array("ggg", "ddd", "aaa", "sss");
 // the only solution is to either put the absolute path here, or
 // remove variables_order= from PHP.ini (setting it in run-test's
 // default INI will fail too)
-// 
-// since we can't depend on PHP.ini being set a certain way, 
+//
+// since we can't depend on PHP.ini being set a certain way,
 // have to put the absolute path here.
 
 $sysroot = exec('echo %SYSTEMROOT%');
@@ -59,7 +57,7 @@ var_dump( is_int($return_value_pclose) );
 
 echo "\n--- Done ---";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing popen(): reading from the pipe ***
 Sample String
 *** Testing popen(): writing to the pipe ***

@@ -2,8 +2,8 @@
 MySQL PDO->exec(), affected rows
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
@@ -33,7 +33,7 @@ MySQLPDOTest::skip();
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
@@ -79,7 +79,7 @@ MySQLPDOTest::skip();
 	print "done!";
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 MySQLPDOTest::dropTestTable($db);
 // clean up
@@ -88,5 +88,5 @@ MySQLPDOTest::dropTestTable($db);
 @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
 @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
 ?>
---EXPECTF--
+--EXPECT--
 done!

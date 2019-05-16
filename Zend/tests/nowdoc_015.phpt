@@ -2,7 +2,7 @@
 Test nowdoc and line numbering
 --FILE--
 <?php
-function error_handler($num, $msg, $file, $line, $vars) {
+function error_handler($num, $msg, $file, $line) {
 	echo $line,"\n";
 }
 set_error_handler('error_handler');

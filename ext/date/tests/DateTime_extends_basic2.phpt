@@ -3,7 +3,7 @@ Test DateTime class inheritance : with user space __construct magic method
 --FILE--
 <?php
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTime() : with user space __construct magic method ***\n";
@@ -21,11 +21,11 @@ class DateTimeExt extends DateTime
 }
 
 $d = new DateTimeExt("1967-05-01 22:30:41");
-echo $d->format("F j, Y, g:i:s a") . "\n"; 
+echo $d->format("F j, Y, g:i:s a") . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing new DateTime() : with user space __construct magic method ***
 May 1, 1967, 10:30:41 pm
 ===DONE===

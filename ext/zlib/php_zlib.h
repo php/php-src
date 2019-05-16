@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Michael Wallner <mike@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_ZLIB_H
 #define PHP_ZLIB_H
@@ -48,6 +46,7 @@ typedef struct _php_zlib_buffer {
 typedef struct _php_zlib_context {
 	z_stream Z;
 	char *inflateDict;
+	int status;
 	size_t inflateDictlen;
 	php_zlib_buffer buffer;
 } php_zlib_context;
@@ -66,19 +65,11 @@ ZEND_END_MODULE_GLOBALS(zlib);
 #define ZLIBG(v) ZEND_MODULE_GLOBALS_ACCESSOR(zlib, v)
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
-extern php_stream_ops php_stream_gzio_ops;
-extern php_stream_wrapper php_stream_gzip_wrapper;
-extern php_stream_filter_factory php_zlib_filter_factory;
+extern const php_stream_ops php_stream_gzio_ops;
+extern const php_stream_wrapper php_stream_gzip_wrapper;
+extern const php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry
 #define phpext_zlib_ptr zlib_module_ptr
 
 #endif /* PHP_ZLIB_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

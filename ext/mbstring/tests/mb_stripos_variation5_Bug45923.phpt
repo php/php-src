@@ -14,7 +14,7 @@ function_exists('mb_stripos') or die("skip mb_stripos() is not available in this
 
 /*
  * Test how mb_stripos() behaves when passed different integers as $offset argument
- * The character length of $string_ascii and $string_mb is the same, 
+ * The character length of $string_ascii and $string_mb is the same,
  * and the needle appears at the same positions in both strings
  */
 
@@ -22,8 +22,8 @@ mb_internal_encoding('UTF-8');
 
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
-$string_ascii = b'+Is an English string'; //21 chars
-$needle_ascii = b'G';
+$string_ascii = '+Is an English string'; //21 chars
+$needle_ascii = 'G';
 
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII='); //21 chars
 $needle_mb = base64_decode('44CC');
@@ -43,7 +43,6 @@ for ($i = -30; $i <= 60; $i += 10) {
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing mb_stripos() : usage variations ***
 

@@ -21,7 +21,7 @@ if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
  * Source:        ext/curl/interface.c
  * Documentation: http://wiki.php.net/qa/temp/ext/curl
  */
- 
+
 // Fake URL to trigger an error
 $url = "fakeURL";
 

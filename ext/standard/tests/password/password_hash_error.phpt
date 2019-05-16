@@ -4,49 +4,38 @@ Test error operation of password_hash()
 <?php
 //-=-=-=-
 
-var_dump(password_hash());
-
-var_dump(password_hash("foo"));
+try {
+    var_dump(password_hash("foo"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 var_dump(password_hash("foo", array()));
 
 var_dump(password_hash("foo", 19, new StdClass));
 
-var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
+try {
+    var_dump(password_hash("foo", PASSWORD_BCRYPT, "baz"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-var_dump(password_hash(array(), PASSWORD_BCRYPT));
-
-var_dump(password_hash("123", PASSWORD_BCRYPT, array("salt" => array())));
-
-/* Non-string salt, checking for memory leaks */
-var_dump(password_hash('123', PASSWORD_BCRYPT, array('salt' => 1234)));
+try {
+    var_dump(password_hash(array(), PASSWORD_BCRYPT));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECTF--
-Warning: password_hash() expects at least 2 parameters, 0 given in %s on line %d
-NULL
+password_hash() expects at least 2 parameters, 1 given
 
-Warning: password_hash() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+Notice: Array to string conversion in %s on line %d
 
-Warning: password_hash() expects parameter 2 to be integer, array given in %s on line %d
+Warning: password_hash(): Unknown password hashing algorithm: Array in %s on line %d
 NULL
 
 Warning: password_hash(): Unknown password hashing algorithm: 19 in %s on line %d
 NULL
-
-Warning: password_hash() expects parameter 3 to be array, string given in %s on line %d
-NULL
-
-Warning: password_hash() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
-
-Warning: password_hash(): Non-string salt parameter supplied in %s on line %d
-NULL
-
-Deprecated: password_hash(): Use of the 'salt' option to password_hash is deprecated in %s on line %d
-
-Warning: password_hash(): Provided salt is too short: 4 expecting 22 in %s on line %d
-NULL
+password_hash() expects parameter 3 to be array, string given
+password_hash() expects parameter 1 to be string, array given

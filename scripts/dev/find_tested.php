@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 
@@ -69,9 +70,9 @@ get_phpt_files($extension_test_path, $count, $phpt_files);
 $extension_method_info = mark_methods_as_tested($extension_method_info, $phpt_files);
 
 /**
- * The loop to ouput the test coverage info
+ * The loop to output the test coverage info
  * Should output: Extension, Class Name, Method/Function Name, Test Status, Test Files
- */ 
+ */
 foreach($extension_method_info as $record) {
     echo $record[EXTENSION_NAME] . ",";
     echo $record[CLASS_NAME] . ",";
@@ -84,7 +85,7 @@ foreach($extension_method_info as $record) {
  * Marks the "tested" status of methods in $method_info according
  * to whether they are tested in $phpt_files
  */
-function mark_methods_as_tested($method_info, $phpt_files) { 
+function mark_methods_as_tested($method_info, $phpt_files) {
 
     foreach($phpt_files as $phpt_file) {
         $tested_functions = extract_tests($phpt_file);
@@ -97,7 +98,7 @@ function mark_methods_as_tested($method_info, $phpt_files) {
                     // matched the method name
                     if ($current_method_record[IS_DUPLICATE] == true) {
                         // we cannot be sure which class this method corresponds to,
-                        // so mark method as needing to be verified 
+                        // so mark method as needing to be verified
                         $current_method_record[IS_TESTED] = "verify";
                     } else {
                         $current_method_record[IS_TESTED] = "yes";
@@ -114,7 +115,7 @@ function mark_methods_as_tested($method_info, $phpt_files) {
  * returns an array containing a record for each defined method.
  */
 function populate_method_info() {
-    
+
     $method_info = array();
 
     // get functions
@@ -197,21 +198,21 @@ function get_phpt_files($dir, &$phpt_file_count, &$all_phpt)
 }
 
 /**
- * Extract tests from a specified file, returns an array of tested function tokens 
- */ 
+ * Extract tests from a specified file, returns an array of tested function tokens
+ */
 function extract_tests($file) {
 	$code = file_get_contents($file);
-	
+
 	if (!preg_match('/--FILE--\s*(.*)\s*--(EXPECTF|EXPECTREGEX|EXPECT)?--/is', $code, $r)) {
 		//print "Unable to get code in ".$file."\n";
 		return array();
 	}
-	
+
 	$tokens = token_get_all($r[1]);
 	$functions = array_filter($tokens, 'filter_functions');
 	$functions = array_map( 'map_token_value',$functions);
 	$functions = array_unique($functions);
-	
+
 	return $functions;
 }
 
@@ -225,4 +226,3 @@ function map_token_value($x) {
 
 
 ?>
-

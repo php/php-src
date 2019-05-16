@@ -21,14 +21,14 @@ require_once('skipifconnectfailure.inc');
 	var_dump($result->fetch_row());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(1) {
   [0]=>
-  %unicode|string%(1) "0"
+  string(1) "0"
 }
 bool(true)
 array(1) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }

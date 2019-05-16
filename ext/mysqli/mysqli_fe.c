@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -261,6 +259,17 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_query, 0, 0, 2)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, resultmode)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_multi_query, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_real_query, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_prepare, 0, 0, 2)
@@ -274,6 +283,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_stmt_prepare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+	ZEND_ARG_INFO(0, resultmode)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_prepare, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_multi_query, 0, 0, 1)
+	ZEND_ARG_INFO(0, query)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_real_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
@@ -398,10 +420,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_data_seek,							arginfo_mysqli_data_seek)
 	PHP_FE(mysqli_dump_debug_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_debug,								arginfo_mysqli_debug)
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FE(mysqli_embedded_server_end,					NULL)
-	PHP_FE(mysqli_embedded_server_start,				NULL)
-#endif
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
@@ -412,7 +430,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_fetch_field_direct,					arginfo_mysqli_result_and_fieldnr)
 	PHP_FE(mysqli_fetch_lengths,						arginfo_mysqli_only_result)
 #ifdef MYSQLI_USE_MYSQLND
-	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_only_result)
+	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_fetch_array)
 #endif
 	PHP_FE(mysqli_fetch_array,							arginfo_mysqli_fetch_array)
 	PHP_FE(mysqli_fetch_assoc,							arginfo_mysqli_only_result)
@@ -429,7 +447,7 @@ const zend_function_entry mysqli_functions[] = {
 #ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FE(mysqli_get_charset,							arginfo_mysqli_only_link)
 #endif
-	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_only_link)
+	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_host_info,						arginfo_mysqli_only_link)
@@ -442,7 +460,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_insert_id,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_kill,									arginfo_mysqli_kill)
 	PHP_FE(mysqli_more_results,							arginfo_mysqli_only_link)
-	PHP_FE(mysqli_multi_query, 							arginfo_mysqli_query)
+	PHP_FE(mysqli_multi_query, 							arginfo_mysqli_multi_query)
 	PHP_FE(mysqli_next_result,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_num_fields,							arginfo_mysqli_only_result)
 	PHP_FE(mysqli_num_rows,								arginfo_mysqli_only_result)
@@ -456,7 +474,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_query,								arginfo_mysqli_query)
 	PHP_FE(mysqli_real_connect,							arginfo_mysqli_real_connect)
 	PHP_FE(mysqli_real_escape_string,					arginfo_mysqli_real_escape_string)
-	PHP_FE(mysqli_real_query,							arginfo_mysqli_query)
+	PHP_FE(mysqli_real_query,							arginfo_mysqli_real_query)
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_reap_async_query,						arginfo_mysqli_only_link)
 #endif
@@ -542,7 +560,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_warnings, mysqli_get_warnings, arginfo_mysqli_no_params)
 	PHP_FALIAS(init,mysqli_init_method, arginfo_mysqli_no_params)
 	PHP_FALIAS(kill,mysqli_kill, arginfo_class_mysqli_kill)
-	PHP_FALIAS(multi_query, mysqli_multi_query, arginfo_class_mysqli_query)
+	PHP_FALIAS(multi_query, mysqli_multi_query, arginfo_class_mysqli_multi_query)
 	PHP_FALIAS(__construct, mysqli_link_construct, arginfo_mysqli_connect)
 	PHP_FALIAS(more_results, mysqli_more_results, arginfo_mysqli_no_params)
 	PHP_FALIAS(next_result, mysqli_next_result, arginfo_mysqli_no_params)
@@ -551,7 +569,7 @@ const zend_function_entry mysqli_link_methods[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_FENTRY(poll, ZEND_FN(mysqli_poll), arginfo_mysqli_poll, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 #endif
-	PHP_FALIAS(prepare, mysqli_prepare, arginfo_class_mysqli_query)
+	PHP_FALIAS(prepare, mysqli_prepare, arginfo_class_mysqli_prepare)
 	PHP_FALIAS(query, mysqli_query, arginfo_class_mysqli_query)
 	PHP_FALIAS(real_connect, mysqli_real_connect, arginfo_class_mysqli_real_connect)
 	PHP_FALIAS(real_escape_string, mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string)
@@ -559,7 +577,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(reap_async_query, mysqli_reap_async_query, arginfo_mysqli_no_params)
 #endif
 	PHP_FALIAS(escape_string, mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string)
-	PHP_FALIAS(real_query, mysqli_real_query, arginfo_class_mysqli_query)
+	PHP_FALIAS(real_query, mysqli_real_query, arginfo_class_mysqli_real_query)
 	PHP_FALIAS(release_savepoint, mysqli_release_savepoint, arginfo_class_mysqli_release_savepoint)
 	PHP_FALIAS(rollback, mysqli_rollback, arginfo_class_mysqli_rollback)
 	PHP_FALIAS(savepoint, mysqli_savepoint, arginfo_class_mysqli_savepoint)
@@ -592,7 +610,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_fields, mysqli_fetch_fields, arginfo_mysqli_no_params)
 	PHP_FALIAS(fetch_field_direct, mysqli_fetch_field_direct, arginfo_class_mysqli_result_and_fieldnr)
 #if defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_mysqli_no_params)
+	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_class_mysqli_fetch_array)
 #endif
 	PHP_FALIAS(fetch_array, mysqli_fetch_array, arginfo_class_mysqli_fetch_array)
 	PHP_FALIAS(fetch_assoc, mysqli_fetch_assoc, arginfo_mysqli_no_params)
@@ -628,7 +646,7 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(send_long_data, mysqli_stmt_send_long_data, arginfo_class_mysqli_stmt_send_long_data)
 	PHP_FALIAS(free_result, mysqli_stmt_free_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(reset, mysqli_stmt_reset, arginfo_mysqli_no_params)
-	PHP_FALIAS(prepare, mysqli_stmt_prepare, arginfo_class_mysqli_query)
+	PHP_FALIAS(prepare, mysqli_stmt_prepare, arginfo_class_mysqli_prepare)
 	PHP_FALIAS(store_result, mysqli_stmt_store_result, arginfo_mysqli_no_params)
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FALIAS(get_result, mysqli_stmt_get_result, arginfo_mysqli_no_params)
@@ -636,12 +654,3 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FE_END
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -1,0 +1,150 @@
+.TH @program_prefix@phpdbg 1 "2019" "The PHP Group" "Scripting Language"
+.SH NAME
+@program_prefix@phpdbg \- The interactive PHP debugger
+.SH SYNOPSIS
+.B @program_prefix@phpdbg
+[options]
+[\fIfile\fP]
+[\fIargs...\fP]
+.SH DESCRIPTION
+.B phpdbg
+is a lightweight, powerful, easy to use debugging platform for PHP.
+.SH OPTIONS
+.TP 15
+.B \-c \fIpath\fB|\fIfile\fR
+Look for
+.B php.ini
+file in the directory
+.IR path
+or use the specified
+.IR file
+.TP
+.B \-d \fIfoo\fP[=\fIbar\fP]
+Define INI entry
+.IR foo
+with value
+.IR bar
+.TP
+.B \-n
+No
+.B php.ini
+file will be used
+.TP
+.B \-z \fIfile\fR
+Load Zend extension
+.IR file
+.TP
+.BR \-q
+Do not print banner on startup
+.TP
+.B \-v
+Enable oplog output
+.TP
+.B \-b
+Disables use of color on the console
+.TP
+.B \-i \fIpath\fB|\fIfile\fR
+Override .phpgdbinit location (implies -I)
+.TP
+.B \-I
+Ignore .phpdbginit (default init file)
+.TP
+.B \-O \fIfile\fR
+Set oplog output to
+.IR file
+.TP
+.B \-r
+Jump straight to run
+.TP
+.B -e
+Generate extended information for debugger/profiler
+.TP
+.B \-E
+Enable step through eval()
+.TP
+.B \-s \fIdelimiter\fP
+Read code to execute from stdin with an optional
+.IR delimiter
+.TP
+.B \-S \fIsapi_name\fP
+Override SAPI name
+.TP
+.B \-l \fIport\fP
+Setup remote console port
+.TP
+.B \-a \fIaddress\fP
+Setup remote console bind address
+.TP
+.B \-x
+Enable XML output
+.TP
+.B \-p \fIopcode\fP
+Output opcodes and quit
+.TP
+.B \-h
+Print the help overview
+.TP
+.B \-V
+Version number
+.TP
+.IR args.\|.\|.
+Arguments passed to script. Use
+.B '\-\-'
+.IR args
+when first argument starts with
+.B '\-'
+or script is read from stdin
+.SH NOTES
+Passing
+.B \-rr
+will cause
+.B phpdbg
+to quit after execution, rather than returning to the console
+.SH FILES
+.TP 15
+.B php.ini
+The standard configuration file
+.TP
+.B .phpdbginit
+The init file
+.SH SEE ALSO
+The online manual can be found at
+.PD 0
+.P
+.B http://php.net/manual/book.phpdbg.php
+.PD 1
+.SH BUGS
+You can view the list of known bugs or report any new bug you
+found at
+.PD 0
+.P
+.B http://bugs.php.net/
+.PD 1
+.SH AUTHORS
+Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.
+.P
+A List of active developers can be found at
+.PD 0
+.P
+.B http://www.php.net/credits.php
+.PD 1
+.P
+And last but not least PHP was developed with the help of a huge amount of
+contributors all around the world.
+.SH VERSION INFORMATION
+This manpage describes \fBphpdbg\fP, for PHP version @PHP_VERSION@.
+.SH COPYRIGHT
+Copyright \(co The PHP Group
+.LP
+This source file is subject to version 3.01 of the PHP license,
+that is bundled with this package in the file LICENSE, and is
+available through the world-wide-web at the following url:
+.PD 0
+.P
+.B http://www.php.net/license/3_01.txt
+.PD 1
+.P
+If you did not receive a copy of the PHP license and are unable to
+obtain it through the world-wide-web, please send a note to
+.B license@php.net
+so we can mail you a copy immediately.

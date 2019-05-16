@@ -57,7 +57,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
 /* Auxiliary macros */
 
 #define SPOOFCHECKER_METHOD_INIT_VARS       \
-    zval*             object  = getThis();   \
+    zval*             object  = ZEND_THIS;  \
     Spoofchecker_object*  co  = NULL;   \
     intl_error_reset(NULL); \
 
@@ -77,5 +77,9 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
         intl_errors_set_custom_msg(SPOOFCHECKER_ERROR_P(co), msg, 0); \
         RETURN_FALSE;                                                           \
     }                                                                           \
+
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+#define SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL USPOOF_HIGHLY_RESTRICTIVE
+#endif
 
 #endif // #ifndef SPOOFCHECKER_CLASS_H

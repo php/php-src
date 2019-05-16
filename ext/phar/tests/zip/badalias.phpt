@@ -6,7 +6,7 @@ Phar: invalid aliases
 <?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
 --FILE--
 <?php
-$e = dirname(__FILE__) . '/files/';
+$e = __DIR__ . '/files/';
 for ($i = 1; $i <= 5; $i++) {
 try {
 new Phar($e . "badalias$i.phar.zip");

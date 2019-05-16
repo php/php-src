@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - hexa formats with integer values 
+Test fscanf() function: usage variations - hexa formats with integer values
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
@@ -16,9 +16,9 @@ if (PHP_INT_SIZE != 4) {
 
 /* Test fscanf() to scan different integer values using different hexa format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different hexa format types with different integer values ***\n"; 
+echo "*** Test fscanf(): different hexa format types with different integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation33.tmp";
@@ -26,7 +26,7 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 
-// different valid  integer vlaues
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
@@ -87,7 +87,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation33.tmp";
 unlink($filename);
 ?>
@@ -1016,4 +1016,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

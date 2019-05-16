@@ -49,8 +49,7 @@ var_dump($d.$d);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-
+--EXPECTF--
 Notice: Array to string conversion in %sconcat_001.php on line %d
 string(24) "Arraythis is test object"
 

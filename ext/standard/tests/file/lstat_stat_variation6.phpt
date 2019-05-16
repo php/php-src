@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - effects of touch() on link 
+Test lstat() and stat() functions: usage variations - effects of touch() on link
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -26,7 +26,7 @@ foreach( $mount_output as $out )  {
 
 /* test the effects of touch() on stats of link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -62,14 +62,13 @@ clearstatcache();
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation6.tmp");
 unlink("$file_path/lstat_stat_variation_link6.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lstat() for link after using touch() on the link ***
 bool(true)
 bool(true)

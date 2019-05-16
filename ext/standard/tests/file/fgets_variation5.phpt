@@ -12,13 +12,13 @@ include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
                     "a+", "a+b", "a+t",
-                    "x+", "x+b", "x+t"); 
+                    "x+", "x+b", "x+t");
 
 $file_content_types = array("numeric", "text", "text_with_new_line", "alphanumeric");
 
 echo "*** Testing fgets() : usage variations ***\n";
 
-$filename = dirname(__FILE__)."/fgets_variation5.tmp";
+$filename = __DIR__."/fgets_variation5.tmp";
 
 foreach($file_modes as $file_mode) {
   echo "\n-- Testing fgets() with file opened using mode $file_mode --\n";
@@ -54,7 +54,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : usage variations ***
 
 -- Testing fgets() with file opened using mode w+ --

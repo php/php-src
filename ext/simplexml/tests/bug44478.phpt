@@ -18,7 +18,7 @@ print $xml_element->asXML();
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 a &#38; b
 a &#38; b
 a & b

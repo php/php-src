@@ -1,8 +1,8 @@
 --TEST--
-Test fopen() for reading eucjp to UTF-8 path 
+Test fopen() for reading eucjp to UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,7 +16,7 @@ skip_if_no_required_exts();
 #vim: set encoding=eucjp
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('eucjp', 'utf-8', "テストマルチバイト・パス"); // EUCJP string
 $prefix = create_data("file_eucjp", $item);
@@ -28,13 +28,13 @@ if ($f) {
 	var_dump(fclose($f));
 } else {
 	echo "open utf8 failed\n";
-} 
+}
 
 remove_data("file_eucjp");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 string(37) "reading file wihh multibyte filename
 "

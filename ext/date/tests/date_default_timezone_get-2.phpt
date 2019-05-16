@@ -11,5 +11,5 @@ date.timezone=
 	putenv('TZ=');
 	echo date_default_timezone_get(), "\n";
 ?>
---EXPECTF--
+--EXPECT--
 UTC

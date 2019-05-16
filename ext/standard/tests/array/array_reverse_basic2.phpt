@@ -3,7 +3,7 @@ Test array_reverse() function : basic functionality - associative array for 'arr
 --FILE--
 <?php
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed 
+ * Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c
 */
 
@@ -25,7 +25,7 @@ var_dump( array_reverse($array, false) );  // expects the keys not to be preserv
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : basic functionality ***
 array(4) {
   [0]=>

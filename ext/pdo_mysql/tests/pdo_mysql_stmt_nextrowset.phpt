@@ -4,8 +4,8 @@ MySQL PDOStatement->nextRowSet()
 nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
@@ -23,7 +23,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -110,7 +110,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
@@ -118,98 +118,98 @@ Emulated PS...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_version"]=>
-    %unicode|string%(%d) "%s"
+    ["_version"]=>
+    string(%d) "%s"
   }
 }
 bool(false)
 array(3) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
   [2]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
+    ["id"]=>
+    string(1) "3"
   }
 }
 array(3) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "3"
+    ["label"]=>
+    string(1) "c"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
   }
   [2]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 bool(false)
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_version"]=>
-    %unicode|string%(%d) "%s"
+    ["_version"]=>
+    string(%d) "%s"
   }
 }
 bool(false)
 array(3) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
   [2]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
+    ["id"]=>
+    string(1) "3"
   }
 }
 array(3) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "3"
+    ["label"]=>
+    string(1) "c"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
   }
   [2]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 bool(false)
@@ -217,98 +217,98 @@ Native PS...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_version"]=>
-    %unicode|string%(%d) "%s"
+    ["_version"]=>
+    string(%d) "%s"
   }
 }
 bool(false)
 array(3) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
   [2]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
+    ["id"]=>
+    string(1) "3"
   }
 }
 array(3) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "3"
+    ["label"]=>
+    string(1) "c"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
   }
   [2]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 bool(false)
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_version"]=>
-    %unicode|string%(%d) "%s"
+    ["_version"]=>
+    string(%d) "%s"
   }
 }
 bool(false)
 array(3) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
   [2]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
+    ["id"]=>
+    string(1) "3"
   }
 }
 array(3) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "3"
+    ["label"]=>
+    string(1) "c"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
   }
   [2]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
   }
 }
 bool(false)

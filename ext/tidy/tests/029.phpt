@@ -13,7 +13,7 @@ $inputs = array(
 );
 
 
-foreach ($inputs as $input) { 
+foreach ($inputs as $input) {
 
 	$t = tidy_parse_string($input);
 	$t->cleanRepair();

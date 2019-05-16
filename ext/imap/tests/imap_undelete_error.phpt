@@ -4,7 +4,7 @@ imap_undelete() incorrect parameter count
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -15,10 +15,10 @@ echo  "Checking with incorrect parameter type\n";
 imap_undelete('');
 imap_undelete(false);
 
-require_once(dirname(__FILE__).'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or 
+require_once(__DIR__.'/imap_include.inc');
+$stream_id = imap_open($default_mailbox, $username, $password) or
 	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
-	
+
 imap_undelete($stream_id);
 
 imap_close($stream_id);

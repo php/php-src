@@ -87,12 +87,10 @@
 #include "idn/idn.h"
 #include "uchar/uchar.h"
 
-#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 # include "spoofchecker/spoofchecker_class.h"
 # include "spoofchecker/spoofchecker.h"
 # include "spoofchecker/spoofchecker_create.h"
 # include "spoofchecker/spoofchecker_main.h"
-#endif
 
 #include "msgformat/msgformat.h"
 #include "common/common_error.h"
@@ -103,7 +101,6 @@
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
-#define INTL_MODULE_VERSION PHP_INTL_VERSION
 
 /*
  * locale_get_default has a conflict since ICU also has
@@ -154,6 +151,11 @@ ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, sort_flags)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(collator_sort_with_sort_keys_args, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, coll, Collator, 0)
+	ZEND_ARG_ARRAY_INFO(1, arr, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
@@ -168,29 +170,29 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( locale_get_loc_in_loc_args, 0, ZEND_RETURN_VALUE, 1 )
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, in_locale)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( locale_filter_matches_args, 0, ZEND_RETURN_VALUE, 2 )
+	ZEND_ARG_INFO(0, langtag)
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, canonicalize)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( locale_lookup_args, 0, ZEND_RETURN_VALUE, 2 )
+	ZEND_ARG_INFO(0, langtag)
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, canonicalize)
+	ZEND_ARG_INFO(0, def)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(locale_0_args, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(locale_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_2_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_3_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-	ZEND_ARG_INFO(0, arg3)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_4_args, 0, 0, 4)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-	ZEND_ARG_INFO(0, arg3)
-	ZEND_ARG_INFO(0, arg4)
 ZEND_END_ARG_INFO()
 
 #define intl_0_args collator_static_0_args
@@ -200,6 +202,12 @@ ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
+
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
+	ZEND_ARG_INFO(0, input)
+ZEND_END_ARG_INFO();
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
@@ -619,7 +627,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in intl_functions[].
  */
-zend_function_entry intl_functions[] = {
+static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
 	PHP_FE( collator_create, collator_static_1_arg )
@@ -629,12 +637,12 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( collator_get_strength, collator_0_args )
 	PHP_FE( collator_set_strength, collator_1_arg )
 	PHP_FE( collator_sort, collator_sort_args )
-	PHP_FE( collator_sort_with_sort_keys, collator_sort_args )
+	PHP_FE( collator_sort_with_sort_keys, collator_sort_with_sort_keys_args )
 	PHP_FE( collator_asort, collator_sort_args )
 	PHP_FE( collator_get_locale, collator_1_arg )
 	PHP_FE( collator_get_error_code, collator_0_args )
 	PHP_FE( collator_get_error_message, collator_0_args )
-	PHP_FE( collator_get_sort_key, collator_2_args )
+	PHP_FE( collator_get_sort_key, collator_1_arg )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )
@@ -657,6 +665,9 @@ zend_function_entry intl_functions[] = {
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, normalizer_args )
 	PHP_FE( normalizer_is_normalized, normalizer_args )
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+#endif
 
 	/* Locale functions */
 	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
@@ -665,17 +676,17 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( locale_get_script, locale_1_arg )
 	PHP_FE( locale_get_region, locale_1_arg )
 	PHP_FE( locale_get_keywords, locale_1_arg )
-	PHP_FE( locale_get_display_script, locale_2_args )
-	PHP_FE( locale_get_display_region, locale_2_args )
-	PHP_FE( locale_get_display_name, locale_2_args )
-	PHP_FE( locale_get_display_language, locale_2_args)
-	PHP_FE( locale_get_display_variant, locale_2_args )
+	PHP_FE( locale_get_display_script, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_region, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_name, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_language, locale_get_loc_in_loc_args)
+	PHP_FE( locale_get_display_variant, locale_get_loc_in_loc_args )
 	PHP_FE( locale_compose, locale_1_arg )
 	PHP_FE( locale_parse, locale_1_arg )
 	PHP_FE( locale_get_all_variants, locale_1_arg )
-	PHP_FE( locale_filter_matches, locale_3_args )
+	PHP_FE( locale_filter_matches, locale_filter_matches_args )
 	PHP_FE( locale_canonicalize, locale_1_arg )
-	PHP_FE( locale_lookup, locale_4_args )
+	PHP_FE( locale_lookup, locale_lookup_args )
 	PHP_FE( locale_accept_from_http, locale_1_arg )
 
 	/* MessageFormatter functions */
@@ -750,18 +761,12 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_create_default, arginfo_tz_void )
 	PHP_FE( intltz_get_id, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_gmt, arginfo_tz_void )
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_FE( intltz_get_unknown, arginfo_tz_void )
-#endif
 	PHP_FE( intltz_create_enumeration, arginfo_tz_create_enumeration )
 	PHP_FE( intltz_count_equivalent_ids, arginfo_tz_idarg_static )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_tz_create_time_zone_id_enumeration )
-#endif
 	PHP_FE( intltz_get_canonical_id, arginfo_tz_get_canonical_id )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_get_region, arginfo_tz_idarg_static )
-#endif
 	PHP_FE( intltz_get_tz_data_version, arginfo_tz_void )
 	PHP_FE( intltz_get_equivalent_id, arginfo_tz_get_equivalent_id )
 	PHP_FE( intltz_use_daylight_time, arginfo_tz_only_tz )
@@ -775,9 +780,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_get_error_message, arginfo_tz_only_tz )
 
 	PHP_FE( intlcal_create_instance, ainfo_cal_create_instance )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 	PHP_FE( intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale )
-#endif
 	PHP_FE( intlcal_get_now, ainfo_cal_void )
 	PHP_FE( intlcal_get_available_locales, ainfo_cal_void )
 	PHP_FE( intlcal_get, ainfo_cal_field )
@@ -793,9 +796,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_field_difference, ainfo_cal_field_difference )
 	PHP_FE( intlcal_get_actual_maximum, ainfo_cal_field )
 	PHP_FE( intlcal_get_actual_minimum, ainfo_cal_field )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_day_of_week_type, ainfo_cal_dow )
-#endif
 	PHP_FE( intlcal_get_first_day_of_week, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_greatest_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_least_maximum, ainfo_cal_field )
@@ -805,28 +806,22 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_get_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_time_zone, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_type, ainfo_cal_only_cal )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_weekend_transition, ainfo_cal_dow )
-#endif
 	PHP_FE( intlcal_in_daylight_time, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_equivalent_to, ainfo_cal_other_cal )
 	PHP_FE( intlcal_is_lenient, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_set, ainfo_cal_field )
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_is_weekend, ainfo_cal_date_optional )
-#endif
 	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
 	PHP_FE( intlcal_set_minimal_days_in_first_week, ainfo_cal_set_minimal_days_in_first_week )
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
 	PHP_FE( intlcal_from_date_time, ainfo_cal_from_date_time )
 	PHP_FE( intlcal_to_date_time, ainfo_cal_only_cal )
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_FE( intlcal_get_repeated_wall_time_option, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_skipped_wall_time_option, ainfo_cal_only_cal )
 	PHP_FE( intlcal_set_repeated_wall_time_option, ainfo_cal_wall_time_option )
 	PHP_FE( intlcal_set_skipped_wall_time_option, ainfo_cal_wall_time_option )
-#endif
 	PHP_FE( intlcal_get_error_code, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_error_message, ainfo_cal_only_cal )
 
@@ -865,7 +860,7 @@ zend_module_entry intl_module_entry = {
 	PHP_RINIT( intl ),
 	PHP_RSHUTDOWN( intl ),
 	PHP_MINFO( intl ),
-	INTL_MODULE_VERSION,
+	PHP_INTL_VERSION,
 	PHP_MODULE_GLOBALS(intl),   /* globals descriptor */
 	PHP_GINIT(intl),            /* globals ctor */
 	NULL,                       /* globals dtor */
@@ -959,13 +954,11 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
 
 	/* Expose Spoofchecker constants to PHP scripts */
 	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-#endif
 
 	/* Register 'IntlException' PHP class */
 	intl_register_IntlException_class(  );
@@ -1040,25 +1033,27 @@ PHP_RSHUTDOWN_FUNCTION( intl )
  */
 PHP_MINFO_FUNCTION( intl )
 {
+#if !UCONFIG_NO_FORMATTING
+	UErrorCode status = U_ZERO_ERROR;
+	const char *tzdata_ver = NULL;
+#endif
+
 	php_info_print_table_start();
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
-	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
+#if !UCONFIG_NO_FORMATTING
+	tzdata_ver = ucal_getTZDataVersion(&status);
+	if (U_ZERO_ERROR == status) {
+		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);
+	}
+#endif
+	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
     /* For the default locale php.ini setting */
     DISPLAY_INI_ENTRIES() ;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -19,10 +19,7 @@ $callback = 'TestClass::method';
 echo $callback();
 ?>
 --EXPECTF--
-Deprecated: Non-static method TestClass::method() should not be called statically in %s on line %d
-
-Fatal error: Uncaught Error: Using $this when not in object context in %s:%d
+Fatal error: Uncaught Error: Non-static method TestClass::method() cannot be called statically in %s:%d
 Stack trace:
-#0 %s(%d): TestClass::method()
-#1 {main}
+#0 {main}
   thrown in %s on line %d

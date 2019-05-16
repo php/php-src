@@ -1,5 +1,5 @@
 --TEST--
-SPL: CachingInterator constructor flag checks 
+SPL: CachingInterator constructor flag checks
 --CREDITS--
 Sean Burlington www.practicalweb.co.uk
 TestFest London May 2009
@@ -20,6 +20,6 @@ $test = new CachingIterator($arrayIterator, 3); // this throws an exception
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 ===DONE===

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author:  Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "fopen_wrappers.h"
@@ -110,59 +108,24 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 static int php_disk_total_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
-	double bytestotal = 0;
-	HINSTANCE kernel32;
-	FARPROC gdfse;
-	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
-	gdfse_func func;
-
-	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	/* These are used by GetDiskFreeSpace otherwise. */
-	DWORD SectorsPerCluster;
-	DWORD BytesPerSector;
-	DWORD NumberOfFreeClusters;
-	DWORD TotalNumberOfClusters;
-
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-						&FreeBytesAvailableToCaller,
-						&TotalNumberOfBytes,
-						&TotalNumberOfFreeBytes) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((zend_ulong)1) << 31) * 2.0 +
-				TotalNumberOfBytes.LowPart;
-		} else { /* If it's not available, we just use GetDiskFreeSpace */
-			if (GetDiskFreeSpace(path,
-						&SectorsPerCluster, &BytesPerSector,
-						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to load kernel32.dll");
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
-	*space = bytestotal;
+	/* i know - this is ugly, but i works <thies@thieso.net> */
+	*space = TotalNumberOfBytes.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + TotalNumberOfBytes.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+
 	return SUCCESS;
 }
 /* }}} */
@@ -223,9 +186,9 @@ PHP_FUNCTION(disk_total_space)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(path)) {
 		RETURN_FALSE;
@@ -241,60 +204,24 @@ PHP_FUNCTION(disk_total_space)
 static int php_disk_free_space(char *path, double *space) /* {{{ */
 #if defined(WINDOWS) /* {{{ */
 {
-	double bytesfree = 0;
-
-	HINSTANCE kernel32;
-	FARPROC gdfse;
-	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
-	gdfse_func func;
-
-	/* These are used by GetDiskFreeSpaceEx, if available. */
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
+	PHP_WIN32_IOUTIL_INIT_W(path)
 
-	/* These are used by GetDiskFreeSpace otherwise. */
-	DWORD SectorsPerCluster;
-	DWORD BytesPerSector;
-	DWORD NumberOfFreeClusters;
-	DWORD TotalNumberOfClusters;
-
-	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
-	   so we have to jump through some hoops to see if the function
-	   exists. */
-	kernel32 = LoadLibrary("kernel32.dll");
-	if (kernel32) {
-		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
-		/* It's available, so we can call it. */
-		if (gdfse) {
-			func = (gdfse_func)gdfse;
-			if (func(path,
-						&FreeBytesAvailableToCaller,
-						&TotalNumberOfBytes,
-						&TotalNumberOfFreeBytes) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-
-			/* i know - this is ugly, but i works <thies@thieso.net> */
-			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((zend_ulong)1) << 31) * 2.0 +
-				FreeBytesAvailableToCaller.LowPart;
-		} else { /* If it's not available, we just use GetDiskFreeSpace */
-			if (GetDiskFreeSpace(path,
-						&SectorsPerCluster, &BytesPerSector,
-						&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) {
-				php_error_docref(NULL, E_WARNING, "%s", php_win_err());
-				return FAILURE;
-			}
-			bytesfree = (double)NumberOfFreeClusters * (double)SectorsPerCluster * (double)BytesPerSector;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to load kernel32.dll");
+	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
 
-	*space = bytesfree;
+	/* i know - this is ugly, but i works <thies@thieso.net> */
+	*space = FreeBytesAvailableToCaller.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + FreeBytesAvailableToCaller.LowPart;
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+
 	return SUCCESS;
 }
 /* }}} */
@@ -336,11 +263,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		return FAILURE;
 	}
-#ifdef NETWARE
-	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bfree));
-#else
 	bytesfree = (((double)buf.f_bsize) * ((double)buf.f_bavail));
-#endif
 #endif
 
 	*space = bytesfree;
@@ -358,9 +281,9 @@ PHP_FUNCTION(disk_free_space)
 	char *path;
 	size_t path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(path, path_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(path)) {
 		RETURN_FALSE;
@@ -373,7 +296,7 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
 {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -416,9 +339,10 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/", &filename, &filename_len, &group) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_ZVAL(group)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -432,7 +356,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
+				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(group));
 				RETURN_FALSE;
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
@@ -461,7 +385,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
+		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(group));
 		RETURN_FALSE;
 	}
 
@@ -486,7 +410,6 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 }
 /* }}} */
 
-#ifndef NETWARE
 /* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
 PHP_FUNCTION(chgrp)
@@ -508,9 +431,8 @@ PHP_FUNCTION(lchgrp)
 }
 #endif
 /* }}} */
-#endif /* !NETWARE */
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
 {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
@@ -553,9 +475,10 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/", &filename, &filename_len, &user) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_ZVAL(user)
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -569,7 +492,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 				RETURN_FALSE;
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
@@ -599,7 +522,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 		RETURN_FALSE;
 	}
 
@@ -625,8 +548,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 /* }}} */
 
 
-#ifndef NETWARE
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
@@ -634,7 +556,7 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
@@ -648,7 +570,6 @@ PHP_FUNCTION(lchown)
 }
 #endif
 /* }}} */
-#endif /* !NETWARE */
 
 /* {{{ proto bool chmod(string filename, int mode)
    Change file mode */
@@ -661,9 +582,10 @@ PHP_FUNCTION(chmod)
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl", &filename, &filename_len, &mode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
@@ -709,9 +631,12 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filetime)
+		Z_PARAM_LONG(fileatime)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!filename_len) {
 		RETURN_FALSE;
@@ -719,11 +644,7 @@ PHP_FUNCTION(touch)
 
 	switch (argc) {
 		case 1:
-#ifdef HAVE_UTIME_NULL
 			newtime = NULL;
-#else
-			newtime->modtime = newtime->actime = time(NULL);
-#endif
 			break;
 		case 2:
 			newtime->modtime = newtime->actime = filetime;
@@ -788,7 +709,7 @@ PHP_FUNCTION(touch)
 
 /* {{{ php_clear_stat_cache()
 */
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len)
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
@@ -819,11 +740,13 @@ PHP_FUNCTION(clearstatcache)
 	char      *filename             = NULL;
 	size_t     filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(clear_realpath_cache)
+		Z_PARAM_PATH(filename, filename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	php_clear_stat_cache(clear_realpath_cache, filename, (int)filename_len);
+	php_clear_stat_cache(clear_realpath_cache, filename, filename_len);
 }
 /* }}} */
 
@@ -834,7 +757,7 @@ PHP_FUNCTION(clearstatcache)
 
 /* {{{ php_stat
  */
-PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value)
+PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
@@ -901,8 +824,6 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	stat_sb = &ssb.sb;
 
-
-#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(ssb.sb.st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -932,12 +853,9 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
-#endif
 
-#ifndef NETWARE
 	if (IS_ABLE_CHECK(type) && getuid() == 0) {
-		/* root has special perms on plain_wrapper
-		   But we don't know about root under Netware */
+		/* root has special perms on plain_wrapper */
 		if (wrapper == &php_plain_files_wrapper) {
 			if (type == FS_IS_X) {
 				xmask = S_IXROOT;
@@ -946,7 +864,6 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 		}
 	}
-#endif
 
 	switch (type) {
 	case FS_PERMS:
@@ -975,7 +892,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		case S_IFDIR: RETURN_STRING("dir");
 		case S_IFBLK: RETURN_STRING("block");
 		case S_IFREG: RETURN_STRING("file");
-#if defined(S_IFSOCK) && !defined(ZEND_WIN32)&&!defined(__BEOS__)
+#if defined(S_IFSOCK) && !defined(PHP_WIN32)
 		case S_IFSOCK: RETURN_STRING("socket");
 #endif
 		}
@@ -986,7 +903,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_IS_R:
 		RETURN_BOOL((ssb.sb.st_mode&rmask)!=0);
 	case FS_IS_X:
-		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0 && !S_ISDIR(ssb.sb.st_mode));
+		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0);
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(ssb.sb.st_mode));
 	case FS_IS_DIR:
@@ -1006,19 +923,8 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
-#ifdef HAVE_ST_RDEV
-# ifdef PHP_WIN32
-	/* It is unsigned, so if a negative came from userspace, it'll
-	   convert to UINT_MAX, but we wan't to keep the userspace value.
-	   Almost the same as in php_if_fstat. */
-	if ((int)stat_sb->st_rdev < 0) {
-		ZVAL_LONG(&stat_rdev, (int)stat_sb->st_rdev);
-	} else {
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-	}
-# else
-	ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
-# endif
 #else
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
@@ -1026,12 +932,12 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
 		ZVAL_LONG(&stat_blksize,-1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
 		ZVAL_LONG(&stat_blocks,-1);
@@ -1053,19 +959,19 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 		/* Store string indexes referencing the same zval*/
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-		zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+		zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 
 		return;
 	}
@@ -1076,21 +982,8 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 /* another quickie macro to make defining similar functions easier */
 /* {{{ FileFunction(name, funcnum) */
-#ifndef FAST_ZPP
-# define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
-	char *filename; \
-	size_t filename_len; \
-	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-		return; \
-	} \
-	\
-	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
-}
-#else
-# define FileFunction(name, funcnum) \
-void name(INTERNAL_FUNCTION_PARAMETERS) { \
+#define FileFunction(name, funcnum) \
+ZEND_NAMED_FUNCTION(name) { \
 	char *filename; \
 	size_t filename_len; \
 	\
@@ -1098,9 +991,8 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		Z_PARAM_PATH(filename, filename_len) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
-	php_stat(filename, (php_stat_len) filename_len, funcnum, return_value); \
+	php_stat(filename, filename_len, funcnum, return_value); \
 }
-#endif
 /* }}} */
 
 /* {{{ proto int fileperms(string filename)
@@ -1242,12 +1134,3 @@ PHP_FUNCTION(realpath_cache_get)
 		buckets++;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

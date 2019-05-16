@@ -5,18 +5,18 @@ Bug #42703 (Exception raised in an iterator::current() causes segfault in Filter
 class BlaIterator implements Iterator
 {
 	public function rewind() { }
-	
+
 	public function next() { }
-	
+
 	public function valid() {
 		return true;
 	}
-	
+
 	public function current()
 	{
 	  throw new Exception('boo');
 	}
-	
+
 	public function key() { }
 }
 
@@ -35,7 +35,7 @@ catch (Exception $e) {
 var_dump($itit->current());
 var_dump($itit->key());
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "boo"
 NULL
 NULL

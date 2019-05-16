@@ -5,7 +5,7 @@ SPL: Bug #45622 (isset($arrayObject->p) misbehaves with ArrayObject::ARRAY_AS_PR
 
 class C extends ArrayObject {
 	public $p = 'object property';
-}	
+}
 
 $ao = new C(array('p'=>'array element'));
 $ao->setFlags(ArrayObject::ARRAY_AS_PROPS);
@@ -30,14 +30,13 @@ var_dump(isset($ao->p));
 var_dump($ao->p);
 ?>
 --EXPECTF--
-
 --> Access the real property:
 bool(true)
-%unicode|string%(15) "object property"
+string(15) "object property"
 
 --> Remove the real property and access the array element:
 bool(true)
-%unicode|string%(13) "array element"
+string(13) "array element"
 
 --> Remove the array element and try access again:
 bool(false)
@@ -47,5 +46,4 @@ NULL
 
 --> Re-add the real property:
 bool(true)
-%unicode|string%(15) "object property"
-
+string(15) "object property"

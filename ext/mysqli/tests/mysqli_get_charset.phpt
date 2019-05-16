@@ -12,18 +12,6 @@ if (!function_exists('mysqli_get_charset'))
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_get_charset()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_get_charset($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_set_charset($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
@@ -101,8 +89,8 @@ if (!function_exists('mysqli_get_charset'))
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_get_charset($link)))
-		printf("[023] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_get_charset($link)))
+		printf("[023] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

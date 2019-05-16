@@ -128,19 +128,18 @@ memory_limit=83886080
 				}
 			}
 
-			if (!empty($expected))
-				reset($expected);
-			while ((list($k, $v) = each($expected)) && mysqli_stmt_fetch($stmt)) {
-				if (!empty($expected)) {
-					if ($result !== $v) {
-						printf("[%03d] Row %d - expecting %s/%s got %s/%s [%s] with %s - %s.\n",
-							$offset + 8,
-							$k,
-							gettype($v), $v,
-							gettype($result), $result,
-							$order_by_col,
-							$format, $sql);
-					}
+			foreach ($expected as $k => $v) {
+				if (!mysqli_stmt_fetch($stmt)) {
+					break;
+				}
+				if ($result !== $v) {
+					printf("[%03d] Row %d - expecting %s/%s got %s/%s [%s] with %s - %s.\n",
+						$offset + 8,
+						$k,
+						gettype($v), $v,
+						gettype($result), $result,
+						$order_by_col,
+						$format, $sql);
 				}
 			}
 
@@ -185,7 +184,7 @@ memory_limit=83886080
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 FLOAT
 FORMAT(col1, 0)
 FLOAT

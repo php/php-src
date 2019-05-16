@@ -1,9 +1,9 @@
 --TEST--
-Test krsort() function : usage variations - sort integer/float values 
+Test krsort() function : usage variations - sort integer/float values
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation 
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 
@@ -23,7 +23,7 @@ $various_arrays = array(
   array(1 => 11, -2 => -11, 3 => 21, -4 => -21, 5 => 31, -6 => -31, 7 => 0, 8 => 41, -10 =>-41),
 
   // float key values
-  array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1), 
+  array(1.0 => 10.5, 0.2 => -10.5, 3.1 => 10.5e2, 4 => 10.6E-2, .5 => .5, 6 => .0001, -7 => -.1),
 
   // mixed value array with different types of keys
   array(1 => .0001, 2 => .0021, -3 => -.01, 4 => -1, 5 => 0, 6 => .09, 7 => 2, -8 => -.9, 9 => 10.6E-2,
@@ -40,24 +40,24 @@ echo "\n-- Testing krsort() by supplying various integer/float arrays --\n";
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With defualt sort flag -\n"; 
-  $temp_array = $array; 
+  echo "- With defualt sort flag -\n";
+  $temp_array = $array;
   var_dump(krsort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flags array and call krsort() with all possible sort flag values
   foreach($flags as $key => $flag){
     echo "- Sort flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(krsort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying various integer/float arrays --

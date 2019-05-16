@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -206,7 +206,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -818,13 +818,13 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			break;
 		}
 		case MYSQL_OPT_READ_TIMEOUT:
+			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
 			net->data->options.timeout_read = *(unsigned int*) value;
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_WRITE_TIMEOUT:
+			DBG_INF("MYSQL_OPT_WRITE_TIMEOUT");
 			net->data->options.timeout_write = *(unsigned int*) value;
 			break;
-#endif
 		case MYSQL_OPT_COMPRESS:
 			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
@@ -906,9 +906,6 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	if (!context) {
-		DBG_RETURN(FAIL);
-	}
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;
@@ -1219,14 +1216,3 @@ mysqlnd_net_free(MYSQLND_NET * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_I
 	DBG_VOID_RETURN;
 }
 /* }}} */
-
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

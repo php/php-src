@@ -37,7 +37,7 @@ $closure = $b->getClosure();
 $closure();
 ?>
 Done.
---EXPECTF--
+--EXPECT--
 1
 42
 42

@@ -5,7 +5,7 @@ zlib.output_compression=1
 --ENV--
 HTTP_ACCEPT_ENCODING=gzip
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) die("skip zlib required");
 ?>
 --FILE--
@@ -14,7 +14,7 @@ header('Vary: Cookie');
 echo 'foo';
 ?>
 --EXPECTF--
-%s
+%a
 --EXPECTHEADERS--
 Vary: Cookie
 Content-Encoding: gzip

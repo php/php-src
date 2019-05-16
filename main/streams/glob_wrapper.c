@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_streams_int.h"
@@ -116,7 +114,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 	if ((pos = strrchr(path, '/')) != NULL) {
 		path = pos+1;
 	}
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 	if ((pos = strrchr(path, '\\')) != NULL) {
 		path = pos+1;
 	}
@@ -128,7 +126,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 		if (pglob->path) {
 			efree(pglob->path);
 		}
-		if (path != gpath) {
+		if ((path - gpath) > 1) {
 			path--;
 		}
 		pglob->path_len = path - gpath;
@@ -195,7 +193,7 @@ static int php_glob_stream_rewind(php_stream *stream, zend_off_t offset, int whe
 }
 /* }}} */
 
-php_stream_ops  php_glob_stream_ops = {
+const php_stream_ops  php_glob_stream_ops = {
 	NULL, php_glob_stream_read,
 	php_glob_stream_close, NULL,
 	"glob",
@@ -213,15 +211,15 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	int ret;
 	const char *tmp, *pos;
 
-	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path)) {
-		return NULL;
-	}
-
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
 		if (opened_path) {
 			*opened_path = zend_string_init(path, strlen(path), 0);
 		}
+	}
+
+	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path)) {
+		return NULL;
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);
@@ -240,7 +238,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	if ((tmp = strrchr(pos, '/')) != NULL) {
 		pos = tmp+1;
 	}
-#if defined(PHP_WIN32) || defined(NETWARE)
+#ifdef PHP_WIN32
 	if ((tmp = strrchr(pos, '\\')) != NULL) {
 		pos = tmp+1;
 	}
@@ -261,7 +259,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 }
 /* }}} */
 
-static php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
+static const php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL,
 	NULL,
 	NULL,
@@ -275,18 +273,9 @@ static php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL
 };
 
-php_stream_wrapper  php_glob_stream_wrapper = {
+const php_stream_wrapper  php_glob_stream_wrapper = {
 	&php_glob_stream_wrapper_ops,
 	NULL,
 	0
 };
 #endif /* HAVE_GLOB */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

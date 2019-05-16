@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -23,15 +23,10 @@
 #define ZEND_OPTIMIZER_INTERNAL_H
 
 #include "zend_ssa.h"
+#include "zend_func_info.h"
 
-#define ZEND_RESULT_TYPE(opline)		(opline)->result_type
-#define ZEND_RESULT(opline)				(opline)->result
-#define ZEND_OP1_TYPE(opline)			(opline)->op1_type
-#define ZEND_OP1(opline)				(opline)->op1
 #define ZEND_OP1_LITERAL(opline)		(op_array)->literals[(opline)->op1.constant]
 #define ZEND_OP1_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op1)
-#define ZEND_OP2_TYPE(opline)			(opline)->op2_type
-#define ZEND_OP2(opline)				(opline)->op2
 #define ZEND_OP2_LITERAL(opline)		(op_array)->literals[(opline)->op2.constant]
 #define ZEND_OP2_JMP_ADDR(opline)		OP_JMP_ADDR(opline, (opline)->op2)
 
@@ -67,7 +62,7 @@ typedef struct _zend_optimizer_ctx {
 	} while (0)
 
 #define literal_dtor(zv) do { \
-		zval_dtor(zv); \
+		zval_ptr_dtor_nogc(zv); \
 		ZVAL_NULL(zv); \
 	} while (0)
 
@@ -80,7 +75,10 @@ int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
 int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
 int  zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value);
-int  zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name);
+int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2);
+int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1);
+int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1);
+int zend_optimizer_eval_strlen(zval *result, zval *op1);
 int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val);
@@ -92,22 +90,29 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
                                      zend_uchar     type,
                                      uint32_t       var,
                                      zval          *val);
+zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline);
 
-void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var);
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass2(zend_op_array *op_array);
-void zend_optimizer_pass3(zend_op_array *op_array);
+void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
-int  zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags);
-void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa);
+int  zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa);
+void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, zend_call_info **call_map);
 void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx);
-void zend_optimizer_nop_removal(zend_op_array *op_array);
+void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimizer_compact_vars(zend_op_array *op_array);
 int zend_optimizer_is_disabled_func(const char *name, size_t len);
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants);
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
+void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline);
+void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_t *shiftlist);
+zend_uchar zend_compound_assign_to_binary_op(zend_uchar opcode);
+int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_arrya, zend_ssa *ssa, zend_call_info **call_map);
+int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects);
+int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa);
 
 #endif

@@ -13,7 +13,7 @@ $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'))
 $stdin = str_repeat('*', 1024 * 16) . '!';
 $stdin = str_repeat('*', 2049 );
 
-$options = array_merge(array('suppress_errors' => true, 'binary_pipes' => true, 'bypass_shell' => false));
+$options = array_merge(array('suppress_errors' => true, 'bypass_shell' => false));
 $process = proc_open($cmd, $descriptors, $pipes, getcwd(), array(), $options);
 
 foreach ($pipes as $pipe) {
@@ -38,7 +38,7 @@ while ($pipes || $writePipes) {
 
     }
     if ($w) {
-        $written = fwrite($writePipes[0], (binary)substr($stdin, $stdinOffset), 8192);
+        $written = fwrite($writePipes[0], substr($stdin, $stdinOffset), 8192);
         if (false !== $written) {
             $stdinOffset += $written;
         }
@@ -68,4 +68,3 @@ string(2049) "%s"
 string(0) ""
 string(0) ""
 ===DONE===
-

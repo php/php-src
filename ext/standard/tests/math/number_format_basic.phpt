@@ -10,10 +10,10 @@ $values = array(1234.5678,
 				02777777777,
 				"123456789",
 				"123.456789",
-				"12.3456789e1",				
+				"12.3456789e1",
 				null,
 				true,
-				false);	
+				false);
 
 echo "\n number_format tests.....default\n";
 for ($i = 0; $i < count($values); $i++) {
@@ -39,7 +39,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
  number_format tests.....default
 string(5) "1,235"
 string(6) "-1,235"

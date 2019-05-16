@@ -32,7 +32,7 @@ function &bar($a) {
 var_dump(foo("para"));
 var_dump(bar("para"));
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "try"
 string(7) "finally"
 string(7) "finally"

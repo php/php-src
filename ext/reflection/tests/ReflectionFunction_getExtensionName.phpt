@@ -13,4 +13,3 @@ var_dump($function->getExtensionName());
 --EXPECT--
 string(8) "standard"
 bool(false)
-

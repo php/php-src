@@ -22,7 +22,7 @@ var_dump(class_exists("TestClass", true));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(2) {

@@ -3,7 +3,7 @@ BZ2 with files
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
-<?php // $Id$
+<?php
 
 error_reporting(E_ALL);
 
@@ -18,6 +18,5 @@ print bzread($bz, 10);
 print bzread($bz);
 bzclose($bz);
 unlink($filename);
-
 --EXPECT--
 This is a test string.

@@ -2,7 +2,6 @@
 Bug #7658 (modify archive with general bit flag 3 set)
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
@@ -24,7 +23,7 @@ $expect = array(
 	"settings.xml",
 	"META-INF/manifest.xml",
 );
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_bug7658.odt';
 $zip = new ZipArchive();
@@ -50,6 +49,6 @@ var_dump($ar);
 unset($zip);
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

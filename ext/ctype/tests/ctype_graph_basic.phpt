@@ -1,11 +1,11 @@
 --TEST--
-Test ctype_graph() function : basic functionality 
+Test ctype_graph() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space 
+ * Description: Checks for any printable character(s) except space
  * Source code: ext/ctype/ctype.c
  */
 
@@ -22,7 +22,7 @@ var_dump(ctype_graph($c2));
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_graph() : basic functionality ***
 bool(true)
 bool(false)

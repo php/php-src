@@ -1,7 +1,7 @@
 --TEST--
 Bug #30862 (Static array with boolean indexes)
 --FILE--
-<?php 
+<?php
 class T {
 	static $a = array(false=>"false", true=>"true");
 }

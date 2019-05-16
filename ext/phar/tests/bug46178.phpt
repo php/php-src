@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 
 $phar = new Phar($fname);
 $phar['long/path/name.txt'] = 'hi';
@@ -15,6 +15,6 @@ $phar->addEmptyDir('long/path');
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
 --EXPECT--
 ===DONE===

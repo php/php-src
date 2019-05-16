@@ -9,7 +9,7 @@ Test is_file() function: usage variations - invalid filenames
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
 
 echo "*** Testing Invalid file types ***\n";
@@ -21,13 +21,12 @@ $filenames = array(
   TRUE,
   FALSE,
   NULL,
-  $file_handle,
-  
+
   /* scalars */
   1234,
   0
 );
-   
+
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
   var_dump( is_file($filename) );
@@ -39,7 +38,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/is_file_variation3.tmp");
 ?>
 --EXPECTF--
@@ -50,11 +49,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-
-Warning: is_file() expects parameter 1 to be a valid path, resource given in %s on line %d
-NULL
 bool(false)
 bool(false)
 
 *** Done ***
-

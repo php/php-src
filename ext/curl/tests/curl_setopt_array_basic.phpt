@@ -19,7 +19,7 @@ include 'server.inc';
 $host = curl_cli_server_start();
 if (!empty($host)) {
     // Use the set Environment variable
-    $url = "{$host}/get.php?test=get";
+    $url = "{$host}/get.inc?test=get";
 } else {
     // Create a temporary file for the test
     $tempname = tempnam(sys_get_temp_dir(), 'CURL_HANDLE');
@@ -54,4 +54,3 @@ isset($tempname) and is_file($tempname) and @unlink($tempname);
 == Starting test curl_setopt_array($ch, $options); ==
 string(25) "Hello World!
 Hello World!"
-

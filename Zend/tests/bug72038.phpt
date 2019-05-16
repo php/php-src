@@ -16,7 +16,6 @@ function test(&$param) {
 
 ?>
 --EXPECTF--
-
 Notice: Only variables should be passed by reference in %s on line %d
 object(stdClass)#1 (0) {
 }
@@ -24,4 +23,3 @@ object(stdClass)#1 (0) {
 Notice: Only variables should be passed by reference in %s on line %d
 int(2)
 int(1)
-

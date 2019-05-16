@@ -17,8 +17,8 @@ var_dump(curl_setopt_array($c, [
 	CURLOPT_UPLOAD => true,
 	CURLOPT_INFILE => $f,
 	CURLOPT_INFILESIZE => filesize(__FILE__),
-	CURLOPT_CONNECTTIMEOUT => 1,
-	CURLOPT_TIMEOUT => 1,
+	CURLOPT_CONNECTTIMEOUT => 3,
+	CURLOPT_TIMEOUT => 3,
 ]));
 fclose($f);
 var_dump(curl_setopt_array($c, [

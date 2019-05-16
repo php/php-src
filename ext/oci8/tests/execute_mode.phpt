@@ -5,7 +5,7 @@ oci_execute() and invalid execute mode
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 
@@ -14,6 +14,6 @@ oci_execute($stmt, -1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_execute(): Invalid execute mode given: -1 in %s on line %d
 Done

@@ -2,7 +2,7 @@
 Bug #48004 (Error handler prevents creation of default object)
 --FILE--
 <?php
-function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
+function error_handler($errno, $errstr, $errfile, $errline) {
         return true;
 }
 

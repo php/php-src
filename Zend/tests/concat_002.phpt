@@ -18,7 +18,6 @@ for ($i = 0; $i < 25; ++$i) {
 var_dump(strlen($result));
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(33554432)
 Done
-

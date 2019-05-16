@@ -1,9 +1,9 @@
 --TEST--
-Test sort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as defualt/SORT_REGULAR 
+Test sort() function : usage variations - sort array with diff. sub arrays, 'sort_flags' as defualt/SORT_REGULAR
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -37,8 +37,8 @@ echo "\n-- Testing sort() by supplying various arrays containing sub arrays --\n
 
 // loop through to test sort() with different arrays
 foreach ($various_arrays as $array) {
- 
-  echo "\n-- Iteration $count --\n"; 
+
+  echo "\n-- Iteration $count --\n";
   // testing sort() function by supplying different arrays, flag value is defualt
   echo "- With Defualt sort flag -\n";
   $temp_array = $array;
@@ -55,7 +55,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various arrays containing sub arrays --

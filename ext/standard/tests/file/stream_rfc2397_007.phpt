@@ -14,7 +14,7 @@ foreach($streams as $stream)
 	echo "===$stream===\n";
 
 	$fp = fopen($stream, 'rb');
-	
+
 	var_dump(ftell($fp));
 	var_dump(feof($fp));
 	echo "===S:4,S===\n";
@@ -81,7 +81,7 @@ foreach($streams as $stream)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===data:,012345===
 int(0)
 bool(false)

@@ -1,5 +1,5 @@
 --TEST--
-SPL: IteratorInterator constructor checks 
+SPL: IteratorInterator constructor checks
 --CREDITS--
 Sean Burlington www.practicalweb.co.uk
 TestFest London May 2009
@@ -21,6 +21,6 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 IteratorIterator::__construct() expects at most 2 parameters, 3 given
 ===DONE===

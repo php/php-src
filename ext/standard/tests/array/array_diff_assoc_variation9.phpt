@@ -3,14 +3,14 @@ Test array_diff_assoc() function : usage variations - compare multidimensional a
 --FILE--
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments but do additional checks whether 
- * the keys are equal 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments but do additional checks whether
+ * the keys are equal
  * Source code: ext/standard/array.c
  */
 
 /*
- * Test how array_diff_assoc behaves when comparing 
+ * Test how array_diff_assoc behaves when comparing
  * multi-dimensional arrays
  */
 
@@ -24,7 +24,7 @@ $array2 = array('sub_arraya' => array (1, 3, 5),
 echo "-- Compare two 2-D arrays --\n";
 var_dump(array_diff_assoc($array1, $array2));
 var_dump(array_diff_assoc($array2, $array1));
-     
+
 echo "\n-- Compare subarrays from two 2-D arrays --\n";
 var_dump(array_diff_assoc($array1['sub_array1'], $array2['sub_arraya']));
 var_dump(array_diff_assoc($array2['sub_arraya'], $array1['sub_array1']));
@@ -37,7 +37,7 @@ var_dump(array_diff_assoc($array1, $array2['sub_arraya']));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 -- Compare two 2-D arrays --
 array(2) {

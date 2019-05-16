@@ -38,7 +38,6 @@ $d = $staticUnscoped->bindTo(new A, 'A');
 $d = $staticScoped->bindTo(new A, 'A');
 
 echo "Done.\n";
-
 --EXPECTF--
 Before binding
 bool(false)

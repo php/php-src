@@ -56,7 +56,7 @@ function ut_main()
         'sr-Latn-QM',
         'sr-Qaaa-CS',
 //Tags that use extensions (examples ONLY: extensions MUST be defined
-//   by revision or update to this document or by RFC): 
+//   by revision or update to this document or by RFC):
         'en-US-u-islamCal',
         'zh-CN-a-myExt-x-private',
         'en-a-myExt-b-another',
@@ -67,7 +67,7 @@ function ut_main()
     );
 
 /*
-	$locales = array(	
+	$locales = array(
 		'es'
 	);
 */

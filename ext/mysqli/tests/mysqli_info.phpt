@@ -6,15 +6,11 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	require_once("connect.inc");
-
-	if (!is_null($tmp = @mysqli_info()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_info(NULL)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	require "table.inc";
 	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
@@ -29,10 +25,6 @@ require_once('skipifconnectfailure.inc');
 
 	if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
 		printf("[006] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
-
-	if ((version_compare(PHP_VERSION, '6.0', '==') == 1) &&
-	    !is_unicode($tmp))
-		printf("[007] Expecting unicode, because unicode mode it on. Got binary string\n");
 
 	if (!$res = mysqli_query($link, 'INSERT INTO test(id, label) SELECT id + 200, label FROM test'))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -67,9 +59,9 @@ require_once('skipifconnectfailure.inc');
 				/* ignore this error */
 				break;
 
-			if (!fwrite($fp, b"100;'a';\n") ||
-				!fwrite($fp, b"101;'b';\n") ||
-				!fwrite($fp, b"102;'c';\n")) {
+			if (!fwrite($fp, "100;'a';\n") ||
+				!fwrite($fp, "101;'b';\n") ||
+				!fwrite($fp, "102;'c';\n")) {
 				@unlink($file);
 				break;
 			}
@@ -98,5 +90,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

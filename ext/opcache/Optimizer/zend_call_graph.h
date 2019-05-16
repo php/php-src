@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -51,6 +51,7 @@ struct _zend_func_info {
 	zend_ssa                ssa;          /* Static Single Assignmnt Form  */
 	zend_call_info         *caller_info;  /* where this function is called from */
 	zend_call_info         *callee_info;  /* which functions are called from this one */
+	zend_call_info        **call_map;     /* Call info associated with init/call/send opnum */
 	int                     num_args;     /* (-1 - unknown) */
 	zend_recv_arg_info     *arg_info;
 	zend_ssa_var_info       return_info;
@@ -69,15 +70,9 @@ typedef struct _zend_call_graph {
 BEGIN_EXTERN_C()
 
 int zend_build_call_graph(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_call_graph *call_graph);
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, zend_op_array *op_array);
+int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info);
 
 END_EXTERN_C()
 
 #endif /* ZEND_CALL_GRAPH_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

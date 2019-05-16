@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Jani Taskinen <jani@php.net>                                |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /*
  *  This product includes software developed by the Apache Group
@@ -33,14 +31,16 @@
 #include "php_variables.h"
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/php_smart_string.h"
+#include "zend_smart_string.h"
 
 #if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
 # define HAVE_ATOLL 1
 #endif
 
-#define DEBUG_FILE_UPLOAD ZEND_DEBUG
+#ifndef DEBUG_FILE_UPLOAD
+# define DEBUG_FILE_UPLOAD 0
+#endif
 
 static int dummy_encoding_translation(void)
 {
@@ -190,23 +190,19 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(zval *el) /* {{{ */
-{
-	zend_string *filename = Z_STR_P(el);
-	VCWD_UNLINK(ZSTR_VAL(filename));
-	return 0;
-}
-/* }}} */
-
-
 static void free_filename(zval *el) {
 	zend_string *filename = Z_STR_P(el);
-	zend_string_release(filename);
+	zend_string_release_ex(filename, 0);
 }
 
 PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename);
+	zval *el;
+
+	ZEND_HASH_FOREACH_VAL(SG(rfc1867_uploaded_files), el) {
+		zend_string *filename = Z_STR_P(el);
+		VCWD_UNLINK(ZSTR_VAL(filename));
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
@@ -281,11 +277,7 @@ static int fill_buffer(multipart_buffer *self)
 /* eof if we are out of bytes, or if we hit the final boundary */
 static int multipart_buffer_eof(multipart_buffer *self)
 {
-	if ( (self->bytes_in_buffer == 0 && fill_buffer(self) < 1) ) {
-		return 1;
-	} else {
-		return 0;
-	}
+	return self->bytes_in_buffer == 0 && fill_buffer(self) < 1;
 }
 
 /* create new multipart_buffer structure */
@@ -392,7 +384,7 @@ static int find_boundary(multipart_buffer *self, char *boundary)
 {
 	char *line;
 
-	/* loop thru lines */
+	/* loop through lines */
 	while( (line = get_line(self)) )
 	{
 		/* finished if we found the boundary */
@@ -1099,7 +1091,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				multipart_event_file_end event_file_end;
 
 				event_file_end.post_bytes_processed = SG(read_post_bytes);
-				event_file_end.temp_filename = ZSTR_VAL(temp_filename);
+				event_file_end.temp_filename = temp_filename ? ZSTR_VAL(temp_filename) : NULL;
 				event_file_end.cancel_upload = cancel_upload;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END, &event_file_end, &event_extra_data) == FAILURE) {
 					cancel_upload = UPLOAD_ERROR_X;
@@ -1111,7 +1103,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
 						unlink(ZSTR_VAL(temp_filename));
 					}
-					zend_string_release(temp_filename);
+					zend_string_release_ex(temp_filename, 0);
 				}
 				temp_filename = NULL;
 			} else {
@@ -1339,12 +1331,3 @@ SAPI_API void php_rfc1867_set_multibyte_callbacks(
 	php_rfc1867_basename = basename;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

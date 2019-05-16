@@ -1,6 +1,5 @@
 --TEST--
 Method returned callable, expected callable
-
 --FILE--
 <?php
 class foo {
@@ -14,7 +13,6 @@ class foo {
 
 $baz = new foo();
 var_dump($baz->bar());
-
 --EXPECT--
 object(Closure)#2 (2) {
   ["static"]=>

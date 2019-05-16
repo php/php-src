@@ -18,7 +18,7 @@ XML_FILE=/book_with_dtd2.xml
 LOAD_OPTIONS=LIBXML_DTDATTR|LIBXML_NOCDATA|LIBXML_NOENT|LIBXML_NOBLANKS
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
-domdocumentloadxml_test_method_savexml.php
+domdocumentloadxml_test_method_savexml.inc
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE books [

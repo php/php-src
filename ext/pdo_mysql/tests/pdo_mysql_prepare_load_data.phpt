@@ -2,8 +2,8 @@
 MySQL PDO->prepare() and 1295 (ER_UNSUPPORTED_PS)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 // Run test only locally - not against remote hosts
@@ -15,6 +15,17 @@ if (count($tmp) < 2)
 	die("skip Cannot detect if test is run against local or remote database server");
 if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 	die("skip Test cannot be run against remote database server");
+
+$stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
+if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
+    if (!is_writable($row['value']))
+        die("skip secure_file_priv directory not writable: {$row['value']}");
+
+    $filename = $row['value'] . DIRECTORY_SEPARATOR  . "pdo_mysql_exec_load_data.csv";
+
+    if (file_exists($filename) && !is_writable($filename))
+        die("skip {$filename} not writable");
+}
 
 ?>
 --FILE--
@@ -47,7 +58,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	// Run with native PS.
 	// The test is about checking the fallback to emulation
@@ -68,8 +79,8 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 		}
 
 		$fp = fopen($filename, "w");
-		fwrite($fp, b"1;foo\n");
-		fwrite($fp, b"2;bar");
+		fwrite($fp, "1;foo\n");
+		fwrite($fp, "2;bar");
 		fclose($fp);
 
 		// This should fail, the PS protocol should not support it.
@@ -105,7 +116,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

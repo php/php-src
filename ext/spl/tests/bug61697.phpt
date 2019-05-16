@@ -8,8 +8,8 @@ function f2($class) { echo "f2: [[$class]]\n"; }
 
 spl_autoload_register('f1');
 spl_autoload_register('f2');
-spl_autoload_register(create_function('$class', 'echo "cf1: [[$class]]\n";'));
-spl_autoload_register(create_function('$class', 'echo "cf2: [[$class]]\n";'));
+spl_autoload_register(function($class) { echo "cf1: [[$class]]\n"; });
+spl_autoload_register(function($class) { echo "cf2: [[$class]]\n"; });
 
 foreach (spl_autoload_functions() AS $func)
 {
@@ -18,7 +18,7 @@ foreach (spl_autoload_functions() AS $func)
 
 print_r(spl_autoload_functions());
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
 )

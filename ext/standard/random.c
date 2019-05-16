@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -27,14 +25,17 @@
 #include "zend_exceptions.h"
 #include "php_random.h"
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include "win32/winutil.h"
 #endif
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
+# if __FreeBSD__ && __FreeBSD_version > 1200000
+#  include <sys/random.h>
+# endif
 #endif
 
 #ifdef ZTS
@@ -80,11 +81,10 @@ PHP_MSHUTDOWN_FUNCTION(random)
 }
 /* }}} */
 
-/* {{{ */
-
+/* {{{ php_random_bytes */
 PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {
@@ -94,14 +94,13 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001))
 	arc4random_buf(bytes, size);
-#elif HAVE_DECL_GETRANDOM
-	/* Linux getrandom(2) syscall */
+#else
 	size_t read_bytes = 0;
-	size_t amount_to_read = 0;
 	ssize_t n;
-
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000)
+	/* Linux getrandom(2) syscall or FreeBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
-	do {
+	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
 
 		   bytes   read_bytes  size
@@ -111,73 +110,76 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 		              amount_to_read
 
 		*/
-		amount_to_read = size - read_bytes;
+		size_t amount_to_read = size - read_bytes;
+#if defined(__linux__)
 		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
+#else
+		n = getrandom(bytes + read_bytes, amount_to_read, 0);
+#endif
 
 		if (n == -1) {
-			if (errno == EINTR || errno == EAGAIN) {
+			if (errno == ENOSYS) {
+				/* This can happen if PHP was compiled against a newer kernel where getrandom()
+				 * is available, but then runs on an older kernel without getrandom(). If this
+				 * happens we simply fall back to reading from /dev/urandom. */
+				ZEND_ASSERT(read_bytes == 0);
+				break;
+			} else if (errno == EINTR || errno == EAGAIN) {
 				/* Try again */
 				continue;
+			} else {
+			    /* If the syscall fails, fall back to reading from /dev/urandom */
+				break;
 			}
-			/*
-				If the syscall fails, we are doomed. The loop that calls
-				php_random_bytes should be terminated by the exception instead
-				of proceeding to demand more entropy.
-			*/
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", errno);
-			}
-			return FAILURE;
 		}
 
 		read_bytes += (size_t) n;
-	} while (read_bytes < size);
-#else
-	int    fd = RANDOM_G(fd);
-	struct stat st;
-	size_t read_bytes = 0;
-	ssize_t n;
-
-	if (fd < 0) {
-#if HAVE_DEV_URANDOM
-		fd = open("/dev/urandom", O_RDONLY);
+	}
 #endif
-		if (fd < 0) {
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
-			}
-			return FAILURE;
-		}
-		/* Does the file exist and is it a character device? */
-		if (fstat(fd, &st) != 0 || 
-# ifdef S_ISNAM
-                !(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
-# else
-                !S_ISCHR(st.st_mode)
-# endif
-		) {
-			close(fd);
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
-			}
-			return FAILURE;
-		}
-		RANDOM_G(fd) = fd;
-	}
-
-	while (read_bytes < size) {
-		n = read(fd, bytes + read_bytes, size - read_bytes);
-		if (n <= 0) {
-			break;
-		}
-		read_bytes += n;
-	}
-
 	if (read_bytes < size) {
-		if (should_throw) {
-			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		int    fd = RANDOM_G(fd);
+		struct stat st;
+
+		if (fd < 0) {
+#if HAVE_DEV_URANDOM
+			fd = open("/dev/urandom", O_RDONLY);
+#endif
+			if (fd < 0) {
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+				}
+				return FAILURE;
+			}
+			/* Does the file exist and is it a character device? */
+			if (fstat(fd, &st) != 0 ||
+# ifdef S_ISNAM
+					!(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# else
+					!S_ISCHR(st.st_mode)
+# endif
+			) {
+				close(fd);
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+				}
+				return FAILURE;
+			}
+			RANDOM_G(fd) = fd;
 		}
-		return FAILURE;
+
+		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+			n = read(fd, bytes + read_bytes, size - read_bytes);
+			if (n <= 0) {
+				break;
+			}
+		}
+
+		if (read_bytes < size) {
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+			}
+			return FAILURE;
+		}
 	}
 #endif
 
@@ -192,9 +194,9 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
 		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
@@ -204,7 +206,7 @@ PHP_FUNCTION(random_bytes)
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
-		zend_string_release(bytes);
+		zend_string_release_ex(bytes, 0);
 		return;
 	}
 
@@ -214,37 +216,27 @@ PHP_FUNCTION(random_bytes)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
-Return an arbitrary pseudo-random integer */
-PHP_FUNCTION(random_int)
+/* {{{ */
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_bool should_throw)
 {
-	zend_long min;
-	zend_long max;
 	zend_ulong umax;
-	zend_ulong result;
-
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
-	}
-
-	if (min > max) {
-		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
-		return;
-	}
+	zend_ulong trial;
 
 	if (min == max) {
-		RETURN_LONG(min);
+		*result = min;
+		return SUCCESS;
 	}
 
 	umax = max - min;
 
-	if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-		return;
+	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+		return FAILURE;
 	}
 
 	/* Special case where no modulus is required */
 	if (umax == ZEND_ULONG_MAX) {
-		RETURN_LONG((zend_long)result);
+		*result = (zend_long)trial;
+		return SUCCESS;
 	}
 
 	/* Increment the max so the range is inclusive of max */
@@ -256,22 +248,40 @@ PHP_FUNCTION(random_int)
 		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
 
 		/* Discard numbers over the limit to avoid modulo bias */
-		while (result > limit) {
-			if (php_random_bytes_throw(&result, sizeof(result)) == FAILURE) {
-				return;
+		while (trial > limit) {
+			if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+				return FAILURE;
 			}
 		}
 	}
 
-	RETURN_LONG((zend_long)((result % umax) + min));
+	*result = (zend_long)((trial % umax) + min);
+	return SUCCESS;
 }
 /* }}} */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+/* {{{ proto int random_int(int min, int max)
+Return an arbitrary pseudo-random integer */
+PHP_FUNCTION(random_int)
+{
+	zend_long min;
+	zend_long max;
+	zend_long result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (min > max) {
+		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
+		return;
+	}
+
+	if (php_random_int_throw(min, max, &result) == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(result);
+}
+/* }}} */

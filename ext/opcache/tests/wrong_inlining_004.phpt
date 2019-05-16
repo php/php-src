@@ -19,5 +19,5 @@ function test() {
 
 test();
 ?>
---EXPECTF--
+--EXPECT--
 int(42)

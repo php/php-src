@@ -3,7 +3,7 @@ Test array_change_key_case() function : usage variations - referenced variables
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Returns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -28,8 +28,7 @@ var_dump($new_input);
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- $input argument is a reference to array --
@@ -61,4 +60,3 @@ array(3) {
   string(3) "xyz"
 }
 Done
-

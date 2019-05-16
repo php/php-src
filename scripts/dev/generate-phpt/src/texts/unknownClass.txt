@@ -1,4 +1,0 @@
-
-The class name is not a valid PHP class name.
-Check that the extension containing the class is loaded.
-

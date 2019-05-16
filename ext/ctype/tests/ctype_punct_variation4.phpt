@@ -5,8 +5,8 @@ Test ctype_punct() function : usage variations - Octal and Hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
@@ -16,7 +16,7 @@ Test ctype_punct() function : usage variations - Octal and Hexadecimal values
 
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 $octal_values = array(041,  042,  043,  044);
 $hex_values   = array(0x21, 0x22, 0x23, 0x24);
@@ -37,10 +37,10 @@ foreach($hex_values as $c) {
 	$iterator++;
 }
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
 -- Octal Values --

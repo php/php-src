@@ -1,7 +1,5 @@
 --TEST--
-ZE2 A private member is 
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
+ZE2 A private member is
 --FILE--
 <?php
 
@@ -53,7 +51,7 @@ unset($t);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 derived::__construct(begin)
 base::__construct(begin)
 base::test

@@ -1,7 +1,5 @@
 --TEST--
 ZE2 interface with an unimplemented method
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -25,5 +23,4 @@ echo "Message: " . $foo->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECTF--
-
 Fatal error: Class Exception_foo contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (ThrowableInterface::getErrno) in %s on line %d

@@ -5,8 +5,8 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-	
+require __DIR__.'/connect.inc';
+
 $create_st = array();
 $create_st[] = "drop sequence myseq";
 $create_st[] = "drop table mytab";
@@ -49,7 +49,7 @@ foreach ($create_st as $statement) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(1)
 int(2)
 int(3)

@@ -49,11 +49,11 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
-  %unicode|string%(10) "1234567890"
+  string(10) "1234567890"
   [1]=>
-  %unicode|string%(14) "this is a test"
+  string(14) "this is a test"
 }
 done!

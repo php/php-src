@@ -22,7 +22,6 @@ echo IntlDateFormatter::formatObject($dt, IntlDateFormatter::FULL), "\n";
 
 ?>
 ==DONE==
-
 --EXPECTF--
 01/01/2012 00:00:00
 Domingo, 1 de Janeiro de 2012 0:00:00 Hora %Sda Europa Ocidental
@@ -31,4 +30,3 @@ Jan 1, 2012 12:00:00 AM
 Sun 2012-01-1 00,00,00.000 Portugal Time (Lisbon)
 Domingo, 1 de Janeiro de 2012 5:00:00 GMT+03:00
 ==DONE==
-

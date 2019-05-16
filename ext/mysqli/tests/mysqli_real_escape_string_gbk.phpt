@@ -2,10 +2,6 @@
 mysqli_real_escape_string() - gbk
 --SKIPIF--
 <?php
-if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
-
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
@@ -71,7 +67,7 @@ mysqli_error($link));
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 done!

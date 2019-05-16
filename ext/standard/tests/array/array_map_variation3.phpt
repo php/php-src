@@ -56,7 +56,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : different arrays for 'arr1' argument ***
 -- Iteration 1 --
 array(2) {
