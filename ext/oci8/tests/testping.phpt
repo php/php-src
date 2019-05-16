@@ -7,7 +7,7 @@ oci8.ping_interval=0
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 for ($i = 0; $i < 2; $i++) {
 	if (!empty($dbase)) {
@@ -21,5 +21,5 @@ for ($i = 0; $i < 2; $i++) {
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Done

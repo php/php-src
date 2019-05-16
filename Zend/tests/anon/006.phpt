@@ -12,4 +12,3 @@ namespace {
 --EXPECTF--
 object(class@%s)#1 (0) {
 }
-

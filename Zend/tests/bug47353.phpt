@@ -22,5 +22,5 @@ $a = new A();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 Done

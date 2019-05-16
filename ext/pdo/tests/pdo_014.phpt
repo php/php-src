@@ -1,10 +1,8 @@
 --TEST--
 PDO Common: PDOStatement SPL iterator
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
-if (!extension_loaded('SPL')) die('skip SPL not available');
-if (!class_exists('IteratorIterator', false)) die('skip IteratorIterator class not present');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -12,13 +10,13 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')'); 
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')'); 
+$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
+$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group2\')');
 $SELECT = 'SELECT val, grp FROM test';
 
 class Test
@@ -49,7 +47,7 @@ class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
 	private function __construct()
 	{
 		echo __METHOD__ . "\n";
-		$this->setFetchMode(PDO::FETCH_NUM);   
+		$this->setFetchMode(PDO::FETCH_NUM);
 		/* default fetch mode is BOTH, so we see if the ctor can overwrite that */
 	}
 

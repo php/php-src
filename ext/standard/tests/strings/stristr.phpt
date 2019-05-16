@@ -2,10 +2,6 @@
 stristr() function
 --FILE--
 <?php
-	var_dump(stristr());
-	var_dump(stristr(array(), ""));
-	var_dump(stristr("", array()));
-	var_dump(stristr(array(), array()));
 	var_dump(stristr("tEsT sTrInG", "tEsT"));
 	var_dump(stristr("tEsT sTrInG", "stRiNg"));
 	var_dump(stristr("tEsT sTrInG", "stRiN"));
@@ -19,17 +15,6 @@ stristr() function
 	var_dump(stristr("tEsT sTrInG", " "));
 ?>
 --EXPECTF--
-Warning: stristr() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
-NULL
-
-Warning: stristr(): needle is not a string or an integer in %s on line %d
-bool(false)
-
-Warning: stristr() expects parameter 1 to be string, array given in %s on line %d
-NULL
 string(11) "tEsT sTrInG"
 string(6) "sTrInG"
 string(6) "sTrInG"

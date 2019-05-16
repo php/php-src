@@ -1,25 +1,21 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_WITH([xmlrpc],
+  [for XMLRPC-EPI support],
+  [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
+    [Include XMLRPC-EPI support])])
 
-sinclude(ext/xmlrpc/libxmlrpc/acinclude.m4)
-sinclude(ext/xmlrpc/libxmlrpc/xmlrpc.m4)
-sinclude(libxmlrpc/acinclude.m4)
-sinclude(libxmlrpc/xmlrpc.m4)
+PHP_ARG_WITH([libexpat-dir],
+  [libexpat dir for XMLRPC-EPI],
+  [AS_HELP_STRING([--with-libexpat-dir=DIR],
+    [XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
-[  --with-xmlrpc[=DIR]       Include XMLRPC-EPI support])
-
-if test -z "$PHP_LIBXML_DIR"; then
-  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR   XMLRPC-EPI: libxml2 install prefix], no, no)
-fi
-
-PHP_ARG_WITH(libexpat-dir, libexpat dir for XMLRPC-EPI,
-[  --with-libexpat-dir=DIR XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
-
-PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
-[  --with-iconv-dir=DIR    XMLRPC-EPI: iconv dir for XMLRPC-EPI],no,no)
+PHP_ARG_WITH([iconv-dir],
+  [iconv dir for XMLRPC-EPI],
+  [AS_HELP_STRING([--with-iconv-dir=DIR],
+    [XMLRPC-EPI: iconv dir for XMLRPC-EPI])],
+  [no],
+  [no])
 
 if test "$PHP_XMLRPC" != "no"; then
 
@@ -33,7 +29,7 @@ if test "$PHP_XMLRPC" != "no"; then
   if test "$PHP_LIBEXPAT_DIR" = "no"; then
 
     if test "$PHP_LIBXML" = "no"; then
-      AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --enable-libxml])
+      AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --with-libxml])
     fi
 
     PHP_SETUP_LIBXML(XMLRPC_SHARED_LIBADD, [
@@ -41,8 +37,6 @@ if test "$PHP_XMLRPC" != "no"; then
         PHP_ADD_SOURCES(ext/xml, compat.c)
         PHP_ADD_BUILD_DIR(ext/xml)
       fi
-    ], [
-      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
     ])
   else
     testval=no
@@ -67,11 +61,11 @@ if test "$PHP_XMLRPC" != "no"; then
     if test "$PHP_ICONV_DIR" != "no"; then
       PHP_ICONV=$PHP_ICONV_DIR
     fi
-  
+
     if test -z "$PHP_ICONV" || test "$PHP_ICONV" = "no"; then
       PHP_ICONV=yes
     fi
-  
+
     PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
       AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
     ])
@@ -79,7 +73,6 @@ if test "$PHP_XMLRPC" != "no"; then
 fi
 
 if test "$PHP_XMLRPC" = "yes"; then
-  XMLRPC_CHECKS
   PHP_NEW_EXTENSION(xmlrpc,xmlrpc-epi-php.c libxmlrpc/base64.c \
           libxmlrpc/simplestring.c libxmlrpc/xml_to_dandarpc.c \
           libxmlrpc/xmlrpc_introspection.c libxmlrpc/encodings.c \
@@ -89,15 +82,16 @@ if test "$PHP_XMLRPC" = "yes"; then
           -I@ext_srcdir@/libxmlrpc -DVERSION="0.50")
   PHP_ADD_BUILD_DIR($ext_builddir/libxmlrpc)
   XMLRPC_MODULE_TYPE=builtin
+  AC_DEFINE(HAVE_XMLRPC_BUNDLED, 1, [ ])
 
 elif test "$PHP_XMLRPC" != "no"; then
 
   if test -r $PHP_XMLRPC/include/xmlrpc.h; then
     XMLRPC_DIR=$PHP_XMLRPC/include
   elif test -r $PHP_XMLRPC/include/xmlrpc-epi/xmlrpc.h; then
-dnl some xmlrpc-epi header files have generic file names like
-dnl queue.h or base64.h. Distributions have to create dir
-dnl for xmlrpc-epi because of this.
+    dnl Some xmlrpc-epi header files have generic file names like queue.h or
+    dnl base64.h. Distributions have to create dir for xmlrpc-epi because of
+    dnl this.
     XMLRPC_DIR=$PHP_XMLRPC/include/xmlrpc-epi
   else
     AC_MSG_CHECKING(for XMLRPC-EPI in default path)

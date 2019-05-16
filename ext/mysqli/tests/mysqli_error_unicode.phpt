@@ -10,23 +10,12 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link	= NULL;
-
-	if (!is_null($tmp = @mysqli_error()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_error($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 	}
 
-	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-		mysqli_query($link, "set names utf8");
-	}
+	mysqli_query($link, "set names utf8");
 
 	$tmp = mysqli_error($link);
 	if (!is_string($tmp) || ('' !== $tmp))
@@ -44,8 +33,8 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(%d) "Table 'няма_такава_таблица' doesn't exist"
+string(%d) "Table 'няма_такава_таблица' doesn't exist"
 
 Warning: mysqli_error(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

@@ -20,5 +20,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 done!

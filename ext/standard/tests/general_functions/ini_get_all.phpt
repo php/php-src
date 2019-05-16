@@ -1,10 +1,11 @@
 --TEST--
 ini_get_all() tests
 --INI--
+pcre.jit=1
 pcre.backtrack_limit=1000000
 pcre.recursion_limit=100000
 --SKIPIF--
-<?php if (!extension_loaded("reflection")) die("skip"); ?>
+<?php if (!PCRE_JIT_SUPPORT) die("skip no pcre jit support"); ?>
 --FILE--
 <?php
 
@@ -20,7 +21,7 @@ var_dump(ini_get_all("", ""));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 
 Warning: ini_get_all(): Unable to find extension '' in %s on line %d

@@ -29,5 +29,5 @@ foreach($booleans as $val=>$exp) {
 }
 echo "Ok.";
 ?>
---EXPECTF--	
+--EXPECT--
 Ok.

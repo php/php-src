@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - string formats with resource 
+Test fscanf() function: usage variations - string formats with resource
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ Test fscanf() function: usage variations - string formats with resource
 
 /* Test fscanf() to scan resource type using different string format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different string format types with resource ***\n"; 
+echo "*** Test fscanf(): different string format types with resource ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation16.tmp";
@@ -23,8 +23,8 @@ if($file_handle == false)
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
-  
+$dfp = opendir ( __DIR__ );
+
 // array of resource types
 $resource_types = array (
   $fp,
@@ -73,7 +73,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation16.tmp";
 unlink($filename);
 ?>
@@ -218,4 +218,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

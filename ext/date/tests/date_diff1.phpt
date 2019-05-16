@@ -11,7 +11,7 @@ var_dump($start);
 var_dump($end);
 var_dump($int);
 ?>
---EXPECT--
+--EXPECTF--
 object(DateTime)#1 (3) {
   ["date"]=>
   string(26) "2010-10-04 02:18:48.000000"
@@ -28,7 +28,7 @@ object(DateTime)#2 (3) {
   ["timezone"]=>
   string(3) "EDT"
 }
-object(DateInterval)#3 (15) {
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -41,6 +41,8 @@ object(DateInterval)#3 (15) {
   int(19)
   ["s"]=>
   int(40)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>

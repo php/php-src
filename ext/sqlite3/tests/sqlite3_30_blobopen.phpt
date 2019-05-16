@@ -1,12 +1,12 @@
 --TEST--
 SQLite3::blobOpen stream test
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
-require_once(dirname(__FILE__) . '/stream_test.inc');
+require_once(__DIR__ . '/new_db.inc');
+require_once(__DIR__ . '/stream_test.inc');
 define('TIMENOW', time());
 
 echo "Creating Table\n";
@@ -25,6 +25,20 @@ $stream = $db->openBlob('test', 'data', 1);
 var_dump($stream);
 echo "Stream Contents\n";
 var_dump(stream_get_contents($stream));
+echo "Writing to read-only stream\n";
+var_dump(fwrite($stream, 'ABCD'));
+echo "Closing Stream\n";
+var_dump(fclose($stream));
+echo "Opening stream in write mode\n";
+$stream = $db->openBlob('test', 'data', 1, 'main', SQLITE3_OPEN_READWRITE);
+var_dump($stream);
+echo "Writing to blob\n";
+var_dump(fwrite($stream, 'ABCD'));
+echo "Stream Contents\n";
+fseek($stream, 0);
+var_dump(stream_get_contents($stream));
+echo "Expanding blob size\n";
+var_dump(fwrite($stream, 'ABCD ABCD ABCD'));
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Closing database\n";
@@ -43,6 +57,22 @@ bool(true)
 resource(%d) of type (stream)
 Stream Contents
 string(9) "TEST TEST"
+Writing to read-only stream
+
+Warning: fwrite(): Can't write to blob stream: is open as read only in %s on line %d
+int(0)
+Closing Stream
+bool(true)
+Opening stream in write mode
+resource(%d) of type (stream)
+Writing to blob
+int(4)
+Stream Contents
+string(9) "ABCD TEST"
+Expanding blob size
+
+Warning: fwrite(): It is not possible to increase the size of a BLOB in %s on line %d
+int(0)
 Closing Stream
 bool(true)
 Closing database

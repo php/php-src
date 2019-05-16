@@ -21,7 +21,7 @@ if (!$IS_MYSQLND)
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');;
+	require_once('connect.inc');
 	require_once('table.inc');
 
 	function try_control_string($link, $control_string, $trace_file, $offset) {
@@ -90,9 +90,11 @@ if (!$IS_MYSQLND)
 		if (isset($functions_trace[$name]))
 			$found++;
 
-	if ($found < (count($memory_funcs) - 3))
+	if ($found < 1) {
 		printf("[016] Only %d memory functions have been found, expecting at least %d.\n",
-			$found, count($memory_funcs) - 3);
+			$found, 1);
+		var_dump($trace);
+	}
 
 	$trace = try_control_string($link, 't:O,' . $trace_file, $trace_file, 20);
 	if (!strstr($trace, 'SELECT * FROM test') && !strstr($trace, 'mysql_real_query'))
@@ -112,9 +114,11 @@ if (!$IS_MYSQLND)
 		if (isset($functions_trace[$name]))
 			$found++;
 
-	if ($found > 2)
+	if ($found > 2) {
 		printf("[026] More than %d memory functions have been recorded, that's strange.\n",
 			$found);
+		var_dump($trace);
+	}
 
 	mysqli_close($link);
 	@unlink($trace_file);
@@ -124,5 +128,5 @@ if (!$IS_MYSQLND)
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

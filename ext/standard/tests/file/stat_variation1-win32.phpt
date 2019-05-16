@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 /* test the effects of rename() on stats of dir/file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -39,11 +39,11 @@ sleep(2);
 var_dump( rename($old_filename, $new_filename) );
 $new_stat = stat($new_filename);
 
-// compare the self stat 
+// compare the self stat
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 
-// compare the two stats 
+// compare the two stats
 var_dump( compare_stats($old_stat, $old_stat, $all_stat_keys) );
 // clear the cache
 clearstatcache();
@@ -70,14 +70,13 @@ clearstatcache();
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation1a.tmp");
 rmdir("$file_path/stat_variation1a");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): on file and directory ater renaming them ***
 -- Testing stat() for files after being renamed --
 bool(true)
@@ -91,4 +90,3 @@ bool(true)
 bool(true)
 
 *** Done ***
-

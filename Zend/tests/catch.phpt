@@ -1,12 +1,12 @@
 --TEST--
-catch shouldn't call __autoload
+catch shouldn't call autoloader
 --FILE--
 <?php
-function __autoload($name) {
+
+spl_autoload_register(function ($name) {
 	echo("AUTOLOAD '$name'\n");
 	eval("class $name {}");
-}
-
+});
 
 try {
 } catch (A $e) {

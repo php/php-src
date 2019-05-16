@@ -4,7 +4,7 @@ Testing imageellipse() of GD library
 Ivan Rosolen <contato [at] ivanrosolen [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
@@ -16,12 +16,8 @@ $image = imagecreatetruecolor(400, 300);
 // Draw a white ellipse
 imageellipse($image, 200, 150, 300, 200, 16777215);
 
-ob_start();
-imagepng($image, null, 9);
-$img = ob_get_contents();
-ob_end_clean();
-
-echo md5(base64_encode($img));
+include_once __DIR__ . '/func.inc';
+test_image_equals_file(__DIR__ . '/imageellipse_basic.png', $image);
 ?>
 --EXPECT--
-d8b9bc2ca224bd68569413f4617f8e1f
+The images are equal.

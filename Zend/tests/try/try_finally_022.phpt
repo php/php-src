@@ -38,4 +38,3 @@ try{
 ?>
 --EXPECT--
 exception2
-

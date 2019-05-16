@@ -1,4 +1,3 @@
-/*      $Id$ */
 /*	OpenBSD: glob.h,v 1.7 2002/02/17 19:42:21 millert Exp 	*/
 /*	NetBSD: glob.h,v 1.5 1994/10/26 00:55:56 cgd Exp 	*/
 

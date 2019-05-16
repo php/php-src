@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include <stdio.h>
@@ -55,6 +53,8 @@ PHPAPI const char php_sig_jp2[12] = {(char)0x00, (char)0x00, (char)0x00, (char)0
                                      (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
+PHPAPI const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
+PHPAPI const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -92,6 +92,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
 	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -207,23 +208,27 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 	unsigned char *b, *buf = NULL;
 	zend_string *bufz;
 
+	if (php_stream_seek(stream, 5, SEEK_CUR)) {
+		return NULL;
+	}
+
+	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a)) {
+		return NULL;
+	}
+
 	b = ecalloc(1, len + 1);
-
-	if (php_stream_seek(stream, 5, SEEK_CUR))
-		return NULL;
-
-	if (php_stream_read(stream, (char *) a, sizeof(a)) != sizeof(a))
-		return NULL;
 
 	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
 		/* failed to decompress the file, will try reading the rest of the file */
 		if (php_stream_seek(stream, 8, SEEK_SET)) {
+			efree(b);
 			return NULL;
 		}
 
 		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 
 		if (!bufz) {
+			efree(b);
 			return NULL;
 		}
 
@@ -242,7 +247,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
-			zend_string_release(bufz);
+			zend_string_release_ex(bufz, 0);
 		}
 
 		if (status == Z_OK) {
@@ -380,47 +385,35 @@ static unsigned short php_read2(php_stream * stream)
 
 /* {{{ php_next_marker
  * get next marker byte from file */
-static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read)
+static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff_read)
 {
 	int a=0, marker;
 
 	/* get marker byte, swallowing possible padding                           */
-	if (last_marker==M_COM && comment_correction) {
-		/* some software does not count the length bytes of COM section           */
-		/* one company doing so is very much envolved in JPEG... so we accept too */
-		/* by the way: some of those companies changed their code now...          */
-		comment_correction = 2;
-	} else {
-		last_marker = 0;
-		comment_correction = 0;
+	if (!ff_read) {
+		size_t extraneous = 0;
+
+		while ((marker = php_stream_getc(stream)) != 0xff) {
+			if (marker == EOF) {
+				return M_EOI;/* we hit EOF */
 	}
-	if (ff_read) {
-		a = 1; /* already read 0xff in filetype detection */
+			extraneous++;
 	}
+		if (extraneous) {
+			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+		}
+	}
+	a = 1;
 	do {
 		if ((marker = php_stream_getc(stream)) == EOF)
 		{
 			return M_EOI;/* we hit EOF */
-		}
-		if (last_marker==M_COM && comment_correction>0)
-		{
-			if (marker != 0xFF)
-			{
-				marker = 0xff;
-				comment_correction--;
-			} else {
-				last_marker = M_PSEUDO; /* stop skipping non 0xff for M_COM */
-			}
 		}
 		a++;
 	} while (marker == 0xff);
 	if (a < 2)
 	{
 		return M_EOI; /* at least one 0xff is needed before marker code */
-	}
-	if ( last_marker==M_COM && comment_correction)
-	{
-		return M_EOI; /* ah illegal: char after COM section not 0xFF */
 	}
 	return (unsigned int)marker;
 }
@@ -458,7 +451,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (zend_long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (zend_long) length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -484,7 +477,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 	unsigned short length, ff_read=1;
 
 	for (;;) {
-		marker = php_next_marker(stream, marker, 1, ff_read);
+		marker = php_next_marker(stream, marker, ff_read);
 		ff_read = 0;
 		switch (marker) {
 			case M_SOF0:
@@ -620,7 +613,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */
 
-	/* Get the single byte that remains after the file type indentification */
+	/* Get the single byte that remains after the file type identification */
 	first_marker_id = php_stream_getc(stream);
 
 	/* Ensure that this marker is SIZ (as is mandated by the standard) */
@@ -987,7 +980,7 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 			return 0;
 		}
 		height = (height << 7) | (i & 0x7f);
-        /* maximum valid heigth for wbmp (although 127 may be a more accurate one) */
+        /* maximum valid height for wbmp (although 127 may be a more accurate one) */
         if (height > 2048) {
             return 0;
         }
@@ -1127,6 +1120,53 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ php_handle_webp
+ */
+static struct gfxinfo *php_handle_webp(php_stream * stream)
+{
+	struct gfxinfo *result = NULL;
+	const char sig[3] = {'V', 'P', '8'};
+	unsigned char buf[18];
+	char format;
+
+	if (php_stream_read(stream, (char *) buf, 18) != 18)
+		return NULL;
+
+	if (memcmp(buf, sig, 3)) {
+		return NULL;
+	}
+	switch (buf[3]) {
+		case ' ':
+		case 'L':
+		case 'X':
+			format = buf[3];
+			break;
+		default:
+			return NULL;
+	}
+
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+
+	switch (format) {
+		case ' ':
+			result->width = buf[14] + ((buf[15] & 0x3F) << 8);
+			result->height = buf[16] + ((buf[17] & 0x3F) << 8);
+			break;
+		case 'L':
+			result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
+			result->height = (buf[10] >> 6) + (buf[11] << 2) + ((buf[12] & 0xF) << 10) + 1;
+			break;
+		case 'X':
+			result->width = buf[12] + (buf[13] << 8) + (buf[14] << 16) + 1;
+			result->height = buf[15] + (buf[16] << 8) + (buf[17] << 16) + 1;
+			break;
+	}
+	result->bits = 8; /* always 1 byte */
+
+	return result;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
@@ -1144,7 +1184,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_PSD:
 			return "image/psd";
 		case IMAGE_FILETYPE_BMP:
-			return "image/x-ms-bmp";
+			return "image/bmp";
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			return "image/tiff";
@@ -1160,6 +1200,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/xbm";
 		case IMAGE_FILETYPE_ICO:
 			return "image/vnd.microsoft.icon";
+		case IMAGE_FILETYPE_WEBP:
+			return "image/webp";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1173,9 +1215,9 @@ PHP_FUNCTION(image_type_to_mime_type)
 {
 	zend_long p_image_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &p_image_type) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(p_image_type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STRING(return_value, (char*)php_image_type_to_mime_type(p_image_type));
 }
@@ -1187,43 +1229,67 @@ PHP_FUNCTION(image_type_to_extension)
 {
 	zend_long image_type;
 	zend_bool inc_dot=1;
+	const char *imgext = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &image_type, &inc_dot) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(image_type)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(inc_dot)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
-			RETURN_STRING(".gif" + !inc_dot);
+			imgext = ".gif";
+			break;
 		case IMAGE_FILETYPE_JPEG:
-			RETURN_STRING(".jpeg" + !inc_dot);
+			imgext = ".jpeg";
+			break;
 		case IMAGE_FILETYPE_PNG:
-			RETURN_STRING(".png" + !inc_dot);
+			imgext = ".png";
+			break;
 		case IMAGE_FILETYPE_SWF:
 		case IMAGE_FILETYPE_SWC:
-			RETURN_STRING(".swf" + !inc_dot);
+			imgext = ".swf";
+			break;
 		case IMAGE_FILETYPE_PSD:
-			RETURN_STRING(".psd" + !inc_dot);
+			imgext = ".psd";
+			break;
 		case IMAGE_FILETYPE_BMP:
 		case IMAGE_FILETYPE_WBMP:
-			RETURN_STRING(".bmp" + !inc_dot);
+			imgext = ".bmp";
+			break;
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
-			RETURN_STRING(".tiff" + !inc_dot);
+			imgext = ".tiff";
+			break;
 		case IMAGE_FILETYPE_IFF:
-			RETURN_STRING(".iff" + !inc_dot);
+			imgext = ".iff";
+			break;
 		case IMAGE_FILETYPE_JPC:
-			RETURN_STRING(".jpc" + !inc_dot);
+			imgext = ".jpc";
+			break;
 		case IMAGE_FILETYPE_JP2:
-			RETURN_STRING(".jp2" + !inc_dot);
+			imgext = ".jp2";
+			break;
 		case IMAGE_FILETYPE_JPX:
-			RETURN_STRING(".jpx" + !inc_dot);
+			imgext = ".jpx";
+			break;
 		case IMAGE_FILETYPE_JB2:
-			RETURN_STRING(".jb2" + !inc_dot);
+			imgext = ".jb2";
+			break;
 		case IMAGE_FILETYPE_XBM:
-			RETURN_STRING(".xbm" + !inc_dot);
+			imgext = ".xbm";
+			break;
 		case IMAGE_FILETYPE_ICO:
-			RETURN_STRING(".ico" + !inc_dot);
+			imgext = ".ico";
+			break;
+		case IMAGE_FILETYPE_WEBP:
+			imgext = ".webp";
+			break;
+	}
+
+	if (imgext) {
+		RETURN_STRING(&imgext[!inc_dot]);
 	}
 
 	RETURN_FALSE;
@@ -1269,6 +1335,16 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_BMP;
 	} else if (!memcmp(filetype, php_sig_jpc, 3)) {
 		return IMAGE_FILETYPE_JPC;
+	} else if (!memcmp(filetype, php_sig_riff, 3)) {
+		if (php_stream_read(stream, filetype+3, 9) != 9) {
+			php_error_docref(NULL, E_NOTICE, "Read error!");
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
+		if (!memcmp(filetype+8, php_sig_webp, 4)) {
+			return IMAGE_FILETYPE_WEBP;
+		} else {
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
 	}
 
 	if (php_stream_read(stream, filetype+3, 1) != 1) {
@@ -1288,7 +1364,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 
     /* WBMP may be smaller than 12 bytes, so delay error */
 	twelve_bytes_read = (php_stream_read(stream, filetype+4, 8) == 8);
-    
+
 /* BYTES READ: 12 */
    	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
@@ -1373,6 +1449,9 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		case IMAGE_FILETYPE_ICO:
 			result = php_handle_ico(stream);
 			break;
+		case IMAGE_FILETYPE_WEBP:
+			result = php_handle_webp(stream);
+			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			break;
@@ -1411,13 +1490,17 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "s|z/", &input, &input_len, &info) == FAILURE) {
-			return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(input, input_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(info)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 2) {
-		zval_dtor(info);
-		array_init(info);
+		info = zend_try_array_init(info);
+		if (!info) {
+			return;
+		}
 	}
 
 	if (mode == FROM_PATH) {
@@ -1449,12 +1532,4 @@ PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+/* }}} */

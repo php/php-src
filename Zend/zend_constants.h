@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,30 +12,37 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_CONSTANTS_H
 #define ZEND_CONSTANTS_H
 
 #include "zend_globals.h"
 
-#define CONST_CS				(1<<0)				/* Case Sensitive */
-#define CONST_PERSISTENT		(1<<1)				/* Persistent */
-#define CONST_CT_SUBST			(1<<2)				/* Allow compile-time substitution */
+#define CONST_CS				0					/* No longer used -- always case sensitive */
+#define CONST_PERSISTENT		(1<<0)				/* Persistent */
+#define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
 
-#define	PHP_USER_CONSTANT INT_MAX	/* a constant defined in user space */
+#define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
 
 typedef struct _zend_constant {
 	zval value;
 	zend_string *name;
-	int flags;
-	int module_number;
 } zend_constant;
+
+#define ZEND_CONSTANT_FLAGS(c) \
+	(Z_CONSTANT_FLAGS((c)->value) & 0xff)
+
+#define ZEND_CONSTANT_MODULE_NUMBER(c) \
+	(Z_CONSTANT_FLAGS((c)->value) >> 8)
+
+#define ZEND_CONSTANT_SET_FLAGS(c, _flags, _module_number) do { \
+		Z_CONSTANT_FLAGS((c)->value) = \
+			((_flags) & 0xff) | ((_module_number) << 8); \
+	} while (0)
 
 #define REGISTER_NULL_CONSTANT(name, flags)  zend_register_null_constant((name), sizeof(name)-1, (flags), module_number)
 #define REGISTER_BOOL_CONSTANT(name, bval, flags)  zend_register_bool_constant((name), sizeof(name)-1, (bval), (flags), module_number)
@@ -64,7 +71,6 @@ void free_zend_constant(zval *zv);
 int zend_startup_constants(void);
 int zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-void clean_non_persistent_constants(void);
 ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
@@ -76,18 +82,21 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 ZEND_API void zend_register_string_constant(const char *name, size_t name_len, char *strval, int flags, int module_number);
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number);
 ZEND_API int zend_register_constant(zend_constant *c);
+#ifdef ZTS
 void zend_copy_constants(HashTable *target, HashTable *sourc);
-zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags);
+#endif
+
+ZEND_API zval *_zend_get_special_const(const char *name, size_t name_len);
+
+static zend_always_inline zval *zend_get_special_const(const char *name, size_t name_len) {
+	if (name_len == 4 || name_len == 5) {
+		return _zend_get_special_const(name, name_len);
+	}
+	return NULL;
+}
+
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

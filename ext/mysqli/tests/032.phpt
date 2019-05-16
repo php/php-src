@@ -37,6 +37,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS general_test"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
-%unicode|string%(38) "Records: 3  Duplicates: 0  Warnings: 0"
+--EXPECT--
+string(38) "Records: 3  Duplicates: 0  Warnings: 0"
 done!

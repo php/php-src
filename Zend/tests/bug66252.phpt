@@ -8,7 +8,7 @@ class A {
 class B extends A {
 	const BHW = parent::HW . " extended by B";
 }
-const C = B::BHW; 
+const C = B::BHW;
 echo C, "\n";
 --EXPECT--
 this is A extended by B

@@ -89,7 +89,7 @@ if (is_callable(array('test_class','test_func4'))) {
 $object = new foo();
 $object->test();
 ?>
---EXPECTF--
+--EXPECT--
 test_func1
 test_func2
 test_func3

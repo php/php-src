@@ -10,7 +10,7 @@ include("config.inc");
 include("lcmess.inc");
 
 if (!extension_loaded("pgsql")) {
-    die("skip\n");
+    die("skip pgsql extension not loaded\n");
 }
 $conn = @pg_connect($conn_str);
 if (!is_resource($conn)) {

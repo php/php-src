@@ -52,7 +52,9 @@ const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	"UTF-8",
 	(const char *(*)[])&mbfl_encoding_utf8_docomo_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_utf8_docomo_wchar,
+	&vtbl_wchar_utf8_docomo
 };
 
 const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
@@ -61,7 +63,9 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	"UTF-8",
 	(const char *(*)[])&mbfl_encoding_utf8_kddi_a_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_utf8_kddi_a_wchar,
+	&vtbl_wchar_utf8_kddi_a
 };
 
 const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
@@ -70,7 +74,9 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
 	"UTF-8",
 	(const char *(*)[])&mbfl_encoding_utf8_kddi_b_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_utf8_kddi_b_wchar,
+	&vtbl_wchar_utf8_kddi_b
 };
 
 const mbfl_encoding mbfl_encoding_utf8_sb = {
@@ -79,7 +85,9 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 	"UTF-8",
 	(const char *(*)[])&mbfl_encoding_utf8_sb_aliases,
 	mblen_table_utf8,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_utf8_sb_wchar,
+	&vtbl_wchar_utf8_sb
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_utf8_docomo = {
@@ -338,4 +346,3 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 
 	return c;
 }
-

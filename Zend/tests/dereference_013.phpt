@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 class foo {
 	public $x = array(2);
-		
+
 	public function __call($x, $y) {
 		if (count($this->x) == 1) {
 			$this->x[] = $y[0];

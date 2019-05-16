@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 require_once('fopen_include_path.inc');
@@ -32,10 +32,10 @@ function runtest() {
     global $dir1;
 	$tmpfile =  basename(__FILE__, ".php") . ".tmp";
 	$h = fopen($tmpfile, "w", true);
-	fwrite($h, (binary)"This is the test file");
+	fwrite($h, "This is the test file");
 	fclose($h);
-	
-	
+
+
 	$h = @fopen($tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in working dir\n";
@@ -45,7 +45,7 @@ function runtest() {
 	   fclose($h);
 	   unlink($tmpfile);
 	}
-	
+
 	$h = @fopen($dir1.'/'.$tmpfile, "r");
 	if ($h === false) {
 	   echo "Not created in dir1\n";
@@ -53,7 +53,7 @@ function runtest() {
 	else {
 	   echo "created in dir1\n";
 	   fclose($h);
-	   unlink($dir1.'/'.$tmpfile);   
+	   unlink($dir1.'/'.$tmpfile);
 	}
 }
 ?>

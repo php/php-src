@@ -36,6 +36,6 @@ $method = $x->getMethod();
 print "Global scope: $method\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Inside impl(): add
 Global scope: add

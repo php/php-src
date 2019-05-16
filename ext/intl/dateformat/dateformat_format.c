@@ -188,4 +188,3 @@ PHP_FUNCTION(datefmt_format)
 }
 
 /* }}} */
-

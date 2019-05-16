@@ -17,7 +17,7 @@ mysqli_driver properties
 --EXPECTF--
 bool(%s)
 int(%d)
-%unicode|string%(%d) "%s"
+string(%d) "%s"
 int(%d)
 bool(%s)
 int(%d)

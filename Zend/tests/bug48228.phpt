@@ -7,7 +7,7 @@ function do_throw() {
 	throw new Exception();
 }
 
-class aa 
+class aa
 {
 	function check()
 	{
@@ -23,7 +23,6 @@ $l_aa=new aa();
 $l_aa->dosome();
 ?>
 --EXPECTF--
-
 Fatal error: Uncaught Exception in %s
 Stack trace:
 #0 %s(%d): do_throw()

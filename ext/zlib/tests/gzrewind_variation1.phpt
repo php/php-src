@@ -1,18 +1,18 @@
 --TEST--
 Test function gzrewind() by calling it with its expected arguments when writing
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
-$f = "temp2.txt.gz";
+$f = "gzrewind_variation1.txt.gz";
 $h = gzopen($f, 'w');
-gzwrite($h, b'The first string.');
+gzwrite($h, 'The first string.');
 var_dump(gzrewind($h));
-gzwrite($h, b'The second string.');
+gzwrite($h, 'The second string.');
 gzclose($h);
 
 $h = gzopen($f, 'r');

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Stig Venaas <venaas@uninett.no>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef _PHP_NETWORK_H
 #define _PHP_NETWORK_H
@@ -91,9 +89,7 @@ END_EXTERN_C()
 #include <sys/time.h>
 #endif
 
-#ifdef HAVE_STDDEF_H
 #include <stddef.h>
-#endif
 
 #ifdef PHP_WIN32
 typedef SOCKET php_socket_t;
@@ -122,8 +118,12 @@ typedef int php_socket_t;
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
 
-#if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
-# include <sys/poll.h>
+#if defined(HAVE_POLL)
+# if defined(HAVE_POLL_H)
+#  include <poll.h>
+# elif defined(HAVE_SYS_POLL_H)
+#  include <sys/poll.h>
+# endif
 typedef struct pollfd php_pollfd;
 #else
 typedef struct _php_pollfd {
@@ -295,8 +295,8 @@ struct _php_netstream_data_t	{
 	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
-PHPAPI extern php_stream_ops php_stream_socket_ops;
-extern php_stream_ops php_stream_generic_socket_ops;
+PHPAPI extern const php_stream_ops php_stream_socket_ops;
+extern const php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
 BEGIN_EXTERN_C()
@@ -337,10 +337,3 @@ END_EXTERN_C()
 #endif
 
 #endif /* _PHP_NETWORK_H */
-
-/*
- * Local variables:
- * tab-width: 8
- * c-basic-offset: 8
- * End:
- */

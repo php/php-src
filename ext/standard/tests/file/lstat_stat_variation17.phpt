@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test the effects on stats by changing permissions of a dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 // checking stat() on directory
@@ -41,13 +41,12 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "!=") );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation17");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lstat() on a dir after changing its access permission ***
 bool(true)
 bool(true)

@@ -3,7 +3,7 @@ Test scandir() function : usage variations - different ints as $sorting_order ar
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -15,10 +15,10 @@ Test scandir() function : usage variations - different ints as $sorting_order ar
 echo "*** Testing scandir() : usage variations ***\n";
 
 // include for create_files/delete_files functions
-include(dirname(__FILE__) . '/../file/file.inc');
+include(__DIR__ . '/../file/file.inc');
 
 // create directory and files
-$dir = dirname(__FILE__) . '/scandir_variation9';
+$dir = __DIR__ . '/scandir_variation9';
 mkdir($dir);
 @create_files($dir, 2);
 
@@ -34,10 +34,10 @@ delete_files($dir, 2);
 ===DONE===
 --CLEAN--
 <?php
-$dir = dirname(__FILE__) . '/scandir_variation9';
+$dir = __DIR__ . '/scandir_variation9';
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 array(4) {
   [0]=>

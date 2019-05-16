@@ -55,11 +55,11 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
-  %unicode|string%(10) "Hello Worl"
+  string(10) "Hello Worl"
   [1]=>
-  %unicode|string%(99) "This is the first sentence. And this is the second sentence. And finally this is the last sentence."
+  string(99) "This is the first sentence. And this is the second sentence. And finally this is the last sentence."
 }
 done!

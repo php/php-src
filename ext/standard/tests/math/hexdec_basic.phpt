@@ -19,17 +19,17 @@ $values = array(0x123abc,
 				'311015',
 				31101.3,
 				31.1013e5,
-				011237,	
-				'011237', 			
+				011237,
+				'011237',
 				true,
 				false,
-				null);	
+				null);
 for ($i = 0; $i < count($values); $i++) {
 	$res = hexdec($values[$i]);
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(18433668)
 int(126895953)
 float(142929835591)

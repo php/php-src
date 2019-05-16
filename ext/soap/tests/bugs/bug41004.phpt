@@ -9,7 +9,7 @@ ini_set('soap.wsdl_cache_enabled', false);
 class EchoBean{
 	public $mandatoryElement;
 	public $optionalElement;
-	
+
 }
 
 class EchoRequest{
@@ -20,7 +20,7 @@ class EchoResponse{
 	public $out;
 }
 
-$wsdl = dirname(__FILE__)."/bug41004.wsdl";
+$wsdl = __DIR__."/bug41004.wsdl";
 $classmap = array('EchoBean'=>'EchoBean','echo'=>'EchoRequest','echoResponse'=>'EchoResponse');
 $client = new SoapClient($wsdl, array('location'=>'test://',"classmap" => $classmap, 'exceptions'=>0, 'trace'=>1));
 $echo=new EchoRequest();

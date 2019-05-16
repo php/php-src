@@ -109,21 +109,21 @@ function remove_data($id, $dir = NULL)
 		$objects = scandir($dir);
 		foreach ($objects as $object) {
 			if ($object != "." && $object != "..") {
-				if (filetype($dir . DIRECTORY_SEPARATOR . $object) == "dir") 
-					remove_data($id, $dir . DIRECTORY_SEPARATOR . $object); 
-				else 
+				if (filetype($dir . DIRECTORY_SEPARATOR . $object) == "dir")
+					remove_data($id, $dir . DIRECTORY_SEPARATOR . $object);
+				else
 					unlink($dir . DIRECTORY_SEPARATOR . $object);
 			}
 		}
 		reset($objects);
 		rmdir($dir);
-	} 
+	}
 }
 
 function create_data($id, $item = "", $cp = 65001, $utf8 = true)
 {
 	if ($utf8) {
-		/* Keep this file ASCII, so zend.multibyte related stuff can be tasted as well. */ 
+		/* Keep this file ASCII, so zend.multibyte related stuff can be tasted as well. */
 		include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util_utf8.inc";
 		return create_data_from_utf8($id, $item, $cp);
 	} else {
@@ -146,4 +146,3 @@ function create_data($id, $item = "", $cp = 65001, $utf8 = true)
 
 	return $prefix;
 }
-

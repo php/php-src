@@ -66,7 +66,9 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	"EUC-JP",
 	(const char *(*)[])&mbfl_encoding_euc_jp_aliases,
 	mblen_table_eucjp,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_eucjp_wchar,
+	&vtbl_wchar_eucjp
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_eucjp = {
@@ -326,6 +328,3 @@ int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-
-

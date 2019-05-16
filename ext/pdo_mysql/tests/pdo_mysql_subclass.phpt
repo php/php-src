@@ -2,19 +2,13 @@
 MySQL PDOStatement->execute()/fetch(), Non-SELECT
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (version_compare(PHP_VERSION, '5.0.0', '<'))
-	die("skip Requires PHP 5.0+");
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
-	// No silly strict mode warnings, please!
-	error_reporting(E_ALL^E_STRICT);
-	ini_set('display_errors', false);
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	try {
 
@@ -25,7 +19,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 				return call_user_func_array(array($this, 'parent::__construct'), func_get_args());
 			}
 
-			public function exec() {
+			public function exec($query) {
 				$this->protocol();
 				return call_user_func_array(array($this, 'parent::exec'), func_get_args());
 			}
@@ -76,7 +70,7 @@ if (version_compare(PHP_VERSION, '5.0.0', '<'))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
@@ -89,13 +83,13 @@ query('SELECT * FROM test ORDER BY id ASC')
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
   }
 }
 bool(false)

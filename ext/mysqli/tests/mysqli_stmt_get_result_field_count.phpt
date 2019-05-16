@@ -45,6 +45,6 @@ mysqli_stmt_get_result() - meta data, field_count()
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 2 2
 done!

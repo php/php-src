@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |          Kévin Dunglas <dunglas@gmail.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_filter.h"
 #include "filter_private.h"
@@ -36,12 +34,24 @@
 #endif
 
 
+/* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
+#define FETCH_DOUBLE_OPTION(var_name, option_name) \
+   	var_name = 0; \
+	var_name##_set = 0; \
+	if (option_array) { \
+		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
+			var_name = zval_get_double(option_val); \
+			var_name##_set = 1; \
+		} \
+	}
+/* }}} */
+
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name) \
    	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
+		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
 			var_name = zval_get_long(option_val); \
 			var_name##_set = 1; \
 		} \
@@ -54,7 +64,7 @@
 	var_name##_set = 0; \
 	var_name##_len = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
+		if ((option_val = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STRVAL_P(option_val); \
 				var_name##_len = Z_STRLEN_P(option_val); \
@@ -69,7 +79,7 @@
 	var_name = NULL; \
 	var_name##_set = 0; \
 	if (option_array) { \
-		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
+		if ((option_val = zend_hash_str_find_deref(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) { \
 			if (Z_TYPE_P(option_val) == IS_STRING) { \
 				var_name = Z_STR_P(option_val); \
 				var_name##_set = 1; \
@@ -314,7 +324,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (ret == -1) {
 		RETURN_VALIDATION_FAILED
 	} else {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_BOOL(value, ret);
 	}
 }
@@ -330,10 +340,15 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int decimal_set;
 	size_t decimal_len;
 	char dec_sep = '.';
-	char tsd_sep[3] = "',.";
+	char *thousand;
+	int thousand_set;
+	size_t thousand_len;
+	char *tsd_sep;
 
 	zend_long lval;
 	double dval;
+	double min_range, max_range;
+	int   min_range_set, max_range_set;
 
 	int first, n;
 
@@ -353,6 +368,22 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			dec_sep = *decimal;
 		}
 	}
+
+	FETCH_STRING_OPTION(thousand, "thousand");
+
+	if (thousand_set) {
+		if (thousand_len < 1) {
+			php_error_docref(NULL, E_WARNING, "thousand separator must be at least one char");
+			RETURN_VALIDATION_FAILED
+		} else {
+			tsd_sep = thousand;
+		}
+	} else {
+		tsd_sep = "',.";
+	}
+
+	FETCH_DOUBLE_OPTION(min_range, "min_range");
+	FETCH_DOUBLE_OPTION(max_range, "max_range");
 
 	num = p = emalloc(len+1);
 	if (str < end && (*str == '+' || *str == '-')) {
@@ -387,7 +418,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			}
 			break;
 		}
-		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && (*str == tsd_sep[0] || *str == tsd_sep[1] || *str == tsd_sep[2])) {
+		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && strchr(tsd_sep, *str)) {
 			if (first?(n < 1 || n > 3):(n != 3)) {
 				goto error;
 			}
@@ -405,10 +436,16 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
 			zval_ptr_dtor(value);
+			if ((min_range_set && (lval < min_range)) || (max_range_set && (lval > max_range))) {
+				goto error;
+			}
 			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
 			if ((!dval && p - num > 1 && strpbrk(num, "123456789")) || !zend_finite(dval)) {
+				goto error;
+			}
+			if ((min_range_set && (dval < min_range)) || (max_range_set && (dval > max_range))) {
 				goto error;
 			}
 			zval_ptr_dtor(value);
@@ -428,11 +465,10 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zval *option_val;
 	zend_string *regexp;
 	int regexp_set;
-	pcre *re = NULL;
-	pcre_extra *pcre_extra = NULL;
-	int preg_options = 0;
-	int ovector[3];
-	int matches;
+	pcre2_code *re = NULL;
+	pcre2_match_data *match_data = NULL;
+	uint32_t capture_count;
+	int rc;
 
 	/* Parse options */
 	FETCH_STR_OPTION(regexp, "regexp");
@@ -442,14 +478,19 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
+	re = pcre_get_compiled_regex(regexp, &capture_count);
 	if (!re) {
 		RETURN_VALIDATION_FAILED
 	}
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
+	match_data = php_pcre_create_match_data(capture_count, re);
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
-	if (matches < 0) {
+	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
 }
@@ -532,7 +573,8 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
+	if (url->scheme != NULL &&
+		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
 		char *e, *s, *t;
 		size_t l;
 
@@ -540,9 +582,9 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			goto bad_url;
 		}
 
-		s = url->host;
-		l = strlen(s);
-		e = url->host + l;
+		s = ZSTR_VAL(url->host);
+		l = ZSTR_LEN(url->host);
+		e = s + l;
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
@@ -552,7 +594,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		// Validate domain
-		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
+		if (!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)) {
 			php_url_free(url);
 			RETURN_VALIDATION_FAILED
 		}
@@ -561,7 +603,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
+		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:
@@ -598,12 +640,11 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * Feel free to use and redistribute this code. But please keep this copyright notice.
 	 *
 	 */
-	pcre       *re = NULL;
-	pcre_extra *pcre_extra = NULL;
-	int preg_options = 0;
-	int         ovector[150]; /* Needs to be a multiple of 3 */
-	int         matches;
+	pcre2_code *re = NULL;
+	pcre2_match_data *match_data = NULL;
+	uint32_t capture_count;
 	zend_string *sregexp;
+	int rc;
 	const char regexp0[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E\\pL\\pN]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F\\pL\\pN]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E\\pL\\pN]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F\\pL\\pN]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iDu";
 	const char regexp1[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iD";
 	const char *regexp;
@@ -623,16 +664,20 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
-	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options);
+	re = pcre_get_compiled_regex(sregexp, &capture_count);
+	zend_string_release_ex(sregexp, 0);
 	if (!re) {
-		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	zend_string_release(sregexp);
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
+	match_data = php_pcre_create_match_data(capture_count, re);
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
-	if (matches < 0) {
+	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
 
@@ -731,7 +776,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 					return (blocks <= 8);
 				}
 			} else if ((str - 1) == s) {
-				/* dont allow leading : without another : following */
+				/* don't allow leading : without another : following */
 				return 0;
 			}
 		}
@@ -789,8 +834,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
 				if (
 					(ip[0] == 10) ||
-					(ip[0] == 169 && ip[1] == 254) ||
-					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
+					(ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31) ||
 					(ip[0] == 192 && ip[1] == 168)
 				) {
 					RETURN_VALIDATION_FAILED
@@ -800,19 +844,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_RES_RANGE) {
 				if (
 					(ip[0] == 0) ||
-					(ip[0] == 10) ||
-					(ip[0] == 100 && (ip[1] >= 64 && ip[1] <= 127)) ||
+					(ip[0] >= 240) ||
 					(ip[0] == 127) ||
-					(ip[0] == 169 && ip[1] == 254) ||
-					(ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31)) ||
-					(ip[0] == 192 && ip[1] == 0 && ip[2] == 0) ||
-					(ip[0] == 192 && ip[1] == 0 && ip[2] == 2) ||
-					(ip[0] == 192 && ip[1] == 88 && ip[2] == 99) ||
-					(ip[0] == 192 && ip[1] == 168) ||
-					(ip[0] == 198 && (ip[1] == 18 || ip[1] == 19)) ||
-					(ip[0] == 198 && ip[1] == 51 && ip[2] == 100) ||
-					(ip[0] == 203 && ip[1] == 0 && ip[2] == 113) ||
-					(ip[0] >= 224 && ip[0] <= 255)
+					(ip[0] == 169 && ip[1] == 254)
 				) {
 					RETURN_VALIDATION_FAILED
 				}
@@ -934,12 +968,3 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

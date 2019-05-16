@@ -52,20 +52,20 @@ void gdPutC (const unsigned char c, gdIOCtx * ctx)
 
 void gdPutWord (int w, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting word..."));
+	IO_DBG (gd_error("Putting word..."));
 	(ctx->putC) (ctx, (unsigned char) (w >> 8));
 	(ctx->putC) (ctx, (unsigned char) (w & 0xFF));
-	IO_DBG (php_gd_error("put."));
+	IO_DBG (gd_error("put."));
 }
 
 void gdPutInt (int w, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting int..."));
+	IO_DBG (gd_error("Putting int..."));
 	(ctx->putC) (ctx, (unsigned char) (w >> 24));
 	(ctx->putC) (ctx, (unsigned char) ((w >> 16) & 0xFF));
 	(ctx->putC) (ctx, (unsigned char) ((w >> 8) & 0xFF));
 	(ctx->putC) (ctx, (unsigned char) (w & 0xFF));
-	IO_DBG (php_gd_error("put."));
+	IO_DBG (gd_error("put."));
 }
 
 int gdGetC (gdIOCtx * ctx)
@@ -95,6 +95,26 @@ int gdGetWord (int *result, gdIOCtx * ctx)
 }
 
 
+int gdGetWordLSB(signed short int *result, gdIOCtx *ctx)
+{
+	int high = 0, low = 0;
+	low = (ctx->getC) (ctx);
+	if (low == EOF) {
+		return 0;
+	}
+
+	high = (ctx->getC) (ctx);
+	if (high == EOF) {
+		return 0;
+	}
+
+	if (result) {
+		*result = (high << 8) | low;
+	}
+
+	return 1;
+}
+
 int gdGetInt (int *result, gdIOCtx * ctx)
 {
 	int r;
@@ -119,11 +139,50 @@ int gdGetInt (int *result, gdIOCtx * ctx)
 	return 1;
 }
 
+int gdGetIntLSB(signed int *result, gdIOCtx *ctx)
+{
+	int c = 0;
+	unsigned int r = 0;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+	r >>= 8;
+
+	c = (ctx->getC) (ctx);
+	if (c == EOF) {
+		return 0;
+	}
+	r |= (c << 24);
+
+	if (result) {
+		*result = (signed int)r;
+	}
+
+	return 1;
+}
+
 int gdPutBuf (const void *buf, int size, gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Putting buf..."));
+	IO_DBG (gd_error("Putting buf..."));
 	return (ctx->putBuf) (ctx, buf, size);
-	IO_DBG (php_gd_error("put."));
+	IO_DBG (gd_error("put."));
 }
 
 int gdGetBuf (void *buf, int size, gdIOCtx * ctx)
@@ -133,14 +192,14 @@ int gdGetBuf (void *buf, int size, gdIOCtx * ctx)
 
 int gdSeek (gdIOCtx * ctx, const int pos)
 {
-	IO_DBG (php_gd_error("Seeking..."));
+	IO_DBG (gd_error("Seeking..."));
 	return ((ctx->seek) (ctx, pos));
-	IO_DBG (php_gd_error("Done."));
+	IO_DBG (gd_error("Done."));
 }
 
 long gdTell (gdIOCtx * ctx)
 {
-	IO_DBG (php_gd_error("Telling..."));
+	IO_DBG (gd_error("Telling..."));
 	return ((ctx->tell) (ctx));
-	IO_DBG (php_gd_error ("told."));
+	IO_DBG (gd_error ("told."));
 }

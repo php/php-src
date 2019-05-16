@@ -9,27 +9,26 @@ $values = array(10,
 				27,
 				39,
 				03,
-				0x5F,	
+				0x5F,
 				"10",
 				"27",
 				"39",
-				"5F", 
+				"5F",
 				"3XYZ"
-				);	
+				);
 
 for ($f= 0; $f < count($frombase); $f++) {
 	echo "\n...from base is ", $frombase[$f], "\n";
 	for ($t= 0; $t < count($tobase); $t++) {
-		echo "......to base is ", $tobase[$t], "\n";	
-		for ($i =0; $i < count($values); $i++){ 	
+		echo "......to base is ", $tobase[$t], "\n";
+		for ($i =0; $i < count($values); $i++){
 			$res = base_convert($values[$i],$frombase[$f],$tobase[$t]);
 			echo ".........value= ", $values[$i], " res = ", $res, "\n";
-		}		
-	}	
+		}
+	}
 }
 ?>
-
---EXPECTF--
+--EXPECT--
 ...from base is 2
 ......to base is 2
 .........value= 10 res = 10

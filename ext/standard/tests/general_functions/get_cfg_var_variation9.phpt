@@ -21,7 +21,7 @@ EOT;
 
 $variation_array = array(
   'session.use_cookies',
-  'session.serialize_handler', 
+  'session.serialize_handler',
   'session.save_handler'
   );
 
@@ -30,7 +30,7 @@ foreach ( $variation_array as $var ) {
   var_dump(get_cfg_var( $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument with array of valid parameters ***
 string(1) "0"
 string(3) "php"

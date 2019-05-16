@@ -2,13 +2,12 @@
 ziparchive::addFile() function
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_addfile.zip';
 
@@ -29,7 +28,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 }
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 0 bar
 1 foobar/
 2 foobar/baz

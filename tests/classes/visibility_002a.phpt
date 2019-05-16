@@ -1,7 +1,5 @@
 --TEST--
 ZE2 A redeclared method must have the same or higher visibility
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -30,4 +28,4 @@ class fail extends same {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Access level to fail::f2() must be public (as in class same) in %s on line %d
+Fatal error: Access level to fail::f2() must be public (as in class same) in %s on line 22

@@ -13,7 +13,7 @@ $array = parse_ini_string('
 		d = INSTALL_ROOT "INSTALL_ROOT"', false, INI_SCANNER_RAW);
 
 var_dump($array);
---EXPECTF--
+--EXPECT--
 array(7) {
   ["int"]=>
   string(3) "123"
@@ -30,4 +30,3 @@ array(7) {
   ["d"]=>
   string(27) "INSTALL_ROOT "INSTALL_ROOT""
 }
-

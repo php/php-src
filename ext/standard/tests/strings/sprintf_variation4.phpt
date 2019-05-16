@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -39,11 +39,11 @@ $int_formats = array(
   "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }
@@ -52,7 +52,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with float values ***
 
 -- Iteration 1 --

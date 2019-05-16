@@ -67,6 +67,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 ok
 done!

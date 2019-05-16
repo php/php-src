@@ -2,8 +2,6 @@
 mb_parse_str()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
---FAIL--
-register_globals calls killed the ability for mb_parse_str() to register into the global scope
 --INI--
 arg_separator.input=&
 --FILE--
@@ -20,15 +18,12 @@ function test($query) {
 	var_dump($array);
 	var_dump($foo);
 	var_dump($bar);
-	mb_parse_str($query);
-	var_dump($foo);
-	var_dump($bar);
 }
 foreach ($queries as $query) {
 	test($query);
 }
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["foo"]=>
   string(3) "abc"
@@ -37,16 +32,12 @@ array(2) {
 }
 string(0) ""
 string(0) ""
-string(3) "abc"
-string(3) "def"
 array(2) {
   ["+foo"]=>
   string(3) "def"
   ["-bar"]=>
   string(3) "jkl"
 }
-string(0) ""
-string(0) ""
 string(0) ""
 string(0) ""
 array(2) {
@@ -67,15 +58,3 @@ array(2) {
 }
 string(0) ""
 string(0) ""
-array(3) {
-  [0]=>
-  string(3) "abc"
-  [1]=>
-  string(3) "def"
-  [2]=>
-  string(3) "ghi"
-}
-array(1) {
-  [0]=>
-  string(3) "jkl"
-}

@@ -10,5 +10,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(74) "SplFileObject::__construct() expects parameter 2 to be string, array given"

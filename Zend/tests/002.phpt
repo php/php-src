@@ -50,7 +50,7 @@ var_dump(func_get_arg(1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: func_get_arg():  The argument number should be >= 0 in %s on line %d
 bool(false)
 

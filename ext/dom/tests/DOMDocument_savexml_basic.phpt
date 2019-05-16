@@ -25,7 +25,7 @@ EOXML;
 $dom = new DOMDocument();
 $dom->loadXML($xml);
 $root = $dom->documentElement;
-$directory = dirname(__FILE__);
+$directory = __DIR__;
 
 $filename = $directory."/tmp_dom_savexml".time();
 var_dump($dom->save($filename));
@@ -33,7 +33,6 @@ $result = file_get_contents($filename);
 var_dump($result == $dom->saveXML());
 
 unlink($filename);
-
---EXPECTF--
+--EXPECT--
 int(151)
 bool(true)

@@ -1,7 +1,7 @@
 --TEST--
 default argument value in and in implementing class with interface in included file
 --FILE--
-<?php 
+<?php
 include 'interface_optional_arg_003.inc';
 
 class C implements I {
@@ -13,5 +13,5 @@ class C implements I {
 $c = new C;
 $c->f();
 ?>
---EXPECTF--
+--EXPECT--
 int(2)

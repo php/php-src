@@ -3,9 +3,9 @@ Test get_class_methods() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -16,7 +16,7 @@ class C {
 	private function privC() {}
 	protected function protC() {}
 	public function pubC() {}
-	
+
 	public static function testFromC() {
 		echo "Accessing C from C:\n";
 		var_dump(get_class_methods("C"));
@@ -31,7 +31,7 @@ class D extends C {
 	private function privD() {}
 	protected function protD() {}
 	public function pubD() {}
-	
+
 	public static function testFromD() {
 		echo "Accessing C from D:\n";
 		var_dump(get_class_methods("C"));
@@ -46,7 +46,7 @@ class X {
 	private function privX() {}
 	protected function protX() {}
 	public function pubX() {}
-	
+
 	public static function testFromX() {
 		echo "Accessing C from X:\n";
 		var_dump(get_class_methods("C"));
@@ -66,7 +66,7 @@ X::testFromX();
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Accessing D from global scope:
 array(4) {
   [0]=>

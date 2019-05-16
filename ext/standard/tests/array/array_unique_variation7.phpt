@@ -3,7 +3,7 @@ Test array_unique() function : usage variations - binary safe checking
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -20,7 +20,7 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : array with binary data for $input argument ***
 array(3) {
   [0]=>

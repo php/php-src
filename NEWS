@@ -1,5 +1,40 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2016, PHP 7.2.0alpha1
+?? ??? ????, PHP 8.0.0alpha1
+
+- Core:
+  . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
+  . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
+    (Fabien Villepinte)
+
+- GD:
+  . Removed deprecated image2wbmp(). (cmb)
+  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
+
+- Intl:
+  . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
+
+- JIT:
+  . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
+
+- LDAP:
+  . Removed deprecated ldap_sort. (mcmic)
+
+- PDO:
+  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
+    (camporter)
+
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
+  . Fixed bug #76801 (too many open files). (alekitto)
+  . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
+    (krakjoe)
+  . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
+  
+- sodium:
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
+
+- XML:
+  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

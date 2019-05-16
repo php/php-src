@@ -7,7 +7,7 @@ GetImageSize()
 --FILE--
 <?php
 	// Note: SWC requires zlib
-	$dir = opendir(dirname(__FILE__)) or die('cannot open directory: '.dirname(__FILE__));
+	$dir = opendir(__DIR__) or die('cannot open directory: '.__DIR__);
 	$result = array();
 	$files  = array();
 	while (($file = readdir($dir)) !== FALSE) {
@@ -18,12 +18,12 @@ GetImageSize()
 	closedir($dir);
 	sort($files);
 	foreach($files as $file) {
-		$result[$file] = getimagesize(dirname(__FILE__)."/$file");
+		$result[$file] = getimagesize(__DIR__."/$file");
 	}
 	var_dump($result);
 ?>
 --EXPECT--
-array(13) {
+array(16) {
   ["test-1pix.bmp"]=>
   array(6) {
     [0]=>
@@ -37,22 +37,37 @@ array(13) {
     ["bits"]=>
     int(24)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
+  }
+  ["test12pix.webp"]=>
+  array(6) {
+    [0]=>
+    int(4)
+    [1]=>
+    int(3)
+    [2]=>
+    int(18)
+    [3]=>
+    string(20) "width="4" height="3""
+    ["bits"]=>
+    int(8)
+    ["mime"]=>
+    string(10) "image/webp"
   }
   ["test1bpix.bmp"]=>
   array(6) {
     [0]=>
-    int(500)
+    int(1)
     [1]=>
-    int(345)
+    int(1)
     [2]=>
     int(6)
     [3]=>
-    string(24) "width="500" height="345""
+    string(20) "width="1" height="1""
     ["bits"]=>
     int(32)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
   }
   ["test1pix.bmp"]=>
   array(6) {
@@ -67,7 +82,7 @@ array(13) {
     ["bits"]=>
     int(24)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
   }
   ["test1pix.jp2"]=>
   array(7) {
@@ -136,6 +151,36 @@ array(13) {
     int(3)
     ["mime"]=>
     string(9) "image/gif"
+  }
+  ["test3llpix.webp"]=>
+  array(6) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+    [2]=>
+    int(18)
+    [3]=>
+    string(20) "width="1" height="3""
+    ["bits"]=>
+    int(8)
+    ["mime"]=>
+    string(10) "image/webp"
+  }
+  ["test3pix.webp"]=>
+  array(6) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(3)
+    [2]=>
+    int(18)
+    [3]=>
+    string(20) "width="1" height="3""
+    ["bits"]=>
+    int(8)
+    ["mime"]=>
+    string(10) "image/webp"
   }
   ["test4pix.gif"]=>
   array(7) {

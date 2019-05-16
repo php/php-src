@@ -14,13 +14,6 @@ if (!function_exists('mysqli_get_connection_stats')) {
 ?>
 --FILE--
 <?php
-	$tmp = $link = null;
-	if (!is_null($tmp = @mysqli_get_connection_stats()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_get_connection_stats($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require("table.inc");
 
 	if (!is_array($info = mysqli_get_connection_stats($link)) || empty($info))
@@ -83,5 +76,5 @@ if (!function_exists('mysqli_get_connection_stats')) {
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

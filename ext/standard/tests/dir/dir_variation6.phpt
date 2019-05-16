@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
@@ -21,7 +21,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing dir() : open a non-existent directory ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation6";
 @mkdir($dir_path);
 

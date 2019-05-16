@@ -24,7 +24,7 @@ function ut_main()
 include_once( 'ut_common.inc' );
 ut_run();
 ?>
---EXPECTF--
+--EXPECT--
 false
 'locale_accept_from_http: locale string too long: U_ILLEGAL_ARGUMENT_ERROR'
 'en'

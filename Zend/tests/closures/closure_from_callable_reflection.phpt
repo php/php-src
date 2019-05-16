@@ -29,13 +29,13 @@ foreach ($callables as $callable) {
 	foreach ($refl->getParameters() as $param) {
 		if ($param->hasType()) {
 			$type = $param->getType();
-			echo $type->__toString() . "\n";
+			echo $type->getName() . "\n";
 		}
 	}
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Bar
 int
 Bar

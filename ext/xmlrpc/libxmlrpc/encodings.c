@@ -30,18 +30,7 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef PHP_WIN32
-#include <php_config.h>
-#else
-#include <config.w32.h>
-#include <stdlib.h>
-#endif
-
-static const char rcsid[] = "#(@) $Id$";
+#include <php.h>
 
 #include <errno.h>
 #include <string.h>
@@ -74,28 +63,23 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
       ic = iconv_open(to_enc, from_enc);
       if(ic != (iconv_t)-1) {
          size_t st;
-         outbuf = (char*)malloc(outlen + 1);
+         outbuf = (char*)emalloc(outlen + 1);
 
-         if(outbuf) {
-            out_ptr = (char*)outbuf;
-            while(inlenleft) {
-               st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
-               if(st == -1) {
-                  if(errno == E2BIG) {
-                     int diff = out_ptr - outbuf;
-                     outlen += inlenleft;
-                     outlenleft += inlenleft;
-                     outbuf = (char*)realloc(outbuf, outlen + 1);
-                     if(!outbuf) {
-                        break;
-                     }
-                     out_ptr = outbuf + diff;
-                  }
-                  else {
-                     free(outbuf);
-                     outbuf = 0;
-                     break;
-                  }
+         out_ptr = (char*)outbuf;
+         while(inlenleft) {
+            st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
+            if(st == -1) {
+               if(errno == E2BIG) {
+                  int diff = out_ptr - outbuf;
+                  outlen += inlenleft;
+                  outlenleft += inlenleft;
+                  outbuf = (char*)erealloc(outbuf, outlen + 1);
+                  out_ptr = outbuf + diff;
+               }
+               else {
+                  efree(outbuf);
+                  outbuf = 0;
+                  break;
                }
             }
          }
@@ -124,4 +108,3 @@ char* utf8_decode(const char *s, int len, int *newlen, const char* encoding)
 {
    return convert(s, len, newlen, "UTF-8", encoding);
 }
-

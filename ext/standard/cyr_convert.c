@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Kirill Maximov <kir@rus.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include <stdlib.h>
 
@@ -274,9 +272,11 @@ PHP_FUNCTION(convert_cyr_string)
 	size_t input_len, fr_cs_len, to_cs_len;
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(input, input_len)
+		Z_PARAM_STRING(fr_cs, fr_cs_len)
+		Z_PARAM_STRING(to_cs, to_cs_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	str = zend_string_init(input, input_len, 0);
 
@@ -284,12 +284,3 @@ PHP_FUNCTION(convert_cyr_string)
 	RETVAL_NEW_STR(str);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

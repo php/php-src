@@ -49,5 +49,5 @@ $proc->importStyleSheet($xsldoc);
 
 var_dump($proc->transformToURI($xsldoc, 'php://output'));
 ?>
---EXPECTF--
+--EXPECT--
 int(56)

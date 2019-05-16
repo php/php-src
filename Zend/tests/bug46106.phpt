@@ -15,8 +15,13 @@ function test($x) {
 }
 
 $x = new ReflectionFunction('str_pad');
-test($x);
+try {
+    test($x);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 DONE
 --EXPECT--
+str_pad() expects at least 2 parameters, 1 given
 DONE

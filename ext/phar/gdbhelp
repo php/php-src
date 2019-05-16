@@ -21,9 +21,9 @@ define ____print_pharht
 		set $temp = *(phar_archive_data*)$p->pDataPtr
 		____print_str $temp.fname $temp.fname_len
 		printf " => "
-		
+
 		if $arg1 == 0
-			
+
 			printf "%i (alias ", $temp.refcount
 			____print_str $temp.alias $temp.alias_len
 			printf ")\n"

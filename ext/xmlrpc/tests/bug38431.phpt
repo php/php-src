@@ -16,7 +16,7 @@ var_dump(xmlrpc_get_type($var));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(5) "array"
 string(5) "array"
 string(5) "array"

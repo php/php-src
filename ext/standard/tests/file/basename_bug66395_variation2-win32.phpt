@@ -20,7 +20,7 @@ echo basename("a:\\b:\\c:d:hello\\world:c:\$DATA") . "\n";
 echo basename("a:\\b:\\c:d:hello\\d:world:c:\$DATA") . "\n";
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 y
 y
 notdriveletter:file.txt

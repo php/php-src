@@ -30,7 +30,6 @@ var_dump(define('ELEPHPANT', [new StdClass]));
 $recursive = [];
 $recursive[0] = &$recursive;
 var_dump(define('RECURSION', $recursive));
-
 --EXPECTF--
 array(4) {
   [0]=>
@@ -94,7 +93,7 @@ array(1) {
   int(7)
 }
 
-Warning: Constants may only evaluate to scalar values or arrays in %s on line %d
+Warning: Constants may only evaluate to scalar values, arrays or resources in %s on line %d
 bool(false)
 
 Warning: Constants cannot be recursive arrays in %s on line %d

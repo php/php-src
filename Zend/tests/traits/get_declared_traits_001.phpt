@@ -12,8 +12,8 @@ final class e { }
 var_dump(get_declared_traits());
 
 ?>
---EXPECT--
-array(1) {
-  [0]=>
+--EXPECTF--
+array(%d) {%A
+  [%d]=>
   string(1) "c"
 }

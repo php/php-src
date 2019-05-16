@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
@@ -30,8 +28,8 @@
 #include "zend_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
-static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
 static php_stream_filter_status_t strfilter_rot13_filter(
 	php_stream *stream,
@@ -61,25 +59,25 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 	return PSFS_PASS_ON;
 }
 
-static php_stream_filter_ops strfilter_rot13_ops = {
+static const php_stream_filter_ops strfilter_rot13_ops = {
 	strfilter_rot13_filter,
 	NULL,
 	"string.rot13"
 };
 
-static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
 }
 
-static php_stream_filter_factory strfilter_rot13_factory = {
+static const php_stream_filter_factory strfilter_rot13_factory = {
 	strfilter_rot13_create
 };
 /* }}} */
 
 /* {{{ string.toupper / string.tolower stream filter implementation */
-static char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
-static char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
+static const char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 static php_stream_filter_status_t strfilter_toupper_filter(
 	php_stream *stream,
@@ -137,158 +135,35 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 	return PSFS_PASS_ON;
 }
 
-static php_stream_filter_ops strfilter_toupper_ops = {
+static const php_stream_filter_ops strfilter_toupper_ops = {
 	strfilter_toupper_filter,
 	NULL,
 	"string.toupper"
 };
 
-static php_stream_filter_ops strfilter_tolower_ops = {
+static const php_stream_filter_ops strfilter_tolower_ops = {
 	strfilter_tolower_filter,
 	NULL,
 	"string.tolower"
 };
 
-static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_toupper_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_toupper_ops, NULL, persistent);
 }
 
-static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_tolower_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
 }
 
-static php_stream_filter_factory strfilter_toupper_factory = {
+static const php_stream_filter_factory strfilter_toupper_factory = {
 	strfilter_toupper_create
 };
 
-static php_stream_filter_factory strfilter_tolower_factory = {
+static const php_stream_filter_factory strfilter_tolower_factory = {
 	strfilter_tolower_create
 };
-/* }}} */
-
-/* {{{ strip_tags filter implementation */
-typedef struct _php_strip_tags_filter {
-	const char *allowed_tags;
-	int allowed_tags_len;
-	int state;
-	int persistent;
-} php_strip_tags_filter;
-
-static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, size_t allowed_tags_len, int persistent)
-{
-	if (allowed_tags != NULL) {
-		if (NULL == (inst->allowed_tags = pemalloc(allowed_tags_len, persistent))) {
-			return FAILURE;
-		}
-		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
-		inst->allowed_tags_len = (int)allowed_tags_len;
-	} else {
-		inst->allowed_tags = NULL;
-	}
-	inst->state = 0;
-	inst->persistent = persistent;
-
-	return SUCCESS;
-}
-
-static void php_strip_tags_filter_dtor(php_strip_tags_filter *inst)
-{
-	if (inst->allowed_tags != NULL) {
-		pefree((void *)inst->allowed_tags, inst->persistent);
-	}
-}
-
-static php_stream_filter_status_t strfilter_strip_tags_filter(
-	php_stream *stream,
-	php_stream_filter *thisfilter,
-	php_stream_bucket_brigade *buckets_in,
-	php_stream_bucket_brigade *buckets_out,
-	size_t *bytes_consumed,
-	int flags
-	)
-{
-	php_stream_bucket *bucket;
-	size_t consumed = 0;
-	php_strip_tags_filter *inst = (php_strip_tags_filter *) Z_PTR(thisfilter->abstract);
-
-	while (buckets_in->head) {
-		bucket = php_stream_bucket_make_writeable(buckets_in->head);
-		consumed = bucket->buflen;
-
-		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), inst->allowed_tags, inst->allowed_tags_len);
-
-		php_stream_bucket_append(buckets_out, bucket);
-	}
-
-	if (bytes_consumed) {
-		*bytes_consumed = consumed;
-	}
-
-	return PSFS_PASS_ON;
-}
-
-static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter)
-{
-	assert(Z_PTR(thisfilter->abstract) != NULL);
-
-	php_strip_tags_filter_dtor((php_strip_tags_filter *)Z_PTR(thisfilter->abstract));
-
-	pefree(Z_PTR(thisfilter->abstract), ((php_strip_tags_filter *)Z_PTR(thisfilter->abstract))->persistent);
-}
-
-static php_stream_filter_ops strfilter_strip_tags_ops = {
-	strfilter_strip_tags_filter,
-	strfilter_strip_tags_dtor,
-	"string.strip_tags"
-};
-
-static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent)
-{
-	php_strip_tags_filter *inst;
-	smart_str tags_ss = {0};
-
-	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
-
-	if (inst == NULL) { /* it's possible pemalloc returns NULL
-						   instead of causing it to bail out */
-		return NULL;
-	}
-
-	if (filterparams != NULL) {
-		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
-			zval *tmp;
-
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
-				convert_to_string_ex(tmp);
-				smart_str_appendc(&tags_ss, '<');
-				smart_str_append(&tags_ss, Z_STR_P(tmp));
-				smart_str_appendc(&tags_ss, '>');
-			} ZEND_HASH_FOREACH_END();
-			smart_str_0(&tags_ss);
-		} else {
-			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
-			convert_to_string_ex(filterparams);
-			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRLEN_P(filterparams));
-		}
-	}
-
-	if (php_strip_tags_filter_ctor(inst, ZSTR_VAL(tags_ss.s), ZSTR_LEN(tags_ss.s), persistent) != SUCCESS) {
-		smart_str_free(&tags_ss);
-		pefree(inst, persistent);
-		return NULL;
-	}
-
-	smart_str_free(&tags_ss);
-
-	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
-}
-
-static php_stream_filter_factory strfilter_strip_tags_factory = {
-	strfilter_strip_tags_create
-};
-
 /* }}} */
 
 /* {{{ base64 / quoted_printable stream filter implementation */
@@ -829,7 +704,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 		}
 
-		if (lb_ptr >= lb_cnt && icnt <= 0) {
+		if (lb_ptr >= lb_cnt && icnt == 0) {
 			break;
 		}
 
@@ -919,7 +794,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			line_ccnt--;
 			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		} else {
-			if (line_ccnt < 4) {
+			if (line_ccnt < 4 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
 					break;
@@ -1035,7 +910,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	for (;;) {
 		switch (scan_stat) {
 			case 0: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == '=') {
@@ -1052,7 +927,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 1: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == ' ' || *ps == '\t') {
@@ -1081,7 +956,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} /* break is missing intentionally */
 
 			case 2: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 
@@ -1108,7 +983,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 4: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (lb_cnt < inst->lbchars_len &&
@@ -1217,15 +1092,13 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	*pretval_len = 0;
 
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
-		zend_string *str = zval_get_string(tmpval);
+		zend_string *tmp;
+		zend_string *str = zval_get_tmp_string(tmpval, &tmp);
 
-		if (NULL == (*pretval = pemalloc(ZSTR_LEN(str) + 1, persistent))) {
-			return PHP_CONV_ERR_ALLOC;
-		}
-
+		*pretval = pemalloc(ZSTR_LEN(str) + 1, persistent);
 		*pretval_len = ZSTR_LEN(str);
 		memcpy(*pretval, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-		zend_string_release(str);
+		zend_tmp_string_release(tmp);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1485,9 +1358,7 @@ static int strfilter_convert_append_bucket(
 	}
 
 	out_buf_size = ocnt = initial_out_buf_size;
-	if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-		return FAILURE;
-	}
+	out_buf = pemalloc(out_buf_size, persistent);
 
 	pd = out_buf;
 
@@ -1540,20 +1411,10 @@ static int strfilter_convert_append_bucket(
 						php_stream_bucket_append(buckets_out, new_bucket);
 
 						out_buf_size = ocnt = initial_out_buf_size;
-						if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-							return FAILURE;
-						}
+						out_buf = pemalloc(out_buf_size, persistent);
 						pd = out_buf;
 					} else {
-						if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
-							if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent))) {
-								goto out_failure;
-							}
-
-							php_stream_bucket_append(buckets_out, new_bucket);
-							return FAILURE;
-						}
-
+						new_out_buf = perealloc(out_buf, new_out_buf_size, persistent);
 						pd = new_out_buf + (pd - out_buf);
 						ocnt += (new_out_buf_size - out_buf_size);
 						out_buf = new_out_buf;
@@ -1612,19 +1473,10 @@ static int strfilter_convert_append_bucket(
 					php_stream_bucket_append(buckets_out, new_bucket);
 
 					out_buf_size = ocnt = initial_out_buf_size;
-					if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
-						return FAILURE;
-					}
+					out_buf = pemalloc(out_buf_size, persistent);
 					pd = out_buf;
 				} else {
-					if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
-						if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent))) {
-							goto out_failure;
-						}
-
-						php_stream_bucket_append(buckets_out, new_bucket);
-						return FAILURE;
-					}
+					new_out_buf = perealloc(out_buf, new_out_buf_size, persistent);
 					pd = new_out_buf + (pd - out_buf);
 					ocnt += (new_out_buf_size - out_buf_size);
 					out_buf = new_out_buf;
@@ -1718,13 +1570,13 @@ static void strfilter_convert_dtor(php_stream_filter *thisfilter)
 	pefree(Z_PTR(thisfilter->abstract), ((php_convert_filter *)Z_PTR(thisfilter->abstract))->persistent);
 }
 
-static php_stream_filter_ops strfilter_convert_ops = {
+static const php_stream_filter_ops strfilter_convert_ops = {
 	strfilter_convert_filter,
 	strfilter_convert_dtor,
 	"convert.*"
 };
 
-static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *strfilter_convert_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
 	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
@@ -1769,7 +1621,7 @@ out:
 	return retval;
 }
 
-static php_stream_filter_factory strfilter_convert_factory = {
+static const php_stream_filter_factory strfilter_convert_factory = {
 	strfilter_convert_create
 };
 /* }}} */
@@ -1778,7 +1630,7 @@ static php_stream_filter_factory strfilter_convert_factory = {
 typedef struct _php_consumed_filter_data {
 	size_t consumed;
 	zend_off_t offset;
-	int persistent;
+	uint8_t persistent;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1821,15 +1673,15 @@ static void consumed_filter_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops consumed_filter_ops = {
+static const php_stream_filter_ops consumed_filter_ops = {
 	consumed_filter_filter,
 	consumed_filter_dtor,
 	"consumed"
 };
 
-static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_consumed_filter_data *data;
 
 	if (strcasecmp(filtername, "consumed")) {
@@ -1838,10 +1690,6 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_consumed_filter_data), persistent);
-	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_consumed_filter_data));
-		return NULL;
-	}
 	data->persistent = persistent;
 	data->consumed = 0;
 	data->offset = ~0;
@@ -1850,7 +1698,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory consumed_filter_factory = {
+static const php_stream_filter_factory consumed_filter_factory = {
 	consumed_filter_create
 };
 
@@ -2029,15 +1877,15 @@ static void php_chunked_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops chunked_filter_ops = {
+static const php_stream_filter_ops chunked_filter_ops = {
 	php_chunked_filter,
 	php_chunked_dtor,
 	"dechunk"
 };
 
-static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
 
 	if (strcasecmp(filtername, "dechunk")) {
@@ -2046,10 +1894,6 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 
 	/* Create this filter */
 	data = (php_chunked_filter_data *)pecalloc(1, sizeof(php_chunked_filter_data), persistent);
-	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_chunked_filter_data));
-		return NULL;
-	}
 	data->state = CHUNK_SIZE_START;
 	data->chunk_size = 0;
 	data->persistent = persistent;
@@ -2058,19 +1902,18 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-static php_stream_filter_factory chunked_filter_factory = {
+static const php_stream_filter_factory chunked_filter_factory = {
 	chunked_filter_create
 };
 /* }}} */
 
 static const struct {
-	php_stream_filter_ops *ops;
-	php_stream_filter_factory *factory;
+	const php_stream_filter_ops *ops;
+	const php_stream_filter_factory *factory;
 } standard_filters[] = {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },
 	{ &strfilter_tolower_ops, &strfilter_tolower_factory },
-	{ &strfilter_strip_tags_ops, &strfilter_strip_tags_factory },
 	{ &strfilter_convert_ops, &strfilter_convert_factory },
 	{ &consumed_filter_ops, &consumed_filter_factory },
 	{ &chunked_filter_ops, &chunked_filter_factory },
@@ -2104,12 +1947,3 @@ PHP_MSHUTDOWN_FUNCTION(standard_filters)
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,10 +1,9 @@
 --TEST--
-XMLReader: libxml2 XML Reader, next 
+XMLReader: libxml2 XML Reader, next
 --SKIPIF--
 <?php if (!extension_loaded("xmlreader")) print "skip"; ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"><test /></book><book num="2" /></books>';
@@ -23,6 +22,6 @@ echo $reader->getAttribute('num');
 echo "\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 book 2
 ===DONE===

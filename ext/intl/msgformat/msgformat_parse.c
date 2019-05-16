@@ -69,9 +69,6 @@ PHP_FUNCTION( msgfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr,  &source, &source_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_parse: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -104,12 +101,10 @@ PHP_FUNCTION( msgfmt_parse_message )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sss",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_parse_message: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
+	INTL_CHECK_LOCALE_LEN(slocale_len);
 	memset(mfo, 0, sizeof(*mfo));
 	msgformat_data_init(&mfo->mf_data);
 
@@ -151,12 +146,3 @@ PHP_FUNCTION( msgfmt_parse_message )
 	msgformat_data_free(&mfo->mf_data);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

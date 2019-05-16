@@ -5,7 +5,7 @@ Test ctype_print() function : usage variations - octal and hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s) 
+ * Description: Checks for printable character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -38,7 +38,7 @@ foreach($hex_values as $c) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_print() : usage variations ***
 
 -- Octal Values --

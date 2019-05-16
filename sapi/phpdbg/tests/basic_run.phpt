@@ -3,6 +3,6 @@ Basic run
 --PHPDBG--
 r
 q
---EXPECTF--
+--EXPECT--
 prompt> [Nothing to execute!]
 prompt> 

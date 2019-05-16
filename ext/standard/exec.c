@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
    |         Ilia Alshanetsky <iliaa@php.net>                             |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include <stdio.h>
 #include "php.h"
@@ -32,9 +31,8 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SIGNAL_H
+
 #include <signal.h>
-#endif
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -50,8 +48,10 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
+
+#ifdef PHP_WIN32
+# include "win32/nice.h"
 #endif
 
 static size_t cmd_max_len;
@@ -209,15 +209,15 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
-	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
-			RETURN_FALSE;
+	ZEND_PARSE_PARAMETERS_START(1, (mode ? 2 : 3))
+		Z_PARAM_STRING(cmd, cmd_len)
+		Z_PARAM_OPTIONAL
+		if (!mode) {
+			Z_PARAM_ZVAL(ret_array)
 		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
+		Z_PARAM_ZVAL(ret_code)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if (!cmd_len) {
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
@@ -230,15 +230,20 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (!ret_array) {
 		ret = php_exec(mode, cmd, NULL, return_value);
 	} else {
-		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
-			zval_dtor(ret_array);
-			array_init(ret_array);
+		if (Z_TYPE_P(Z_REFVAL_P(ret_array)) == IS_ARRAY) {
+			ZVAL_DEREF(ret_array);
+			SEPARATE_ARRAY(ret_array);
+		} else {
+			ret_array = zend_try_array_init(ret_array);
+			if (!ret_array) {
+				return;
+			}
 		}
+
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		zval_dtor(ret_code);
-		ZVAL_LONG(ret_code, ret);
+		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret);
 	}
 }
 /* }}} */
@@ -288,7 +293,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 	/* max command line length - two single quotes - \0 byte length */
 	if (l > cmd_max_len - 2 - 1) {
-		php_error_docref(NULL, E_ERROR, "Command exceeds the allowed length of %d bytes", cmd_max_len);
+		php_error_docref(NULL, E_ERROR, "Command exceeds the allowed length of %zu bytes", cmd_max_len);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -321,7 +326,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				ZSTR_VAL(cmd)[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH while ^%PATH^% will not. escapeshellcmd->val will escape all % and !.
 			*/
 			case '%':
@@ -363,9 +368,9 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	}
 	ZSTR_VAL(cmd)[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
-		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %d bytes", cmd_max_len);
-		zend_string_release(cmd);
+	if (y > cmd_max_len + 1) {
+		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %zu bytes", cmd_max_len);
+		zend_string_release_ex(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -392,7 +397,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 
 	/* max command line length - two single quotes - \0 byte length */
 	if (l > cmd_max_len - 2 - 1) {
-		php_error_docref(NULL, E_ERROR, "Argument exceeds the allowed length of %d bytes", cmd_max_len);
+		php_error_docref(NULL, E_ERROR, "Argument exceeds the allowed length of %zu bytes", cmd_max_len);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -450,9 +455,9 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 #endif
 	ZSTR_VAL(cmd)[y] = '\0';
 
-	if (y - 1 > cmd_max_len) {
-		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %d bytes", cmd_max_len);
-		zend_string_release(cmd);
+	if (y > cmd_max_len + 1) {
+		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %zu bytes", cmd_max_len);
+		zend_string_release_ex(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -473,9 +478,9 @@ PHP_FUNCTION(escapeshellcmd)
 	char *command;
 	size_t command_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
@@ -496,9 +501,9 @@ PHP_FUNCTION(escapeshellarg)
 	char *argument;
 	size_t argument_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &argument, &argument_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(argument, argument_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument) {
 		if (argument_len != strlen(argument)) {
@@ -520,9 +525,9 @@ PHP_FUNCTION(shell_exec)
 	zend_string *ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
@@ -550,14 +555,20 @@ PHP_FUNCTION(proc_nice)
 {
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &pri) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(pri)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	errno = 0;
 	php_ignore_value(nice(pri));
 	if (errno) {
+#ifdef PHP_WIN32
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
+#else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
+#endif
 		RETURN_FALSE;
 	}
 
@@ -565,12 +576,3 @@ PHP_FUNCTION(proc_nice)
 }
 /* }}} */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

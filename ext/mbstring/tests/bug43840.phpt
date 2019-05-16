@@ -8,7 +8,7 @@ function_exists('mb_strpos') or die("skip mb_strpos() is not available in this b
 --FILE--
 <?php
 /* Prototype  : int mb_strpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another 
+ * Description: Find position of first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -28,7 +28,7 @@ foreach($offsets as $i) {
 	echo "--Multibyte String:--\n";
 	var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
 	echo"--ASCII String:--\n";
-	var_dump(mb_strpos(b'This is na English ta', b'a', $i));
+	var_dump(mb_strpos('This is na English ta', 'a', $i));
 }
 ?>
 --EXPECTF--

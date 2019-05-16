@@ -179,7 +179,7 @@ if (!have_innodb($link))
 
 								if ($parent_row != $client_row) {
 									printf("[015] Child indicates different results than parent.\n");
-									var_dump($child_row);
+									var_dump($client_row);
 									var_dump($parent_row);
 									if (!mysqli_query($plink, sprintf($parent_sql, 'stop'))) {
 										printf("[016] Parent cannot inform child\n", mysqli_errno($plink), mysqli_error($plink));
@@ -236,7 +236,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS messages"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["message"]=>
   string(20) "dumped by the parent"

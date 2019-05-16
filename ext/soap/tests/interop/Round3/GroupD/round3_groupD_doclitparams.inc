@@ -2,7 +2,7 @@
 class SOAP_Interop_GroupD {
 
     function echoString($inputString)
-    {    	
+    {
       return array("return"=>$inputString->param0);
     }
 

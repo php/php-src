@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,13 +12,11 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    |          Pierre Joye <pierre@php.net>                                |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef VIRTUAL_CWD_H
 #define VIRTUAL_CWD_H
@@ -34,9 +32,7 @@
 #include <utime.h>
 #endif
 
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#endif
 
 #ifdef ZTS
 #define VIRTUAL_DIR
@@ -53,7 +49,7 @@
 #endif
 
 #ifdef ZEND_WIN32
-#include "readdir.h"
+#include "win32/readdir.h"
 #include <sys/utime.h>
 #include "win32/ioutil.h"
 /* mode_t isn't defined on Windows */
@@ -72,19 +68,6 @@ typedef unsigned short mode_t;
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && (/* is local */isalpha(path[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
-
-#elif defined(NETWARE)
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-
-#define DEFAULT_SLASH '/'
-#define DEFAULT_DIR_SEPARATOR	';'
-#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
-#define IS_SLASH_P(c)	IS_SLASH(*(c))
-/* Colon indicates volume name, either first character should be forward slash or backward slash */
-#define IS_ABSOLUTE_PATH(path, len) \
-    ((strchr(path, ':') != NULL) || ((len >= 1) && ((path[0] == '/') || (path[0] == '\\'))))
 
 #else
 #ifdef HAVE_DIRENT_H
@@ -131,21 +114,27 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef ZEND_WIN32
-CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
-# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
-# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
-CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
+# define php_sys_stat_ex php_win32_ioutil_stat_ex
+# define php_sys_stat php_win32_ioutil_stat
+# define php_sys_lstat php_win32_ioutil_lstat
+# define php_sys_fstat php_win32_ioutil_fstat
+# define php_sys_readlink php_win32_ioutil_readlink
+# define php_sys_symlink php_win32_ioutil_symlink
+# define php_sys_link php_win32_ioutil_link
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
+# define php_sys_fstat fstat
 # ifdef HAVE_SYMLINK
 # define php_sys_readlink(link, target, target_len) readlink(link, target, target_len)
+# define php_sys_symlink symlink
+# define php_sys_link link
 # endif
 #endif
 
 typedef struct _cwd_state {
 	char *cwd;
-	int cwd_length;
+	size_t cwd_length;
 } cwd_state;
 
 typedef int (*verify_path_func)(const cwd_state *);
@@ -173,34 +162,19 @@ CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
-#if defined(ZEND_WIN32)
-/* these are not defined in win32 headers */
-#ifndef W_OK
-#define W_OK 0x02
-#endif
-#ifndef R_OK
-#define R_OK 0x04
-#endif
-#ifndef X_OK
-#define X_OK 0x01
-#endif
-#ifndef F_OK
-#define F_OK 0x00
-#endif
-#endif
 
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode);
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link);
 #endif
 
 /* One of the following constants must be used as the last argument
    in virtual_file_ex() call. */
 
-#define CWD_EXPAND   0 /* expand "." and ".." but dont resolve symlinks      */
+#define CWD_EXPAND   0 /* expand "." and ".." but don't resolve symlinks     */
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
@@ -217,14 +191,14 @@ typedef struct _realpath_cache_bucket {
 	char                          *realpath;
 	struct _realpath_cache_bucket *next;
 	time_t                         expires;
-	int                            path_len;
-	int                            realpath_len;
-	int                            is_dir;
+	uint16_t                       path_len;
+	uint16_t                       realpath_len;
+	uint8_t                        is_dir:1;
 #ifdef ZEND_WIN32
-	unsigned char                  is_rvalid;
-	unsigned char                  is_readable;
-	unsigned char                  is_wvalid;
-	unsigned char                  is_writable;
+	uint8_t                        is_rvalid:1;
+	uint8_t                        is_readable:1;
+	uint8_t                        is_wvalid:1;
+	uint8_t                        is_writable:1;
 #endif
 } realpath_cache_bucket;
 
@@ -238,18 +212,23 @@ typedef struct _virtual_cwd_globals {
 
 #ifdef ZTS
 extern ts_rsrc_id cwd_globals_id;
-# define CWDG(v) ZEND_TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
+extern size_t cwd_globals_offset;
+# define CWDG(v) ZEND_TSRMG_FAST(cwd_globals_offset, virtual_cwd_globals *, v)
 #else
 extern virtual_cwd_globals cwd_globals;
 # define CWDG(v) (cwd_globals.v)
 #endif
 
 CWD_API void realpath_cache_clean(void);
-CWD_API void realpath_cache_del(const char *path, int path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API void realpath_cache_del(const char *path, size_t path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
+
+#ifdef CWD_EXPORTS
+extern void virtual_cwd_main_cwd_init(uint8_t);
+#endif
 
 /* The actual macros to be used in programs using TSRM
  * If the program defines VIRTUAL_DIR it will use the
@@ -281,7 +260,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
@@ -336,7 +315,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 # endif
 #endif
 
-#if !defined(ZEND_WIN32) && !defined(NETWARE)
+#if !defined(ZEND_WIN32)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #if HAVE_LCHOWN
 #define VCWD_LCHOWN(path, owner, group) lchown(path, owner, group)
@@ -355,7 +334,8 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #ifndef S_IFLNK
-# define S_IFLNK 0120000
+#define _IFLNK  0120000	/* symbolic link */
+#define S_IFLNK _IFLNK
 #endif
 
 #ifndef S_ISDIR
@@ -372,6 +352,17 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 #ifndef S_IXROOT
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+#endif
+
+/* XXX should be _S_IFIFO? */
+#ifndef S_IFIFO
+#define	_IFIFO  0010000	/* fifo */
+#define S_IFIFO	_IFIFO
+#endif
+
+#ifndef S_IFBLK
+#define	_IFBLK  0060000	/* block special */
+#define S_IFBLK	_IFBLK
 #endif
 
 #endif /* VIRTUAL_CWD_H */

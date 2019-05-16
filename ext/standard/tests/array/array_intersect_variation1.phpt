@@ -3,7 +3,7 @@ Test array_intersect() function : usage variations - unexpected values for 'arr1
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -19,7 +19,7 @@ echo "*** Testing array_intersect() : Passing non-array values to \$arr1 argumen
 $arr2 = array(1, 2);
 
 // array to be passed to optional argument
-$arr3 = array(1, 2, "one" => 1, "two" => 2); 
+$arr3 = array(1, 2, "one" => 1, "two" => 2);
 
 // get an unset variable
 $unset_var = 10;
@@ -70,7 +70,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -93,7 +93,7 @@ $arrays = array(
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
   echo "\n-- Iterator $iterator --";
-  
+
   // Calling array_intersect() with default arguments
   var_dump( array_intersect($unexpected_value,$arr2) );
 
@@ -111,170 +111,170 @@ echo "Done";
 *** Testing array_intersect() : Passing non-array values to $arr1 argument ***
 
 -- Iterator 1 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iterator 2 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iterator 3 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iterator 4 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
 -- Iterator 5 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iterator 6 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iterator 7 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iterator 8 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iterator 9 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, float given in %s on line %d
 NULL
 
 -- Iterator 10 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iterator 11 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iterator 12 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iterator 13 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iterator 14 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iterator 15 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, bool given in %s on line %d
 NULL
 
 -- Iterator 16 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iterator 17 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iterator 18 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iterator 19 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iterator 20 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, string given in %s on line %d
 NULL
 
 -- Iterator 21 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, object given in %s on line %d
 NULL
 
 -- Iterator 22 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iterator 23 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, null given in %s on line %d
 NULL
 
 -- Iterator 24 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
+Warning: array_intersect(): Expected parameter 1 to be an array, resource given in %s on line %d
 NULL
 Done

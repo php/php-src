@@ -16,7 +16,7 @@ echo "$i\n";
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Test
 %d
 %d

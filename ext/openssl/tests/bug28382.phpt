@@ -1,13 +1,12 @@
 --TEST--
 Bug #28382 (openssl_x509_parse extensions support)
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
-if (OPENSSL_VERSION_NUMBER<0x009070af) die("skip");
+<?php
+if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
 <?php
-$cert = file_get_contents(dirname(__FILE__) . "/bug28382cert.txt");
+$cert = file_get_contents(__DIR__ . "/bug28382cert.txt");
 $ext = openssl_x509_parse($cert);
 var_dump($ext['extensions']);
 /* openssl 1.0 prepends the string "Full Name:" to the crlDistributionPoints array key.

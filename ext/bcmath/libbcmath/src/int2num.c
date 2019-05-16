@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -81,4 +80,3 @@ bc_int2num (num, val)
   while (ix-- > 0)
     *vptr++ = *--bptr;
 }
-

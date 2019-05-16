@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - file opened using w and r mode 
+Test lstat() and stat() functions: usage variations - file opened using w and r mode
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* use stat on file created using "w" and "r" mode of fopen */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -43,13 +43,12 @@ var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation13.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking stat() on a file opened using read/write mode ***
 bool(true)
 bool(true)

@@ -6,7 +6,7 @@ Testing unlink() function : basic functionality
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing unlink() on a file ***\n";
 $filename = "$file_path/unlink_basic.tmp";  // temp file name used here
@@ -32,7 +32,7 @@ var_dump( file_exists($filename) );  // confirm file doesnt exist
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing unlink() on a file ***
 bool(true)
 bool(false)

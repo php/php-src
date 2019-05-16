@@ -24,8 +24,16 @@ class MyCachingIterator extends CachingIterator
 		{
 			echo "===$k===\n";
 			var_dump($v);
-			var_dump($this->offsetExists($v));
-			var_dump($this->offsetGet($v));
+			try {
+                var_dump($this->offsetExists($v));
+            } catch (TypeError $e) {
+                echo $e->getMessage(), "\n";
+            }
+			try {
+                var_dump($this->offsetGet($v));
+            } catch (TypeError $e) {
+                echo $e->getMessage(), "\n";
+            }
 		}
 	}
 }
@@ -52,9 +60,6 @@ catch(Exception $e)
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)), CachingIterator::FULL_CACHE);
 
-var_dump($it->offsetExists());
-var_dump($it->offsetGet());
-
 $checks = array(0, new stdClass, new MyFoo, NULL, 2, 'foo', 3);
 
 $it->test($checks);
@@ -71,12 +76,6 @@ $it->test($checks);
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
-
-Warning: CachingIterator::offsetExists() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
-NULL
-
-Warning: CachingIterator::offsetGet() expects exactly 1 parameter, 0 given in %siterator_044.php on line %d
-NULL
 ===0===
 int(0)
 bool(false)
@@ -86,12 +85,8 @@ NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string, object given in %siterator_044.php on line %d
-NULL
-
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string, object given in %siterator_044.php on line %d
-NULL
+CachingIterator::offsetExists() expects parameter 1 to be string, object given
+CachingIterator::offsetGet() expects parameter 1 to be string, object given
 ===2===
 object(MyFoo)#%d (0) {
 }
@@ -131,12 +126,8 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-
-Warning: CachingIterator::offsetExists() expects parameter 1 to be string, object given in %siterator_044.php on line %d
-NULL
-
-Warning: CachingIterator::offsetGet() expects parameter 1 to be string, object given in %siterator_044.php on line %d
-NULL
+CachingIterator::offsetExists() expects parameter 1 to be string, object given
+CachingIterator::offsetGet() expects parameter 1 to be string, object given
 ===2===
 object(MyFoo)#2 (0) {
 }

@@ -9,7 +9,7 @@ class A extends SplObjectStorage {
     public function __construct() {
         $this->a = '123';
     }
-    
+
     public function getA() {
         return $this->a;
     }

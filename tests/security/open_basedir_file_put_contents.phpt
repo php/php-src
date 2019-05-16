@@ -54,4 +54,3 @@ Warning: file_put_contents(): open_basedir restriction in effect. File%s/test/ba
 Warning: file_put_contents%s/test/bad/bad.txt): failed to open stream: %s in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [file_put_contents] ***
-

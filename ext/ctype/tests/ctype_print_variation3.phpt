@@ -5,7 +5,7 @@ Test ctype_print() function : usage variations - different strings
 --FILE--
 <?php
 /* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s) 
+ * Description: Checks for printable character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -40,7 +40,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
 );
 
@@ -54,7 +54,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_print() : usage variations ***
 
 -- Iteration 1 --

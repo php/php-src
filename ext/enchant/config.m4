@@ -1,10 +1,7 @@
-dnl
-dnl $Id$
-dnl
-
-PHP_ARG_WITH(enchant,for ENCHANT support,
-[  --with-enchant[=DIR]      Include enchant support.
-                          GNU Aspell version 1.1.3 or higher required.])
+PHP_ARG_WITH([enchant],
+  [for ENCHANT support],
+  [AS_HELP_STRING([[--with-enchant[=DIR]]],
+    [Include enchant support. GNU Aspell version 1.1.3 or higher required.])])
 
 if test "$PHP_ENCHANT" != "no"; then
 	PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)

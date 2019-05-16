@@ -6,16 +6,17 @@ w/Kenzo over the shoulder
 #phptek Chicago 2014
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
-include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_addpattern.zip';
+include __DIR__ . '/utils.inc';
 
-copy($dirname . 'test.zip', $file);
+$dirname = __DIR__ . '/oo_addpattern_dir/';
+$file = $dirname . 'tmp.zip';
+
+@mkdir($dirname);
+copy(__DIR__ . '/test.zip', $file);
 touch($dirname . 'foo.txt');
 touch($dirname . 'bar.txt');
 
@@ -37,12 +38,13 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 ?>
 --CLEAN--
 <?php
-$dirname = dirname(__FILE__) . '/';
-unlink($dirname . '__tmp_oo_addpattern.zip');
+$dirname = __DIR__ . '/oo_addpattern_dir/';
+unlink($dirname . 'tmp.zip');
 unlink($dirname . 'foo.txt');
 unlink($dirname . 'bar.txt');
+rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 0 bar
 1 foobar/
 2 foobar/baz

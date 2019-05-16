@@ -10,7 +10,7 @@ namespace TestNamespace
         {
             echo "Static method called!\n";
         }
-        
+
         public static function staticMethodWithArgs($arg1, $arg2, $arg3)
         {
             printf("Static method called with args: %s, %s, %s\n", $arg1, $arg2, $arg3);

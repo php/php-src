@@ -8,7 +8,7 @@ soap.wsdl_cache_enabled=0
 <?php
 ini_set("soap.wsdl_cache_enabled",0);
 $timestamp = "2005-11-08T11:22:07+03:00";
-$wsdl = dirname(__FILE__)."/bug35142.wsdl";
+$wsdl = __DIR__."/bug35142.wsdl";
 
 function PostEvents($x) {
 	var_dump($x);
@@ -32,7 +32,7 @@ class TestSoapClient extends SoapClient {
 
 }
 
-$soapClient = new TestSoapClient($wsdl, 
+$soapClient = new TestSoapClient($wsdl,
 	array('trace' => 1, 'exceptions' => 0,
 		'classmap' => array('logOnEvent' => 'LogOnEvent',
 			'logOffEvent' => 'LogOffEvent',

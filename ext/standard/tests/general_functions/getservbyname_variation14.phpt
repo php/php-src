@@ -6,7 +6,7 @@ Test function getservbyname() by substituting argument 2 with string values.
 
 echo "*** Test substituting argument 2 with string values ***\n";
 
-$service = "www"; 
+$service = "www";
 
 
 $heredoc = <<<EOT
@@ -25,7 +25,7 @@ foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $service, $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 2 with string values ***
 bool(false)
 bool(false)

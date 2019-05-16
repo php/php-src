@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -236,12 +236,25 @@ typedef enum mysqlnd_client_option
 	MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
 	MYSQL_PLUGIN_DIR,
 	MYSQL_DEFAULT_AUTH,
+	MYSQL_OPT_BIND,
+	MYSQL_OPT_SSL_KEY,
+	MYSQL_OPT_SSL_CERT,
+	MYSQL_OPT_SSL_CA,
+	MYSQL_OPT_SSL_CAPATH,
+	MYSQL_OPT_SSL_CIPHER,
+	MYSQL_OPT_SSL_CRL,
+	MYSQL_OPT_SSL_CRLPATH,
 	MYSQL_OPT_CONNECT_ATTR_RESET,
 	MYSQL_OPT_CONNECT_ATTR_ADD,
 	MYSQL_OPT_CONNECT_ATTR_DELETE,
 	MYSQL_SERVER_PUBLIC_KEY,
 	MYSQL_ENABLE_CLEARTEXT_PLUGIN,
 	MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
+	MYSQL_OPT_SSL_ENFORCE,
+	MYSQL_OPT_MAX_ALLOWED_PACKET,
+	MYSQL_OPT_NET_BUFFER_LENGTH,
+	MYSQL_OPT_TLS_VERSION,
+	MYSQL_OPT_SSL_MODE,
 	MYSQLND_DEPRECATED_ENUM1 = 200,
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,
@@ -618,6 +631,7 @@ enum mysqlnd_packet_type
 	PROT_CHG_USER_RESP_PACKET,
 	PROT_SHA256_PK_REQUEST_PACKET,
 	PROT_SHA256_PK_REQUEST_RESPONSE_PACKET,
+	PROT_CACHED_SHA2_RESULT_PACKET,
 	PROT_LAST /* should always be last */
 };
 
@@ -697,13 +711,3 @@ enum mysqlnd_buffered_type
 #define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

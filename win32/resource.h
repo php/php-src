@@ -3,6 +3,9 @@
 // Used by php7dllts.rc
 //
 
+#ifndef PHP_WIN32_RESOURCE_H
+#define PHP_WIN32_RESOURCE_H
+
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED
@@ -12,4 +15,6 @@
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
+#endif
+
 #endif

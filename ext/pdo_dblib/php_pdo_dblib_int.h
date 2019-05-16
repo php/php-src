@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |         Frank M. Kromann <frank@kromann.info>                        |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_PDO_DBLIB_INT_H
 #define PHP_PDO_DBLIB_INT_H
@@ -53,6 +51,7 @@
 # define SQLINT1	SYBINT1
 # define SQLINT2	SYBINT2
 # define SQLINT4	SYBINT4
+# define SQLINT8	SYBINT8
 # define SQLINTN	SYBINTN
 # define SQLBIT		SYBBIT
 # define SQLFLT4	SYBREAL
@@ -63,6 +62,9 @@
 # define SQLDATETIME	SYBDATETIME
 # define SQLDATETIM4	SYBDATETIME4
 # define SQLDATETIMN	SYBDATETIMN
+# ifdef SYBMSDATETIME2
+# define SQLMSDATETIME2  SYBMSDATETIME2
+# endif
 # define SQLMONEY		SYBMONEY
 # define SQLMONEY4		SYBMONEY4
 # define SQLMONEYN		SYBMONEYN
@@ -89,14 +91,19 @@ typedef unsigned char *LPBYTE;
 typedef float			DBFLT4;
 #endif
 
+/* hardcoded string length from FreeTDS
+ * src/tds/convert.c:tds_convert_datetimeall()
+ */
+# define DATETIME_MAX_LEN   63
+
 int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr);
 
 int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line);
 
-extern pdo_driver_t pdo_dblib_driver;
-extern struct pdo_stmt_methods dblib_stmt_methods;
+extern const pdo_driver_t pdo_dblib_driver;
+extern const struct pdo_stmt_methods dblib_stmt_methods;
 
 typedef struct {
 	int severity;
@@ -108,11 +115,17 @@ typedef struct {
 	char *lastmsg;
 } pdo_dblib_err;
 
+void pdo_dblib_err_dtor(pdo_dblib_err *err);
+
 typedef struct {
 	LOGINREC	*login;
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	unsigned assume_national_character_set_strings:1;
+	unsigned stringify_uniqueidentifier:1;
+	unsigned skip_empty_rowsets:1;
+	unsigned datetime_convert:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -132,18 +145,23 @@ ZEND_BEGIN_MODULE_GLOBALS(dblib)
 	char sqlstate[6];
 ZEND_END_MODULE_GLOBALS(dblib)
 
-#ifdef ZTS
-# define DBLIB_G(v) TSRMG(dblib_globals_id, zend_dblib_globals *, v)
-#else
-# define DBLIB_G(v) (dblib_globals.v)
+#if defined(ZTS) && (defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL))
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(dblib)
+#define DBLIB_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dblib, v)
 
 ZEND_EXTERN_MODULE_GLOBALS(dblib)
 
 enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
-	PDO_DBLIB_ATTR_QUERY_TIMEOUT
+	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
+	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+	PDO_DBLIB_ATTR_VERSION,
+	PDO_DBLIB_ATTR_TDS_VERSION,
+	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
+	PDO_DBLIB_ATTR_DATETIME_CONVERT,
 };
 
 #endif
-

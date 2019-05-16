@@ -1,13 +1,11 @@
 --TEST--
 ZE2 __call()
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
 class Caller {
 	public $x = array(1, 2, 3);
-	
+
 	function __call($m, $a) {
 		echo "Method $m called:\n";
 		var_dump($a);

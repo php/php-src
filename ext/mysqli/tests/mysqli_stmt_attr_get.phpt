@@ -10,22 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_attr_get()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_get($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_attr_get($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
-
-	if (!is_null($tmp = @mysqli_stmt_attr_get($link, $link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	$valid_attr = array("max_length" => MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
 	if (mysqli_get_client_version() > 50003)
@@ -53,8 +38,8 @@ require_once('skipifconnectfailure.inc');
 	$stmt->close();
 
 	foreach ($valid_attr as $k => $attr) {
-		if (!is_null($tmp = @mysqli_stmt_attr_get($stmt, $attr))) {
-			printf("[007] Expecting NULL/NULL, got %s/%s for attribute %s/%s\n",
+		if (false !== ($tmp = @mysqli_stmt_attr_get($stmt, $attr))) {
+			printf("[007] Expecting false, got %s/%s for attribute %s/%s\n",
 				gettype($tmp), $tmp, $k, $attr);
 		}
 	}
@@ -66,5 +51,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

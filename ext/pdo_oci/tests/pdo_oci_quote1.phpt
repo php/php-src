@@ -3,13 +3,13 @@ Test PDO->quote() for PDO_OCI
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc';
+require __DIR__ . '/../../pdo/tests/pdo_test.inc';
 $db = PDOTest::factory();
 
 @$db->exec("drop table poq_tab");
@@ -39,7 +39,7 @@ echo "Done\n";
 @$db->exec("drop table poq_tab");
 
 ?>
---EXPECTF--
+--EXPECT--
 Unquoted : NULL
 Quoted   : string(2) "''"
 array(1) {

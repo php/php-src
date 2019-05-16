@@ -3,7 +3,7 @@ Test array_flip() function : usage variations - 'input' argument with repeatitiv
 --FILE--
 <?php
 /* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped 
+ * Description: Return array with key <-> value flipped
  * Source code: ext/standard/array.c
 */
 
@@ -39,7 +39,7 @@ var_dump( array_flip($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_flip() : 'input' array with repeatitive keys/values ***
 array(3) {
   ["VaLuE"]=>

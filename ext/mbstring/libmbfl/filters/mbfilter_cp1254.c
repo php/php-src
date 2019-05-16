@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_cp1254 = {
 	"Windows-1254",
 	(const char *(*)[])&mbfl_encoding_cp1254_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_cp1254_wchar,
+	&vtbl_wchar_cp1254
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp1254 = {
@@ -153,5 +155,3 @@ static int mbfl_filt_ident_cp1254(int c, mbfl_identify_filter *filter)
 		filter->flag = 1; /* not it */
 	return c;
 }
-
-

@@ -79,7 +79,7 @@ $a = array (
 
 print_r(array_unique($a));
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => acls_channel

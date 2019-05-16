@@ -18,7 +18,7 @@ var_dump(str_getcsv('.foo..bar.', '.', '.', '.'));
 print "-----\n";
 var_dump(str_getcsv('.foo. .bar.', '   ', '.', '.'));
 print "-----\n";
-var_dump(str_getcsv((binary)'1foo1 1bar111', (binary)'   ', (binary)'1   ', (binary) '\  '));
+var_dump(str_getcsv('1foo1 1bar111', '   ', '1   ', '\  '));
 print "-----\n";
 var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";

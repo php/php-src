@@ -64,8 +64,46 @@ bool(true)
 int(0)
 bool(true)
 int(0)
-bool(false)
-int(0)
-bool(false)
-int(0)
+bool(true)
+array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.10.1"
+    ["iscritical"]=>
+    bool(true)
+    ["value"]=>
+    NULL
+  }
+  ["1.2.752.58.1.10"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.1.10"
+    ["iscritical"]=>
+    bool(false)
+    ["value"]=>
+    string(5) "magic"
+  }
+}
+bool(true)
+array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.10.1"
+    ["iscritical"]=>
+    bool(true)
+    ["value"]=>
+    NULL
+  }
+  ["1.2.752.58.1.10"]=>
+  array(3) {
+    ["oid"]=>
+    string(15) "1.2.752.58.1.10"
+    ["iscritical"]=>
+    bool(false)
+    ["value"]=>
+    string(5) "magic"
+  }
+}
 ===DONE===

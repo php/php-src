@@ -1,7 +1,7 @@
 --TEST--
 Bug #38618 (RecursiveArrayIterator::hasChildren() follows objects)
 --FILE--
-<?php # vim:ft=php
+<?php
 
 class FruitPublic
 {
@@ -88,7 +88,7 @@ test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAY
 <?php exit(0); ?>
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===Default with array===
 1 => apple
 1 => grape

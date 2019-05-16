@@ -37,7 +37,7 @@ mysqli.reconnect = Off
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 closed once
 closed twice
 closed for third time

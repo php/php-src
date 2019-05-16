@@ -12,17 +12,17 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description: Renames a file or directory
 */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 /* creating directory */
-$file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation3_dir"; 
+$file_path = __DIR__;
+$dirname = "$file_path/rename_variation3_dir";
 mkdir($dirname);
 
 /* test rename() by trying to rename an existing file/dir to the same name
   and one another */
 
-$filename = "$file_path/rename_variation3.tmp"; 
+$filename = "$file_path/rename_variation3.tmp";
 $fp = fopen($filename, "w");
 if (!$fp) {
 	die("Cannot create $filename\n");
@@ -54,7 +54,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation3_link.tmp");
 unlink($file_path."/rename_variation3.tmp");
 rmdir($file_path."/rename_variation3_dir");
@@ -81,4 +81,3 @@ bool(true)
 bool(true)
 bool(false)
 Done
-

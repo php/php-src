@@ -2,13 +2,13 @@
 PDO_MYSQL: Defining a connection charset in the DSN
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	/* Connect to mysql to determine the current charset so we can diffinate it */
 	$link 		= MySQLPDOTest::factory();
@@ -29,5 +29,5 @@ MySQLPDOTest::skip();
 		echo "failed!\n";
 	}
 ?>
---EXPECTF--
+--EXPECT--
 done!

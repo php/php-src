@@ -1,5 +1,5 @@
 --TEST--
-errmsg: __destruct() cannot take arguments 
+errmsg: __destruct() cannot take arguments
 --FILE--
 <?php
 
@@ -10,5 +10,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Destructor test::__destruct() cannot take arguments in %s on line %d

@@ -42,7 +42,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation5.txt';
+$data_file = __DIR__ . '/vfprintf_variation5.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -83,4 +83,3 @@ unlink($data_file);
 -- Iteration 8 --
 1.110000 2.220000 3.330000 4.440000
 ===DONE===
-

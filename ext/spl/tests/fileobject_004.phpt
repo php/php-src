@@ -5,7 +5,7 @@ SPL: SplFileObject realpath and include_path
 
 set_include_path('tests');
 
-chdir(dirname(dirname(__FILE__))); // ext/spl
+chdir(dirname(__DIR__)); // ext/spl
 
 
 $fo = new SplFileObject('fileobject_004.phpt', 'r', true);

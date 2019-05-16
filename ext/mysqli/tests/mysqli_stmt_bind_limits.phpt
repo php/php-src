@@ -115,7 +115,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 Testing 273 columns with 240 rows...
 ... table created
 ... statement with 65520 parameters prepared

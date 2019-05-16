@@ -46,7 +46,7 @@ echo "--------- creating a new attribute\n";
 //$attr = $dom->createAttribute("src", "picture.gif");
 //print_r($attr);
 
-//$rootnode->set_attributeNode($attr); 
+//$rootnode->set_attributeNode($attr);
 $attr = $rootnode->setAttribute("src", "picture.gif");
 $attr = $rootnode->getAttribute("src");
 print_r($attr);

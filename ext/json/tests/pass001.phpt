@@ -1,15 +1,13 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
 --INI--
-precision=14
+serialize_precision=-1
 --SKIPIF--
 <?php
 if (!extension_loaded('json')) die('skip');
 ?>
 --FILE--
 <?php
-// Expect warnings about INF.
-ini_set("error_reporting", E_ALL & ~E_WARNING);
 
 $test = "
 [

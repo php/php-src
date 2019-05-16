@@ -1,11 +1,11 @@
 --TEST--
 Test SQLite3::createCollation() by adding strnatcmp() as an SQL COLLATE sequence
 --SKIPIF--
-<?php require_once dirname(__FILE__) .  '/skipif.inc'; ?>
+<?php require_once __DIR__ .  '/skipif.inc'; ?>
 --FILE--
 <?php
 
-require_once dirname(__FILE__) .  '/new_db.inc';
+require_once __DIR__ .  '/new_db.inc';
 
 $db->createCollation('NAT', 'strnatcmp');
 

@@ -2,12 +2,12 @@
 Bug #60477: Segfault after two multipart/form-data POST requestes
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('echo done, "\n";', null);
+php_cli_server_start('echo "done\n";', null);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
@@ -62,7 +62,6 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

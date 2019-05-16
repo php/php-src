@@ -10,7 +10,7 @@ for ($i = 0; $i < 32; $i++) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(4) "31st"
 string(3) "1st"
 string(3) "2nd"

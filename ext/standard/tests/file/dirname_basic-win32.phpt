@@ -1,5 +1,5 @@
 --TEST--
-Test dirname() function : basic functionality 
+Test dirname() function : basic functionality
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : string dirname(string path)
- * Description: Returns the directory name component of the path 
+ * Description: Returns the directory name component of the path
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing dirname() : basic functionality ***\n";
@@ -49,7 +49,7 @@ $paths = array(
 			' c:',
 			'		c:\test\adir\afile.txt',
 			'/usr',
-			'/usr/',			
+			'/usr/',
 			);
 
 foreach ($paths as $path) {
@@ -58,7 +58,7 @@ foreach ($paths as $path) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing dirname() : basic functionality ***
 string(0) ""
 string(1) "."

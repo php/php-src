@@ -31,14 +31,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"
@@ -70,7 +63,9 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	"HTML-ENTITIES",
 	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
 	NULL,
-	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_html_wchar,
+	&vtbl_wchar_html
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {
@@ -88,7 +83,8 @@ const struct mbfl_convert_vtbl vtbl_html_wchar = {
 	mbfl_filt_conv_html_dec_ctor,
 	mbfl_filt_conv_html_dec_dtor,
 	mbfl_filt_conv_html_dec,
-	mbfl_filt_conv_html_dec_flush };
+	mbfl_filt_conv_html_dec_flush,
+	mbfl_filt_conv_html_dec_copy };
 
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -309,4 +305,9 @@ int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)
 	return err;
 }
 
-
+void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter *dest)
+{
+	*dest = *src;
+	dest->opaque = mbfl_malloc(html_enc_buffer_size+1);
+	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
+}

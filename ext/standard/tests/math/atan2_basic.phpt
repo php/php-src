@@ -12,11 +12,11 @@ $valuesy = array(23,
 				027,
 				"23",
 				"23.45",
-				"2.345e1",				
+				"2.345e1",
 				null,
 				true,
 				false);
-					
+
 $valuesx = array(23,
 				-23,
 				2.345e1,
@@ -25,20 +25,20 @@ $valuesx = array(23,
 				027,
 				"23",
 				"23.45",
-				"2.345e1",				
+				"2.345e1",
 				null,
 				true,
-				false);					
+				false);
 
 for ($i = 0; $i < count($valuesy); $i++) {
-	for ($j = 0; $j < count($valuesx); $j++) {	
+	for ($j = 0; $j < count($valuesx); $j++) {
 		$res = atan2($valuesy[$i], $valuesx[$j]);
 		echo "Y:$valuesy[$i] X:$valuesx[$j] ";
 		var_dump($res);
-	}	
+	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 Y:23 X:23 float(0.78539816339745)
 Y:23 X:-23 float(2.3561944901923)
 Y:23 X:23.45 float(0.77571063007847)

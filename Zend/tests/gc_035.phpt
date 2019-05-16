@@ -1,5 +1,7 @@
 --TEST--
 GC 035: Lost inner-cycles garbage
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class A {

@@ -13,7 +13,7 @@ $scalar_variables = array(
   -45678,
   0x5FF,  // hexadecimal as integer
   0X566,
-  -0xAAF, 
+  -0xAAF,
   -0XCCF,
   01234,  // octal as integer
   -0126,
@@ -33,8 +33,8 @@ $scalar_variables = array(
   " ",
   ' ',
   "string",
-  'string', 
-  "0",  // numeric as string  
+  'string',
+  "0",  // numeric as string
   "40",
   "50.696",
   "0x534",
@@ -45,7 +45,7 @@ $scalar_variables = array(
   true,
   false
 );
-/* loop through each valid scalar variables in $scalar_variables 
+/* loop through each valid scalar variables in $scalar_variables
    and see the working of is_scalar(), expected output: bool(true)
 */
 $loop_counter = 1;
@@ -65,7 +65,7 @@ $array = array(10);
 $resource = opendir('.');
 unset($int_var, $float_var, $string_var, $boolean_var, $object, $array, $resource);
 
-// resources 
+// resources
 $fp = fopen(__FILE__, "r");
 $dfp = opendir(".");
 
@@ -73,7 +73,7 @@ $variation_array = array(
   NULL,
   null,
 
-  array(),  // arrays 
+  array(),  // arrays
   array(NULL),
   array(true),
   array(0),
@@ -94,9 +94,9 @@ $variation_array = array(
   @$resource,
 
   @$undefined_var  // undefined variable
-);  
+);
 
-/* loop through each element of $variation_array to see the 
+/* loop through each element of $variation_array to see the
    working of is_scalar on non-scalar values, expected output: bool(false)
 */
 $loop_counter = 1;
@@ -105,15 +105,7 @@ foreach( $variation_array as $value ) {
   var_dump( is_scalar($value) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-// Zero arguments
-var_dump( is_scalar() );
-
-// Arguments more than expected
-var_dump( is_scalar( $scalar_variables[2], $scalar_variables[2]) );
-var_dump( is_scalar( new stdclass, new stdclass) );
-
-echo "Done\n";  
+echo "Done\n";
 
 // close the resources used
 fclose($fp);
@@ -226,15 +218,4 @@ bool(false)
 bool(false)
 -- Iteration 18 --
 bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_scalar() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: is_scalar() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

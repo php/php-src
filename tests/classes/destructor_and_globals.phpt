@@ -28,7 +28,7 @@ class counter {
     global $test_cnt;
     $test_cnt--;
   }
-  
+
   static public function destroy(&$obj) {
   	$obj = NULL;
   	}

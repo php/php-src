@@ -169,7 +169,7 @@ echo "\r\n";
 echo "24)";
 echo ($c->val=300) + $c->val;
 echo "\r\n";
- 
+
 ?>
 --EXPECT--
 1)goodgood

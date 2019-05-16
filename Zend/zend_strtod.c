@@ -2677,6 +2677,14 @@ zend_strtod
 			}
 		}
  dig_done:
+ 	if (nd < 0) {
+ 		/* overflow */
+ 		nd = DBL_DIG + 2;
+ 	}
+ 	if (nf < 0) {
+ 		/* overflow */
+ 		nf = DBL_DIG + 2;
+ 	}
 	e = 0;
 	if (c == 'e' || c == 'E') {
 		if (!nd && !nz && !nz0) {
@@ -3743,7 +3751,7 @@ zend_dtoa
 	*/
 
 	int bbits, b2, b5, be, dig, i, ieps, ilim = 0, ilim0, ilim1,
-		j, j1, k, k0, k_check, leftright, m2, m5, s2, s5,
+		j, j1 = 0, k, k0, k_check, leftright, m2, m5, s2, s5,
 		spec_case = 0, try_quick;
 	Long L;
 #ifndef Sudden_Underflow
@@ -4529,17 +4537,9 @@ static void destroy_freelist(void)
 		}
 		freelist[i] = NULL;
 	}
-	FREE_DTOA_LOCK(0) 
+	FREE_DTOA_LOCK(0)
 }
 
 #ifdef __cplusplus
 }
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

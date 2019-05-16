@@ -10,7 +10,7 @@ trait ATrait {
   public static function get_class_name() {
     return __CLASS__;
   }
-  
+
   public function get_class_name_obj() {
     return __CLASS__;
   }
@@ -18,7 +18,7 @@ trait ATrait {
   public static function get_class_name2() {
     return self::$static_var;
   }
-  
+
   public function get_class_name_obj2() {
     return $this->var;
   }

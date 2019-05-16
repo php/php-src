@@ -23,11 +23,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "php.h"
 
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.14 2014/04/17 12:44:01 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.16 2017/03/29 15:57:48 christos Exp $")
 #endif
 
 #include <time.h>
@@ -56,7 +57,7 @@ cdf_getdays(int year)
 
 	for (y = CDF_BASE_YEAR; y < year; y++)
 		days += isleap(y) + 365;
-		
+
 	return days;
 }
 
@@ -77,7 +78,7 @@ cdf_getday(int year, int days)
 	return days;
 }
 
-/* 
+/*
  * Return the 0...11 month number.
  */
 static int
@@ -96,7 +97,7 @@ cdf_getmonth(int year, int days)
 }
 
 int
-cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
+cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 {
 	struct tm tm;
 #ifdef HAVE_STRUCT_TM_TM_ZONE
@@ -104,9 +105,8 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 #endif
 	int rdays;
 
-	/* XXX 5.14 at least introdced 100 ns intervals, this is to do */
-	/* Time interval, in microseconds */
-	ts->tv_usec = (t % CDF_TIME_PREC) * CDF_TIME_PREC;
+	/* Unit is 100's of nanoseconds */
+	ts->tv_nsec = (t % CDF_TIME_PREC) * 100;
 
 	t /= CDF_TIME_PREC;
 	tm.tm_sec = (int)(t % 60);
@@ -145,7 +145,7 @@ cdf_timestamp_to_timespec(struct timeval *ts, cdf_timestamp_t t)
 
 int
 /*ARGSUSED*/
-cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timeval *ts)
+cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timespec *ts)
 {
 #ifndef __lint__
 	(void)&t;
@@ -153,11 +153,11 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timeval *ts)
 #endif
 #ifdef notyet
 	struct tm tm;
-	if (gmtime_r(&ts->ts_sec, &tm) == NULL) {
+	if (php_gmtime_r(&ts->ts_sec, &tm) == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
-	*t = (ts->ts_usec / CDF_TIME_PREC) * CDF_TIME_PREC;
+	*t = (ts->ts_nsec / 100) * CDF_TIME_PREC;
 	*t = tm.tm_sec;
 	*t += tm.tm_min * 60;
 	*t += tm.tm_hour * 60 * 60;
@@ -169,10 +169,10 @@ cdf_timespec_to_timestamp(cdf_timestamp_t *t, const struct timeval *ts)
 char *
 cdf_ctime(const time_t *sec, char *buf)
 {
-	char *ptr = ctime_r(sec, buf);
+	char *ptr = php_ctime_r(sec, buf);
 	if (ptr != NULL)
 		return buf;
-	(void)snprintf(buf, 26, "*Bad* 0x%16.16" INT64_T_FORMAT "x\n",
+	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 	    (long long)*sec);
 	return buf;
 }
@@ -182,7 +182,7 @@ cdf_ctime(const time_t *sec, char *buf)
 int
 main(int argc, char *argv[])
 {
-	struct timeval ts;
+	struct timespec ts;
 	char buf[25];
 	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
 	static const char *ref = "Sat Apr 23 01:30:00 1977";

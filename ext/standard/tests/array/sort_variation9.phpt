@@ -3,7 +3,7 @@ Test sort() function : usage variations - sort diff. associative arrays, 'sort_f
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -33,8 +33,8 @@ $various_arrays = array(
 $count = 1;
 echo "\n-- Testing sort() by supplying various arrays with key values --\n";
 
-// loop through to test sort() with different arrays, 
-// to test the new keys for the elements in the sorted array 
+// loop through to test sort() with different arrays,
+// to test the new keys for the elements in the sorted array
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
@@ -52,7 +52,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying various arrays with key values --

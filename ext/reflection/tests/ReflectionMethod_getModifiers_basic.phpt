@@ -75,168 +75,160 @@ reflectMethodModifiers("DerivedClass");
 reflectMethodModifiers("TestInterface");
 reflectMethodModifiers("AbstractClass");
 
-echo "Wrong number of params:\n";
-$a = new ReflectionMethod('TestClass::foo');
-$a->getModifiers(1);
-
 $a = new ReflectionMethod('ReflectionMethod::getModifiers');
 
-echo "\nReflectionMethod::getModifiers() modifiers:\n";
+echo "ReflectionMethod::getModifiers() modifiers:\n";
 printf("0x%08x\n", $a->getModifiers());
 
 ?>
 --EXPECTF--
 Modifiers for method TestClass::foo():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::stat():
-0x08000101
+0x00000011
 
 
 Modifiers for method TestClass::priv():
-0x08010400
+0x00000004
 
 
 Modifiers for method TestClass::prot():
-0x08010200
+0x00000002
 
 
 Modifiers for method TestClass::fin():
-0x08010104
+0x00000021
 
 
 Modifiers for method TestClass::__destruct():
-0x08004100
+0x00000001
 
 
 Modifiers for method TestClass::__call():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__clone():
-0x08008100
+0x00000001
 
 
 Modifiers for method TestClass::__get():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__set():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__unset():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__isset():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__tostring():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__sleep():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__wakeup():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__set_state():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__autoload():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::foo():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::stat():
-0x08000101
+0x00000011
 
 
 Modifiers for method TestClass::priv():
-0x08010400
+0x00000004
 
 
 Modifiers for method TestClass::prot():
-0x08010200
+0x00000002
 
 
 Modifiers for method TestClass::fin():
-0x08010104
+0x00000021
 
 
 Modifiers for method TestClass::__destruct():
-0x08004100
+0x00000001
 
 
 Modifiers for method TestClass::__call():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__clone():
-0x08008100
+0x00000001
 
 
 Modifiers for method TestClass::__get():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__set():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__unset():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__isset():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__tostring():
-0x08000100
+0x00000001
 
 
 Modifiers for method TestClass::__sleep():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__wakeup():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__set_state():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestClass::__autoload():
-0x08010100
+0x00000001
 
 
 Modifiers for method TestInterface::int():
-0x08000102
+0x00000041
 
 
 Modifiers for method TestInterface::__clone():
-0x08000102
+0x00000041
 
 
 Modifiers for method AbstractClass::foo():
-0x08010102
+0x00000041
 
-
-Wrong number of params:
-
-Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %sReflectionMethod_getModifiers_basic.php on line %d
 
 ReflectionMethod::getModifiers() modifiers:
-0x00000100
+0x00000001

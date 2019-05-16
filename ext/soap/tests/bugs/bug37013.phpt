@@ -1,7 +1,7 @@
 --TEST--
 Bug #37013 (server hangs when returning circular object references)
 --SKIPIF--
-<?php 
+<?php
   if (!extension_loaded('soap')) die('skip soap extension not available');
 ?>
 --INI--
@@ -49,7 +49,7 @@ class MultiRefTest {
 }
 
 
-$server = new SoapServer(dirname(__FILE__)."/bug37013.wsdl");
+$server = new SoapServer(__DIR__."/bug37013.wsdl");
 $server->setClass( "MultiRefTest");
 $server->handle( $request );
 ?>

@@ -2,22 +2,22 @@
 Bug #44327 (PDORow::queryString property & numeric offsets / Crash)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
-	$stmt = $db->prepare("SELECT 1 AS \"one\""); 
-	$stmt->execute(); 
-	$row = $stmt->fetch(PDO::FETCH_LAZY); 
+	$stmt = $db->prepare("SELECT 1 AS \"one\"");
+	$stmt->execute();
+	$row = $stmt->fetch(PDO::FETCH_LAZY);
 	var_dump($row);
 	var_dump($row->{0});
-	var_dump($row->one); 
+	var_dump($row->one);
 	var_dump($row->queryString);
 
 	print "----------------------------------\n";
@@ -34,31 +34,31 @@ $db = MySQLPDOTest::factory();
 
 	print "----------------------------------\n";
 
-	$stmt = $db->prepare('foo'); 
+	$stmt = $db->prepare('foo');
 	@$stmt->execute();
 	$row = $stmt->fetch();
 	var_dump($row->queryString);
-	
+
 ?>
 --EXPECTF--
 object(PDORow)#%d (2) {
-  [%u|b%"queryString"]=>
-  %unicode|string%(17) "SELECT 1 AS "one""
-  [%u|b%"one"]=>
-  %unicode|string%(1) "1"
+  ["queryString"]=>
+  string(17) "SELECT 1 AS "one""
+  ["one"]=>
+  string(1) "1"
 }
-%unicode|string%(1) "1"
-%unicode|string%(1) "1"
-%unicode|string%(17) "SELECT 1 AS "one""
+string(1) "1"
+string(1) "1"
+string(17) "SELECT 1 AS "one""
 ----------------------------------
 object(PDORow)#%d (2) {
-  [%u|b%"queryString"]=>
-  %unicode|string%(19) "SELECT id FROM test"
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
+  ["queryString"]=>
+  string(19) "SELECT id FROM test"
+  ["id"]=>
+  string(1) "1"
 }
-%unicode|string%(19) "SELECT id FROM test"
+string(19) "SELECT id FROM test"
 ----------------------------------
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'queryString' of non-object in %s on line %d
 NULL

@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+
 $reader = new XMLReader();
 
 $reader->open('zip://' . dirname(__FILE__) . '/test.odt#meta.xml');

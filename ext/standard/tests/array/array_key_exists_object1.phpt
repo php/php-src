@@ -3,7 +3,7 @@ Test array_key_exists() function : object functionality
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -18,7 +18,7 @@ class myClass {
 	var $var1;
 	var $var2;
 	var $var3;
-	
+
 	function __construct($a, $b, $c = null) {
 		$this->var1 = $a;
 		$this->var2 = $b;
@@ -46,8 +46,7 @@ var_dump($class2);
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : object functionality ***
 
 -- Do not assign a value to $class1->var3 --
@@ -57,11 +56,11 @@ $key = var3:
 bool(true)
 $class1:
 object(myClass)#1 (3) {
-  [%b|u%"var1"]=>
-  %unicode|string%(1) "a"
-  [%b|u%"var2"]=>
-  %unicode|string%(1) "b"
-  [%b|u%"var3"]=>
+  ["var1"]=>
+  string(1) "a"
+  ["var2"]=>
+  string(1) "b"
+  ["var3"]=>
   NULL
 }
 
@@ -70,11 +69,11 @@ $key = var3:
 bool(true)
 $class2:
 object(myClass)#2 (3) {
-  [%b|u%"var1"]=>
-  %unicode|string%(1) "x"
-  [%b|u%"var2"]=>
-  %unicode|string%(1) "y"
-  [%b|u%"var3"]=>
-  %unicode|string%(1) "z"
+  ["var1"]=>
+  string(1) "x"
+  ["var2"]=>
+  string(1) "y"
+  ["var3"]=>
+  string(1) "z"
 }
 Done

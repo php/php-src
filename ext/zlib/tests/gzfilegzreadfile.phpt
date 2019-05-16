@@ -1,7 +1,7 @@
 --TEST--
 gzfile(), gzreadfile()
 --SKIPIF--
-<?php /* $Id$ */
+<?php
 if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--
 <?php

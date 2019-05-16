@@ -1,15 +1,15 @@
 --TEST--
 Test function gzeof while writing.
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
+$filename = __DIR__."/gzeof_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

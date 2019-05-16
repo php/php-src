@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -26,14 +24,12 @@
 #include "php.h"
 #include "php_versioning.h"
 
-#define sign(n) ((n)<0?-1:((n)>0?1:0))
-
 /* {{{ php_canonicalize_version() */
 
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    int len = strlen(version);
+    size_t len = strlen(version);
     char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
     const char *p;
 
@@ -117,7 +113,7 @@ compare_special_version_forms(char *form1, char *form2)
 			break;
 		}
 	}
-	return sign(found1 - found2);
+	return ZEND_NORMALIZE_BOOL(found1 - found2);
 }
 
 /* }}} */
@@ -162,7 +158,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 			/* compare element numerically */
 			l1 = strtol(p1, NULL, 10);
 			l2 = strtol(p2, NULL, 10);
-			compare = sign(l1 - l2);
+			compare = ZEND_NORMALIZE_BOOL(l1 - l2);
 		} else if (!isdigit(*p1) && !isdigit(*p2)) {
 			/* compare element names */
 			compare = compare_special_version_forms(p1, p2);
@@ -212,15 +208,17 @@ PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2, *op = NULL;
 	size_t v1_len, v2_len, op_len = 0;
-	int compare, argc;
+	int compare;
 
-	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc, "ss|s", &v1, &v1_len, &v2,
-							  &v2_len, &op, &op_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(v1, v1_len)
+		Z_PARAM_STRING(v2, v2_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(op, op_len)
+	ZEND_PARSE_PARAMETERS_END();
+
 	compare = php_version_compare(v1, v2);
-	if (argc == 2) {
+	if (!op) {
 		RETURN_LONG(compare);
 	}
 	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
@@ -245,11 +243,3 @@ PHP_FUNCTION(version_compare)
 }
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

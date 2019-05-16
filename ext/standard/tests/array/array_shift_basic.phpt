@@ -1,9 +1,9 @@
 --TEST--
-Test array_shift() function : basic functionality 
+Test array_shift() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed array_shift(array &$stack)
- * Description: Pops an element off the beginning of the array 
+ * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : basic functionality ***
 
 -- Before shift: --

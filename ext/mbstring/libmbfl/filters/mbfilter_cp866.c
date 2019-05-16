@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_cp866 = {
 	"CP866",
 	(const char *(*)[])&mbfl_encoding_cp866_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_cp866_wchar,
+	&vtbl_wchar_cp866
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp866 = {
@@ -147,5 +149,3 @@ static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
 		filter->flag = 1; /* not it */
 	return c;
 }
-
-

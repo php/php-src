@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "at" mode 
+Test fopen and fclose() functions - usage variations - "at" mode
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) != "WIN" )
@@ -24,7 +24,7 @@ if( substr(PHP_OS, 0, 3) != "WIN" )
    checking for the file pointer position,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "w", "007_variation", 13, "bytes");
@@ -46,10 +46,10 @@ var_dump( filesize($file) ); //Check that data hasn't over written; Expected: Si
 unlink($file);  //Deleting the file
 fclose( fopen($file, "at") );  //Opening the non-existing file in "at" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation13.tmp");
+unlink(__DIR__."/007_variation13.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'at' mode ***

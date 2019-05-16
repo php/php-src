@@ -14,7 +14,7 @@ var_dump(filter_var("data", FILTER_VALIDATE_REGEXP));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "data"
 bool(false)
 string(4) "data"

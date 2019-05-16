@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Rob Richards <rrichards@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,12 +55,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_remove_named_item_ns, 0, 0, 0)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_count, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
 * class DOMNamedNodeMap
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
 * Since:
 */
 
@@ -74,6 +75,7 @@ const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_dom_namednodemap_get_named_item_ns)
 	PHP_FALIAS(setNamedItemNS, dom_namednodemap_set_named_item_ns, arginfo_dom_namednodemap_set_named_item_ns)
 	PHP_FALIAS(removeNamedItemNS, dom_namednodemap_remove_named_item_ns, arginfo_dom_namednodemap_remove_named_item_ns)
+	PHP_FALIAS(count, dom_namednodemap_count, arginfo_dom_namednodemap_count)
 	PHP_FE_END
 };
 /* }}} */
@@ -136,7 +138,8 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_namednodemap_class_entry, &named, &namedlen) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -210,7 +213,8 @@ PHP_FUNCTION(dom_namednodemap_item)
 	xmlNodePtr nodep, curnode;
 	int count;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		return;
 	}
 	if (index >= 0) {
@@ -274,7 +278,8 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	xmlNodePtr nodep;
 	xmlNotation *notep = NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!s", &id, dom_namednodemap_class_entry, &uri, &urilen, &named, &namedlen) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &urilen, &named, &namedlen) == FAILURE) {
 		return;
 	}
 
@@ -332,13 +337,23 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item_ns)
 }
 /* }}} end dom_namednodemap_remove_named_item_ns */
 
-#endif
+/* {{{ proto int|bool dom_namednodemap_count();
+*/
+PHP_FUNCTION(dom_namednodemap_count)
+{
+	zval *id;
+	dom_object *intern;
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_DOMOBJ_P(id);
+	if(dom_namednodemap_length_read(intern, return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+}
+/* }}} end dom_namednodemap_count */
+
+#endif

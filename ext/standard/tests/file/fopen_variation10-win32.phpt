@@ -15,33 +15,33 @@ if (!is_writable('c:\\fopen_variation10.tmp')) {
 --FILE--
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing fopen() : variation ***\n";
 
 // fopen with interesting windows paths.
-$testdir = dirname(__FILE__).'/fopen10.tmpDir';
+$testdir = __DIR__.'/fopen10.tmpDir';
 $rootdir = 'fopen10.tmpdirTwo';
 mkdir($testdir);
 mkdir('c:\\'.$rootdir);
 
 $unixifiedDir = '/'.substr(str_replace('\\','/',$testdir),3);
 
-$paths = array('c:\\', 
-               'c:', 
-               'c', 
-               '\\', 
-               '/', 
-               'c:'.$rootdir, 
-               'c:adir', 
-               'c:\\/', 
+$paths = array('c:\\',
+               'c:',
+               'c',
+               '\\',
+               '/',
+               'c:'.$rootdir,
+               'c:adir',
+               'c:\\/',
                'c:\\'.$rootdir.'\\/',
-               'c:\\'.$rootdir.'\\', 
+               'c:\\'.$rootdir.'\\',
                'c:\\'.$rootdir.'/',
-               $unixifiedDir, 
+               $unixifiedDir,
                '/sortout');
 
 $file = "fopen_variation10.tmp";
@@ -98,21 +98,21 @@ file in root
 Warning: fopen(c\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --\--
 
 Warning: fopen(\\fopen_variation10.tmp): failed to open stream: Invalid argument in %s on line %d
 file not opened for read
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --/--
 
 Warning: fopen(/\fopen_variation10.tmp): failed to open stream: Invalid argument in %s on line %d
 file not opened for read
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --c:fopen10.tmpdirTwo--
 file in fopen10.tmpdirTwo
@@ -122,7 +122,7 @@ file in fopen10.tmpdirTwo
 Warning: fopen(c:adir\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --c:\/--
 file in root
@@ -144,6 +144,5 @@ file in fopen10.tmpDir
 Warning: fopen(/sortout\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 ===DONE===
-

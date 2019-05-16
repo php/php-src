@@ -3,7 +3,7 @@ Test key() function : usage variations
 --FILE--
 <?php
 /* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer 
+ * Description: Return the key of the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  */
 
@@ -45,7 +45,7 @@ var_dump(key($multi_array[3][3][3]));
 var_dump(key($multi_array[3][3][3][1]));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Two Dimensional Array --

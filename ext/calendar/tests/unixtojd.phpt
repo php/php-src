@@ -30,11 +30,13 @@ putenv('TZ=UTC');
 //		-this incorrect localtime is passed to the julian date conversion (GregorianToSDN) function which works (probably correctly)
 //			but returns -1 day from expected because its input is -1 from expected
 
+echo unixtojd(). "\n";
 echo unixtojd(40000). "\n";
 echo unixtojd(1000000000). "\n";
 echo unixtojd(1152459009). "\n";
 ?>
---EXPECT--
+--EXPECTF--
+%d
 2440588
 2452162
 2453926

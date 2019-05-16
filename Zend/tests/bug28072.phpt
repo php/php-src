@@ -4,8 +4,8 @@ Bug #28072 (static array with some constant keys will be incorrectly ordered)
 <?php
 define("FIRST_KEY", "a");
 define("THIRD_KEY", "c");
-                                                                        
-                 
+
+
 function test()
 {
         static $arr = array(
@@ -16,7 +16,7 @@ function test()
         );
         print_r($arr);
 }
-                                                                        
+
 function test2()
 {
         static $arr = array(
@@ -27,7 +27,7 @@ function test2()
         );
         print_r($arr);
 }
-                 
+
 test();
 test2();
 ?>

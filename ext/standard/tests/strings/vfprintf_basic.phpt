@@ -1,5 +1,5 @@
 --TEST--
-Test vfprintf() function : basic functionality 
+Test vfprintf() function : basic functionality
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
@@ -7,9 +7,9 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function writeAndDump($fp, $format, $args)
@@ -25,7 +25,7 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : basic functionality ***\n";
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_basic.txt';
 $fp = fopen( $file, "a+" );
 
 // Test vfprintf()
@@ -46,11 +46,11 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_basic.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : basic functionality ***
 string(17) "Foo is 30 and bar"
 int(17)

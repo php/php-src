@@ -5,17 +5,6 @@ Strict scalar type basics
 
 declare(strict_types=1);
 
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-    E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR'
-];
-
-set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
-    echo "$errnames[$errno]: $errmsg on line $line\n";
-    return true;
-});
-
 $functions = [
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
@@ -68,28 +57,28 @@ Testing 'int' type:
 int(1)
 
 *** Trying float value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, float given, called in %s on line %d
 
 *** Trying string value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
 
 *** Trying true value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, bool given, called in %s on line %d
 
 *** Trying false value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, bool given, called in %s on line %d
 
 *** Trying null value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
 
 *** Trying array value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
 *** Trying resource value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -103,10 +92,10 @@ float(1)
 *** Caught Argument 1 passed to {closure}() must be of the type float, string given, called in %s on line %d
 
 *** Trying true value
-*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type float, bool given, called in %s on line %d
 
 *** Trying false value
-*** Caught Argument 1 passed to {closure}() must be of the type float, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type float, bool given, called in %s on line %d
 
 *** Trying null value
 *** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d
@@ -123,7 +112,7 @@ float(1)
 Testing 'string' type:
 
 *** Trying integer value
-*** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type string, int given, called in %s on line %d
 
 *** Trying float value
 *** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d
@@ -132,10 +121,10 @@ Testing 'string' type:
 string(1) "1"
 
 *** Trying true value
-*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type string, bool given, called in %s on line %d
 
 *** Trying false value
-*** Caught Argument 1 passed to {closure}() must be of the type string, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type string, bool given, called in %s on line %d
 
 *** Trying null value
 *** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d
@@ -152,13 +141,13 @@ string(1) "1"
 Testing 'bool' type:
 
 *** Trying integer value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, int given, called in %s on line %d
 
 *** Trying float value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, float given, called in %s on line %d
 
 *** Trying string value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, string given, called in %s on line %d
 
 *** Trying true value
 bool(true)
@@ -167,15 +156,15 @@ bool(true)
 bool(false)
 
 *** Trying null value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
 
 *** Trying array value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
 *** Trying resource value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, resource given, called in %s on line %d
 
 Done

@@ -1,5 +1,5 @@
 --TEST--
-Test ezmlm_hash() function : basic functionality 
+Test ezmlm_hash() function : basic functionality
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
@@ -13,8 +13,8 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 
 echo "*** Testing ezmlm_hash() : basic functionality ***\n";
 
-var_dump(ezmlm_hash(b"webmaster@somewhere.com"));
-var_dump(ezmlm_hash(b"foo@somewhere.com"));
+var_dump(ezmlm_hash("webmaster@somewhere.com"));
+var_dump(ezmlm_hash("foo@somewhere.com"));
 
 ?>
 ===Done===

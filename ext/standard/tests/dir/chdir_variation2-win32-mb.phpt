@@ -1,9 +1,15 @@
 --TEST--
 Test chdir() function : usage variations - relative paths
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 
@@ -13,7 +19,8 @@ Test chdir() function : usage variations - relative paths
 
 echo "*** Testing chdir() : usage variations ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __DIR__ . '/chdir_variation2-win32-mb';
+@mkdir($base_dir_path);
 
 $level_one_dir_name = "私はガラスを食べられますlevel_one";
 $level_one_dir_path = "$base_dir_path/$level_one_dir_name";
@@ -57,19 +64,15 @@ echo "\n-- \$directory = '../../'私はガラスを食べられますlevel_one':
 var_dump(chdir($level_two_dir_path));
 var_dump(chdir("../../$level_one_dir_name"));
 var_dump(getcwd());
-
-$file_path = dirname(__FILE__);
-chdir($file_path);/* not that PWD is accidentialy one of the dirs to be deleted. */
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
 ?>
 ===DONE===
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
-chdir($file_path);/* not that PWD is accidentialy one of the dirs to be deleted. */
-rmdir("$file_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
-rmdir("$file_path/私はガラスを食べられますlevel_one");
+$base_dir_path = __DIR__ . '/chdir_variation2-win32-mb';
+chdir(__DIR__); /* not that PWD is accidentialy one of the dirs to be deleted. */
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
+rmdir("$base_dir_path/私はガラスを食べられますlevel_one");
+rmdir($base_dir_path);
 ?>
 --EXPECTF--
 *** Testing chdir() : usage variations ***

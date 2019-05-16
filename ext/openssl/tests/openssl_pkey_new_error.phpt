@@ -11,15 +11,23 @@ $rsa = array("rsa" => array());
 $dsa = array("dsa" => array());
 $dh = array("dh" => array());
 
-openssl_pkey_get_details(openssl_pkey_new($rsa));
-openssl_pkey_get_details(openssl_pkey_new($dsa));
-openssl_pkey_get_details(openssl_pkey_new($dh));
+try {
+    openssl_pkey_get_details(openssl_pkey_new($rsa));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    openssl_pkey_get_details(openssl_pkey_new($dsa));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    openssl_pkey_get_details(openssl_pkey_new($dh));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: openssl_pkey_get_details() expects parameter 1 to be resource, boolean given in %s on line %d
-
+--EXPECT--
+openssl_pkey_get_details() expects parameter 1 to be resource, bool given
+openssl_pkey_get_details() expects parameter 1 to be resource, bool given
+openssl_pkey_get_details() expects parameter 1 to be resource, bool given

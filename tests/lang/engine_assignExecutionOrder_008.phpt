@@ -2,7 +2,6 @@
 Ensure by value assignments leave temporaries on the stack, for all sorts of assignees.
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_STRICT);
 
 function f() { return 0; }
 $a[0][1] = 'good';
@@ -71,9 +70,15 @@ Warning: Creating default object from empty value in %s on line %d
 good
 $i->p->q=f(): 
 Warning: Creating default object from empty value in %s on line %d
+
+Warning: Creating default object from empty value in %s on line %d
 good
-$i->p[0]=f(): good
+$i->p[0]=f(): 
+Warning: Creating default object from empty value in %s on line %d
+good
 $i->p[0]->p=f(): 
+Warning: Creating default object from empty value in %s on line %d
+
 Warning: Creating default object from empty value in %s on line %d
 good
 C::$p=f(): good

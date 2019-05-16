@@ -63,84 +63,84 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
+  ["affected_rows"]=>
   int(0)
-  [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"client_version"]=>
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(0)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(0)
-  [%u|b%"error"]=>
-  %unicode|string%(0) ""
-  [%u|b%"error_list"]=>
+  ["error"]=>
+  string(0) ""
+  ["error_list"]=>
   array(0) {
   }
-  [%u|b%"field_count"]=>
+  ["field_count"]=>
   int(0)
-  [%u|b%"host_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"info"]=>
+  ["host_info"]=>
+  string(%d) "%s"
+  ["info"]=>
   NULL
-  [%u|b%"insert_id"]=>
+  ["insert_id"]=>
   int(0)
-  [%u|b%"server_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"server_version"]=>
+  ["server_info"]=>
+  string(%d) "%s"
+  ["server_version"]=>
   int(%d)
-  [%u|b%"stat"]=>
+  ["stat"]=>
   string(%d) "Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d"
-  [%u|b%"sqlstate"]=>
-  %unicode|string%(5) "00000"
-  [%u|b%"protocol_version"]=>
+  ["sqlstate"]=>
+  string(5) "00000"
+  ["protocol_version"]=>
   int(10)
-  [%u|b%"thread_id"]=>
+  ["thread_id"]=>
   int(%d)
-  [%u|b%"warning_count"]=>
+  ["warning_count"]=>
   int(0)
 }
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
-  NULL
-  [%u|b%"client_info"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"client_version"]=>
+  ["affected_rows"]=>
+  bool(false)
+  ["client_info"]=>
+  string(%d) "%s"
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(0)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(0)
-  [%u|b%"error"]=>
-  %unicode|string%(0) ""
-  [%u|b%"error_list"]=>
+  ["error"]=>
+  string(0) ""
+  ["error_list"]=>
+  bool(false)
+  ["field_count"]=>
+  bool(false)
+  ["host_info"]=>
+  bool(false)
+  ["info"]=>
+  bool(false)
+  ["insert_id"]=>
+  bool(false)
+  ["server_info"]=>
+  bool(false)
+  ["server_version"]=>
+  bool(false)
+  ["stat"]=>
   NULL
-  [%u|b%"field_count"]=>
-  NULL
-  [%u|b%"host_info"]=>
-  NULL
-  [%u|b%"info"]=>
-  NULL
-  [%u|b%"insert_id"]=>
-  NULL
-  [%u|b%"server_info"]=>
-  NULL
-  [%u|b%"server_version"]=>
-  NULL
-  [%u|b%"stat"]=>
-  NULL
-  [%u|b%"sqlstate"]=>
-  NULL
-  [%u|b%"protocol_version"]=>
-  NULL
-  [%u|b%"thread_id"]=>
-  NULL
-  [%u|b%"warning_count"]=>
-  NULL
+  ["sqlstate"]=>
+  bool(false)
+  ["protocol_version"]=>
+  bool(false)
+  ["thread_id"]=>
+  bool(false)
+  ["warning_count"]=>
+  bool(false)
 }
 Done

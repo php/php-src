@@ -3,9 +3,9 @@ Test base64_decode() function : basic functionality - strict vs non-strict with 
 --FILE--
 <?php
 /* Prototype  : proto string base64_decode(string str[, bool strict])
- * Description: Decodes string using MIME base64 algorithm 
+ * Description: Decodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "Decode 'hello world!':\n";
@@ -29,7 +29,7 @@ var_dump(base64_decode($badChars, true));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Decode 'hello world!':
 string(12) "hello world!"
 string(12) "hello world!"

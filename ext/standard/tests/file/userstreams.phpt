@@ -2,7 +2,6 @@
 User-space streams
 --FILE--
 <?php
-# vim600:syn=php:
 
 /* This is a fairly aggressive test that looks at
  * user streams and also gives the seek/gets/buffer
@@ -67,7 +66,7 @@ for ($i = 0; $i < 30; $i++) {
 /* store the data in a regular file so that we can compare
  * the results */
 $tf = tmpfile();
-fwrite($tf, (binary)$DATA);
+fwrite($tf, $DATA);
 $n = ftell($tf);
 rewind($tf) or die("failed to rewind tmp file!");
 if (ftell($tf) != 0)
@@ -76,11 +75,11 @@ $DATALEN = strlen($DATA);
 if ($n != $DATALEN)
 	die("tmpfile stored $n bytes; should be $DATALEN!");
 
-class uselessstream 
+class uselessstream
 {
 }
 
-class mystream 
+class mystream
 {
 	public $path;
 	public $mode;
@@ -102,7 +101,7 @@ class mystream
 			$this->position = strlen($GLOBALS[$this->varname]);
 		else
 			$this->position = 0;
-		
+
 		return true;
 	}
 
@@ -228,7 +227,7 @@ for ($i = 0; $i < 256; $i++) {
 	$seeks[] = array($whence, $offset, $position);
 }
 
-/* we compare the results of fgets using differing line lengths to 
+/* we compare the results of fgets using differing line lengths to
  * test the fgets layer also */
 $line_lengths = array(1024, 256, 64, 16);
 $fail_count = 0;
@@ -266,7 +265,7 @@ foreach($line_lengths as $line_length) {
 			var_dump($dat);
 			break;
 		}
-		
+
 		$j++;
 	}
 	if ($fail_count)

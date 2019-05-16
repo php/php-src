@@ -1,9 +1,15 @@
 --TEST--
-Test readdir() function : basic functionality 
+Test readdir() function : basic functionality
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.C
  */
 
@@ -14,10 +20,10 @@ Test readdir() function : basic functionality
 echo "*** Testing readdir() : basic functionality ***\n";
 
 // include the file.inc for Function: function create_files()
-chdir(dirname(__FILE__));
-include(dirname(__FILE__)."/../file/file.inc");
+chdir(__DIR__);
+include(__DIR__."/../file/file.inc");
 
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_basic';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_basic';
 mkdir($path);
 create_files($path, 3);
 
@@ -49,7 +55,7 @@ closedir($dh);
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_basic';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_basic';
 rmdir($path);
 ?>
 --EXPECTF--

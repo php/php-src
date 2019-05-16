@@ -60,7 +60,7 @@ $arrays = array (
 
 // array to be passsed to $arr2 argument
 $arr2 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
-              "\tHello" => 111, 2.2, 'color', "Hello world" => "string", 
+              "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
               "pen\n" => 33,  133 => "int");
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
@@ -79,7 +79,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr1 argument ***
 -- Iteration 1 --
 array(0) {

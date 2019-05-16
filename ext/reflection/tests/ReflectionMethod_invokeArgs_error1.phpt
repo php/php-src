@@ -19,13 +19,13 @@ $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 $testClassInstance = new TestClass();
 
 echo "\nMethod with args:\n";
-var_dump($methodWithArgs->invokeArgs($testClassInstance, array())); 
+var_dump($methodWithArgs->invokeArgs($testClassInstance, array()));
 
 ?>
 --EXPECTF--
 Method with args:
 
-Fatal error: Uncaught Error: Too few arguments to function TestClass::methodWithArgs(), 0 passed and exactly 2 expected in %sReflectionMethod_invokeArgs_error1.php:5
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function TestClass::methodWithArgs(), 0 passed and exactly 2 expected in %sReflectionMethod_invokeArgs_error1.php:5
 Stack trace:
 #0 [internal function]: TestClass->methodWithArgs()
 #1 %sReflectionMethod_invokeArgs_error1.php(19): ReflectionMethod->invokeArgs(Object(TestClass), Array)

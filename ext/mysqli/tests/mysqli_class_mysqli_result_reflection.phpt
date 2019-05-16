@@ -7,9 +7,6 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
-if (($tmp = substr(PHP_VERSION, 0, strpos(PHP_VERSION, '.'))) && ($tmp < 5))
-	die("skip Reflection not available before PHP 5 (found PHP $tmp)");
-
 /*
 Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.
 Most of the things which we test are covered by mysqli_class_*_interface.phpt.
@@ -27,7 +24,7 @@ if ($MYSQLND_VERSION < 50004)
 	inspectClass($class);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Inspecting class 'mysqli_result'
 isInternal: yes
 isUserDefined: no
@@ -52,7 +49,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -68,7 +65,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -84,7 +81,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -100,7 +97,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -123,9 +120,16 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
-Number of Parameters: 0
+Modifiers: 1
+Number of Parameters: 1
 Number of Required Parameters: 0
+
+Inspecting parameter 'result_type' of method 'fetch_all'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_array'
 isFinal: no
@@ -139,7 +143,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 0
 
@@ -162,7 +166,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -178,7 +182,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -194,7 +198,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -217,7 +221,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -233,7 +237,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 268435712
+Modifiers: 1
 Number of Parameters: 2
 Number of Required Parameters: 0
 
@@ -263,7 +267,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -279,7 +283,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 1
 Number of Required Parameters: 1
 
@@ -302,7 +306,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -318,7 +322,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 1
 Number of Parameters: 0
 Number of Required Parameters: 0
 
@@ -328,7 +332,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'field_count'
 isPublic: yes
@@ -336,7 +340,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'lengths'
 isPublic: yes
@@ -344,7 +348,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'num_rows'
 isPublic: yes
@@ -352,7 +356,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'type'
 isPublic: yes
@@ -360,7 +364,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 Default property 'current_field'
 Default property 'field_count'
 Default property 'lengths'

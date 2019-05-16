@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 /* creating directories, symbolic links and files */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/readlink_realpath_basic1/home/test/", 0777, true);
 
 $file_handle1 = fopen("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp", "w");
@@ -26,7 +26,7 @@ fclose($file_handle1);
 fclose($file_handle2);
 fclose($file_handle3);
 
-symlink("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp", 
+symlink("$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1.tmp",
         "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp");
 symlink("$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1.tmp",
         "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp");
@@ -38,7 +38,7 @@ $linknames = array (
   "$file_path/readlink_realpath_basic1/home/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/test/readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1//home/test//../test/./readlink_realpath_basic1_link.tmp",
-  
+
   /* linknames with invalid linkpath */
   "$file_path///readlink_realpath_basic1/home//..//././test//readlink_realpath_basic1_link.tmp",
   "$file_path/readlink_realpath_basic1/home/../home/../test/../readlink_realpath_basic1_link.tmp",
@@ -60,7 +60,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$name_prefix = dirname(__FILE__)."/readlink_realpath_basic1";
+$name_prefix = __DIR__."/readlink_realpath_basic1";
 unlink("$name_prefix/home/test/readlink_realpath_basic1.tmp");
 unlink("$name_prefix/home/readlink_realpath_basic1.tmp");
 unlink("$name_prefix/readlink_realpath_basic1.tmp");

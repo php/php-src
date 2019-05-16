@@ -21,9 +21,9 @@ $const  = __NAMESPACE__ .'\\foo';  // class
 $const2 = __NAMESPACE__ .'\\Ifoo'; // interface
 
 var_dump(	foo,
-			\foo\foo, 
-			namespace\foo, 
-			\foo\foo::foo, 
+			\foo\foo,
+			namespace\foo,
+			\foo\foo::foo,
 			$const::foo,
 			\foo,
 			constant('foo'),

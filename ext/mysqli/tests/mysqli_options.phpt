@@ -27,29 +27,11 @@ require_once('skipifconnectfailure.inc');
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE'))
 		$valid_options[] = constant('MYSQLI_OPT_INT_AND_FLOAT_NATIVE');
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_options()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_options($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	$link = mysqli_init();
 
 	/* set it twice, checking if memory for the previous one is correctly freed */
 	mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "utf8");
 	mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "latin1");
-
-	if (!is_null($tmp = @mysqli_options($link, MYSQLI_OPT_CONNECT_TIMEOUT)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_options($link, "s", 'extra_my.cnf')))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=0', 'foo')))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	// print "run_tests.php don't fool me with your 'ungreedy' expression '.+?'!\n";
 	var_dump("MYSQLI_READ_DEFAULT_GROUP",	mysqli_options($link, MYSQLI_READ_DEFAULT_GROUP, 'extra_my.cnf'));
@@ -58,7 +40,6 @@ require_once('skipifconnectfailure.inc');
 	var_dump("MYSQLI_OPT_LOCAL_INFILE",		mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1));
 	var_dump("MYSQLI_INIT_COMMAND",			mysqli_options($link, MYSQLI_INIT_COMMAND, array('SET AUTOCOMMIT=0', 'SET AUTOCOMMIT=1')));
 
-	
 	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -104,7 +85,7 @@ require_once('skipifconnectfailure.inc');
 
 	/* mysqli_real_connect() */
 	var_dump("MYSQLI_CLIENT_SSL",			mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
-	
+
 	mysqli_close($link);
 
 	echo "Link closed";
@@ -139,5 +120,5 @@ bool(false)
 Link closed
 Warning: mysqli_options(): Couldn't fetch mysqli in %s line %d
 %s(19) "MYSQLI_INIT_COMMAND"
-NULL
+bool(false)
 done!

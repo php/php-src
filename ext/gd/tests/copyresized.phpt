@@ -85,7 +85,7 @@ imagecopyresized($dst_tc, $src_tc, 0,0, 0,0, imagesx($dst_tc), imagesy($dst_tc),
 if (!check_doublesize($dst_tc)) exit("3 failed\n");
 echo "P->P: ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 TC->TC: ok
 P->TC: ok
 P->P: ok

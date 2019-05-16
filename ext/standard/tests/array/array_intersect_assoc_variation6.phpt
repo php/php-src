@@ -49,7 +49,7 @@ $arrays = array (
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 
-       // array with  unset variable 
+       // array with  unset variable
 /*10*/ array( @$unset_var => "hello"),
 
        // array with mixed keys
@@ -79,7 +79,7 @@ foreach($arrays as $arr2) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr2 argument ***
 -- Iteration 1 --
 array(0) {

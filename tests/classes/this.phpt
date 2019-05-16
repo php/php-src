@@ -1,11 +1,9 @@
 --TEST--
 ZE2 $this cannot be exchanged
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
-/* please don't shorten this test. It shows what would happen if 
+/* please don't shorten this test. It shows what would happen if
  * the fatal error would have been a warning.
  */
 class Foo

@@ -18,5 +18,5 @@ XML_FILE=/wrong_book_with_dtd.xml
 LOAD_OPTIONS=LIBXML_DTDVALID | LIBXML_NOERROR
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
-domdocumentloadxml_test_method.php
+domdocumentloadxml_test_method.inc
 --EXPECT--

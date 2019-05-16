@@ -13,13 +13,13 @@ echo "*** Testing strrpos() function: with double quoted strings ***\n";
 $haystack = "Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ";
 $needle = array(
   //regular strings
-  "l",  
+  "l",
   "L",
   "HELLO",
   "hEllo",
 
   //escape characters
-  "\t",  
+  "\t",
   "\T",  //invalid input
   "     ",
   "\n",
@@ -28,40 +28,40 @@ $needle = array(
 ",  //new line
 
   //nulls
-  "\0",  
+  "\0",
   NULL,
   null,
 
   //boolean false
-  FALSE,  
+  FALSE,
   false,
 
   //empty string
   "",
 
   //special chars
-  " ",  
+  " ",
   "$",
   " $",
   "&",
-  "!#", 
+  "!#",
   "()",
-  "<=>", 
-  ">",  
+  "<=>",
+  ">",
   "=>",
   "?",
   "@",
   "@hEllo",
 
-  "12345", //decimal numeric string  
+  "12345", //decimal numeric string
   "\x23",  //hexadecimal numeric string
   "#",  //respective ASCII char of \x23
   "\101",  //octal numeric string
   "A",  //respective ASCII char of \101
   "456HEE",  //numerics + chars
-  $haystack  //haystack as needle  
+  $haystack  //haystack as needle
 );
- 
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
@@ -72,7 +72,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)
@@ -108,16 +108,16 @@ int(9)
 int(8)
 bool(false)
 -- Iteration 12 --
-int(8)
+bool(false)
 bool(false)
 -- Iteration 13 --
-int(8)
+bool(false)
 bool(false)
 -- Iteration 14 --
-int(8)
+bool(false)
 bool(false)
 -- Iteration 15 --
-int(8)
+bool(false)
 bool(false)
 -- Iteration 16 --
 bool(false)

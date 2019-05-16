@@ -14,10 +14,10 @@ $method = 'aes-128-gcm';
 $tests = openssl_get_cipher_tests($method);
 
 foreach ($tests as $idx => $test) {
-	echo "TEST $idx\n";
-	$pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-		$test['iv'], $test['tag'], $test['aad']);
-	var_dump($test['pt'] === $pt);
+    echo "TEST $idx\n";
+    $pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+        $test['iv'], $test['tag'], $test['aad']);
+    var_dump($test['pt'] === $pt);
 }
 
 // no IV
@@ -45,7 +45,7 @@ bool(true)
 TEST 5
 bool(true)
 
-Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
+Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 bool(false)
 bool(false)

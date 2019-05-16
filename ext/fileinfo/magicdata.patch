@@ -1,218 +1,180 @@
-Patches applied to file 5.17 sources tree before generating magic.mgc
-and before running create_data_file.php to create data_file.c.
-
-
-
-From 0b478f445b6b7540b58af5d1fe583fa9e48fd745 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Wed, 28 May 2014 19:52:36 +0000
-Subject: [PATCH] further optimize awk by not looking for the BEGIN regex until
- we found the BEGIN (Jan Kaluza)
-
----
- magic/Magdir/commands | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/magic/Magdir/commands b/magic/Magdir/commands
-index bfffdef..26b2869 100644
---- a/magic/Magdir/commands
-+++ b/magic/Magdir/commands
-@@ -49,7 +49,8 @@
- !:mime	text/x-awk
- 0	string/wt	#!\ /usr/bin/awk	awk script text executable
- !:mime	text/x-awk
--0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
-+0       search/16384    BEGIN
-+>0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+diff -u a/magic/Magdir/c-lang b/magic/Magdir/c-lang
+--- a/magic/Magdir/c-lang	2017-08-14 09:40:38.000000000 +0200
++++ b/magic/Magdir/c-lang	2018-11-10 13:06:33.171398452 +0100
+@@ -13,61 +13,61 @@
+ # C
+ # Check for class if include is found, otherwise class is beaten by include becouse of lowered strength
+ 0	regex	\^#include			C
+->0	regex	\^class[[:space:]]+
++>0	regex/4096	\^class[[:space:]]+
+ >>&0	regex 	\\{[\.\*]\\}(;)?$			\b++
+ >&0	clear	x				source text
+ !:strength + 13
+ !:mime	text/x-c
+-0	regex	\^#[[:space:]]*pragma	C source text
++0	regex/4096	\^#[[:space:]]*pragma	C source text
+ !:mime	text/x-c
+-0	regex	\^#[[:space:]]*(if\|ifn)def
+->&0	regex	\^#[[:space:]]*endif$	C source text
++0	regex/4096	\^#[[:space:]]*(if\|ifn)def
++>&0	regex/4096	\^#[[:space:]]*endif$	C source text
+ !:mime	text/x-c
+-0	regex	\^#[[:space:]]*(if\|ifn)def
+->&0	regex	\^#[[:space:]]*define	C source text
++0	regex/4096	\^#[[:space:]]*(if\|ifn)def
++>&0	regex/4096	\^#[[:space:]]*define	C source text
+ !:mime	text/x-c
+-0	regex	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
++0	regex/4096	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+ !:mime	text/x-c
+-0	regex	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
++0	regex/4096	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+ !:mime	text/x-c
+-0	regex	\^[[:space:]]*extern[[:space:]]+		C source text
++0	regex/4096	\^[[:space:]]*extern[[:space:]]+		C source text
+ !:mime	text/x-c
+-0	regex	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
++0	regex/4096	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
+ !:mime	text/x-c
+-0	regex	\^struct[[:space:]]+		C source text
++0	regex/4096	\^struct[[:space:]]+		C source text
+ !:mime	text/x-c
+-0	regex	\^union[[:space:]]+		C source text
++0	regex/4096	\^union[[:space:]]+		C source text
+ !:mime	text/x-c
+ 0	search/8192	main(
+->&0 regex	\\)[[:space:]]*\\{		C source text
++>&0 regex/4096	\\)[[:space:]]*\\{		C source text
+ !:mime	text/x-c
  
- # AT&T Bell Labs' Plan 9 shell
- 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
--- 
-2.0.3
-
-From 71a8b6c0d758acb0f73e2e51421a711b5e9d6668 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Fri, 30 May 2014 16:48:44 +0000
-Subject: [PATCH] Limit regex search for BEGIN to the first 4K of the file.
-
----
- magic/Magdir/commands | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/magic/Magdir/commands b/magic/Magdir/commands
-index 26b2869..bcd0f43 100644
---- a/magic/Magdir/commands
-+++ b/magic/Magdir/commands
-@@ -49,8 +49,7 @@
- !:mime	text/x-awk
- 0	string/wt	#!\ /usr/bin/awk	awk script text executable
- !:mime	text/x-awk
--0       search/16384    BEGIN
-->0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
-+0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+ # C++
+ # The strength of these rules is increased so they beat the C rules above
+-0	regex	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
++0	regex/4096	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+ # using namespace [namespace] or using std::[lib]
+-0	regex	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
++0	regex/4096	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+-0	regex	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
++0	regex/4096	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+-0	regex	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
++0	regex/4096	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+ # But class alone is reduced to avoid beating php (Jens Schleusener)
+-0	regex	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
++0	regex/4096	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
+ !:strength + 13
+ !:mime	text/x-c++
+-0	regex	\^[[:space:]]*public:		C++ source text
++0	regex/4096	\^[[:space:]]*public:		C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+-0	regex	\^[[:space:]]*private:		C++ source text
++0	regex/4096	\^[[:space:]]*private:		C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
+-0	regex	\^[[:space:]]*protected:		C++ source text
++0	regex/4096	\^[[:space:]]*protected:		C++ source text
+ !:strength + 30
+ !:mime	text/x-c++
  
- # AT&T Bell Labs' Plan 9 shell
- 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
--- 
-2.0.3
-
-From 71d04468a5777fe43064af02f06d74cb60feafab Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Andreas=20K=C3=B6hler?= <andi5.py@gmx.net>
-Date: Sat, 14 Jun 2014 03:04:28 +0200
-Subject: [PATCH] Fix regex in msooxml to avoid matching other archives.
-
----
- magic/Magdir/msooxml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/magic/Magdir/msooxml b/magic/Magdir/msooxml
-index c908b71..5ff3760 100644
---- a/magic/Magdir/msooxml
-+++ b/magic/Magdir/msooxml
-@@ -16,7 +16,7 @@
- 0		string		PK\003\004
- !:strength +10
- # make sure the first file is correct
-->0x1E		regex		\[Content_Types\]\.xml|_rels/\.rels
-+>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels
- # skip to the second local file header
- # since some documents include a 520-byte extra field following the file
- # header, we need to scan for the next header
--- 
-2.0.0
-
-From f2750e17d784dd6b21f7649965d2bd0605bfd471 Mon Sep 17 00:00:00 2001
-From: Christos Zoulas <christos@zoulas.com>
-Date: Tue, 25 Feb 2014 20:28:16 +0000
-Subject: [PATCH] comment out, too weak magic
-
----
- magic/Magdir/filesystems | 81 ++++++++++++++++++++++++------------------------
- 1 file changed, 41 insertions(+), 40 deletions(-)
-
-diff --git a/magic/Magdir/filesystems b/magic/Magdir/filesystems
-index 5624de0..a25e16a 100644
---- a/magic/Magdir/filesystems
-+++ b/magic/Magdir/filesystems
-@@ -1,5 +1,5 @@
- #------------------------------------------------------------------------------
--# $File: filesystems,v 1.84 2013/10/24 15:51:07 christos Exp $
-+# $File: filesystems,v 1.85 2013/11/19 23:54:05 christos Exp $
- # filesystems:  file(1) magic for different filesystems
- #
- 0	name	partid  
-@@ -1870,9 +1870,10 @@
+diff -u a/magic/Magdir/python b/magic/Magdir/python
+--- a/magic/Magdir/python	2017-08-14 09:40:38.000000000 +0200
++++ b/magic/Magdir/python	2018-11-10 13:06:36.799268528 +0100
+@@ -63,7 +63,7 @@
+ !:mime text/x-python
  
- # all FAT12 (strength=70) floppies with sectorsize 512 added by Joerg Jenderek at Jun 2013
- # http://en.wikipedia.org/wiki/File_Allocation_Table#Exceptions
--512		ubelong&0xE0ffff00	0xE0ffff00		
-+# Too Weak.
-+#512		ubelong&0xE0ffff00	0xE0ffff00		
- # without valid Media descriptor in place of BPB, cases with are done at other places
-->21		ubyte			<0xE5			floppy with old FAT filesystem
-+#>21		ubyte			<0xE5			floppy with old FAT filesystem
- # but valid Media descriptor at begin of FAT
- #>>512		ubyte			=0xed			720k
- #>>512		ubyte			=0xf0			1440k
-@@ -1880,64 +1881,64 @@
- #>>512		ubyte			=0xf9			1220k
- #>>512		ubyte			=0xfa			320k
- #>>512		ubyte			=0xfb			640k
-->>512		ubyte			=0xfc			180k
-+#>>512		ubyte			=0xfc			180k
- # look like an an old DOS directory entry
-->>>0xA0E	ubequad			0			
-->>>>0xA00	ubequad			!0			
--!:mime application/x-ima
-->>512		ubyte			=0xfd			
-+#>>>0xA0E	ubequad			0			
-+#>>>>0xA00	ubequad			!0			
-+#!:mime application/x-ima
-+#>>512		ubyte			=0xfd			
- # look for 2nd FAT at different location to distinguish between 360k and 500k
-->>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
-+#>>>0x600	ubelong&0xE0ffff00	0xE0ffff00		360k
- #>>>0x500	ubelong&0xE0ffff00	0xE0ffff00		500k
-->>>0xA0E	ubequad			0			
--!:mime application/x-ima
-->>512		ubyte			=0xfe			
-->>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
-->>>>0x60E	ubequad			0			
-->>>>>0x600	ubequad			!0			
--!:mime application/x-ima
-+#>>>0xA0E	ubequad			0			
-+#!:mime application/x-ima
-+#>>512		ubyte			=0xfe			
-+#>>>0x400	ubelong&0xE0ffff00	0xE0ffff00		160k
-+#>>>>0x60E	ubequad			0			
-+#>>>>>0x600	ubequad			!0			
-+#!:mime application/x-ima
- #>>>0xC00	ubelong&0xE0ffff00	0xE0ffff00		1200k
-->>512		ubyte			=0xff			320k
-->>>0x60E	ubequad			0			
-->>>>0x600	ubequad			!0			
--!:mime application/x-ima
-->>512		ubyte			x			\b, Media descriptor 0x%x
-+#>>512		ubyte			=0xff			320k
-+#>>>0x60E	ubequad			0			
-+#>>>>0x600	ubequad			!0			
-+#!:mime application/x-ima
-+#>>512		ubyte			x			\b, Media descriptor 0x%x
- # without x86 jump instruction
-->>0		ulelong&0x804000E9	!0x000000E9		
-+#>>0		ulelong&0x804000E9	!0x000000E9		
- # assembler instructions: CLI;MOV SP,1E7;MOV AX;07c0;MOV 	
-->>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
-+#>>>0	ubequad				0xfabce701b8c0078e	\b, MS-DOS 1.12 bootloader
- # IOSYS.COM+MSDOS.COM
-->>>>0xc4	use			2xDOS-filename
-->>0		ulelong&0x804000E9	=0x000000E9	
-+#>>>>0xc4	use			2xDOS-filename
-+#>>0		ulelong&0x804000E9	=0x000000E9	
- # only x86 short jump instruction found
-->>>0		ubyte			=0xEB
-->>>>1		ubyte			x			\b, code offset 0x%x+2
-+#>>>0		ubyte			=0xEB
-+#>>>>1		ubyte			x			\b, code offset 0x%x+2
- # http://thestarman.pcministry.com/DOS/ibm100/Boot.htm
- # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;MOV DX,0		
-->>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
-+#>>>>(1.b+2)	ubequad			0xfa8cc88ed8ba0000	\b, PC-DOS 1.0 bootloader 
- # ibmbio.com+ibmdos.com
-->>>>>0x176	use			DOS-filename
-->>>>>0x181	ubyte			x			\b+
-->>>>>0x182	use			DOS-filename
-+#>>>>>0x176	use			DOS-filename
-+#>>>>>0x181	ubyte			x			\b+
-+#>>>>>0x182	use			DOS-filename
- # http://thestarman.pcministry.com/DOS/ibm110/Boot.htm
- # assembler instructions: CLI;MOV AX,CS;MOV DS,AX;XOR DX,DX;MOV		
-->>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
-+#>>>>(1.b+2)	ubequad			0xfa8cc88ed833d28e	\b, PC-DOS 1.1 bootloader 
- # ibmbio.com+ibmdos.com
-->>>>>0x18b	use			DOS-filename
-->>>>>0x196	ubyte			x			\b+
-->>>>>0x197	use			DOS-filename
-+#>>>>>0x18b	use			DOS-filename
-+#>>>>>0x196	ubyte			x			\b+
-+#>>>>>0x197	use			DOS-filename
- # http://en.wikipedia.org/wiki/Zenith_Data_Systems
- # assembler instructions: MOV BX,07c0;MOV SS,BX;MOV SP,01c6		
-->>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
-+#>>>>(1.b+2)	ubequad			0xbbc0078ed3bcc601	\b, Zenith Data Systems MS-DOS 1.25 bootloader
- # IO.SYS+MSDOS.SYS
-->>>>>0x20	use			2xDOS-filename
-+#>>>>>0x20	use			2xDOS-filename
- # http://en.wikipedia.org/wiki/Corona_Data_Systems
- # assembler instructions: MOV AX,CS;MOV DS,AX;CLI;MOV SS,AX;		
-->>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
-+#>>>>(1.b+2)	ubequad			0x8cc88ed8fa8ed0bc	\b, MS-DOS 1.25 bootloader
- # IO.SYS+MSDOS.SYS
-->>>>>0x69	use			2xDOS-filename
-+#>>>>>0x69	use			2xDOS-filename
- # assembler instructions: CLI;PUSH CS;POP SS;MOV SP,7c00;		
-->>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
-+#>>>>(1.b+2)	ubequad			0xfa0e17bc007cb860	\b, MS-DOS 2.11 bootloader
- # defect IO.SYS+MSDOS.SYS ?
- #>>>>>0x162	use			2xDOS-filename
+ # import module [as abrev]
+-0	regex	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
++0	regex/4096	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
+ !:mime text/x-python
  
+ # comments
+@@ -79,7 +79,7 @@
+ # except: or finally:
+ # block
+ 0	search/4096	try:
+->&0	regex	\^[[:space:]]*except.*:$	Python script text executable
++>&0	regex/4096	\^[[:space:]]*except.*:$	Python script text executable
+ !:strength + 15
+ !:mime text/x-python
+ >&0	search/4096	finally:	Python script text executable
+@@ -91,7 +91,7 @@
+ !:mime text/x-python
+ 
+ # def name(*args, **kwargs):
+-0	regex	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
++0	regex/4096	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
+ >&0	regex	 \\(([[:alpha:]*_,\ ]){0,255}\\):$ Python script text executable
+ !:strength + 15
+ !:mime text/x-python
+diff -u a/magic/Magdir/rpm b/magic/Magdir/rpm
+--- a/magic/Magdir/rpm	2013-01-11 17:45:23.000000000 +0100
++++ b/magic/Magdir/rpm	2018-11-10 12:27:29.858619326 +0100
+@@ -29,6 +29,7 @@
+ >>8	beshort		17		SuperH
+ >>8	beshort		18		Xtensa
+ >>8	beshort		255		noarch
++>>10	string		x		%s
+ 
+ #delta RPM    Daniel Novotny (dnovotny@redhat.com)
+ 0	string		drpm		Delta RPM
+diff -u a/magic/Magdir/ruby b/magic/Magdir/ruby
+--- a/magic/Magdir/ruby	2017-08-14 15:39:18.000000000 +0200
++++ b/magic/Magdir/ruby	2018-11-10 13:06:28.703557761 +0100
+@@ -22,30 +22,30 @@
+ # What looks like ruby, but does not have a shebang
+ # (modules and such)
+ # From: Lubomir Rintel <lkundrak@v3.sk>
+-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
++0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
+ >0	regex		def\ [a-z]|\ do$
+->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+ !:strength + 30
+ !:mime	text/x-ruby
+-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
++0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+ >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
+->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+ !:strength + 30
+ !:mime	text/x-ruby
+ # Classes with no modules or defs, beats simple ASCII
+-0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+->&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
++0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
++>&0	regex/4096	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
+ !:strength + 10
+ !:mime	text/x-ruby
+ # Looks for function definition to balance python magic
+ # def name (args)
+ # end
+-0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
+->&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++0	regex/4096		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
++>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
+ !:strength + 10
+ !:mime	text/x-ruby
+ 
+-0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
++0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
+ !:mime	text/x-ruby
+-0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
++0 regex/4096 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
+ !:mime	text/x-ruby
+diff -u a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
+--- a/magic/Magdir/securitycerts	2009-09-19 18:28:12.000000000 +0200
++++ b/magic/Magdir/securitycerts	2018-11-10 12:27:29.858619326 +0100
+@@ -4,3 +4,5 @@
+ 0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
+ 0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
+ 0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
++
++0	string \0volume_key	volume_key escrow packet

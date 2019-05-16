@@ -30,7 +30,7 @@ try {
 	var_dump($e->getMessage());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(36) "Cannot use string offset as an array"
 string(27) "Cannot unset string offsets"
 string(41) "Only variables can be passed by reference"

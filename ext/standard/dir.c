@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /* {{{ includes/startup/misc */
 
 #include "php.h"
@@ -27,10 +25,6 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -63,21 +57,13 @@ int dir_globals_id;
 php_dir_globals dir_globals;
 #endif
 
-#if 0
-typedef struct {
-	int id;
-	DIR *dir;
-} php_dir;
-
-static int le_dirp;
-#endif
-
 static zend_class_entry *dir_class_entry_ptr;
 
 #define FETCH_DIRP() \
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &id) == FAILURE) { \
-		return; \
-	} \
+	ZEND_PARSE_PARAMETERS_START(0, 1) \
+		Z_PARAM_OPTIONAL \
+		Z_PARAM_RESOURCE(id) \
+	ZEND_PARSE_PARAMETERS_END(); \
 	if (ZEND_NUM_ARGS() == 0) { \
 		myself = getThis(); \
 		if (myself) { \
@@ -121,7 +107,7 @@ static void php_set_default_dir(zend_resource *res)
 	}
 
 	if (res) {
-		GC_REFCOUNT(res)++;
+		GC_ADDREF(res);
 	}
 
 	DIRG(default_dir) = res;
@@ -224,9 +210,11 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r", &dirname, &dir_len, &zcontext) == FAILURE) {
-		RETURN_NULL();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(dirname, dir_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_RESOURCE(zcontext)
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -300,9 +288,9 @@ PHP_FUNCTION(chroot)
 	int ret;
 	size_t str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &str, &str_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(str, str_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	ret = chroot(str);
 	if (ret != 0) {
@@ -332,9 +320,9 @@ PHP_FUNCTION(chdir)
 	int ret;
 	size_t str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &str, &str_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(str, str_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (php_check_open_basedir(str)) {
 		RETURN_FALSE;
@@ -429,7 +417,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
-	int cwd_skip = 0;
+	size_t cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
@@ -443,9 +431,11 @@ PHP_FUNCTION(glob)
 	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &pattern, &pattern_len, &flags) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(pattern, pattern_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (pattern_len >= MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
@@ -468,7 +458,7 @@ PHP_FUNCTION(glob)
 			cwd[2] = '\0';
 		}
 #endif
-		cwd_skip = (int)strlen(cwd)+1;
+		cwd_skip = strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
@@ -497,7 +487,9 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
+#ifdef GLOB_NOMATCH
 no_results:
+#endif
 #ifndef PHP_WIN32
 		/* Paths containing '*', '?' and some other chars are
 		illegal on Windows but legit on other platforms. For
@@ -515,7 +507,7 @@ no_results:
 	}
 
 	array_init(return_value);
-	for (n = 0; n < globbuf.gl_pathc; n++) {
+	for (n = 0; n < (size_t)globbuf.gl_pathc; n++) {
 		if (PG(open_basedir) && *PG(open_basedir)) {
 			if (php_check_open_basedir_ex(globbuf.gl_pathv[n], 0)) {
 				basedir_limit = 1;
@@ -547,7 +539,7 @@ no_results:
 	globfree(&globbuf);
 
 	if (basedir_limit && !zend_hash_num_elements(Z_ARRVAL_P(return_value))) {
-		zval_dtor(return_value);
+		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 }
@@ -566,9 +558,12 @@ PHP_FUNCTION(scandir)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_PATH(dirn, dirn_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+		Z_PARAM_RESOURCE(zcontext)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
 		php_error_docref(NULL, E_WARNING, "Directory name cannot be empty");
@@ -602,12 +597,3 @@ PHP_FUNCTION(scandir)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

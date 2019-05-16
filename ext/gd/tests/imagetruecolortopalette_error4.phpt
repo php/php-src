@@ -3,7 +3,7 @@ Testing imagetruecolortopalette(): out of range parameter 3
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 	if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
 ?>
@@ -16,6 +16,6 @@ imagetruecolortopalette($image, true, -1);
 
 ?>
 --EXPECTF--
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero in %s on line %d
+Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d
 
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero in %s on line %d
+Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d

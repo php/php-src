@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_OPENSSL_H
 #define PHP_OPENSSL_H
 /* HAVE_OPENSSL would include SSL MySQL stuff */
@@ -29,8 +27,28 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include <openssl/opensslv.h>
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL version check */
+#if LIBRESSL_VERSION_NUMBER < 0x20700000L
+#define PHP_OPENSSL_API_VERSION 0x10001
+#else
+#define PHP_OPENSSL_API_VERSION 0x10100
+#endif
+#else
+/* OpenSSL version check */
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+#define PHP_OPENSSL_API_VERSION 0x10001
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#define PHP_OPENSSL_API_VERSION 0x10002
+#else
+#define PHP_OPENSSL_API_VERSION 0x10100
+#endif
+#endif
+
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
+#define OPENSSL_DONT_ZERO_PAD_KEY 4
 
 #define OPENSSL_ERROR_X509_PRIVATE_KEY_VALUES_MISMATCH 0x0B080074
 
@@ -47,6 +65,14 @@ extern zend_module_entry openssl_module_entry;
 	"AES256-GCM-SHA384:AES128:AES256:HIGH:!SSLv2:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!RC4:!ADH"
 
 #include <openssl/err.h>
+
+#ifdef PHP_WIN32
+#	define PHP_OPENSSL_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_OPENSSL_API __attribute__((visibility("default")))
+#else
+#	define PHP_OPENSSL_API
+#endif
 
 struct php_openssl_errors {
 	int buffer[ERR_NUM_ERRORS];
@@ -67,6 +93,17 @@ ZEND_TSRMLS_CACHE_EXTERN();
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 void php_openssl_store_errors();
+
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(char *method);
+PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long length);
+PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len,
+		char *method, size_t method_len, char *password,
+		size_t password_len, zend_long options, char *iv, size_t iv_len,
+		zval *tag, zend_long tag_len, char *aad, size_t add_len);
+PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len,
+		char *method, size_t method_len, char *password,
+		size_t password_len, zend_long options, char *iv, size_t iv_len,
+		char *tag, zend_long tag_len, char *aad, size_t add_len);
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
@@ -97,6 +134,7 @@ PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
 PHP_FUNCTION(openssl_pkcs7_encrypt);
+PHP_FUNCTION(openssl_pkcs7_read);
 
 PHP_FUNCTION(openssl_error_string);
 
@@ -108,6 +146,7 @@ PHP_FUNCTION(openssl_x509_export);
 PHP_FUNCTION(openssl_x509_fingerprint);
 PHP_FUNCTION(openssl_x509_export_to_file);
 PHP_FUNCTION(openssl_x509_check_private_key);
+PHP_FUNCTION(openssl_x509_verify);
 
 PHP_FUNCTION(openssl_pkcs12_export);
 PHP_FUNCTION(openssl_pkcs12_export_to_file);
@@ -126,6 +165,15 @@ PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
 
 PHP_FUNCTION(openssl_get_cert_locations);
+
+#ifdef PHP_WIN32
+#define PHP_OPENSSL_BIO_MODE_R(flags) (((flags) & PKCS7_BINARY) ? "rb" : "r")
+#define PHP_OPENSSL_BIO_MODE_W(flags) (((flags) & PKCS7_BINARY) ? "wb" : "w")
+#else
+#define PHP_OPENSSL_BIO_MODE_R(flags) "r"
+#define PHP_OPENSSL_BIO_MODE_W(flags) "w"
+#endif
+
 #else
 
 #define phpext_openssl_ptr NULL
@@ -134,10 +182,3 @@ PHP_FUNCTION(openssl_get_cert_locations);
 
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

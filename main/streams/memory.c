@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Marcus Boerger <helly@php.net>                               |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #define _GNU_SOURCE
 #include "php.h"
@@ -53,21 +51,18 @@ static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_
 
 	if (ms->mode & TEMP_STREAM_READONLY) {
 		return 0;
+	} else if (ms->mode & TEMP_STREAM_APPEND) {
+		ms->fpos = ms->fsize;
 	}
 	if (ms->fpos + count > ms->fsize) {
 		char *tmp;
-
 		if (!ms->data) {
 			tmp = emalloc(ms->fpos + count);
 		} else {
 			tmp = erealloc(ms->data, ms->fpos + count);
 		}
-		if (!tmp) {
-			count = ms->fsize - ms->fpos + 1;
-		} else {
-			ms->data = tmp;
-			ms->fsize = ms->fpos + count;
-		}
+		ms->data = tmp;
+		ms->fsize = ms->fpos + count;
 	}
 	if (!ms->data)
 		count = 0;
@@ -214,17 +209,9 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 	ssb->sb.st_size = ms->fsize;
 	ssb->sb.st_mode |= S_IFREG; /* regular file */
-
-#ifdef NETWARE
-	ssb->sb.st_mtime.tv_sec = timestamp;
-	ssb->sb.st_atime.tv_sec = timestamp;
-	ssb->sb.st_ctime.tv_sec = timestamp;
-#else
 	ssb->sb.st_mtime = timestamp;
 	ssb->sb.st_atime = timestamp;
 	ssb->sb.st_ctime = timestamp;
-#endif
-
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
 	/* this is only for APC, so use /dev/null device - no chance of conflict there! */
@@ -234,9 +221,6 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 #ifndef PHP_WIN32
 	ssb->sb.st_blksize = -1;
-#endif
-
-#if !defined(PHP_WIN32) && !defined(__BEOS__)
 	ssb->sb.st_blocks = -1;
 #endif
 
@@ -278,7 +262,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 }
 /* }}} */
 
-PHPAPI php_stream_ops	php_stream_memory_ops = {
+PHPAPI const php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
 	php_stream_memory_close, php_stream_memory_flush,
 	"MEMORY",
@@ -288,6 +272,29 @@ PHPAPI php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_set_option
 };
 
+/* {{{ */
+PHPAPI int php_stream_mode_from_str(const char *mode)
+{
+	if (strpbrk(mode, "a")) {
+		return TEMP_STREAM_APPEND;
+	} else if (strpbrk(mode, "w+")) {
+		return TEMP_STREAM_DEFAULT;
+	}
+	return TEMP_STREAM_READONLY;
+}
+/* }}} */
+
+/* {{{ */
+PHPAPI const char *_php_stream_mode_to_str(int mode)
+{
+	if (mode == TEMP_STREAM_READONLY) {
+		return "rb";
+	} else if (mode == TEMP_STREAM_APPEND) {
+		return "a+b";
+	}
+	return "w+b";
+}
+/* }}} */
 
 /* {{{ */
 PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
@@ -302,7 +309,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 	self->smax = ~0u;
 	self->mode = mode;
 
-	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, _php_stream_mode_to_str(mode));
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
 }
@@ -501,9 +508,14 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 		return FAILURE;
 	}
 
+	file = php_stream_fopen_tmpfile();
+	if (file == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.");
+		return FAILURE;
+	}
+
 	/* perform the conversion and then pass the request on to the innerstream */
 	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
-	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
 
@@ -546,7 +558,7 @@ static int php_stream_temp_set_option(php_stream *stream, int option, int value,
 }
 /* }}} */
 
-PHPAPI php_stream_ops	php_stream_temp_ops = {
+PHPAPI const php_stream_ops	php_stream_temp_ops = {
 	php_stream_temp_write, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"TEMP",
@@ -571,7 +583,7 @@ PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage,
 	if (tmpdir) {
 		self->tmpdir = estrdup(tmpdir);
 	}
-	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
+	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, _php_stream_mode_to_str(mode));
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
 	php_stream_encloses(stream, self->innerstream);
@@ -608,7 +620,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 }
 /* }}} */
 
-PHPAPI php_stream_ops php_stream_rfc2397_ops = {
+PHPAPI const php_stream_ops php_stream_rfc2397_ops = {
 	php_stream_temp_write, php_stream_temp_read,
 	php_stream_temp_close, php_stream_temp_flush,
 	"RFC2397",
@@ -624,11 +636,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	char *comma, *semi, *sep, *key;
-	size_t mlen, dlen, plen, vlen;
+	char *comma, *semi, *sep;
+	size_t mlen, dlen, plen, vlen, ilen;
 	zend_off_t newoffs;
 	zval meta;
-	int base64 = 0, ilen;
+	int base64 = 0;
 	zend_string *base64_comma = NULL;
 
 	ZVAL_NULL(&meta);
@@ -696,11 +708,9 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			/* found parameter ... the heart of cs ppl lies in +1/-1 or was it +2 this time? */
 			plen = sep - path;
 			vlen = (semi ? (size_t)(semi - sep) : (mlen - plen)) - 1 /* '=' */;
-			key = estrndup(path, plen);
-			if (plen != sizeof("mediatype")-1 || memcmp(key, "mediatype", sizeof("mediatype")-1)) {
-				add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
+			if (plen != sizeof("mediatype")-1 || memcmp(path, "mediatype", sizeof("mediatype")-1)) {
+				add_assoc_stringl_ex(&meta, path, plen, sep + 1, vlen);
 			}
-			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
 			path += plen;
@@ -727,11 +737,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			return NULL;
 		}
 		comma = ZSTR_VAL(base64_comma);
-		ilen = (int)ZSTR_LEN(base64_comma);
+		ilen = ZSTR_LEN(base64_comma);
 	} else {
 		comma = estrndup(comma, dlen);
 		dlen = php_url_decode(comma, dlen);
-		ilen = (int)dlen;
+		ilen = dlen;
 	}
 
 	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {
@@ -760,7 +770,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	return stream;
 }
 
-PHPAPI php_stream_wrapper_ops php_stream_rfc2397_wops = {
+PHPAPI const php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	php_stream_url_wrap_rfc2397,
 	NULL, /* close */
 	NULL, /* fstat */
@@ -774,17 +784,8 @@ PHPAPI php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	NULL, /* stream_metadata */
 };
 
-PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper =	{
 	&php_stream_rfc2397_wops,
 	NULL,
 	1, /* is_url */
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

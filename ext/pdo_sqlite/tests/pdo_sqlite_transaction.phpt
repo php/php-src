@@ -5,7 +5,7 @@ PDO_sqlite: Testing transaction
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $db->beginTransaction();
 
@@ -24,5 +24,5 @@ var_dump($r->rowCount());
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)

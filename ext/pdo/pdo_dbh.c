@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
   |         Sterling Hughes <sterling@php.net>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* The PDO Database Handle Class */
 
@@ -35,6 +33,7 @@
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
+#include "zend_interfaces.h"
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
@@ -169,7 +168,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (message) {
-		zend_string_release(message);
+		zend_string_release_ex(message, 0);
 	}
 
 	if (supp) {
@@ -192,11 +191,11 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
+/* {{{ proto PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	pdo_dbh_t *dbh = NULL;
 	zend_bool is_persistent = 0;
 	char *data_source;
@@ -210,11 +209,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 	int call_factory = 1;
 	zend_error_handling zeh;
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(),
-				"s|s!s!a!", &data_source, &data_source_len,
-				&username, &usernamelen, &password, &passwordlen, &options)) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(data_source, data_source_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
+		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
+		Z_PARAM_ARRAY_EX(options, 1, 0)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* parse the data source name */
 	colon = strchr(data_source, ':');
@@ -271,7 +272,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		pdo_dbh_t *pdbh = NULL;
 		zval *v;
 
-		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
+		if ((v = zend_hash_index_find_deref(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
 				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
 				/* user specified key */
@@ -297,7 +298,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 					/* is the connection still alive ? */
 					if (pdbh->methods->check_liveness && FAILURE == (pdbh->methods->check_liveness)(pdbh)) {
 						/* nope... need to kill it */
-						/*??? memory leak */
+						pdbh->refcount--;
 						zend_list_close(le);
 						pdbh = NULL;
 					}
@@ -310,6 +311,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 				/* need a brand new pdbh */
 				pdbh = pecalloc(1, sizeof(*pdbh), 1);
 
+				pdbh->refcount = 1;
 				pdbh->is_persistent = 1;
 				pdbh->persistent_id = pemalloc(plen + 1, 1);
 				memcpy((char *)pdbh->persistent_id, hashkey, plen+1);
@@ -322,6 +324,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 			efree(dbh);
 			/* switch over to the persistent one */
 			Z_PDO_OBJECT_P(object)->inner = pdbh;
+			pdbh->refcount++;
 			dbh = pdbh;
 		}
 
@@ -355,18 +358,11 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* all set */
 
 		if (is_persistent) {
-			zend_resource le;
-
 			/* register in the persistent list etc. */
 			/* we should also need to replace the object store entry,
 			   since it was created with emalloc */
-
-			le.type = php_pdo_list_entry();
-			le.ptr = dbh;
-			GC_REFCOUNT(&le) = 1;
-
-			if ((zend_hash_str_update_mem(&EG(persistent_list),
-						(char*)dbh->persistent_id, dbh->persistent_id_len, &le, sizeof(le))) == NULL) {
+			if ((zend_register_persistent_resource(
+						(char*)dbh->persistent_id, dbh->persistent_id_len, dbh, php_pdo_list_entry())) == NULL) {
 				php_error_docref(NULL, E_ERROR, "Failed to register persistent entry");
 			}
 		}
@@ -382,6 +378,7 @@ options:
 				if (str_key) {
 					continue;
 				}
+				ZVAL_DEREF(attr_value);
 				pdo_dbh_attribute_set(dbh, long_key, attr_value);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -422,13 +419,13 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
 {
 	zval query_string;
-	zval z_key;
+	zend_string *key;
 
 	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
-	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
-	std_object_handlers.write_property(object, &z_key, &query_string, NULL);
+	key = zend_string_init("queryString", sizeof("queryString") - 1, 0);
+	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
 	zval_ptr_dtor(&query_string);
-	zval_ptr_dtor(&z_key);
+	zend_string_release_ex(key, 0);
 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
@@ -445,9 +442,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 		zend_fcall_info_args(&fci, ctor_args);
 
-		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
-		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 
@@ -469,13 +464,14 @@ static PHP_METHOD(PDO, prepare)
 	size_t statement_len;
 	zval *options = NULL, *opt, *item, ctor_args;
 	zend_class_entry *dbstmt_ce, *pce;
-	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
+	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|a", &statement,
-			&statement_len, &options)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(statement, statement_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY(options)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -553,7 +549,7 @@ static PHP_METHOD(PDO, prepare)
 	PDO_HANDLE_DBH_ERR();
 
 	/* kill the object handle for the stmt here */
-	zval_dtor(return_value);
+	zval_ptr_dtor(return_value);
 
 	RETURN_FALSE;
 }
@@ -563,7 +559,7 @@ static PHP_METHOD(PDO, prepare)
    Initiates a transaction */
 static PHP_METHOD(PDO, beginTransaction)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -596,7 +592,7 @@ static PHP_METHOD(PDO, beginTransaction)
    Commit a transaction */
 static PHP_METHOD(PDO, commit)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -622,7 +618,7 @@ static PHP_METHOD(PDO, commit)
    roll back a transaction */
 static PHP_METHOD(PDO, rollBack)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -648,7 +644,7 @@ static PHP_METHOD(PDO, rollBack)
    determine if inside a transaction */
 static PHP_METHOD(PDO, inTransaction)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -817,17 +813,18 @@ fail:
 }
 /* }}} */
 
-/* {{{ proto bool PDO::setAttribute(long attribute, mixed value)
+/* {{{ proto bool PDO::setAttribute(int attribute, mixed value)
    Set an attribute */
 static PHP_METHOD(PDO, setAttribute)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	zend_long attr;
 	zval *value;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lz", &attr, &value)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(attr)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -839,16 +836,16 @@ static PHP_METHOD(PDO, setAttribute)
 }
 /* }}} */
 
-/* {{{ proto mixed PDO::getAttribute(long attribute)
+/* {{{ proto mixed PDO::getAttribute(int attribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	zend_long attr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(attr)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -874,7 +871,7 @@ static PHP_METHOD(PDO, getAttribute)
 			array_init(return_value);
 			add_next_index_str(return_value, zend_string_copy(dbh->def_stmt_ce->name));
 			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
-				if (Z_REFCOUNTED(dbh->def_stmt_ctor_args)) Z_ADDREF(dbh->def_stmt_ctor_args);
+				Z_TRY_ADDREF(dbh->def_stmt_ctor_args);
 				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
 			}
 			return;
@@ -904,18 +901,18 @@ static PHP_METHOD(PDO, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto long PDO::exec(string query)
+/* {{{ proto int PDO::exec(string query)
    Execute a query that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *statement;
 	size_t statement_len;
 	zend_long ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &statement, &statement_len)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(statement, statement_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!statement_len) {
 		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query");
@@ -937,13 +934,14 @@ static PHP_METHOD(PDO, exec)
    Returns the id of the last row that we affected on this connection.  Some databases require a sequence or table name to be passed in.  Not always meaningful. */
 static PHP_METHOD(PDO, lastInsertId)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *name = NULL;
 	size_t namelen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &name, &namelen)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_EX(name, namelen, 1, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -970,7 +968,7 @@ static PHP_METHOD(PDO, lastInsertId)
    Fetch the error code associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorCode)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1001,7 +999,7 @@ static PHP_METHOD(PDO, errorInfo)
 	int error_count_diff 	 = 0;
 	int error_expected_count = 3;
 
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1049,7 +1047,7 @@ static PHP_METHOD(PDO, query)
 	pdo_stmt_t *stmt;
 	char *statement;
 	size_t statement_len;
-	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(getThis());
+	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
 	/* Return a meaningful error when no parameters were passed */
@@ -1127,16 +1125,18 @@ static PHP_METHOD(PDO, query)
    quotes string for use in a query.  The optional paramtype acts as a hint for drivers that have alternate quoting styles.  The default value is PDO_PARAM_STR */
 static PHP_METHOD(PDO, quote)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(getThis());
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	char *str;
 	size_t str_len;
 	zend_long paramtype = PDO_PARAM_STR;
 	char *qstr;
 	size_t qlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &paramtype)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(paramtype)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1152,22 +1152,6 @@ static PHP_METHOD(PDO, quote)
 	}
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto int PDO::__wakeup()
-   Prevents use of a PDO instance that has been unserialized */
-static PHP_METHOD(PDO, __wakeup)
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You cannot serialize or unserialize PDO instances");
-}
-/* }}} */
-
-/* {{{ proto int PDO::__sleep()
-   Prevents serialization of a PDO instance */
-static PHP_METHOD(PDO, __sleep)
-{
-	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You cannot serialize or unserialize PDO instances");
 }
 /* }}} */
 
@@ -1243,8 +1227,6 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 	PHP_ME(PDO, errorInfo,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	arginfo_pdo_getattribute,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, quote,			arginfo_pdo_quote,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, __wakeup,               arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	PHP_ME(PDO, __sleep,                arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
@@ -1253,7 +1235,7 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 static void cls_method_dtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
-		zend_string_release(func->common.function_name);
+		zend_string_release_ex(func->common.function_name, 0);
 	}
 	efree(func);
 }
@@ -1262,7 +1244,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 static void cls_method_pdtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
-		zend_string_release(func->common.function_name);
+		zend_string_release_ex(func->common.function_name, 1);
 	}
 	pefree(func, 1);
 }
@@ -1285,9 +1267,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		return 0;
 	}
 
-	if (!(dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent))) {
-		php_error_docref(NULL, E_ERROR, "out of memory while allocating PDO methods.");
-	}
+	dbh->cls_methods[kind] = pemalloc(sizeof(HashTable), dbh->is_persistent);
 	zend_hash_init_ex(dbh->cls_methods[kind], 8, NULL,
 			dbh->is_persistent? cls_method_pdtor : cls_method_dtor, dbh->is_persistent, 0);
 
@@ -1339,16 +1319,13 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 	return 1;
 }
 
-static union _zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key)
+static zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key)
 {
 	zend_function *fbc = NULL;
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_init(ZSTR_VAL(method_name), ZSTR_LEN(method_name), 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
-
-	if ((fbc = std_object_handlers.get_method(object, method_name, key)) == NULL) {
+	if ((fbc = zend_std_get_method(object, method_name, key)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
 		if (!dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH]) {
@@ -1359,11 +1336,12 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 			}
 		}
 
+		lc_method_name = zend_string_tolower(method_name);
 		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
+		zend_string_release_ex(lc_method_name, 0);
 	}
 
 out:
-	zend_string_release(lc_method_name);
 	return fbc;
 }
 
@@ -1372,9 +1350,9 @@ static int dbh_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-static HashTable *dbh_get_gc(zval *object, zval **gc_data, int *gc_count)
+static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
-	pdo_dbh_t *dbh = Z_PDO_DBH_P(object);
+	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
 	*gc_data = &dbh->def_stmt_ctor_args;
 	*gc_count = 1;
 	return zend_std_get_properties(object);
@@ -1390,11 +1368,14 @@ void pdo_dbh_init(void)
 	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
 	pdo_dbh_ce = zend_register_internal_class(&ce);
 	pdo_dbh_ce->create_object = pdo_dbh_new;
+	pdo_dbh_ce->serialize = zend_class_serialize_deny;
+	pdo_dbh_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
 	pdo_dbh_object_handlers.dtor_obj = zend_objects_destroy_object;
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
+	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare_objects = dbh_compare;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
@@ -1406,6 +1387,9 @@ void pdo_dbh_init(void)
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_LOB",  (zend_long)PDO_PARAM_LOB);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_STMT", (zend_long)PDO_PARAM_STMT);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INPUT_OUTPUT", (zend_long)PDO_PARAM_INPUT_OUTPUT);
+	REGISTER_PDO_CLASS_CONST_LONG("PARAM_STR_NATL", (zend_long)PDO_PARAM_STR_NATL);
+	REGISTER_PDO_CLASS_CONST_LONG("PARAM_STR_CHAR", (zend_long)PDO_PARAM_STR_CHAR);
+
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_ALLOC",		(zend_long)PDO_PARAM_EVT_ALLOC);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_EVT_FREE",			(zend_long)PDO_PARAM_EVT_FREE);
@@ -1455,6 +1439,7 @@ void pdo_dbh_init(void)
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_MAX_COLUMN_LEN", (zend_long)PDO_ATTR_MAX_COLUMN_LEN);
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_EMULATE_PREPARES", (zend_long)PDO_ATTR_EMULATE_PREPARES);
 	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DEFAULT_FETCH_MODE", (zend_long)PDO_ATTR_DEFAULT_FETCH_MODE);
+	REGISTER_PDO_CLASS_CONST_LONG("ATTR_DEFAULT_STR_PARAM", (zend_long)PDO_ATTR_DEFAULT_STR_PARAM);
 
 	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_SILENT",	(zend_long)PDO_ERRMODE_SILENT);
 	REGISTER_PDO_CLASS_CONST_LONG("ERRMODE_WARNING",	(zend_long)PDO_ERRMODE_WARNING);
@@ -1479,33 +1464,24 @@ void pdo_dbh_init(void)
 
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (zend_long)PDO_CURSOR_FWDONLY);
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
-
-#if 0
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_CANT_MAP", 		(zend_long)PDO_ERR_CANT_MAP);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_SYNTAX", 		(zend_long)PDO_ERR_SYNTAX);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_CONSTRAINT", 	(zend_long)PDO_ERR_CONSTRAINT);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NOT_FOUND", 		(zend_long)PDO_ERR_NOT_FOUND);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_ALREADY_EXISTS", 	(zend_long)PDO_ERR_ALREADY_EXISTS);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NOT_IMPLEMENTED", 	(zend_long)PDO_ERR_NOT_IMPLEMENTED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_MISMATCH", 		(zend_long)PDO_ERR_MISMATCH);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_TRUNCATED", 		(zend_long)PDO_ERR_TRUNCATED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_DISCONNECTED", 	(zend_long)PDO_ERR_DISCONNECTED);
-	REGISTER_PDO_CLASS_CONST_LONG("ERR_NO_PERM",		(zend_long)PDO_ERR_NO_PERM);
-#endif
-
 }
 
 static void dbh_free(pdo_dbh_t *dbh, zend_bool free_persistent)
 {
 	int i;
 
-	if (dbh->is_persistent && !free_persistent) {
-		return;
-	}
-
 	if (dbh->query_stmt) {
 		zval_ptr_dtor(&dbh->query_stmt_zval);
 		dbh->query_stmt = NULL;
+	}
+
+	if (dbh->is_persistent) {
+#if ZEND_DEBUG
+		ZEND_ASSERT(!free_persistent || (dbh->refcount == 1));
+#endif
+		if (!free_persistent && (--dbh->refcount)) {
+			return;
+		}
 	}
 
 	if (dbh->methods) {
@@ -1559,7 +1535,7 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 {
 	pdo_dbh_object_t *dbh;
 
-	dbh = ecalloc(1, sizeof(pdo_dbh_object_t) + zend_object_properties_size(ce));
+	dbh = zend_object_alloc(sizeof(pdo_dbh_object_t), ce);
 	zend_object_std_init(&dbh->std, ce);
 	object_properties_init(&dbh->std, ce);
 	rebuild_object_properties(&dbh->std);
@@ -1582,12 +1558,3 @@ ZEND_RSRC_DTOR_FUNC(php_pdo_pdbh_dtor) /* {{{ */
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

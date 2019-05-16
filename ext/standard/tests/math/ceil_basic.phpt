@@ -2,10 +2,6 @@
 Test ceil() - basic function test for ceil()
 --INI--
 precision=14
---SKIPIF--
-if (strtolower(PHP_OS) == 'darwin') {
-    die('SKIP OSX does weird things with -0 so this test doesn't work there');
-}
 --FILE--
 <?php
 /* Prototype  : float ceil  ( float $value  )
@@ -25,7 +21,7 @@ $values = array(0,
 				2.6,
 				-2.6,
 				037,
-				0x5F,	
+				0x5F,
 				"10.5",
 				"-10.5",
 				"3.95E3",
@@ -33,8 +29,8 @@ $values = array(0,
 				"039",
 				true,
 				false,
-				null, 
-				);	
+				null,
+				);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = ceil($values[$i]);
@@ -43,7 +39,7 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing ceil() : basic functionality ***
 float(0)
 float(0)

@@ -1,15 +1,15 @@
 --TEST--
 DBA NDBM handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'ndbm';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
 	$handler = 'ndbm';
-	require_once dirname(__FILE__) .'/test.inc';
-	require_once dirname(__FILE__) .'/dba_handler.inc';
+	require_once __DIR__ .'/test.inc';
+	require_once __DIR__ .'/dba_handler.inc';
 ?>
 ===DONE===
 --EXPECT--

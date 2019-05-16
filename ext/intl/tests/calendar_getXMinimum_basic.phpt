@@ -17,7 +17,7 @@ var_dump(
 		$intlcal->getGreatestMinimum(IntlCalendar::FIELD_DAY_OF_MONTH),
 		intlcal_get_greatest_minimum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH),
 		$intlcal->getActualMinimum(IntlCalendar::FIELD_DAY_OF_MONTH),
-		intlcal_get_actual_minimum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH), 
+		intlcal_get_actual_minimum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH),
 		$intlcal->getMinimum(IntlCalendar::FIELD_DAY_OF_MONTH),
 		intlcal_get_minimum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH)
 );

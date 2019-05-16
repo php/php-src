@@ -3,9 +3,9 @@ Test strftime() function : usage variation - Passing month related format string
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing strftime() : usage variation ***\n";

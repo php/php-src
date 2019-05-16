@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -20,7 +20,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directories
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path . "/scandir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
@@ -29,7 +29,7 @@ mkdir($sub_dir_path);
 
 // with different wildcard characters
 
-echo "\n-- Wildcard = '*' --\n"; 
+echo "\n-- Wildcard = '*' --\n";
 var_dump( scandir($file_path . "/scandir_var*") );
 var_dump( scandir($file_path . "/*") );
 
@@ -41,7 +41,7 @@ var_dump( scandir($dir_path . "/sub?dir1") );
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/scandir_variation6";
+$dir_path = __DIR__ . "/scandir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
 rmdir($sub_dir_path);

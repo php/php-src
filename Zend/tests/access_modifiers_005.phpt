@@ -10,5 +10,5 @@ class test {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple final modifiers are not allowed in %s on line %d

@@ -2,14 +2,13 @@
 Phar: create and modify phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 @unlink($fname);
@@ -35,9 +34,9 @@ file_put_contents($pname .'/b.php', "another!\n");
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
 
-var_dump($sig1[b'hash']);
-var_dump($sig2[b'hash']);
-var_dump($sig1[b'hash'] != $sig2[b'hash']);
+var_dump($sig1['hash']);
+var_dump($sig2['hash']);
+var_dump($sig1['hash'] != $sig2['hash']);
 
 include $pname . '/a.php';
 include $pname . '/b.php';
@@ -45,7 +44,7 @@ include $pname . '/b.php';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 brand new!
 string(40) "%s"

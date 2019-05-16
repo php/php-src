@@ -16,7 +16,7 @@ var_dump(json_last_error_msg());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 bool(true)
 NULL

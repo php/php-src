@@ -49,7 +49,7 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(NumberFormatter_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(NumberFormatter_object), ce);
 	formatter_data_init( &intern->nf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -61,13 +61,13 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ NumberFormatter_object_clone */
-zend_object *NumberFormatter_object_clone(zval *object)
+zend_object *NumberFormatter_object_clone(zend_object *object)
 {
 	NumberFormatter_object *nfo, *new_nfo;
 	zend_object *new_obj;
 
-	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	nfo = php_intl_number_format_fetch_object(object);
+	new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
 	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
@@ -150,8 +150,8 @@ ZEND_END_ARG_INFO()
 /* {{{ NumberFormatter_class_functions
  * Every 'NumberFormatter' class method has an entry in this table
  */
-static zend_function_entry NumberFormatter_class_functions[] = {
-	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
+static const zend_function_entry NumberFormatter_class_functions[] = {
+	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )
 	PHP_NAMED_FE( parse, ZEND_FN( numfmt_parse ), number_parse_arginfo )
@@ -184,26 +184,10 @@ void formatter_register_class( void )
 	ce.create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&NumberFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));
 	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
-
-	/* Declare 'NumberFormatter' class properties. */
-	if( !NumberFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register NumberFormatter class");
-		return;
-	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

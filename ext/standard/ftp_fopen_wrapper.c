@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,6 @@
    |          Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include "php_globals.h"
@@ -49,8 +48,6 @@
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#elif defined(NETWARE) && defined(USE_WINSOCK)
-#include <novsock2.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -59,7 +56,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -82,6 +79,7 @@ typedef struct _php_ftp_dirstream_data {
  */
 static inline int get_ftp_result(php_stream *stream, char *buffer, size_t buffer_size)
 {
+	buffer[0] = '\0'; /* in case read fails to read anything */
 	while (php_stream_gets(stream, buffer, buffer_size-1) &&
 		   !(isdigit((int) buffer[0]) && isdigit((int) buffer[1]) &&
 			 isdigit((int) buffer[2]) && buffer[3] == ' '));
@@ -136,7 +134,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 {
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
-	int result, use_ssl, use_ssl_on_data = 0, tmp_len;
+	int result, use_ssl, use_ssl_on_data = 0;
 	char tmp_line[512];
 	char *transport;
 	int transport_len;
@@ -149,13 +147,13 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		return NULL;
 	}
 
-	use_ssl = resource->scheme && (strlen(resource->scheme) > 3) && resource->scheme[3] == 's';
+	use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 3) && ZSTR_VAL(resource->scheme)[3] == 's';
 
 	/* use port 21 if one wasn't specified */
 	if (resource->port == 0)
 		resource->port = 21;
 
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", resource->host, resource->port);
+	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", ZSTR_VAL(resource->host), resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -187,7 +185,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 			/* get the response */
 			result = GET_FTP_RESULT(stream);
 			if (result != 334) {
-				use_ssl = 0;
+				php_stream_wrapper_log_error(wrapper, options, "Server doesn't support FTPS.");
+				goto connect_errexit;
 			} else {
 				/* we must reuse the old SSL session id */
 				/* if we talk to an old ftpd-ssl */
@@ -245,11 +244,11 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 
 	/* send the user name */
 	if (resource->user != NULL) {
-		tmp_len = (int)php_raw_url_decode(resource->user, (int)strlen(resource->user));
+		ZSTR_LEN(resource->user) = php_raw_url_decode(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user));
 
-		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
+		PHP_FTP_CNTRL_CHK(ZSTR_VAL(resource->user), ZSTR_LEN(resource->user), "Invalid login %s")
 
-		php_stream_printf(stream, "USER %s\r\n", resource->user);
+		php_stream_printf(stream, "USER %s\r\n", ZSTR_VAL(resource->user));
 	} else {
 		php_stream_write_string(stream, "USER anonymous\r\n");
 	}
@@ -262,11 +261,11 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, tmp_line, 0);
 
 		if (resource->pass != NULL) {
-			tmp_len = (int)php_raw_url_decode(resource->pass, (int)strlen(resource->pass));
+			ZSTR_LEN(resource->pass) = php_raw_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
 
-			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
+			PHP_FTP_CNTRL_CHK(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass), "Invalid password %s")
 
-			php_stream_printf(stream, "PASS %s\r\n", resource->pass);
+			php_stream_printf(stream, "PASS %s\r\n", ZSTR_VAL(resource->pass));
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
@@ -428,6 +427,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int8_t read_write = 0;
 	char *transport;
 	int transport_len;
+	zend_string *error_message = NULL;
 
 	tmp_line[0] = '\0';
 
@@ -475,7 +475,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		goto errexit;
 
 	/* find out the size of the file (verifying it exists) */
-	php_stream_printf(stream, "SIZE %s\r\n", resource->path);
+	php_stream_printf(stream, "SIZE %s\r\n", ZSTR_VAL(resource->path));
 
 	/* read the response */
 	result = GET_FTP_RESULT(stream);
@@ -504,7 +504,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			if (allow_overwrite) {
 				/* Context permits overwriting file,
 				   so we just delete whatever's there in preparation */
-				php_stream_printf(stream, "DELE %s\r\n", resource->path);
+				php_stream_printf(stream, "DELE %s\r\n", ZSTR_VAL(resource->path));
 				result = GET_FTP_RESULT(stream);
 				if (result >= 300 || result <= 199) {
 					goto errexit;
@@ -548,16 +548,17 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		/* Append */
 		memcpy(tmp_line, "APPE", sizeof("APPE"));
 	}
-	php_stream_printf(stream, "%s %s\r\n", tmp_line, (resource->path != NULL ? resource->path : "/"));
+	php_stream_printf(stream, "%s %s\r\n", tmp_line, (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
 
 	/* open the data channel */
 	if (hoststart == NULL) {
-		hoststart = resource->host;
+		hoststart = ZSTR_VAL(resource->host);
 	}
 	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
-	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
+	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, &error_message, NULL);
 	efree(transport);
 	if (datastream == NULL) {
+		tmp_line[0]='\0';
 		goto errexit;
 	}
 
@@ -581,6 +582,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 		php_stream_close(datastream);
 		datastream = NULL;
+		tmp_line[0]='\0';
 		goto errexit;
 	}
 
@@ -600,6 +602,11 @@ errexit:
 	}
 	if (tmp_line[0] != '\0')
 		php_stream_wrapper_log_error(wrapper, options, "FTP server reports %s", tmp_line);
+
+	if (error_message) {
+		php_stream_wrapper_log_error(wrapper, options, "Failed to set up data channel: %s", ZSTR_VAL(error_message));
+		zend_string_release(error_message);
+	}
 	return NULL;
 }
 /* }}} */
@@ -632,7 +639,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	tmp_len = MIN(sizeof(ent->d_name), ZSTR_LEN(basename) - 1);
 	memcpy(ent->d_name, ZSTR_VAL(basename), tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	zend_string_release(basename);
+	zend_string_release_ex(basename, 0);
 
 	/* Trim off trailing whitespace characters */
 	while (tmp_len > 0 &&
@@ -669,7 +676,7 @@ static int php_ftp_dirstream_close(php_stream *stream, int close_handle)
 
 /* ftp dirstreams only need to support read and close operations,
    They can't be rewound because the underlying ftp stream can't be rewound. */
-static php_stream_ops php_ftp_dirstream_ops = {
+static const php_stream_ops php_ftp_dirstream_ops = {
 	NULL, /* write */
 	php_ftp_dirstream_read, /* read */
 	php_ftp_dirstream_close, /* close */
@@ -707,6 +714,9 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	if (result > 299 || result < 200)
 		goto opendir_errexit;
 
+	// tmp_line isn't relevant after the php_fopen_do_pasv().
+	tmp_line[0] = '\0';
+
 	/* set up the passive connection */
 	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart);
 
@@ -714,16 +724,17 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		goto opendir_errexit;
 	}
 
-	php_stream_printf(stream, "NLST %s\r\n", (resource->path != NULL ? resource->path : "/"));
-
 	/* open the data channel */
 	if (hoststart == NULL) {
-		hoststart = resource->host;
+		hoststart = ZSTR_VAL(resource->host);
 	}
+
 	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
 	if (datastream == NULL) {
 		goto opendir_errexit;
 	}
+
+	php_stream_printf(stream, "NLST %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
 
 	result = GET_FTP_RESULT(stream);
 	if (result != 150 && result != 125) {
@@ -736,7 +747,6 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	}
 
 	php_stream_context_set(datastream, context);
-
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			php_stream_xport_crypto_enable(datastream, 1) < 0)) {
@@ -789,12 +799,12 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 	}
 
 	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so approximate one based on being readable */
-	php_stream_printf(stream, "CWD %s\r\n", (resource->path != NULL ? resource->path : "/")); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
+	php_stream_printf(stream, "CWD %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/")); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
 		ssb->sb.st_mode |= S_IFREG;
 	} else {
-		ssb->sb.st_mode |= S_IFDIR;
+		ssb->sb.st_mode |= S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH;
 	}
 
 	php_stream_write_string(stream, "TYPE I\r\n"); /* we need this since some servers refuse to accept SIZE command in ASCII mode */
@@ -805,7 +815,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		goto stat_errexit;
 	}
 
-	php_stream_printf(stream, "SIZE %s\r\n", (resource->path != NULL ? resource->path : "/"));
+	php_stream_printf(stream, "SIZE %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
 		/* Failure either means it doesn't exist
@@ -820,7 +830,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		ssb->sb.st_size = atoi(tmp_line + 4);
 	}
 
-	php_stream_printf(stream, "MDTM %s\r\n", (resource->path != NULL ? resource->path : "/"));
+	php_stream_printf(stream, "MDTM %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
 	result = GET_FTP_RESULT(stream);
 	if (result == 213) {
 		char *p = tmp_line + 4;
@@ -873,9 +883,9 @@ mdtm_error:
 
 	ssb->sb.st_nlink = 1;
 	ssb->sb.st_rdev = -1;
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 	ssb->sb.st_blksize = 4096;				/* Guess since FTP won't expose this information */
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 	ssb->sb.st_blocks = (int)((4095 + ssb->sb.st_size) / ssb->sb.st_blksize); /* emulate ceil */
 #endif
 #endif
@@ -903,7 +913,7 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 	int result;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
@@ -919,7 +929,7 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* Attempt to delete the file */
-	php_stream_printf(stream, "DELE %s\r\n", (resource->path != NULL ? resource->path : "/"));
+	php_stream_printf(stream, "DELE %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
@@ -962,10 +972,10 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 		!resource_to ||
 		!resource_from->scheme ||
 		!resource_to->scheme ||
-		strcmp(resource_from->scheme, resource_to->scheme) ||
+		!zend_string_equals(resource_from->scheme, resource_to->scheme) ||
 		!resource_from->host ||
 		!resource_to->host ||
-		strcmp(resource_from->host, resource_to->host) ||
+		!zend_string_equals(resource_from->host, resource_to->host) ||
 		(resource_from->port != resource_to->port &&
 		 resource_from->port * resource_to->port != 0 &&
 		 resource_from->port + resource_to->port != 21) ||
@@ -974,16 +984,16 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 		goto rename_errexit;
 	}
 
-	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, NULL, NULL, NULL, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, context, NULL, NULL, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", resource_from->host);
+			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", ZSTR_VAL(resource_from->host));
 		}
 		goto rename_errexit;
 	}
 
 	/* Rename FROM */
-	php_stream_printf(stream, "RNFR %s\r\n", (resource_from->path != NULL ? resource_from->path : "/"));
+	php_stream_printf(stream, "RNFR %s\r\n", (resource_from->path != NULL ? ZSTR_VAL(resource_from->path) : "/"));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 300 || result > 399) {
@@ -994,7 +1004,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	}
 
 	/* Rename TO */
-	php_stream_printf(stream, "RNTO %s\r\n", (resource_to->path != NULL ? resource_to->path : "/"));
+	php_stream_printf(stream, "RNTO %s\r\n", (resource_to->path != NULL ? ZSTR_VAL(resource_to->path) : "/"));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
@@ -1032,7 +1042,7 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 	int result, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
@@ -1048,52 +1058,51 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 	}
 
 	if (!recursive) {
-		php_stream_printf(stream, "MKD %s\r\n", resource->path);
+		php_stream_printf(stream, "MKD %s\r\n", ZSTR_VAL(resource->path));
 		result = GET_FTP_RESULT(stream);
     } else {
-        /* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+        /* we look for directory separator from the end of string, thus hopefully reducing our work load */
         char *p, *e, *buf;
 
-        buf = estrdup(resource->path);
-        e = buf + strlen(buf);
+        buf = estrndup(ZSTR_VAL(resource->path), ZSTR_LEN(resource->path));
+        e = buf + ZSTR_LEN(resource->path);
 
         /* find a top level directory we need to create */
         while ((p = strrchr(buf, '/'))) {
-            *p = '\0';
-			php_stream_printf(stream, "CWD %s\r\n", buf);
+			*p = '\0';
+			php_stream_printf(stream, "CWD %s\r\n", strlen(buf) ? buf : "/");
 			result = GET_FTP_RESULT(stream);
 			if (result >= 200 && result <= 299) {
 				*p = '/';
 				break;
 			}
-        }
-        if (p == buf) {
-			php_stream_printf(stream, "MKD %s\r\n", resource->path);
-			result = GET_FTP_RESULT(stream);
-        } else {
-			php_stream_printf(stream, "MKD %s\r\n", buf);
-			result = GET_FTP_RESULT(stream);
-			if (result >= 200 && result <= 299) {
-				if (!p) {
-					p = buf;
-				}
-				/* create any needed directories if the creation of the 1st directory worked */
-				while (++p != e) {
-					if (*p == '\0' && *(p + 1) != '\0') {
-						*p = '/';
-						php_stream_printf(stream, "MKD %s\r\n", buf);
-						result = GET_FTP_RESULT(stream);
-						if (result < 200 || result > 299) {
-							if (options & REPORT_ERRORS) {
-								php_error_docref(NULL, E_WARNING, "%s", tmp_line);
-							}
-							break;
+		}
+
+		php_stream_printf(stream, "MKD %s\r\n", strlen(buf) ? buf : "/");
+		result = GET_FTP_RESULT(stream);
+
+		if (result >= 200 && result <= 299) {
+			if (!p) {
+				p = buf;
+			}
+			/* create any needed directories if the creation of the 1st directory worked */
+			while (p != e) {
+				if (*p == '\0' && *(p + 1) != '\0') {
+					*p = '/';
+					php_stream_printf(stream, "MKD %s\r\n", buf);
+					result = GET_FTP_RESULT(stream);
+					if (result < 200 || result > 299) {
+						if (options & REPORT_ERRORS) {
+							php_error_docref(NULL, E_WARNING, "%s", tmp_line);
 						}
+						break;
 					}
 				}
+				++p;
 			}
 		}
-        efree(buf);
+
+		efree(buf);
     }
 
 	php_url_free(resource);
@@ -1126,7 +1135,7 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 	int result;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
@@ -1141,7 +1150,7 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 		goto rmdir_errexit;
 	}
 
-	php_stream_printf(stream, "RMD %s\r\n", resource->path);
+	php_stream_printf(stream, "RMD %s\r\n", ZSTR_VAL(resource->path));
 	result = GET_FTP_RESULT(stream);
 
 	if (result < 200 || result > 299) {
@@ -1167,7 +1176,7 @@ rmdir_errexit:
 }
 /* }}} */
 
-static php_stream_wrapper_ops ftp_stream_wops = {
+static const php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,
@@ -1181,18 +1190,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_ftp_wrapper =	{
 	&ftp_stream_wops,
 	NULL,
 	1 /* is_url */
 };
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

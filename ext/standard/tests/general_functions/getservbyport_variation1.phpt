@@ -12,29 +12,13 @@ Simone Gentili (sensorario@gmail.com)
 	var_dump(getservbyport( -1, "tcp" ));
 	var_dump(getservbyport( 80, "ppp" ));
 	var_dump(getservbyport( null, null));
-	var_dump(getservbyport( array(), array()));
-	var_dump(getservbyport( array(80), array("tcp")));
-	var_dump(getservbyport( array(2, 3), array("one"=>1, "two"=>2)));
 	var_dump(getservbyport( 2, 2));
 	var_dump(getservbyport( "80", "tcp"));
-	var_dump(getservbyport( new stdClass(), new stdClass()));
-	
+
 ?>
 --EXPECTF--
 bool(false)
 bool(false)
 bool(false)
-
-Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
-NULL
-
-Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
-NULL
-
-Warning: getservbyport() expects parameter 1 to be integer, array given in %s on line %d
-NULL
 bool(false)
 string(%d) "%s"
-
-Warning: getservbyport() expects parameter 1 to be integer, object given in %s on line %d
-NULL

@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #36428 (Incorrect error message for PDO::fetchAll())
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 if (!extension_loaded('simplexml')) die('skip SimpleXML not loaded');
 $dir = getenv('REDIR_TEST_DIR');
@@ -11,7 +11,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/'); 
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();

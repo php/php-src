@@ -1,5 +1,3 @@
-static const char rcsid[] = "#(@) $Id$";
-
 /*
 
 	   Encode or decode file as MIME base64 (RFC 1341)
@@ -15,6 +13,7 @@ static const char rcsid[] = "#(@) $Id$";
 /*  ENCODE  --	Encode binary file into base64.  */
 #include <stdlib.h>
 #include <ctype.h>
+#include <php.h>
 
 #include "base64.h"
 
@@ -23,7 +22,7 @@ static unsigned char dtable[512];
 void buffer_new(struct buffer_st *b)
 {
   b->length = 512;
-  b->data = malloc(sizeof(char)*(b->length));
+  b->data = emalloc(sizeof(char)*(b->length));
   b->data[0] = 0;
   b->ptr = b->data;
   b->offset = 0;
@@ -31,18 +30,21 @@ void buffer_new(struct buffer_st *b)
 
 void buffer_add(struct buffer_st *b, char c)
 {
+  if ((INT_MAX - b->length) <= 512) {
+		return;
+  }
   *(b->ptr++) = c;
   b->offset++;
   if (b->offset == b->length) {
     b->length += 512;
-    b->data = realloc(b->data, b->length);
+    b->data = erealloc(b->data, b->length);
     b->ptr = b->data + b->offset;
   }
 }
 
 void buffer_delete(struct buffer_st *b)
 {
-  free(b->data);
+  efree(b->data);
   b->length = 0;
   b->offset = 0;
   b->ptr = NULL;
@@ -53,9 +55,6 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
 {
   int i, hiteof = 0;
   int offset = 0;
-  int olen;
-
-  olen = 0;
 
   buffer_new(b);
 
@@ -73,13 +72,13 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
 
   while (!hiteof) {
     unsigned char igroup[3], ogroup[4];
-    int c, n;
+	int c, n;
 
     igroup[0] = igroup[1] = igroup[2] = 0;
     for (n = 0; n < 3; n++) {
       c = *(source++);
       offset++;
-      if (offset > length) {
+      if (offset > length || offset <= 0) {
 	hiteof = 1;
 	break;
       }
@@ -165,7 +164,7 @@ void base64_decode_xmlrpc(struct buffer_st *bfr, const char *source, int length)
 		return;
 	    }
 
-	    if (dtable[c] & 0x80) {
+	    if (dtable[(unsigned char)c] & 0x80) {
 	      /*
 	      fprintf(stderr, "Offset %i length %i\n", offset, length);
 	      fprintf(stderr, "character '%c:%x:%c' in input file.\n", c, c, dtable[c]);

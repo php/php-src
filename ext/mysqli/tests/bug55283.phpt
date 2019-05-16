@@ -59,7 +59,7 @@ $link->close();
 
 	echo "done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(10) "Ssl_cipher"

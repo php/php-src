@@ -12,5 +12,5 @@ require_once('skipifemb.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

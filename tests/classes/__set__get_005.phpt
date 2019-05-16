@@ -1,7 +1,5 @@
 --TEST--
 ZE2 __set() and __get()
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class Test
@@ -12,7 +10,7 @@ class Test
 		echo __METHOD__ . "\n";
 		if (isset($this->x[$name])) {
 			return $this->x[$name];
-		} 
+		}
 		else
 		{
 			return NULL;

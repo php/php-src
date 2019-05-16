@@ -3,12 +3,12 @@ Test ksort() function : usage variations - sorting arrays with/without keys
 --FILE--
 <?php
 /* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation. 
+ * Description: Sort an array by key, maintaining key to data correlation.
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing ksort() by providing arrays  with/without key values for $array argument with following flag values: 
+ * Testing ksort() by providing arrays  with/without key values for $array argument with following flag values:
  *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
  */
@@ -29,7 +29,7 @@ $various_arrays = array (
 $count = 1;
 echo "\n-- Testing ksort() by supplying various arrays with/without key values --\n";
 
-// loop through to test ksort() with different arrays, 
+// loop through to test ksort() with different arrays,
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
@@ -47,7 +47,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : usage variations ***
 
 -- Testing ksort() by supplying various arrays with/without key values --

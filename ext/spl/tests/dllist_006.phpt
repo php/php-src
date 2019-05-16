@@ -47,7 +47,7 @@ try {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

@@ -5,7 +5,7 @@ oci_server_version()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
 	var_dump($c = oci_connect($user, $password, $dbase));
@@ -13,7 +13,7 @@ if (!empty($dbase)) {
 else {
 	var_dump($c = oci_connect($user, $password));
 }
-	
+
 $v = oci_server_version($c);
 var_dump(str_replace("\n", "", $v));
 

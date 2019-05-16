@@ -13,5 +13,5 @@ $list->offsetUnset(0);
 $list->next();
 echo "okey";
 ?>
---EXPECTF--
+--EXPECT--
 okey

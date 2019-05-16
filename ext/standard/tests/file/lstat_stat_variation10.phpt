@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test the effects of is_dir() on stats of a dir */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -43,13 +43,12 @@ var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys) );
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir("$file_path/lstat_stat_variation10");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on directory after using is_dir() on it ***
 bool(true)
 bool(true)

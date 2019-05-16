@@ -3,9 +3,9 @@ Test date_sunset() function : usage variation -  Checking sunrise for consecutiv
 --FILE--
 <?php
 /* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location 
+ * Description: Returns time of sunrise for a given day and location
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing date_sunset() : usage variation ***\n";
@@ -29,12 +29,12 @@ foreach($inputs as $timezone => $value) {
 	 date_default_timezone_set($timezone);
 	 $time = mktime(8, 8, 8, 8, 11, 2008);
 	 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"] ));
-	 $time = mktime(8, 8, 8, 8, 12, 2008); 
+	 $time = mktime(8, 8, 8, 8, 12, 2008);
 	 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"]) );
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_sunset() : usage variation ***
 
 --Pacific/Samoa--
@@ -42,24 +42,24 @@ string(5) "18:13"
 string(5) "18:13"
 
 --US/Alaska--
-string(5) "21:00"
-string(5) "20:57"
+string(5) "21:02"
+string(5) "20:59"
 
 --America/Chicago--
+string(5) "19:52"
 string(5) "19:51"
-string(5) "19:50"
 
 --America/Montevideo--
 string(5) "18:08"
-string(5) "18:09"
+string(5) "18:08"
 
 --Africa/Casablanca--
+string(5) "19:18"
 string(5) "19:17"
-string(5) "19:16"
 
 --Europe/Moscow--
-string(5) "21:09"
-string(5) "21:07"
+string(5) "21:10"
+string(5) "21:08"
 
 --Asia/Hong_Kong--
 string(5) "18:55"

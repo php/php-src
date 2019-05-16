@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -32,19 +32,21 @@
 #define ZEND_OPTIMIZER_PASS_5		(1<<4)   /* CFG based optimization       */
 #define ZEND_OPTIMIZER_PASS_6		(1<<5)   /* DFA based optimization       */
 #define ZEND_OPTIMIZER_PASS_7		(1<<6)   /* CALL GRAPH optimization      */
-#define ZEND_OPTIMIZER_PASS_8		(1<<7)
+#define ZEND_OPTIMIZER_PASS_8		(1<<7)   /* SCCP (constant propagation)  */
 #define ZEND_OPTIMIZER_PASS_9		(1<<8)   /* TMP VAR usage                */
 #define ZEND_OPTIMIZER_PASS_10		(1<<9)   /* NOP removal                 */
 #define ZEND_OPTIMIZER_PASS_11		(1<<10)  /* Merge equal constants       */
 #define ZEND_OPTIMIZER_PASS_12		(1<<11)  /* Adjust used stack           */
-#define ZEND_OPTIMIZER_PASS_13		(1<<12)
-#define ZEND_OPTIMIZER_PASS_14		(1<<13)
-#define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* Collect constants */
+#define ZEND_OPTIMIZER_PASS_13		(1<<12)  /* Remove unused variables     */
+#define ZEND_OPTIMIZER_PASS_14		(1<<13)  /* DCE (dead code elimination) */
+#define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* (unsafe) Collect constants */
 #define ZEND_OPTIMIZER_PASS_16		(1<<15)  /* Inline functions */
+
+#define ZEND_OPTIMIZER_IGNORE_OVERLOADING	(1<<16)  /* (unsafe) Ignore possibility of operator overloading */
 
 #define ZEND_OPTIMIZER_ALL_PASSES	0x7FFFFFFF
 
-#define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFFBFFF"
+#define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFEBFFF"
 
 
 #define ZEND_DUMP_AFTER_PASS_1		ZEND_OPTIMIZER_PASS_1
@@ -77,12 +79,14 @@
 #define ZEND_DUMP_DFA_PHI           (1<<26)
 #define ZEND_DUMP_DFA_SSA           (1<<27)
 #define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
+#define ZEND_DUMP_SCCP              (1<<29)
 
 typedef struct _zend_script {
 	zend_string   *filename;
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
+	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);

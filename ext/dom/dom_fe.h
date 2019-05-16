@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
 #ifndef DOM_FE_H
 #define DOM_FE_H
 
@@ -172,6 +171,7 @@ PHP_METHOD(domnode, getLineNo);
 
 /* domnodelist methods */
 PHP_FUNCTION(dom_nodelist_item);
+PHP_FUNCTION(dom_nodelist_count);
 
 /* domnamednodemap methods */
 PHP_FUNCTION(dom_namednodemap_get_named_item);
@@ -181,6 +181,7 @@ PHP_FUNCTION(dom_namednodemap_item);
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns);
 PHP_FUNCTION(dom_namednodemap_set_named_item_ns);
 PHP_FUNCTION(dom_namednodemap_remove_named_item_ns);
+PHP_FUNCTION(dom_namednodemap_count);
 
 /* domcharacterdata methods */
 PHP_FUNCTION(dom_characterdata_substring_data);
@@ -269,12 +270,3 @@ PHP_FUNCTION(dom_xpath_register_php_functions);
 #endif
 
 #endif /* DOM_FE_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

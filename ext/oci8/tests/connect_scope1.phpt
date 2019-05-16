@@ -5,7 +5,7 @@ Test oci_connect end-of-scope when statement returned
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Initialization
 
@@ -18,7 +18,7 @@ if (!empty($dbase))
 	$c1 = oci_new_connect($user,$password,$dbase);
 else
 	$c1 = oci_new_connect($user,$password);
-						 						 
+
 oci8_test_sql_execute($c1, $stmtarray);
 
 // Run Test
@@ -68,7 +68,7 @@ oci8_test_sql_execute($c1, $stmtarray);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1 - oci_connect
 array(1) {
   ["C1"]=>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
@@ -23,7 +23,6 @@
    |                     Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include "php_rand.h"
@@ -34,7 +33,7 @@
 /*
 	The following php_mt_...() functions are based on a C++ class MTRand by
 	Richard J. Wagner. For more information see the web page at
-	http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
+	http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/MersenneTwister.h
 
 	Mersenne Twister random number generator -- a C++ class MTRand
 	Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
@@ -45,7 +44,7 @@
 	The period, 2^19937-1, and the order of equidistribution, 623 dimensions,
 	are far greater.  The generator is also fast; it avoids multiplication and
 	division, and it benefits from caches and pipelines.  For more information
-	see the inventors' web page at http://www.math.keio.ac.jp/~matumoto/emt.html
+	see the inventors' web page at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 
 	Reference
 	M. Matsumoto and T. Nishimura, "Mersenne Twister: A 623-Dimensionally
@@ -191,8 +190,11 @@ PHP_FUNCTION(mt_srand)
 	zend_long seed = 0;
 	zend_long mode = MT_RAND_MT19937;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &seed, &mode) == FAILURE)
-		return;
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(seed)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
@@ -204,44 +206,105 @@ PHP_FUNCTION(mt_srand)
 		default:
 			BG(mt_rand_mode) = MT_RAND_MT19937;
 	}
-	
+
 	php_mt_srand(seed);
 }
 /* }}} */
 
-/* {{{ php_mt_rand_range
- */
-PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
-{
-	zend_ulong umax = max - min;
-	zend_ulong limit;
-	zend_ulong result;
+static uint32_t rand_range32(uint32_t umax) {
+	uint32_t result, limit;
 
 	result = php_mt_rand();
-	if (umax > UINT32_MAX) {
-		result = (result << 32) | php_mt_rand();
-	}
 
 	/* Special case where no modulus is required */
-	if (UNEXPECTED(umax == ZEND_ULONG_MAX)) {
-		return (zend_long)result;
+	if (UNEXPECTED(umax == UINT32_MAX)) {
+		return result;
 	}
 
 	/* Increment the max so the range is inclusive of max */
 	umax++;
 
 	/* Powers of two are not biased */
-	if (EXPECTED((umax & (umax - 1)) != 0)) {
-		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
-		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
-
-		/* Discard numbers over the limit to avoid modulo bias */
-		while (UNEXPECTED(result > limit)) {
-			result = (result << 32) | php_mt_rand();
-		}
+	if ((umax & (umax - 1)) == 0) {
+		return result & (umax - 1);
 	}
 
-	return (zend_long)((result % umax) + min);
+	/* Ceiling under which UINT32_MAX % max == 0 */
+	limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
+
+	/* Discard numbers over the limit to avoid modulo bias */
+	while (UNEXPECTED(result > limit)) {
+		result = php_mt_rand();
+	}
+
+	return result % umax;
+}
+
+#if ZEND_ULONG_MAX > UINT32_MAX
+static uint64_t rand_range64(uint64_t umax) {
+	uint64_t result, limit;
+
+	result = php_mt_rand();
+	result = (result << 32) | php_mt_rand();
+
+	/* Special case where no modulus is required */
+	if (UNEXPECTED(umax == UINT64_MAX)) {
+		return result;
+	}
+
+	/* Increment the max so the range is inclusive of max */
+	umax++;
+
+	/* Powers of two are not biased */
+	if ((umax & (umax - 1)) == 0) {
+		return result & (umax - 1);
+	}
+
+	/* Ceiling under which UINT64_MAX % max == 0 */
+	limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
+
+	/* Discard numbers over the limit to avoid modulo bias */
+	while (UNEXPECTED(result > limit)) {
+		result = php_mt_rand();
+		result = (result << 32) | php_mt_rand();
+	}
+
+	return result % umax;
+}
+#endif
+
+/* {{{ php_mt_rand_range
+ */
+PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
+{
+	zend_ulong umax = max - min;
+
+#if ZEND_ULONG_MAX > UINT32_MAX
+	if (umax > UINT32_MAX) {
+		return (zend_long) (rand_range64(umax) + min);
+	}
+#endif
+
+	return (zend_long) (rand_range32(umax) + min);
+}
+/* }}} */
+
+/* {{{ php_mt_rand_common
+ * rand() allows min > max, mt_rand does not */
+PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
+{
+	int64_t n;
+
+	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
+		return php_mt_rand_range(min, max);
+	}
+
+	/* Legacy mode deliberately not inside php_mt_rand_range()
+	 * to prevent other functions being affected */
+	n = (int64_t)php_mt_rand() >> 1;
+	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
+
+	return n;
 }
 /* }}} */
 
@@ -251,7 +314,6 @@ PHP_FUNCTION(mt_rand)
 {
 	zend_long min;
 	zend_long max;
-	zend_long n;
 	int argc = ZEND_NUM_ARGS();
 
 	if (argc == 0) {
@@ -259,24 +321,17 @@ PHP_FUNCTION(mt_rand)
 		RETURN_LONG(php_mt_rand() >> 1);
 	}
 
-	if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(max < min)) {
 		php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 		RETURN_FALSE;
 	}
 
-	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
-		RETURN_LONG(php_mt_rand_range(min, max));
-	}
-
-	/* Legacy mode deliberately not inside php_mt_rand_range()
-	 * to prevent other functions being affected */
-	n = (zend_long)php_mt_rand() >> 1;
-	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
-	RETURN_LONG(n);
+	RETURN_LONG(php_mt_rand_common(min, max));
 }
 /* }}} */
 
@@ -303,13 +358,3 @@ PHP_MINIT_FUNCTION(mt_rand)
 
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
-

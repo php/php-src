@@ -2,10 +2,10 @@
 Reflection Bug #29268 (__autoload() not called with reflectionProperty->getClass())
 --FILE--
 <?php
-function __autoload($classname) {
+spl_autoload_register(function ($classname) {
 	echo "__autoload($classname)\n";
 	eval("class $classname {}");
-}
+});
 
 class B{
 	public function doit(A $a){
@@ -13,7 +13,7 @@ class B{
 }
 
 $ref = new reflectionMethod('B','doit');
-$parameters = $ref->getParameters();	
+$parameters = $ref->getParameters();
 foreach($parameters as $parameter)
 {
 	$class = $parameter->getClass();

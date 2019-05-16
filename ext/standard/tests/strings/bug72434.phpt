@@ -1,9 +1,5 @@
 --TEST--
 Bug #72434: ZipArchive class Use After Free Vulnerability in PHP's GC algorithm and unserialize
---SKIPIF--
-<?php
-if(!class_exists('zip')) die('ZipArchive');
-?>
 --FILE--
 <?php
 // The following array will be serialized and this representation will be freed later on.

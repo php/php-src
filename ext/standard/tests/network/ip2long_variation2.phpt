@@ -2,12 +2,13 @@
 Test ip2long() function : usage variation 2, 32 bit
 --SKIPIF--
 <?php if(PHP_INT_SIZE != 4) {die('skip 32 bit only');} ?>
+<?php if (strtolower(substr(PHP_OS, 0, 3)) == 'aix') {die('skip not for AIX');} ?>
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address 
+ * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $ips = array(

@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_status.c 312262 2011-06-18 17:41:56Z felipe $ */
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"
@@ -467,7 +465,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 	if (!test && strlen(buffer) > 0) {
 		buffer[len] = '\n';
-		write(fpm_log_fd, buffer, len + 1);
+		zend_quiet_write(fpm_log_fd, buffer, len + 1);
 	}
 
 	return 0;

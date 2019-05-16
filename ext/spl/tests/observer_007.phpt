@@ -14,7 +14,7 @@ var_dump($a == $b);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

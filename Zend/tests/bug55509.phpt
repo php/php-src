@@ -45,6 +45,13 @@ elseif (PHP_OS == 'FreeBSD') {
   if ($freeMemory < 2100*1024*1024) {
     die('skip Not enough memory.');
   }
+} elseif (PHP_OS == "WINNT") {
+  $s = trim(shell_exec("wmic OS get FreeVirtualMemory /Value 2>nul"));
+  $freeMemory = explode('=', $s)[1]*1;
+
+  if ($freeMemory < 2.1*1024*1024) {
+    die('skip Not enough memory.');
+  }
 }
 ?>
 --INI--

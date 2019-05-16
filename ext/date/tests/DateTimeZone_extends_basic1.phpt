@@ -1,9 +1,9 @@
 --TEST--
-Test DateTimeZone class inheritance  
+Test DateTimeZone class inheritance
 --FILE--
 <?php
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing basic DateTimeZone inheritance() ***\n";
@@ -24,7 +24,7 @@ echo $d . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing basic DateTimeZone inheritance() ***
 
 -- Create an instance of DateTimeZoneExt --

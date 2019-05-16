@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: George Schlossnagle <george@omniti.com>                      |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_pdo_driver.h"
@@ -69,10 +67,10 @@ static int scan(Scanner *s)
 struct placeholder {
 	char *pos;
 	size_t len;
-	int bindno;
 	size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
+	int bindno;
 	struct placeholder *next;
 };
 
@@ -85,7 +83,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 {
 	Scanner s;
 	char *ptr, *newbuffer;
-	int t;
+	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
@@ -102,7 +100,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
-				int len = s.cur - s.tok;
+				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
@@ -226,12 +224,12 @@ safe:
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								zend_string_release(buf);
+								zend_string_release_ex(buf, 0);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							zend_string_release(buf);
+							zend_string_release_ex(buf, 0);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
@@ -240,40 +238,54 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					zval tmp_param;
-				   	ZVAL_DUP(&tmp_param, parameter);
-					switch (Z_TYPE(tmp_param)) {
-						case IS_NULL:
+					enum pdo_param_type param_type = param->param_type;
+					zend_string *buf = NULL;
+
+					/* assume all types are nullable */
+					if (Z_TYPE_P(parameter) == IS_NULL) {
+						param_type = PDO_PARAM_NULL;
+					}
+
+					switch (param_type) {
+						case PDO_PARAM_BOOL:
+							plc->quoted = zend_is_true(parameter) ? "1" : "0";
+							plc->qlen = sizeof("1")-1;
+							plc->freeq = 0;
+							break;
+
+						case PDO_PARAM_INT:
+							buf = zend_long_to_str(zval_get_long(parameter));
+
+							plc->qlen = ZSTR_LEN(buf);
+							plc->quoted = estrdup(ZSTR_VAL(buf));
+							plc->freeq = 1;
+							break;
+
+						case PDO_PARAM_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
 							plc->freeq = 0;
 							break;
 
-						case IS_FALSE:
-						case IS_TRUE:
-							convert_to_long(&tmp_param);
-							/* fall through */
-						case IS_LONG:
-						case IS_DOUBLE:
-							convert_to_string(&tmp_param);
-							plc->qlen = Z_STRLEN(tmp_param);
-							plc->quoted = estrdup(Z_STRVAL(tmp_param));
-							plc->freeq = 1;
-							break;
-
 						default:
-							convert_to_string(&tmp_param);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
-									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
-									param->param_type)) {
+							buf = zval_get_string(parameter);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
+									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
+									param_type)) {
 								/* bork */
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+								if (buf) {
+									zend_string_release_ex(buf, 0);
+								}
 								goto clean_up;
 							}
 							plc->freeq = 1;
 					}
-					zval_dtor(&tmp_param);
+
+					if (buf) {
+						zend_string_release_ex(buf, 0);
+					}
 				}
 			} else {
 				zval *parameter;
@@ -402,138 +414,3 @@ clean_up:
 
 	return ret;
 }
-
-#if 0
-int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery,
-		int *outquery_len)
-{
-	Scanner s;
-	char *ptr;
-	int t;
-	int bindno = 0;
-	int newbuffer_len;
-	int padding;
-	HashTable *params = stmt->bound_params;
-	struct pdo_bound_param_data *param;
-	/* allocate buffer for query with expanded binds, ptr is our writing pointer */
-	newbuffer_len = inquery_len;
-
-	/* calculate the possible padding factor due to quoting */
-	if(stmt->dbh->max_escaped_char_length) {
-		padding = stmt->dbh->max_escaped_char_length;
-	} else {
-		padding = 3;
-	}
-	if(params) {
-		ZEND_HASH_FOREACH_PTR(params, param) {
-			if(param->parameter) {
-				convert_to_string(param->parameter);
-				/* accommodate a string that needs to be fully quoted
-                   bind placeholders are at least 2 characters, so
-                   the accommodate their own "'s
-                */
-				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	*outquery = (char *) emalloc(newbuffer_len + 1);
-	*outquery_len = 0;
-
-	ptr = *outquery;
-	s.cur = inquery;
-	while((t = scan(&s)) != PDO_PARSER_EOI) {
-		if(t == PDO_PARSER_TEXT) {
-			memcpy(ptr, s.tok, s.cur - s.tok);
-			ptr += (s.cur - s.tok);
-			*outquery_len += (s.cur - s.tok);
-		}
-		else if(t == PDO_PARSER_BIND) {
-			if(!params) {
-				/* error */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			/* lookup bind first via hash and then index */
-			/* stupid keys need to be null-terminated, even though we know their length */
-			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))
-			    ||
-			   NULL != (params = zend_hash_index_find_ptr(params, bindno)))
-			{
-				char *quotedstr;
-				int quotedstrlen;
-				/* restore the in-string key, doesn't need null-termination here */
-				/* currently everything is a string here */
-
-				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
-				{
-					memcpy(ptr, quotedstr, quotedstrlen);
-					ptr += quotedstrlen;
-					*outquery_len += quotedstrlen;
-					efree(quotedstr);
-				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
-				}
-			}
-			else {
-				/* error and cleanup */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			bindno++;
-		}
-		else if(t == PDO_PARSER_BIND_POS) {
-			if(!params) {
-				/* error */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			/* lookup bind by index */
-			if(NULL != (params = zend_hash_index_find_ptr(params, bindno)))
-			{
-				char *quotedstr;
-				int quotedstrlen;
-				/* currently everything is a string here */
-
-				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
-				{
-					memcpy(ptr, quotedstr, quotedstrlen);
-					ptr += quotedstrlen;
-					*outquery_len += quotedstrlen;
-					efree(quotedstr);
-				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
-				}
-			}
-			else {
-				/* error and cleanup */
-				efree(*outquery);
-				*outquery = NULL;
-				return (int) (s.cur - inquery);
-			}
-			bindno++;
-		}
-	}
-	*ptr = '\0';
-	return 0;
-}
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker ft=c
- * vim<600: noet sw=4 ts=4
- */

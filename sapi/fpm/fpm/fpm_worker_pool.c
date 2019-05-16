@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_worker_pool.c,v 1.15.2.1 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"

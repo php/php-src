@@ -4,7 +4,7 @@ Test strspn() function : usage variations - with varying start and len args
 <?php
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
-                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
+                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -42,7 +42,7 @@ $mask_array = array(
                     "fhel\t\i\100\xa"
                    );
 
-// defining the array for start values		
+// defining the array for start values
 $start_array = array(
 		    0,
 		    1,
@@ -51,7 +51,7 @@ $start_array = array(
 		    2147483647,  // max positive integer
 		    -2147483648,  // min negative integer
                    );
-		
+
 // defining an array of len values
 $len_array = array(
 		    0,
@@ -61,7 +61,7 @@ $len_array = array(
 		    2147483647,  // max positive integer
 		    -2147483648,  // min negative integer
                    );
-		
+
 
 // loop through each element of the array for len argument
 $count = 1;
@@ -79,7 +79,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strspn() : with different start and len values ***
 
 -- Iteration 1 --

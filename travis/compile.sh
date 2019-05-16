@@ -1,18 +1,34 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
-	DEBUG="--enable-debug";
+	DEBUG="--enable-debug --without-pcre-valgrind";
 else
 	DEBUG="";
 fi
+
+if [[ -z "$CONFIG_LOG_FILE" ]]; then
+	CONFIG_QUIET="--quiet"
+	CONFIG_LOG_FILE="/dev/stdout"
+else
+	CONFIG_QUIET=""
+fi
+if [[ -z "$MAKE_LOG_FILE" ]]; then
+	MAKE_QUIET="--quiet"
+	MAKE_LOG_FILE="/dev/stdout"
+else
+	MAKE_QUIET=""
+fi
+
+MAKE_JOBS=${MAKE_JOBS:-2}
+
 ./buildconf --force
 ./configure \
---prefix=$HOME"/php-install" \
---quiet \
+--prefix="$HOME"/php-install \
+$CONFIG_QUIET \
 $DEBUG \
 $TS \
 --enable-phpdbg \
@@ -24,18 +40,18 @@ $TS \
 --with-pdo-sqlite \
 --enable-intl \
 --without-pear \
---with-gd \
---with-jpeg-dir=/usr \
---with-png-dir=/usr \
+--enable-gd \
+--with-jpeg \
+--with-webp \
+--with-freetype \
+--with-xpm \
 --enable-exif \
 --enable-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
---with-mcrypt=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
@@ -55,10 +71,12 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
---with-freetype-dir=/usr \
---with-xpm-dir=/usr \
 --with-kerberos \
---enable-sysvmsg 
-make -j2 --quiet
-make install
+--enable-sysvmsg \
+--with-ffi \
+--enable-zend-test=shared \
+--enable-werror \
+> "$CONFIG_LOG_FILE"
+
+make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
+make install >> "$MAKE_LOG_FILE"

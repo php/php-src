@@ -5,7 +5,7 @@ Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -22,6 +22,6 @@ Checking with no parameters
 Warning: imap_expunge() expects exactly 1 parameter, 0 given in %s on line %d
 Checking with incorrect parameter type
 
-Warning: imap_expunge() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line %d
+Warning: imap_expunge() expects parameter 1 to be resource, string given in %s on line %d
 
-Warning: imap_expunge() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_expunge() expects parameter 1 to be resource, bool given in %s on line %d

@@ -12,5 +12,5 @@ var_dump($files);
 --EXPECTF--
 array(1) {
   [0]=>
-  %string|unicode%(%d)%s
+  string(%d)%s
 }

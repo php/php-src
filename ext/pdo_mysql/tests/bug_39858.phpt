@@ -3,8 +3,8 @@ Bug #39858 (Lost connection to MySQL server during query by a repeated call stor
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 
@@ -22,7 +22,7 @@ if ($version < 50000)
 nextRowset() problem with stored proc & emulation mode & mysqlnd
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -66,39 +66,39 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec("DROP PROCEDURE IF EXISTS p");
 ?>
---EXPECTF--
+--EXPECT--
 Emulated Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 Native Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 done!

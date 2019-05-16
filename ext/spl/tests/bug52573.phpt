@@ -9,7 +9,7 @@ var_dump($f->fscanf('<?php // %s', $result));
 var_dump($result);
 var_dump($f->fscanf('<?php // %s'));
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 string(4) "test"
 array(1) {

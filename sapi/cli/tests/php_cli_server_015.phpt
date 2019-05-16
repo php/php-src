@@ -2,7 +2,7 @@
 Bug #60523 (PHP Errors are not reported in browsers using built-in SAPI)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --INI--
 display_errors=1
@@ -10,7 +10,7 @@ display_errors=1
 <?php
 include "php_cli_server.inc";
 php_cli_server_start('require("syntax_error.php");');
-$dir = realpath(dirname(__FILE__));
+$dir = realpath(__DIR__);
 
 file_put_contents($dir . "/syntax_error.php", "<?php non_exists_function(); ?>");
 

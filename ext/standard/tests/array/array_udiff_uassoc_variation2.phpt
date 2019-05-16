@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff_uassoc() function : usage variation 
+Test array_udiff_uassoc() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff_uassoc() : usage variation ***\n";
@@ -103,126 +103,126 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, int given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --int 1--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, int given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --int 12345--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, int given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --int -12345--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, int given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, float given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, float given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, float given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, float given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --float .5--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, float given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, null given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, null given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, bool given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, bool given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, bool given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, bool given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --string DQ--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --string SQ--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --heredoc--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, string given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, object given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, object given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --undefined var--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, null given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 
 --unset var--
 
-Warning: array_udiff_uassoc(): Argument #2 is not an array in %sarray_udiff_uassoc_variation2.php on line %d
+Warning: array_udiff_uassoc(): Expected parameter 2 to be an array, null given in %sarray_udiff_uassoc_variation2.php on line %d
 NULL
 ===DONE===

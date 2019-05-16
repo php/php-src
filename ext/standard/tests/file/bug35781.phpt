@@ -3,8 +3,8 @@ Bug #35781 (stream_filter_append() causes segfault)
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/bug35781.txt";
-	
+$filename = __DIR__."/bug35781.txt";
+
 $fp = fopen($filename, "w");
 stream_filter_append($fp, "string.rot13", -49);
 fwrite($fp, "This is a test\n");
@@ -18,7 +18,7 @@ var_dump(file_get_contents($filename));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(15) "Guvf vf n grfg
 "
 Done

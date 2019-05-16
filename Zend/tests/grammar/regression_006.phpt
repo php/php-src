@@ -19,8 +19,7 @@ echo Obj::
 
     USE, PHP_EOL;
 echo "\nDone\n";
-
---EXPECTF--
+--EXPECT--
 declare
 return
 function

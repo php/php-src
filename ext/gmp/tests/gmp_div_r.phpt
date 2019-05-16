@@ -5,9 +5,6 @@ gmp_div_r() tests
 --FILE--
 <?php
 
-var_dump(gmp_div_r());
-var_dump(gmp_div_r(""));
-
 var_dump($r = gmp_div_r(0,1));
 var_dump($r = gmp_div_r(1,0));
 var_dump($r = gmp_div_r(12653,23482734));
@@ -26,12 +23,7 @@ var_dump(gmp_div_r(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_div_r() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_div_r() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+--EXPECTF--
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"

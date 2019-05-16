@@ -26,6 +26,8 @@
 
 #ifndef USE_BREAKITERATOR_POINTER
 typedef void BreakIterator;
+#else
+using icu::BreakIterator;
 #endif
 
 typedef struct {

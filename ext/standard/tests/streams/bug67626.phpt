@@ -5,18 +5,18 @@ Bug #67626: Exceptions not properly handled in user stream handlers
 class MyStream
 {
 	public function stream_open() { return true; }
-	
+
 	public function stream_read()
 	{
 		throw new Exception('stream_read_exception');
 		return 'read';
 	}
-	
+
 	public function stream_eof()
 	{
 		return true;
 	}
-	
+
 	public function stream_write()
 	{
 		throw new Exception('stream_write_exception');
@@ -40,6 +40,6 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 stream_read_exception
 stream_write_exception

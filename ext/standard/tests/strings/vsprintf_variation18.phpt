@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - scientific formats with non-scient
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -15,7 +15,7 @@ Test vsprintf() function : usage variations - scientific formats with non-scient
 echo "*** Testing vsprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
-$formats = 
+$formats =
   '%e %+e %-e 
    %le %Le %4e %-4e
    %10.4e %-10.4e %04e %04.4e
@@ -53,7 +53,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 // looping to test vsprintf() with different scientific formats from the above $format array
@@ -67,7 +67,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : scientific formats and non-scientific values ***
 
 -- Iteration 1 --

@@ -27,7 +27,7 @@ IPv6 Loopback test
 	if (!socket_listen($server, 2)) {
 		die('Unable to listen on socket');
 	}
-	
+
 	/* Connect to it */
 	$client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
 	if (!$client) {

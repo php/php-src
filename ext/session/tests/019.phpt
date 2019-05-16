@@ -46,7 +46,6 @@ var_dump($_SESSION);
 session_destroy();
 ?>
 --EXPECTF--
-
 array(2) {
   ["o1"]=>
   &object(TFoo)#%d (1) {
@@ -71,4 +70,3 @@ array(2) {
     int(44)
   }
 }
-

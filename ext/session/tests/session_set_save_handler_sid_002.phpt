@@ -3,6 +3,7 @@ Test session_set_save_handler() function: create_sid
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+session.save_path=/tmp
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -70,7 +71,6 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
-
 --EXPECTF--
 *** Testing session_set_save_handler() function: create_sid ***
 
@@ -79,7 +79,7 @@ Stack trace:
 #0 %s(%d): session_start()
 #1 {main}
 
-Next Error: Failed to create session ID: user (path: ) in %s:%d
+Next Error: Failed to create session ID: user (path: %s) in %s:%d
 Stack trace:
 #0 %s(%d): session_start()
 #1 {main}

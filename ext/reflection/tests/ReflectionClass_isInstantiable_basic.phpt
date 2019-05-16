@@ -27,12 +27,12 @@ $classes = array("C", "iface", "ifaceImpl", "abstractClass", "D");
 foreach($classes  as $class ) {
 	$reflectionClass = new ReflectionClass($class);
 	echo "Is $class instantiable?  ";
-	var_dump($reflectionClass->IsInstantiable()); 
+	var_dump($reflectionClass->IsInstantiable());
 
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Is C instantiable?  bool(true)
 Is iface instantiable?  bool(false)
 Is ifaceImpl instantiable?  bool(true)

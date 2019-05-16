@@ -32,45 +32,65 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: softmagic.c,v 1.212 2015/01/24 22:11:25 christos Exp $")
+FILE_RCSID("@(#)$File: softmagic.c,v 1.259 2018/03/11 01:23:52 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
+#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <time.h>
-#if defined(HAVE_LOCALE_H)
-#include <locale.h>
-#endif
+#include "der.h"
 
 #ifndef PREG_OFFSET_CAPTURE
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-
-
 private int match(struct magic_set *, struct magic *, uint32_t,
-    const unsigned char *, size_t, size_t, int, int, int, uint16_t,
+    const struct buffer *, size_t, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *);
-private int mget(struct magic_set *, const unsigned char *,
-    struct magic *, size_t, size_t, unsigned int, int, int, int, uint16_t,
+private int mget(struct magic_set *, struct magic *, const struct buffer *,
+    const unsigned char *, size_t, 
+    size_t, unsigned int, int, int, int, uint16_t *,
     uint16_t *, int *, int *, int *);
+private int msetoffset(struct magic_set *, struct magic *, struct buffer *,
+    const struct buffer *, size_t, unsigned int);
 private int magiccheck(struct magic_set *, struct magic *);
-private int32_t mprint(struct magic_set *, struct magic *);
-private int32_t moffset(struct magic_set *, struct magic *);
+private int32_t mprint(struct magic_set *, struct magic *,
+    const struct buffer *);
+private int moffset(struct magic_set *, struct magic *, const struct buffer *,
+    int32_t *);
 private void mdebug(uint32_t, const char *, size_t);
 private int mcopy(struct magic_set *, union VALUETYPE *, int, int,
     const unsigned char *, uint32_t, size_t, struct magic *);
 private int mconvert(struct magic_set *, struct magic *, int);
 private int print_sep(struct magic_set *, int);
-private int handle_annotation(struct magic_set *, struct magic *);
-private void cvt_8(union VALUETYPE *, const struct magic *);
-private void cvt_16(union VALUETYPE *, const struct magic *);
-private void cvt_32(union VALUETYPE *, const struct magic *);
-private void cvt_64(union VALUETYPE *, const struct magic *);
+private int handle_annotation(struct magic_set *, struct magic *,
+    const struct buffer *, int);
+private int cvt_8(union VALUETYPE *, const struct magic *);
+private int cvt_16(union VALUETYPE *, const struct magic *);
+private int cvt_32(union VALUETYPE *, const struct magic *);
+private int cvt_64(union VALUETYPE *, const struct magic *);
 
-#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) > ((n) - (o)))
+#define OFFSET_OOB(n, o, i)	((n) < (uint32_t)(o) || (i) > ((n) - (o)))
+#define BE64(p) (((uint64_t)(p)->hq[0]<<56)|((uint64_t)(p)->hq[1]<<48)| \
+    ((uint64_t)(p)->hq[2]<<40)|((uint64_t)(p)->hq[3]<<32)| \
+    ((uint64_t)(p)->hq[4]<<24)|((uint64_t)(p)->hq[5]<<16)| \
+    ((uint64_t)(p)->hq[6]<<8)|((uint64_t)(p)->hq[7]))
+#define LE64(p) (((uint64_t)(p)->hq[7]<<56)|((uint64_t)(p)->hq[6]<<48)| \
+    ((uint64_t)(p)->hq[5]<<40)|((uint64_t)(p)->hq[4]<<32)| \
+    ((uint64_t)(p)->hq[3]<<24)|((uint64_t)(p)->hq[2]<<16)| \
+    ((uint64_t)(p)->hq[1]<<8)|((uint64_t)(p)->hq[0]))
+#define LE32(p) (((uint32_t)(p)->hl[3]<<24)|((uint32_t)(p)->hl[2]<<16)| \
+     ((uint32_t)(p)->hl[1]<<8)|((uint32_t)(p)->hl[0]))
+#define BE32(p) (((uint32_t)(p)->hl[0]<<24)|((uint32_t)(p)->hl[1]<<16)| \
+     ((uint32_t)(p)->hl[2]<<8)|((uint32_t)(p)->hl[3]))
+#define ME32(p) (((uint32_t)(p)->hl[1]<<24)|((uint32_t)(p)->hl[0]<<16)| \
+     ((uint32_t)(p)->hl[3]<<8)|((uint32_t)(p)->hl[2]))
+#define BE16(p) (((uint16_t)(p)->hs[0]<<8)|((uint16_t)(p)->hs[1]))
+#define LE16(p) (((uint16_t)(p)->hs[1]<<8)|((uint16_t)(p)->hs[0]))
+#define SEXT(s,v,p) ((s)?(intmax_t)(int##v##_t)(p):(intmax_t)(uint##v##_t)(p))
 
 /*
  * softmagic - lookup one file in parsed, in-memory copy of database
@@ -78,21 +98,25 @@ private void cvt_64(union VALUETYPE *, const struct magic *);
  */
 /*ARGSUSED1*/		/* nbytes passed for regularity, maybe need later */
 protected int
-file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
-    uint16_t indir_level, uint16_t *name_count, int mode, int text)
+file_softmagic(struct magic_set *ms, const struct buffer *b,
+    uint16_t *indir_count, uint16_t *name_count, int mode, int text)
 {
 	struct mlist *ml;
 	int rv, printed_something = 0, need_separator = 0;
-	uint16_t nc;
+	uint16_t nc, ic;
 
 	if (name_count == NULL) {
 		nc = 0;
 		name_count = &nc;
 	}
+	if (indir_count == NULL) {
+		ic = 0;
+		indir_count = &ic;
+	}
 
 	for (ml = ms->mlist[0]->next; ml != ms->mlist[0]; ml = ml->next)
-		if ((rv = match(ms, ml->magic, ml->nmagic, buf, nbytes, 0, mode,
-		    text, 0, indir_level, name_count,
+		if ((rv = match(ms, ml->magic, ml->nmagic, b, 0, mode,
+		    text, 0, indir_count, name_count,
 		    &printed_something, &need_separator, NULL)) != 0)
 			return rv;
 
@@ -104,20 +128,20 @@ file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
 #define F(a, b, c) file_fmtcheck((a), (b), (c), __FILE__, __LINE__)
 
 private const char * __attribute__((__format_arg__(3)))
-file_fmtcheck(struct magic_set *ms, const struct magic *m, const char *def,
+file_fmtcheck(struct magic_set *ms, const char *desc, const char *def,
 	const char *file, size_t line)
 {
-	const char *ptr = fmtcheck(m->desc, def);
+	const char *ptr = fmtcheck(desc, def);
 	if (ptr == def)
 		file_magerror(ms,
 		    "%s, %" SIZE_T_FORMAT "u: format `%s' does not match"
-		    " with `%s'", file, line, m->desc, def);
+		    " with `%s'", file, line, desc, def);
 	return ptr;
 }
 #elif defined(HAVE_FMTCHECK)
-#define F(a, b, c) fmtcheck((b)->desc, (c))
+#define F(a, b, c) fmtcheck((b), (c))
 #else
-#define F(a, b, c) ((b)->desc)
+#define F(a, b, c) ((b))
 #endif
 
 /*
@@ -149,15 +173,16 @@ file_fmtcheck(struct magic_set *ms, const struct magic *m, const char *def,
  */
 private int
 match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
-    const unsigned char *s, size_t nbytes, size_t offset, int mode, int text,
-    int flip, uint16_t indir_level, uint16_t *name_count,
+    const struct buffer *b, size_t offset, int mode, int text,
+    int flip, uint16_t *indir_count, uint16_t *name_count,
     int *printed_something, int *need_separator, int *returnval)
 {
 	uint32_t magindex = 0;
 	unsigned int cont_level = 0;
 	int returnvalv = 0, e; /* if a match is found it is set to 1*/
 	int firstline = 1; /* a flag to print X\n  X\n- X */
-	int print = (ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0;
+	struct buffer bb;
+	int print = (ms->flags & MAGIC_NODESC) == 0;
 
 	if (returnval == NULL)
 		returnval = &returnvalv;
@@ -175,20 +200,22 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 		     ((text && (m->str_flags & FLT) == STRING_BINTEST) ||
 		      (!text && (m->str_flags & FLT) == STRING_TEXTTEST))) ||
 		    (m->flag & mode) != mode) {
+flush:
 			/* Skip sub-tests */
-			while (magindex + 1 < nmagic &&
-                               magic[magindex + 1].cont_level != 0 &&
-			       ++magindex)
-				continue;
+			while (magindex < nmagic - 1 &&
+			    magic[magindex + 1].cont_level != 0)
+				magindex++;
+			cont_level = 0;
 			continue; /* Skip to next top-level test*/
 		}
 
-		ms->offset = m->offset;
+		if (msetoffset(ms, m, &bb, b, offset, cont_level) == -1)
+			goto flush;
 		ms->line = m->lineno;
 
 		/* if main entry matches, print it... */
-		switch (mget(ms, s, m, nbytes, offset, cont_level, mode, text,
-		    flip, indir_level, name_count,
+		switch (mget(ms, m, b, bb.fbuf, bb.flen, offset, cont_level,
+		    mode, text, flip, indir_count, name_count,
 		    printed_something, need_separator, returnval)) {
 		case -1:
 			return -1;
@@ -216,18 +243,16 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 			 * main entry didn't match,
 			 * flush its continuations
 			 */
-			while (magindex < nmagic - 1 &&
-			    magic[magindex + 1].cont_level != 0)
-				magindex++;
-			continue;
+			goto flush;
 		}
 
-		if ((e = handle_annotation(ms, m)) != 0) {
+		if ((e = handle_annotation(ms, m, b, firstline)) != 0) {
 			*need_separator = 1;
 			*printed_something = 1;
 			*returnval = 1;
 			return e;
 		}
+
 		/*
 		 * If we are going to print something, we'll need to print
 		 * a blank before we print something else.
@@ -239,11 +264,16 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 				return -1;
 		}
 
-
-		if (print && mprint(ms, m) == -1)
+		if (print && mprint(ms, m, b) == -1)
 			return -1;
 
-		ms->c.li[cont_level].off = moffset(ms, m);
+		switch (moffset(ms, m, &bb, &ms->c.li[cont_level].off)) {
+		case -1:
+		case 0:
+			goto flush;
+		default:
+			break;
+		}
 
 		/* and any continuations that match */
 		if (file_check_mem(ms, ++cont_level) == -1)
@@ -263,7 +293,8 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 				 */
 				cont_level = m->cont_level;
 			}
-			ms->offset = m->offset;
+			if (msetoffset(ms, m, &bb, b, offset, cont_level) == -1)
+				goto flush;
 			if (m->flag & OFFADD) {
 				ms->offset +=
 				    ms->c.li[cont_level - 1].off;
@@ -276,9 +307,10 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 					continue;
 			}
 #endif
-			switch (mget(ms, s, m, nbytes, offset, cont_level, mode,
-			    text, flip, indir_level, name_count,
-			    printed_something, need_separator, returnval)) {
+			switch (mget(ms, m, b, bb.fbuf, bb.flen, offset,
+			    cont_level, mode, text, flip, indir_count,
+			    name_count, printed_something, need_separator,
+			    returnval)) {
 			case -1:
 				return -1;
 			case 0:
@@ -312,7 +344,9 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 						break;
 				} else
 					ms->c.li[cont_level].got_match = 1;
-				if ((e = handle_annotation(ms, m)) != 0) {
+
+				if ((e = handle_annotation(ms, m, b, firstline))
+				    != 0) {
 					*need_separator = 1;
 					*printed_something = 1;
 					*returnval = 1;
@@ -345,10 +379,19 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 						return -1;
 					*need_separator = 0;
 				}
-				if (print && mprint(ms, m) == -1)
+				if (print && mprint(ms, m, b) == -1)
 					return -1;
 
-				ms->c.li[cont_level].off = moffset(ms, m);
+				switch (moffset(ms, m, &bb,
+				    &ms->c.li[cont_level].off)) {
+				case -1:
+				case 0:
+					flush = 1;
+					cont_level--;
+					break;
+				default:
+					break;
+				}
 
 				if (*m->desc)
 					*need_separator = 1;
@@ -377,52 +420,117 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 }
 
 private int
-check_fmt(struct magic_set *ms, struct magic *m)
+check_fmt(struct magic_set *ms, const char *fmt)
 {
-	pcre *pce;
-	int re_options, rv = -1;
-	pcre_extra *re_extra;
+	pcre2_code *pce;
+	uint32_t capture_count;
+	int rv = -1;
 	zend_string *pattern;
 
-	if (strchr(m->desc, '%') == NULL)
+	if (strchr(fmt, '%') == NULL)
 		return 0;
 
 	(void)setlocale(LC_CTYPE, "C");
-	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
+	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
+	if ((pce = pcre_get_compiled_regex(pattern, &capture_count)) == NULL) {
 		rv = -1;
 	} else {
-	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
+		if (match_data) {
+			rv = pcre2_match(pce, (PCRE2_SPTR)fmt, strlen(fmt), 0, 0, match_data, php_pcre_mctx()) > 0;
+			php_pcre_free_match_data(match_data);
+		}
 	}
-	zend_string_release(pattern);
+	zend_string_release_ex(pattern, 0);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
 
+static int
+varexpand(char *buf, size_t len, const struct buffer *b, const char *str)
+{
+	const char *ptr, *sptr, *e, *t, *ee, *et;
+	size_t l;
+
+	for (sptr = str; (ptr = strstr(sptr, "${")) != NULL;) {
+		l = (size_t)(ptr - sptr);
+		if (l >= len)
+			return -1;
+		memcpy(buf, sptr, l);
+		buf += l;
+		len -= l;
+		ptr += 2;
+		if (!*ptr || ptr[1] != '?')
+			return -1;
+		for (et = t = ptr + 2; *et && *et != ':'; et++)
+			continue;
+		if (*et != ':')
+			return -1;
+		for (ee = e = et + 1; *ee && *ee != '}'; ee++)
+			continue;
+		if (*ee != '}')
+			return -1;
+		switch (*ptr) {
+		case 'x':
+			if (b->st.st_mode & 0111) {
+				ptr = t;
+				l = et - t;
+			} else {
+				ptr = e;
+				l = ee - e;
+			}
+			break;
+		default:
+			return -1;
+		}
+		if (l >= len)
+			return -1;
+		memcpy(buf, ptr, l);
+		buf += l;
+		len -= l;
+		sptr = ee + 1;
+	}
+
+	l = strlen(sptr);
+	if (l >= len)
+		return -1;
+
+	memcpy(buf, sptr, l);
+	buf[l] = '\0';
+	return 0;
+}
+
+
 private int32_t
-mprint(struct magic_set *ms, struct magic *m)
+mprint(struct magic_set *ms, struct magic *m, const struct buffer *b)
 {
 	uint64_t v;
 	float vf;
 	double vd;
 	int64_t t = 0;
- 	char buf[128], tbuf[26], sbuf[512];
+ 	char buf[128], tbuf[26], sbuf[512], ebuf[512];
+	const char *desc;
 	union VALUETYPE *p = &ms->ms_value;
+
+	if (varexpand(ebuf, sizeof(ebuf), b, m->desc) == -1)
+		desc = m->desc;
+	else
+		desc = ebuf;
 
   	switch (m->type) {
   	case FILE_BYTE:
 		v = file_signextend(ms, m, (uint64_t)p->b);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%d",
 			    (unsigned char)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%d"),
+			if (file_printf(ms, F(ms, desc, "%d"),
 			    (unsigned char) v) == -1)
 				return -1;
 			break;
@@ -434,17 +542,17 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BESHORT:
   	case FILE_LESHORT:
 		v = file_signextend(ms, m, (uint64_t)p->h);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%u",
 			    (unsigned short)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%u"),
+			if (file_printf(ms, F(ms, desc, "%u"),
 			    (unsigned short) v) == -1)
 				return -1;
 			break;
@@ -457,16 +565,16 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_LELONG:
   	case FILE_MELONG:
 		v = file_signextend(ms, m, (uint64_t)p->l);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%u", (uint32_t) v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%u"), (uint32_t) v) == -1)
+			if (file_printf(ms, F(ms, desc, "%u"), (uint32_t) v) == -1)
 				return -1;
 			break;
 		}
@@ -477,17 +585,17 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BEQUAD:
   	case FILE_LEQUAD:
 		v = file_signextend(ms, m, p->q);
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%" INT64_T_FORMAT "u",
 			    (unsigned long long)v);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%" INT64_T_FORMAT "u"),
+			if (file_printf(ms, F(ms, desc, "%" INT64_T_FORMAT "u"),
 			    (unsigned long long) v) == -1)
 				return -1;
 			break;
@@ -500,7 +608,7 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BESTRING16:
   	case FILE_LESTRING16:
 		if (m->reln == '=' || m->reln == '!') {
-			if (file_printf(ms, F(ms, m, "%s"), 
+			if (file_printf(ms, F(ms, desc, "%s"), 
 			    file_printable(sbuf, sizeof(sbuf), m->value.s))
 			    == -1)
 				return -1;
@@ -528,7 +636,7 @@ mprint(struct magic_set *ms, struct magic *m)
 				*++last = '\0';
 			}
 
-			if (file_printf(ms, F(ms, m, "%s"),
+			if (file_printf(ms, F(ms, desc, "%s"),
 			    file_printable(sbuf, sizeof(sbuf), str)) == -1)
 				return -1;
 
@@ -541,7 +649,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEDATE:
 	case FILE_LEDATE:
 	case FILE_MEDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->l, 0, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint32_t);
@@ -551,7 +659,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BELDATE:
 	case FILE_LELDATE:
 	case FILE_MELDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->l, FILE_T_LOCAL, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint32_t);
@@ -560,7 +668,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QDATE:
 	case FILE_BEQDATE:
 	case FILE_LEQDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, 0, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -569,7 +677,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QLDATE:
 	case FILE_BEQLDATE:
 	case FILE_LEQLDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, FILE_T_LOCAL, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -578,7 +686,7 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_QWDATE:
 	case FILE_BEQWDATE:
 	case FILE_LEQWDATE:
-		if (file_printf(ms, F(ms, m, "%s"),
+		if (file_printf(ms, F(ms, desc, "%s"),
 		    file_fmttime(p->q, FILE_T_WINDOWS, tbuf)) == -1)
 			return -1;
 		t = ms->offset + sizeof(uint64_t);
@@ -588,16 +696,16 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEFLOAT:
 	case FILE_LEFLOAT:
 		vf = p->f;
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%g", vf);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%g"), vf) == -1)
+			if (file_printf(ms, F(ms, desc, "%g"), vf) == -1)
 				return -1;
 			break;
 		}
@@ -608,32 +716,29 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
 		vd = p->d;
-		switch (check_fmt(ms, m)) {
+		switch (check_fmt(ms, desc)) {
 		case -1:
 			return -1;
 		case 1:
 			(void)snprintf(buf, sizeof(buf), "%g", vd);
-			if (file_printf(ms, F(ms, m, "%s"), buf) == -1)
+			if (file_printf(ms, F(ms, desc, "%s"), buf) == -1)
 				return -1;
 			break;
 		default:
-			if (file_printf(ms, F(ms, m, "%g"), vd) == -1)
+			if (file_printf(ms, F(ms, desc, "%g"), vd) == -1)
 				return -1;
 			break;
 		}
 		t = ms->offset + sizeof(double);
   		break;
 
+	case FILE_SEARCH:
 	case FILE_REGEX: {
 		char *cp;
 		int rval;
 
 		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
-		if (cp == NULL) {
-			file_oomem(ms, ms->search.rm_len);
-			return -1;
-		}
-		rval = file_printf(ms, F(ms, m, "%s"),
+		rval = file_printf(ms, F(ms, desc, "%s"),
 		    file_printable(sbuf, sizeof(sbuf), cp));
 		efree(cp);
 
@@ -647,15 +752,6 @@ mprint(struct magic_set *ms, struct magic *m)
 		break;
 	}
 
-	case FILE_SEARCH:
-		if (file_printf(ms, F(ms, m, "%s"), m->value.s) == -1)
-			return -1;
-		if ((m->str_flags & REGEX_OFFSET_START))
-			t = ms->search.offset;
-		else
-			t = ms->search.offset + m->vallen;
-		break;
-
 	case FILE_DEFAULT:
 	case FILE_CLEAR:
 	  	if (file_printf(ms, "%s", m->desc) == -1)
@@ -668,7 +764,12 @@ mprint(struct magic_set *ms, struct magic *m)
 	case FILE_NAME:
 		t = ms->offset;
 		break;
-
+	case FILE_DER:
+		if (file_printf(ms, F(ms, desc, "%s"), 
+		    file_printable(sbuf, sizeof(sbuf), ms->ms_value.s)) == -1)
+			return -1;
+		t = ms->offset;
+		break;
 	default:
 		file_magerror(ms, "invalid m->type (%d) in mprint()", m->type);
 		return -1;
@@ -676,100 +777,154 @@ mprint(struct magic_set *ms, struct magic *m)
 	return (int32_t)t;
 }
 
-private int32_t
-moffset(struct magic_set *ms, struct magic *m)
+private int
+moffset(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    int32_t *op)
 {
+	size_t nbytes = b->flen;
+	int32_t o;
+
   	switch (m->type) {
   	case FILE_BYTE:
-		return CAST(int32_t, (ms->offset + sizeof(char)));
+		o = CAST(int32_t, (ms->offset + sizeof(char)));
+		break;
 
   	case FILE_SHORT:
   	case FILE_BESHORT:
   	case FILE_LESHORT:
-		return CAST(int32_t, (ms->offset + sizeof(short)));
+		o = CAST(int32_t, (ms->offset + sizeof(short)));
+		break;
 
   	case FILE_LONG:
   	case FILE_BELONG:
   	case FILE_LELONG:
   	case FILE_MELONG:
-		return CAST(int32_t, (ms->offset + sizeof(int32_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(int32_t)));
+		break;
 
   	case FILE_QUAD:
   	case FILE_BEQUAD:
   	case FILE_LEQUAD:
-		return CAST(int32_t, (ms->offset + sizeof(int64_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(int64_t)));
+		break;
 
   	case FILE_STRING:
   	case FILE_PSTRING:
   	case FILE_BESTRING16:
   	case FILE_LESTRING16:
-		if (m->reln == '=' || m->reln == '!')
-			return ms->offset + m->vallen;
-		else {
+		if (m->reln == '=' || m->reln == '!') {
+			o = ms->offset + m->vallen;
+		} else {
 			union VALUETYPE *p = &ms->ms_value;
-			uint32_t t;
 
 			if (*m->value.s == '\0')
 				p->s[strcspn(p->s, "\r\n")] = '\0';
-			t = CAST(uint32_t, (ms->offset + strlen(p->s)));
+			o = CAST(uint32_t, (ms->offset + strlen(p->s)));
 			if (m->type == FILE_PSTRING)
-				t += (uint32_t)file_pstring_length_size(m);
-			return t;
+				o += (uint32_t)file_pstring_length_size(m);
 		}
+		break;
 
 	case FILE_DATE:
 	case FILE_BEDATE:
 	case FILE_LEDATE:
 	case FILE_MEDATE:
-		return CAST(int32_t, (ms->offset + sizeof(uint32_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(uint32_t)));
+		break;
 
 	case FILE_LDATE:
 	case FILE_BELDATE:
 	case FILE_LELDATE:
 	case FILE_MELDATE:
-		return CAST(int32_t, (ms->offset + sizeof(uint32_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(uint32_t)));
+		break;
 
 	case FILE_QDATE:
 	case FILE_BEQDATE:
 	case FILE_LEQDATE:
-		return CAST(int32_t, (ms->offset + sizeof(uint64_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(uint64_t)));
+		break;
 
 	case FILE_QLDATE:
 	case FILE_BEQLDATE:
 	case FILE_LEQLDATE:
-		return CAST(int32_t, (ms->offset + sizeof(uint64_t)));
+		o = CAST(int32_t, (ms->offset + sizeof(uint64_t)));
+		break;
 
   	case FILE_FLOAT:
   	case FILE_BEFLOAT:
   	case FILE_LEFLOAT:
-		return CAST(int32_t, (ms->offset + sizeof(float)));
+		o = CAST(int32_t, (ms->offset + sizeof(float)));
+		break;
 
   	case FILE_DOUBLE:
   	case FILE_BEDOUBLE:
   	case FILE_LEDOUBLE:
-		return CAST(int32_t, (ms->offset + sizeof(double)));
+		o = CAST(int32_t, (ms->offset + sizeof(double)));
+		break;
 
 	case FILE_REGEX:
 		if ((m->str_flags & REGEX_OFFSET_START) != 0)
-			return CAST(int32_t, ms->search.offset);
+			o = CAST(int32_t, ms->search.offset);
 		else
-			return CAST(int32_t, (ms->search.offset +
-			    ms->search.rm_len));
+			o = CAST(int32_t,
+			    (ms->search.offset + ms->search.rm_len));
+		break;
 
 	case FILE_SEARCH:
 		if ((m->str_flags & REGEX_OFFSET_START) != 0)
-			return CAST(int32_t, ms->search.offset);
+			o = CAST(int32_t, ms->search.offset);
 		else
-			return CAST(int32_t, (ms->search.offset + m->vallen));
+			o = CAST(int32_t, (ms->search.offset + m->vallen));
+		break;
 
 	case FILE_CLEAR:
 	case FILE_DEFAULT:
 	case FILE_INDIRECT:
-		return ms->offset;
+		o = ms->offset;
+		break;
+
+	case FILE_DER:
+		{
+			o = der_offs(ms, m, nbytes);
+			if (o == -1 || (size_t)o > nbytes) {
+				if ((ms->flags & MAGIC_DEBUG) != 0) {
+					(void)fprintf(stderr,
+					    "Bad DER offset %d nbytes=%zu",
+					    o, nbytes);
+				}
+				*op = 0;
+				return 0;
+			}
+			break;
+		}
 
 	default:
-		return 0;
+		o = 0;
+		break;
 	}
+
+	if ((size_t)o > nbytes) {
+#if 0
+		file_error(ms, 0, "Offset out of range %zu > %zu",
+		    (size_t)o, nbytes);
+#endif
+		return -1;
+	}
+	*op = o;
+	return 1;
+}
+
+private uint32_t
+cvt_id3(struct magic_set *ms, uint32_t v)
+{
+	v = ((((v >>  0) & 0x7f) <<  0) |
+	     (((v >>  8) & 0x7f) <<  7) |
+	     (((v >> 16) & 0x7f) << 14) |
+	     (((v >> 24) & 0x7f) << 21));
+	if ((ms->flags & MAGIC_DEBUG) != 0)
+		fprintf(stderr, "id3 offs=%u\n", v);
+	return v;
 }
 
 private int
@@ -844,66 +999,78 @@ cvt_flip(int type, int flip)
 			p->fld *= cast m->num_mask; \
 			break; \
 		case FILE_OPDIVIDE: \
+			if (cast m->num_mask == 0) \
+				return -1; \
 			p->fld /= cast m->num_mask; \
 			break; \
 		case FILE_OPMODULO: \
+			if (cast m->num_mask == 0) \
+				return -1; \
 			p->fld %= cast m->num_mask; \
 			break; \
 		} \
 	if (m->mask_op & FILE_OPINVERSE) \
 		p->fld = ~p->fld \
 
-private void
+private int
 cvt_8(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT(b, (uint8_t));
+	return 0;
 }
 
-private void
+private int
 cvt_16(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT(h, (uint16_t));
+	return 0;
 }
 
-private void
+private int
 cvt_32(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT(l, (uint32_t));
+	return 0;
 }
 
-private void
+private int
 cvt_64(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT(q, (uint64_t));
+	return 0;
 }
 
 #define DO_CVT2(fld, cast) \
 	if (m->num_mask) \
 		switch (m->mask_op & FILE_OPS_MASK) { \
 		case FILE_OPADD: \
-			p->fld += cast (int64_t)m->num_mask; \
+			p->fld += cast m->num_mask; \
 			break; \
 		case FILE_OPMINUS: \
-			p->fld -= cast (int64_t)m->num_mask; \
+			p->fld -= cast m->num_mask; \
 			break; \
 		case FILE_OPMULTIPLY: \
-			p->fld *= cast (int64_t)m->num_mask; \
+			p->fld *= cast m->num_mask; \
 			break; \
 		case FILE_OPDIVIDE: \
-			p->fld /= cast (int64_t)m->num_mask; \
+			if (cast m->num_mask == 0) \
+				return -1; \
+			p->fld /= cast m->num_mask; \
 			break; \
 		} \
 
-private void
+private int
 cvt_float(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT2(f, (float));
+	return 0;
 }
 
-private void
+private int
 cvt_double(union VALUETYPE *p, const struct magic *m)
 {
 	DO_CVT2(d, (double));
+	return 0;
 }
 
 /*
@@ -915,25 +1082,28 @@ private int
 mconvert(struct magic_set *ms, struct magic *m, int flip)
 {
 	union VALUETYPE *p = &ms->ms_value;
-	uint8_t type;
 
-	switch (type = cvt_flip(m->type, flip)) {
+	switch (cvt_flip(m->type, flip)) {
 	case FILE_BYTE:
-		cvt_8(p, m);
+		if (cvt_8(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_SHORT:
-		cvt_16(p, m);
+		if (cvt_16(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LONG:
 	case FILE_DATE:
 	case FILE_LDATE:
-		cvt_32(p, m);
+		if (cvt_32(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_QUAD:
 	case FILE_QDATE:
 	case FILE_QLDATE:
 	case FILE_QWDATE:
-		cvt_64(p, m);
+		if (cvt_64(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_STRING:
 	case FILE_BESTRING16:
@@ -955,7 +1125,7 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 			 * string by p->s, so we need to deduct sz.
 			 * Because we can use one of the bytes of the length
 			 * after we shifted as NUL termination.
-			 */ 
+			 */
 			len = sz;
 		}
 		while (len--)
@@ -964,85 +1134,79 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 		return 1;
 	}
 	case FILE_BESHORT:
-		p->h = (short)((p->hs[0]<<8)|(p->hs[1]));
-		cvt_16(p, m);
+		p->h = (short)BE16(p);
+		if (cvt_16(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_BELONG:
 	case FILE_BEDATE:
 	case FILE_BELDATE:
-		p->l = (int32_t)
-		    ((p->hl[0]<<24)|(p->hl[1]<<16)|(p->hl[2]<<8)|(p->hl[3]));
-		cvt_32(p, m);
+		p->l = (int32_t)BE32(p);
+		if (cvt_32(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_BEQUAD:
 	case FILE_BEQDATE:
 	case FILE_BEQLDATE:
 	case FILE_BEQWDATE:
-		p->q = (uint64_t)
-		    (((uint64_t)p->hq[0]<<56)|((uint64_t)p->hq[1]<<48)|
-		     ((uint64_t)p->hq[2]<<40)|((uint64_t)p->hq[3]<<32)|
-		     ((uint64_t)p->hq[4]<<24)|((uint64_t)p->hq[5]<<16)|
-		     ((uint64_t)p->hq[6]<<8)|((uint64_t)p->hq[7]));
-		cvt_64(p, m);
+		p->q = (uint64_t)BE64(p);
+		if (cvt_64(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LESHORT:
-		p->h = (short)((p->hs[1]<<8)|(p->hs[0]));
-		cvt_16(p, m);
+		p->h = (short)LE16(p);
+		if (cvt_16(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LELONG:
 	case FILE_LEDATE:
 	case FILE_LELDATE:
-		p->l = (int32_t)
-		    ((p->hl[3]<<24)|(p->hl[2]<<16)|(p->hl[1]<<8)|(p->hl[0]));
-		cvt_32(p, m);
+		p->l = (int32_t)LE32(p);
+		if (cvt_32(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LEQUAD:
 	case FILE_LEQDATE:
 	case FILE_LEQLDATE:
 	case FILE_LEQWDATE:
-		p->q = (uint64_t)
-		    (((uint64_t)p->hq[7]<<56)|((uint64_t)p->hq[6]<<48)|
-		     ((uint64_t)p->hq[5]<<40)|((uint64_t)p->hq[4]<<32)|
-		     ((uint64_t)p->hq[3]<<24)|((uint64_t)p->hq[2]<<16)|
-		     ((uint64_t)p->hq[1]<<8)|((uint64_t)p->hq[0]));
-		cvt_64(p, m);
+		p->q = (uint64_t)LE64(p);
+		if (cvt_64(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_MELONG:
 	case FILE_MEDATE:
 	case FILE_MELDATE:
-		p->l = (int32_t)
-		    ((p->hl[1]<<24)|(p->hl[0]<<16)|(p->hl[3]<<8)|(p->hl[2]));
-		cvt_32(p, m);
+		p->l = (int32_t)ME32(p);
+		if (cvt_32(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_FLOAT:
-		cvt_float(p, m);
+		if (cvt_float(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_BEFLOAT:
-		p->l =  ((uint32_t)p->hl[0]<<24)|((uint32_t)p->hl[1]<<16)|
-			((uint32_t)p->hl[2]<<8) |((uint32_t)p->hl[3]);
-		cvt_float(p, m);
+		p->l = BE32(p);
+		if (cvt_float(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LEFLOAT:
-		p->l =  ((uint32_t)p->hl[3]<<24)|((uint32_t)p->hl[2]<<16)|
-			((uint32_t)p->hl[1]<<8) |((uint32_t)p->hl[0]);
-		cvt_float(p, m);
+		p->l = LE32(p);
+		if (cvt_float(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_DOUBLE:
-		cvt_double(p, m);
+		if (cvt_double(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_BEDOUBLE:
-		p->q =  ((uint64_t)p->hq[0]<<56)|((uint64_t)p->hq[1]<<48)|
-			((uint64_t)p->hq[2]<<40)|((uint64_t)p->hq[3]<<32)|
-			((uint64_t)p->hq[4]<<24)|((uint64_t)p->hq[5]<<16)|
-			((uint64_t)p->hq[6]<<8) |((uint64_t)p->hq[7]);
-		cvt_double(p, m);
+		p->q = BE64(p);
+		if (cvt_double(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_LEDOUBLE:
-		p->q =  ((uint64_t)p->hq[7]<<56)|((uint64_t)p->hq[6]<<48)|
-			((uint64_t)p->hq[5]<<40)|((uint64_t)p->hq[4]<<32)|
-			((uint64_t)p->hq[3]<<24)|((uint64_t)p->hq[2]<<16)|
-			((uint64_t)p->hq[1]<<8) |((uint64_t)p->hq[0]);
-		cvt_double(p, m);
+		p->q = LE64(p);
+		if (cvt_double(p, m) == -1)
+			goto out;
 		return 1;
 	case FILE_REGEX:
 	case FILE_SEARCH:
@@ -1050,11 +1214,15 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 	case FILE_CLEAR:
 	case FILE_NAME:
 	case FILE_USE:
+	case FILE_DER:
 		return 1;
 	default:
 		file_magerror(ms, "invalid type %d in mconvert()", m->type);
 		return 0;
 	}
+out:
+	file_magerror(ms, "zerodivide in mconvert()");
+	return 0;
 }
 
 
@@ -1077,7 +1245,10 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 	 */
 	if (indir == 0) {
 		switch (type) {
+		case FILE_DER:
 		case FILE_SEARCH:
+			if (offset > nbytes)
+				offset = CAST(uint32_t, nbytes);
 			ms->search.s = RCAST(const char *, s) + offset;
 			ms->search.s_len = nbytes - offset;
 			ms->search.offset = offset;
@@ -1091,34 +1262,27 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 			const char *end;
 			size_t lines, linecnt, bytecnt;
 
-			if (s == NULL) {
+			if (s == NULL || nbytes < offset) {
 				ms->search.s_len = 0;
 				ms->search.s = NULL;
 				return 0;
 			}
 
-			/* bytecnt checks are to be kept for PHP, see cve-2014-3538.
-			 PCRE might get stuck if the input buffer is too big. */
-			linecnt = m->str_range;
-			bytecnt = linecnt * 80;
-
-			if (bytecnt == 0) {
-				bytecnt = 1 << 14;
+			if (m->str_flags & REGEX_LINE_COUNT) {
+				linecnt = m->str_range;
+				bytecnt = linecnt * 80;
+			} else {
+				linecnt = 0;
+				bytecnt = m->str_range;
 			}
 
-			if (bytecnt > nbytes) {
-				bytecnt = nbytes;
-			}
-			if (offset > bytecnt) {
-				offset = bytecnt;
-			}
-			if (s == NULL) {
-				ms->search.s_len = 0;
-				ms->search.s = NULL;
-				return 0;
-			}
+			if (bytecnt == 0 || bytecnt > nbytes - offset)
+				bytecnt = nbytes - offset;
+			if (bytecnt > ms->regex_max)
+				bytecnt = ms->regex_max;
+
 			buf = RCAST(const char *, s) + offset;
-			end = last = RCAST(const char *, s) + bytecnt;
+			end = last = RCAST(const char *, s) + bytecnt + offset;
 			/* mget() guarantees buf <= last */
 			for (lines = linecnt, b = buf; lines && b < end &&
 			     ((b = CAST(const char *,
@@ -1127,11 +1291,11 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				 memchr(c, '\r', CAST(size_t, (end - c))))));
 			     lines--, b++) {
 				last = b;
-				if (b[0] == '\r' && b[1] == '\n')
+				if (b < end - 1 && b[0] == '\r' && b[1] == '\n')
 					b++;
 			}
 			if (lines)
-				last = RCAST(const char *, s) + bytecnt;
+				last = end;
 
 			ms->search.s = buf;
 			ms->search.s_len = last - buf;
@@ -1160,7 +1324,8 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				if (*dst == '\0') {
 					if (type == FILE_BESTRING16 ?
 					    *(src - 1) != '\0' :
-					    *(src + 1) != '\0')
+					    ((src + 1 < esrc) &&
+					    *(src + 1) != '\0'))
 						*dst = ' ';
 				}
 			}
@@ -1195,23 +1360,108 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 	return 0;
 }
 
+private uint32_t
+do_ops(struct magic *m, intmax_t lhs, intmax_t off)
+{
+	intmax_t offset;
+	if (off) {
+		switch (m->in_op & FILE_OPS_MASK) {
+		case FILE_OPAND:
+			offset = lhs & off;
+			break;
+		case FILE_OPOR:
+			offset = lhs | off;
+			break;
+		case FILE_OPXOR:
+			offset = lhs ^ off;
+			break;
+		case FILE_OPADD:
+			offset = lhs + off;
+			break;
+		case FILE_OPMINUS:
+			offset = lhs - off;
+			break;
+		case FILE_OPMULTIPLY:
+			offset = lhs * off;
+			break;
+		case FILE_OPDIVIDE:
+			offset = lhs / off;
+			break;
+		case FILE_OPMODULO:
+			offset = lhs % off;
+			break;
+		}
+	} else
+		offset = lhs;
+	if (m->in_op & FILE_OPINVERSE)
+		offset = ~offset;
+
+	return (uint32_t)offset;
+}
+
 private int
-mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
-    size_t nbytes, size_t o, unsigned int cont_level, int mode, int text,
-    int flip, uint16_t indir_level, uint16_t *name_count,
+msetoffset(struct magic_set *ms, struct magic *m, struct buffer *bb,
+    const struct buffer *b, size_t o, unsigned int cont_level)
+{
+	if (m->offset < 0) {
+		if (cont_level > 0) {
+			if (m->flag & (OFFADD|INDIROFFADD))
+				goto normal;
+#if 0
+			file_error(ms, 0, "negative offset %d at continuation"
+			    "level %u", m->offset, cont_level);
+			return -1;
+#endif
+		}
+		if (buffer_fill(b) == -1)
+			return -1;
+		if (o != 0) {
+			// Not yet!
+			file_magerror(ms, "non zero offset %zu at"
+			    " level %u", o, cont_level);
+			return -1;
+		}
+		if ((size_t)-m->offset > b->elen)
+			return -1;
+		buffer_init(bb, -1, b->ebuf, b->elen);
+		ms->eoffset = ms->offset = b->elen + m->offset;
+	} else {
+		if (cont_level == 0) {
+normal:
+			// XXX: Pass real fd, then who frees bb?
+			buffer_init(bb, -1, b->fbuf, b->flen);
+			ms->offset = m->offset;
+			ms->eoffset = 0;
+		} else {
+			ms->offset = ms->eoffset + m->offset;
+		}
+	}
+	if ((ms->flags & MAGIC_DEBUG) != 0) {
+		fprintf(stderr, "bb=[%p,%zu], %d [b=%p,%zu], [o=%#x, c=%d]\n",
+		    bb->fbuf, bb->flen, ms->offset, b->fbuf, b->flen,
+		    m->offset, cont_level);
+	}
+	return 0;
+}
+
+private int
+mget(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    const unsigned char *s, size_t nbytes, size_t o, unsigned int cont_level,
+    int mode, int text, int flip, uint16_t *indir_count, uint16_t *name_count,
     int *printed_something, int *need_separator, int *returnval)
 {
 	uint32_t offset = ms->offset;
-	uint32_t lhs;
+	struct buffer bb;
+	intmax_t lhs;
 	file_pushbuf_t *pb;
 	int rv, oneed_separator, in_type;
 	char *rbuf;
 	union VALUETYPE *p = &ms->ms_value;
 	struct mlist ml;
 
-	if (indir_level >= ms->indir_max) {
-		file_error(ms, 0, "indirect recursion nesting (%hu) exceeded",
-		    indir_level);
+	if (*indir_count >= ms->indir_max) {
+		file_error(ms, 0, "indirect count (%hu) exceeded",
+		    *indir_count);
 		return -1;
 	}
 
@@ -1226,358 +1476,101 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		return -1;
 
 	if ((ms->flags & MAGIC_DEBUG) != 0) {
-		fprintf(stderr, "mget(type=%d, flag=%x, offset=%u, o=%"
+		fprintf(stderr, "mget(type=%d, flag=%#x, offset=%u, o=%"
 		    SIZE_T_FORMAT "u, " "nbytes=%" SIZE_T_FORMAT
 		    "u, il=%hu, nc=%hu)\n",
 		    m->type, m->flag, offset, o, nbytes,
-		    indir_level, *name_count);
+		    *indir_count, *name_count);
 		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
 	}
 
 	if (m->flag & INDIR) {
-		int off = m->in_offset;
+		intmax_t off = m->in_offset;
+		const int sgn = m->in_op & FILE_OPSIGNED;
 		if (m->in_op & FILE_OPINDIRECT) {
 			const union VALUETYPE *q = CAST(const union VALUETYPE *,
 			    ((const void *)(s + offset + off)));
+			if (OFFSET_OOB(nbytes, offset + off, sizeof(*q)))
+				return 0;
 			switch (cvt_flip(m->in_type, flip)) {
 			case FILE_BYTE:
-				off = q->b;
+				off = SEXT(sgn,8,q->b);
 				break;
 			case FILE_SHORT:
-				off = q->h;
+				off = SEXT(sgn,16,q->h);
 				break;
 			case FILE_BESHORT:
-				off = (short)((q->hs[0]<<8)|(q->hs[1]));
+				off = SEXT(sgn,16,BE16(q));
 				break;
 			case FILE_LESHORT:
-				off = (short)((q->hs[1]<<8)|(q->hs[0]));
+				off = SEXT(sgn,16,LE16(q));
 				break;
 			case FILE_LONG:
-				off = q->l;
+				off = SEXT(sgn,32,q->l);
 				break;
 			case FILE_BELONG:
 			case FILE_BEID3:
-				off = (int32_t)((q->hl[0]<<24)|(q->hl[1]<<16)|
-						 (q->hl[2]<<8)|(q->hl[3]));
+				off = SEXT(sgn,32,BE32(q));
 				break;
 			case FILE_LEID3:
 			case FILE_LELONG:
-				off = (int32_t)((q->hl[3]<<24)|(q->hl[2]<<16)|
-						 (q->hl[1]<<8)|(q->hl[0]));
+				off = SEXT(sgn,32,LE32(q));
 				break;
 			case FILE_MELONG:
-				off = (int32_t)((q->hl[1]<<24)|(q->hl[0]<<16)|
-						 (q->hl[3]<<8)|(q->hl[2]));
+				off = SEXT(sgn,32,ME32(q));
 				break;
 			}
 			if ((ms->flags & MAGIC_DEBUG) != 0)
-				fprintf(stderr, "indirect offs=%u\n", off);
+				fprintf(stderr, "indirect offs=%jd\n", off);
 		}
 		switch (in_type = cvt_flip(m->in_type, flip)) {
 		case FILE_BYTE:
 			if (OFFSET_OOB(nbytes, offset, 1))
 				return 0;
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = p->b & off;
-					break;
-				case FILE_OPOR:
-					offset = p->b | off;
-					break;
-				case FILE_OPXOR:
-					offset = p->b ^ off;
-					break;
-				case FILE_OPADD:
-					offset = p->b + off;
-					break;
-				case FILE_OPMINUS:
-					offset = p->b - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = p->b * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = p->b / off;
-					break;
-				case FILE_OPMODULO:
-					offset = p->b % off;
-					break;
-				}
-			} else
-				offset = p->b;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			offset = do_ops(m, SEXT(sgn,8,p->b), off);
 			break;
 		case FILE_BESHORT:
 			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
-			lhs = (p->hs[0] << 8) | p->hs[1];
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = lhs & off;
-					break;
-				case FILE_OPOR:
-					offset = lhs | off;
-					break;
-				case FILE_OPXOR:
-					offset = lhs ^ off;
-					break;
-				case FILE_OPADD:
-					offset = lhs + off;
-					break;
-				case FILE_OPMINUS:
-					offset = lhs - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = lhs * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = lhs / off;
-					break;
-				case FILE_OPMODULO:
-					offset = lhs % off;
-					break;
-				}
-			} else
-				offset = lhs;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			offset = do_ops(m, SEXT(sgn,16,BE16(p)), off);
 			break;
 		case FILE_LESHORT:
 			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
-			lhs = (p->hs[1] << 8) | p->hs[0];
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = lhs & off;
-					break;
-				case FILE_OPOR:
-					offset = lhs | off;
-					break;
-				case FILE_OPXOR:
-					offset = lhs ^ off;
-					break;
-				case FILE_OPADD:
-					offset = lhs + off;
-					break;
-				case FILE_OPMINUS:
-					offset = lhs - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = lhs * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = lhs / off;
-					break;
-				case FILE_OPMODULO:
-					offset = lhs % off;
-					break;
-				}
-			} else
-				offset = lhs;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			offset = do_ops(m, SEXT(sgn,16,LE16(p)), off);
 			break;
 		case FILE_SHORT:
 			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = p->h & off;
-					break;
-				case FILE_OPOR:
-					offset = p->h | off;
-					break;
-				case FILE_OPXOR:
-					offset = p->h ^ off;
-					break;
-				case FILE_OPADD:
-					offset = p->h + off;
-					break;
-				case FILE_OPMINUS:
-					offset = p->h - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = p->h * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = p->h / off;
-					break;
-				case FILE_OPMODULO:
-					offset = p->h % off;
-					break;
-				}
-			}
-			else
-				offset = p->h;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			offset = do_ops(m, SEXT(sgn,16,p->h), off);
 			break;
 		case FILE_BELONG:
 		case FILE_BEID3:
 			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
-			lhs = (p->hl[0] << 24) | (p->hl[1] << 16) |
-			    (p->hl[2] << 8) | p->hl[3];
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = lhs & off;
-					break;
-				case FILE_OPOR:
-					offset = lhs | off;
-					break;
-				case FILE_OPXOR:
-					offset = lhs ^ off;
-					break;
-				case FILE_OPADD:
-					offset = lhs + off;
-					break;
-				case FILE_OPMINUS:
-					offset = lhs - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = lhs * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = lhs / off;
-					break;
-				case FILE_OPMODULO:
-					offset = lhs % off;
-					break;
-				}
-			} else
-				offset = lhs;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			lhs = BE32(p);
+			if (in_type == FILE_BEID3)
+				lhs = cvt_id3(ms, (uint32_t)lhs);
+			offset = do_ops(m, SEXT(sgn,32,lhs), off);
 			break;
 		case FILE_LELONG:
 		case FILE_LEID3:
 			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
-			lhs = (p->hl[3] << 24) | (p->hl[2] << 16) |
-			    (p->hl[1] << 8) | p->hl[0];
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = lhs & off;
-					break;
-				case FILE_OPOR:
-					offset = lhs | off;
-					break;
-				case FILE_OPXOR:
-					offset = lhs ^ off;
-					break;
-				case FILE_OPADD:
-					offset = lhs + off;
-					break;
-				case FILE_OPMINUS:
-					offset = lhs - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = lhs * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = lhs / off;
-					break;
-				case FILE_OPMODULO:
-					offset = lhs % off;
-					break;
-				}
-			} else
-				offset = lhs;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			lhs = LE32(p);
+			if (in_type == FILE_LEID3)
+				lhs = cvt_id3(ms, (uint32_t)lhs);
+			offset = do_ops(m, SEXT(sgn,32,lhs), off);
 			break;
 		case FILE_MELONG:
 			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
-			lhs = (p->hl[1] << 24) | (p->hl[0] << 16) |
-			    (p->hl[3] << 8) | p->hl[2];
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = lhs & off;
-					break;
-				case FILE_OPOR:
-					offset = lhs | off;
-					break;
-				case FILE_OPXOR:
-					offset = lhs ^ off;
-					break;
-				case FILE_OPADD:
-					offset = lhs + off;
-					break;
-				case FILE_OPMINUS:
-					offset = lhs - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = lhs * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = lhs / off;
-					break;
-				case FILE_OPMODULO:
-					offset = lhs % off;
-					break;
-				}
-			} else
-				offset = lhs;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
+			offset = do_ops(m, SEXT(sgn,32,ME32(p)), off);
 			break;
 		case FILE_LONG:
 			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
-			if (off) {
-				switch (m->in_op & FILE_OPS_MASK) {
-				case FILE_OPAND:
-					offset = p->l & off;
-					break;
-				case FILE_OPOR:
-					offset = p->l | off;
-					break;
-				case FILE_OPXOR:
-					offset = p->l ^ off;
-					break;
-				case FILE_OPADD:
-					offset = p->l + off;
-					break;
-				case FILE_OPMINUS:
-					offset = p->l - off;
-					break;
-				case FILE_OPMULTIPLY:
-					offset = p->l * off;
-					break;
-				case FILE_OPDIVIDE:
-					offset = p->l / off;
-					break;
-				case FILE_OPMODULO:
-					offset = p->l % off;
-					break;
-				}
-			} else
-				offset = p->l;
-			if (m->in_op & FILE_OPINVERSE)
-				offset = ~offset;
-			break;
-		default:
-			break;
-		}
-
-		switch (in_type) {
-		case FILE_LEID3:
-		case FILE_BEID3:
-			offset = ((((offset >>  0) & 0x7f) <<  0) |
-				 (((offset >>  8) & 0x7f) <<  7) |
-				 (((offset >> 16) & 0x7f) << 14) |
-				 (((offset >> 24) & 0x7f) << 21));
-			if ((ms->flags & MAGIC_DEBUG) != 0)
-				fprintf(stderr, "id3 offs=%u\n", offset);
+			offset = do_ops(m, SEXT(sgn,32,p->l), off);
 			break;
 		default:
 			break;
@@ -1668,8 +1661,12 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		if ((pb = file_push_buffer(ms)) == NULL)
 			return -1;
 
-		rv = file_softmagic(ms, s + offset, nbytes - offset,
-		    indir_level + 1, name_count, BINTEST, text);
+		(*indir_count)++;
+		bb = *b;
+		bb.fbuf = s + offset;
+		bb.flen = nbytes - offset;
+		rv = file_softmagic(ms, &bb,
+		    indir_count, name_count, BINTEST, text);
 
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			fprintf(stderr, "indirect @offs=%u[%d]\n", offset, rv);
@@ -1679,8 +1676,8 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			return -1;
 
 		if (rv == 1) {
-			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
-			    file_printf(ms, F(ms, m, "%u"), offset) == -1) {
+			if ((ms->flags & MAGIC_NODESC) == 0 &&
+			    file_printf(ms, F(ms, m->desc, "%u"), offset) == -1) {
 				if (rbuf) efree(rbuf);
 				return -1;
 			}
@@ -1708,17 +1705,20 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		oneed_separator = *need_separator;
 		if (m->flag & NOSPACE)
 			*need_separator = 0;
-		rv = match(ms, ml.magic, ml.nmagic, s, nbytes, offset + o,
-		    mode, text, flip, indir_level, name_count,
+		rv = match(ms, ml.magic, ml.nmagic, b, offset + o,
+		    mode, text, flip, indir_count, name_count,
 		    printed_something, need_separator, returnval);
 		if (rv != 1)
 		    *need_separator = oneed_separator;
 		return rv;
 
 	case FILE_NAME:
+		if (ms->flags & MAGIC_NODESC)
+			return 1;
 		if (file_printf(ms, "%s", m->desc) == -1)
 			return -1;
 		return 1;
+	case FILE_DER:
 	case FILE_DEFAULT:	/* nothing to check */
 	case FILE_CLEAR:
 	default:
@@ -1740,6 +1740,7 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 	 */
 	const unsigned char *a = (const unsigned char *)s1;
 	const unsigned char *b = (const unsigned char *)s2;
+	const unsigned char *eb = b + len;
 	uint64_t v;
 
 	/*
@@ -1754,6 +1755,10 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 	}
 	else { /* combine the others */
 		while (len-- > 0) {
+			if (b >= eb) {
+				v = 1;
+				break;
+			}
 			if ((flags & STRING_IGNORE_LOWERCASE) &&
 			    islower(*a)) {
 				if ((v = tolower(*b++) - *a++) != '\0')
@@ -1769,7 +1774,7 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 				a++;
 				if (isspace(*b++)) {
 					if (!isspace(*a))
-						while (isspace(*b))
+						while (b < eb && isspace(*b))
 							b++;
 				}
 				else {
@@ -1780,7 +1785,7 @@ file_strncmp(const char *s1, const char *s2, size_t len, uint32_t flags)
 			else if ((flags & STRING_COMPACT_OPTIONAL_WHITESPACE) &&
 			    isspace(*a)) {
 				a++;
-				while (isspace(*b))
+				while (b < eb && isspace(*b))
 					b++;
 			}
 			else {
@@ -1805,7 +1810,7 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 }
 
 public void
-convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
+convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 {
 	int i, j=0;
 	zend_string *t;
@@ -1827,10 +1832,10 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	}
 	ZSTR_VAL(t)[j++] = '~';
 
-	if (options & PCRE_CASELESS) 
+	if (options & PCRE2_CASELESS)
 		ZSTR_VAL(t)[j++] = 'i';
 
-	if (options & PCRE_MULTILINE)
+	if (options & PCRE2_MULTILINE)
 		ZSTR_VAL(t)[j++] = 'm';
 
 	ZSTR_VAL(t)[j]='\0';
@@ -1986,13 +1991,13 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
 		for (idx = 0; m->str_range == 0 || idx < m->str_range; idx++) {
 			if (slen + idx > ms->search.s_len)
-				break;
+				return 0;
 
 			v = file_strncmp(m->value.s, ms->search.s + idx, slen,
 			    m->str_flags);
 			if (v == 0) {	/* found match */
 				ms->search.offset += idx;
-				ms->search.rm_len = m->str_range - idx;
+				ms->search.rm_len = ms->search.s_len - idx;
 				break;
 			}
 		}
@@ -2000,13 +2005,13 @@ magiccheck(struct magic_set *ms, struct magic *m)
 	}
 	case FILE_REGEX: {
 		zval pattern;
-		int options = 0;
+		uint32_t options = 0;
 		pcre_cache_entry *pce;
 
-		options |= PCRE_MULTILINE;
+		options |= PCRE2_MULTILINE;
 
 		if (m->str_flags & STRING_IGNORE_CASE) {
-			options |= PCRE_CASELESS;
+			options |= PCRE2_CASELESS;
 		}
 
 		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
@@ -2019,18 +2024,18 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			/* pce now contains the compiled regex */
 			zval retval;
 			zval subpats;
-			char *haystack;
+			zend_string *haystack;
 
 			ZVAL_NULL(&retval);
 			ZVAL_NULL(&subpats);
 
 			/* Cut the search len from haystack, equals to REG_STARTEND */
-			haystack = estrndup(ms->search.s, ms->search.s_len);
+			haystack = zend_string_init(ms->search.s, ms->search.s_len, 0);
 
 			/* match v = 0, no match v = 1 */
-			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 0, 1, PREG_OFFSET_CAPTURE, 0);
+			php_pcre_match_impl(pce, haystack, &retval, &subpats, 0, 1, PREG_OFFSET_CAPTURE, 0);
 			/* Free haystack */
-			efree(haystack);
+			zend_string_release(haystack);
 
 			if (Z_LVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
@@ -2076,6 +2081,16 @@ error_out:
 	case FILE_USE:
 	case FILE_NAME:
 		return 1;
+	case FILE_DER:
+		matched = der_cmp(ms, m);
+		if (matched == -1) {
+			if ((ms->flags & MAGIC_DEBUG) != 0) {
+				(void) fprintf(stderr,
+				    "EOF comparing DER entries");
+			}
+			return 0;
+		}
+		return matched;
 	default:
 		file_magerror(ms, "invalid type %d in magiccheck()", m->type);
 		return -1;
@@ -2173,15 +2188,33 @@ error_out:
 }
 
 private int
-handle_annotation(struct magic_set *ms, struct magic *m)
+handle_annotation(struct magic_set *ms, struct magic *m, const struct buffer *b,
+    int firstline)
 {
-	if (ms->flags & MAGIC_APPLE) {
+	if ((ms->flags & MAGIC_APPLE) && m->apple[0]) {
+		if (!firstline && file_printf(ms, "\n- ") == -1)
+			return -1;
 		if (file_printf(ms, "%.8s", m->apple) == -1)
 			return -1;
 		return 1;
 	}
+	if ((ms->flags & MAGIC_EXTENSION) && m->ext[0]) {
+		if (!firstline && file_printf(ms, "\n- ") == -1)
+			return -1;
+		if (file_printf(ms, "%s", m->ext) == -1)
+			return -1;
+		return 1;
+	}
 	if ((ms->flags & MAGIC_MIME_TYPE) && m->mimetype[0]) {
-		if (file_printf(ms, "%s", m->mimetype) == -1)
+		char buf[1024];
+		const char *p;
+		if (!firstline && file_printf(ms, "\n- ") == -1)
+			return -1;
+		if (varexpand(buf, sizeof(buf), b, m->mimetype) == -1)
+			p = m->mimetype;
+		else
+			p = buf;
+		if (file_printf(ms, "%s", p) == -1)
 			return -1;
 		return 1;
 	}
@@ -2191,8 +2224,8 @@ handle_annotation(struct magic_set *ms, struct magic *m)
 private int
 print_sep(struct magic_set *ms, int firstline)
 {
-	if (ms->flags & MAGIC_MIME)
-		return 0;
+//	if (ms->flags & MAGIC_NODESC)
+//		return 0;
 	if (firstline)
 		return 0;
 	/*

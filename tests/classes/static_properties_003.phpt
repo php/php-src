@@ -1,5 +1,5 @@
 --TEST--
-Attempting to access static properties using instance property syntax 
+Attempting to access static properties using instance property syntax
 --FILE--
 <?php
 class C {
@@ -41,8 +41,8 @@ Notice: Accessing static property C::$x as non static in %s on line 13
 Notice: Accessing static property C::$x as non static in %s on line 15
 
 Notice: Accessing static property C::$x as non static in %s on line 16
-%unicode|string%(3) "ref"
-%unicode|string%(5) "C::$x"
+string(3) "ref"
+string(5) "C::$x"
 
 --> Access non-visible static prop like instance prop:
 bool(false)

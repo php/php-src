@@ -2,7 +2,6 @@
 Conflicting properties with different visibility modifiers should result in a fatal error, since this indicates that the code is incompatible.
 --FILE--
 <?php
-error_reporting(E_ALL);
 
 trait THello1 {
   public $hello;
@@ -24,7 +23,7 @@ echo "POST-CLASS-GUARD\n";
 $t = new TraitsTest;
 $t->hello = "foo";
 ?>
---EXPECTF--	
+--EXPECTF--
 PRE-CLASS-GUARD
 
 Fatal error: THello1 and THello2 define the same property ($hello) in the composition of TraitsTest. However, the definition differs and is considered incompatible. Class was composed in %s on line %d

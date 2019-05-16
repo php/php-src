@@ -5,7 +5,7 @@ binding empty values
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $drop = "DROP table bind_empty_tab";
 $statement = oci_parse($c, $drop);
@@ -91,7 +91,7 @@ $statement = oci_parse($c, $drop);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(true)
 Test 2

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -52,7 +52,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	int currT;
 	int i;
 	int max = -1;
-	int var_to_free = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 
 	bitset_len = zend_bitset_len(T);
@@ -66,8 +65,8 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 
     /* Find T definition points */
     while (opline >= end) {
-        if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
-			start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
+        if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+			start_of_T[VAR_NUM(opline->result.var) - offset] = opline;
 		}
 		opline--;
 	}
@@ -79,8 +78,8 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
     opline = &op_array->opcodes[op_array->last - 1];
 
     while (opline >= end) {
-		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
-			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
+		if ((opline->op1_type & (IS_VAR | IS_TMP_VAR))) {
+			currT = VAR_NUM(opline->op1.var) - offset;
 			if (opline->opcode == ZEND_ROPE_END) {
 				int num = (((opline->extended_value + 1) * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
 				int var;
@@ -94,7 +93,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				map_T[currT] = var;
 				zend_bitset_incl(valid_T, currT);
 				zend_bitset_incl(taken_T, var);
-				ZEND_OP1(opline).var = NUM_VAR(var + offset);
+				opline->op1.var = NUM_VAR(var + offset);
 				while (num > 1) {
 					num--;
 					zend_bitset_incl(taken_T, var + num);
@@ -109,6 +108,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 					 */
 					if ((op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) &&
 					    (opline->opcode == ZEND_RETURN ||
+					     opline->opcode == ZEND_GENERATOR_RETURN ||
 					     opline->opcode == ZEND_RETURN_BY_REF ||
 					     opline->opcode == ZEND_FREE ||
 					     opline->opcode == ZEND_FE_FREE)) {
@@ -135,22 +135,22 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 					map_T[currT] = i;
 					zend_bitset_incl(valid_T, currT);
 				}
-				ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
+				opline->op1.var = NUM_VAR(map_T[currT] + offset);
 			}
 		}
 
-		if ((ZEND_OP2_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
-			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
+		if ((opline->op2_type & (IS_VAR | IS_TMP_VAR))) {
+			currT = VAR_NUM(opline->op2.var) - offset;
 			if (!zend_bitset_in(valid_T, currT)) {
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				zend_bitset_incl(valid_T, currT);
 			}
-			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
+			opline->op2.var = NUM_VAR(map_T[currT] + offset);
 		}
 
-		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
-			currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
+		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+			currT = VAR_NUM(opline->result.var) - offset;
 			if (zend_bitset_in(valid_T, currT)) {
 				if (start_of_T[currT] == opline) {
 					/* ZEND_FAST_CALL can not share temporary var with others
@@ -160,7 +160,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 						zend_bitset_excl(taken_T, map_T[currT]);
 					}
 				}
-				ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
+				opline->result.var = NUM_VAR(map_T[currT] + offset);
 				if (opline->opcode == ZEND_ROPE_INIT) {
 					if (start_of_T[currT] == opline) {
 						uint32_t num = ((opline->extended_value * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
@@ -175,24 +175,11 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				zend_bitset_incl(valid_T, currT);
-				ZEND_RESULT(opline).var = NUM_VAR(i + offset);
+				opline->result.var = NUM_VAR(i + offset);
 			}
 		}
 
-		if (var_to_free >= 0) {
-			zend_bitset_excl(taken_T, var_to_free);
-			var_to_free = -1;
-		}
-
 		opline--;
-	}
-
-	if (op_array->live_range) {
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				NUM_VAR(map_T[VAR_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK) - offset] + offset) |
-				(op_array->live_range[i].var & ZEND_LIVE_MASK);
-		}
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);

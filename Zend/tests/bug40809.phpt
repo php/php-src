@@ -2,7 +2,6 @@
 Bug #40809 (Poor performance of ".=")
 --FILE--
 <?php
-error_reporting(E_ALL|E_STRICT);
 
 $num_increments = 100;
 $num_repeats = 1000;

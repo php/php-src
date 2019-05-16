@@ -15,12 +15,6 @@ require_once('skipifconnectfailure.inc');
 			$host, $user, $db, $port, $socket);
 	}
 
-	if (!is_null($tmp = @mysqli_fetch_lengths()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_lengths($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT id, label FROM test ORDER BY id LIMIT 1")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -53,5 +47,5 @@ array(2) {
 bool(false)
 
 Warning: mysqli_fetch_lengths(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

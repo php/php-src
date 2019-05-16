@@ -12,11 +12,11 @@ class A {
 
 	protected $c = 5;
 	static protected $C = 6;
-	
+
 	public function __construct() {
 		var_dump(get_class_vars('A'));
 	}
-	
+
 	static public function test() {
 		var_dump(get_class_vars('A'));
 	}

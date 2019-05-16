@@ -3,12 +3,12 @@ Bug #37220 (LOB Type mismatch when using windows & oci8.dll)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 // Initialization
 
@@ -23,21 +23,21 @@ oci8_test_sql_execute($c, $stmtarray);
 // 'THETAG' to 'MYTAG' (mycolumn is an XMLTYPE datatype and
 // bug37220_tab a normal Oracle table)
 
-$query = "UPDATE  bug37220_tab 
-  		  SET     bug37220_tab.mycolumn = updateXML(bug37220_tab.mycolumn,'/THETAG',xmltype.createXML(:data)) 
-		  WHERE   existsNode(bug37220_tab.mycolumn,'/THETAG[@myID=\"1234\"]') = 1"; 
-$stmt = oci_parse ($c, $query); 
-$clob = oci_new_descriptor($c, OCI_D_LOB); 
-oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB); 
-$clob->writetemporary("<MYTAG/>", OCI_TEMP_CLOB); 
-$success = oci_execute($stmt, OCI_COMMIT_ON_SUCCESS); 
-oci_free_statement($stmt); 	
-$clob->close(); 
+$query = "UPDATE  bug37220_tab
+  		  SET     bug37220_tab.mycolumn = updateXML(bug37220_tab.mycolumn,'/THETAG',xmltype.createXML(:data))
+		  WHERE   existsNode(bug37220_tab.mycolumn,'/THETAG[@myID=\"1234\"]') = 1";
+$stmt = oci_parse ($c, $query);
+$clob = oci_new_descriptor($c, OCI_D_LOB);
+oci_bind_by_name($stmt, ':data', $clob, -1, OCI_B_CLOB);
+$clob->writetemporary("<MYTAG/>", OCI_TEMP_CLOB);
+$success = oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
+oci_free_statement($stmt);
+$clob->close();
 
 // Query back the change
 
 $query = "select * from bug37220_tab";
-$stmt = oci_parse ($c, $query); 
+$stmt = oci_parse ($c, $query);
 
 oci_execute($stmt);
 

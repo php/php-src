@@ -30,7 +30,7 @@ array_walk($tokens, function($tk) {
 echo "Done";
 
 ?>
---EXPECTF--
+--EXPECT--
 L1: T_OPEN_TAG <?php
 
 L2: T_STRING X

@@ -2,8 +2,8 @@
 PDO->beginTransaction()
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
@@ -11,7 +11,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
@@ -183,24 +183,24 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 bool(false)
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "z"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "z"
 }
 [026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000
 [028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?
-%unicode|string%(5) "00000"
+string(5) "00000"
 done!

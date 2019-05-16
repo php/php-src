@@ -1,9 +1,25 @@
 #define	FILE_VERSION_MAJOR	5
-#define	patchlevel		22
+#define	patchlevel		33
 
 /*
  * Patchlevel file for Ian Darwin's MAGIC command.
  * $File: patchlevel.h,v 1.68 2008/03/22 21:39:43 christos Exp $
+ *
+ * $Log$
+ * Revision 2.1  2018/04/26 22:27:12 ab
+ * Update libmagic to 5.33
+ *
+ * $Log$
+ * Revision 2.0  2017/10/11 22:27:12 ab
+ * Update libmagic to 5.31
+ *
+ * $Log$
+ * Revision 1.9  2016/11/24 22:27:12 ab
+ * Update libmagic to 5.29
+ *
+ * $Log$
+ * Revision 1.9  2016/10/11 22:27:12 ab
+ * Update libmagic to 5.28
  *
  * $Log$
  * Revision 1.9  2015/03/06 22:27:12 ab
@@ -357,14 +373,14 @@
  * Numerous changes from Guy Harris too numerous to mention but including
  * byte-order independance, fixing "old-style masking", etc. etc. A bugfix
  * for broken symlinks from martin@@d255s004.zfe.siemens.de.
- * 
+ *
  * Revision 1.7  93/01/05  14:57:27  ian
  * Couple of nits picked by Christos (again, thanks).
- * 
+ *
  * Revision 1.6  93/01/05  13:51:09  ian
  * Lotsa work on the Magic directory.
- * 
+ *
  * Revision 1.5  92/09/14  14:54:51  ian
  * Fix a tiny null-pointer bug in previous fix for tar archive + uncompress.
- * 
+ *
  */

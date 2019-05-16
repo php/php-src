@@ -1,15 +1,15 @@
 --TEST--
-Test arsort() function : basic functionality   
+Test arsort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $sort_flags] )
  * Description: Sort an array and maintain index association
-                Elements will be arranged from highest to lowest when this function has completed. 
+                Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing arsort() by providing integer/string arrays to check the basic functionality 
+ * Testing arsort() by providing integer/string arrays to check the basic functionality
  * with following flag values.
  *  flag value as default
  *  SORT_REGULAR - compare items normally
@@ -19,13 +19,13 @@ Test arsort() function : basic functionality
 
 echo "*** Testing arsort() : basic functionality ***\n";
 
-// an array containing unsorted string values with indices  
+// an array containing unsorted string values with indices
 $unsorted_strings = array(
 	"l" => "lemon", "o" => "orange",
 	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
 	"b" => "banana",
 );
-// an array containing unsorted numeric values with indices 
+// an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 1 => 100, 2 => 33, 3 => 555, 4 => 22 );
 
 echo "\n-- Testing arsort() by supplying string array, 'flag' value is default --\n";
@@ -75,7 +75,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing arsort() : basic functionality ***
 
 -- Testing arsort() by supplying string array, 'flag' value is default --

@@ -3,14 +3,14 @@ Test array_intersect_key() function : usage variation - Passing integer indexed 
 --FILE--
 <?php
 /* Prototype  : array array_intersect_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
+ * Description: Returns the entries of arr1 that have keys which are present in all the other arguments.
  * Source code: ext/standard/array.c
  */
 
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(0 => '0', -1 => '-1' , 02 => 'two', -07 => '-07', 0xA => '0xA', -0xC => '-0xc'); 
+$input_array = array(0 => '0', -1 => '-1' , 02 => 'two', -07 => '-07', 0xA => '0xA', -0xC => '-0xc');
 
 $input_arrays = array(
       'decimal indexed' => array(10 => '10', '-17' => '-17'),
@@ -25,7 +25,7 @@ foreach($input_arrays as $key =>$value) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
 --decimal indexed--

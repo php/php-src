@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -41,14 +39,11 @@ PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
  Rewind to first element */
 PHP_METHOD(ce_SimpleXMLIterator, rewind)
 {
-	php_sxe_iterator iter;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->rewind((zend_object_iterator*)&iter);
+	php_sxe_rewind_iterator(Z_SXEOBJ_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -56,7 +51,7 @@ PHP_METHOD(ce_SimpleXMLIterator, rewind)
  Check whether iteration is valid */
 PHP_METHOD(ce_SimpleXMLIterator, valid)
 {
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -70,7 +65,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
  Get current element */
 PHP_METHOD(ce_SimpleXMLIterator, current)
 {
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -82,8 +77,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 /* }}} */
 
@@ -93,7 +87,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 {
 	xmlNodePtr curnode;
 	php_sxe_object *intern;
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -117,14 +111,11 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
  Move to next element */
 PHP_METHOD(ce_SimpleXMLIterator, next)
 {
-	php_sxe_iterator iter;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->move_forward((zend_object_iterator*)&iter);
+	php_sxe_move_forward_iterator(Z_SXEOBJ_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -132,7 +123,7 @@ PHP_METHOD(ce_SimpleXMLIterator, next)
  Check whether element has children (elements) */
 PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 {
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	php_sxe_object *child;
 	xmlNodePtr      node;
 
@@ -160,7 +151,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
  Get child element iterator */
 PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 {
-	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -172,8 +163,7 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	}
 
 	data = &sxe->iter.data;
-	ZVAL_DEREF(data);
-	ZVAL_COPY(return_value, data);
+	ZVAL_COPY_DEREF(return_value, data);
 }
 
 /* {{{ arginfo */
@@ -211,17 +201,8 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, zend_ce_countable);
 
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

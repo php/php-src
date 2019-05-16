@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
-$formats = 
+$formats =
   '%o %+o %-o 
    %lo %Lo %4o %-4o
    %10.4o %-10.4o %.4o 
@@ -64,9 +64,9 @@ $args_array = array(
          true, false, TRUE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 // looping to test vprintf() with different octal formats from the above $format array
 // and with non-octal values from the above $args_array array
 $counter = 1;
@@ -80,7 +80,7 @@ foreach($args_array as $args) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --

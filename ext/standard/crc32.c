@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Rasmus Lerdorf <rasmus@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php.h"
 #include "basic_functions.h"
@@ -31,9 +29,10 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	uint32_t crcinit = 0;
 	register uint32_t crc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &p, &nr) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(p, nr)
+	ZEND_PARSE_PARAMETERS_END();
+
 	crc = crcinit^0xFFFFFFFF;
 
 	for (; nr--; ++p) {
@@ -42,12 +41,3 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	RETVAL_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

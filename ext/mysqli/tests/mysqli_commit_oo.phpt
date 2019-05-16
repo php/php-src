@@ -21,8 +21,8 @@ if (!have_innodb($link))
 	$link   = NULL;
 
 	$mysqli = new mysqli();
-	if (!is_null($tmp = @$mysqli->commit())) {
-		printf("[013] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->commit())) {
+		printf("[013] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 	}
 
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
@@ -90,8 +90,8 @@ if (!have_innodb($link))
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->commit())) {
-		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->commit())) {
+		printf("[017] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 	}
 
 	print "done!";

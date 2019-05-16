@@ -9,7 +9,7 @@ class C {
 	public $pub2 = 'public2';
 	public $pub3 = 'public3';
 	public $pub4 = 'public4';
-} 
+}
 
 function showFirstTwoItems($it) {
   echo str_replace("\0", '\0', $it->key()) . " => " . $it->current() .

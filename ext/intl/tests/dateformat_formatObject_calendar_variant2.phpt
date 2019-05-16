@@ -27,7 +27,6 @@ echo IntlDateFormatter::formatObject($cal, IntlDateFormatter::FULL, "en-US"), "\
 
 ?>
 ==DONE==
-
 --EXPECTF--
 01/01/2012, 00:00:00
 Domingo, 1 de Janeiro de 2012 às 00:00:00 Hora %Sda Europa Ocidental

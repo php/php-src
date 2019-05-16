@@ -21,7 +21,7 @@ if (setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8") === false) {
 /* Test the setlocale() when multiple valid/invalid locales are provided as argument */
 
 /* Prototype  : array list_system_locales( void )
-   Description: To get the currently installed locle in this platform 
+   Description: To get the currently installed locle in this platform
    Arguments  : Nil
    Returns    : set of locale as array
 */
@@ -44,7 +44,7 @@ function list_system_locales() {
   return $system_locales;
 }
 
-/* Collect existing system locales and get 2 valid locales that can be use to 
+/* Collect existing system locales and get 2 valid locales that can be use to
    pass as argument to setlocale(), pass 2 invalid arguments along with two valid arguments*/
 echo "*** Testing setlocale() by passing multiple valid/invalid locales as argument ***\n";
 

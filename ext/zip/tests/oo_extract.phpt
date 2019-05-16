@@ -2,12 +2,11 @@
 extractTo
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
@@ -67,21 +66,8 @@ if (!file_exists($dirname . '__oo_extract_tmp/foo')) {
 
 rmdir_rf($dirname . '__oo_extract_tmp');
 ?>
---EXPECTF--
+--EXPECT--
 blabla laber rababer sülz
-
-bar
-
-foo
-
-
-bar
-
-bar
-
-foo
---UEXPECTF--
-blabla laber rababer sÃ¼lz
 
 bar
 

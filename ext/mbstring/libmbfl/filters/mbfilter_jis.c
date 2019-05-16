@@ -46,7 +46,9 @@ const mbfl_encoding mbfl_encoding_jis = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_jis_wchar,
+	&vtbl_wchar_jis
 };
 
 const mbfl_encoding mbfl_encoding_2022jp = {
@@ -55,7 +57,9 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_2022jp_wchar,
+	&vtbl_wchar_2022jp
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_jis = {
@@ -659,5 +663,3 @@ retry:
 
 	return c;
 }
-
-

@@ -3,7 +3,7 @@ Test count() function : usage variations - Infinitely recursive array
 --FILE--
 <?php
 /* Prototype  : int count(mixed $var [, int $mode])
- * Description: Count the number of elements in a variable (usually an array) 
+ * Description: Count the number of elements in a variable (usually an array)
  * Source code: ext/standard/array.c
  */
 
@@ -35,5 +35,5 @@ int(4)
 -- $mode = 1: --
 
 Warning: count(): recursion detected in %s on line %d
-int(12)
+int(4)
 Done

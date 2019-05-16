@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - int formats with arrays
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -32,14 +32,14 @@ $array_types = array (
 $int_formats = array(
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
-  "\t%d", "\n%d", "%4d", 
+  "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
 );
- 
+
 $count = 1;
 foreach($array_types as $arr) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($int_formats as $format) {
     var_dump( sprintf($format, $arr) );
   }
@@ -48,7 +48,7 @@ foreach($array_types as $arr) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with arrays ***
 
 -- Iteration 1 --

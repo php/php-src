@@ -3,13 +3,13 @@ fetching cursor from a statement
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__)."/create_table.inc";
+require __DIR__."/connect.inc";
+require __DIR__."/create_table.inc";
 
 $insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
 
@@ -42,7 +42,7 @@ while ($data = oci_fetch_assoc($stmt)) {
 	var_dump(oci_cancel($data["CURS"]));
 }
 
-require dirname(__FILE__)."/drop_table.inc";
+require __DIR__."/drop_table.inc";
 
 echo "Done\n";
 

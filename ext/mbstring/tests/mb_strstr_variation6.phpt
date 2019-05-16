@@ -8,9 +8,9 @@ function_exists('mb_strstr') or die("skip mb_strstr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another 
+ * Description: Finds first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strstr() : variation ***\n";
@@ -18,10 +18,10 @@ echo "*** Testing mb_strstr() : variation ***\n";
 mb_internal_encoding('UTF-8');
 
 //ascii
-$string_ascii = b'abcdef';
-$needle_ascii_upper = b"BCD";
-$needle_ascii_mixed = b"bCd";
-$needle_ascii_lower = b"bcd";
+$string_ascii = 'abcdef';
+$needle_ascii_upper = "BCD";
+$needle_ascii_mixed = "bCd";
+$needle_ascii_lower = "bcd";
 
 //Greek string in lower case UTF-8
 $string_mb = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');

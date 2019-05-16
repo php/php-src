@@ -23,7 +23,6 @@ var_dump(odbc_fetch_row($res));
 var_dump(odbc_result($res, 'test'));
 var_dump(odbc_free_result($res));
 var_dump(odbc_free_result($conn));
-var_dump(odbc_free_result(NULL));
 var_dump(odbc_fetch_row($res));
 var_dump(odbc_result($res, 'test'));
 
@@ -39,9 +38,6 @@ bool(true)
 
 Warning: odbc_free_result(): supplied resource is not a valid ODBC result resource in %s on line %d
 bool(false)
-
-Warning: odbc_free_result() expects parameter 1 to be resource, null given in %s on line %d
-NULL
 
 Warning: odbc_fetch_row(): supplied resource is not a valid ODBC result resource in %s on line %d
 bool(false)

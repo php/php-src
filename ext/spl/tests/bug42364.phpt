@@ -2,10 +2,12 @@
 Bug #42364 (Crash when using getRealPath with DirectoryIterator)
 --FILE--
 <?php
-$it = new DirectoryIterator(dirname(__FILE__));
+$dir = __DIR__ . '/bug42364';
+@mkdir($dir);
+touch($dir . '/test');
 
 $count = 0;
-
+$it = new DirectoryIterator($dir);
 foreach ($it as $e) {
     $count++;
     $type = gettype($e->getRealPath());
@@ -19,6 +21,11 @@ if ($count > 0) {
 }
 ?>
 ===DONE===
+--CLEAN--
+<?php
+unlink(__DIR__ . '/bug42364/test');
+rmdir(__DIR__ . '/bug42364');
+?>
 --EXPECTF--
 Found %i entries!
 ===DONE===

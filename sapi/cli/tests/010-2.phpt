@@ -1,8 +1,8 @@
 --TEST--
 executing a code with -R
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
-$filename_txt = dirname(__FILE__)."/010.test.txt";
+$filename_txt = __DIR__."/010.test.txt";
 
 $txt = '
 test
@@ -27,7 +27,7 @@ var_dump(`cat "$filename_txt" | "$php" -n -R "var_dump(1);"`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(21) "int(1)
 int(1)
 int(1)

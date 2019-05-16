@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
    Description : Deletes filename
 */
 
-$file_path = dirname(__FILE__).DIRECTORY_SEPARATOR."私はガラスを食べられます";
+$file_path = __DIR__.DIRECTORY_SEPARATOR."私はガラスを食べられます";
 
 @mkdir($file_path);
 
@@ -25,13 +25,6 @@ $context = stream_context_create();
 
 echo "*** Testing unlink() : error conditions ***\n";
 
-echo "-- Testing unlink() on unexpected no. of arguments --\n";
-// arg < expected
-var_dump( unlink() );
-// args > expected
-var_dump( unlink($filename, $context, true) );
-var_dump( file_exists($filename) ); // expected: true
-
 echo "\n-- Testing unlink() on invalid arguments --\n";
 // invalid arguments
 var_dump( unlink('') );  // $filename as empty string
@@ -43,13 +36,9 @@ var_dump( file_exists(NULL) );  // confirm file doesnt exist
 var_dump( unlink(false) );  // $filename as boolean false
 var_dump( file_exists(false) );  // confirm file doesnt exist
 
-var_dump( unlink($filename, '') );  // $context as empty string
-var_dump( unlink($filename, false) );  // $context as boolean false
-var_dump( unlink($filename, NULL) );  // $context as NULL
-
 
 echo "\n-- Testing unlink() on non-existent file --\n";
-var_dump( unlink(dirname(__FILE__)."/non_existent_file.tmp") );
+var_dump( unlink(__DIR__."/non_existent_file.tmp") );
 
 echo "\n-- Testing unlink() on directory --\n";
 // temp directory used here
@@ -63,20 +52,12 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/私はガラスを食べられます/unlink_error.tmp");
-rmdir(dirname(__FILE__)."/私はガラスを食べられます/unlink_error");
-rmdir(dirname(__FILE__)."/私はガラスを食べられます");
+unlink(__DIR__."/私はガラスを食べられます/unlink_error.tmp");
+rmdir(__DIR__."/私はガラスを食べられます/unlink_error");
+rmdir(__DIR__."/私はガラスを食べられます");
 ?>
 --EXPECTF--
 *** Testing unlink() : error conditions ***
--- Testing unlink() on unexpected no. of arguments --
-
-Warning: unlink() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: unlink() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
-bool(true)
 
 -- Testing unlink() on invalid arguments --
 
@@ -92,15 +73,6 @@ Warning: unlink(): %s in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink() expects parameter 2 to be resource, string given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d
-bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, null given in %s on line %d
-bool(false)
-
 -- Testing unlink() on non-existent file --
 
 Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
@@ -108,6 +80,6 @@ bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): Permission denied in %s on line %d
+Warning: unlink(%s/unlink_error): Is a directory in %s on line %d
 bool(false)
 Done

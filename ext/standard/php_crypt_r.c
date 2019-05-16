@@ -1,9 +1,8 @@
-/* $Id$ */
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +36,7 @@
 
 #include <string.h>
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 # include <windows.h>
 # include <Wincrypt.h>
 #endif
@@ -123,7 +122,7 @@ to64(char *s, int32_t v, int n)
 	}
 }
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	HCRYPTPROV hCryptProv;
 	HCRYPTHASH ctx, ctx1;
@@ -155,9 +154,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	}
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++) {
-		continue;
-	}
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = (DWORD)(ep - sp);
@@ -336,8 +333,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 		sp += MD5_MAGIC_LEN;
 
 	/* It stops at the first '$', max 8 chars */
-	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++)
-		continue;
+	for (ep = sp; *ep != '\0' && *ep != '$' && ep < (sp + 8); ep++);
 
 	/* get the length of the true salt */
 	sl = ep - sp;
@@ -364,7 +360,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 		PHP_MD5Update(&ctx, final, (unsigned int)(pl > 16 ? 16 : pl));
 
 	/* Don't leave anything around in vm they could use. */
-	memset(final, 0, sizeof(final));
+	ZEND_SECURE_ZERO(final, sizeof(final));
 
 	/* Then something really weird... */
 	for (i = pwl; i != 0; i >>= 1)
@@ -425,4 +421,3 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 #undef MD5_MAGIC
 #undef MD5_MAGIC_LEN
 #endif
-

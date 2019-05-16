@@ -4,7 +4,7 @@ Test strcspn() function : usage variations - with varying mask & default start a
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -49,7 +49,7 @@ $mask_array = array(
 		    " \t",
                     "\t\i\100\xa"
                    );
-		
+
 
 // loop through each element of the array for mask argument
 $count = 1;
@@ -63,7 +63,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different mask strings and default start and len arguments ***
 
 -- Itearation 1 --

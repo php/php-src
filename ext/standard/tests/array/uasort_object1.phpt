@@ -1,9 +1,9 @@
 --TEST--
-Test uasort() function : object functionality 
+Test uasort() function : object functionality
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -49,7 +49,7 @@ function multiple_cmp($value1, $value2)
 class SimpleClass1
 {
   private $int_value;
-  
+
   public function __construct($value) {
     $this->int_value = $value;
   }
@@ -68,7 +68,7 @@ class SimpleClass2
   }
   public function getValue() {
     return $this->int_value;
-  }  
+  }
 }
 
 // array of SimpleClass objects with only one member
@@ -92,7 +92,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : object functionality ***
 bool(true)
 array(4) {

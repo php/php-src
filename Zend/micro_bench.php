@@ -4,12 +4,12 @@ function hallo() {
 }
 
 function simpleucall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     hallo();
 }
 
 function simpleudcall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     hallo2();
 }
 
@@ -17,7 +17,7 @@ function hallo2() {
 }
 
 function simpleicall($n) {
-  for ($i = 0; $i < $n; $i++) 
+  for ($i = 0; $i < $n; $i++)
     func_num_args();
 }
 
@@ -238,23 +238,23 @@ function empty_loop($n) {
 	}
 }
 
-function getmicrotime()
+function gethrtime()
 {
-  $t = gettimeofday();
-  return ($t['sec'] + $t['usec'] / 1000000);
+  $hrtime = hrtime();
+  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
 }
 
 function start_test()
 {
   ob_start();
-  return getmicrotime();
+  return gethrtime();
 }
 
 function end_test($start, $name, $overhead = null)
 {
   global $total;
   global $last_time;
-  $end = getmicrotime();
+  $end = gethrtime();
   ob_end_clean();
   $last_time = $end-$start;
   $total += $last_time;
@@ -267,7 +267,7 @@ function end_test($start, $name, $overhead = null)
     echo $name.$pad.$num."    ".$num2."\n";
   }
   ob_start();
-  return getmicrotime();
+  return gethrtime();
 }
 
 function total()

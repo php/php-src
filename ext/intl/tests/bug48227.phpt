@@ -17,5 +17,5 @@ string(1) "0"
 string(1) "1"
 string(1) "0"
 
-Notice: Object of class NumberFormatter could not be converted to int in %s on line %d
+Notice: Object of class NumberFormatter could not be converted to number in %s on line %d
 string(1) "1"

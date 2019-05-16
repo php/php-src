@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,12 +20,15 @@
 #define ZEND_SMART_STR_H
 
 #include <zend.h>
+#include "zend_globals.h"
 #include "zend_smart_str_public.h"
 
 #define smart_str_appends_ex(dest, src, what) \
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
 #define smart_str_appends(dest, src) \
 	smart_str_appendl((dest), (src), strlen(src))
+#define smart_str_extend(dest, len) \
+	smart_str_extend_ex((dest), (len), 0)
 #define smart_str_appendc(dest, c) \
 	smart_str_appendc_ex((dest), (c), 0)
 #define smart_str_appendl(dest, src, len) \
@@ -40,12 +43,16 @@
 	smart_str_append_long_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
+#define smart_str_free(dest) \
+	smart_str_free_ex((dest), 0)
 
 BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
+ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...)
+	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 END_EXTERN_C()
 
@@ -66,9 +73,16 @@ do_smart_str_realloc:
 	return len;
 }
 
-static zend_always_inline void smart_str_free(smart_str *str) {
+static zend_always_inline char* smart_str_extend_ex(smart_str *dest, size_t len, zend_bool persistent) {
+	size_t new_len = smart_str_alloc(dest, len, persistent);
+	char *ret = ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s);
+	ZSTR_LEN(dest->s) = new_len;
+	return ret;
+}
+
+static zend_always_inline void smart_str_free_ex(smart_str *str, zend_bool persistent) {
 	if (str->s) {
-		zend_string_release(str->s);
+		zend_string_release_ex(str->s, persistent);
 		str->s = NULL;
 	}
 	str->a = 0;
@@ -77,6 +91,22 @@ static zend_always_inline void smart_str_free(smart_str *str) {
 static zend_always_inline void smart_str_0(smart_str *str) {
 	if (str->s) {
 		ZSTR_VAL(str->s)[ZSTR_LEN(str->s)] = '\0';
+	}
+}
+
+static zend_always_inline size_t smart_str_get_len(smart_str *str) {
+	return str->s ? ZSTR_LEN(str->s) : 0;
+}
+
+static zend_always_inline zend_string *smart_str_extract(smart_str *str) {
+	if (str->s) {
+		zend_string *res;
+		smart_str_0(str);
+		res = str->s;
+		str->s = NULL;
+		return res;
+	} else {
+		return ZSTR_EMPTY_ALLOC();
 	}
 }
 
@@ -120,4 +150,3 @@ static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, 
 }
 
 #endif
-

@@ -26,7 +26,7 @@ $atts = $x->xpath("/xml/data/@label");
 echo $atts[0] . "\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 I am A
 I am a:Nothing
 I am a:A

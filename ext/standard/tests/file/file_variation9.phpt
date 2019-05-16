@@ -5,13 +5,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing file() : variation ***\n";
-$testfile = dirname(__FILE__)."/fileVar9.txt";
+$testfile = __DIR__."/fileVar9.txt";
 
 $contents = array(
    "File ends on a single character\na",
@@ -21,7 +21,7 @@ $contents = array(
    "File has\r\nmultiple crlfs\n\r\n"
    );
 
-@unlink($testfile);   
+@unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);
@@ -32,7 +32,7 @@ foreach ($contents as $content) {
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing file() : variation ***
 array(2) {
   [0]=>

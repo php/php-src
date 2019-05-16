@@ -2,7 +2,7 @@
 htmlentities() test 11 (default_charset / ISO-8859-15)
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+internal_encoding=pass
 default_charset=ISO-8859-15
 --FILE--
 <?php

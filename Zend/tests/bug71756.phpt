@@ -20,7 +20,7 @@ function c ($option) {
 }
 a(array('bla' => 'false'));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["bla"]=>
   string(7) "changed"

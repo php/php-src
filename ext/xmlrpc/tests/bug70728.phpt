@@ -13,7 +13,7 @@ $obj->scalar = 0x1122334455;
 var_dump(xmlrpc_encode($obj));
 var_dump($obj);
 ?>
---EXPECTF--	
+--EXPECT--
 string(135) "<?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>

@@ -8,12 +8,12 @@ Test md5() function : basic functionality - with raw output
 */
 
 echo "*** Testing md5() : basic functionality - with raw output***\n";
-$str = b"Hello World";
+$str = "Hello World";
 $md5_raw = md5($str, true);
 var_dump(bin2hex($md5_raw));
 
 $md5 = md5($str, false);
-	
+
 if (strcmp(bin2hex($md5_raw), $md5) == 0 ) {
 	echo "TEST PASSED\n";
 } else {

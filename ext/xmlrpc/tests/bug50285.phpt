@@ -14,11 +14,11 @@ function test2($func, $params) {
 }
 
 function test3($func, $params) {
-    return array('One', 3 => 'Three', b'Five' => 5, 'Six');
+    return array('One', 3 => 'Three', 'Five' => 5, 'Six');
 }
 
 function test4($func, $params) {
-    return array('One', 'Three', 'Five', b'Six' => 6);
+    return array('One', 'Three', 'Five', 'Six' => 6);
 }
 
 $server = xmlrpc_server_create();
@@ -33,7 +33,7 @@ EOD;
 $response = xmlrpc_server_call_method($server, $HTTP_RAW_POST_DATA, null);
 var_dump(xmlrpc_decode($response));
 
-// ------------ 
+// ------------
 
 $server = xmlrpc_server_create();
 $result = xmlrpc_server_register_method($server, 'test2', 'test2');
@@ -47,7 +47,7 @@ EOD;
 $response = xmlrpc_server_call_method($server, $HTTP_RAW_POST_DATA, null);
 var_dump(xmlrpc_decode($response));
 
-// ------------ 
+// ------------
 
 $server = xmlrpc_server_create();
 $result = xmlrpc_server_register_method($server, 'test3', 'test3');
@@ -61,7 +61,7 @@ EOD;
 $response = xmlrpc_server_call_method($server, $HTTP_RAW_POST_DATA, null);
 var_dump(xmlrpc_decode($response));
 
-// ------------ 
+// ------------
 
 $server = xmlrpc_server_create();
 $result = xmlrpc_server_register_method($server, 'test4', 'test4');

@@ -1,7 +1,5 @@
 --TEST--
 ZE2 factory and singleton, test 1
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class test {
@@ -43,7 +41,7 @@ class test {
       return NULL;
     }
   }
-  
+
   static public function count() {
     return test::$cnt;
   }

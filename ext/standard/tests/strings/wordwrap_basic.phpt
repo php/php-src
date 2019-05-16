@@ -1,5 +1,5 @@
 --TEST--
-Test wordwrap() function : basic functionality 
+Test wordwrap() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
@@ -35,7 +35,7 @@ $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing wordwrap() : basic functionality ***
 string(96) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
 doooooooooooooooooooooog."

@@ -26,5 +26,5 @@ $o->sayHello();
 $o->sayWorld();
 
 ?>
---EXPECTF--	
+--EXPECT--
 Hello World!

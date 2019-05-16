@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP version 5                                                        |
+   | PHP version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
    |          Ilia Alshanetsky <ilia@prohost.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -80,7 +79,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ shmop_functions[]
  */
-const zend_function_entry shmop_functions[] = {
+static const zend_function_entry shmop_functions[] = {
 	PHP_FE(shmop_open, 		arginfo_shmop_open)
 	PHP_FE(shmop_read, 		arginfo_shmop_read)
 	PHP_FE(shmop_close, 	arginfo_shmop_close)
@@ -142,7 +141,7 @@ PHP_MINFO_FUNCTION(shmop)
 }
 /* }}} */
 
-/* {{{ proto int shmop_open (int key, string flags, int mode, int size)
+/* {{{ proto resource shmop_open(int key, string flags, int mode, int size)
    gets and attaches a shared memory segment */
 PHP_FUNCTION(shmop_open)
 {
@@ -223,7 +222,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string shmop_read (int shmid, int start, int count)
+/* {{{ proto string shmop_read(resource shmid, int start, int count)
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
@@ -261,7 +260,7 @@ PHP_FUNCTION(shmop_read)
 }
 /* }}} */
 
-/* {{{ proto void shmop_close (int shmid)
+/* {{{ proto void shmop_close(resource shmid)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
@@ -281,7 +280,7 @@ PHP_FUNCTION(shmop_close)
 }
 /* }}} */
 
-/* {{{ proto int shmop_size (int shmid)
+/* {{{ proto int shmop_size(resource shmid)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
@@ -300,7 +299,7 @@ PHP_FUNCTION(shmop_size)
 }
 /* }}} */
 
-/* {{{ proto int shmop_write (int shmid, string data, int offset)
+/* {{{ proto int shmop_write(resource shmid, string data, int offset)
    writes to a shared memory segment */
 PHP_FUNCTION(shmop_write)
 {
@@ -335,7 +334,7 @@ PHP_FUNCTION(shmop_write)
 }
 /* }}} */
 
-/* {{{ proto bool shmop_delete (int shmid)
+/* {{{ proto bool shmop_delete(resource shmid)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {
@@ -360,12 +359,3 @@ PHP_FUNCTION(shmop_delete)
 /* }}} */
 
 #endif	/* HAVE_SHMOP */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

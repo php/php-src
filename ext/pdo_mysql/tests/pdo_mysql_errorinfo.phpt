@@ -2,14 +2,14 @@
 MySQL PDO->errorInfo()
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db);
 
@@ -98,10 +98,10 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 Emulated Prepared Statements...
 [015] Driver-specific error code not set
 [015] Driver-specific error message.not set

@@ -1,14 +1,14 @@
 --TEST--
 Testing instanceof operator with several operators
 --FILE--
-<?php 
+<?php
 
 $a = new stdClass;
 var_dump($a instanceof stdClass);
 
 var_dump(new stdCLass instanceof stdClass);
 
-$b = create_function('', 'return new stdClass;');
+$b = function() { return new stdClass; };
 var_dump($b() instanceof stdClass);
 
 $c = array(new stdClass);
@@ -26,4 +26,4 @@ bool(true)
 bool(true)
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

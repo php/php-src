@@ -52,7 +52,9 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	"Shift_JIS",
 	(const char *(*)[])&mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_sjis_mac_wchar,
+	&vtbl_wchar_sjis_mac
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
@@ -697,4 +699,3 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

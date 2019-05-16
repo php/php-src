@@ -3,9 +3,6 @@ parse_ini_string() multiple calls
 --FILE--
 <?php
 
-var_dump(parse_ini_string());
-var_dump(parse_ini_string(1,1,1,1));
-
 $ini = "
 test =
 ";
@@ -86,15 +83,10 @@ var_dump(parse_ini_string($ini, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: parse_ini_string() expects at least 1 parameter, 0 given in %s
-bool(false)
-
-Warning: parse_ini_string() expects at most 3 parameters, 4 given in %s
-bool(false)
+--EXPECTF--
 array(1) {
-  [%u|b%"test"]=>
-  %unicode|string%(0) ""
+  ["test"]=>
+  string(0) ""
 }
 
 Warning: syntax error, unexpected '='%sin Unknown on line 2
@@ -105,64 +97,64 @@ Warning: syntax error, unexpected '='%sin Unknown on line 2
  in %s
 bool(false)
 array(1) {
-  [%u|b%"test"]=>
-  %unicode|string%(8) "new
+  ["test"]=>
+  string(8) "new
 line"
 }
 array(1) {
-  [%u|b%"test"]=>
-  %unicode|string%(16) "test const value"
+  ["test"]=>
+  string(16) "test const value"
 }
 array(1) {
-  [%u|b%"section"]=>
+  ["section"]=>
   array(1) {
-    [%u|b%"test"]=>
-    %unicode|string%(5) "hello"
+    ["test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [%u|b%"test"]=>
-  %unicode|string%(5) "hello"
+  ["test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [%u|b%"section.test"]=>
-  %unicode|string%(5) "hello"
+  ["section.test"]=>
+  string(5) "hello"
 }
 array(1) {
-  [%u|b%"section"]=>
+  ["section"]=>
   array(1) {
-    [%u|b%"section.test"]=>
-    %unicode|string%(5) "hello"
+    ["section.test"]=>
+    string(5) "hello"
   }
 }
 array(1) {
-  [%u|b%"section"]=>
+  ["section"]=>
   array(1) {
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
   }
 }
 array(1) {
   [1]=>
-  %unicode|string%(1) "2"
+  string(1) "2"
 }
 array(1) {
-  [%u|b%"test"]=>
-  %unicode|string%(5) "test4"
+  ["test"]=>
+  string(5) "test4"
 }
 array(1) {
-  [%u|b%"section1"]=>
+  ["section1"]=>
   array(1) {
-    [%u|b%"name"]=>
-    %unicode|string%(5) "value"
+    ["name"]=>
+    string(5) "value"
   }
 }
 array(3) {
-  [%u|b%"foo"]=>
-  %unicode|string%(4) "bar1"
-  [%u|b%"_foo"]=>
-  %unicode|string%(4) "bar2"
-  [%u|b%"foo_"]=>
-  %unicode|string%(4) "bar3"
+  ["foo"]=>
+  string(4) "bar1"
+  ["_foo"]=>
+  string(4) "bar2"
+  ["foo_"]=>
+  string(4) "bar3"
 }
 Done

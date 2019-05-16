@@ -40,9 +40,9 @@ max_execution_time=12
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
-  [%u|b%"SLEEP(6)"]=>
-  %unicode|string%(1) "0"
+  ["SLEEP(6)"]=>
+  string(1) "0"
 }
 done!

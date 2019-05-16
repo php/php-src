@@ -1,16 +1,16 @@
 --TEST--
-Test finfo_buffer() function : basic functionality 
+Test finfo_buffer() function : basic functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return infromation about a string buffer. 
+ * Description: Return infromation about a string buffer.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 
 $options = array(
 	FILEINFO_NONE,
@@ -38,7 +38,7 @@ foreach( $options as $option ) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo_buffer() : basic functionality ***
 string(36) "ASCII text, with no line terminators"
 string(3) "ELF"

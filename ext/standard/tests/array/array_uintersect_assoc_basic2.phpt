@@ -5,7 +5,7 @@ Test array_uintersect_assoc() function : basic functionality - testing with mult
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
  * Description: U
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***\n";
@@ -25,7 +25,7 @@ var_dump( array_uintersect_assoc($arr1, $arr2, $arr3, $arr4, $data_compare_funct
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***
 array(2) {
   ["one"]=>

@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -42,25 +42,24 @@ $count = 1;
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
-  echo "- With Defualt sort flag -\n"; 
-  $temp_array = $array; 
+  echo "- With Defualt sort flag -\n";
+  $temp_array = $array;
   var_dump(rsort($temp_array) );
   var_dump($temp_array);
 
   // loop through $flag_value array and setting all possible flag values
   foreach($flag_value as $key => $flag){
     echo "- Sort flag = $key -\n";
-    $temp_array = $array; 
+    $temp_array = $array;
     var_dump(rsort($temp_array, $flag) );
     var_dump($temp_array);
-  }  
+  }
   $count++;
-} 
+}
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : variation ***
 
 -- Iteration 1 --

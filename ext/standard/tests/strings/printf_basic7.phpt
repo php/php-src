@@ -25,7 +25,7 @@ $arg1 = -1111;
 $arg2 = -1234567;
 $arg3 = +2345432;
 
-echo "\n-- Calling printf() with no arguments --\n"; 
+echo "\n-- Calling printf() with no arguments --\n";
 $result = printf($format);
 echo "\n";
 var_dump($result);
@@ -47,7 +47,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using unsigned format ***
 
 -- Calling printf() with no arguments --

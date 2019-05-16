@@ -1,7 +1,5 @@
 --TEST--
 ZE2 A final method may not be overwritten
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -22,4 +20,4 @@ class fail extends pass {
 echo "Done\n"; // Shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method pass::show() in %s on line %d
+Fatal error: Cannot override final method pass::show() in %s on line 12

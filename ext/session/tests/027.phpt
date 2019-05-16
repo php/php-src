@@ -11,6 +11,7 @@ session.save_handler=files
 --FILE--
 <?php
 error_reporting(E_ALL);
+ob_start();
 
 session_id("abtest");
 

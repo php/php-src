@@ -38,7 +38,7 @@ foreach($quotes as $string_value)
 }
 
 echo "Done";
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(33) "hello 	world... strip_tags_test"

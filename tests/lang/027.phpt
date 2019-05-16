@@ -1,7 +1,7 @@
 --TEST--
 Testing do-while loop
 --FILE--
-<?php 
+<?php
 $i=3;
 do {
 	echo $i;

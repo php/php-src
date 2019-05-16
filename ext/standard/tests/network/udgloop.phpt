@@ -1,9 +1,9 @@
 --TEST--
 Streams Based Unix Domain Datagram Loopback test
 --SKIPIF--
-<?php # vim:ft=php:
+<?php
 	if (array_search("udg",stream_get_transports()) === false)
-		die('SKIP No support for UNIX domain sockets.'); 
+		die('SKIP No support for UNIX domain sockets.');
 ?>
 --FILE--
 <?php

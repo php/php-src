@@ -74,7 +74,7 @@ new Derived_6('6');
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Base::__construct(1)
 Base::__construct(2)
 Base::__construct(3)

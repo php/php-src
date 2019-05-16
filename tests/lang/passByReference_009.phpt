@@ -5,7 +5,7 @@ Assignement as argument
     function foo(&$x, &$y) { $x = 1; echo $y ; }
 
     $x = 0;
-    foo($x, $x); // prints 1 .. 
+    foo($x, $x); // prints 1 ..
 
 
     function foo2($x, &$y, $z)
@@ -20,5 +20,5 @@ Assignement as argument
     foo2($x, $x, $x = 1);
     echo $x; // 2
 ?>
---EXPECTF--
+--EXPECT--
 1012

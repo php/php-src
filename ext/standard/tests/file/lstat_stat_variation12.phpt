@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - effects of is_link()  
+Test lstat() and stat() functions: usage variations - effects of is_link()
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* test the effects of is_link() on stats of link */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -49,14 +49,13 @@ clearstatcache();
 
 echo "\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/lstat_stat_variation12_link.tmp");
 unlink("$file_path/lstat_stat_variation12.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on a link after using is_link() on it ***
 bool(true)
 bool(true)

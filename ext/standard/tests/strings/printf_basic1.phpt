@@ -41,7 +41,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using string format ***
 
 -- Calling printf() with no arguments --

@@ -9,5 +9,5 @@ implode('', array(""));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

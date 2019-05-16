@@ -1,7 +1,7 @@
 --TEST--
 Testing multiples 'default:' in switch
 --FILE--
-<?php 
+<?php
 
 switch (1) {
 	case 2:

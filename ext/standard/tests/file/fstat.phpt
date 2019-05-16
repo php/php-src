@@ -3,7 +3,7 @@ fstat() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/fstat.dat";
+$filename = __DIR__."/fstat.dat";
 
 $fp = fopen($filename, "w");
 var_dump(fstat($fp));
@@ -13,7 +13,7 @@ var_dump(fstat($fp));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(26) {
   [0]=>
   int(%i)

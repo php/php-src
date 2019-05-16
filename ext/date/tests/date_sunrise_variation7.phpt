@@ -3,9 +3,9 @@ Test date_sunrise() function : usage variation -  Checking sunrise for consecuti
 --FILE--
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location 
+ * Description: Returns time of sunrise for a given day and location
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing date_sunrise() : usage variation ***\n";
@@ -28,23 +28,23 @@ foreach($inputs as $timezone => $value) {
 	 date_default_timezone_set($timezone);
 	 $time = mktime(8, 8, 8, 8, 11, 2008);
 	 var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"] ));
-	 $time = mktime(8, 8, 8, 8, 12, 2008); 
+	 $time = mktime(8, 8, 8, 8, 12, 2008);
 	 var_dump( date_sunrise($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"]) );
 }
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_sunrise() : usage variation ***
+string(5) "06:42"
 string(5) "06:41"
-string(5) "06:41"
+string(5) "05:07"
 string(5) "05:09"
-string(5) "05:11"
+string(5) "05:58"
 string(5) "05:59"
-string(5) "06:00"
+string(5) "07:31"
 string(5) "07:30"
-string(5) "07:29"
-string(5) "05:53"
+string(5) "05:52"
 string(5) "05:53"
 string(5) "05:59"
 string(5) "06:01"

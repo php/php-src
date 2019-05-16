@@ -32,7 +32,7 @@ var_dump( strrpos("Hello, World", "o", 6) );
 var_dump( strrpos("Hello, World", "o", 10) );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: basic functionality ***
 -- With all arguments --
 int(0)

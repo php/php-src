@@ -14,8 +14,8 @@ Phar::unlinkArchive("");
 echo $e->getMessage(),"\n";
 }
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$pdname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$pdname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 try {
 Phar::unlinkArchive($fname);
@@ -28,11 +28,15 @@ Phar::unlinkArchive($pdname);
 } catch (Exception $e) {
 echo $e->getMessage(),"\n";
 }
-Phar::unlinkArchive(array());
+try {
+    Phar::unlinkArchive(array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
 $stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
@@ -78,19 +82,18 @@ include $pname . '/evil.php';
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
 Unknown phar archive ""
 Unknown phar archive "%sphar_unlinkarchive.phar"
 Unknown phar archive "%sphar_unlinkarchive.phar.tar": internal corruption of phar "%sphar_unlinkarchive.phar.tar" (truncated entry)
-
-Warning: Phar::unlinkArchive() expects parameter 1 to be a valid path, array given in %sphar_unlinkarchive.php on line %d
+Phar::unlinkArchive() expects parameter 1 to be a valid path, array given
 bool(false)
 string(48) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>"
 phar archive "%sphar_unlinkarchive.phar" has open file handles or objects.  fclose() all file handles, and unset() all objects prior to calling unlinkArchive()

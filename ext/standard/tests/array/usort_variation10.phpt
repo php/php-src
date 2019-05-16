@@ -3,7 +3,7 @@ Test usort() function : usage variations - duplicate keys and values
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -26,8 +26,8 @@ function cmp($value1, $value2)
 }
 
 // Array with duplicate string and integer keys and values
-$array_arg = array(0 => 2,     "a" => 8, "d" => 9, 
-                   3 => 3,     5 => 2,   "o" => 6, 
+$array_arg = array(0 => 2,     "a" => 8, "d" => 9,
+                   3 => 3,     5 => 2,   "o" => 6,
                    "z" => -99, 0 => 1,   "z" => 3);
 
 echo "\n-- Array with duplicate keys --\n";
@@ -42,7 +42,7 @@ var_dump( usort($array_arg, 'cmp') );
 var_dump($array_arg);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Array with duplicate keys --

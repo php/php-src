@@ -4,8 +4,6 @@ IntlGregorianCalendar::__construct(): basic
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip for ICU 4.8+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -48,4 +46,4 @@ string(5) "pt_PT"
 string(12) "Europe/Paris"
 string(5) "fr_CA"
 string(9) "gregorian"
-==DONE==
+==DONE==

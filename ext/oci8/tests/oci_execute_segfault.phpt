@@ -3,13 +3,13 @@ oci_execute() segfault after repeated bind of LOB descriptor
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob, clob)
@@ -38,7 +38,7 @@ while ($arr = oci_fetch_assoc($s)) {
     var_dump($result);
 }
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 

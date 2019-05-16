@@ -1,8 +1,7 @@
 --TEST--
 locale_get_keywords() icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 --FILE--
 <?php
 
@@ -30,7 +29,7 @@ function ut_main()
         'fr',
         'ja',
         'i-enochian', //(example of a grandfathered tag)
-//Language subtag plus Script subtag:	
+//Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
         'sr-Cyrl',
@@ -53,7 +52,7 @@ function ut_main()
 //Private use subtags:
         'de-CH-x-phonebk',
         'az-Arab-x-AZE-derbend',
-//Extended language subtags 
+//Extended language subtags
         'zh-min',
         'zh-min-nan-Hant-CN',
 //Private use registry values

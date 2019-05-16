@@ -1,8 +1,7 @@
 --TEST--
 numfmt_get/set_symbol() icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 <?php if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
@@ -88,7 +87,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 Symbol 'DECIMAL_SEPARATOR_SYMBOL'
 Default symbol: [.]
 New symbol: [_._]
@@ -132,7 +131,7 @@ A number formatted with the new symbol: 1.2345123456E4
 Symbol 'CURRENCY_SYMBOL'
 Default symbol: [$]
 New symbol: [_$_]
-A number formatted with the new symbol: _$_12,345.12
+A number formatted with the new symbol: _$_%A12,345.12
 
 Symbol 'INTL_CURRENCY_SYMBOL'
 Default symbol: [USD]
@@ -188,4 +187,3 @@ Symbol 'MONETARY_GROUPING_SEPARATOR_SYMBOL-3'
 Default symbol: [,]
 New symbol: [blahblahblahblahblahblahblahblahblahblah]
 A number formatted with the new symbol: $12blahblahblahblahblahblahblahblahblahblah345.12
-

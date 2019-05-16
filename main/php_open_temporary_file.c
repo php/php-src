@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #include "php.h"
 #include "php_open_temporary_file.h"
@@ -30,13 +28,6 @@
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #include <sys/socket.h>
@@ -97,13 +88,13 @@
 
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
-	char *trailing_slash;
 #ifdef PHP_WIN32
 	char *opened_path = NULL;
 	size_t opened_path_len;
 	wchar_t *cwdw, *pfxw, pathw[MAXPATHLEN];
 #else
 	char opened_path[MAXPATHLEN];
+	char *trailing_slash;
 #endif
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
@@ -121,7 +112,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(pfx, (const int)strlen(pfx))) {
+	if (!php_win32_check_trailing_space(pfx, strlen(pfx))) {
 		SetLastError(ERROR_INVALID_NAME);
 		return -1;
 	}
@@ -132,20 +123,20 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 
 	new_state.cwd = estrdup(cwd);
-	new_state.cwd_length = (int)strlen(cwd);
+	new_state.cwd_length = strlen(cwd);
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH)) {
 		efree(new_state.cwd);
 		return -1;
 	}
 
+#ifndef PHP_WIN32
 	if (IS_SLASH(new_state.cwd[new_state.cwd_length - 1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
 	}
 
-#ifndef PHP_WIN32
 	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
@@ -223,7 +214,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 	{
 		char *sys_temp_dir = PG(sys_temp_dir);
 		if (sys_temp_dir) {
-			int len = (int)strlen(sys_temp_dir);
+			size_t len = strlen(sys_temp_dir);
 			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
 				PG(php_sys_temp_dir) = estrndup(sys_temp_dir, len - 1);
 				return PG(php_sys_temp_dir);
@@ -244,7 +235,10 @@ PHPAPI const char* php_get_temporary_directory(void)
 		wchar_t sTemp[MAXPATHLEN];
 		char *tmp;
 		size_t len = GetTempPathW(MAXPATHLEN, sTemp);
-		assert(0 < len);  /* should *never* fail! */
+
+		if (!len) {
+			return NULL;
+		}
 
 		if (NULL == (tmp = php_win32_ioutil_conv_w_to_any(sTemp, len, &len))) {
 			return NULL;
@@ -260,7 +254,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 	{
 		char* s = getenv("TMPDIR");
 		if (s && *s) {
-			int len = strlen(s);
+			size_t len = strlen(s);
 
 			if (s[len - 1] == DEFAULT_SLASH) {
 				PG(php_sys_temp_dir) = estrndup(s, len - 1);
@@ -348,12 +342,3 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_stri
 	return fp;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

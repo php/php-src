@@ -2,8 +2,6 @@
 Test: setAttributeNode()
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
---INI--
-error_reporting = E_ALL & ~E_WARNING
 --FILE--
 <?php
 
@@ -33,7 +31,7 @@ ob_start();
 	$contents = ob_get_contents();
 	ob_end_clean();
 	echo preg_replace('/object\(DOMAttr\).+\{.*?\}/s', 'DOMAttr', $contents);
-} 
+}
 
 ?>
 --EXPECTF--

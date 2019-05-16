@@ -1,11 +1,5 @@
 --TEST--
 crypt() function - characters > 0x80
---SKIPIF--
-<?php
-if (!function_exists('crypt')) {
-        die("SKIP crypt() is not available");
-}
-?>
 --FILE--
 <?php
 var_dump(crypt("À1234abcd", "99"));

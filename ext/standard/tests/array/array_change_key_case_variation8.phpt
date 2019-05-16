@@ -8,7 +8,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Retuns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -35,8 +35,7 @@ foreach($inputs as $input) {
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- $case = default --

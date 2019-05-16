@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : mixed opendir(string $path[, resource $context])
- * Description: Open a directory and return a dir_handle 
+ * Description: Open a directory and return a dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 echo "*** Testing opendir() : usage variations ***\n";
 // create the temporary directories
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path . "/opendir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
@@ -28,7 +28,7 @@ mkdir($sub_dir_path);
 
 // with different wildcard characters
 
-echo "\n-- Wildcard = '*' --\n"; 
+echo "\n-- Wildcard = '*' --\n";
 var_dump( opendir($file_path . "/opendir_var*") );
 var_dump( opendir($file_path . "/*") );
 
@@ -40,7 +40,7 @@ var_dump( opendir($dir_path . "/sub?dir1") );
 ===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/opendir_variation6";
+$dir_path = __DIR__ . "/opendir_variation6";
 $sub_dir_path = $dir_path . "/sub_dir1";
 
 rmdir($sub_dir_path);

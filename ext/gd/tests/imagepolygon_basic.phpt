@@ -1,8 +1,8 @@
 --TEST--
 imageploygon()
 --SKIPIF--
-<?php 
-	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available'); 
+<?php
+	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
 	require_once('skipif_imagetype.inc');
 ?>
 --FILE--
@@ -11,7 +11,7 @@ imageploygon()
 /* Prototype  : bool imagepolygon  ( resource $image  , array $points  , int $num_points  , int $color  )
  * Description: Draws a polygon.
  * Source code: ext/standard/image.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -22,7 +22,7 @@ $dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';
 // create a blank image
 $image = imagecreatetruecolor(400, 300);
 
-// set the background color to black 
+// set the background color to black
 $bg = imagecolorallocate($image, 0, 0, 0);
 
 // draw a red polygon
@@ -45,16 +45,16 @@ $col2 = imagecolorat($image, 100, 100);
 $color1 = imagecolorsforindex($image, $col1);
 $color2 = imagecolorsforindex($image, $col2);
 var_dump($color1, $color2);
- 
+
 imagedestroy($image);
 
-echo "Done\n"; 
+echo "Done\n";
 ?>
 --CLEAN--
 <?php
 	$dest = dirname(realpath(__FILE__)) . '/imagepolygon.png';
 	@unlink($dest);
-?>	
+?>
 --EXPECT--
 Simple test of imagepolygon() function
 array(4) {

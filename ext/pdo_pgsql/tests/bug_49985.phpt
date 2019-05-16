@@ -3,14 +3,14 @@ Bug #49985 (pdo_pgsql prepare() re-use previous aborted transaction)
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->exec("CREATE TABLE test (a int PRIMARY KEY)");
@@ -32,4 +32,3 @@ for ($i = 0; $i < 3; $i++) {
 bool(true)
 SQLSTATE[23505]: %stest_pkey%s
 SQLSTATE[23505]: %stest_pkey%s
-

@@ -9,10 +9,10 @@ session.cookie_path=/path
 
 ob_start();
 
-/* 
+/*
  * Prototype : void session_set_cookie_params(int $lifetime [, string $path [, string $domain [, bool $secure [, bool $httponly]]]])
  * Description : Set the session cookie parameters
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_cookie_params() : variation ***\n";
@@ -35,15 +35,16 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_cookie_params() : variation ***
 string(5) "/path"
-NULL
+bool(true)
 string(4) "/foo"
 bool(true)
 string(4) "/foo"
-NULL
-string(5) "/blah"
+
+Warning: session_set_cookie_params(): Cannot change session cookie parameters when session is active in %s on line 18
+bool(false)
+string(4) "/foo"
 bool(true)
-string(5) "/blah"
-NULL
+string(4) "/foo"
+bool(true)
 string(5) "/guff"
 Done
-

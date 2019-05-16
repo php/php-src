@@ -6,7 +6,7 @@ if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -25,7 +25,7 @@ $xml =<<<EOF
 </sxe>
 EOF;
 
-var_dump(simplexml_load_string((binary)$xml, 'SimpleXMLIterator'));
+var_dump(simplexml_load_string($xml, 'SimpleXMLIterator'));
 
 ?>
 ===DONE===

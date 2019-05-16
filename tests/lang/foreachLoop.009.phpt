@@ -28,7 +28,7 @@ $count=0;
 foreach ($refedArray as $k=>$v3) {
 	array_push($refedArray, "new.$k");
 	echo "key: $k; value: $v3\n";
-	
+
 	if ($count++>5) {
 		echo "Loop detected, as expected.\n";
 		break;
@@ -42,7 +42,7 @@ $count=0;
 foreach ($refedArray as $k=>&$v4) {
 	array_push($refedArray, "new.$k");
 	echo "key: $k; value: $v4\n";
-	
+
 	if ($count++>5) {
 		echo "Loop detected, as expected.\n";
 		break;
@@ -51,7 +51,6 @@ foreach ($refedArray as $k=>&$v4) {
 
 ?>
 --EXPECT--
-
 Remove elements from a referenced array during loop
 key: 0; value: original.0
 key: 1; value: original.1
@@ -75,4 +74,3 @@ key: 4; value: new.1
 key: 5; value: new.2
 key: 6; value: new.3
 Loop detected, as expected.
-

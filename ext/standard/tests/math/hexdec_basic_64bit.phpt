@@ -21,20 +21,20 @@ $values = array(0x123abc,
 				'311015',
 				31101.3,
 				31.1013e5,
-				011237,	
-				'011237', 			
+				011237,
+				'011237',
 				true,
 				false,
-				null);	
+				null);
 
 foreach($values as $value) {
 	echo "\n-- hexdec $value --\n";
 	var_dump(hexdec($value));
-};						
-				
+};
+
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hexdec() : basic functionality ***
 
 -- hexdec 1194684 --

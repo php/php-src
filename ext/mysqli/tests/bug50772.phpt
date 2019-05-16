@@ -30,7 +30,7 @@ require_once('skipifconnectfailure.inc');
 	}
 	echo "done\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok 1
 ok 2
 done

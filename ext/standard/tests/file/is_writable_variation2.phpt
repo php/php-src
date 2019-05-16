@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only on LINUX');
 }
 // Skip if being run by root
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_readable_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -26,10 +26,10 @@ unlink ($filename);
 
 /* test is_executable() with file/dir having different permissions */
 
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 echo "*** Testing is_writable(): usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 mkdir("$file_path/is_writable_variation2");
 
 echo "\n*** Testing is_writable() on directory without write permission ***\n";
@@ -40,16 +40,16 @@ chmod("$file_path/is_writable_variation2", 0777);  // chmod to enable deletion o
 
 echo "\n*** Testing miscelleneous input for is_writable() function ***\n";
 $name_prefix = "is_writable_variation2";
-create_files(dirname(__FILE__), 1, "numeric", 0755, 1, "w", $name_prefix, 1);
-create_files(dirname(__FILE__), 1, "text", 0755, 1, "w", $name_prefix, 2);
-create_files(dirname(__FILE__), 1, "empty", 0755, 1, "w", $name_prefix, 3);
-create_files(dirname(__FILE__), 1, "numeric", 0555, 1, "w", $name_prefix, 4);
-create_files(dirname(__FILE__), 1, "text", 0222, 1, "w", $name_prefix, 5);
-create_files(dirname(__FILE__), 1, "numeric", 0711, 1, "w", $name_prefix, 6);
-create_files(dirname(__FILE__), 1, "text", 0114, 1, "w", $name_prefix, 7);
-create_files(dirname(__FILE__), 1, "numeric", 0244, 1, "w", $name_prefix, 8);
-create_files(dirname(__FILE__), 1, "text", 0421, 1, "w", $name_prefix, 9);
-create_files(dirname(__FILE__), 1, "text", 0422, 1, "w", $name_prefix, 10);
+create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
+create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
+create_files(__DIR__, 1, "empty", 0755, 1, "w", $name_prefix, 3);
+create_files(__DIR__, 1, "numeric", 0555, 1, "w", $name_prefix, 4);
+create_files(__DIR__, 1, "text", 0222, 1, "w", $name_prefix, 5);
+create_files(__DIR__, 1, "numeric", 0711, 1, "w", $name_prefix, 6);
+create_files(__DIR__, 1, "text", 0114, 1, "w", $name_prefix, 7);
+create_files(__DIR__, 1, "numeric", 0244, 1, "w", $name_prefix, 8);
+create_files(__DIR__, 1, "text", 0421, 1, "w", $name_prefix, 9);
+create_files(__DIR__, 1, "text", 0422, 1, "w", $name_prefix, 10);
 
 $misc_files = array (
   "$file_path/is_writable_variation21.tmp",
@@ -83,9 +83,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__)."/is_writable_variation2/");
+rmdir(__DIR__."/is_writable_variation2/");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() on directory without write permission ***

@@ -3,13 +3,16 @@ Bug #53156 (imagerectangle problem with point ordering)
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
+if (!GD_BUNDLED && version_compare(GD_VERSION, '2.3', '<')) {
+    die("skip test requires GD 2.3 or newer");
+}
 ?>
 --FILE--
 <?php
 function draw_and_check_pixel($x, $y)
 {
     global $img, $black, $red;
-    
+
     echo (imagecolorat($img, $x, $y) === $black) ? '+' : '-';
     imagesetpixel($img, $x, $y, $red);
 }
@@ -17,7 +20,7 @@ function draw_and_check_pixel($x, $y)
 function draw_and_check_rectangle($x1, $y1, $x2, $y2)
 {
     global $img, $black;
-    
+
     echo 'Rectangle: ';
     imagerectangle($img, $x1, $y1, $x2, $y2, $black);
     $x = ($x1 + $x2) / 2;

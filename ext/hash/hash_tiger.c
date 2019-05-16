@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |          Sara Golemon <pollita@php.net>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_hash.h"
 #include "php_hash_tiger.h"
@@ -251,7 +249,8 @@ PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *con
 		(php_hash_copy_func_t) php_hash_copy, \
 		b/8, \
 		64, \
-		sizeof(PHP_TIGER_CTX) \
+		sizeof(PHP_TIGER_CTX), \
+		1 \
 	}
 
 PHP_HASH_TIGER_OPS(3, 128);
@@ -260,12 +259,3 @@ PHP_HASH_TIGER_OPS(3, 192);
 PHP_HASH_TIGER_OPS(4, 128);
 PHP_HASH_TIGER_OPS(4, 160);
 PHP_HASH_TIGER_OPS(4, 192);
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

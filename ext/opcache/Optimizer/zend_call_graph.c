@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id:$ */
 
 #include "php.h"
 #include "zend_compile.h"
@@ -55,6 +53,7 @@ static int zend_op_array_collect(zend_call_graph *call_graph, zend_op_array *op_
 static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *script, zend_op_array_func_t func)
 {
 	zend_class_entry *ce;
+	zend_string *key;
 	zend_op_array *op_array;
 
 	if (func(call_graph, &script->main_op_array) != SUCCESS) {
@@ -67,9 +66,14 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
+		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+			continue;
+		}
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-			if (op_array->scope == ce) {
+			if (op_array->scope == ce
+			 && op_array->type == ZEND_USER_FUNCTION
+			 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				if (func(call_graph, op_array) != SUCCESS) {
 					return FAILURE;
 				}
@@ -80,65 +84,7 @@ static int zend_foreach_op_array(zend_call_graph *call_graph, zend_script *scrip
 	return SUCCESS;
 }
 
-static void zend_collect_args_info(zend_call_info *call_info)
-{
-	zend_op *opline = call_info->caller_init_opline;
-	zend_op *end = call_info->caller_call_opline;
-	uint32_t i;
-	int num;
-	int level = 0;
-
-	ZEND_ASSERT(opline && end);
-	if (!opline->extended_value) {
-		return;
-	}
-	for (i = 0; i < opline->extended_value; i++) {
-		call_info->arg_info[i].opline = NULL;
-	}
-	while (opline < end) {
-		opline++;
-		switch (opline->opcode) {
-			case ZEND_SEND_VAL:
-			case ZEND_SEND_VAR:
-			case ZEND_SEND_VAL_EX:
-			case ZEND_SEND_VAR_EX:
-			case ZEND_SEND_REF:
-			case ZEND_SEND_VAR_NO_REF:
-			case ZEND_SEND_VAR_NO_REF_EX:
-				num = opline->op2.num;
-				if (num > 0) {
-					num--;
-				}
-				if (!level) {
-					call_info->arg_info[num].opline = opline;
-				}
-				break;
-			case ZEND_SEND_ARRAY:
-			case ZEND_SEND_USER:
-			case ZEND_SEND_UNPACK:
-				// ???
-				break;
-			case ZEND_INIT_FCALL:
-			case ZEND_INIT_FCALL_BY_NAME:
-			case ZEND_INIT_NS_FCALL_BY_NAME:
-			case ZEND_INIT_DYNAMIC_CALL:
-			case ZEND_NEW:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_INIT_STATIC_METHOD_CALL:
-			case ZEND_INIT_USER_CALL:
-				level++;
-				break;
-			case ZEND_DO_FCALL:
-			case ZEND_DO_ICALL:
-			case ZEND_DO_UCALL:
-			case ZEND_DO_FCALL_BY_NAME:
-				level--;
-				break;
-		}
-	}
-}
-
-static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
+int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -149,12 +95,13 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 	ALLOCA_FLAG(use_heap);
 
 	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
+	call_info = NULL;
 	while (opline != end) {
-		call_info = NULL;
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
+				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, (build_flags & ZEND_RT_CONSTANTS) != 0);
 				if (func) {
@@ -167,20 +114,31 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 					call_info->next_callee = func_info->callee_info;
 					func_info->callee_info = call_info;
 
-					if (func->type == ZEND_INTERNAL_FUNCTION) {
+					if (build_flags & ZEND_CALL_TREE) {
+						call_info->next_caller = NULL;
+					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
-						call_info->next_caller = callee_func_info ? callee_func_info->caller_info : NULL;
+						if (callee_func_info) {
+							call_info->next_caller = callee_func_info->caller_info;
+							callee_func_info->caller_info = call_info;
+						} else {
+							call_info->next_caller = NULL;
+						}
 					}
+				} else {
+					call_info = NULL;
 				}
-				/* break missing intentionally */
+				call++;
+				break;
 			case ZEND_INIT_FCALL_BY_NAME:
 			case ZEND_INIT_NS_FCALL_BY_NAME:
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_NEW:
 			case ZEND_INIT_USER_CALL:
 				call_stack[call] = call_info;
+				call_info = NULL;
 				call++;
 				break;
 			case ZEND_DO_FCALL:
@@ -188,10 +146,35 @@ static int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t 
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
 				func_info->flags |= ZEND_FUNC_HAS_CALLS;
+				if (call_info) {
+					call_info->caller_call_opline = opline;
+				}
 				call--;
-				if (call_stack[call]) {
-					call_stack[call]->caller_call_opline = opline;
-					zend_collect_args_info(call_stack[call]);
+				call_info = call_stack[call];
+				break;
+			case ZEND_SEND_VAL:
+			case ZEND_SEND_VAR:
+			case ZEND_SEND_VAL_EX:
+			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_FUNC_ARG:
+			case ZEND_SEND_REF:
+			case ZEND_SEND_VAR_NO_REF:
+			case ZEND_SEND_VAR_NO_REF_EX:
+			case ZEND_SEND_USER:
+				if (call_info) {
+					uint32_t num = opline->op2.num;
+
+					if (num > 0) {
+						num--;
+					}
+					call_info->arg_info[num].opline = opline;
+				}
+				break;
+			case ZEND_SEND_ARRAY:
+			case ZEND_SEND_UNPACK:
+				/* TODO: set info about var_arg call ??? */
+				if (call_info) {
+					call_info->num_args = -1;
 				}
 				break;
 		}
@@ -291,10 +274,25 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, uint32_t buil
 }
 /* }}} */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, zend_op_array *op_array) /* {{{ */
+{
+	zend_call_info **map, *call;
+	if (!info->callee_info) {
+		/* Don't build call map if function contains no calls */
+		return NULL;
+	}
+
+	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
+	for (call = info->callee_info; call; call = call->next_callee) {
+		int i;
+		map[call->caller_init_opline - op_array->opcodes] = call;
+		map[call->caller_call_opline - op_array->opcodes] = call;
+		for (i = 0; i < call->num_args; i++) {
+			if (call->arg_info[i].opline) {
+				map[call->arg_info[i].opline - op_array->opcodes] = call;
+			}
+		}
+	}
+	return map;
+}
+/* }}} */

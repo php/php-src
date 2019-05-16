@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_H
 #define PHP_H
@@ -26,7 +24,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20151012
+#define PHP_API_VERSION 20190128
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -38,8 +36,22 @@
 
 #include "zend_API.h"
 
-#undef sprintf
-#define sprintf php_sprintf
+#define php_sprintf sprintf
+
+/* Operating system family definition */
+#ifdef PHP_WIN32
+# define PHP_OS_FAMILY			"Windows"
+#elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+# define PHP_OS_FAMILY			"BSD"
+#elif defined(__APPLE__) || defined(__MACH__)
+# define PHP_OS_FAMILY			"Darwin"
+#elif defined(__sun__)
+# define PHP_OS_FAMILY			"Solaris"
+#elif defined(__linux__)
+# define PHP_OS_FAMILY			"Linux"
+#else
+# define PHP_OS_FAMILY			"Unknown"
+#endif
 
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef PHP_DEBUG
@@ -47,7 +59,6 @@
 
 #ifdef PHP_WIN32
 #	include "tsrm_win32.h"
-#	include "win95nt.h"
 #	ifdef PHP_EXPORTS
 #		define PHPAPI __declspec(dllexport)
 #	else
@@ -66,13 +77,48 @@
 #	define PHP_EOL "\n"
 #endif
 
-#ifdef NETWARE
-/* For php_get_uname() function */
-#define PHP_UNAME  "NetWare"
-#define PHP_OS      PHP_UNAME
+/* Windows specific defines */
+#ifdef PHP_WIN32
+# define PHP_PROG_SENDMAIL		"Built in mailer"
+# define WIN32_LEAN_AND_MEAN
+# define NOOPENFILE
+
+# include <io.h>
+# include <malloc.h>
+# include <direct.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <stdarg.h>
+# include <sys/types.h>
+# include <process.h>
+
+typedef int uid_t;
+typedef int gid_t;
+typedef char * caddr_t;
+typedef int pid_t;
+
+# ifndef PHP_DEBUG
+#  ifdef inline
+#   undef inline
+#  endif
+#  define inline		__inline
+# endif
+
+# define M_TWOPI        (M_PI * 2.0)
+# define off_t			_off_t
+
+# define lstat(x, y)	php_sys_lstat(x, y)
+# define chdir(path)	_chdir(path)
+# define mkdir(a, b)	_mkdir(a)
+# define rmdir(a)		_rmdir(a)
+# define getpid			_getpid
+# define php_sleep(t)	SleepEx(t*1000, TRUE)
+
+# ifndef getcwd
+#  define getcwd(a, b)	_getcwd(a, b)
+# endif
 #endif
 
-#if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG
 #else
@@ -81,9 +127,6 @@
 #endif
 #endif
 #include <assert.h>
-#else /* HAVE_ASSERT_H */
-#define assert(expr) ((void) (0))
-#endif /* HAVE_ASSERT_H */
 
 #define APACHE 0
 
@@ -126,6 +169,8 @@ PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
+#define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -134,6 +179,16 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
+#endif
+
+#ifndef HAVE_EXPLICIT_BZERO
+BEGIN_EXTERN_C()
+PHPAPI void php_explicit_bzero(void *dst, size_t siz);
+END_EXTERN_C()
+#undef explicit_bzero
+#define explicit_bzero php_explicit_bzero
 #endif
 
 #ifndef HAVE_STRTOK_R
@@ -143,7 +198,7 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-# if PHP_WIN32
+# ifdef PHP_WIN32
 typedef int socklen_t;
 # else
 typedef unsigned int socklen_t;
@@ -165,42 +220,15 @@ typedef unsigned int socklen_t;
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STDARG_H
-#include <stdarg.h>
-#else
-# if HAVE_SYS_VARARGS_H
-# include <sys/varargs.h>
-# endif
-#endif
 
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
-# else
-#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
-# endif
-#endif
+#include <stdarg.h>
 
 #include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"
-
-#if STDC_HEADERS
-# include <string.h>
-#else
-# ifndef HAVE_MEMCPY
-#  define memcpy(d, s, n)	bcopy((s), (d), (n))
-# endif
-# ifndef HAVE_MEMMOVE
-#  define memmove(d, s, n)	bcopy ((s), (d), (n))
-# endif
-#endif
-
-#ifndef HAVE_STRERROR
-char *strerror(int);
-#endif
+#include <string.h>
 
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
@@ -211,9 +239,7 @@ char *strerror(int);
 # endif
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
@@ -256,7 +282,7 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# if PHP_WIN32
+# ifdef PHP_WIN32
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # elif PATH_MAX
@@ -345,6 +371,11 @@ PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);
+
+PHPAPI const char *php_get_internal_encoding(void);
+PHPAPI const char *php_get_input_encoding(void);
+PHPAPI const char *php_get_output_encoding(void);
+PHPAPI extern void (*php_internal_encoding_changed)(void);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */
@@ -455,12 +486,3 @@ END_EXTERN_C()
 #endif /* !XtOffsetOf */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

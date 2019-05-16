@@ -14,5 +14,5 @@ ob_end_flush();
 echo "done (you shouldn't see this)";
 
 ?>
---EXPECTF--
+--EXPECT--
 I have stolen your output

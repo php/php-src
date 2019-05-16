@@ -38,7 +38,7 @@ echo $h2->extract()."\n";
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Exception: Can't extract from an empty heap
 5
 3

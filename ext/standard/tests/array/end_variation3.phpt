@@ -3,7 +3,7 @@ Test end() function : usage variations - Referenced variables
 --FILE--
 <?php
 /* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it 
+ * Description: Advances array argument's internal pointer to the last element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -29,7 +29,7 @@ echo "\$array2: ";
 var_dump(current($array2));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing end() : usage variations ***
 
 -- Initial position of internal pointer --

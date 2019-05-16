@@ -1,12 +1,14 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_WITH([snmp],
+  [for SNMP support],
+  [AS_HELP_STRING([[--with-snmp[=DIR]]],
+    [Include SNMP support])])
 
-PHP_ARG_WITH(snmp,for SNMP support,
-[  --with-snmp[=DIR]         Include SNMP support])
-
-PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
-[  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
+PHP_ARG_WITH([openssl-dir],
+  [OpenSSL dir for SNMP],
+  [AS_HELP_STRING([[--with-openssl-dir[=DIR]]],
+    [SNMP: openssl install prefix])],
+  [no],
+  [no])
 
 if test "$PHP_SNMP" != "no"; then
 
@@ -37,7 +39,7 @@ if test "$PHP_SNMP" != "no"; then
     else
       AC_MSG_ERROR([Net-SNMP version 5.3 or greater reqired (detected $snmp_full_version).])
     fi
-  else 
+  else
     AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
   fi
 

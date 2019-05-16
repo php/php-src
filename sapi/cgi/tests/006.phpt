@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__)."/006.test.php";
+$filename = __DIR__."/006.test.php";
 
 $code = '
 <?php
@@ -54,7 +54,7 @@ if (defined("PHP_WINDOWS_VERSION_MAJOR")) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "No syntax errors detected in %s006.test.php
 "
 string(%d) "No input file specified.

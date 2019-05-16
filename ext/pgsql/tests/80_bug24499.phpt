@@ -1,14 +1,14 @@
 --TEST--
 Bug #24499 (Notice: Undefined property: stdClass::)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ("Could not connect to the server");

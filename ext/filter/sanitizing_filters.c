@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Authors: Derick Rethans <derick@php.net>                             |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "php_filter.h"
 #include "filter_private.h"
@@ -159,8 +157,7 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 static void filter_map_apply(zval *value, filter_map *map)
 {
 	unsigned char *str;
-	size_t i;
-	int c;
+	size_t i, c;
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);
@@ -213,7 +210,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	Z_STRLEN_P(value) = new_len;
 
 	if (new_len == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
 		} else {
@@ -293,7 +290,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 
 		php_filter_encode_html(value, enc);
 	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
 }
@@ -369,24 +366,17 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 }
 /* }}} */
 
-/* {{{ php_filter_magic_quotes */
-void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
+/* {{{ php_filter_add_slashes */
+void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 {
+	/* This filter is used by both 'add_slashes' & 'magic_quotes' (legacy) */
+
 	zend_string *buf;
 
 	/* just call php_addslashes quotes */
-	buf = php_addslashes(Z_STR_P(value), 0);
+	buf = php_addslashes(Z_STR_P(value));
 
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

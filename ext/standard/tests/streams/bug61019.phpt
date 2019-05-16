@@ -23,17 +23,17 @@ if(is_resource($process))
 	$stdin_stream="";
 	$stderr_stream="";
 
-	echo "External command executed\n";   	
-	do                                     	
+	echo "External command executed\n";
+	do
 	{
 		$process_state=proc_get_status($process);
-		$tmp_stdin=stream_get_contents($pipes[1]);   	
-		if($tmp_stdin) 
+		$tmp_stdin=stream_get_contents($pipes[1]);
+		if($tmp_stdin)
 		{
 			$stdin_stream=$stdin_stream.$tmp_stdin;
 		}
 		$tmp_stderr=stream_get_contents($pipes[2]);
-		if($tmp_stderr) 
+		if($tmp_stderr)
 		{
 			$stderr_stream=$stderr_stream.$tmp_stderr;
 		}
@@ -42,13 +42,13 @@ if(is_resource($process))
 	echo "External command exit: ".$process_state['exitcode']."\n";
 
 	//read outstanding data
-	$tmp_stdin=stream_get_contents($pipes[1]);   	
-	if($tmp_stdin) 
+	$tmp_stdin=stream_get_contents($pipes[1]);
+	if($tmp_stdin)
 	{
 		$stdin_stream=$stdin_stream.$tmp_stdin;
 	}
 	$tmp_stderr=stream_get_contents($pipes[2]);
-	if($tmp_stderr) 
+	if($tmp_stderr)
 	{
 		$stderr_stream=$stderr_stream.$tmp_stderr;
 	}
@@ -57,7 +57,7 @@ if(is_resource($process))
 	fclose ($pipes[1]);
 	fclose ($pipes[2]);
 
-	proc_close($process);    
+	proc_close($process);
 
 	echo "STDOUT: ".$stdin_stream."\n";
 	echo "STDERR: ".$stderr_stream."\n";

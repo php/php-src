@@ -1,9 +1,15 @@
 --TEST--
-Test closedir() function : basic functionality 
+Test closedir() function : basic functionality
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle 
+ * Description: Close directory connection identified by the dir_handle
  * Source code: ext/standard/dir.c
  * Alias to functions: close
  */
@@ -14,7 +20,7 @@ Test closedir() function : basic functionality
 
 echo "*** Testing closedir() : basic functionality ***\n";
 
-$base_dir = dirname(__FILE__);
+$base_dir = __DIR__;
 $dir_path = $base_dir . '/私はガラスを食べられますclosedir_basic';
 mkdir($dir_path);
 
@@ -37,7 +43,7 @@ var_dump($dh2);
 ===DONE===
 --CLEAN--
 <?php
-$base_dir = dirname(__FILE__);
+$base_dir = __DIR__;
 $dir_path = $base_dir . '/私はガラスを食べられますclosedir_basic';
 rmdir($dir_path);
 ?>

@@ -3,16 +3,16 @@ Test method_exists() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
 /* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists 
+ * Description: Checks if the class method exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+	echo "In autoload($className)\n";
+});
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');
@@ -160,11 +160,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
+In autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
+In autoload(String)
 bool(false)
 
 Arg value  

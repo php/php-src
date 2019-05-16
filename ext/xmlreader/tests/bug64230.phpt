@@ -38,11 +38,11 @@ Done
 --EXPECTF--
 Test
 Internal errors TRUE
-Internal: Specification mandate value for attribute att
+Internal: Specification mandate%A value for attribute att
 
 Internal errors FALSE
 
-Warning: XMLReader::read(): %s: parser error : Specification mandate value for attribute att in %s on line %d
+Warning: XMLReader::read(): %s: parser error : Specification mandate%A value for attribute att in %s on line %d
 
 Warning: XMLReader::read(): <root att/> in %s on line %d
 

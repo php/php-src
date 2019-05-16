@@ -6,9 +6,9 @@ if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 --FILE--
 <?php
 $var48 = bcscale(634314234334311);
-$var67 = bcsqrt(false);
-$var414 = bcadd(false,null,10);
+$var67 = bcsqrt(0);
+$var414 = bcadd(0,-1,10);
 die('ALIVE');
 ?>
---EXPECTF--
+--EXPECT--
 ALIVE

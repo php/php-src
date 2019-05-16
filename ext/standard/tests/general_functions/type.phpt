@@ -54,7 +54,7 @@ foreach ($types as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 string(6) "string"
 string(5) "array"
@@ -63,7 +63,7 @@ string(6) "double"
 string(4) "NULL"
 string(7) "boolean"
 string(6) "string"
-string(12) "unknown type"
+string(17) "resource (closed)"
 string(8) "resource"
 string(6) "object"
 bool(true)
@@ -265,11 +265,11 @@ array(0) {
 }
 bool(true)
 object(stdClass)#%d (3) {
-  [0]=>
+  ["0"]=>
   int(1)
-  [1]=>
+  ["1"]=>
   int(2)
-  [2]=>
+  ["2"]=>
   int(3)
 }
 bool(true)
@@ -279,11 +279,11 @@ object(stdClass)#%d (1) {
 }
 bool(true)
 object(stdClass)#%d (3) {
-  [0]=>
+  ["0"]=>
   int(2)
-  [1]=>
+  ["1"]=>
   int(3)
-  [2]=>
+  ["2"]=>
   int(4)
 }
 bool(true)

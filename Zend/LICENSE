@@ -1,25 +1,25 @@
--------------------------------------------------------------------- 
+--------------------------------------------------------------------
                 The Zend Engine License, Version 2.00
 Copyright (c) 1999-2006 Zend Technologies Ltd. All rights reserved.
--------------------------------------------------------------------- 
+--------------------------------------------------------------------
 
 Redistribution and use in source and binary forms, with or without
 modification, is permitted provided that the following conditions
 are met:
 
   1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer. 
- 
-  2. Redistributions in binary form must reproduce the above 
-     copyright notice, this list of conditions and the following 
+     notice, this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the following
      disclaimer in the documentation and/or other materials provided
      with the distribution.
- 
+
   3. The names "Zend" and "Zend Engine" must not be used to endorse
      or promote products derived from this software without prior
      permission from Zend Technologies Ltd. For written permission,
-     please contact license@zend.com. 
- 
+     please contact license@zend.com.
+
   4. Zend Technologies Ltd. may publish revised and/or new versions
      of the license from time to time. Each version will be given a
      distinguishing version number.
@@ -40,9 +40,9 @@ are met:
      software must display the following acknowledgment:
      "The Zend Engine is freely available at http://www.zend.com"
 
-THIS SOFTWARE IS PROVIDED BY ZEND TECHNOLOGIES LTD. ``AS IS'' AND 
+THIS SOFTWARE IS PROVIDED BY ZEND TECHNOLOGIES LTD. ``AS IS'' AND
 ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL ZEND
 TECHNOLOGIES LTD.  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
@@ -53,4 +53,4 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
--------------------------------------------------------------------- 
+--------------------------------------------------------------------

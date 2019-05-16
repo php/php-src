@@ -13,5 +13,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 DOMComment::__construct() expects at most 1 parameter, 2 given

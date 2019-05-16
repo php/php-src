@@ -10,7 +10,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing filegroup() with different notations of file names ***\n";
 $dir_name = $file_path."/filegroup_variation3";
@@ -28,7 +28,7 @@ $files_arr = array(
   "/filegroup_variation3//filegroup_variation3.tmp",
   "//filegroup_variation3//filegroup_variation3.tmp",
   "/filegroup_variation3/*.tmp",
-  "filegroup_variation3/filegroup*.tmp", 
+  "filegroup_variation3/filegroup*.tmp",
 
   /* Testing Binary safe */
   "/filegroup_variation3/filegroup_variation3.tmp".chr(0),
@@ -39,7 +39,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( filegroup( $file_path."/".$file ) );
+  try {
+    var_dump( filegroup( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -48,7 +52,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/filegroup_variation3";
 unlink($dir_name."/filegroup_variation3.tmp");
 rmdir($dir_name);
@@ -74,12 +78,8 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-
-Warning: filegroup() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+filegroup() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: filegroup() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+filegroup() expects parameter 1 to be a valid path, string given
 
 *** Done ***

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 /* FastCGI protocol */
 
@@ -102,6 +100,7 @@ int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 const char *fcgi_get_last_client_ip();
 void fcgi_set_in_shutdown(int new_value);
+void fcgi_request_set_keep(fcgi_request *req, int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
 typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -118,7 +117,8 @@ void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 int fcgi_read(fcgi_request *req, char *str, int len);
 
 int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
-int fcgi_flush(fcgi_request *req, int close);
+int fcgi_flush(fcgi_request *req, int end);
+int fcgi_end(fcgi_request *req);
 
 #ifdef PHP_WIN32
 void fcgi_impersonate(void);
@@ -126,12 +126,3 @@ void fcgi_impersonate(void);
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
 void fcgi_free_mgmt_var_cb(zval *zv);
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,22 +1,20 @@
 --TEST--
 Returning a reference from a non-static method via another non-static method
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 class C {
 	function returnConstantByValue() {
 		return 100;
 	}
-	
+
 	function &returnConstantByRef() {
 		return 100;
 	}
-	
+
 	function &returnVariableByRef() {
 		return $GLOBALS['a'];
 	}
-	
+
 	function &returnFunctionCallByRef($functionToCall) {
 		return $this->$functionToCall();
 	}
@@ -46,7 +44,6 @@ var_dump($a, $b);
 
 ?>
 --EXPECTF--
-
 ---> 1. Via a return by ref function call, assign by reference the return value of a function that returns by value:
 
 Notice: Only variable references should be returned by reference in %s on line 16

@@ -1,18 +1,18 @@
 --TEST--
-Test trait_exists() function : basic functionality 
+Test trait_exists() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
- * Description: Checks if the trait exists 
+ * Description: Checks if the trait exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing trait_exists() : basic functionality ***\n";
 
-function __autoload($traitName) {
-	echo "In __autoload($traitName)\n";
-}
+spl_autoload_register(function ($traitName) {
+	echo "In autoload($traitName)\n";
+});
 
 trait MyTrait {}
 
@@ -33,10 +33,10 @@ var_dump( trait_exists('MyTrait') );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing trait_exists() : basic functionality ***
 Calling trait_exists() on non-existent trait with autoload explicitly enabled:
-In __autoload(C)
+In autoload(C)
 bool(false)
 
 Calling trait_exists() on existing trait with autoload explicitly enabled:
@@ -49,7 +49,7 @@ Calling trait_exists() on existing trait with autoload explicitly disabled:
 bool(true)
 
 Calling trait_exists() on non-existent trait with autoload unspecified:
-In __autoload(E)
+In autoload(E)
 bool(false)
 
 Calling trait_exists() on existing trait with autoload unspecified:

@@ -21,7 +21,7 @@ $values = array(0,
 				2.6,
 				-2.6,
 				037,
-				0x5F,	
+				0x5F,
 				"10.5",
 				"-10.5",
 				"3.95E3",
@@ -29,17 +29,17 @@ $values = array(0,
 				"039",
 				true,
 				false,
-				null, 
-				);	
-				
+				null,
+				);
+
 foreach($values as $value) {
 	echo "\n-- floor $value --\n";
 	var_dump(floor($value));
-};				
+};
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing floor() : basic functionality ***
 
 -- floor 0 --

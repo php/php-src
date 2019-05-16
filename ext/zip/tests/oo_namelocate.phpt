@@ -2,12 +2,11 @@
 Locate entries by name
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
 $file = $dirname . '__tmp_oo_rename.zip';
 
@@ -39,7 +38,7 @@ var_dump($zip->locateName('enTRy2d.txt', ZIPARCHIVE::FL_NOCASE|ZIPARCHIVE::FL_NO
 $zip->close();
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 bool(false)
 int(1)

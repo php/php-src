@@ -28,6 +28,6 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
-%unicode|string%(6) "foobar"
+--EXPECT--
+string(6) "foobar"
 done!

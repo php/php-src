@@ -8,7 +8,7 @@ require_once "open_basedir.inc";
 $initdir = getcwd();
 test_open_basedir_before("file");
 test_open_basedir_error("file");
-     
+
 var_dump(file("ok.txt"));
 var_dump(file("../ok/ok.txt"));
 var_dump(file($initdir."/test/ok/ok.txt"));
@@ -85,4 +85,3 @@ array(1) {
   string(12) "Hello World!"
 }
 *** Finished testing open_basedir configuration [file] ***
-

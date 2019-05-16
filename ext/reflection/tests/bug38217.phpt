@@ -3,21 +3,21 @@ Bug #38217 (ReflectionClass::newInstanceArgs() tries to allocate too much memory
 --FILE--
 <?php
 
-class Object {
+class ObjectOne {
 	public function __construct() {
 	}
 }
 
-$class= new ReflectionClass('Object');
+$class= new ReflectionClass('ObjectOne');
 var_dump($class->newInstanceArgs());
 
-class Object1 {
+class ObjectTwo {
 	public function __construct($var) {
 		var_dump($var);
 	}
 }
 
-$class= new ReflectionClass('Object1');
+$class= new ReflectionClass('ObjectTwo');
 try {
 	var_dump($class->newInstanceArgs());
 } catch (Throwable $e) {
@@ -28,11 +28,11 @@ var_dump($class->newInstanceArgs(array('test')));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-object(Object)#%d (0) {
+--EXPECTF--
+object(ObjectOne)#%d (0) {
 }
-Exception: Too few arguments to function Object1::__construct(), 0 passed and exactly 1 expected
+Exception: Too few arguments to function ObjectTwo::__construct(), 0 passed and exactly 1 expected
 string(4) "test"
-object(Object1)#%d (0) {
+object(ObjectTwo)#%d (0) {
 }
 Done

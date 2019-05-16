@@ -219,6 +219,10 @@ function ut_norm_is_normalized( $str, $form )
 {
     return $GLOBALS['oo-mode'] ? Normalizer::isNormalized( $str, $form ) : normalizer_is_normalized( $str, $form );
 }
+function ut_norm_get_raw_decomposition( $str, $form )
+{
+    return $GLOBALS['oo-mode'] ? Normalizer::getRawDecomposition( $str, $form ) : normalizer_get_raw_decomposition( $str, $form );
+}
 
 /*
  * Wrappers around Collator methods to run them in either OO- or procedural mode.

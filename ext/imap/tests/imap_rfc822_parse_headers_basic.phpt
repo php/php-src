@@ -1,22 +1,22 @@
 --TEST--
-imap_rfc822_parse_headers() function : basic functionality 
+imap_rfc822_parse_headers() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 $z = imap_headerinfo($stream_id, 1);
 
 $fields = array ('toaddress','to','fromaddress','from',
 'reply_toaddress','reply_to',
-	'senderaddress', 'sender', 
+	'senderaddress', 'sender',
 'subject','Subject',
 	'MailDate','Size','udate');
 
@@ -84,7 +84,7 @@ imap_close($stream_id);
 
 ?>
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

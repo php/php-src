@@ -4,7 +4,7 @@ SPL SplTempFileObject constructor sets correct defaults when passed a negative v
 <?php
 var_dump(new SplTempFileObject(-1));
 ?>
---EXPECTF--
+--EXPECT--
 object(SplTempFileObject)#1 (5) {
   ["pathName":"SplFileInfo":private]=>
   string(12) "php://memory"
