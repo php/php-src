@@ -2307,8 +2307,10 @@ PHP_FUNCTION(str_begin) {
 	zend_string *haystack, *needle;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
-		RETURN_NULL();
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
 
 	for (i = 0; i < needle->len; i++) 
 		if (haystack->val[i] != needle->val[i]) 
@@ -2322,8 +2324,10 @@ PHP_FUNCTION(str_ibegin) {
 	zend_string *haystack, *needle;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
-		RETURN_NULL();
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
 
 	for (i = 0; i < needle->len; i++) 
 		if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
@@ -2337,8 +2341,10 @@ PHP_FUNCTION(str_end) {
 	zend_string *haystack, *needle;
 	int i, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
-		RETURN_NULL();
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
 
 	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
 		if (haystack->val[i] != needle->val[j]) 
@@ -2352,8 +2358,10 @@ PHP_FUNCTION(str_iend) {
 	zend_string *haystack, *needle;
 	int i, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &haystack, &needle) == FAILURE) 
-		RETURN_NULL();
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
 
 	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
 		if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
