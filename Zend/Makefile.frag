@@ -15,7 +15,7 @@ $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
 # https://git.savannah.gnu.org/cgit/bison.git/tree/data/README.md for more.
 	@$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o $@
 	@$(SED) -e 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' < $@ \
-	> $(srcdir)/zend_language_parser.c.tmp && \
+	> $@.tmp && \
 	mv $@.tmp $@
 	@$(SED) -e 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' < $(srcdir)/zend_language_parser.h \
 	> $(srcdir)/zend_language_parser.h.tmp && \
