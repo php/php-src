@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,10 +18,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
-/* Synced with php 3.0 revision 1.24 1999-06-18 [ssb] */
-
 #ifndef FSOCK_H
 #define FSOCK_H
 
@@ -32,11 +28,4 @@
 PHP_FUNCTION(fsockopen);
 PHP_FUNCTION(pfsockopen);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim: sw=4 ts=4
- */
 #endif /* FSOCK_H */

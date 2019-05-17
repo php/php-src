@@ -12,7 +12,7 @@ var_dump(strrchr("test".chr(0)."string", "t"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

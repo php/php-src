@@ -9,4 +9,8 @@ function f($a=Foo::bar) {
 echo f()."\n";
 ?>
 --EXPECTF--
-Fatal error: Class 'Foo\Foo' not found in %sbug43344_3.php on line %d
+Fatal error: Uncaught Error: Class 'Foo\Foo' not found in %s:%d
+Stack trace:
+#0 %s(%d): Foo\f()
+#1 {main}
+  thrown in %s on line %d

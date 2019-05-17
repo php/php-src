@@ -23,7 +23,7 @@ foreach ($tests as $elem) {
 if (!msg_remove_queue($queue)) {
 	echo "BAD: queue removal failed\n";
 }
-	
+
 echo "Done\n";
 ?>
 --EXPECTF--

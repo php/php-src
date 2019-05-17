@@ -1,5 +1,5 @@
 --TEST--
-Bug #40833 (Crash when using unset() on an ArrayAccess object retrieved via __get) 
+Bug #40833 (Crash when using unset() on an ArrayAccess object retrieved via __get)
 --FILE--
 <?php
 	class entity

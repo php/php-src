@@ -10,7 +10,7 @@ echo basename("y:file.txt", ".txt") . "\n";
 echo basename("notdriveletter:file.txt") . "\n";
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 file.txt
 file.txt
 file

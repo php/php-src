@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -116,8 +114,7 @@ PHP_FUNCTION(com_create_instance)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Flags", sizeof("Flags")-1))) {
-			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_P(tmp);
+			ctx = (CLSCTX)zval_get_long(tmp);
 		}
 	}
 
@@ -234,7 +231,7 @@ PHP_FUNCTION(com_create_instance)
 
 		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Failed to create COM object `%s': %s", module_name, werr);
-		LocalFree(werr);
+		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
@@ -392,7 +389,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
@@ -408,7 +405,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			default:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 		}
 
@@ -488,11 +485,10 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid);
 
 	if (FAILED(hr)) {
-		char *winerr = NULL;
 		char *msg = NULL;
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", f->function_name->val, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
@@ -565,7 +561,8 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 					zval *arg = &args[nargs - i - 1];
 
 					ZVAL_DEREF(arg);
-					SEPARATE_ZVAL_NOREF(arg);
+					zval_ptr_dtor(arg);
+					ZVAL_NULL(arg);
 
 					/* if the variant is pointing at the byref_vals, we need to map
 					 * the pointee value as a zval; otherwise, the value is pointing
@@ -650,15 +647,14 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 {
 	DISPID dispid;
 	HRESULT hr;
-	char *winerr = NULL;
 	char *msg = NULL;
 
 	hr = php_com_get_id_of_name(obj, name, namelen, &dispid);
 
 	if (FAILED(hr)) {
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
@@ -835,6 +831,11 @@ PHP_FUNCTION(com_load_typelib)
 		return;
 	}
 
+	if (!cs) {
+		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
+		RETURN_FALSE;
+	}
+
 	RETVAL_FALSE;
 
 	php_com_initialize();
@@ -851,14 +852,3 @@ PHP_FUNCTION(com_load_typelib)
 	}
 }
 /* }}} */
-
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

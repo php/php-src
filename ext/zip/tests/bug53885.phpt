@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__)."/test53885.zip";
+$fname = __DIR__."/test53885.zip";
 if(file_exists($fname)) unlink($fname);
 touch($fname);
 $nx=new ZipArchive();
@@ -17,8 +17,8 @@ $nx->statName("a",ZIPARCHIVE::FL_UNCHANGED);
 ==DONE==
 --CLEAN--
 <?php
-$fname = dirname(__FILE__)."/test53885.zip";
+$fname = __DIR__."/test53885.zip";
 unlink($fname);
 ?>
---EXPECTF--
+--EXPECT--
 ==DONE==

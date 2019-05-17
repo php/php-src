@@ -107,7 +107,7 @@ class MySQLPDOTest extends PDOTest {
 
 		// stinky string which we need to parse
 		$parts = explode('.', $version_string);
-		if (count($parts) != 3)
+		if (count($parts) < 3)
 			return -1;
 
 		$version = (int)$parts[0] * 10000;
@@ -141,7 +141,7 @@ class MySQLPDOTest extends PDOTest {
 
 	}
 
-	static function detect_transactional_mysql_engine($db) {		
+	static function detect_transactional_mysql_engine($db) {
 		foreach ($db->query("show variables like 'have%'") as $row) {
 			if (!empty($row) && $row[1] == 'YES' && ($row[0] == 'have_innodb' || $row[0] == 'have_bdb')) {
 				return str_replace("have_", "", $row[0]);

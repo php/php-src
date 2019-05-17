@@ -3,7 +3,7 @@ Chunked encoding
 --SKIPIF--
 <?php
 $filters = stream_get_filters();
-if(! in_array( "dechunk", $filters )) die( "chunked filter not available." );
+if(! in_array( "dechunk", $filters )) die( "skip Chunked filter not available." );
 ?>
 --INI--
 allow_url_fopen=1

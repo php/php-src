@@ -11,7 +11,6 @@ class FailStream {
 stream_wrapper_register('mystream', 'FailStream');
 fopen('mystream://foo', 'r');
 echo 'Done';
-
 --EXPECTF--
 Warning: fopen(mystream://foo): failed to open stream: "FailStream::stream_open" call failed in %s%euser-stream-error.php on line %d
 

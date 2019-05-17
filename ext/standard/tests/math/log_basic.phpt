@@ -12,10 +12,10 @@ $values = array(23,
 				027,
 				"23",
 				"23.45",
-				"2.345e1",				
+				"2.345e1",
 				null,
 				true,
-				false);	
+				false);
 
 echo "\n LOG tests...no base\n";
 for ($i = 0; $i < count($values); $i++) {
@@ -29,8 +29,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-
---EXPECTF--
+--EXPECT--
  LOG tests...no base
 float(3.1354942159291)
 float(NAN)

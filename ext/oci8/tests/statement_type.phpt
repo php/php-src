@@ -5,7 +5,7 @@ oci_statement_type()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $sqls = Array(
     "SELECT * FROM table",
@@ -31,7 +31,7 @@ foreach ($sqls as $sql) {
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "SELECT"
 string(6) "DELETE"
 string(6) "INSERT"

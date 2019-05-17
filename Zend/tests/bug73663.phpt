@@ -14,15 +14,18 @@ $func = function (&$ref) {
 $array = [1];
 var_dump(list($val) = $array); // NG: Invalid opcode
 
-change(list($val) = $array);
+change(list(&$val) = $array);
 var_dump($array);
 
 $array = [1];
+$func(list(&$val) = $array);
+var_dump($array);
 
-$func(list($val) = $array);
+$array = [1];
+change(list($val) = $array);
 var_dump($array);
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
   int(1)
@@ -70,4 +73,10 @@ array(10) {
   int(9)
   [9]=>
   int(10)
+}
+
+Notice: Only variables should be passed by reference in %s on line %d
+array(1) {
+  [0]=>
+  int(1)
 }

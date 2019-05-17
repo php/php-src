@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,23 +44,23 @@ void mysqlnd_upsert_status_init(MYSQLND_UPSERT_STATUS * const upsert_status);
 
 
 /* Error handling */
-#define SET_NEW_MESSAGE(buf, buf_len, message, len, persistent) \
+#define SET_NEW_MESSAGE(buf, buf_len, message, len) \
 	{\
 		if ((buf)) { \
-			mnd_pefree((buf), (persistent)); \
+			mnd_efree((buf)); \
 		} \
 		if ((message)) { \
-			(buf) = mnd_pestrndup((message), (len), (persistent)); \
+			(buf) = mnd_pestrndup((message), (len), 0); \
 		} else { \
 			(buf) = NULL; \
 		} \
 		(buf_len) = (len); \
 	}
 
-#define SET_EMPTY_MESSAGE(buf, buf_len, persistent) \
+#define SET_EMPTY_MESSAGE(buf, buf_len) \
 	{\
 		if ((buf)) { \
-			mnd_pefree((buf), (persistent)); \
+			mnd_efree((buf)); \
 			(buf) = NULL; \
 		} \
 		(buf_len) = 0; \
@@ -76,12 +76,3 @@ PHPAPI void	mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info);
 PHPAPI void mysqlnd_connection_state_init(struct st_mysqlnd_connection_state * const state);
 
 #endif /* MYSQLND_CONNECTION_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

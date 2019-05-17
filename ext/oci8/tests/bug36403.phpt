@@ -2,12 +2,12 @@
 Bug #36403 (oci_execute no longer supports OCI_DESCRIBE_ONLY)
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 

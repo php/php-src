@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (variation 9) 
+Test extract() function (variation 9)
 --FILE--
 <?php
 /* Using Class and objects */

@@ -14,7 +14,7 @@ var_dump($res = msg_receive ($queue, 1, $msg_type, 16384, $msg, true, 0, $msg_er
 if (!msg_remove_queue($queue)) {
 	echo "BAD: queue removal failed\n";
 }
-	
+
 echo "Done\n";
 ?>
 --EXPECTF--

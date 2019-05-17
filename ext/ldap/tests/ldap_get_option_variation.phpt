@@ -66,14 +66,16 @@ bool(true)
 int(0)
 bool(true)
 array(2) {
-  [0]=>
-  array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
     ["oid"]=>
     string(15) "1.2.752.58.10.1"
     ["iscritical"]=>
     bool(true)
+    ["value"]=>
+    NULL
   }
-  [1]=>
+  ["1.2.752.58.1.10"]=>
   array(3) {
     ["oid"]=>
     string(15) "1.2.752.58.1.10"
@@ -85,14 +87,16 @@ array(2) {
 }
 bool(true)
 array(2) {
-  [0]=>
-  array(2) {
+  ["1.2.752.58.10.1"]=>
+  array(3) {
     ["oid"]=>
     string(15) "1.2.752.58.10.1"
     ["iscritical"]=>
     bool(true)
+    ["value"]=>
+    NULL
   }
-  [1]=>
+  ["1.2.752.58.1.10"]=>
   array(3) {
     ["oid"]=>
     string(15) "1.2.752.58.1.10"

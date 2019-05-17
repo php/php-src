@@ -11,7 +11,7 @@ $numeric = &$ref['numeric'];
 var_dump(str_replace(array_keys($data), $data, "a numeric"));
 var_dump($numeric);
 var_dump($data['numeric']);
---EXPECTF--
+--EXPECT--
 string(3) "b 1"
 int(1)
 int(1)

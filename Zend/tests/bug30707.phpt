@@ -14,7 +14,7 @@ class C {
 		}
 	}
 
-	function plap($a) {	
+	function plap($a) {
 	}
 
 	function plop() {

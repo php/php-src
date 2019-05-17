@@ -26,6 +26,6 @@ foreach ($r->GetProperties() as $p)
 }
 
 ?>
---EXPECT--	
+--EXPECT--
 bar foo
 ancester ancester

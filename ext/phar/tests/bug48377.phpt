@@ -7,8 +7,8 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.zip';
 
 touch($fname2);
 
@@ -22,8 +22,8 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
 phar "%sbug48377.zip" exists and must be unlinked prior to conversion
 ===DONE===

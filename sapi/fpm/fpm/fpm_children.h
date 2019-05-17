@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_children.h,v 1.9 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_CHILDREN_H
@@ -10,6 +8,7 @@
 
 #include "fpm_worker_pool.h"
 #include "fpm_events.h"
+#include "zlog.h"
 
 int fpm_children_create_initial(struct fpm_worker_pool_s *wp);
 int fpm_children_free(struct fpm_child_s *child);
@@ -31,6 +30,7 @@ struct fpm_child_s {
 	int idle_kill;
 	pid_t pid;
 	int scoreboard_i;
+	struct zlog_stream *log_stream;
 };
 
 #endif

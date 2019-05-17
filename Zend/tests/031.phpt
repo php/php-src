@@ -1,7 +1,7 @@
 --TEST--
 Testing array with '[]' passed as argument by value
 --FILE--
-<?php 
+<?php
 
 function test($var) { }
 test($arr[]);

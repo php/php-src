@@ -8,8 +8,8 @@ class foo {
 		var_dump($x,$y);
 		return 1;
 	}
-	
-	public function teste() {
+
+	public static function teste() {
 		return foo::x(function &($a=1,$b) { });
 	}
 }
@@ -18,8 +18,7 @@ var_dump(call_user_func(array('foo', 'teste')));
 
 ?>
 --EXPECTF--
-Deprecated: %son-static method foo::teste() should not be called statically in %s on line %d
-%string|unicode%(1) "x"
+string(1) "x"
 array(1) {
   [0]=>
   object(Closure)#%d (1) {

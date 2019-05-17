@@ -8,7 +8,7 @@ function a($ary) {
 }
 
 function cb($v, $elem) {
-	return $v + a($elem); 
+	return $v + a($elem);
 }
 
 $ary = array(

@@ -10,6 +10,6 @@ $test = new Test();
 
 var_dump(isset($test->protectedProperty));
 var_dump(isset($test->protectedProperty->foo));
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)

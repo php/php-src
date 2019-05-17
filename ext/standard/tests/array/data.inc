@@ -1,6 +1,6 @@
 <?php
 $tmp = pow(2,24);
-$data = array( 
+$data = array(
 	'PHP',
 	17=>'PHP: Hypertext Preprocessor',
 	5=>'Test',

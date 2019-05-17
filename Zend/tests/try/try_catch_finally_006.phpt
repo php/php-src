@@ -11,7 +11,7 @@ function foo($ex = NULL) {
         } finally {
             var_dump("finally1");
             if ($ex) throw $ex;
-        } 
+        }
     } catch (Exception $e) {
        var_dump("catched");
        if ($ex) return "return1";
@@ -28,7 +28,7 @@ var_dump(foo());
 var_dump(foo(new Exception()));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "finally1"
 string(8) "finally2"
 string(5) "label"

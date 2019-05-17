@@ -3,14 +3,14 @@ Ensure __autoload is called twice if unserialize_callback_func is defined.
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized) 
+ * Description: Returns a string representation of variable (which can later be unserialized)
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($name) {
@@ -20,7 +20,7 @@ spl_autoload_register(function ($name) {
 ini_set('unserialize_callback_func','check');
 
 function check($name) {
-	echo "in check($name)\n"; 
+	echo "in check($name)\n";
 }
 
 $o = unserialize('O:3:"FOO":0:{}');

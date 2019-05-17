@@ -13,7 +13,7 @@ $obj = new test;
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===
 
 Warning: Call to private test::__destruct() from context '' during shutdown ignored in Unknown on line 0

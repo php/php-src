@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Kristian Koehntopp <kris@koehntopp.de>					      |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* {{{ includes & prototypes */
 
@@ -57,11 +55,7 @@ ZEND_BEGIN_MODULE_GLOBALS(recode)
     RECODE_OUTER  outer;
 ZEND_END_MODULE_GLOBALS(recode)
 
-#ifdef ZTS
-# define ReSG(v) TSRMG(recode_globals_id, zend_recode_globals *, v)
-#else
-# define ReSG(v) (recode_globals.v)
-#endif
+#define ReSG(v) ZEND_MODULE_GLOBALS_ACCESSOR(recode, v)
 
 ZEND_DECLARE_MODULE_GLOBALS(recode)
 static PHP_GINIT_FUNCTION(recode);
@@ -105,11 +99,17 @@ zend_module_entry recode_module_entry = {
 };
 
 #ifdef COMPILE_DL_RECODE
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(recode)
 #endif
 
 static PHP_GINIT_FUNCTION(recode)
 {
+#if defined(COMPILE_DL_RECODE) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	recode_globals->outer = NULL;
 }
 
@@ -135,7 +135,6 @@ PHP_MINFO_FUNCTION(recode)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Recode Support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Id$");
 	php_info_print_table_end();
 }
 
@@ -233,10 +232,3 @@ error_exit:
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -1,14 +1,12 @@
 --TEST--
-Test hash_file() function : basic functionality 
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: hash_file() function : basic functionality
 --FILE--
 <?php
 
 /* Prototype  : string hash_hmac  ( string $algo  , string $data  , string $key  [, bool $raw_output  ] )
  * Description: Generate a keyed hash value using the HMAC method
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 echo "*** Testing hash_hmac() : basic functionality ***\n";
@@ -37,7 +35,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n"
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac() : basic functionality ***
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
 haval128,3: 4d1318607f0406bd1b7bd50907772672

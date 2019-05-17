@@ -49,6 +49,6 @@ Too few arguments to function bar(), 1 passed in %s and exactly 2 expected
 ArgumentCountError
 Too few arguments to function bat(), 1 passed in %s and exactly 2 expected
 TypeError
-Argument 1 passed to bat() must be of the type integer, string given, called in %s
+Argument 1 passed to bat() must be of the type int, string given, called in %s
 TypeError
-Argument 2 passed to bat() must be of the type string, integer given, called in %s
+Argument 2 passed to bat() must be of the type string, int given, called in %s

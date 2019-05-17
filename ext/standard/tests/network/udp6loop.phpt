@@ -1,7 +1,7 @@
 --TEST--
 Streams Based IPv6 UDP Loopback test
 --SKIPIF--
-<?php # vim:ft=php:
+<?php
 	/* If IPv6 is supported on the platform this will error out with code 111 -
 	 * Connection refused.  If IPv6 is NOT supported, $errno will be set to
 	 * something else (indicating parse/getaddrinfo error)

@@ -23,7 +23,7 @@ var_dump(realpath("."));
 <?php
 rmdir("chroot_001_x");
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

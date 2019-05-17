@@ -25,7 +25,7 @@ foreach ($sqlCommandList as $exampleNumber => $sql) {
 		$e = odbc_errormsg($conn);
 		$n = odbc_error($conn);
 
-		var_dump($sql, $n, $e, strlen($e));	
+		var_dump($sql, $n, $e);
 		echo "\n";
 	}
 
@@ -38,15 +38,13 @@ foreach ($sqlCommandList as $exampleNumber => $sql) {
 odbc_close($conn);
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 string(42) "/* non existent procedure xy */ execute xy"
 string(5) "37000"
-string(84) "[Microsoft][ODBC SQL Server Driver][SQL Server]Could not find stored procedure 'xy'."
-int(84)
+string(%d) "[Microsoft][%s][SQL Server]Could not find stored procedure 'xy'."
 
 string(58) "/* another erroneous query */ SELECT * FROM zwiebelfleisch"
 string(5) "S0002"
-string(84) "[Microsoft][ODBC SQL Server Driver][SQL Server]Invalid object name 'zwiebelfleisch'."
-int(84)
+string(%d) "[Microsoft][%s][SQL Server]Invalid object name 'zwiebelfleisch'."
 
 ==DONE==

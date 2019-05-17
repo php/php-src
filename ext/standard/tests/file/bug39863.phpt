@@ -7,17 +7,11 @@ Andrew van der Stock, vanderaj @ owasp.org
 
 $filename = __FILE__ . chr(0). ".ridiculous";
 
-if (file_exists($filename)) {
-    echo "FAIL\n";
-}
-else {
-    echo "PASS\n";
+try {
+    var_dump(file_exists($filename));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
-Warning: file_exists() expects parameter 1 to be a valid path, string given in %s on line %d
-PASS
-===DONE===
-
+--EXPECT--
+file_exists() expects parameter 1 to be a valid path, string given

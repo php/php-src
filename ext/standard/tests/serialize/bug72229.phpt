@@ -11,7 +11,7 @@ class C1
         $this->arr1[0] = $this;
         $this->arr2[0] = $this->arr1[0];
         $var1 = &$this->arr1[0];  // Set a reference...
-        unset($var1);             // ... and unset it. 
+        unset($var1);             // ... and unset it.
     }
 }
 $Obj1 = new C1();
@@ -22,7 +22,7 @@ print_r($Obj1);
 $Obj2->arr2[0] = 50;
 print_r($Obj2);
 ?>
---EXPECTF--
+--EXPECT--
 C1 Object
 (
     [arr1] => Array

@@ -17,7 +17,7 @@ var_dump(in_array($disabled_function, $functions['internal']));
 $functions = get_defined_functions(true);
 var_dump(in_array($disabled_function, $functions['internal']));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)

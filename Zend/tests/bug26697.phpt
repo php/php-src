@@ -1,5 +1,5 @@
 --TEST--
-Bug #26697 (calling class_exists on a nonexistent class in __autoload results in segfault)
+Bug #26697 (calling class_exists on a nonexistent class in autoloader results in segfault)
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ var_dump(class_exists('NotExistingClass'));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 {closure}(NotExistingClass)
 bool(false)
 {closure}(NotExistingClass), done

@@ -2,7 +2,7 @@
 Bug #40909 (pcre 7.0 regression)
 --FILE--
 <?php
-            
+
 $pattern =
 "/\s([\w_\.\/]+)(?:=([\'\"]?(?:[\w\d\s\?=\(\)\.,'_#\/\\:;&-]|(?:\\\\\"|\\\')?)+[\'\"]?))?/";
 $context = "<simpletag an_attribute=\"simpleValueInside\">";

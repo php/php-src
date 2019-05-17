@@ -28,12 +28,12 @@ $values = array (
   'ENDING',  //String
   '@#$%^',  //Special chars
 
-  
-  '\t',  
+
+  '\t',
   '\n',
   '\r',
   '\r\n',
-  
+
   '\0',  //Null char
   '123',  //Numeric
   '(MSG)',  //With ( and )
@@ -51,7 +51,7 @@ for($count = 0; $count < count($values); $count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different single quoted strings as 'ending' ***
 -- Iteration 0 --
 string(73) "This is to test chunk_split() with various 'single quoted' ending string."

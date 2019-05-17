@@ -67,7 +67,7 @@ foreach($heredoc_strings as $string)  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with heredoc strings ***
 
 --- Iteration 1 ---

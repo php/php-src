@@ -1,5 +1,5 @@
 --TEST--
-Bug #33116 (crash when assigning class name to global variable in __autoload)
+Bug #33116 (crash when assigning class name to global variable in autoloader)
 --FILE--
 <?php
 spl_autoload_register(function ($class) {

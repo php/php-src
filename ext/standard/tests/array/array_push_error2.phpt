@@ -3,7 +3,7 @@ Test array_push() function : error conditions - max int value as key
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -21,7 +21,6 @@ var_dump($array);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_push() : error conditions ***
 

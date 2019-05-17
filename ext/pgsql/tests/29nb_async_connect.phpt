@@ -23,18 +23,20 @@ if (!$db = pg_connect($conn_str, PGSQL_CONNECT_ASYNC)) {
 while (TRUE) {
 	switch ($status = pg_connect_poll($db)) {
 		case PGSQL_POLLING_READING:
-			if (nb_is_readable($db_socket)) { break 2; }
+			nb_is_readable($db_socket);
 			break;
 		case PGSQL_POLLING_WRITING:
-			if (nb_is_writable($db_socket)) { break 2; }
+			nb_is_writable($db_socket);
 			break;
 		case PGSQL_POLLING_FAILED:
 			die("async connection failed");
 		case PGSQL_POLLING_OK:
 			break 2;
+		default:
+			die("unknown poll status");
 	}
 }
-assert(pg_connection_status($db) === PGSQL_CONNECTION_MADE);
+assert(pg_connection_status($db) === PGSQL_CONNECTION_OK);
 echo "OK";
 
 pg_close($db);

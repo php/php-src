@@ -3,7 +3,7 @@ Test sprintf() function : usage variations - float formats with float values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -55,7 +55,7 @@ $float_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($float_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }
@@ -64,7 +64,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : float formats with float values ***
 
 -- Iteration 1 --

@@ -4,7 +4,7 @@ testing @ and error_reporting - 8
 <?php
 
 error_reporting(E_ALL);
-	
+
 function foo1($arg) {
 }
 
@@ -26,7 +26,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Undefined variable: undef3 in %s on line %d
 int(32767)
 Done

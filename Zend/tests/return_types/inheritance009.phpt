@@ -1,9 +1,7 @@
 --TEST--
 Inheritance Hinting Compile Checking Failure Internal Classes
-
 --INI--
 opcache.enable_cli=1
-
 --FILE--
 <?php
 class Foo {
@@ -20,7 +18,6 @@ class Bar extends Foo {
 
 var_dump(Bar::test());
 var_dump(Foo::test());
-
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>

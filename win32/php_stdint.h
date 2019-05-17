@@ -263,12 +263,3 @@ static __inline int64_t llabs(int64_t i)
 #ifndef u_char
 typedef unsigned __int8   u_char;
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

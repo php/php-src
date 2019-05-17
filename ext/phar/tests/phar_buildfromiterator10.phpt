@@ -10,11 +10,11 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator10.phar');
+	chdir(__DIR__);
+	$phar = new Phar(__DIR__ . '/buildfromiterator10.phar');
 	$dir = new RecursiveDirectoryIterator('.');
 	$iter = new RecursiveIteratorIterator($dir);
-	$a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), dirname(__FILE__) . DIRECTORY_SEPARATOR);
+	$a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), __DIR__ . DIRECTORY_SEPARATOR);
 	asort($a);
 	var_dump($a);
 } catch (Exception $e) {
@@ -24,8 +24,8 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromiterator10.phar');
+<?php
+unlink(__DIR__ . '/buildfromiterator10.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

@@ -12,11 +12,11 @@ function withRefValue($elements, $transform) {
 		$a[] = "v.$i";
 	}
 	$counter=0;
-	
+
 	echo "--> State of array before loop:\n";
 	var_dump($a);
-	
-	echo "--> Do loop:\n";	
+
+	echo "--> Do loop:\n";
 	foreach ($a as $k=>&$v) {
 		echo "     iteration $counter:  \$k=$k; \$v=$v\n";
 		eval($transform);
@@ -26,7 +26,7 @@ function withRefValue($elements, $transform) {
 			break;
 		}
 	}
-	
+
 	echo "--> State of array after loop:\n";
 	var_dump($a);
 }
@@ -69,7 +69,6 @@ withRefValue(4, $transform);
 
 ?>
 --EXPECT--
-
 Popping elements off end of an unreferenced array, using &$value.
 ---( Array with 1 element(s): )---
 --> State of array before loop:
@@ -488,18 +487,21 @@ array(3) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=3; $v=v.2
+     iteration 1:  $k=2; $v=v.1
+     iteration 2:  $k=4; $v=v.2
 --> State of array after loop:
-array(5) {
+array(6) {
   [0]=>
-  string(5) "new.1"
+  string(5) "new.2"
   [1]=>
-  string(5) "new.0"
+  string(5) "new.1"
   [2]=>
-  string(3) "v.0"
+  string(5) "new.0"
   [3]=>
-  string(3) "v.1"
+  string(3) "v.0"
   [4]=>
+  string(3) "v.1"
+  [5]=>
   &string(3) "v.2"
 }
 
@@ -517,19 +519,25 @@ array(4) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=4; $v=v.3
+     iteration 1:  $k=2; $v=v.1
+     iteration 2:  $k=4; $v=v.2
+     iteration 3:  $k=6; $v=v.3
 --> State of array after loop:
-array(6) {
+array(8) {
   [0]=>
-  string(5) "new.1"
+  string(5) "new.3"
   [1]=>
-  string(5) "new.0"
+  string(5) "new.2"
   [2]=>
-  string(3) "v.0"
+  string(5) "new.1"
   [3]=>
-  string(3) "v.1"
+  string(5) "new.0"
   [4]=>
-  string(3) "v.2"
+  string(3) "v.0"
   [5]=>
+  string(3) "v.1"
+  [6]=>
+  string(3) "v.2"
+  [7]=>
   &string(3) "v.3"
 }

@@ -27,7 +27,7 @@ similar_text("abcdefghabcdef", "zzzzabcdefggg", $percent);
 var_dump($percent);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 int(3)
 int(0)
 int(1)

@@ -23,7 +23,7 @@ foreach($classes as $class) {
 	var_dump($rc->getConstant('doesntexist'));
 }
 ?>
---EXPECTF--
+--EXPECT--
 Reflecting on class C: 
 string(12) "hello from C"
 bool(false)

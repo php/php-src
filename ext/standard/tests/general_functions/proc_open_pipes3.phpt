@@ -1,16 +1,14 @@
 --TEST--
-proc_open() with invalid pipes 
+proc_open() with invalid pipes
 --FILE--
 <?php
-
-include dirname(__FILE__) . "/proc_open_pipes.inc";
 
 for ($i = 3; $i<= 5; $i++) {
 	$spec[$i] = array('pipe', 'w');
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE");
-$callee = create_sleep_script();
+$callee = __DIR__ . "/proc_open_pipes_sleep.inc";
 
 $spec[$i] = array('pi');
 proc_open("$php -n $callee", $spec, $pipes);
@@ -27,13 +25,6 @@ proc_open("$php -n $callee", $spec, $pipes);
 var_dump($pipes);
 
 echo "END\n";
-?>
---CLEAN--
-<?php
-include dirname(__FILE__) . "/proc_open_pipes.inc";
-
-unlink_sleep_script();
-
 ?>
 --EXPECTF--
 Warning: proc_open(): pi is not a valid descriptor spec/mode in %s on line %d

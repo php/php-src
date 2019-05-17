@@ -5,19 +5,19 @@ foreach with nested iteratorAggregates
 class EnglishMealIterator implements Iterator {
 	private $pos=0;
 	private $myContent=array("breakfast", "dinner", "tea");
-	
+
 	public function valid() {
 		global $indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->pos<3;
 	}
-	
+
 	public function next() {
 		global $indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos++];
 	}
-	
+
 	public function rewind() {
 		global $indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
@@ -29,13 +29,13 @@ class EnglishMealIterator implements Iterator {
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return $this->myContent[$this->pos];
 	}
-	
+
 	public function key() {
 		global $indent;
 		echo "$indent--> " . __METHOD__ . " ($this->pos)\n";
 		return "meal " . $this->pos;
 	}
-	
+
 }
 
 class A1 implements IteratorAggregate {
@@ -58,22 +58,22 @@ class A3 implements IteratorAggregate {
 
 echo "\n-----( A1: )-----\n";
 foreach (new A1 as $k=>$v) {
-	echo "$k => $v\n";	
+	echo "$k => $v\n";
 }
 
 echo "\n-----( A2: )-----\n";
 foreach (new A2 as $k=>$v) {
-	echo "$k => $v\n";	
+	echo "$k => $v\n";
 }
 
 echo "\n-----( A3: )-----\n";
 foreach (new A3 as $k=>$v) {
-	echo "$k => $v\n";	
+	echo "$k => $v\n";
 }
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -----( A1: )-----
 --> EnglishMealIterator::rewind (0)
 --> EnglishMealIterator::valid (0)

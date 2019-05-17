@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    | Modified for pHASH by: Sara Golemon <pollita@php.net>
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_HASH_MD_H
 #define PHP_HASH_MD_H
@@ -67,7 +65,7 @@ typedef struct {
 
 PHP_HASH_API void make_digest(char *md5str, unsigned char *digest);
 PHP_HASH_API void PHP_MD5Init(PHP_MD5_CTX *);
-PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
 
 PHP_NAMED_FUNCTION(php_if_md5);
@@ -82,7 +80,7 @@ typedef struct {
 } PHP_MD4_CTX;
 
 PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX *);
-PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, size_t);
 PHP_HASH_API void PHP_MD4Final(unsigned char[16], PHP_MD4_CTX *);
 
 /* MD2 context */
@@ -94,7 +92,7 @@ typedef struct {
 } PHP_MD2_CTX;
 
 PHP_HASH_API void PHP_MD2Init(PHP_MD2_CTX *context);
-PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, size_t);
 PHP_HASH_API void PHP_MD2Final(unsigned char[16], PHP_MD2_CTX *);
 
 #endif

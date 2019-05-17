@@ -10,19 +10,19 @@ $values = array(234,
 				0352,
 				"234",
 				"234.5",
-				"23.45e1",				
+				"23.45e1",
 				null,
 				true,
 				false,
 				pow(0, -2),
-				acos(1.01));	
+				acos(1.01));
 ;
 for ($i = 0; $i < count($values); $i++) {
 	$res = is_infinite($values[$i]);
-	var_dump($res);		
+	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
@@ -37,6 +37,3 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-
-
-

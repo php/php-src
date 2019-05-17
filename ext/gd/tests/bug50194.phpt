@@ -13,7 +13,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';
 $im = imagecreatetruecolor(240, 55);
 $background = imagecolorallocatealpha($im, 60, 60, 60, 0); // no tranparency
 $black = imagecolorallocate($im, 0, 0, 0);
-imagealphablending($im, false); 
+imagealphablending($im, false);
 imagefilledrectangle($im, 0, 0, 239, 54, $background);
 $text = 'Testing ... ';
 $font = __DIR__ . DIRECTORY_SEPARATOR . 'Tuffy.ttf';

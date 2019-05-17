@@ -22,14 +22,16 @@ $userinput = "1\0"; // from post or get data
 $temp = $tempdir. "/test" . $userinput .".tmp";
 
 echo "\nimagegd2 TEST\n";
-imagegd2($image, $temp);
+try {
+    imagegd2($image, $temp);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(file_exists($tempdir. "/test1"));
 var_dump(file_exists($tempdir. "/test1.tmp"));
 foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
-
---EXPECTF--
+--EXPECT--
 imagegd2 TEST
-
-Warning: imagegd2() expects parameter 2 to be a valid path, string given in %s on line %d
+imagegd2() expects parameter 2 to be a valid path, string given
 bool(false)
 bool(false)

@@ -11,7 +11,7 @@ echo "\n*** Testing array_keys() on range of values ***\n";
 $arr_range = array(
   2147483647 => 1,
   2147483648 => 2,
-  -2147483647 => 3, 
+  -2147483647 => 3,
   -2147483648 => 4,
   -2147483649 => 5,
   -0 => 6,
@@ -25,7 +25,7 @@ var_dump(array_keys(array()));  // null array
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() on range of values ***
 array(4) {
   [0]=>

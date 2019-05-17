@@ -7,8 +7,8 @@ Test strrpos() function : usage variations - unexpected inputs for 'needle' argu
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function with unexpected inputs for 'needle' and 
- *  an expected type of input for 'haystack' argument 
+/* Test strrpos() function with unexpected inputs for 'needle' and
+ *  an expected type of input for 'haystack' argument
 */
 
 echo "*** Testing strrpos() function with unexpected values for needle ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -65,7 +65,7 @@ $needles =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -83,7 +83,11 @@ $needles =  array (
 $counter = 1;
 for($index = 0; $index < count($needles); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( strrpos($haystack, $needles[$index]) );
+  try {
+    var_dump( strrpos($haystack, $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
@@ -91,58 +95,46 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function with unexpected values for needle ***
 -- Iteration 1 --
-bool(false)
+int(42)
 -- Iteration 2 --
-bool(false)
+int(41)
 -- Iteration 3 --
 bool(false)
 -- Iteration 4 --
 bool(false)
 -- Iteration 5 --
-bool(false)
+int(27)
 -- Iteration 6 --
-bool(false)
+int(21)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
 bool(false)
 -- Iteration 9 --
-bool(false)
+int(28)
 -- Iteration 10 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 11 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 12 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 13 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 14 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, array given
 -- Iteration 15 --
-bool(false)
+int(41)
 -- Iteration 16 --
 bool(false)
 -- Iteration 17 --
-bool(false)
+int(41)
 -- Iteration 18 --
 bool(false)
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
+int(64)
 -- Iteration 20 --
 bool(false)
 -- Iteration 21 --
@@ -152,9 +144,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrpos(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrpos() expects parameter 2 to be string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

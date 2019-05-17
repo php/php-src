@@ -1,8 +1,8 @@
 --TEST--
-Test DateTime class inheritance : with user space fromat() method  
+Test DateTime class inheritance : with user space fromat() method
 --FILE--
 <?php
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing new DateTime() : with user format() method ***\n";
@@ -20,7 +20,7 @@ echo $d->format() . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing new DateTime() : with user format() method ***
 May 1, 1967, 10:30:41 pm
 ===DONE===

@@ -9,9 +9,9 @@ foreach (['nokia.jpg', 'samsung.jpg', 'panasonic.jpg'] as $picture) {
 
 	$info = exif_read_data(__DIR__ . DIRECTORY_SEPARATOR . $picture);
 	var_dump($info['MakerNote']);
-} 
+}
 ?>
---EXPECTF--
+--EXPECT--
 nokia.jpg: string(5) "Nikon"
 samsung.jpg: NULL
 panasonic.jpg: string(9) "Panasonic"

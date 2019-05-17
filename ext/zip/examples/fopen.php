@@ -31,5 +31,3 @@ while (!feof($fp)) {
 fclose($fp);
 file_put_contents('t',$contents);
 echo "done.\n";
-
-

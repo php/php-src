@@ -3,9 +3,6 @@ parse_ini_string() multiple calls
 --FILE--
 <?php
 
-var_dump(parse_ini_string());
-var_dump(parse_ini_string(1,1,1,1));
-
 $ini = "
 test =
 ";
@@ -86,12 +83,7 @@ var_dump(parse_ini_string($ini, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: parse_ini_string() expects at least 1 parameter, 0 given in %s
-bool(false)
-
-Warning: parse_ini_string() expects at most 3 parameters, 4 given in %s
-bool(false)
+--EXPECTF--
 array(1) {
   ["test"]=>
   string(0) ""

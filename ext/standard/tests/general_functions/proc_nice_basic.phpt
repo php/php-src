@@ -28,5 +28,5 @@ if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
 	$niceAfter = getNice($pid);
 	var_dump($niceBefore == ($niceAfter - $delta));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

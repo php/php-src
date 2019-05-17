@@ -7,13 +7,13 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // Open handle
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error3.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
@@ -39,7 +39,7 @@ fclose( $fp );
 --CLEAN--
 <?php
 
-$file = 'vfprintf_test.txt';
+$file = 'vfprintf_error3.txt';
 unlink( $file );
 
 ?>

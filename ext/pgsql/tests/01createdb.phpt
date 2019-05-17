@@ -9,7 +9,7 @@ PostgreSQL create db
 include('config.inc');
 
 $db = pg_connect($conn_str);
-if (!@pg_num_rows(@pg_query($db, "SELECT * FROM ".$table_name)))
+if (!($q = @pg_query($db, "SELECT * FROM ".$table_name)) || !@pg_num_rows($q))
 {
 	pg_query($db,$table_def); // Create table here
 	for ($i=0; $i < $num_test_record; $i++) {
@@ -21,7 +21,7 @@ else {
 }
 
 $v = pg_version();
-if (version_compare($v['server'], '9.2', '>=') && !@pg_num_rows(@pg_query($db, "SELECT * FROM ".$table_name_92)))
+if (version_compare($v['server'], '9.2', '>=') && (!($q = @pg_query($db, "SELECT * FROM ".$table_name_92)) || !@pg_num_rows($q)))
 {
 	pg_query($db,$table_def_92); // Create table here
 }

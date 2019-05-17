@@ -1,7 +1,7 @@
 --TEST--
 Creating instances dynamically
 --FILE--
-<?php 
+<?php
 
 $arr = array(new stdClass, 'stdClass');
 

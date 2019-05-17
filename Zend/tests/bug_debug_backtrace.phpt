@@ -5,17 +5,17 @@ Bug - crash in debug_backtrace when trace starts in eval
 function foo() {
     bar();
 }
-                                                                                                            
+
 function bar() {
     boo();
 }
-                                                                                                            
+
 function boo(){
     debug_print_backtrace();
 }
-                                                                                                            
+
 eval("foo();");
-                                                                                                            
+
 echo "Done\n";
 ?>
 ===DONE===

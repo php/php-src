@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
   |         Johannes Schlueter <johannes@mysql.com>                      |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,7 +80,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
+static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 	&pdo_mysql_module_entry,
 	pdo_mysql_convert_zv_to_mysqlnd
 };
@@ -226,7 +224,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 /* }}} */
 
 /* {{{ pdo_mysql_functions[] */
-const zend_function_entry pdo_mysql_functions[] = {
+static const zend_function_entry pdo_mysql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */
@@ -265,13 +263,3 @@ zend_module_entry pdo_mysql_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

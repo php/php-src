@@ -34,7 +34,7 @@ var_dump(nl2br($heredoc_str2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing nl2br() : usage variations ***
 string(147) "<br />
 <br />

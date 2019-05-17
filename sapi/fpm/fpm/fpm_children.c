@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_children.c,v 1.32.2.2 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -58,6 +56,10 @@ static struct fpm_child_s *fpm_child_alloc() /* {{{ */
 
 static void fpm_child_free(struct fpm_child_s *child) /* {{{ */
 {
+	if (child->log_stream) {
+		zlog_stream_close(child->log_stream);
+		free(child->log_stream);
+	}
 	free(child);
 }
 /* }}} */
@@ -146,6 +148,7 @@ static struct fpm_child_s *fpm_child_find(pid_t pid) /* {{{ */
 static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	fpm_globals.max_requests = wp->config->pm_max_requests;
+	fpm_globals.listening_socket = dup(wp->listening_socket);
 
 	if (0 > fpm_stdio_init_child(wp)  ||
 	    0 > fpm_log_init_child(wp)    ||
@@ -192,7 +195,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "with code %d", WEXITSTATUS(status));
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill) {
 				restart_child = 0;
@@ -204,7 +207,11 @@ void fpm_children_bury() /* {{{ */
 
 		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
+#ifdef WCOREDUMP
 			const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
+#else
+			const char* have_core = "";
+#endif
 
 			if (signame == NULL) {
 				signame = "";
@@ -213,7 +220,7 @@ void fpm_children_bury() /* {{{ */
 			snprintf(buf, sizeof(buf), "on signal %d (%s%s)", WTERMSIG(status), signame, have_core);
 
 			/* if it's been killed because of dynamic process management
-			 * don't restart it automaticaly
+			 * don't restart it automatically
 			 */
 			if (child && child->idle_kill && WTERMSIG(status) == SIGQUIT) {
 				restart_child = 0;
@@ -477,4 +484,3 @@ int fpm_children_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

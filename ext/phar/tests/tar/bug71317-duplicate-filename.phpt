@@ -2,11 +2,10 @@
 Bug #71317: regression in opening tar based phar files
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
 $testDirectory = __DIR__ . '/files/test_bug71317';
 $testTarFilename  = __DIR__ . '/files/test_bug71317.tar';

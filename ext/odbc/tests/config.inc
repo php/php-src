@@ -16,4 +16,3 @@ if (false === $user) {
 if (false == $pass) {
 	$pass = '';
 }
-

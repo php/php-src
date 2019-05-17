@@ -1,5 +1,5 @@
 --TEST--
-Test sizeof() function : usage variations - all kinds of unset variables for 'var' argument 
+Test sizeof() function : usage variations - all kinds of unset variables for 'var' argument
 --FILE--
 <?php
 /* Prototype  : int sizeof($mixed var[, int $mode])
@@ -15,11 +15,11 @@ echo "--- Testing sizeof() for all kinds of unset variables in default, Normal a
 
 // class declaration
 class test
-{  
+{
   public $member1;
 }
 
-// get an resource variable 
+// get an resource variable
 $fp = fopen(__FILE__, "r");
 
 // array containing different types of variables
@@ -54,21 +54,21 @@ $values = array (
   /* 20 */  $fp
 );
 
-// loop through the each element of the $values array for 'var' argument 
+// loop through the each element of the $values array for 'var' argument
 // and check the functionality of sizeof()
 $counter = 1;
 foreach($values as $value)
 {
   echo "-- Iteration $counter --\n";
- 
-  // unset the variable 
+
+  // unset the variable
   unset($value);
 
   // now check the size of unset variable when different modes are given
   echo "Default Mode: ";
   var_dump( sizeof($value) );
   echo "\n";
- 
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($value, COUNT_NORMAL) );
   echo "\n";

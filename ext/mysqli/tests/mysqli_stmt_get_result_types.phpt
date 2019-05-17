@@ -253,5 +253,5 @@ mysqli_stmt_get_result - data types
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

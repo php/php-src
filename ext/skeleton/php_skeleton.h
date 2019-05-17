@@ -13,4 +13,3 @@ ZEND_TSRMLS_CACHE_EXTERN()
 # endif
 
 #endif	/* PHP_%EXTNAMECAPS%_H */
-%FOOTER%

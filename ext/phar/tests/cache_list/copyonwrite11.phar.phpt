@@ -8,7 +8,7 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE_EXTERNAL--
 files/write11.phar
---EXPECTF--
+--EXPECT--
 string(174) "<?php
 $p = new Phar(__FILE__);
 var_dump($p->getStub());
@@ -18,5 +18,5 @@ echo strlen($p2->getStub()),"\n";
 echo "ok\n";
 __HALT_COMPILER(); ?>
 "
-6653
+6643
 ok

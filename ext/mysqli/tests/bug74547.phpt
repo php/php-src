@@ -20,6 +20,6 @@ Bug #74547 mysqli::change_user() doesn't accept null as $database argument w/str
 	mysqli_close($link);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 ===DONE===

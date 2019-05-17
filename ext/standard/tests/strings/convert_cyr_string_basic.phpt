@@ -1,5 +1,5 @@
 --TEST--
-Test convert_cyr_string() function : basic functionality 
+Test convert_cyr_string() function : basic functionality
 --FILE--
 <?php
 
@@ -26,7 +26,7 @@ for ($i = 128; $i < 256; $i++) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing convert_cyr_string() : basic functionality ***
 
 -- First try some simple English text --

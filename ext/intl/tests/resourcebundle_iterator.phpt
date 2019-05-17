@@ -32,7 +32,7 @@ Test ResourceBundle iterator
 	   echo "$onekey => $oneval\n";
 	}
 ?>
---EXPECTF--
+--EXPECT--
 Here comes testarray:
 ResourceBundle Object
 (

@@ -1,6 +1,5 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.6 2005-06-21 13:47:38 sniper Exp $
 # replacement for genif.pl
 
 infile=$1
@@ -13,7 +12,7 @@ awk=$1
 shift
 
 if test -z "$infile" || test -z "$srcdir"; then
-	echo "please supply infile and srcdir"
+	echo "please supply infile and srcdir" >&2
 	exit 1
 fi
 
@@ -38,5 +37,3 @@ cat $infile | \
 	-e "s'@EXT_MODULE_PTRS@'$module_ptrs'" \
 	-e 's/@NEWLINE@/\
 /g'
-
-

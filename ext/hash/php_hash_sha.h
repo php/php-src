@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    | SHA256 Author: Sara Golemon <pollita@php.net>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_HASH_SHA_H
 #define PHP_HASH_SHA_H
@@ -42,7 +40,7 @@ typedef struct {
 } PHP_SHA1_CTX;
 
 PHP_HASH_API void PHP_SHA1Init(PHP_SHA1_CTX *);
-PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
 
 PHP_FUNCTION(sha1);
@@ -58,7 +56,7 @@ typedef struct {
 } PHP_SHA224_CTX;
 
 PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX *);
-PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SHA224Final(unsigned char[28], PHP_SHA224_CTX *);
 
 /* SHA256 context. */
@@ -69,7 +67,7 @@ typedef struct {
 } PHP_SHA256_CTX;
 
 PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX *);
-PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
 
 /* SHA384 context */
@@ -80,7 +78,7 @@ typedef struct {
 } PHP_SHA384_CTX;
 
 PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX *);
-PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SHA384Final(unsigned char[48], PHP_SHA384_CTX *);
 
 /* SHA512 context */
@@ -91,7 +89,7 @@ typedef struct {
 } PHP_SHA512_CTX;
 
 PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX *);
-PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, unsigned int);
+PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, size_t);
 PHP_HASH_API void PHP_SHA512Final(unsigned char[64], PHP_SHA512_CTX *);
 
 PHP_HASH_API void PHP_SHA512_256Init(PHP_SHA512_CTX *);

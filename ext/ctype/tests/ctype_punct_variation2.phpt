@@ -5,8 +5,8 @@ Test ctype_punct() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
@@ -17,7 +17,7 @@ Test ctype_punct() function : usage variations - different integers
 
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
 	if (ctype_punct($c)) {
@@ -25,10 +25,10 @@ for ($c = 1; $c < 256; $c++) {
 	}
 }
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 character code 33 is punctuation
 character code 34 is punctuation

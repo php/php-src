@@ -1,7 +1,7 @@
 --TEST--
 Bug #72697: select_colors write out-of-bounds
 --SKIPIF--
-<?php 
+<?php
 if (!function_exists("imagecreatetruecolor")) die("skip");
 if (PHP_INT_MAX !== 9223372036854775807) die("skip for 64-bit long systems only");
 ?>

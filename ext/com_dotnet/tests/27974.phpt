@@ -1,10 +1,10 @@
 --TEST--
 COM: mapping a safearray
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
 --FILE--
-<?php // $Id$
+<?php
 error_reporting(E_ALL);
 
 try {

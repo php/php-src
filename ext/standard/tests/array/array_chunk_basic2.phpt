@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : basic functionality - 'preserve_keys' as true/false 
+Test array_chunk() function : basic functionality - 'preserve_keys' as true/false
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
@@ -20,18 +20,18 @@ $input_arrays = array(
 
   // associative arrays - key as string
   array('key1' => 1, "key2" => 2, "key3" => 3),
- 
+
   // associative arrays - key as numeric
   array(1 => 'one', 2 => "two", 3 => "three"),
 
   // array containing elements with/without keys
   array(1 => 'one','two', 3 => 'three', 4, "five" => 5)
-); 
+);
 
 $count = 1;
 // loop through each element of the array for input
-foreach ($input_arrays as $input_array){ 
-  echo "\n-- Iteration $count --\n";  
+foreach ($input_arrays as $input_array){
+  echo "\n-- Iteration $count --\n";
   var_dump( array_chunk($input_array, $size, true) );
   var_dump( array_chunk($input_array, $size, false) );
   $count++;
@@ -39,7 +39,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : basic functionality ***
 
 -- Iteration 1 --

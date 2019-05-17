@@ -2,11 +2,10 @@
 Phar: corrupted zip (truncated filename record)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --FILE--
 <?php
 try {
-	new PharData(dirname(__FILE__) . '/files/truncfilename.zip');
+	new PharData(__DIR__ . '/files/truncfilename.zip');
 } catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 }

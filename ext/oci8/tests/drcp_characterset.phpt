@@ -5,7 +5,7 @@ DRCP: oci_pconnect() and oci_connect() with different character sets
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 // Create connections with oci_connect and oci_pconnect with UTF8 as Charset
 

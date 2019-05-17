@@ -25,7 +25,7 @@ if ($pid == -1) {
 	pcntl_waitpid($pid, $status, 0, $rusage);
 	var_dump(gettype($rusage));
 	var_dump(count($rusage));
-	
+
 	$rusage = new stdClass;
 	pcntl_waitpid($pid, $status, 0, $rusage);
 	var_dump(gettype($rusage));

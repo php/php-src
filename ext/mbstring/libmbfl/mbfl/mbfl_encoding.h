@@ -36,7 +36,6 @@
 enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
 	mbfl_no_encoding_pass,
-	mbfl_no_encoding_auto,
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_byte2be,
 	mbfl_no_encoding_byte2le,

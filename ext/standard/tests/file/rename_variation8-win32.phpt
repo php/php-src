@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') die('skip..  for Windows');
 */
 
 echo "\n*** Testing rename() on non-existing file ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // try renaming a non existing file
 $src_name = $file_path."/non_existent_file.tmp";
@@ -32,7 +32,7 @@ var_dump( rename($dir_name, $new_dir_name) );
 var_dump( file_exists($dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) );  // expecting true
 
-// try to rename an non_existing dir 
+// try to rename an non_existing dir
 echo "\n*** Testing rename() on non-existing directory ***\n";
 $non_existent_dir_name = $file_path."/non_existent_dir";
 $new_dir_name = "$file_path/rename_basic_dir2";
@@ -45,7 +45,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__)."/rename_basic_dir1");
+rmdir(__DIR__."/rename_basic_dir1");
 ?>
 --EXPECTF--
 *** Testing rename() on non-existing file ***
@@ -67,4 +67,3 @@ bool(false)
 bool(false)
 bool(false)
 Done
-

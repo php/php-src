@@ -19,7 +19,7 @@ Michele Orselli mo@ideato.it
     // to 10th of a second. this means there can be up to a .9 millisecond difference
     // which will fail this test. this test randomly fails on Windows and this is the cause.
     //
-    // fix: round to nearest millisecond 
+    // fix: round to nearest millisecond
     // passes for up to .5 milliseconds less, fails for more than .5 milliseconds
     // should be fine since time_sleep_until() on Windows is accurate to the
     // millisecond(.5 rounded up is 1 millisecond)

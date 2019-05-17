@@ -35,7 +35,6 @@
 #include "mbfilter_iso2022jp_2004.h"
 #include "mbfilter_sjis_2004.h"
 
-#include "unicode_table_jis2004.h"
 #include "unicode_table_jis.h"
 
 extern int mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter);
@@ -166,5 +165,3 @@ retry:
 
 	return c;
 }
-
-

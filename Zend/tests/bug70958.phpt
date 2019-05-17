@@ -1,5 +1,5 @@
 --TEST--
-Bug #70958 (Invalid opcode while using ::class as trait method paramater default value)
+Bug #70958 (Invalid opcode while using ::class as trait method parameter default value)
 --FILE--
 <?php
 trait Foo

@@ -34,7 +34,7 @@ foreach($it as $val=>$key)
 ?>
 ===DONE===
 <?php exit(0);
---EXPECTF--
+--EXPECT--
 ===EmptyIterator===
 ===InfiniteIterator===
 2=>C

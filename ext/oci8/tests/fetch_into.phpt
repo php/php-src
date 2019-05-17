@@ -5,7 +5,7 @@ ocifetchinto()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -49,7 +49,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 array(2) {
   [0]=>

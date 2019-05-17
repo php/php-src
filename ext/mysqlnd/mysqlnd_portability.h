@@ -49,13 +49,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define _LONG_LONG 1        /* For AIX string library */
 #endif
 
-
 /* Go around some bugs in different OS and compilers */
-#if defined(_HPUX_SOURCE) && defined(HAVE_SYS_STREAM_H)
-#include <sys/stream.h>        /* HPUX 10.20 defines ulong here. UGLY !!! */
-#define HAVE_ULONG
-#endif
-
 
 #if SIZEOF_LONG_LONG > 4
 #define HAVE_LONG_LONG 1
@@ -389,13 +383,3 @@ typedef union {
 #endif /* float8get */
 
 #endif /* MYSQLND_PORTABILITY_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

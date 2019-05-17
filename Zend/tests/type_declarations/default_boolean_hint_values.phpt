@@ -11,6 +11,6 @@ function foo(bool $x = true, bool $y = false) {
 
 foo();
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

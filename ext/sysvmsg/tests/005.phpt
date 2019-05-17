@@ -10,18 +10,17 @@ $tests = array(null, 'foo');
 foreach ($tests as $q) {
 
     if ($q === null) {
-	do {
-	    $id = ftok(__FILE__, chr(mt_rand(0, 255)));
-	} while (msg_queue_exists($id));
-	
+		do {
+			$id = ftok(__FILE__, chr(mt_rand(0, 255))); } while (msg_queue_exists($id));
+    }
+
 	$q = msg_get_queue($id) or die("Failed to create queue");
 	msg_remove_queue($q) or die("Failed to close queue");
-    }
 
     echo "Using '$q' as queue resource:\n";
 
     $errno = 0;
-    
+
     var_dump(msg_set_queue($q, array('msg_qbytes' => 1)));
 
     var_dump(msg_stat_queue($q));
@@ -50,22 +49,16 @@ bool(false)
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
 bool(true)
-Using 'foo' as queue resource:
-
-Warning: msg_set_queue() expects parameter 1 to be resource, string given in %s on line %d
+Using 'Resource id #5' as queue resource:
 bool(false)
-
-Warning: msg_stat_queue() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
-
-Warning: msg_receive() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
+bool(true)
+
+Warning: msg_receive(): maximum size of the message has to be greater than zero in %s on line %d
 bool(false)
 
-Warning: msg_receive() expects parameter 1 to be resource, string given in %s on line %d
+Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
-
-Warning: msg_send() expects parameter 1 to be resource, string given in %s on line %d
-bool(false)
-bool(false)
+bool(true)
 Done

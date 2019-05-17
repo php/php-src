@@ -34,8 +34,6 @@
  * SUCH DAMAGE.
  */
 
-/* $Id$ */
-
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)merge.c	8.2 (Berkeley) 2/14/94";
 #endif /* LIBC_SCCS and not lint */
@@ -347,12 +345,3 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 		}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

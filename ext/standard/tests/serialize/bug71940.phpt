@@ -43,7 +43,7 @@ $serialized = serialize([$entry1, $entry2]);
 print_r(unserialize($serialized));
 
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => Entry Object

@@ -5,8 +5,8 @@ Test ctype_punct() function : usage variations - different punctuation
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
@@ -41,7 +41,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
        base64_decode("w4DDoMOHw6fDiMOo"), // non-ascii characters
        "!$%@\n",
 /*25*/ "\"?!\"",
@@ -57,7 +57,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_punct() : usage variations ***
 
 -- Iteration 1 --

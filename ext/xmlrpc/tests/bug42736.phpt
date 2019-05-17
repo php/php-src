@@ -28,7 +28,7 @@ var_dump($response);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(402) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodResponse>
 <params>

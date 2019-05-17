@@ -10,7 +10,7 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
@@ -19,6 +19,9 @@ $db->exec('INSERT INTO test VALUES(1)');
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 	case 'dblib':
 		$sql = 'SELECT TOP :limit * FROM test';
+		break;
+	case 'odbc':
+		$sql = 'SELECT TOP (:limit) * FROM test';
 		break;
 	case 'firebird':
 		$sql = 'SELECT FIRST :limit * FROM test';
@@ -37,7 +40,7 @@ if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

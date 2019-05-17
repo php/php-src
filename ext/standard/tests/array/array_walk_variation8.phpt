@@ -3,7 +3,7 @@ Test array_walk() function : usage variations - buit-in function as callback
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -25,7 +25,11 @@ echo "-- With 'min' built-in function --\n";
 var_dump( array_walk($input, "min"));
 
 echo "-- With 'echo' language construct --\n";
-var_dump( array_walk($input, "echo"));
+try {
+    var_dump( array_walk($input, "echo"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done"
 ?>
@@ -36,7 +40,5 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-
-Warning: array_walk() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
+array_walk() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name
 Done

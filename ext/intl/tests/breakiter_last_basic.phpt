@@ -14,7 +14,7 @@ $bi->setText('foo bar trans');
 var_dump($bi->current());
 var_dump($bi->last());
 var_dump($bi->current());
---EXPECTF--
+--EXPECT--
 int(0)
 int(13)
 int(13)

@@ -61,7 +61,7 @@ function base64_encode_var_dump($regs) {
 	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 ASCII String without $regs arg:		int(1)

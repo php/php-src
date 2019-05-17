@@ -1,5 +1,7 @@
 --TEST--
 Bug #73789 (Strange behavior of class constants in switch/case block)
+--SKIPIF--
+<?php if (!extension_loaded('ctype')) die('skip extension ctype not loaded'); ?>
 --FILE--
 <?php
 class Lexer
@@ -26,5 +28,6 @@ class Lexer
 	}
 }
 var_dump((new Lexer())->getType("dot"));
+?>
 --EXPECT--
 int(2)

@@ -3,14 +3,14 @@ Test array_diff_key() function : usage variation - Passing integer indexed array
 --FILE--
 <?php
 /* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(-07 => '-07', 0xA => '0xA'); 
+$input_array = array(-07 => '-07', 0xA => '0xA');
 
 $input_arrays = array(
       'decimal indexed' => array(10 => '10', '-17' => '-17'),
@@ -26,7 +26,7 @@ foreach($input_arrays as $key =>$value) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
 --decimal indexed--

@@ -14,7 +14,7 @@ var_dump((string)$c == (string)$a);
 var_dump($a->key() == $c->key());
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

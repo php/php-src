@@ -3,7 +3,7 @@ Test krsort() function : usage variations - sort array with/without key values
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation. 
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation.
  * Source code: ext/standard/array.c
 */
 
@@ -30,7 +30,7 @@ $various_arrays = array (
 $count = 1;
 echo "\n-- Testing krsort() by supplying various arrays with/without key values --\n";
 
-// loop through to test krsort() with different arrays, 
+// loop through to test krsort() with different arrays,
 foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n";
 
@@ -48,7 +48,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying various arrays with/without key values --

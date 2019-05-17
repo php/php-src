@@ -45,9 +45,9 @@ while ($stmt->fetch()) {
 echo "Finished 1\n";
 
 $newArray = array();
-	
+
 echo "Finished 2\n";
-	
+
 ?>
 --CLEAN--
 <?php
@@ -60,6 +60,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS bug72489"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 Finished 1
 Finished 2

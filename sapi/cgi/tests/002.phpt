@@ -1,8 +1,8 @@
 --TEST--
 defining INI options with -d
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -11,7 +11,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$file = dirname(__FILE__)."/002.test.php";
+$file = __DIR__."/002.test.php";
 
 file_put_contents($file, '<?php var_dump(ini_get("max_execution_time")); ?>');
 
@@ -27,7 +27,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 

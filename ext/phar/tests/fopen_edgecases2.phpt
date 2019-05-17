@@ -2,17 +2,20 @@
 Phar: test edge cases of fopen() function interception #2
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(phpversion(), '6.0', '>=')) die('skip parameter parsing changed in 6.0'); ?>
 --INI--
 phar.readonly=0
 --FILE--
 <?php
 Phar::interceptFileFuncs();
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-fopen(array(), 'r');
-chdir(dirname(__FILE__));
+try {
+    fopen(array(), 'r');
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+chdir(__DIR__);
 file_put_contents($fname, "blah\n");
 file_put_contents("foob", "test\n");
 $a = fopen($fname, 'rb');
@@ -32,11 +35,11 @@ include $pname . '/foo/hi';
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php rmdir(dirname(__FILE__) . '/poo'); ?>
-<?php unlink(dirname(__FILE__) . '/foob'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php rmdir(__DIR__ . '/poo'); ?>
+<?php unlink(__DIR__ . '/foob'); ?>
 --EXPECTF--
-Warning: fopen() expects parameter 1 to be a valid path, array given in %sfopen_edgecases2.php on line %d
+fopen() expects parameter 1 to be a valid path, array given
 blah
 test
 

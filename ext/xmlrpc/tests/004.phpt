@@ -7,7 +7,6 @@ xmlrpc_encode() Simple test encode int
 
 $response = xmlrpc_encode(1);
 echo $response;
-
 --EXPECT--
 <?xml version="1.0" encoding="utf-8"?>
 <params>

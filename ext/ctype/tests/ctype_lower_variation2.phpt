@@ -5,7 +5,7 @@ Test ctype_lower() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)  
+ * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -23,11 +23,11 @@ for ($i = 0; $i < 256; $i++) {
 		echo "character code $i is a lower case character\n";
 	}
 }
- 
+
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_lower() : usage variations ***
 character code 97 is a lower case character
 character code 98 is a lower case character

@@ -10,9 +10,9 @@ phar.require_hash=0
 <?php
 
 $file = "zfapp";
-$orig_file = dirname(__FILE__) . "/files/$file.tgz";
-$tgz_file = dirname(__FILE__) . "/$file.tgz";
-$phar_file = dirname(__FILE__) . "/$file.phar.tar.gz";
+$orig_file = __DIR__ . "/files/$file.tgz";
+$tgz_file = __DIR__ . "/$file.tgz";
+$phar_file = __DIR__ . "/$file.phar.tar.gz";
 copy($orig_file, $tgz_file);
 
 $phar = new PharData($tgz_file);
@@ -37,8 +37,8 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/zfapp.tgz');
-unlink(dirname(__FILE__) . '/zfapp.phar.tar.gz');
+unlink(__DIR__ . '/zfapp.tgz');
+unlink(__DIR__ . '/zfapp.phar.tar.gz');
 ?>
 --EXPECTF--
 phar://%szfapp.phar.tar.gz/application/default/controllers/ErrorController.php

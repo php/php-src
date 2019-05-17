@@ -12,7 +12,8 @@ require "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
-var_dump(ldap_exop_passwd($link, "cn=userA,$base", "wrongPassword", "newPassword"));
+var_dump(ldap_exop_passwd($link, "cn=userA,$base", "wrongPassword", "newPassword", $ctrls));
+var_dump($ctrls);
 var_dump(ldap_error($link));
 var_dump(ldap_errno($link));
 var_dump(test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version));
@@ -27,8 +28,10 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-Warning: ldap_exop_passwd(): Passwd modify extended operation failed: Server is unwilling to perform (53) in %s on line %d
+Warning: ldap_exop_passwd(): Passwd modify extended operation failed: %s (53) in %s on line %d
 bool(false)
+array(0) {
+}
 string(30) "Server is unwilling to perform"
 int(53)
 

@@ -1,11 +1,11 @@
 --TEST--
-Test array_uintersect_uassoc() function : usage variation - incorrect callbacks 
+Test array_uintersect_uassoc() function : usage variation - incorrect callbacks
 --FILE--
 <?php
 /* Prototype  : array array_uintersect_uassoc(array arr1, array arr2 [, array ...], callback data_compare_func, callback key_compare_func)
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect_uassoc() : usage variation - incorrect callbacks ***\n";
@@ -37,7 +37,7 @@ var_dump(array_uintersect_uassoc($arr1, $arr2, 'too_few_parameters', 'too_few_pa
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_uintersect_uassoc() : usage variation - incorrect callbacks ***
 
 -- comparison function with an incorrect return value --

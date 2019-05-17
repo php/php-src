@@ -5,13 +5,13 @@ serialize_precision=17
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float vlaues 
+// different valid  float values
 $valid_floats = array(
 	  "-2147483649" => (float)-2147483649, // float value
 	  "2147483648" => (float)2147483648,  // float value

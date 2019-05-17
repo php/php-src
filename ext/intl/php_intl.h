@@ -71,15 +71,6 @@ PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
 
-#define PHP_INTL_VERSION "1.1.0"
+#define PHP_INTL_VERSION PHP_VERSION
 
 #endif  /* PHP_INTL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,19 +12,19 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
 /* pass 1
  * - substitute persistent constants (true, false, null, etc)
  * - perform compile-time evaluation of constant binary and unary operations
- * - optimize series of ADD_STRING and/or ADD_CHAR
  * - convert CAST(IS_BOOL,x) into BOOL(x)
  * - pre-evaluate constant function calls
+ * - eliminate FETCH $GLOBALS followed by FETCH_DIM/UNSET_DIM/ISSET_ISEMPTY_DIM
  */
 
 #include "php.h"
@@ -34,8 +34,6 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
-
-#define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
@@ -131,79 +129,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
-#if 0
-		case ZEND_ADD_STRING:
-		case ZEND_ADD_CHAR:
-			{
-				zend_op *next_op = opline + 1;
-				int requires_conversion = (opline->opcode == ZEND_ADD_CHAR? 1 : 0);
-				size_t final_length = 0;
-				zend_string *str;
-				char *ptr;
-				zend_op *last_op;
-
-				/* There is always a ZEND_RETURN at the end
-				if (next_op>=end) {
-					break;
-				}
-				*/
-				while (next_op->opcode == ZEND_ADD_STRING || next_op->opcode == ZEND_ADD_CHAR) {
-					if (opline->result.var != next_op->result.var) {
-						break;
-					}
-					if (next_op->opcode == ZEND_ADD_CHAR) {
-						final_length += 1;
-					} else { /* ZEND_ADD_STRING */
-						final_length += Z_STRLEN(ZEND_OP2_LITERAL(next_op));
-					}
-					next_op++;
-				}
-				if (final_length == 0) {
-					break;
-				}
-				last_op = next_op;
-				final_length += (requires_conversion? 1 : Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-				str = zend_string_alloc(final_length, 0);
-				str->len = final_length;
-				ptr = str->val;
-				ptr[final_length] = '\0';
-				if (requires_conversion) { /* ZEND_ADD_CHAR */
-					char chval = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-
-					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
-					ptr[0] = chval;
-					opline->opcode = ZEND_ADD_STRING;
-					ptr++;
-				} else { /* ZEND_ADD_STRING */
-					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
-					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
-					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
-					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
-				}
-				next_op = opline + 1;
-				while (next_op < last_op) {
-					if (next_op->opcode == ZEND_ADD_STRING) {
-						memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(next_op)), Z_STRLEN(ZEND_OP2_LITERAL(next_op)));
-						ptr += Z_STRLEN(ZEND_OP2_LITERAL(next_op));
-						literal_dtor(&ZEND_OP2_LITERAL(next_op));
-					} else { /* ZEND_ADD_CHAR */
-						*ptr = (char)Z_LVAL(ZEND_OP2_LITERAL(next_op));
-						ptr++;
-					}
-					MAKE_NOP(next_op);
-					next_op++;
-				}
-				if (!((ZEND_OPTIMIZER_PASS_5|ZEND_OPTIMIZER_PASS_10) & OPTIMIZATION_LEVEL)) {
-					/* NOP removal is disabled => insert JMP over NOPs */
-					if (last_op-opline >= 3) { /* If we have more than 2 NOPS then JMP over them */
-						(opline + 1)->opcode = ZEND_JMP;
-						(opline + 1)->op1.opline_num = last_op - op_array->opcodes; /* that's OK even for ZE2, since opline_num's are resolved in pass 2 later */
-					}
-				}
-			}
-			break;
-#endif
-
 		case ZEND_FETCH_CONSTANT:
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
@@ -289,8 +214,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else if (op_array->scope &&
 					opline->op1_type == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
-					((opline - 1)->op1_type == IS_UNUSED &&
-					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->op2_type == IS_UNUSED &&
+					((opline - 1)->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					(opline - 1)->result.var == opline->op1.var) {
 					/* for self::B */
 					ce = op_array->scope;
@@ -305,16 +230,14 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							break;
-						}
-						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) {
-							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1) ||
-							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
+							zend_ast *ast = Z_ASTVAL_P(c);
+							if (ast->kind != ZEND_AST_CONSTANT
+							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &t, 1)
+							 || Z_TYPE(t) == IS_CONSTANT_AST) {
 								break;
 							}
 						} else {
-							ZVAL_COPY_VALUE(&t, c);
-							zval_copy_ctor(&t);
+							ZVAL_COPY_OR_DUP(&t, c);
 						}
 
 						if (opline->op1_type == IS_CONST) {
@@ -455,7 +378,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					}
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					break;
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
@@ -467,7 +390,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
 							lc_name);
 
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					if (!m) {
 						if (PG(enable_dl)) {
 							break;
@@ -545,7 +468,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					} else {
-						zend_string_release(dirname);
+						zend_string_release_ex(dirname, 0);
 					}
 					break;
 				}
@@ -590,6 +513,49 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
 			    Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_STRING) {
 				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
+			}
+			break;
+//		case ZEND_FETCH_R:
+		case ZEND_FETCH_W:
+//		case ZEND_FETCH_RW:
+		case ZEND_FETCH_IS:
+//		case ZEND_FETCH_FUNC_ARG:
+		case ZEND_FETCH_UNSET:
+			/* convert FETCH $GLOBALS (global), FETCH_DIM $x into FETCH $x (global) */
+			if ((opline->extended_value & ZEND_FETCH_GLOBAL) != 0 &&
+			    opline->op1_type == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    zend_string_equals_literal(Z_STR(ZEND_OP1_LITERAL(opline)), "GLOBALS") &&
+			    ((opline + 1)->opcode == opline->opcode + 1 ||
+			     ((opline + 1)->opcode == ZEND_UNSET_DIM &&
+			      opline->opcode == ZEND_FETCH_UNSET) ||
+			     ((opline + 1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ &&
+			      opline->opcode == ZEND_FETCH_IS)) &&
+			    (opline + 1)->op1_type == opline->result_type &&
+			    (opline + 1)->op1.var == opline->result.var &&
+			    ((opline + 1)->op2_type != IS_CONST ||
+			     Z_TYPE(ZEND_OP2_LITERAL(opline + 1)) < IS_ARRAY)) {
+
+				if ((opline + 1)->opcode == ZEND_UNSET_DIM) {
+					(opline + 1)->opcode = ZEND_UNSET_VAR;
+					(opline + 1)->extended_value = ZEND_FETCH_GLOBAL;
+				} else if ((opline + 1)->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ) {
+					(opline + 1)->opcode = ZEND_ISSET_ISEMPTY_VAR;
+					(opline + 1)->extended_value |= ZEND_FETCH_GLOBAL;
+				} else {
+					(opline + 1)->opcode = opline->opcode;
+					(opline + 1)->extended_value = ZEND_FETCH_GLOBAL;
+				}
+				(opline + 1)->op1_type = (opline + 1)->op2_type;
+				(opline + 1)->op1 = (opline + 1)->op2;
+				if ((opline + 1)->op1_type == IS_CONST &&
+				    Z_TYPE(ZEND_OP1_LITERAL(opline + 1)) != IS_STRING) {
+
+					convert_to_string(&ZEND_OP1_LITERAL(opline + 1));
+					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline + 1)));
+				}
+				SET_UNUSED((opline + 1)->op2);
+				MAKE_NOP(opline);
 			}
 			break;
 

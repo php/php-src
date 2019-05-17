@@ -5,7 +5,7 @@ Test ctype_print() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_print(mixed $c)
- * Description: Checks for printable character(s) 
+ * Description: Checks for printable character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -27,7 +27,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_print() : usage variations ***
 character code 32 is a printable character
 character code 33 is a printable character

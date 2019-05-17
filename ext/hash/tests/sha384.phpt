@@ -1,7 +1,5 @@
 --TEST--
-sha384 algorithm
---SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+Hash: sha384 algorithm
 --FILE--
 <?php
 echo hash('sha384', '') . "\n";

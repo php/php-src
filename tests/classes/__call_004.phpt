@@ -14,7 +14,7 @@ class B extends A {
 		echo "In " . __METHOD__ . "($strMethod, array(" . implode(',',$arrArgs) . "))\n";
 		var_dump($this);
 	}
-	
+
 	function test() {
 		A::test1(1,'a');
 		B::test2(1,'a');
@@ -26,7 +26,7 @@ class B extends A {
 $b = new B();
 $b->test();
 ?>
---EXPECTF--
+--EXPECT--
 In B::__call(test1, array(1,a))
 object(B)#1 (0) {
 }

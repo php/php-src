@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Christian Cartus <cartus@atrior.de>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* This has been built and tested on Linux 2.2.14
  *
@@ -35,6 +33,7 @@
 #include <errno.h>
 
 #include "php_sysvshm.h"
+#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "php_ini.h"
@@ -78,7 +77,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ sysvshm_functions[]
  */
-const zend_function_entry sysvshm_functions[] = {
+static const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach,		arginfo_shm_attach)
 	PHP_FE(shm_remove,		arginfo_shm_detach)
 	PHP_FE(shm_detach, 		arginfo_shm_remove)
@@ -100,7 +99,7 @@ zend_module_entry sysvshm_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	PHP_MINFO(sysvshm),
 	PHP_SYSVSHM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -144,6 +143,16 @@ PHP_MINIT_FUNCTION(sysvshm)
 		php_sysvshm.init_mem=10000;
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(sysvshm)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "sysvshm support", "enabled");
+	php_info_print_table_end();
 }
 /* }}} */
 
@@ -435,12 +444,3 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 /* }}} */
 
 #endif /* HAVE_SYSVSHM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

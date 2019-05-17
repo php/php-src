@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-PHPAPI extern php_stream_wrapper  php_glob_stream_wrapper;
-PHPAPI extern php_stream_ops      php_glob_stream_ops;
+PHPAPI extern const php_stream_wrapper php_glob_stream_wrapper;
+PHPAPI extern const php_stream_ops     php_glob_stream_ops;
 
 BEGIN_EXTERN_C()
 
@@ -33,12 +31,3 @@ PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_
 #define php_glob_stream_get_count(stream, pflags)	_php_glob_stream_get_count((stream), (pflags) STREAMS_CC)
 
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

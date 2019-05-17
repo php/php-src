@@ -3,7 +3,7 @@ Bug #73144 (Use-afte-free in ArrayObject Deserialization)
 --FILE--
 <?php
 try {
-$token = 'a:2:{i:0;O:1:"0":2:0s:1:"0";i:0;s:1:"0";a:1:{i:0;C:11:"ArrayObject":7:0x:i:0;r0';
+$token = 'a:2:{i:0;O:1:"0":2:0s:1:"0";i:0;s:1:"0";a:1:{i:0;C:11:"ArrayObject":7:{x:i:0;r}';
 $obj = unserialize($token);
 } catch(Exception $e) {
 	echo $e->getMessage()."\n";

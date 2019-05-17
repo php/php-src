@@ -8,4 +8,3 @@ class A {
 ?>
 --EXPECTF--
 Fatal error: Cannot use 'abstract' as constant modifier in %s on line 3
-

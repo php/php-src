@@ -3,7 +3,7 @@ Test readdir() function : usage variations - empty directories
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -13,7 +13,7 @@ Test readdir() function : usage variations - empty directories
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = dirname(__FILE__) . '/readdir_variation2';
+$path = __DIR__ . '/readdir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 
@@ -36,10 +36,10 @@ foreach($entries as $entry) {
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/readdir_variation2';
+$path = __DIR__ . '/readdir_variation2';
 rmdir($path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 
 -- Pass an empty directory to readdir() --

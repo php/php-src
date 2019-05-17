@@ -1,5 +1,5 @@
 --TEST--
-Test array_diff_key() : basic functionality 
+Test array_diff_key() : basic functionality
 --FILE--
 <?php
 /*

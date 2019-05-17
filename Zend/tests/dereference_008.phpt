@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 class foo {
 	public $x = array(1);
-		
+
 	public function &b() {
 		return $this->x;
 	}

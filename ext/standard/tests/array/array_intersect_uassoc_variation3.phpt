@@ -9,7 +9,7 @@ Test array_intersect_uassoc() function : usage variation - Passing unexpected va
 
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
-// Initialise function arguments 
+// Initialise function arguments
 $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
 $array2 = array("a" => "green", "yellow", "red");
 
@@ -109,136 +109,135 @@ fclose($fp);
 ?>
 ===DONE===
 --EXPECTF--
-
 *** Testing array_intersect_uassoc() : usage variation ***
 
 --int 0--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int 1--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int 12345--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --int -12345--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, int given in %s on line %d
 NULL
 
 --float 10.5--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float -10.5--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float 12.3456789000e10--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float -12.3456789000e10--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --float .5--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, float given in %s on line %d
 NULL
 
 --uppercase NULL--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --lowercase null--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --lowercase true--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, bool given in %s on line %d
 NULL
 
 --empty string DQ--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --empty string SQ--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --string DQ--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --string SQ--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --mixed case string--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --heredoc--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, string given in %s on line %d
 NULL
 
 --instance of classWithToString--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, object given in %s on line %d
 NULL
 
 --undefined var--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --unset var--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
 
 --resource--
 
-Warning: array_intersect_uassoc(): Argument #3 is not an array in %s on line %d
+Warning: array_intersect_uassoc(): Expected parameter 3 to be an array, resource given in %s on line %d
 NULL
 ===DONE===

@@ -1,5 +1,5 @@
-		  GNU LESSER GENERAL PUBLIC LICENSE
-		       Version 2.1, February 1999
+                  GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 2.1, February 1999
 
  Copyright (C) 1991, 1999 Free Software Foundation, Inc.
      59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -10,7 +10,7 @@
  as the successor of the GNU Library Public License, version 2, hence
  the version number 2.1.]
 
-			    Preamble
+                            Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -112,7 +112,7 @@ modification follow.  Pay close attention to the difference between a
 former contains code derived from the library, whereas the latter must
 be combined with the library in order to run.
 
-		  GNU LESSER GENERAL PUBLIC LICENSE
+                  GNU LESSER GENERAL PUBLIC LICENSE
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. This License Agreement applies to any software library or other
@@ -146,7 +146,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-  
+
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -432,7 +432,7 @@ decision will be guided by the two goals of preserving the free status
 of all derivatives of our free software and of promoting the sharing
 and reuse of software generally.
 
-			    NO WARRANTY
+                            NO WARRANTY
 
   15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
 WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
@@ -455,4 +455,62 @@ FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-		     END OF TERMS AND CONDITIONS
+                     END OF TERMS AND CONDITIONS
+
+"streamable kanji code filter and converter"
+
+Copyright (c) 1998,1999,2000,2001 HappySize, Inc. All rights reserved.
+
+This software is released under the GNU Lesser General Public License.
+(Version 2.1, February 1999)
+Please read the following detail of the licence (in japanese).
+
+◆使用許諾条件◆
+
+このソフトウェアは株式会社ハッピーサイズによって開発されました。株式会社ハッ
+ピーサイズは、著作権法および万国著作権条約の定めにより、このソフトウェアに関
+するすべての権利を留保する権利を持ち、ここに行使します。株式会社ハッピーサイ
+ズは以下に明記した条件に従って、このソフトウェアを使用する排他的ではない権利
+をお客様に許諾します。何人たりとも、以下の条件に反してこのソフトウェアを使用
+することはできません。
+
+このソフトウェアを「GNU Lesser General Public License (Version 2.1, February
+1999)」に示された条件で使用することを、全ての方に許諾します。「GNU Lesser
+General Public License」を満たさない使用には、株式会社ハッピーサイズから書面
+による許諾を得る必要があります。
+
+「GNU Lesser General Public License」の全文は以下のウェブページから取得でき
+ます。「GNU Lesser General Public License」とは、これまでLibrary General
+Public Licenseと呼ばれていたものです。
+    http://www.gnu.org/ --- GNUウェブサイト
+    http://www.gnu.org/copyleft/lesser.html --- ライセンス文面
+このライセンスの内容がわからない方、守れない方には使用を許諾しません。
+
+しかしながら、当社とGNUプロジェクトとの特定の関係を示唆または主張するもので
+はありません。
+
+◆保証内容◆
+
+このソフトウェアは、期待された動作・機能・性能を持つことを目標として設計され
+開発されていますが、これを保証するものではありません。このソフトウェアは「こ
+のまま」の状態で提供されており、たとえばこのソフトウェアの有用性ないし特定の
+目的に合致することといった、何らかの保証内容が、明示されたり暗黙に示されてい
+る場合であっても、その保証は無効です。このソフトウェアを使用した結果ないし使
+用しなかった結果によって、直接あるいは間接に受けた身体的な傷害、財産上の損害
+、データの損失あるいはその他の全ての損害については、その損害の可能性が使用者
+、当社あるいは第三者によって警告されていた場合であっても、当社はその損害の賠
+償および補填を行いません。この規定は他の全ての、書面上または書面に無い保証・
+契約・規定に優先します。
+
+◆著作権者の連絡先および使用条件についての問い合わせ先◆
+
+〒102-0073
+東京都千代田区九段北1-13-5日本地所第一ビル4F
+株式会社ハッピーサイズ
+Phone: 03-3512-3655, Fax: 03-3512-3656
+Email: sales@happysize.co.jp
+Web: http://happysize.com/
+
+◆著者◆
+
+金本　茂 <sgk@happysize.co.jp>

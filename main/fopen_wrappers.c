@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Jim Winstead <jimw@php.net>                                 |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* {{{ includes
  */
@@ -439,7 +437,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		}
 		return FAILURE;
 	}
-	zend_string_release(resolved_path);
+	zend_string_release_ex(resolved_path, 0);
 
 	orig_display_errors = PG(display_errors);
 	PG(display_errors) = 0;
@@ -830,12 +828,3 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	return real_path;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

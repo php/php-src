@@ -38,7 +38,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        PHP_INT_MAX,
 
        // float data
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -67,10 +67,10 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*23*/ new classA(),       
-       
+/*23*/ new classA(),
+
        // undefined data
 /*24*/ @$undefined_var,
 
@@ -172,7 +172,7 @@ int(0)
 
 -- Iteration 23 --
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Notice: Object of class classA could not be converted to number in %s on line %d
 int(1)
 
 -- Iteration 24 --

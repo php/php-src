@@ -15,7 +15,7 @@ foreach (a(range(1, 3)) as $a) {
 	var_dump($a);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

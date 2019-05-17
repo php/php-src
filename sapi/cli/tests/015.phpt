@@ -1,8 +1,8 @@
 --TEST--
 CLI long options
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
@@ -20,7 +20,7 @@ echo `"$php" -n --notexisting foo bar baz | grep Usage:`;
 
 echo "Done\n";
 ?>
---EXPECTF--     
+--EXPECTF--
 PHP %d.%d.%d%s(cli) (built: %s)%s
 Array
 (

@@ -1,10 +1,10 @@
 --TEST--
 Test OCI8 php.ini settings
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (!(isset($matches[0]) && $matches[0] >= 11)) { 
+if (!(isset($matches[0]) && $matches[0] >= 11)) {
     die("skip works only with Oracle 11g or greater version of Oracle client libraries");
 }
 ?>
@@ -55,7 +55,7 @@ echo 'oci8.old_oci_close_semantics = ' . ini_get('oci8.old_oci_close_semantics')
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1 - check initialization
 oci8.privileged_connect = 1
 oci8.max_persistent = 111

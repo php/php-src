@@ -1,16 +1,16 @@
 --TEST--
 DBA dba.default_handler tests
 --SKIPIF--
-<?php 
+<?php
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 ?>
 --INI--
 dba.default_handler=flatfile
 --FILE--
 <?php
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 echo "Test 1\n";
@@ -27,8 +27,8 @@ var_dump(dba_open($db_filename, 'n'));
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile

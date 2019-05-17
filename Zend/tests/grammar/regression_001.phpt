@@ -22,9 +22,7 @@ Foo::
 );
 
 echo "\nDone\n";
-
---EXPECTF--
-
+--EXPECT--
 Foo::function
 Foo::function
 Foo::function

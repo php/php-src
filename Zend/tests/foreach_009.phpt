@@ -9,7 +9,7 @@ foreach ($a as &$ref) {
 		echo "$ref-$ref2\n";
 		if ($ref == 5 && $ref2 == 6) {
 			$a[42] = 8;
-		}	
+		}
 	}
 }
 ?>

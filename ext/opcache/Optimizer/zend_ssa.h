@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -95,9 +95,15 @@ typedef struct _zend_ssa_op {
 typedef enum _zend_ssa_alias_kind {
 	NO_ALIAS,
 	SYMTABLE_ALIAS,
-	PHP_ERRORMSG_ALIAS,
 	HTTP_RESPONSE_HEADER_ALIAS
 } zend_ssa_alias_kind;
+
+typedef enum _zend_ssa_escape_state {
+	ESCAPE_STATE_UNKNOWN,
+	ESCAPE_STATE_NO_ESCAPE,
+	ESCAPE_STATE_FUNCTION_ESCAPE,
+	ESCAPE_STATE_GLOBAL_ESCAPE
+} zend_ssa_escape_state;
 
 typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
@@ -106,10 +112,11 @@ typedef struct _zend_ssa_var {
 	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
-	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constaints */
+	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
 	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
-	zend_ssa_alias_kind    alias : 2;  /* value may be changed indirectly */
+	unsigned int           alias : 2;  /* value may be changed indirectly */
+	unsigned int           escape_state : 2;
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
@@ -135,10 +142,11 @@ typedef struct _zend_ssa {
 
 BEGIN_EXTERN_C()
 
-int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags);
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
@@ -179,10 +187,13 @@ END_EXTERN_C()
 static zend_always_inline int zend_ssa_next_use(const zend_ssa_op *ssa_op, int var, int use)
 {
 	ssa_op += use;
-	if (ssa_op->result_use == var) {
+	if (ssa_op->op1_use == var) {
+		return ssa_op->op1_use_chain;
+	} else if (ssa_op->op2_use == var) {
+		return ssa_op->op2_use_chain;
+	} else {
 		return ssa_op->res_use_chain;
 	}
-	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
 }
 
 static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ssa, int var, const zend_ssa_phi *p)
@@ -208,8 +219,10 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 	if (opline->opcode == ZEND_FE_FETCH_R) {
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
-	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
-		return 1;
+	if (ssa_op->result_use == var
+			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
+			&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
+		return ssa_op->op1_use != var && ssa_op->op2_use != var;
 	}
 	return 0;
 }
@@ -304,11 +317,3 @@ static zend_always_inline void zend_ssa_rename_defs_of_instr(zend_ssa *ssa, zend
 } while (0)
 
 #endif /* ZEND_SSA_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -1,9 +1,9 @@
 --TEST--
-Test current() function : basic functionality 
+Test current() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed current(array $array_arg)
- * Description: Return the element currently pointed to by the internal array pointer 
+ * Description: Return the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  */
 
@@ -23,7 +23,7 @@ next($array);
 var_dump(current($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing current() : basic functionality ***
 string(4) "zero"
 string(3) "one"

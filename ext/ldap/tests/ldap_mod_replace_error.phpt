@@ -18,7 +18,7 @@ var_dump(ldap_mod_replace($link));
 var_dump(ldap_mod_replace($link, "$base"));
 
 // Too many parameters
-var_dump(ldap_mod_replace($link, "$base", array(), "Additional data"));
+var_dump(ldap_mod_replace($link, "$base", array(), [], "Additional data"));
 
 // DN not found
 var_dump(ldap_mod_replace($link, "dc=my-domain,$base", array()));
@@ -37,16 +37,16 @@ require "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ?>
 --EXPECTF--
-Warning: ldap_mod_replace() expects exactly 3 parameters, 0 given in %s on line %d
+Warning: ldap_mod_replace() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 
-Warning: ldap_mod_replace() expects exactly 3 parameters, 1 given in %s on line %d
+Warning: ldap_mod_replace() expects at least 3 parameters, 1 given in %s on line %d
 NULL
 
-Warning: ldap_mod_replace() expects exactly 3 parameters, 2 given in %s on line %d
+Warning: ldap_mod_replace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_mod_replace() expects exactly 3 parameters, 4 given in %s on line %d
+Warning: ldap_mod_replace() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: ldap_mod_replace(): Modify: No such object in %s on line %d

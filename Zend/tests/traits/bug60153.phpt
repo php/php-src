@@ -14,6 +14,5 @@ trait TFoo {
 class C implements IFoo {
   use TFoo;
 }
-
 --EXPECTF--
 Fatal error: Declaration of C::oneArgument() must be compatible with IFoo::oneArgument($a) in %s on line %d

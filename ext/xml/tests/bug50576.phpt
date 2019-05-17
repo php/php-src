@@ -34,7 +34,7 @@ xml_parse($xml_parser, $XML);
 xml_parser_free($xml_parser);
 
 ?>
---EXPECTF--
+--EXPECT--
 Index array
 Array
 (

@@ -11,5 +11,5 @@ array_walk_recursive(
 );
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Done

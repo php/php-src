@@ -7,10 +7,10 @@ Test session_decode() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_decode(void)
  * Description : Decodes session data from a string
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_decode() : basic functionality ***\n";
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 
@@ -97,7 +97,7 @@ fclose($fp);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_decode() : basic functionality ***
 bool(true)
 
@@ -271,4 +271,3 @@ array(1) {
 }
 bool(true)
 Done
-

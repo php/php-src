@@ -38,7 +38,7 @@ foreach ($data as $a) {
 }
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Test base64_decode (output as JSON):
 base64 ""               non-strict ""       strict ""
 base64 "="              non-strict ""       strict false

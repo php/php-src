@@ -16,7 +16,7 @@ var_dump($a);
 var_dump(array_reverse($array));
 
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   string(1) "a"

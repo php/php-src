@@ -24,4 +24,3 @@ var_dump($rc->getParameters()[0]->isCallable());
 bool(true)
 bool(true)
 bool(true)
-

@@ -3,8 +3,8 @@ array_walk_recursive() and objects
 --FILE--
 <?php
 
-function walk($key, $value) { 
-	var_dump($value, $key); 
+function walk($key, $value) {
+	var_dump($value, $key);
 }
 
 class test {
@@ -24,11 +24,15 @@ array_walk_recursive($t, "walk");
 $var = array();
 array_walk_recursive($var, "walk");
 $var = "";
-array_walk_recursive($var, "walk");
+try {
+    array_walk_recursive($var, "walk");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(3) "foo"
 string(3) "foo"
 string(3) "bar"
@@ -39,6 +43,5 @@ string(10) "%r\0%r*%r\0%rvar_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"
-
-Warning: array_walk_recursive() expects parameter 1 to be array, string given in %s on line %d
+array_walk_recursive() expects parameter 1 to be array, string given
 Done

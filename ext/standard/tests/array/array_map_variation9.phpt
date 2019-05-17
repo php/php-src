@@ -37,7 +37,7 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : array with binary data for 'arr1' argument ***
 -- checking binary safe array with one parameter callback function --
 array(4) {

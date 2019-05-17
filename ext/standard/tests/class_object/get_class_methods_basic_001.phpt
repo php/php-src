@@ -1,11 +1,11 @@
 --TEST--
-Test get_class_methods() function : basic functionality 
+Test get_class_methods() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -18,7 +18,7 @@ class C {
 	function f() {}
 	function g() {}
 	function h() {}
-} 
+}
 
 echo "Argument is class name:\n";
 var_dump( get_class_methods("C") );
@@ -35,7 +35,7 @@ var_dump( get_class_methods("NonExistent") );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_class_methods() : basic functionality ***
 Argument is class name:
 array(3) {

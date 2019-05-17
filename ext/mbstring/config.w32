@@ -1,40 +1,26 @@
-// $Id$
 // vim:ft=javascript
 
-ARG_WITH("libmbfl", "use external libmbfl", "no");
 ARG_ENABLE("mbstring", "multibyte string functions", "no");
 ARG_ENABLE("mbregex", "multibyte regex support", "no");
-ARG_ENABLE("mbregex-backtrack", "check multibyte regex backtrack", "yes");
 
 if (PHP_MBSTRING != "no") {
 
-	EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
+	if (CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING) &&
+		CHECK_HEADER_ADD_INCLUDE("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
+		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
 
-	FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\oniguruma.h",
-		"ext\\mbstring\\oniguruma\\oniguruma.h", true);
+		/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */
+		ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-	if (PHP_LIBMBFL != "no" &&
-			CHECK_HEADER_ADD_INCLUDE("mbfl/mbfilter.h", "CFLAGS_LIBMBFL", PHP_LIBMBFL + "\\include") &&
-			CHECK_LIB("mbfl.lib", "libmbfl", PHP_LIBMBFL + "\\lib")) {
-
-		ADD_FLAG("LIBS_MBSTRING", get_define("LIBS_LIBMBFL"));
-		ADD_FLAG("LDFLAGS_MBSTRING", get_define("LDFLAGS_LIBMBFL"));
-		ADD_FLAG("CFLAGS_MBSTRING", get_define("CFLAGS_LIBMBFL") +
-			" /I ext/mbstring/oniguruma /D NOT_RUBY=1 \
-		          /D HAVE_STDARG_PROTOTYPES=1 /D HAVE_STDLIB_H \
-		          /D HAVE_STRICMP /D EXPORT /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-
-		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h oniguruma/oniguruma.h php_mbregex.h php_onig_compat.h");
-	} else {
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
 		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
-			-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
-		        /D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
-		        /D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
+			/D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
+			/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H \
+			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
-		   	"ext\\mbstring\\libmbfl\\config.h", true);
+			"ext\\mbstring\\libmbfl\\config.h", true);
 
 		ADD_SOURCES("ext/mbstring/libmbfl/filters", "html_entities.c \
 			mbfilter_7bit.c mbfilter_ascii.c mbfilter_base64.c mbfilter_big5.c \
@@ -67,33 +53,23 @@ if (PHP_MBSTRING != "no") {
 			nls_kr.c nls_neutral.c nls_ru.c nls_uni.c nls_zh.c nls_hy.c \
 			nls_ua.c nls_tr.c", "mbstring");
 
-		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h oniguruma/oniguruma.h php_mbregex.h php_onig_compat.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
-	}
+		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h php_mbregex.h php_onig_compat.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
 
-	AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
-	AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
-	AC_DEFINE('HAVE_MBSTR_JA', 1, 'JA');
-	AC_DEFINE('HAVE_MBSTR_KR', 1, 'KR');
-	AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
-	AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
+		AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
+		AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
+		AC_DEFINE('HAVE_MBSTR_JA', 1, 'JA');
+		AC_DEFINE('HAVE_MBSTR_KR', 1, 'KR');
+		AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
+		AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
-	if (X64) {
-		FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\config.h.win64",
-			"ext\\mbstring\\oniguruma\\src\\config.h", true);
-	} else {
-		FSO.CopyFile("ext\\mbstring\\oniguruma\\src\\config.h.win32",
-			"ext\\mbstring\\oniguruma\\src\\config.h", true);
-	}
-
-	if (PHP_MBREGEX != "no") {
-		AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
-		AC_DEFINE('HAVE_MBREGEX', 1);
-		AC_DEFINE('HAVE_ONIG', 1);
-		if (PHP_MBREGEX_BACKTRACK != "no") {
-			AC_DEFINE('USE_COMBINATION_EXPLOSION_CHECK', 1);
+		if (PHP_MBREGEX != "no") {
+			AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
+			AC_DEFINE('HAVE_MBREGEX', 1);
+			ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
+			PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
 		}
-		ADD_SOURCES("ext/mbstring/oniguruma/src", "ascii.c big5.c cp1251.c euc_jp.c euc_jp_prop.c euc_kr.c euc_tw.c gb18030.c iso8859_1.c iso8859_10.c iso8859_11.c iso8859_13.c iso8859_14.c iso8859_15.c iso8859_16.c iso8859_2.c iso8859_3.c iso8859_4.c iso8859_5.c iso8859_6.c iso8859_7.c iso8859_8.c iso8859_9.c koi8.c koi8_r.c mktable.c onig_init.c regcomp.c regenc.c regerror.c regexec.c regext.c reggnu.c regparse.c regposerr.c regposix.c regsyntax.c regtrav.c regversion.c sjis.c sjis_prop.c st.c unicode.c unicode_fold1_key.c unicode_fold2_key.c unicode_fold3_key.c unicode_unfold_key.c utf16_be.c utf16_le.c utf32_be.c utf32_le.c utf8.c", "mbstring");
-		ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
-		PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
+
+	} else {
+		WARNING("mbstring not enabled; libraries and headers not found");
 	}
 }

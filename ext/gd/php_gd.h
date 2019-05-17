@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
    |          Stig Bakken <ssb@php.net>                                   |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_GD_H
 #define PHP_GD_H
@@ -49,6 +47,15 @@
 #define PHP_GDIMG_TYPE_GD2PART  10
 #define PHP_GDIMG_TYPE_WEBP     11
 #define PHP_GDIMG_TYPE_BMP      12
+
+#define PHP_IMG_GIF    1
+#define PHP_IMG_JPG    2
+#define PHP_IMG_JPEG   2
+#define PHP_IMG_PNG    4
+#define PHP_IMG_WBMP   8
+#define PHP_IMG_XPM   16
+#define PHP_IMG_WEBP  32
+#define PHP_IMG_BMP   64
 
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
@@ -196,10 +203,6 @@ PHP_FUNCTION(imagegetclip);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);
-
-PHP_FUNCTION(jpeg2wbmp);
-PHP_FUNCTION(png2wbmp);
-PHP_FUNCTION(image2wbmp);
 
 PHP_FUNCTION(imagecolormatch);
 

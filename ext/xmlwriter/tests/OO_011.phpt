@@ -6,11 +6,9 @@ Mauricio Vieira <mauricio [at] @mauriciovieira [dot] net>
 --SKIPIF--
 <?php
 if (!extension_loaded("xmlwriter")) die("skip");
-if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required");
 ?>
 --FILE--
 <?php
-/* $Id$ */
 
 $xw = new XMLWriter();
 $xw->openMemory();

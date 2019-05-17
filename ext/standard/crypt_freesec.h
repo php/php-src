@@ -1,5 +1,3 @@
-/* $Id$ */
-
 #ifndef _CRYPT_FREESEC_H
 #define _CRYPT_FREESEC_H
 

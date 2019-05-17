@@ -11,5 +11,5 @@ array_diff($a, $b, $c);
 echo "OK!";
 ?>
 --EXPECTF--
-Warning: array_diff(): Argument #2 is not an array in %s
+Warning: array_diff(): Expected parameter 2 to be an array, int given in %s
 OK!

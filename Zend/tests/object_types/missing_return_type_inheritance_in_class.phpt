@@ -10,6 +10,5 @@ class One {
 class Two extends One {
     public function a() {}
 }
-
 --EXPECTF--
-Fatal error: Declaration of Two::a() must be compatible with One::a(): object in %s on line 9
+Fatal error: Declaration of Two::a() must be compatible with One::a(): object in %s on line 8

@@ -24,7 +24,7 @@ $res_str .= "Formatting clone result: " . ut_msgfmt_format( $fmt_clone, array(12
 echo $res_str;
 
 ?>
---EXPECTF--
+--EXPECT--
 Formatting result: 123 monkeys on 456 trees
 Formatting result: 123 trees hosting 456 monkeys
 Formatting clone result: 123 monkeys on 456 trees

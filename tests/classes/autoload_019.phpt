@@ -9,5 +9,5 @@ spl_autoload_register(function ($name) {
 
 class_exists("unDefinedClass");
 ?>
---EXPECTF--
+--EXPECT--
 autoload unDefinedClass

@@ -12,5 +12,5 @@ $baz = '\\Foo\\Bar\\Baz';
 new $baz();
 
 ?>
---EXPECTF--
-%string|unicode%(11) "Foo\Bar\Baz"
+--EXPECT--
+string(11) "Foo\Bar\Baz"

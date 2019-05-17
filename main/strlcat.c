@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +16,11 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 
 #ifdef USE_STRLCAT_PHP_IMPL
 
-/*     $OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp $    */
+/*     $OpenBSD: strlcat.c,v 1.18 2016/10/16 17:37:39 dtucker Exp $    */
 
 /*
  * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -61,8 +59,9 @@ static char *rcsid = "$OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters
- * will be copied.  Always NUL terminates (unless siz == 0).
- * Returns strlen(src); if retval >= siz, truncation occurred.
+ * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
+ * Returns strlen(src) + MIN(siz, strlen(initial dst).
+ * If retval >= siz, truncation occurred.
  */
 PHPAPI size_t php_strlcat(dst, src, siz)
 	char *dst;
@@ -77,7 +76,7 @@ PHPAPI size_t php_strlcat(dst, src, siz)
 	/* Find the end of dst and adjust bytes left but don't go past end */
 	while (n-- != 0 && *dst != '\0')
 		dst++;
-	dlen = (uintptr_t)dst - (uintptr_t)d;
+	dlen = dst - d;
 	n = siz - dlen;
 
 	if (n-- == 0)
@@ -91,21 +90,7 @@ PHPAPI size_t php_strlcat(dst, src, siz)
 	}
 	*dst = '\0';
 
-	/*
-	 * Cast pointers to unsigned type before calculation, to avoid signed
-	 * overflow when the string ends where the MSB has changed.
-	 * Return value does not include NUL.
-	 */
-	return(dlen + ((uintptr_t)src - (uintptr_t)s));
+	return(dlen + (src - s));
 }
 
 #endif /* !HAVE_STRLCAT */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

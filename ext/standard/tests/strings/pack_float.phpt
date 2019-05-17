@@ -19,7 +19,7 @@ var_dump(
     bin2hex(pack("e", -10000000000000000)),
     bin2hex(pack("e", -0.591234709823149)),
     bin2hex(pack("e", -12345678901234567890.1234567898765432123456789)),
-    
+
     'pack E',
     bin2hex(pack("E", "")),
     bin2hex(pack("E", "a")),
@@ -36,7 +36,7 @@ var_dump(
     bin2hex(pack("E", -10000000000000000)),
     bin2hex(pack("E", -0.591234709823149)),
     bin2hex(pack("E", -12345678901234567890.1234567898765432123456789)),
-    
+
     'pack g',
     bin2hex(pack("g", "")),
     bin2hex(pack("g", "a")),
@@ -53,7 +53,7 @@ var_dump(
     bin2hex(pack("g", -10000000000000000)),
     bin2hex(pack("g", -0.591234709823149)),
     bin2hex(pack("g", -12345678901234567890.1234567898765432123456789)),
-    
+
     'pack G',
     bin2hex(pack("G", "")),
     bin2hex(pack("G", "a")),
@@ -70,7 +70,7 @@ var_dump(
     bin2hex(pack("G", -10000000000000000)),
     bin2hex(pack("G", -0.591234709823149)),
     bin2hex(pack("G", -12345678901234567890.1234567898765432123456789)),
-    
+
     'unpack e',
     unpack('e', hex2bin('0000000000000000')),
     unpack('e', hex2bin('000000000000f03f')),
@@ -80,7 +80,7 @@ var_dump(
     unpack('e', hex2bin('0080e03779c341c3')),
     unpack('e', hex2bin('4a6ade0d65ebe2bf')),
     unpack('e', hex2bin('e1639d31956ae5c3')),
-    
+
     'unpack E',
     unpack('E', hex2bin('3ff0000000000000')),
     unpack('E', hex2bin('4341c37937e08000')),
@@ -90,7 +90,7 @@ var_dump(
     unpack('E', hex2bin('c341c37937e08000')),
     unpack('E', hex2bin('bfe2eb650dde6a4a')),
     unpack('E', hex2bin('c3e56a95319d63e1')),
-    
+
     'unpack g',
     unpack('g', hex2bin('0000803f')),
     unpack('g', hex2bin('ca1b0e5a')),
@@ -100,7 +100,7 @@ var_dump(
     unpack('g', hex2bin('ca1b0eda')),
     unpack('g', hex2bin('285b17bf')),
     unpack('g', hex2bin('aa542bdf')),
-    
+
     'unpack G',
     unpack('G', hex2bin('3f800000')),
     unpack('G', hex2bin('5a0e1bca')),
@@ -110,10 +110,10 @@ var_dump(
     unpack('G', hex2bin('da0e1bca')),
     unpack('G', hex2bin('bf175b28')),
     unpack('G', hex2bin('df2b54aa'))
-    
+
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "pack e"
 string(16) "0000000000000000"
 string(16) "0000000000000000"

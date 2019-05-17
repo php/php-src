@@ -2,14 +2,13 @@
 Phar: create with illegal path
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 @unlink($fname);
@@ -29,7 +28,7 @@ set_error_handler('error_handler');
 
 $count = 0;
 $checks = array(
-    '/', '.', '../', 'a/..', 'a/', 'b//a.php', 
+    '/', '.', '../', 'a/..', 'a/', 'b//a.php',
     "Font\xE5\x84\xB7\xE9\xBB\x91pro.ttf", //two valid multi-byte characters
     "\xF0\x9F\x98\x8D.ttf", // valid 4 byte char - smiling face with heart-shaped eyes
     "Font\xE9\xBBpro.ttf", //Invalid multi-byte character - missing last byte
@@ -54,7 +53,7 @@ foreach($checks as $check)
 	{
 		$phar[$check] = 'error';
 	}
-	catch(Exception $e)
+	catch (TypeError $e)
 	{
 		echo 'Exception: ' . $e->getMessage() . "\n";
 	}
@@ -63,7 +62,7 @@ foreach($checks as $check)
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(5) "query"
 string(5) "query"
@@ -80,5 +79,5 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-Error: Phar::offsetSet() expects parameter 1 to be a valid path, string given===DONE===
-
+Exception: Phar::offsetSet() expects parameter 1 to be a valid path, string given
+===DONE===

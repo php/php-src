@@ -72,7 +72,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["it_works"]=>
   string(2) "ok"

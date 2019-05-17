@@ -9,8 +9,6 @@ $minusTen = gmp_init(-10);
 $plusTen = gmp_init(10);
 $zero = gmp_init(0);
 
-var_dump(gmp_random_range());
-var_dump(gmp_random_range(10));
 var_dump(gmp_random_range(10, -10));
 
 var_dump(gmp_random_range($plusTen, $minusTen));
@@ -64,12 +62,6 @@ while (1) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gmp_random_range() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_random_range() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
 Warning: gmp_random_range(): The minimum value must be less than the maximum value in %s on line %d
 bool(false)
 

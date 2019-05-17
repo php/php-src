@@ -1,5 +1,5 @@
 --TEST--
-Test count_chars() function : basic functionality 
+Test count_chars() function : basic functionality
 --FILE--
 <?php
 
@@ -23,7 +23,7 @@ var_dump(bin2hex(count_chars($string, 4)));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing count_chars() : basic functionality ***
 array(256) {
   [0]=>

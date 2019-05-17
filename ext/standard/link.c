@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,19 +16,23 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_filestat.h"
 #include "php_globals.h"
 
-#ifdef HAVE_SYMLINK
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+
+#ifdef PHP_WIN32
+#include <WinBase.h>
+#endif
 
 #include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifndef PHP_WIN32
 #include <sys/stat.h>
+#endif
 #include <string.h>
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
@@ -50,6 +54,14 @@
 #include "php_link.h"
 #include "php_string.h"
 
+#ifndef VOLUME_NAME_NT
+#define VOLUME_NAME_NT 0x2
+#endif
+
+#ifndef VOLUME_NAME_DOS
+#define VOLUME_NAME_DOS 0x0
+#endif
+
 /* {{{ proto string readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
@@ -70,13 +82,17 @@ PHP_FUNCTION(readlink)
 	ret = php_sys_readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
+#ifdef PHP_WIN32
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+#else
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+#endif
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	RETURN_STRING(buff);
+	RETURN_STRINGL(buff, ret);
 }
 /* }}} */
 
@@ -106,7 +122,7 @@ PHP_FUNCTION(linkinfo)
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		efree(dirname);
-		RETURN_LONG(-1L);
+		RETURN_LONG(Z_L(-1));
 	}
 
 	efree(dirname);
@@ -162,7 +178,7 @@ PHP_FUNCTION(symlink)
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = symlink(topath, source_p);
+	ret = php_sys_symlink(topath, source_p);
 
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -209,9 +225,9 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = link(topath, frompath);
+	ret = php_sys_link(topath, frompath);
 #else
-	ret = link(dest_p, source_p);
+	ret = php_sys_link(dest_p, source_p);
 #endif
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -223,12 +239,3 @@ PHP_FUNCTION(link)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

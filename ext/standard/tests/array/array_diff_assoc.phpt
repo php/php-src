@@ -1,6 +1,6 @@
 --TEST--
 basic array_diff_assoc test
---FILE--	
+--FILE--
 <?php
 $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red", "");
 $array2 = array("a" => "green", "yellow", "red", TRUE);
@@ -44,6 +44,3 @@ Array
         )
 
 )
-
-
-

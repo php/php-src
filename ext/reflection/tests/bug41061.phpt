@@ -5,7 +5,7 @@ Reflection Bug #41061 ("visibility error" in ReflectionFunction::export())
 
 function foo() {
 }
- 
+
 class bar {
     private function foo() {
     }

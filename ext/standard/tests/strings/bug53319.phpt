@@ -10,7 +10,7 @@ var_dump(strip_tags($str));
 var_dump(strip_tags('<a/b>', '<a>'));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(47) "USD<input type="text"/>CDN<input type="text" />"
 bool(true)
 string(6) "USDCDN"

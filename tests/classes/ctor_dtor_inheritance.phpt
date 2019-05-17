@@ -6,7 +6,7 @@ ZE2 A derived class can use the inherited constructor/destructor
 // This test checks for:
 // - inherited constructors/destructors are not called automatically
 // - base classes know about derived properties in constructor/destructor
-// - base class constructors/destructors know the instanciated class name
+// - base class constructors/destructors know the instantiated class name
 
 class base {
 	public $name;
@@ -16,7 +16,7 @@ class base {
 		$this->name = 'base';
 		print_r($this);
 	}
-	
+
 	function __destruct() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 		print_r($this);
@@ -52,7 +52,7 @@ unset($t);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Testing class base
 base::__construct
 base Object

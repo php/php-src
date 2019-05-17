@@ -1,4 +1,3 @@
-
 /*
  * "streamable kanji code filter and converter"
  * Copyright (c) 1998-2002 HappySize, Inc. All rights reserved.
@@ -297,7 +296,7 @@ mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 			*snd = 0;
@@ -332,7 +331,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -350,7 +349,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi2[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -377,7 +376,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -386,7 +385,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 		w = mb_tbl_code2uni_sb2[si];
 		if (w > 0xf000) {
 			w += 0x10000;
-		} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+		} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 			w += 0xf0000;
 		}
 	} else if (s >= mb_tbl_code2uni_sb3_min && s <= mb_tbl_code2uni_sb3_max) {
@@ -398,7 +397,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb3[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -930,4 +929,3 @@ mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

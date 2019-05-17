@@ -1,9 +1,9 @@
 --TEST--
-Test strval() function : basic functionality 
+Test strval() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
 
@@ -21,19 +21,19 @@ $values = array(
 			// Simple strings
 /*1*/		"Hello World",
 			'Hello World',
-			
+
 			// String with control chars
 /*3*/		"String\nwith\ncontrol\ncharacters\r\n",
-			
+
 			// String with quotes
 /*4*/		"String with \"quotes\"",
-			
+
 			//Numeric String
 /*5*/		"123456",
-			
+
 			// Hexadecimal string
 /*6*/		"0xABC",
-			
+
 			//Heredoc String
 /*7*/		$simple_heredoc
 );
@@ -47,7 +47,7 @@ foreach($values as $value) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strval() : basic variations ***
 
 -- Iteration 1 --

@@ -2,7 +2,7 @@
 htmlentities() test 13 (default_charset / EUC-JP)
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+internal_encoding=pass
 default_charset=EUC-JP
 filter.default=unsafe_raw
 --FILE--

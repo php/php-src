@@ -3,7 +3,7 @@ Bug #43364 (recursive xincludes don't remove internal xml nodes properly)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 function loopElements($nodes)
 {
     $count = 0;

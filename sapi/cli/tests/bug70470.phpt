@@ -4,8 +4,6 @@ Bug #70470 (Built-in server truncates headers spanning over TCP packets)
 <?php
 include "skipif.inc";
 ?>
---XFAIL--
-bug is not fixed yet
 --FILE--
 <?php
 include "php_cli_server.inc";

@@ -1,11 +1,11 @@
 --TEST--
-Bug #42850 (array_walk_recursive() leaves references) 
+Bug #42850 (array_walk_recursive() leaves references)
 --FILE--
 <?php
 
 // Bug #42850
 $data = array ('key1' => 'val1', array('key2' => 'val2'));
-function apply_dumb($item, $key) {}; 
+function apply_dumb($item, $key) {};
 var_dump($data);
 array_walk_recursive($data, 'apply_dumb');
 $data2 = $data;
@@ -22,7 +22,6 @@ function apply_changed(&$input, $key) {
 }
 myfunc($data);
 var_dump($data);
-
 --EXPECT--
 array(2) {
   ["key1"]=>

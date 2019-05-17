@@ -1,15 +1,14 @@
 --TEST--
-XMLWriter: libxml2 XML Writer, comments 
+XMLWriter: libxml2 XML Writer, comments
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlwriter")) die("skip"); 
+if (!extension_loaded("xmlwriter")) die("skip");
 if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ required");
 ?>
 --FILE--
-<?php 
-/* $Id$ */
+<?php
 
-$doc_dest = '001.xml';
+$doc_dest = '005.xml';
 $xw = xmlwriter_open_uri($doc_dest);
 xmlwriter_start_document($xw, '1.0', 'UTF-8');
 xmlwriter_start_element($xw, "tag1");
@@ -24,7 +23,7 @@ xmlwriter_end_document($xw);
 $output_bytes = xmlwriter_flush($xw, true);
 echo file_get_contents($doc_dest);
 unset($xw);
-unlink('001.xml');
+unlink($doc_dest);
 ?>
 ===DONE===
 --EXPECT--

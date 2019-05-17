@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 echo "*** Testing readdir() : usage variations ***\n";
 
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation2';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
 mkdir($path);
 $dir_handle = opendir($path);
 
@@ -42,10 +42,10 @@ foreach($entries as $entry) {
 ===DONE===
 --CLEAN--
 <?php
-$path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation2';
+$path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
 rmdir($path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 
 -- Pass an empty directory to readdir() --

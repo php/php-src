@@ -17,7 +17,7 @@ $str = "this is a sample string";
 $token = " ";
 
 echo "\n*** Testing strtok() when string being tokenised is prefixed with another string in between the process ***\n";
-var_dump( strtok($str, $token) ); 
+var_dump( strtok($str, $token) );
 // adding a string to the input string which is being tokenised
 $str = "extra string ".$str;
 for( $count = 1; $count <=6; $count++ )  {
@@ -25,9 +25,9 @@ for( $count = 1; $count <=6; $count++ )  {
   var_dump( strtok($token) );
   echo "\n-- Input str is \"$str\" --\n";
 }
-		      
+
 echo "\n*** Testing strtok() when string being tokenised is suffixed with another string in between the process ***\n";
-var_dump( strtok($str, $token) ); 
+var_dump( strtok($str, $token) );
 // adding a string to the input string which is being tokenised
 $str = $str." extra string";
 for( $count = 1; $count <=10; $count++ )  {
@@ -37,7 +37,7 @@ for( $count = 1; $count <=10; $count++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with modification of input string in between tokenising ***
 
 *** Testing strtok() when string being tokenised is prefixed with another string in between the process ***

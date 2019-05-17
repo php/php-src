@@ -10,10 +10,10 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() : shutdown failure ***\n";
@@ -57,7 +57,7 @@ $_SESSION['foo'] = 'bar';
 echo "done\n";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_set_save_handler() : shutdown failure ***
 (#1) constructor called
 done

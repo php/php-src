@@ -1,5 +1,5 @@
 --TEST--
-SPL: Test on RecursiveIteratorIterator key function checking switch statements 
+SPL: Test on RecursiveIteratorIterator key function checking switch statements
 --CREDITS--
 Rohan Abraham (rohanabrahams@gmail.com)
 TestFest London May 2009
@@ -14,7 +14,7 @@ TestFest London May 2009
     var_dump($k);
   }
 ?>
---EXPECTF--
+--EXPECT--
 one=>1
 string(3) "one"
 two=>2

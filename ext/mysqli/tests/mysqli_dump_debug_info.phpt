@@ -10,15 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link	= NULL;
-
-	if (NULL !== ($tmp = @mysqli_dump_debug_info()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (NULL !== ($tmp = @mysqli_dump_debug_info($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -32,8 +23,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_dump_debug_info($link)))
-		printf("[005] Expecting NULL, got %s/%s\n",
+	if (false !== ($tmp = mysqli_dump_debug_info($link)))
+		printf("[005] Expecting NULL, got %s/%s, [%d] %s\n",
 			gettype($tmp), $tmp,
 			mysqli_errno($link), mysqli_error($link));
 

@@ -18,4 +18,3 @@ string(6) "strpos"
 int(123)
 string(6) "strpos"
 string(6) "substr"
-

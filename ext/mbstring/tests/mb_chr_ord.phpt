@@ -16,7 +16,7 @@ for($ch = 1; $ch < 80000; $ch++) {
 	}
 }
 echo 'OK';
---EXPECTF--
+--EXPECT--
 ERROR(55296)
 ERROR(55297)
 ERROR(55298)
@@ -2066,4 +2066,3 @@ ERROR(57341)
 ERROR(57342)
 ERROR(57343)
 OK
-

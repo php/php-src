@@ -1,47 +1,40 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha1
+?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
-  . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
-  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
-
-- cURL:
-  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
-    (cebe)
+  . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
+  . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
+    (Fabien Villepinte)
 
 - GD:
-  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
+  . Removed deprecated image2wbmp(). (cmb)
+  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
+
+- Intl:
+  . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
+
+- JIT:
+  . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
 
 - LDAP:
-  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
-    (Come)
+  . Removed deprecated ldap_sort. (mcmic)
 
-- Mbstring:
-  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
-    capitalized). (Nikita)
-  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
-    (Nikita)
-  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
-  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
-    on Windows). (Nikita)
+- PDO:
+  . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
+    (camporter)
 
-- ODBC:
-  . Removed support for ODBCRouter. (Kalle)
-  . Removed support for Birdstep. (Kalle)
+- phpdbg:
+  . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
+  . Fixed bug #76801 (too many open files). (alekitto)
+  . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
+    (krakjoe)
+  . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
+  
+- sodium:
+  . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
-- phar:
-  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
-    (bwbroersma)
-
-- Session:
-  . Fixed bug #74941 (session fails to start after having headers sent). 
-    (morozov)
-
-- SPL:
-  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
-    (Andrew Nester)
+- XML:
+  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

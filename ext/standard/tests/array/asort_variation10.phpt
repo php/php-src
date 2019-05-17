@@ -1,9 +1,9 @@
 --TEST--
-Test asort() function : usage variations - sort octal values 
+Test asort() function : usage variations - sort octal values
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $sort_flags] )
- * Description: Sort an array and maintain index association. 
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -18,8 +18,8 @@ Test asort() function : usage variations - sort octal values
 echo "*** Testing asort() : usage variations ***\n";
 
 // an array contains unsorted octal values
-$unsorted_oct_array = array ( 
-   01235 => 01235, 0321 => 0321, 0345 => 0345, 066 => 066, 0772 => 0772, 
+$unsorted_oct_array = array (
+   01235 => 01235, 0321 => 0321, 0345 => 0345, 066 => 066, 0772 => 0772,
    077 => 077, -066 => -066, -0345 => -0345, 0 => 0
 );
 
@@ -40,7 +40,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing asort() : usage variations ***
 
 -- Testing asort() by supplying octal value array, 'flag' value is defualt  --

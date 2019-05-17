@@ -67,14 +67,18 @@ static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 		 * unless strace_level >= 3
 		 */
 		if ((jpeg_info->err->num_warnings == 0) || (jpeg_info->err->trace_level >= 3)) {
-			gd_error_ex(ignore_warning ? GD_NOTICE : GD_WARNING, "gd-jpeg, libjpeg: recoverable error: %s\n", message);
+			if (!ignore_warning) {
+				gd_error("gd-jpeg, libjpeg: recoverable error: %s\n", message);
+			}
 		}
 
 		jpeg_info->err->num_warnings++;
 	} else {
 		/* strace msg, Show it if trace_level >= level. */
 		if (jpeg_info->err->trace_level >= level) {
-			gd_error_ex(GD_NOTICE, "gd-jpeg, libjpeg: strace message: %s\n", message);
+			if (!ignore_warning) {
+				gd_error("gd-jpeg, libjpeg: strace message: %s\n", message);
+			}
 		}
 	}
 	return 1;
@@ -86,9 +90,10 @@ static long php_jpeg_emit_message(j_common_ptr jpeg_info, int level)
 static void fatal_jpeg_error (j_common_ptr cinfo)
 {
 	jmpbuf_wrapper *jmpbufw;
+	char buffer[JMSG_LENGTH_MAX];
 
-	gd_error("gd-jpeg: JPEG library reports unrecoverable error: ");
-	(*cinfo->err->output_message) (cinfo);
+	(*cinfo->err->format_message)(cinfo, buffer);
+	gd_error_ex(GD_WARNING, "gd-jpeg: JPEG library reports unrecoverable error: %s", buffer);
 
 	jmpbufw = (jmpbuf_wrapper *) cinfo->client_data;
 	jpeg_destroy (cinfo);
@@ -101,11 +106,6 @@ static void fatal_jpeg_error (j_common_ptr cinfo)
 	}
 
 	exit (99);
-}
-
-int gdJpegGetVersionInt()
-{
-	return JPEG_LIB_VERSION;
 }
 
 const char * gdJpegGetVersionString()
@@ -132,6 +132,7 @@ const char * gdJpegGetVersionString()
 	}
 }
 
+static int _gdImageJpegCtx(gdImagePtr im, gdIOCtx *outfile, int quality);
 
 /*
  * Write IM to OUTFILE as a JFIF-formatted JPEG image, using quality
@@ -153,8 +154,11 @@ void *gdImageJpegPtr (gdImagePtr im, int *size, int quality)
 {
 	void *rv;
 	gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
-	gdImageJpegCtx (im, out, quality);
-	rv = gdDPExtractData (out, size);
+	if (!_gdImageJpegCtx(im, out, quality)) {
+		rv = gdDPExtractData(out, size);
+	} else {
+		rv = NULL;
+	}
 	out->gd_free (out);
 
 	return rv;
@@ -163,6 +167,12 @@ void *gdImageJpegPtr (gdImagePtr im, int *size, int quality)
 void jpeg_gdIOCtx_dest (j_compress_ptr cinfo, gdIOCtx * outfile);
 
 void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
+{
+	_gdImageJpegCtx(im, outfile, quality);
+}
+
+/* returns 0 on success, 1 on failure */
+static int _gdImageJpegCtx(gdImagePtr im, gdIOCtx *outfile, int quality)
 {
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -184,7 +194,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 		if (row) {
 			gdFree (row);
 		}
-		return;
+		return 1;
 	}
 
 	cinfo.err->error_exit = fatal_jpeg_error;
@@ -277,6 +287,7 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	jpeg_finish_compress (&cinfo);
 	jpeg_destroy_compress (&cinfo);
 	gdFree (row);
+	return 0;
 }
 
 gdImagePtr gdImageCreateFromJpeg (FILE * inFile)

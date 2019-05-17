@@ -21,5 +21,5 @@ class TraitsTest {
 	use THello2;
 }
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on TraitsTest in %s on line %d

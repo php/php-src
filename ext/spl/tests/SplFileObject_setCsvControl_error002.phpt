@@ -4,21 +4,20 @@ SPL: SplFileObject::setCsvControl error 002
 Erwin Poeze <erwin.poeze at gmail.com>
 --FILE--
 <?php
-file_put_contents('csv_control_data.csv',
+file_put_contents('csv_control_data_error002.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
 'rode kersen'|30
 CDATA
 );
-$s = new SplFileObject('csv_control_data.csv');
+$s = new SplFileObject('csv_control_data_error002.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('|', 'two');
 ?>
 --CLEAN--
 <?php
-unlink('csv_control_data.csv');
+unlink('csv_control_data_error002.csv');
 ?>
 --EXPECTF--
 Warning: SplFileObject::setCsvControl(): enclosure must be a character in %s on line %d
-

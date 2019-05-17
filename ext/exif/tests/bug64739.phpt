@@ -3,6 +3,7 @@ Bug #64739 (Invalid Title and Author data returned)
 --SKIPIF--
 <?php
 extension_loaded("exif") or die("skip need exif");
+if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 ?>
 --FILE--
 <?php
@@ -32,7 +33,7 @@ var_dump($headers2['Author']);
 
 ?>
 Done
---EXPECTF--
+--EXPECT--
 Test
 bool(true)
 bool(true)

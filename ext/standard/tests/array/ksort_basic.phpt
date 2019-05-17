@@ -1,9 +1,9 @@
 --TEST--
-Test ksort() function : basic functionality   
+Test ksort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool ksort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key, maintaining key to data correlation 			
+ * Description: Sort an array by key, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 
@@ -17,13 +17,13 @@ Test ksort() function : basic functionality
 
 echo "*** Testing ksort() : basic functionality ***\n";
 
-// an array containing unsorted string values with indices  
+// an array containing unsorted string values with indices
 $unsorted_strings =   array(
 	"l" => "lemon", "o" => "orange",
 	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
 	"b" => "banana",
 );
-// an array containing unsorted numeric values with indices 
+// an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
 echo "\n-- Testing ksort() by supplying string array, 'flag' value is defualt --\n";
@@ -73,7 +73,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : basic functionality ***
 
 -- Testing ksort() by supplying string array, 'flag' value is defualt --

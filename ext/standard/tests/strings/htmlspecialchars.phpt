@@ -35,13 +35,6 @@ var_dump( htmlspecialchars($str, ENT_QUOTES) );
 var_dump( htmlspecialchars($str, ENT_NOQUOTES) );
 var_dump( htmlspecialchars($str, ENT_COMPAT) );
 
-echo "\n*** Testing error conditions ***\n";
-/* zero argument */
-var_dump( htmlspecialchars() );
-
-/* giving arguments more than expected */
-var_dump( htmlspecialchars("<br>",ENT_QUOTES,'iso-8859-1', "test2") );
-
 echo "Done\n"
 ?>
 --EXPECTF--
@@ -321,11 +314,4 @@ string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
-
-*** Testing error conditions ***
-
-Warning: htmlspecialchars() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-string(10) "&lt;br&gt;"
 Done
-

@@ -3,13 +3,13 @@ various tests with wrong param count
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -32,7 +32,7 @@ oci_execute($statement, OCI_DEFAULT);
 
 var_dump($blob);
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 
@@ -47,8 +47,6 @@ Warning: oci_bind_by_name() expects at most 5 parameters, 7 given in %s on line 
 Warning: oci_bind_by_name() expects at least 3 parameters, 2 given in %s on line %d
 
 Warning: oci_bind_by_name() expects at least 3 parameters, 1 given in %s on line %d
-
-Warning: oci_execute(): ORA-00932: %s on line %d
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)

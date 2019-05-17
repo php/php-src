@@ -105,7 +105,7 @@ object(mysqli)#%d (%d) {
 }
 object(mysqli)#%d (%d) {
   ["affected_rows"]=>
-  NULL
+  bool(false)
   ["client_info"]=>
   string(%d) "%s"
   ["client_version"]=>
@@ -119,28 +119,28 @@ object(mysqli)#%d (%d) {
   ["error"]=>
   string(0) ""
   ["error_list"]=>
-  NULL
+  bool(false)
   ["field_count"]=>
-  NULL
+  bool(false)
   ["host_info"]=>
-  NULL
+  bool(false)
   ["info"]=>
-  NULL
+  bool(false)
   ["insert_id"]=>
-  NULL
+  bool(false)
   ["server_info"]=>
-  NULL
+  bool(false)
   ["server_version"]=>
-  NULL
+  bool(false)
   ["stat"]=>
   NULL
   ["sqlstate"]=>
-  NULL
+  bool(false)
   ["protocol_version"]=>
-  NULL
+  bool(false)
   ["thread_id"]=>
-  NULL
+  bool(false)
   ["warning_count"]=>
-  NULL
+  bool(false)
 }
 Done

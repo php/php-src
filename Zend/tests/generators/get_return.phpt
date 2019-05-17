@@ -68,7 +68,7 @@ $gen = gen6();
 var_dump($gen->getReturn());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(42)
 int(24)
 int(42)

@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #74386: Phar::__construct(): wrong number of parameters by reflection
 --SKIPIF--
-<?php if (!extension_loaded("phar") || !extension_loaded('reflection')) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
 $r = new ReflectionMethod(Phar::class, '__construct');

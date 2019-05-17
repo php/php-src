@@ -1,7 +1,7 @@
 --TEST--
 Various pow() tests
 --FILE--
-<?php // $Id$
+<?php
 
 define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
 define('LONG_MIN', -LONG_MAX - 1);
@@ -141,8 +141,7 @@ LONG_MIN*LONG_MIN ~== pow(LONG_MIN,2.0)
 TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
- include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
-
+ include(__DIR__ . '/../../../../tests/quicktester.inc');
 --EXPECT--
 1,1,0,0
 On failure, please mail result to php-dev@lists.php.net

@@ -11,29 +11,29 @@ class Test
 	protected $protectedProperty     = 'protectedProperty set';
 
 	private   $privateProperty       = 'privateProperty set';
-	
+
 	public function __get($name)
 	{
 		return '__get "' . $name . '"';
 	}
-	
+
 	public function __set($name, $value)
 	{
 		$this->$name = $value;
 		echo '__set "' . $name . '" to "' . $value . '"';
 	}
-	
+
 	public function __isset($name)
 	{
 		echo '__isset "' . $name . '"';
 		return isset($this->$name);
 	}
-	
+
 	public function getPublicProperty()
 	{
 		return $this->publicProperty;
 	}
-	
+
 	public function setPublicProperty($publicProperty)
 	{
 		$this->publicProperty = $publicProperty;
@@ -126,8 +126,7 @@ echo $o->getPrivateProperty();
 echo "\n\n";
 
 ?>
-
---EXPECTF--
+--EXPECT--
 publicProperty set
 true
 __isset "publicProperty"

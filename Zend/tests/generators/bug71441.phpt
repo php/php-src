@@ -26,4 +26,3 @@ var_dump($gen->getReturn());
 int(2002)
 Ok
 string(7) "Success"
-

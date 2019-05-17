@@ -1,7 +1,5 @@
 --TEST--
-Test hash_pbkdf2() function : error functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: Test hash_pbkdf2() function : error functionality
 --FILE--
 <?php
 
@@ -13,15 +11,6 @@ echo "*** Testing hash_pbkdf2() : error conditions ***\n";
 
 $password = 'password';
 $salt = 'salt';
-
-echo "\n-- Testing hash_pbkdf2() function with less than expected no. of arguments --\n";
-var_dump(hash_pbkdf2());
-var_dump(hash_pbkdf2('md5'));
-var_dump(hash_pbkdf2('md5', $password));
-var_dump(hash_pbkdf2('md5', $password, $salt));
-
-echo "\n-- Testing hash_pbkdf2() function with more than expected no. of arguments --\n";
-var_dump(hash_pbkdf2('md5', $password, $salt, 10, 10, true, 'extra arg'));
 
 echo "\n-- Testing hash_pbkdf2() function with invalid hash algorithm --\n";
 var_dump(hash_pbkdf2('foo', $password, $salt, 1));
@@ -40,25 +29,6 @@ var_dump(hash_pbkdf2('md5', $password, $salt, 1, -1));
 ===Done===
 --EXPECTF--
 *** Testing hash_pbkdf2() : error conditions ***
-
--- Testing hash_pbkdf2() function with less than expected no. of arguments --
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 0 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 1 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 2 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 3 given in %s on line %d
-NULL
-
--- Testing hash_pbkdf2() function with more than expected no. of arguments --
-
-Warning: hash_pbkdf2() expects at most 6 parameters, 7 given in %s on line %d
-NULL
 
 -- Testing hash_pbkdf2() function with invalid hash algorithm --
 

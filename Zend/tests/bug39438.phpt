@@ -19,12 +19,12 @@ $test2=array(
         	    'lastuploaddate' => 1088427240,
         	    'dependencies' => array (
         	          'depends' => array(
-        	                  'typo3' =>'', 
-        	                  'php' =>'', 
+        	                  'typo3' =>'',
+        	                  'php' =>'',
         	                  'cms' => ''
-        	           ),        	
-        	          'conflicts' => array('' =>'')        	
-        	    ),        	
+        	           ),
+        	          'conflicts' => array('' =>'')
+        	    ),
         	  	'authorname' => 'Mirko Balluff',
         	  	'authoremail' => 'balluff@amt1.de',
         	  	'ownerusername' => 'amt1',
@@ -34,7 +34,7 @@ $test2=array(
   	)
 );
 $test=array();
-while($i<1200) {	
+while($i<1200) {
 	$test[]=$test2;
 	$i++;
 }

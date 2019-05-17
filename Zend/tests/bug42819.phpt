@@ -1,7 +1,5 @@
 --TEST--
 Bug #42819 (namespaces in indexes of constant arrays)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip SPL extension required"; ?>
 --FILE--
 <?php
 namespace foo\foo;

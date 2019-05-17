@@ -7,7 +7,7 @@ function drcp_create_table($conn)
 	$create_sql = "CREATE TABLE DRCPTEST (id NUMBER, name VARCHAR2(10), dept VARCHAR2(10))";
 	$statement = oci_parse($conn, $create_sql);
 	oci_execute($statement);
-	
+
 	$id_values = array(100,101,102,103,104,105,106,107,108);
 	$name_values = array("WIILIAMS","JOHN","SMITH","JONES","ADAMS","ROBERT",
 						 "BILL","LAWSON","MARY");
@@ -17,7 +17,7 @@ function drcp_create_table($conn)
 		$insert = "INSERT INTO DRCPTEST VALUES(".$id_values[$i].",'". $name_values[$i]."','".$dept_values[$i]."')";
 		$s = oci_parse($conn, $insert);
 		oci_execute($s);
-	}	
+	}
 }
 
 function drcp_drop_table($conn)
@@ -74,12 +74,12 @@ function drcp_create_package($c)
 			end;";
 	$s1 = oci_parse($c, $create_package_stmt);
 	oci_execute($s1);
-	
+
 	$package_body = "create or replace package body drcp_test_package as
 		procedure p1(var1 int) is
 		begin
 		var :=var1;
-		end;	
+		end;
 		function f1 return number is
 		begin
 		return drcp_test_package.var;

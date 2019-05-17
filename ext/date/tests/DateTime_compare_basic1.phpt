@@ -1,11 +1,11 @@
 --TEST--
 Test of compare object handler for DateTime objects
 --FILE--
-<?php 
+<?php
 
 echo "Simple test for DateTime compare object handler\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 class DateTimeExt1 extends DateTime {
@@ -33,7 +33,7 @@ var_dump($obj2 == $obj3);
 var_dump($obj2 == $obj4);
 var_dump($obj3 == $obj4);
 
-date_modify($obj1, "+1 day"); 
+date_modify($obj1, "+1 day");
 echo "\n-- The following test should still compare equal --\n";
 var_dump($obj1 == $obj1);
 echo "\n-- All the following tests should now compare NOT equal --\n";
@@ -44,7 +44,7 @@ var_dump($obj1 == $obj4);
 echo "\n-- All the following tests should again compare equal --\n";
 date_modify($obj2, "+1 day");
 date_modify($obj3, "+1 day");
-date_modify($obj4, "+1 day");   
+date_modify($obj4, "+1 day");
 var_dump($obj1 == $obj2);
 var_dump($obj1 == $obj3);
 var_dump($obj1 == $obj4);

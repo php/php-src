@@ -17,6 +17,9 @@ if ($msg = check_local_infile_support($link, $engine))
 mysqli_close($link);
 ?>
 --INI--
+mysqli.allow_local_infile=1
+mysqli.allow_persistent=1
+mysqli.max_persistent=1
 open_basedir=
 --FILE--
 <?php
@@ -74,7 +77,7 @@ $link->close();
 
 unlink('bug53503.data');
 ?>
---EXPECTF--
+--EXPECT--
 done
 [006] [2000] open_basedir restriction in effect. Unable to open file
 done

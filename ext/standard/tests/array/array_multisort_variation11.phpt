@@ -15,7 +15,7 @@ var_dump(array_multisort(array()));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : Testing with empty array ***
 bool(true)
 ===DONE===

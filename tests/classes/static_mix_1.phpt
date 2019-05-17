@@ -19,6 +19,6 @@ pass::show();
 fail::show();
 
 echo "Done\n"; // shouldn't be displayed
-?>                                                            
+?>
 --EXPECTF--
-Fatal error: Cannot make static method pass::show() non static in class fail in %s on line %d
+Fatal error: Cannot make static method pass::show() non static in class fail in %s on line 10

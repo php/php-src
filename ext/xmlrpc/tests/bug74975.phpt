@@ -8,14 +8,14 @@ if (!extension_loaded("xmlrpc")) print "skip";
 <?php
 
 class Foo {
-    
+
 }
 
 class Bar {
-    
+
     public $xmlrpc_type;
     public $scalar;
-    
+
 }
 
 $foo = new Foo();
@@ -32,7 +32,7 @@ echo xmlrpc_encode([
 ]);
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>

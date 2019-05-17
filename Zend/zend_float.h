@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Christian Seiler <chris_se@gmx.net>                         |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef ZEND_FLOAT_H
 #define ZEND_FLOAT_H
@@ -68,7 +66,7 @@ END_EXTERN_C()
     on how to do that?
 
  MS Visual C:
-  - Since MSVC users tipically don't use autoconf or CMake, we will detect
+  - Since MSVC users typically don't use autoconf or CMake, we will detect
     MSVC via compile time define. Floating point precision change isn't
     supported on 64 bit platforms, so it's NOP. See
     http://msdn.microsoft.com/en-us/library/c9676k6h(v=vs.110).aspx
@@ -418,13 +416,3 @@ END_EXTERN_C()
 #endif /* FPU CONTROL */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

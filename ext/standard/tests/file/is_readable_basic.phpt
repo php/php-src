@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_readable_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -23,12 +23,12 @@ unlink($filename);
 */
 
 // include common file test functions
-require dirname(__FILE__).'/file.inc';
+require __DIR__.'/file.inc';
 
 echo "*** Testing is_readable(): basic functionality ***\n";
 
 // create a file
-$filename = dirname(__FILE__)."/is_readable.tmp";
+$filename = __DIR__."/is_readable.tmp";
 create_file($filename);
 
 $counter = 1;
@@ -47,7 +47,7 @@ delete_file($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable(): basic functionality ***
 -- Changing mode of file to 0 --
 bool(false)

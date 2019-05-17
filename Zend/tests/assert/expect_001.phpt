@@ -8,5 +8,5 @@ assert.exception=1
 assert(true);
 var_dump(true);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

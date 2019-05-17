@@ -3,7 +3,7 @@ Bug #31402 (unserialize() generates references when it should not)
 --INI--
 error_reporting=E_ALL
 --FILE--
-<?php 
+<?php
 
 class TestX {
   var $i;

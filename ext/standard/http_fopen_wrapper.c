@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
    |          Sara Golemon <pollita@php.net>                              |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include "php_globals.h"
@@ -157,7 +156,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		if (!context ||
 			(tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "proxy")) == NULL ||
 			Z_TYPE_P(tmpzval) != IS_STRING ||
-			Z_STRLEN_P(tmpzval) <= 0) {
+			Z_STRLEN_P(tmpzval) == 0) {
 			php_url_free(resource);
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
@@ -224,7 +223,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (errstr) {
 		php_stream_wrapper_log_error(wrapper, options, "%s", ZSTR_VAL(errstr));
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 		errstr = NULL;
 	}
 
@@ -447,7 +446,7 @@ finish:
 			if (ZSTR_IS_INTERNED(tmp)) {
 				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			} else if (GC_REFCOUNT(tmp) > 1) {
-				GC_REFCOUNT(tmp)--;
+				GC_DELREF(tmp);
 				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			}
 
@@ -520,7 +519,7 @@ finish:
 
 		}
 		if (tmp) {
-			zend_string_release(tmp);
+			zend_string_release_ex(tmp, 0);
 		}
 	}
 
@@ -662,11 +661,11 @@ finish:
 		array_init(response_header);
 	}
 
-	if (!php_stream_eof(stream)) {
-		size_t tmp_line_len;
+	{
 		/* get response header */
-
-		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
+		size_t tmp_line_len;
+		if (!php_stream_eof(stream) &&
+			php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval http_response;
 
 			if (tmp_line_len > 9) {
@@ -719,18 +718,18 @@ finish:
 								tmp_line, response_code);
 				}
 			}
-			if (tmp_line[tmp_line_len - 1] == '\n') {
+			if (tmp_line_len >= 1 && tmp_line[tmp_line_len - 1] == '\n') {
 				--tmp_line_len;
-				if (tmp_line[tmp_line_len - 1] == '\r') {
+				if (tmp_line_len >= 1 &&tmp_line[tmp_line_len - 1] == '\r') {
 					--tmp_line_len;
 				}
 			}
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
 			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
+		} else {
+			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
+			goto out;
 		}
-	} else {
-		php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
-		goto out;
 	}
 
 	/* read past HTTP headers */
@@ -739,7 +738,7 @@ finish:
 
 	while (!php_stream_eof(stream)) {
 		size_t http_header_line_length;
-		
+
 		if (php_stream_get_line(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE, &http_header_line_length) && *http_header_line != '\n' && *http_header_line != '\r') {
 			char *e = http_header_line + http_header_line_length - 1;
 			char *http_header_value;
@@ -781,6 +780,10 @@ finish:
 						&& (*http_header_value == ' ' || *http_header_value == '\t')) {
 					http_header_value++;
 				}
+			} else {
+				/* There is no colon. Set the value to the end of the header line, which is
+				 * effectively an empty string. */
+				http_header_value = e;
 			}
 
 			if (!strncasecmp(http_header_line, "Location:", sizeof("Location:")-1)) {
@@ -797,11 +800,11 @@ finish:
 				strlcpy(location, http_header_value, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
-			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length")-1)) {
+			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
 				file_size = atoi(http_header_value);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
 			} else if (
-				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding")-1)
+				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
 				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
 			) {
 
@@ -860,7 +863,7 @@ finish:
 						if (!s) {
 							s = ZSTR_VAL(resource->path);
 							if (!ZSTR_LEN(resource->path)) {
-								zend_string_release(resource->path);
+								zend_string_release_ex(resource->path, 0);
 								resource->path = zend_string_init("/", 1, 0);
 								s = ZSTR_VAL(resource->path);
 							} else {
@@ -974,14 +977,14 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 	php_stream *stream;
 	zval headers;
 	ZVAL_UNDEF(&headers);
-	
+
 	stream = php_stream_url_wrap_http_ex(
 		wrapper, path, mode, options, opened_path, context,
 		PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT, &headers STREAMS_CC);
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
-				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
+				"http_response_header", sizeof("http_response_header")-1, &headers, 1)) {
 			zval_ptr_dtor(&headers);
 		}
 	}
@@ -999,7 +1002,7 @@ static int php_stream_http_stream_stat(php_stream_wrapper *wrapper, php_stream *
 }
 /* }}} */
 
-static php_stream_wrapper_ops http_stream_wops = {
+static const php_stream_wrapper_ops http_stream_wops = {
 	php_stream_url_wrap_http,
 	NULL, /* stream_close */
 	php_stream_http_stream_stat,
@@ -1013,17 +1016,8 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_http_wrapper = {
+PHPAPI const php_stream_wrapper php_stream_http_wrapper = {
 	&http_stream_wops,
 	NULL,
 	1 /* is_url */
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

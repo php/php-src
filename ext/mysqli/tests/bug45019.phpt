@@ -51,7 +51,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Using CAST('somestring' AS CHAR)...
 string(3) "one"
 string(5) "three"

@@ -1,5 +1,5 @@
 --TEST--
-Bug #64770 stream_select() fails with pipes from proc_open() 
+Bug #64770 stream_select() fails with pipes from proc_open()
 --FILE--
 <?php
 
@@ -9,7 +9,7 @@ $descs = array(
 	2 => array('pipe', 'w'), // strerr
 );
 
-$other_opts = array('suppress_errors' => false, 'binary_pipes' => true);
+$other_opts = array('suppress_errors' => false);
 
 $cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
 $p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);
@@ -17,7 +17,7 @@ $p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);
 if (is_resource($p)) {
 	$data = '';
 
-	while (1) {	
+	while (1) {
 		$w = $e = NULL;
 		$n = stream_select($pipes, $w, $e, 300);
 

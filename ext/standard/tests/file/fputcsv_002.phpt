@@ -3,7 +3,7 @@ fputcsv(): Checking data after calling the function
 --FILE--
 <?php
 
-$file = dirname(__FILE__) .'/fgetcsv-test.csv';
+$file = __DIR__ .'/fgetcsv-test.csv';
 
 $data = array(1, 2, 'foo', 'haha', array(4, 5, 6), 1.3, null);
 
@@ -13,8 +13,11 @@ fputcsv($fp, $data);
 
 var_dump($data);
 
-@unlink($file);
-
+?>
+--CLEAN--
+<?php
+$file = __DIR__ .'/fgetcsv-test.csv';
+unlink($file);
 ?>
 --EXPECTF--
 Notice: Array to string conversion in %s on line %d

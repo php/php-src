@@ -4,11 +4,13 @@ Phar: mounted manifest directory test
 <?php
 if (!extension_loaded("phar")) die("skip");
 ?>
+--CONFLICTS--
+tempmanifest1.phar.php
 --INI--
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
+$fname = __DIR__ . '/tempmanifest1.phar.php';
 $pname = 'phar://' . $fname;
 
 $a = new Phar($fname);
@@ -31,15 +33,15 @@ set_include_path("phar://" . __FILE__);
 include "index.php";
 __HALT_COMPILER();');
 unset($a);
-mkdir(dirname(__FILE__) . '/testit');
-mkdir(dirname(__FILE__) . '/testit/directory');
-file_put_contents(dirname(__FILE__) . '/testit/extfile.php', '<?php
+mkdir(__DIR__ . '/testit');
+mkdir(__DIR__ . '/testit/directory');
+file_put_contents(__DIR__ . '/testit/extfile.php', '<?php
 var_dump(__FILE__);
 ?>');
-file_put_contents(dirname(__FILE__) . '/testit/extfile2.php', '<?php
+file_put_contents(__DIR__ . '/testit/extfile2.php', '<?php
 var_dump(__FILE__);
 ?>');
-include dirname(__FILE__) . '/testit/extfile.php';
+include __DIR__ . '/testit/extfile.php';
 include $fname;
 
 $a = opendir($pname . '/testit');
@@ -65,17 +67,17 @@ Phar::mount($pname . '/testit', 'another\\..\\mistake');
 echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/notfound', dirname(__FILE__) . '/this/does/not/exist');
+Phar::mount($pname . '/notfound', __DIR__ . '/this/does/not/exist');
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/testit', dirname(__FILE__));
+Phar::mount($pname . '/testit', __DIR__);
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/testit/extfile.php', dirname(__FILE__));
+Phar::mount($pname . '/testit/extfile.php', __DIR__);
 } catch (Exception $e) {
 echo $e->getMessage(), "\n";
 }
@@ -83,11 +85,11 @@ echo $e->getMessage(), "\n";
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');
-@unlink(dirname(__FILE__) . '/testit/extfile.php');
-@unlink(dirname(__FILE__) . '/testit/extfile2.php');
-@rmdir(dirname(__FILE__) . '/testit/directory');
-@rmdir(dirname(__FILE__) . '/testit');
+@unlink(__DIR__ . '/tempmanifest1.phar.php');
+@unlink(__DIR__ . '/testit/extfile.php');
+@unlink(__DIR__ . '/testit/extfile2.php');
+@rmdir(__DIR__ . '/testit/directory');
+@rmdir(__DIR__ . '/testit');
 
 ?>
 --EXPECTF--

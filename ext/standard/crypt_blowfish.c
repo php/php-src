@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * The crypt_blowfish homepage is:
  *

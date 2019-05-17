@@ -16,7 +16,7 @@ $intlcal->clear();
 var_dump($intlcal->set(2012, 1, 29));
 var_dump($intlcal->getTime(),
 		strtotime('2012-02-29 00:00:00 +0000') * 1000.);
-		
+
 //two minutes to midnight!
 var_dump($intlcal->set(2012, 1, 29, 23, 58));
 var_dump($intlcal->getTime(),

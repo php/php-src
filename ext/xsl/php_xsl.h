@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author:                                                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_XSL_H
 #define PHP_XSL_H
@@ -104,31 +102,4 @@ PHP_RINIT_FUNCTION(xsl);
 PHP_RSHUTDOWN_FUNCTION(xsl);
 PHP_MINFO_FUNCTION(xsl);
 
-
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(xsl)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(xsl)
-*/
-
-#ifdef ZTS
-#define XSL_G(v) TSRMG(xsl_globals_id, zend_xsl_globals *, v)
-#else
-#define XSL_G(v) (xsl_globals.v)
-#endif
-
 #endif	/* PHP_XSL_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

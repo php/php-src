@@ -3,7 +3,7 @@ Test array_map() function : usage variations - anonymous callback function
 --FILE--
 <?php
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays 
+ * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
 
@@ -85,6 +85,6 @@ array(3) {
 }
 -- passing NULL as 'arr1' --
 
-Warning: array_map(): Argument #2 should be an array in %s on line %d
+Warning: array_map(): Expected parameter 2 to be an array, null given in %s on line %d
 NULL
 Done

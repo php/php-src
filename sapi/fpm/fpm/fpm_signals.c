@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_signals.c,v 1.24 2008/08/26 15:09:15 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -144,7 +142,7 @@ static void sig_soft_quit(int signo) /* {{{ */
 	int saved_errno = errno;
 
 	/* closing fastcgi listening socket will force fcgi_accept() exit immediately */
-	close(0);
+	close(fpm_globals.listening_socket);
 	if (0 > socket(AF_UNIX, SOCK_STREAM, 0)) {
 		zlog(ZLOG_WARNING, "failed to create a new socket");
 	}
@@ -252,4 +250,3 @@ int fpm_signals_get_fd() /* {{{ */
 	return sp[0];
 }
 /* }}} */
-

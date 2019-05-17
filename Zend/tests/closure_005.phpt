@@ -25,13 +25,13 @@ class A {
 			echo $this->x."\n";
 		};
 	}
-	
+
 	function getError() {
 		return static function() {
 			echo $this->x."\n";
 		};
 	}
-	
+
 	function printX() {
 		echo $this->x."\n";
 	}

@@ -7,7 +7,7 @@ Class C {
 	function f() {
 		static $a = array(1,2,3);
 		eval(' static $k = array(4,5,6); ');
-		
+
 		function cfg() {
 			static $a = array(7,8,9);
 			eval(' static $k = array(10,11,12); ');
@@ -33,7 +33,7 @@ $e = new E;
 $e->f();
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

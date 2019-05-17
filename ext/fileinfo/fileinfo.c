@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
   | Author: Ilia Alshanetsky <ilia@php.net>                              |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -54,7 +52,7 @@ typedef struct _finfo_object {
 } finfo_object;
 
 #define FILEINFO_DECLARE_INIT_OBJECT(object) \
-	zval *object = ZEND_IS_METHOD_CALL() ? getThis() : NULL;
+	zval *object = getThis();
 
 static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 	return (finfo_object *)((char*)(obj) - XtOffsetOf(finfo_object, zo));
@@ -100,7 +98,7 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 {
 	finfo_object *intern;
 
-	intern = ecalloc(1, sizeof(finfo_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(finfo_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -162,8 +160,8 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-zend_function_entry finfo_class_functions[] = {
-	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
+static const zend_function_entry finfo_class_functions[] = {
+	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
@@ -196,7 +194,7 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-zend_function_entry fileinfo_functions[] = {
+static const zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
@@ -217,7 +215,7 @@ PHP_MINIT_FUNCTION(finfo)
 	finfo_class_entry = zend_register_internal_class(&_finfo_class_entry);
 
 	/* copy the standard object handlers to you handler table */
-	memcpy(&finfo_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	finfo_object_handlers.offset = XtOffsetOf(finfo_object, zo);
 	finfo_object_handlers.free_obj = finfo_objects_free;
 
@@ -278,7 +276,6 @@ PHP_MINFO_FUNCTION(fileinfo)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "fileinfo support", "enabled");
-	php_info_print_table_row(2, "version", PHP_FILEINFO_VERSION);
 	php_info_print_table_row(2, "libmagic", magic_ver);
 	php_info_print_table_end();
 }
@@ -295,9 +292,8 @@ PHP_FUNCTION(finfo_open)
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
-	int flags = object ? ZEND_PARSE_PARAMS_THROW : 0;
 
-	if (zend_parse_parameters_ex(flags, ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -607,7 +603,7 @@ PHP_FUNCTION(finfo_file)
 /* }}} */
 
 /* {{{ proto string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
-   Return infromation about a string buffer. */
+   Return information about a string buffer. */
 PHP_FUNCTION(finfo_buffer)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, FILEINFO_MODE_BUFFER, 0);
@@ -621,13 +617,3 @@ PHP_FUNCTION(mime_content_type)
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

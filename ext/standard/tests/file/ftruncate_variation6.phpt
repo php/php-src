@@ -21,7 +21,7 @@ include ("file.inc");
 echo "*** Testing ftruncate() : usage variations ***\n";
 
 /* test ftruncate with file opened in different modes */
-$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t", 
+$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
                     "w", "wb", "wt", "w+", "w+b", "w+t",
                     "x", "xb", "xt", "x+", "x+b", "x+t",
                     "a", "ab", "at", "a+", "a+b", "a+t");
@@ -35,26 +35,26 @@ foreach($file_content_types as $file_content_type) {
   echo "-- Testing ftruncate() with file opening using $file_modes[$mode_counter] mode --\n";
 
    // create 1 file with some contents
-   $filename = dirname(__FILE__)."/ftruncate_variation6.tmp";
+   $filename = __DIR__."/ftruncate_variation6.tmp";
    if( strstr($file_modes[$mode_counter], "x") || strstr($file_modes[$mode_counter], "w") ) {
      // fopen the file using the $file_modes
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
      fill_file($file_handle, $file_content_type, 1024);
    } else {
-     create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 1, "w", "ftruncate_variation", 6);
+     create_files ( __DIR__, 1, $file_content_type, 0755, 1, "w", "ftruncate_variation", 6);
      // fopen the file using the $file_modes
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
    }
    if (!$file_handle) {
-     echo "Error: failed to open file $filename!\n"; 
+     echo "Error: failed to open file $filename!\n";
      exit();
    }
 
    rewind($file_handle); // file pointer to 0
- 
+
    echo "-- Testing ftruncate(): truncate to smaller size and display the file content --\n";
    /* try to truncate it and display the file content */
-  
+
    $new_size = 15;
    var_dump( filesize($filename) );  // current filesize
    var_dump( ftell($file_handle) );
@@ -66,15 +66,15 @@ foreach($file_content_types as $file_content_type) {
    var_dump( feof($file_handle) );
    fclose($file_handle);
    clearstatcache(); // clear previous size value in cache
-   var_dump( filesize($filename) ); 
-    
+   var_dump( filesize($filename) );
+
    //delete all files created
    delete_file( $filename );
  }//end of inner for loop
 }//end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ftruncate() : usage variations ***
 
 -- Testing ftruncate() with file having data of type numeric --

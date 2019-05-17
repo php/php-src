@@ -31,8 +31,6 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id$";
-
 #include "php.h"
 #include "main/snprintf.h"
 #include <string.h>
@@ -407,4 +405,3 @@ xml_element* XMLRPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
    }
    return wrapper;
 }
-

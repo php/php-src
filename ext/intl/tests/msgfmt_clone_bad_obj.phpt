@@ -15,6 +15,5 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
-
 --EXPECTF--
 string(%d) "Cannot clone unconstructed MessageFormatter"

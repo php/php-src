@@ -6,7 +6,7 @@ SPL: SplObjectStorage serialization & overloading
 class TestClass
 {
 	public $test = 25;
-	
+
 	public function __construct($test = 42)
 	{
 		$this->test = $test;
@@ -16,7 +16,7 @@ class TestClass
 class MyStorage extends SplObjectStorage
 {
 	public $bla = 25;
-	
+
 	public function __construct($bla = 26)
 	{
 		$this->bla = $bla;

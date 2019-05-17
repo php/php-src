@@ -13,7 +13,7 @@ $test->method();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Uncaught Error: Non-static method ArrayIterator::current() cannot be called statically in %s:%d
 Stack trace:
 #0 %s(%d): test->method()

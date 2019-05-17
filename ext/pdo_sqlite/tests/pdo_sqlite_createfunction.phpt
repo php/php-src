@@ -5,7 +5,7 @@ PDO_sqlite: Testing sqliteCreateFunction()
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
 
@@ -23,16 +23,16 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["testing(name)"]=>
-  %string|unicode%(3) "php"
+  string(3) "php"
   [0]=>
-  %string|unicode%(3) "php"
+  string(3) "php"
 }
 array(2) {
   ["testing(name)"]=>
-  %string|unicode%(4) "php6"
+  string(4) "php6"
   [0]=>
-  %string|unicode%(4) "php6"
+  string(4) "php6"
 }

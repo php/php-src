@@ -47,17 +47,7 @@ extern "C" {
 #include "gd_io.h"
 
 /* va_list needed in gdErrorMethod */
-#ifdef PHP_WIN32
-# include <stdarg.h>
-#else
-# if HAVE_STDARG_H
-# include <stdarg.h>
-# else
-#  if HAVE_SYS_VARARGS_H
-#  include <sys/varargs.h>
-#  endif
-# endif
-#endif
+#include <stdarg.h>
 
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
@@ -378,10 +368,8 @@ gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
-int gdJpegGetVersionInt();
 const char * gdPngGetVersionString();
 
-int gdJpegGetVersionInt();
 const char * gdJpegGetVersionString();
 
 /* A custom data source. */
@@ -728,6 +716,18 @@ enum gdPixelateMode {
 };
 
 int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
+
+typedef struct {
+	int sub;
+	int plus;
+	unsigned int num_colors;
+	int *colors;
+	unsigned int seed;
+} gdScatter, *gdScatterPtr;
+
+int gdImageScatter(gdImagePtr im, int sub, int plus);
+int gdImageScatterColor(gdImagePtr im, int sub, int plus, int colors[], unsigned int num_colors);
+int gdImageScatterEx(gdImagePtr im, gdScatterPtr s);
 
 /* Macros to access information about images. */
 

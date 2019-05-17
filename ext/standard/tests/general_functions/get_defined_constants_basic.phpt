@@ -1,11 +1,11 @@
 --TEST--
-Test get_defined_constants() function : basic functionality 
+Test get_defined_constants() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array get_defined_constants  ([ bool $categorize  ] )
  * Description:  Returns an associative array with the names of all the constants and their values
  * Source code: Zend/zend_builtin_functions.c
- */		
+ */
 
 echo "*** Testing get_defined_constants() : basic functionality ***\n";
 
@@ -29,7 +29,7 @@ if ($n2 == $n1 + 1 && array_key_exists("USER_CONSTANT", $arr2)) {
 
 ?>
 ===DONE===
---EXPECTF-- 
+--EXPECT--
 *** Testing get_defined_constants() : basic functionality ***
 string(5) "array"
 string(5) "array"

@@ -1,8 +1,5 @@
 --TEST--
 Test is_callable() function : usage variations - defined functions
---INI--
-precision=14
-error_reporting = E_ALL & ~E_NOTICE | E_STRICT
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );

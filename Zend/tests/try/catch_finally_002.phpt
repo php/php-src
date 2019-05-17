@@ -15,7 +15,7 @@ function foo () {
 
 var_dump(foo());
 ?>
---EXPECTF--
+--EXPECT--
 try
 finally
 int(1)

@@ -20,10 +20,7 @@ class Foo {
 Foo::test();
 ?>
 --EXPECTF--
-Deprecated: Non-static method Foo::test() should not be called statically in %swrong_inlining_002.php on line 11
-
-Fatal error: Uncaught Error: Using $this when not in object context in %swrong_inlining_002.php:7
+Fatal error: Uncaught Error: Non-static method Foo::test() cannot be called statically in %s:%d
 Stack trace:
-#0 %swrong_inlining_002.php(11): Foo::test()
-#1 {main}
-  thrown in %swrong_inlining_002.php on line 7
+#0 {main}
+  thrown in %s on line %d

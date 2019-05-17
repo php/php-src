@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (variation 6) 
+Test extract() function (variation 6)
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 string(3) "aaa"
 int(1)

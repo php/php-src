@@ -1,5 +1,7 @@
 --TEST--
 Bug #69267: mb_strtolower fails on titlecase characters
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

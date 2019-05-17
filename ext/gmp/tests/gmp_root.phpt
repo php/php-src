@@ -5,8 +5,6 @@ gmp_root() basic tests
 --FILE--
 <?php
 
-var_dump(gmp_root());
-
 var_dump(gmp_root(1000, 3));
 var_dump(gmp_root(100, 3));
 var_dump(gmp_root(-100, 3));
@@ -20,9 +18,7 @@ var_dump(gmp_root(100, 0));
 var_dump(gmp_root(100, -3));
 
 ?>
---EXPECTF--	
-Warning: gmp_root() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
+--EXPECTF--
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "10"

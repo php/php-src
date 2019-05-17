@@ -19,7 +19,7 @@ $arg1 = 111;
 $arg2 = 222;
 $arg3 = 333;
 
-echo "\n-- Calling printf() with no arguments --\n"; 
+echo "\n-- Calling printf() with no arguments --\n";
 $result = printf($format);
 echo "\n";
 var_dump($result);
@@ -41,7 +41,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using integer format ***
 
 -- Calling printf() with no arguments --

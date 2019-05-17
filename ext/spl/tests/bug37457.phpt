@@ -6,13 +6,13 @@ Bug #37457 (Crash when an exception is thrown in accept() method of FilterIterat
 class Collection implements Iterator
 {
 	protected $array, $valid = false;
-	
+
 	public function __construct(array $a)
 	{
 		echo __METHOD__ . "\n";
 		$this->array = $a;
 	}
-	
+
 	public function current()
 	{
 		echo __METHOD__ . "\n";
@@ -69,7 +69,7 @@ catch (Exception $e)
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Collection::__construct
 Collection::rewind
 Collection::valid

@@ -5,7 +5,7 @@ Bug #45458 (OCI8: Numeric keys for associative arrays are not handled properly)
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Run Test
 

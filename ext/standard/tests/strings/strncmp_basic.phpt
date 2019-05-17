@@ -1,5 +1,5 @@
 --TEST--
-Test strncmp() function : basic functionality 
+Test strncmp() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int strncmp ( string $str1, string $str2, int $len );

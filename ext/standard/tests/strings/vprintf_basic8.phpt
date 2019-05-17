@@ -3,7 +3,7 @@ Test vprintf() function : basic functionality - octal format
 --FILE--
 <?php
 /* Prototype  : string vprintf(string $format , array $args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -20,15 +20,15 @@ $arg3 = array(021,0347,0567);
 
 $result = vprintf($format1,$arg1);
 echo "\n";
-var_dump($result); 
+var_dump($result);
 
 $result = vprintf($format2,$arg2);
 echo "\n";
-var_dump($result); 
+var_dump($result);
 
 $result = vprintf($format3,$arg3);
 echo "\n";
-var_dump($result); 
+var_dump($result);
 
 ?>
 ===DONE===

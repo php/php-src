@@ -3,11 +3,11 @@ Test is_numeric() function
 --FILE--
 <?php
 /* Prototype: bool is_numeric ( mixed $var );
- * Description: Finds whether a variable is a number or a numeric string  
+ * Description: Finds whether a variable is a number or a numeric string
  */
 
 echo "*** Testing is_numeric() with valid numeric values ***\n";
-// different valid numeric  vlaues 
+// different valid numeric  values
 $numerics = array(
   0,
   1,
@@ -58,15 +58,15 @@ $numerics = array(
   //0x1111111111111111111111,
   -0x1111111,
   +0x6698319,
-  01000000000000000000000, 
+  01000000000000000000000,
   0123,
   0345,
-  -0200001,  
-  -0200001.7,  
-  0200001.7,  
-  +0200001,  
-  +0200001.7,  
-  +0200001.7,  
+  -0200001,
+  -0200001.7,
+  0200001.7,
+  +0200001,
+  +0200001.7,
+  +0200001.7,
   2.00000000000000000000001, // a float value with more precision points
   "1",	// numeric in the form of string
   "-1",
@@ -87,7 +87,7 @@ $numerics = array(
   '-0123',
   '+0123'
 );
-/* loop to check that is_numeric() recognizes different 
+/* loop to check that is_numeric() recognizes different
    numeric values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($numerics as $num ) {
@@ -99,19 +99,19 @@ echo "\n*** Testing is_numeric() on non numeric types ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variable
 $unset_var = 10.5;
 unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_numerics = array(
   "0x80001",
-  "-0x80001", 
-  "+0x80001", 
+  "-0x80001",
+  "+0x80001",
   "-0x80001.5",
-  "0x80001.5", 
+  "0x80001.5",
   new stdclass, // object
   $fp,  // resource
   $dfp,
@@ -126,7 +126,7 @@ $not_numerics = array(
   "20 test",
   "3.6test",
   "1,000",
-  "NULL", 
+  "NULL",
   "true",
   true,
   NULL,
@@ -137,7 +137,7 @@ $not_numerics = array(
   @$unset_var, // unset variable
   @$undefined_var
 );
-/* loop through the $not_numerics to see working of 
+/* loop through the $not_numerics to see working of
    is_numeric() on non numeric values, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_numerics as $type ) {
@@ -145,13 +145,6 @@ foreach ($not_numerics as $type ) {
   var_dump( is_numeric($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_numeric() );
-
-//arguments more than expected 
-var_dump( is_numeric("10", "20") );
- 
 echo "Done\n";
 
 // close the resources used
@@ -373,12 +366,4 @@ bool(false)
 bool(false)
 -- Iteration 29 --
 bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_numeric() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

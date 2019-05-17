@@ -2,9 +2,9 @@
 Bug #54379 (PDO_OCI: UTF-8 output gets truncated)
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) 
+if (!extension_loaded('pdo') || !extension_loaded('pdo_oci'))
 die('skip not loaded');
-require dirname(__FILE__).'/../../pdo/tests/pdo_test.inc';
+require __DIR__.'/../../pdo/tests/pdo_test.inc';
 if (!preg_match('/charset=.*utf8/i', getenv('PDOTEST_DSN')))
 die('skip not UTF8 DSN');
 PDOTest::skip();
@@ -26,7 +26,7 @@ $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $db->exec("DROP TABLE test");
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(1) {

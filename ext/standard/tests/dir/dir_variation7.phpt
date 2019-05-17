@@ -6,7 +6,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/dir_root_check.tmp";
+$filename = __DIR__."/dir_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -17,13 +17,13 @@ unlink($filename);
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
  */
 
-/* 
+/*
  * remove the execute permission from the parent dir and test dir() on child dir
  *   1) remove write & execute permission from the 1st parent and test dir()
  *   2) remove execute permission from 2nd parent and test dir()
@@ -36,7 +36,7 @@ echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
     |-> sub_dir    ( sub parent )
          |-> child_dir  ( child dir)
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $parent_dir_path = $file_path."/dir_variation7";
 @mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
@@ -67,7 +67,7 @@ echo "Done";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $parent_dir_path = $file_path."/dir_variation7";
 $sub_dir_path = $parent_dir_path."/sub_dir";
 $child_dir_path = $sub_dir_path."/child_dir";

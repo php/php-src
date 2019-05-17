@@ -3,7 +3,7 @@ Test array_filter() function : usage variations - Different types of 'callback' 
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -46,7 +46,7 @@ var_dump( array_filter($input, "callback3") );
 // callback function with parameter and with return value
 function callback4($input)
 {
-  if($input > 0 ) { 
+  if($input > 0 ) {
     return true;
   }
   else {
@@ -58,7 +58,7 @@ var_dump( array_filter($input, "callback4") );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variation - different 'callback' functions***
 -- Callback function without parameter and with return --
 array(8) {

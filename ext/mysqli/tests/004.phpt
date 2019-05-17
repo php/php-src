@@ -34,7 +34,7 @@ require_once('skipifconnectfailure.inc');
 
 	if (!$stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch ORDER BY c1"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	
+
 	$c1 = $c2 = NULL;
 	mysqli_stmt_bind_result($stmt, $c1, $c2);
 	mysqli_stmt_execute($stmt);
@@ -61,7 +61,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(10) "1234567890"

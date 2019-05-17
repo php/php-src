@@ -9,7 +9,7 @@ class ReflectTestClass {
     public static function staticMethod(&$paramOne, $anotherParam) {
         return ++$theIncrement;
     }
-    
+
     public function instanceMethod($firstParam, &$secondParam) {
       $firstParam = "Hello\n";
     }

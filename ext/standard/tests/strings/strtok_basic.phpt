@@ -1,5 +1,5 @@
 --TEST--
-Test strtok() function : basic functionality 
+Test strtok() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string strtok ( str $str, str $token )
@@ -31,7 +31,7 @@ for( $i = 2; $i <=7; $i++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : basic functionality ***
 
 The Input string is:

@@ -3,7 +3,7 @@ Test array_key_exists() function : usage variations - array keys are different d
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -42,7 +42,7 @@ $inputs = array(
        -10.5 => 'negative',
        .5 => 'half',
        ),
-       
+
        'extreme floats' => array(
        12.3456789000e10 => 'large',
        12.3456789000E-10 => 'small',
@@ -51,7 +51,7 @@ $inputs = array(
        // null data
 /*3*/ 'null uppercase' => array(
        NULL => 'null 1',
-       ), 
+       ),
        'null lowercase' => array(
        null => 'null 2',
        ),
@@ -65,7 +65,7 @@ $inputs = array(
        TRUE => 'uppert',
        FALSE => 'upperf',
        ),
-       
+
        // empty data
 /*5*/ 'empty double quotes' => array(
        "" => 'emptyd',
@@ -109,8 +109,7 @@ foreach($inputs as $type => $input) {
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Iteration 1: int data --

@@ -12,5 +12,5 @@ try {
 	var_dump($e->getCode());
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(14)

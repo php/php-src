@@ -5,7 +5,7 @@ Test ctype_digit() function : usage variations - octal and hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s) 
+ * Description: Checks for numeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -39,7 +39,7 @@ foreach($hex_values as $c) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_digit() : usage variations ***
 
 -- Octal Values --

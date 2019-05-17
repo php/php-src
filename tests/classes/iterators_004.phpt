@@ -51,7 +51,7 @@ foreach($obj as $v => $w) {
 
 print "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 1st try
 2nd try
 object:max=>3

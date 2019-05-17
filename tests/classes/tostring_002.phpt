@@ -9,7 +9,7 @@ class Test
 	{
 		return "Hello\n";
 	}
-	
+
 	function __destruct()
 	{
 		echo $this;
@@ -23,7 +23,7 @@ $o = new Test;
 
 ?>
 ====DONE====
---EXPECTF--
+--EXPECT--
 Hello
 ====DONE====
 Hello

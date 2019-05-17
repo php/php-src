@@ -5,7 +5,7 @@ Test ctype_cntrl() function : usage variations - Different data types as $c arg
 --FILE--
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s) 
+ * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $inputs = array(
        '
 ',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -100,7 +100,7 @@ fclose($fp);
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 
 -- Iteration 1 --

@@ -4,7 +4,7 @@ Test arsort, asort, krsort, ksort, rsort, and sort
 precision=14
 --FILE--
 <?php
-require(dirname(__FILE__) . '/data.inc');
+require(__DIR__ . '/data.inc');
 
 function test_sort ($sort_function, $data) {
     echo "\n -- Testing $sort_function() -- \n";

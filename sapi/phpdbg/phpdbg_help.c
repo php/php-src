@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -544,8 +544,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **at**       **A**     specify breakpoint by location and condition" CR
-"  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
+"  **at**       **@**     specify breakpoint by location and condition" CR
+"  **del**      **~**     delete breakpoint by breakpoint identifier number" CR CR
 
 "**Break at** takes two arguments. The first is any valid target. The second "
 "is a valid PHP expression which will trigger the break in "
@@ -924,7 +924,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
-"     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **S b 4 on**." CR
+"     Temporarily disable breakpoint 4.  This can be subsequently re-enabled by a **S b 4 on**." CR
 //*********** check oplog syntax
 },
 

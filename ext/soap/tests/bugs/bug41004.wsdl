@@ -7,7 +7,8 @@
 		<xsd:schema targetNamespace="urn:Formation">
 			<xsd:element name="echo">
 				<xsd:complexType>
-					<xsd:sequence>						<xsd:element name="in" type="tns:EchoBean"></xsd:element>
+					<xsd:sequence>
+						<xsd:element name="in" type="tns:EchoBean"></xsd:element>
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
@@ -49,7 +50,10 @@
 			<wsdl:output message="tns:echoResponse"></wsdl:output>
 		</wsdl:operation>
 	</wsdl:portType>
-	<wsdl:binding name="FormationServiceV1" type="tns:Formation">		<soap:binding style="document"			transport="http://schemas.xmlsoap.org/soap/http" />		<wsdl:operation name="echo">
+	<wsdl:binding name="FormationServiceV1" type="tns:Formation">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="echo">
 			<soap:operation soapAction="urn:Formation/echo" />
 			<wsdl:input>
 				<soap:body use="literal" />

@@ -22,7 +22,7 @@ var_dump(filter_var("кириллица", FILTER_SANITIZE_SPECIAL_CHARS, FILTER_
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(55) "?&#62;&#60;!@#$%^&#38;*()}{~Qwertyuilfdsasdfgmnbvcxcvbn"
 string(23) "&#60;data&#38;sons&#62;"
 string(0) ""

@@ -61,7 +61,7 @@ catch (Exception $e) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 foo
 From foo::__callStatic:
 123

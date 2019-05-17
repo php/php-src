@@ -11,6 +11,6 @@ $x = $m[2];
 }
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 Error at offset 10 of 19 bytes
 DONE

@@ -3,8 +3,8 @@ Test array_diff() function : usage variations - arrays containing referenced var
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -44,9 +44,7 @@ var_dump(array_diff($arr2, $arr1));
 
 echo "Done";
 ?>
-
---EXPECTF--
-
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 -- Basic Comparison --
 array(3) {

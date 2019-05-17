@@ -5,13 +5,13 @@ Test sprintf() function : usage variations - octal formats with float values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : octal formats with float values ***\n";
 
-// array of float values 
+// array of float values
 $float_values = array(
   0.0,
   -0.1,
@@ -24,9 +24,9 @@ $float_values = array(
 );
 
 // array of octal formats
-$octal_formats = array( 
-  "%o", "%ho", "%lo", 
-  "%Lo", " %o", "%o ",                        
+$octal_formats = array(
+  "%o", "%ho", "%lo",
+  "%Lo", " %o", "%o ",
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
 );
@@ -34,7 +34,7 @@ $octal_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($octal_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }
@@ -43,7 +43,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with float values ***
 
 -- Iteration 1 --

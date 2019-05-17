@@ -29,7 +29,7 @@ foreach ($h as $out) {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 10
 9
 8

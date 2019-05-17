@@ -31,7 +31,7 @@ ob_start();
 	$contents = ob_get_contents();
 	ob_end_clean();
 	echo preg_replace('/object\(DOMAttr\).+\{.*?\}/s', 'DOMAttr', $contents);
-} 
+}
 
 ?>
 --EXPECTF--

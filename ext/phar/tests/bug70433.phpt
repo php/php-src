@@ -10,7 +10,7 @@ $meta = $phar->getMetadata();
 var_dump($meta);
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 object(PharData)#1 (3) {
   ["pathName":"SplFileInfo":private]=>
   string(0) ""

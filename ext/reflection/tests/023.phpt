@@ -1,7 +1,5 @@
 --TEST--
 ReflectionClass::getDefaultProperties (filtering parent privates)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class C1 {
@@ -17,7 +15,7 @@ class C2 extends C1 {
 $class = new ReflectionClass("C2");
 var_dump($class->getDefaultProperties());
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   ["p4"]=>
   int(4)

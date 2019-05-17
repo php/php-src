@@ -38,8 +38,7 @@ $d = $nonstaticUnscoped->bindTo(new A, 'A'); $d(); echo "\n";
 $d = $nonstaticScoped->bindTo(new A, 'A'); $d(); echo "\n";
 
 echo "Done.\n";
-
---EXPECTF--
+--EXPECT--
 Before binding
 bool(false)
 bool(false)

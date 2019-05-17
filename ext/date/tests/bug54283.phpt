@@ -10,5 +10,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(51) "DatePeriod::__construct(): Unknown or bad format ()"

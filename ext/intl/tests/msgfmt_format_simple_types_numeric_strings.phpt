@@ -6,8 +6,6 @@ date.timezone=Atlantic/Azores
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip for ICU 4.8+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -25,7 +23,7 @@ $mf = new MessageFormatter('en_US',"
 	ordinal			{i,ordinal}
 	duration		{j,duration}
 	");
-	
+
 $ex = "1336317965.5 str";
 var_dump($mf->format(array(
 'a' => $ex,

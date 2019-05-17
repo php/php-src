@@ -18,23 +18,14 @@ if (!function_exists('mysqli_stmt_get_result'))
 	*/
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_get_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_get_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (NULL !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
+		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -58,8 +49,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (NULL !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
+		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[012] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -81,8 +72,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 		printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (NULL !== ($tmp = mysqli_stmt_get_result($stmt)))
-		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+	if (false !== ($tmp = mysqli_stmt_get_result($stmt)))
+		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[019] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -148,8 +139,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	mysqli_stmt_close($stmt);
 
-	if (NULL !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[042] Expecting NULL, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
+		printf("[042] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
 
 	mysqli_close($link);
 

@@ -5,8 +5,8 @@ Test ctype_graph() function : usage variations - octal and hexadecimal values
 --FILE--
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space 
- * Source code: ext/ctype/ctype.c 
+ * Description: Checks for any printable character(s) except space
+ * Source code: ext/ctype/ctype.c
  */
 
 /*
@@ -39,7 +39,7 @@ foreach($hex_values as $c) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_graph() : usage variations ***
 
 -- Octal Values --

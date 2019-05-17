@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,10 +15,6 @@
    | Author: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                        |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
-/* Synced with php 3.0 revision 1.30 1999-06-16 [ssb] */
 
 #ifndef FILE_H
 #define FILE_H
@@ -39,7 +35,6 @@ PHPAPI PHP_FUNCTION(fread);
 PHPAPI PHP_FUNCTION(fgetc);
 PHPAPI PHP_FUNCTION(fgets);
 PHP_FUNCTION(fscanf);
-PHPAPI PHP_FUNCTION(fgetss);
 PHP_FUNCTION(fgetcsv);
 PHP_FUNCTION(fputcsv);
 PHPAPI PHP_FUNCTION(fwrite);
@@ -62,7 +57,7 @@ PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 PHP_FUNCTION(realpath);
 #endif
 #ifdef HAVE_FNMATCH
@@ -81,8 +76,10 @@ PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
 PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
 PHPAPI int php_mkdir(const char *dir, zend_long mode);
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value);
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char);
+
+#define PHP_CSV_NO_ESCAPE EOF
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
+PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -146,4 +143,3 @@ extern PHPAPI php_file_globals file_globals;
 
 
 #endif /* FILE_H */
-

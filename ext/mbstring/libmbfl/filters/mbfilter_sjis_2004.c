@@ -39,8 +39,6 @@
 
 extern const unsigned char mblen_table_sjis[];
 
-static int mbfl_filt_ident_sjis2004(int c, mbfl_identify_filter *filter);
-
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);

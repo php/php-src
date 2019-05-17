@@ -4,12 +4,12 @@ Test return type and value for expected input sin()
 precision = 14
 --FILE--
 <?php
-/* 
+/*
  * proto float sin(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/allowed_rounding_error.inc");
 
 
@@ -64,7 +64,7 @@ var_dump(sin($twoseventy));
 if (allowed_rounding_error(sin($twoseventy),-1.0)) {
 	echo "Pass\n";
 }
-else {	
+else {
 	echo "Fail\n";
 }
 

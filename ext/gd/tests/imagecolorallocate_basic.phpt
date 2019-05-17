@@ -8,7 +8,7 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
@@ -26,7 +26,7 @@ var_dump( imagecolorallocate($im, 0, 0, 255) );
 var_dump( imagecolorallocate($im, 255, 255, 255) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : basic functionality ***
 int(16711680)
 int(65280)

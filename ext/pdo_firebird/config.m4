@@ -1,6 +1,8 @@
-PHP_ARG_WITH(pdo-firebird,for Firebird support for PDO,
-[  --with-pdo-firebird[=DIR] PDO: Firebird support.  DIR is the Firebird base
-                          install directory [/opt/firebird]])
+PHP_ARG_WITH([pdo-firebird],
+  [for Firebird support for PDO],
+  [AS_HELP_STRING([[--with-pdo-firebird[=DIR]]],
+    [PDO: Firebird support. DIR is the Firebird base install directory
+    [/opt/firebird]])])
 
 if test "$PHP_PDO_FIREBIRD" != "no"; then
 
@@ -55,7 +57,7 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH($FIREBIRD_LIBNAME, $FIREBIRD_LIBDIR, PDO_FIREBIRD_SHARED_LIBADD)
     PHP_ADD_INCLUDE($FIREBIRD_INCDIR)
   fi
- 
+
   PHP_CHECK_PDO_INCLUDES
 
   AC_DEFINE(HAVE_PDO_FIREBIRD,1,[ ])

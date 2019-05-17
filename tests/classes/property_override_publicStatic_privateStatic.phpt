@@ -10,7 +10,7 @@ Redeclare inherited public static property as private static.
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       private static $p = "B::p (static)";
@@ -19,14 +19,12 @@ Redeclare inherited public static property as private static.
           echo self::$p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   B::showA();
   B::showB();
 ?>
 --EXPECTF--
-
 Fatal error: Access level to B::$p must be public (as in class A) in %s on line 18
-

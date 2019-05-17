@@ -15,11 +15,11 @@ echo "--- Testing sizeof() with objects which doesn't implement Countable interf
 
 // class without member
 class test
-{ 
+{
   // no members
 }
 
-// class with only members and with out member functions 
+// class with only members and with out member functions
 class test1
 {
   public $member1;
@@ -33,7 +33,7 @@ class test1
 // class with only member functions
 class test2
 {
-  // no data members 
+  // no data members
 
   public function display()
   {
@@ -53,7 +53,7 @@ abstract class abstract_class
 {
   public $member1;
   private $member2;
- 
+
   abstract protected function display();
 }
 
@@ -83,7 +83,7 @@ for($i = 0; $i < count($objects); $i++)
   echo "Default Mode: ";
   var_dump( sizeof($var) );
   echo "\n";
-  
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($var, COUNT_NORMAL) );
   echo "\n";
@@ -91,7 +91,7 @@ for($i = 0; $i < count($objects); $i++)
   echo "COUNT_RECURSIVE Mode: ";
   var_dump( sizeof($var, COUNT_RECURSIVE) );
   echo "\n";
- 
+
   $counter++;
 }
 

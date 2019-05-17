@@ -20,4 +20,3 @@ function render($properties) {
 OK
 --EXPECT--
 OK
-

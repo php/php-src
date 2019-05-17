@@ -1,11 +1,9 @@
 --TEST--
 Bug#71412 ArrayIterator reflection parameter info
---SKIPIF--
-<?php
-extension_loaded('SPL') || print "skip";
 --FILE--
 <?php
 echo (new ReflectionMethod('ArrayIterator', '__construct'));
+?>
 --EXPECT--
 Method [ <internal:SPL, ctor> public method __construct ] {
 

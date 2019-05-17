@@ -271,8 +271,8 @@ require_once('skipifconnectfailure.inc');
 
 	$mysqli->close();
 
-	if (null !== ($tmp = $res->fetch_array(MYSQLI_ASSOC)))
-		printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = $res->fetch_array(MYSQLI_ASSOC)))
+		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

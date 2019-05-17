@@ -6,5 +6,5 @@ Bug #67238 Ungreedy and min/max quantifier bug in PCRE 8.34 upstream
 echo preg_match('/a{1,3}b/U', 'ab');
 
 ?>
---EXPECTF--
+--EXPECT--
 1

@@ -31,4 +31,3 @@ Stack trace:
 #1 %s(%d): Generator->throw(Object(RuntimeException))
 #2 {main}
   thrown in %s on line %d
-

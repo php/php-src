@@ -1,9 +1,9 @@
 --TEST--
 Test incremental deflate_add() error functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded"; 
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -16,7 +16,6 @@ $badFlushType = 6789;
 var_dump(deflate_add($resource, "test", $badFlushType));
 ?>
 --EXPECTF--
-
 Warning: deflate_add(): Invalid deflate resource in %s on line %d
 bool(false)
 

@@ -3,15 +3,12 @@ Test collection Oracle error handling collections and numbers (2)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
-$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE ".$type_name;
 $statement = oci_parse($c,$ora_sql);
@@ -29,7 +26,7 @@ var_dump($coll1->append('a long string'));              // invalid type for appe
 var_dump($coll1->assignElem(1, 'a long string')); 	// invalid type for assignelem()
 var_dump($coll1->getElem(0));
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 echo "Test 1\n";
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF NUMBER";
@@ -45,7 +42,7 @@ echo "Test 2\n";
 var_dump($coll1->assignElem(1, 1234));  		// invalid location for number
 var_dump($coll1->getElem(0));
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 echo "Test 3\n";
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF VARCHAR2(1)";
@@ -57,7 +54,7 @@ $coll1 = oci_new_collection($c, $type_name);
 var_dump($coll1->assignElem(1, 'abc')); 		// invalid location for string
 var_dump($coll1->getElem(0));
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 echo "Test 4\n";
 $ora_sql = "CREATE TYPE ".$type_name." AS TABLE OF DATE";
@@ -70,7 +67,7 @@ var_dump($coll1->append(1));                   		// invalid date format
 var_dump($coll1->assignElem(1, '01-JAN-06'));  		// invalid location for date
 var_dump($coll1->getElem(0));
 
-require dirname(__FILE__)."/drop_type.inc";
+require __DIR__."/drop_type.inc";
 
 echo "Done\n";
 

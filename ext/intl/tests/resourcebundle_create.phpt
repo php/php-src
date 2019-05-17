@@ -4,7 +4,7 @@ Test ResourceBundle::__construct() - existing/missing bundles/locales
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
-	
+
 include "resourcebundle.inc";
 
 function ut_main() {
@@ -31,14 +31,14 @@ function ut_main() {
 	// missing
 	$r3 = ut_resourcebundle_create( 'en_US', 'nonexisting' );
         $str_res .= debug( $r3 );
-	
+
 	return $str_res;
 }
 
 	include_once( 'ut_common.inc' );
 	ut_run();
 ?>
---EXPECTF--
+--EXPECT--
 ResourceBundle Object
 (
 )

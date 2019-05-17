@@ -27,7 +27,7 @@ $string_array = array(
                        chr(0).'hello'.chr(0),
                        'hello'.chr(0).'world'
  		     );
-$token_array = array( 
+$token_array = array(
 		      "wr",
 		      "hello world",
 		      "__",
@@ -47,17 +47,17 @@ $token_array = array(
 $counter =1;
 foreach( $string_array as $string )  {
   echo "\n--- Iteration $counter ---\n";
-  var_dump( strtok($string, $token_array[$counter-1]) ); 
+  var_dump( strtok($string, $token_array[$counter-1]) );
   for( $count = 1; $count <=5; $count++ )  {
     var_dump( strtok($token_array[$counter-1]) );
   }
   $counter++;
-}		      
-		      
+}
+
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with miscellaneous inputs ***
 
 --- Iteration 1 ---

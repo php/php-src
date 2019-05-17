@@ -49,4 +49,3 @@ Adding UTF-8 encoding: UTF-8
 UTF-8 Encoding Read: UTF-8
 Adding UTF-16 encoding: UTF-16
 UTF-16 Encoding Read: UTF-16
-

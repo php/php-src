@@ -5,7 +5,7 @@ SELECT tests with duplicate column anmes
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -59,7 +59,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1 - OCI_ASSOC
 array(3) {
   ["C1"]=>

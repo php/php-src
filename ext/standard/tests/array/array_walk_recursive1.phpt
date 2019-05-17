@@ -3,12 +3,6 @@ array_walk_recursive() tests
 --FILE--
 <?php
 
-var_dump(array_walk_recursive());
-$var = 1;
-var_dump(array_walk_recursive($var,1));
-$var = array();
-var_dump(array_walk_recursive($var,""));
-
 function foo($v1, $v2, $v3) {
 	var_dump($v1);
 	var_dump($v2);
@@ -30,15 +24,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_walk_recursive() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function '' not found or invalid function name in %s on line %d
-NULL
+--EXPECTF--
 int(1)
 int(0)
 string(4) "data"

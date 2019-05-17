@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,9 +15,6 @@
    | Author: Kristian Koehntopp <kris@koehntopp.de>                       |
    +----------------------------------------------------------------------+
  */
-
-
-/* $Id$ */
 
 #ifndef PHP_POSIX_H
 #define PHP_POSIX_H
@@ -128,11 +125,12 @@ ZEND_BEGIN_MODULE_GLOBALS(posix)
 	int last_error;
 ZEND_END_MODULE_GLOBALS(posix)
 
-#ifdef ZTS
-# define POSIX_G(v) TSRMG(posix_globals_id, zend_posix_globals *, v)
-#else
-# define POSIX_G(v)	(posix_globals.v)
+#if defined(ZTS) && defined(COMPILE_DL_POSIX)
+ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(posix)
+#define POSIX_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(posix, v)
 
 #else
 

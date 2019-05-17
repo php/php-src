@@ -328,7 +328,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 Regular, procedural, using variables
 int(1)
 string(1) "a"

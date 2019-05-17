@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,7 @@
 
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
+static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_object_handlers zend_test_class_handlers;
 
@@ -34,6 +35,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_array_return, IS_ARRAY, 0
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_nullable_array_return, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_void_return, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
@@ -46,7 +50,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(zend_test_func)
 {
-	/* dummy */
+	RETVAL_STR_COPY(EX(func)->common.function_name);
+
+	/* Cleanup trampoline */
+	ZEND_ASSERT(EX(func)->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	zend_string_release(EX(func)->common.function_name);
+	zend_free_trampoline(EX(func));
+	EX(func) = NULL;
 }
 
 ZEND_FUNCTION(zend_test_array_return)
@@ -61,6 +71,11 @@ ZEND_FUNCTION(zend_test_nullable_array_return)
 	zval *arg1, *arg2;
 
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2);
+}
+
+ZEND_FUNCTION(zend_test_void_return)
+{
+	/* dummy */
 }
 
 /* Create a string without terminating null byte. Must be termined with
@@ -128,44 +143,49 @@ ZEND_FUNCTION(zend_leak_variable)
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type) /* {{{ */ {
 	zend_object *obj = zend_objects_new(class_type);
+	object_properties_init(obj, class_type);
 	obj->handlers = &zend_test_class_handlers;
 	return obj;
 }
 /* }}} */
 
 static zend_function *zend_test_class_method_get(zend_object **object, zend_string *name, const zval *key) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION_TEMPORARY;
+	zend_internal_function *fptr;
+
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		fptr = (zend_internal_function *) &EG(trampoline);
+	} else {
+		fptr = emalloc(sizeof(zend_internal_function));
+	}
+	memset(fptr, 0, sizeof(zend_internal_function));
+	fptr->type = ZEND_INTERNAL_FUNCTION;
 	fptr->num_args = 1;
-	fptr->arg_info = NULL;
 	fptr->scope = (*object)->ce;
 	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 	fptr->function_name = zend_string_copy(name);
 	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
 
 	return (zend_function*)fptr;
 }
 /* }}} */
 
 static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, zend_string *name) /* {{{ */ {
-	zend_internal_function *fptr = emalloc(sizeof(zend_internal_function));
-	fptr->type = ZEND_OVERLOADED_FUNCTION;
+	zend_internal_function *fptr;
+
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		fptr = (zend_internal_function *) &EG(trampoline);
+	} else {
+		fptr = emalloc(sizeof(zend_internal_function));
+	}
+	memset(fptr, 0, sizeof(zend_internal_function));
+	fptr->type = ZEND_INTERNAL_FUNCTION;
 	fptr->num_args = 1;
-	fptr->arg_info = NULL;
 	fptr->scope = ce;
 	fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
-	fptr->function_name = name;
+	fptr->function_name = zend_string_copy(name);
 	fptr->handler = ZEND_FN(zend_test_func);
-	zend_set_function_arg_flags((zend_function*)fptr);
 
 	return (zend_function*)fptr;
-}
-/* }}} */
-
-static int zend_test_class_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */ {
-	RETVAL_STR(zend_string_copy(method));
-	return 0;
 }
 /* }}} */
 
@@ -174,7 +194,7 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 }
 /* }}} */
 
-static zend_function_entry zend_test_trait_methods[] = {
+static const zend_function_entry zend_test_trait_methods[] = {
     ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
@@ -192,14 +212,50 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
-	memcpy(&zend_test_class_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	zend_declare_property_null(zend_test_class, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_STATIC);
+
+	{
+		zend_string *name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+		zval val;
+		ZVAL_LONG(&val, 123);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, ZEND_TYPE_ENCODE(IS_LONG, 0));
+		zend_string_release(name);
+	}
+
+	{
+		zend_string *name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+		zend_string *class_name = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
+		zval val;
+		ZVAL_NULL(&val);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
+			ZEND_TYPE_ENCODE_CLASS(class_name, 1));
+		zend_string_release(name);
+	}
+
+	{
+		zend_string *name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+		zval val;
+		ZVAL_LONG(&val, 123);
+		zend_declare_typed_property(
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL,
+			ZEND_TYPE_ENCODE(IS_LONG, 0));
+		zend_string_release(name);
+	}
+
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestChildClass", NULL);
+	zend_test_child_class = zend_register_internal_class_ex(&class_entry, zend_test_class);
+
+	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
-	zend_test_class_handlers.call_method = zend_test_class_call_method;
 
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestTrait", zend_test_trait_methods);
 	zend_test_trait = zend_register_internal_class(&class_entry);
 	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
 	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
+
+	zend_register_class_alias("_ZendTestClassAlias", zend_test_class);
 	return SUCCESS;
 }
 
@@ -228,9 +284,10 @@ PHP_MINFO_FUNCTION(zend_test)
 	php_info_print_table_end();
 }
 
-const zend_function_entry zend_test_functions[] = {
+static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
+	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_bytes, NULL)
@@ -240,7 +297,7 @@ const zend_function_entry zend_test_functions[] = {
 
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"test",
+	"zend-test",
 	zend_test_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),
@@ -257,4 +314,3 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(zend_test)
 #endif
-

@@ -2,8 +2,8 @@
 Test fopen(), fclose() & feof() functions: basic functionality
 --FILE--
 <?php
-/* 
- Prototype: resource fopen(string $filename, string $mode 
+/*
+ Prototype: resource fopen(string $filename, string $mode
                             [, bool $use_include_path [, resource $context]] );
  Description: Opens file or URL.
 
@@ -41,7 +41,7 @@ $modes = array(
 for( $i=0; $i<count($modes); $i++ ) {
   echo "\n-- Iteration with mode '$modes[$i]' --\n";
 
-  $filename = dirname(__FILE__)."/007_basic.tmp";
+  $filename = __DIR__."/007_basic.tmp";
   // check fopen()
   $handle = fopen($filename, $modes[$i]);
   var_dump($handle );

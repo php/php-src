@@ -128,9 +128,6 @@ require_once('skipifconnectfailure.inc');
 	if (!is_object($res = new mysqli_result($link, MYSQLI_USE_RESULT)))
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!is_object($res = new mysqli_result($link, 'invalid')))
-		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
 	$valid = array(MYSQLI_STORE_RESULT, MYSQLI_USE_RESULT);
 	do {
 		$mode = mt_rand(-1000, 1000);
@@ -145,12 +142,6 @@ require_once('skipifconnectfailure.inc');
 		if (!stristr($content, 'Invalid value for resultmode'))
 			printf("[009] Expecting warning because of invalid resultmode\n");
 	}
-
-	if (!is_object($res = new mysqli_result('foo')))
-		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!is_object($res = @new mysqli_result($link, MYSQLI_STORE_RESULT, 1)))
-		printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	print "done!";
 ?>
@@ -186,8 +177,4 @@ Access to undefined properties:
 mysqli_result->unknown = ''
 
 Constructor:
-
-Warning: mysqli_result::__construct() expects parameter 2 to be integer, string given in %s on line %d
-
-Warning: mysqli_result::__construct() expects parameter 1 to be mysqli, string given in %s on line %d
 done!

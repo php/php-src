@@ -16,13 +16,13 @@ $obj = new C;
 $count=0;
 foreach ($obj as $v) {
 	if ($v==$obj->a) {
-		unset($obj->c);	
+		unset($obj->c);
 	}
 	var_dump($v);
 	if (++$count>10) {
 		echo "Loop detected.\n";
 		break;
-	}		
+	}
 }
 var_dump($obj);
 
@@ -30,20 +30,19 @@ echo "\nRemoving properties before the current element from an iterated object.\
 $obj = new C;
 foreach ($obj as $v) {
 	if ($v==$obj->b) {
-		unset($obj->a);	
+		unset($obj->a);
 	}
 	var_dump($v);
 	if (++$count>10) {
 		echo "Loop detected.\n";
 		break;
-	}	
+	}
 }
 var_dump($obj);
 
 
 ?>
 --EXPECTF--
-
 Removing properties before the current element from an iterated object.
 string(10) "Original a"
 string(10) "Original b"

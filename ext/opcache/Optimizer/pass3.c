@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -32,9 +32,6 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
-
-/* compares opcodes with allowing oc1 be _EX of oc2 */
-#define SAME_OPCODE_EX(oc1, oc2) ((oc1 == oc2) || (oc1 == ZEND_JMPZ_EX && oc2 == ZEND_JMPZ) || (oc1 == ZEND_JMPNZ_EX && oc2 == ZEND_JMPNZ))
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
 #define CHECK_JMP(target, label) 			\
@@ -53,7 +50,7 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2_JMP_ADDR(target);
 
-void zend_optimizer_pass3(zend_op_array *op_array)
+void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -93,16 +90,17 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 						break;
 					}
 
-					if ((opline->op2_type & (IS_VAR | IS_CV))
+					/* change $i=expr+$i to $i=$i+expr so that the following optimization
+					 * works on it. Only do this if we are ignoring operator overloading,
+					 * as operand order might be significant otherwise. */
+					if ((ctx->optimization_level & ZEND_OPTIMIZER_IGNORE_OVERLOADING)
+						&& (opline->op2_type & (IS_VAR | IS_CV))
 						&& opline->op2.var == next_opline->op1.var &&
 						(opline->opcode == ZEND_ADD ||
 						 opline->opcode == ZEND_MUL ||
 						 opline->opcode == ZEND_BW_OR ||
 						 opline->opcode == ZEND_BW_AND ||
 						 opline->opcode == ZEND_BW_XOR)) {
-						/* change $i=expr+$i to $i=$i+expr so that the next
-						* optimization works on it
-						*/
 						zend_uchar tmp_type = opline->op1_type;
 						znode_op tmp = opline->op1;
 
@@ -114,6 +112,7 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 							COPY_NODE(opline->op2, tmp);
 						}
 					}
+
 					if ((opline->op1_type & (IS_VAR | IS_CV))
 						&& opline->op1.var == next_opline->op1.var
 						&& opline->op1_type == next_opline->op1_type) {
@@ -270,13 +269,17 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 					while (ZEND_OP2_JMP_ADDR(opline) < end) {
 						zend_op *target = ZEND_OP2_JMP_ADDR(opline);
 
-						if (SAME_OPCODE_EX(opline->opcode, target->opcode) &&
+						if (target->opcode == opline->opcode-3 &&
 							SAME_VAR(target->op1, T)) {
-							/* Check for JMPZ_EX to JMPZ[_EX] with the same condition, either with _EX or not */
-							if (target->opcode == opline->opcode) {
-								/* change T only if we have _EX opcode there */
-								COPY_NODE(T, target->result);
-							}
+						   /* convert T=JMPZ_EX(X,L1), L1: JMPZ(T,L2) to
+							  JMPZ_EX(X,L2) */
+							CHECK_JMP2(target, continue_jmp_ex_optimization);
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(target));
+						} else if (target->opcode == opline->opcode &&
+							SAME_VAR(target->op1, T) &&
+							SAME_VAR(target->result, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: T=JMPZ_EX(T,L2) to
+							  JMPZ_EX(X,L2) */
 							CHECK_JMP2(target, continue_jmp_ex_optimization);
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(target));
 						} else if (target->opcode == ZEND_JMPZNZ &&
@@ -296,6 +299,19 @@ void zend_optimizer_pass3(zend_op_array *op_array)
 									target->opcode == INV_EX_COND(opline->opcode)) &&
 									SAME_VAR(opline->op1, target->op1)) {
 						   /* convert JMPZ_EX(X,L1), L1: JMPNZ_EX(X,L2) to
+							  JMPZ_EX(X,L1+1) */
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
+							break;
+						} else if (target->opcode == INV_EX_COND(opline->opcode) &&
+									SAME_VAR(target->op1, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: JMPNZ(T,L2) to
+							  JMPZ_EX(X,L1+1) */
+							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
+							break;
+						} else if (target->opcode == INV_EX_COND_EX(opline->opcode) &&
+									SAME_VAR(target->op1, T) &&
+									SAME_VAR(target->result, T)) {
+						   /* convert T=JMPZ_EX(X,L1), L1: T=JMPNZ_EX(T,L2) to
 							  JMPZ_EX(X,L1+1) */
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target + 1);
 							break;
@@ -413,6 +429,8 @@ continue_jmpznz_optimization:
 				}
 				break;
 
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ:
 			case ZEND_POST_INC:
 			case ZEND_POST_DEC: {
 					/* POST_INC, FREE => PRE_INC */

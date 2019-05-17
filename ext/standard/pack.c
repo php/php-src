@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,6 @@
    | Author: Chris Schneider <cschneid@relog.ch>                          |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 
@@ -462,15 +461,15 @@ PHP_FUNCTION(pack)
 			case 'A':
 			case 'Z': {
 				size_t arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
-
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(&argv[currentarg++], &tmp_str);
 
 				memset(&ZSTR_VAL(output)[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
 				memcpy(&ZSTR_VAL(output)[outputpos], ZSTR_VAL(str),
 					   (ZSTR_LEN(str) < arg_cp) ? ZSTR_LEN(str) : arg_cp);
 
 				outputpos += arg;
-				zend_string_release(str);
+				zend_tmp_string_release(tmp_str);
 				break;
 			}
 
@@ -478,8 +477,8 @@ PHP_FUNCTION(pack)
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
-
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(&argv[currentarg++], &tmp_str);
 				char *v = ZSTR_VAL(str);
 
 				outputpos--;
@@ -513,7 +512,7 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
-				zend_string_release(str);
+				zend_tmp_string_release(tmp_str);
 				break;
 			}
 
@@ -600,7 +599,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'g': {
 				/* pack little endian float */
 				while (arg-- > 0) {
@@ -608,7 +607,7 @@ PHP_FUNCTION(pack)
 					php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
-				
+
 				break;
 			}
 			case 'G': {
@@ -629,7 +628,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
@@ -639,7 +638,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
@@ -788,6 +787,10 @@ PHP_FUNCTION(unpack)
 			/* Never use any input */
 			case 'X':
 				size = -1;
+				if (arg < 0) {
+					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", type);
+					arg = 1;
+				}
 				break;
 
 			case '@':
@@ -846,7 +849,7 @@ PHP_FUNCTION(unpack)
 				break;
 #else
 				php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 #endif
 
@@ -866,14 +869,14 @@ PHP_FUNCTION(unpack)
 
 			default:
 				php_error_docref(NULL, E_WARNING, "Invalid format type %c", type);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 				break;
 		}
 
 		if (size != 0 && size != -1 && size < 0) {
 			php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-			zval_dtor(return_value);
+			zend_array_destroy(Z_ARR_P(return_value));
 			RETURN_FALSE;
 		}
 
@@ -892,7 +895,7 @@ PHP_FUNCTION(unpack)
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
 				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 
@@ -1115,7 +1118,7 @@ PHP_FUNCTION(unpack)
 					}
 #endif
 
-					case 'f': /* float */ 
+					case 'f': /* float */
 					case 'g': /* little endian float*/
 					case 'G': /* big endian float*/
 					{
@@ -1128,15 +1131,15 @@ PHP_FUNCTION(unpack)
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
-						
+
 						add_assoc_double(return_value, n, (double)v);
 						break;
 					}
-					
+
 
 					case 'd': /* double */
 					case 'e': /* little endian float */
-					case 'E': /* big endian float */ 
+					case 'E': /* big endian float */
 					{
 						double v;
 						if (type == 'e') {
@@ -1188,7 +1191,7 @@ PHP_FUNCTION(unpack)
 				break;
 			} else {
 				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
-				zval_dtor(return_value);
+				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}
 		}
@@ -1328,12 +1331,3 @@ PHP_MINIT_FUNCTION(pack)
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

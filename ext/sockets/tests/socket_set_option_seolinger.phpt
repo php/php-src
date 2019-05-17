@@ -36,7 +36,6 @@ var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 
 socket_close($socket);
 ?>
-
 --EXPECTF--
 Warning: socket_set_option(): no key "l_onoff" passed in optval in %s on line %d
 

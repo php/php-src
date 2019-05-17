@@ -1,6 +1,6 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi
@@ -40,9 +40,11 @@ $TS \
 --with-pdo-sqlite \
 --enable-intl \
 --without-pear \
---with-gd \
---with-jpeg-dir=/usr \
---with-png-dir=/usr \
+--enable-gd \
+--with-jpeg \
+--with-webp \
+--with-freetype \
+--with-xpm \
 --enable-exif \
 --enable-zip \
 --with-zlib \
@@ -50,7 +52,6 @@ $TS \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
@@ -70,12 +71,11 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
---with-freetype-dir=/usr \
---with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-zend-test \
+--with-ffi \
+--enable-zend-test=shared \
+--enable-werror \
 > "$CONFIG_LOG_FILE"
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"

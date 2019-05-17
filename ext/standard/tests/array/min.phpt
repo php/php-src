@@ -5,7 +5,6 @@ precision=14
 --FILE--
 <?php
 
-var_dump(min());
 var_dump(min(1));
 var_dump(min(array()));
 var_dump(min(new stdclass));
@@ -19,17 +18,14 @@ var_dump(min(0, true, false, true));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: min() expects at least 1 parameter, 0 given in %s on line 3
+--EXPECTF--
+Warning: min(): When only one parameter is given, it must be an array in %s on line %d
 NULL
 
-Warning: min(): When only one parameter is given, it must be an array in %s on line 4
-NULL
-
-Warning: min(): Array must contain at least one element in %s on line 5
+Warning: min(): Array must contain at least one element in %s on line %d
 bool(false)
 
-Warning: min(): When only one parameter is given, it must be an array in %s on line 6
+Warning: min(): When only one parameter is given, it must be an array in %s on line %d
 NULL
 int(1)
 float(2.09)

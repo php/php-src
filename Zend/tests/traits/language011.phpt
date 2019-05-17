@@ -26,5 +26,5 @@ $o->sayHello();
 $o->sayWorld();
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Trait method sayHello has not been applied, because there are collisions with other trait methods on MyClass in %s on line %d

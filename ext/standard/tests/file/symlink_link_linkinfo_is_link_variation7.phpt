@@ -24,7 +24,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* Variation 7 : Create soft/hard link to itself */
 
 // temp file used
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
 // link name used
@@ -33,7 +33,7 @@ $linkname = "$dir/symlink_link_linkinfo_is_link_link_variation7.tmp";
 $dirname = "$dir/home/test";
 mkdir($dirname, 0755, true);
 
-// create file 
+// create file
 $fp = fopen($filename, "w");
 fclose($fp);
 
@@ -65,7 +65,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir = "$file_path/symlink_link_linkinfo_is_link_variation7";
 $filename = "$dir/symlink_link_linkinfo_is_link_variation7.tmp";
 unlink($filename);

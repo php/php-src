@@ -38,7 +38,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 a) [1065] Query was empty
 b) [1065] Query was empty
 c) [1065] Query was empty

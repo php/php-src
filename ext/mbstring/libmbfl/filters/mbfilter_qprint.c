@@ -241,6 +241,3 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-
-
-

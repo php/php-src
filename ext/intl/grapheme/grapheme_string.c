@@ -24,6 +24,7 @@
 #include "grapheme_util.h"
 
 #include <unicode/utypes.h>
+#include <unicode/utf8.h>
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
@@ -62,8 +63,6 @@ PHP_FUNCTION(grapheme_strlen)
 	UErrorCode status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &string, &string_len) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strlen: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -115,8 +114,6 @@ PHP_FUNCTION(grapheme_strpos)
 	zend_long ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -169,7 +166,7 @@ PHP_FUNCTION(grapheme_strpos)
    Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
-	char *haystack, *needle, *haystack_dup, *needle_dup;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
@@ -178,8 +175,6 @@ PHP_FUNCTION(grapheme_stripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_stripos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -201,6 +196,7 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
+		char *haystack_dup, *needle_dup;
 		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
@@ -246,8 +242,6 @@ PHP_FUNCTION(grapheme_strrpos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strrpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -309,8 +303,6 @@ PHP_FUNCTION(grapheme_strripos)
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strrpos: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -389,8 +381,6 @@ PHP_FUNCTION(grapheme_substr)
 	zend_bool no_length = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_substr: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -596,10 +586,6 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	zend_bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
-
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_strstr: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -787,8 +773,6 @@ PHP_FUNCTION(grapheme_extract)
 	zval *next = NULL; /* return offset of next part of the string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", &str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "grapheme_extract: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
 
@@ -834,10 +818,10 @@ PHP_FUNCTION(grapheme_extract)
 	pstr = str + start;
 
 	/* just in case pstr points in the middle of a character, move forward to the start of the next char */
-	if ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
+	if ( !U8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 		char *str_end = str + str_len;
 
-		while ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
+		while ( !U8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 			pstr++;
 			if ( pstr >= str_end ) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -898,13 +882,3 @@ PHP_FUNCTION(grapheme_extract)
 }
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */
-

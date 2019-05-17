@@ -40,7 +40,7 @@ extern "C" {
 #define INTLITERATOR_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(IntlIterator, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_ITERATOR, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT\
-	object = getThis(); \
+	object = ZEND_THIS; \
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (ii->iterator == NULL) { \
 		intl_errors_set(&ii->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlIterator", 0); \
@@ -75,6 +75,7 @@ U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
 U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter);
 
 #ifdef __cplusplus
+using icu::StringEnumeration;
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
 #endif
 

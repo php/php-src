@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Harald Radi <harald.radi@nme.at>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend.h"
 #include "zend_ts_hash.h"
@@ -59,24 +57,14 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
 #endif
-	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
-}
-
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
-{
-#ifdef ZTS
-	ht->mx_reader = tsrm_mutex_alloc();
-	ht->mx_writer = tsrm_mutex_alloc();
-	ht->reader = 0;
-#endif
-	_zend_hash_init_ex(TS_HASH(ht), nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent);
 }
 
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
@@ -99,23 +87,45 @@ ZEND_API void zend_ts_hash_clean(TsHashTable *ht)
 	end_write(ht);
 }
 
-ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zval *pData, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_add(TsHashTable *ht, zend_string *key, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_add_or_update(TS_HASH(ht), key, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_add(TS_HASH(ht), key, pData);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_update(TsHashTable *ht, zend_string *key, zval *pData)
 {
 	zval *retval;
 
 	begin_write(ht);
-	retval = _zend_hash_index_add_or_update(TS_HASH(ht), h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	retval = zend_hash_update(TS_HASH(ht), key, pData);
+	end_write(ht);
+
+	return retval;
+}
+
+ZEND_API zval *zend_ts_hash_next_index_insert(TsHashTable *ht, zval *pData)
+{
+	zval *retval;
+
+	begin_write(ht);
+	retval = zend_hash_next_index_insert(TS_HASH(ht), pData);
+	end_write(ht);
+
+	return retval;
+}
+
+ZEND_API zval *zend_ts_hash_index_update(TsHashTable *ht, zend_ulong h, zval *pData)
+{
+	zval *retval;
+
+	begin_write(ht);
+	retval = zend_hash_index_update(TS_HASH(ht), h, pData);
 	end_write(ht);
 
 	return retval;
@@ -220,28 +230,6 @@ ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong h)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_exists(TS_HASH(ht), key);
-	end_read(ht);
-
-	return retval;
-}
-
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h)
-{
-	int retval;
-
-	begin_read(ht);
-	retval = zend_hash_index_exists(TS_HASH(ht), h);
-	end_read(ht);
-
-	return retval;
-}
-
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor)
 {
 	begin_read(source);
@@ -276,15 +264,11 @@ ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, co
 	end_read(source);
 }
 
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
 {
-	int retval;
-
 	begin_write(ht);
-	retval = zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
+	zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
-
-	return retval;
 }
 
 ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
@@ -344,7 +328,7 @@ ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t le
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData)
 {
 	zval *retval;
 
@@ -355,7 +339,7 @@ ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData)
 {
 	zval *retval;
 
@@ -365,11 +349,3 @@ ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t le
 
 	return retval;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

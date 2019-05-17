@@ -24,4 +24,3 @@ Warning: session_module_name(): Cannot change save handler module when session i
 bool(true)
 
 Recoverable fatal error: session_module_name(): Cannot set 'user' save handler by ini_set() or session_module_name() in %s on line 7
-

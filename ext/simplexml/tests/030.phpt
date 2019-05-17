@@ -3,7 +3,7 @@ SimpleXML: isset and unset by offset
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <root s:att1="b" att1="a" 
       xmlns:s="urn::test" xmlns:t="urn::test-t">

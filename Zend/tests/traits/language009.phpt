@@ -24,7 +24,7 @@ trait C {
 
 class MyClass {
     use C, A, B {
-		B::foo insteadof A, C; 
+		B::foo insteadof A, C;
 	}
 }
 
@@ -32,5 +32,5 @@ $t = new MyClass;
 $t->foo();
 
 ?>
---EXPECTF--	
+--EXPECT--
 b

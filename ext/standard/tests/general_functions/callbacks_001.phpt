@@ -69,7 +69,11 @@ class P extends O {
         $this->call(array('parent', 'who'));
         $this->call(array('P', 'parent::who'));
         $this->call(array($this, 'O::who'));
-        $this->call(array($this, 'B::who'));
+        try {
+            $this->call(array($this, 'B::who'));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
@@ -103,6 +107,5 @@ O
 $this|O::who
 O
 $this|B::who
-
-Warning: call_user_func() expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B' in %s on line %d
+call_user_func() expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B'
 ===DONE===

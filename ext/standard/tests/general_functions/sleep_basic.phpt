@@ -1,5 +1,5 @@
 --TEST--
-Test sleep() function : basic functionality 
+Test sleep() function : basic functionality
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -7,22 +7,22 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 /* Prototype  : int sleep  ( int $seconds  )
- * Description: Delays the program execution for the given number of seconds . 
+ * Description: Delays the program execution for the given number of seconds .
  * Source code: ext/standard/basic_functions.c
  */
 
 echo "*** Testing sleep() : basic functionality ***\n";
 
-$sleeptime = 5; // sleep for 5 seconds 
+$sleeptime = 1; // sleep for 1 seconds
 
-set_time_limit(20); 
+set_time_limit(20);
 
 $time_start = microtime(true);
 
 // Sleep for a while
 sleep($sleeptime);
 
-// Test passes if sleeps for at least 98% of specified time 
+// Test passes if sleeps for at least 98% of specified time
 $sleeplow = $sleeptime - ($sleeptime * 2 /100);
 
 $time_end = microtime(true);

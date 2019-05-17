@@ -7,10 +7,10 @@ $info = new SplFileInfo(__FILE__);
 
 try {
     $info->setInfoClass('stdClass');
-} catch (UnexpectedValueException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'stdClass' given

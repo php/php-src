@@ -2,7 +2,7 @@
 cp1254 cmd test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ default_charset=cp1254
 #vim: set encoding=cp1254
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "çokbaytlý iþleri";
@@ -35,7 +35,7 @@ remove_data("file_cp1254");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\çokbaytlý iþleri"
 bool(true)
 bool(true)

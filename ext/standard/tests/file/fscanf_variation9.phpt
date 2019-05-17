@@ -16,9 +16,9 @@ if (PHP_INT_SIZE != 4) {
 
 /* Test fscanf() to scan integer values using different float format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different float format types with integer values ***\n"; 
+echo "*** Test fscanf(): different float format types with integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation9.tmp";
@@ -83,7 +83,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation9.tmp";
 unlink($filename);
 ?>
@@ -1012,4 +1012,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

@@ -1,5 +1,5 @@
 --TEST--
-Test imagecolorstotal() function : basic functionality 
+Test imagecolorstotal() function : basic functionality
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --SKIPIF--
@@ -14,9 +14,9 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--
 <?php
 /* Prototype  : int imagecolorstotal(resource im)
- * Description: Find out the number of colors in an image's palette 
+ * Description: Find out the number of colors in an image's palette
  * Source code: ext/gd/gd.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
@@ -40,7 +40,7 @@ imagedestroy( $img );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***
 int(0)
 int(1)

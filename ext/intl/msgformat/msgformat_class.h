@@ -25,10 +25,6 @@
 #include "../intl_error.h"
 #include "../intl_data.h"
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM < 48
-# define MSG_FORMAT_QUOTE_APOS 1
-#endif
-
 #include "msgformat_data.h"
 
 typedef struct {

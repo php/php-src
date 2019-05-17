@@ -1,8 +1,8 @@
-/*
+﻿/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,10 +18,6 @@
 
 #include "php.h"
 #include "php_network.h"
-
-#ifdef PHP_WIN32
-
-/* $Id$ */
 
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
  * - If you supply only sockets, this simply passes through to winsock select().
@@ -66,7 +62,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 	FD_ZERO(&sock_except);
 
 	/* build an array of handles for non-sockets */
-	for (i = 0; i < max_fd; i++) {
+	for (i = 0; (uint32_t)i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
 			handles[n_handles] = (HANDLE)(zend_uintptr_t)_get_osfhandle(i);
 			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
@@ -168,14 +164,3 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 
 	return retcode;
 }
-
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

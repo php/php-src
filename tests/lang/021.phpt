@@ -1,12 +1,12 @@
 --TEST--
 Switch test 2
 --FILE--
-<?php 
+<?php
 
 for ($i=0; $i<=5; $i++)
 {
   echo "i=$i\n";
-  
+
   switch($i) {
     case 0:
       echo "In branch 0\n";

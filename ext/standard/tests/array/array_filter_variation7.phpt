@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : usage variations - anonymous callback functions 
+Test array_filter() function : usage variations - anonymous callback functions
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -33,7 +33,7 @@ var_dump( array_filter($input, function($input) { }) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - Anonymous callback functions ***
 Anonymous callback function with regular parameter and statement
 array(3) {

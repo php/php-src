@@ -10,15 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_num_rows()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_num_rows($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	function func_test_mysqli_num_rows($link, $query, $expected, $offset, $test_free = false) {
@@ -28,16 +19,17 @@ require_once('skipifconnectfailure.inc');
 			return;
 		}
 
-		if ($expected !== ($tmp = mysqli_num_rows($res)))
-			printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 1,
-				gettype($expected), $expected,
-				gettype($tmp), $tmp);
+		if (!is_bool($res)) {
+			if ($expected !== ($tmp = mysqli_num_rows($res)))
+				printf("[%03d] Expecting %s/%d, got %s/%d\n", $offset + 1,
+					gettype($expected), $expected,
+					gettype($tmp), $tmp);
 
-		mysqli_free_result($res);
+			mysqli_free_result($res);
 
-		if ($test_free && (NULL !== ($tmp = mysqli_num_rows($res))))
-			printf("[%03d] Expecting NULL, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
-
+			if ($test_free && (false !== ($tmp = mysqli_num_rows($res))))
+				printf("[%03d] Expecting false, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
+		}
 	}
 
 	func_test_mysqli_num_rows($link, "SELECT 1 AS a", 1, 5);
@@ -78,10 +70,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
-
-Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
-
 Warning: mysqli_num_rows(): Couldn't fetch mysqli_result in %s on line %d
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
 

@@ -3,7 +3,7 @@ get_meta_tags() tests
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/get_meta_tags.html";
+$filename = __DIR__."/get_meta_tags.html";
 
 $data = <<<DATA
 <meta name="author" content="name">
@@ -55,7 +55,7 @@ foreach ($array as $html) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 array(4) {
   ["author"]=>
   string(4) "name"

@@ -1,5 +1,5 @@
 --TEST--
-Test krsort() function : usage variations - sort heredoc strings  
+Test krsort() function : usage variations - sort heredoc strings
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
@@ -32,7 +32,7 @@ Test this!!!
 EOT;
 
 $array = array (
-  $simple_heredoc1 => "Heredoc", 
+  $simple_heredoc1 => "Heredoc",
   $simple_heredoc2 => "HEREDOC",
   $multiline_heredoc => "heredoc string\twith!@# and 123\nTest this!!!"
 );
@@ -54,7 +54,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --

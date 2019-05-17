@@ -1,9 +1,9 @@
 --TEST--
-Test krsort() function : usage variations - sort octal values  
+Test krsort() function : usage variations - sort octal values
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation. 
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation.
  * Source code: ext/standard/array.c
 */
 
@@ -40,7 +40,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying octal value array, 'flag' value is defualt  --

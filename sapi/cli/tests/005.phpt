@@ -1,11 +1,8 @@
 --TEST--
 show information about class
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
-if (!extension_loaded("reflection")) {
-    die("skip reflection extension required");
-}
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -18,7 +15,7 @@ var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
 ?>
---EXPECTF-- 
+--EXPECT--
 string(40) "Exception: Class unknown does not exist
 "
 string(183) "Class [ <internal:Core> class stdClass ] {

@@ -7,8 +7,8 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
@@ -58,9 +58,9 @@ chmod($fname2, 0666);
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECT--
 bool(true)

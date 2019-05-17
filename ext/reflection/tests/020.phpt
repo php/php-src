@@ -1,7 +1,5 @@
 --TEST--
 ReflectionObject::hasProperty
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class Foo {
@@ -20,7 +18,7 @@ var_dump($obj->hasProperty("p2"));
 var_dump($obj->hasProperty("p3"));
 var_dump($obj->hasProperty("p4"));
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

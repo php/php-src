@@ -7,7 +7,7 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
-if (!$IS_MYSQLND)	
+if (!$IS_MYSQLND)
 	die("skip mysqlnd only test");
 ?>
 --FILE--
@@ -45,12 +45,12 @@ if (!$IS_MYSQLND)
 			printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 			continue;
 		}
-		
+
 		if (!mysqli_query($link, sprintf("CREATE TABLE test (id %s)", $data[0]))) {
 			printf("[004] TODO [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 			continue;
 		}
-		
+
 		if (!mysqli_query($link, sprintf("INSERT INTO test(id) VALUES (%f)", $data[1]))) {
 			printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 			continue;
@@ -65,7 +65,7 @@ if (!$IS_MYSQLND)
 		mysqli_free_result($res);
 
 		if ($row['id'] !== $data[1]) {
-			printf("[007] Expecting %s - %s/%s got %s/%s\n", 
+			printf("[007] Expecting %s - %s/%s got %s/%s\n",
 				$name,
 				$data[1], gettype($data[1]), $row['id'], gettype($row['id']));
 		}
@@ -81,7 +81,7 @@ if (!$IS_MYSQLND)
 			printf("[009] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 			continue;
 		}
-		
+
 		if (!$res = mysqli_query($link, "SELECT id FROM test")) {
 			printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 			continue;
@@ -91,19 +91,19 @@ if (!$IS_MYSQLND)
 		mysqli_free_result($res);
 
 		if (!is_string($row['id']) || ($row['id'] != $data[1])) {
-			printf("[011] Expecting %s - %s/string got %s/%s\n", 
+			printf("[011] Expecting %s - %s/string got %s/%s\n",
 				$name,
 				$data[1], $row['id'], gettype($row['id']));
-		}		
-		mysqli_close($link);		
+		}
+		mysqli_close($link);
 
 	}
-	
+
 	print "done!";
 ?>
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

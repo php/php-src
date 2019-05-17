@@ -1,11 +1,11 @@
 --TEST--
 Bug #27508 (userspace wrappers have bogus eof indicator)
 --FILE--
-<?php # vim:ft=php
+<?php
 class FileStream {
     public $fp;
-   
-    function stream_open($path, $mode, $options, &$opened_path) 
+
+    function stream_open($path, $mode, $options, &$opened_path)
     {
         $url = urldecode(substr($path, 9));
         $this->fp = fopen($url, $mode);
@@ -13,22 +13,22 @@ class FileStream {
         return true;
     }
 
-    function stream_read($count) 
+    function stream_read($count)
     {
         return fread($this->fp, $count);
     }
 
-    function stream_write($data) 
+    function stream_write($data)
     {
         return fwrite($this->fp, $data);
     }
 
-    function stream_tell() 
+    function stream_tell()
     {
         return ftell($this->fp);
     }
 
-    function stream_eof() 
+    function stream_eof()
     {
         if (!$this->fp) {
             return true;
@@ -36,7 +36,7 @@ class FileStream {
         return feof($this->fp);
     }
 
-    function stream_seek($offset, $whence) 
+    function stream_seek($offset, $whence)
     {
         return fseek($this->fp, $offset, $whence) == 0 ? true : false;
     }

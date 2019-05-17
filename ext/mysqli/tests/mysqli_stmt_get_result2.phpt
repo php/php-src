@@ -17,22 +17,10 @@ if (!function_exists('mysqli_stmt_get_result'))
 	*/
 	require_once("connect.inc");
 
-	$tmp	= NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_get_result()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_get_result($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!is_null($tmp = @mysqli_stmt_get_result($stmt, "foo")))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id ASC LIMIT 1"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -144,8 +132,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 
-	if (NULL !== ($res = mysqli_stmt_get_result($stmt))) {
-		printf("[022] Expecting NULL got %s/%s\n",
+	if (false !== ($res = mysqli_stmt_get_result($stmt))) {
+		printf("[026] Expecting false got %s/%s\n",
 			gettype($res), $res);
 	}
 

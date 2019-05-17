@@ -163,7 +163,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["id"]=>
   string(1) "1"

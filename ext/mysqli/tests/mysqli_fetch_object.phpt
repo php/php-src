@@ -12,15 +12,6 @@ require_once('skipifconnectfailure.inc');
 
 	set_error_handler('handle_catchable_fatal');
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_fetch_object()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_fetch_object($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5")) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -67,7 +58,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	} catch (Throwable $e) {
 		echo "Exception: " . $e->getMessage() . "\n";
-	}	
+	}
 
 	try {
 		$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a'));
@@ -77,7 +68,7 @@ require_once('skipifconnectfailure.inc');
 		}
 	} catch (Throwable $e) {
 		echo "Exception: " . $e->getMessage() . "\n";
-	}	
+	}
 
 	$obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a', 'b'));
 	if (($obj->ID !== "5") || ($obj->label !== "e") || ($obj->a !== 'a') || ($obj->b !== 'b') || (get_class($obj) != 'mysqli_fetch_object_construct')) {
@@ -145,14 +136,12 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-[E_WARNING] mysqli_fetch_object() expects at least 1 parameter, 0 given in %s on line %d
-[E_WARNING] mysqli_fetch_object() expects parameter 1 to be mysqli_result, null given in %s on line %d
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 [0] Argument 3 passed to mysqli_fetch_object() must be of the type array, string given in %s on line %d
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

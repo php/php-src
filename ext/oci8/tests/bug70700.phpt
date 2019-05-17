@@ -8,13 +8,13 @@ ashnazg@php.net
 <?php
 if (!extension_loaded('mbstring')) die('skip mbstring is not enabled');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --ENV--
 NLS_LANG=.AL32UTF8
 --FILE--
 <?php
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 
 $stmt = oci_parse($c, 'DROP TABLE oci8_bug70700');
@@ -154,9 +154,7 @@ echo 'size of string4 is ', strlen($string4), ' bytes, ', mb_strlen($string4), '
 echo 'size of stream4a is ', strlen($stream4a), ' bytes, ', mb_strlen($stream4a), ' chars.', PHP_EOL;
 echo 'beg of stream4a is ', $start4a, PHP_EOL;
 echo 'end of stream4a is ', $ending4a, PHP_EOL;
-
---EXPECTF--
-
+--EXPECT--
 Test 1: j
 size of string1 is 1000006 bytes, 1000006 chars.
 size of stream1a is 1000006 bytes, 1000006 chars.
@@ -180,4 +178,3 @@ size of string4 is 8193 bytes, 2735 chars.
 size of stream4a is 8193 bytes, 2735 chars.
 beg of stream4a is abcののののののの
 end of stream4a is のののののののxyz
-

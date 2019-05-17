@@ -8,7 +8,7 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE_EXTERNAL--
 files/write19.phar
---EXPECTF--
+--EXPECT--
 string(2) "hi"
-%string|unicode%(3) "hi2"
+string(3) "hi2"
 ok

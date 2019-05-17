@@ -26,6 +26,8 @@
 
 #ifndef USE_CALENDAR_POINTER
 typedef void Calendar;
+#else
+using icu::Calendar;
 #endif
 
 typedef struct {

@@ -40,7 +40,7 @@ $values = array(
        "abc123\n",
 /*20*/ 'abc 123',
        '',
-       ' ', 
+       ' ',
        base64_decode("w4DDoMOHw6fDiMOo"), // non-ascii characters
        "\"\n",
 /*25*/ " \t\r\n",
@@ -57,7 +57,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 
 -- Iteration 1 --

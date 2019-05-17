@@ -15,7 +15,7 @@ TESTS;
   Remember to NOT put a trailing ; after a line!
 
  */
-error_reporting(E_ALL);  
+error_reporting(E_ALL);
 $tests = explode("\n",$tests);
 $success = TRUE;
 foreach ($tests as $n=>$test)
@@ -72,4 +72,3 @@ foreach ($tests as $n=>$test)
 	}
 }
 if ($success) echo "OK";
-		 

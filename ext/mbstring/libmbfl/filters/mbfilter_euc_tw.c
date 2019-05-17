@@ -66,7 +66,9 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	"EUC-TW",
 	(const char *(*)[])&mbfl_encoding_euc_tw_aliases,
 	mblen_table_euctw,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_euctw_wchar,
+	&vtbl_wchar_euctw
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_euctw = {
@@ -326,4 +328,3 @@ static int mbfl_filt_ident_euctw(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-

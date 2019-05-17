@@ -1,9 +1,9 @@
 --TEST--
-Test end() function : basic functionality 
+Test end() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed end(array $array_arg)
- * Description: Advances array argument's internal pointer to the last element and return it 
+ * Description: Advances array argument's internal pointer to the last element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -29,7 +29,7 @@ $array[2] = 'foo';
 var_dump(end($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing end() : basic functionality ***
 
 -- Initial Position: --

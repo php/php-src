@@ -16,7 +16,7 @@ class first {
 $t1 = new first();
 $t1->do_show();
 
-class second extends first { 
+class second extends first {
 }
 
 //$t2 = new second();
@@ -33,7 +33,7 @@ $t3->do_show();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Call show()
 Call show()
 Done

@@ -3,14 +3,14 @@ Set and get of connection attributes with errors.
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
@@ -22,9 +22,9 @@ if (!(isset($matches[0]) &&
 <?php
 
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 
@@ -62,7 +62,7 @@ foreach($values_array as $val ) {
 	oci_set_module_name($c1,$val);
 	oci_set_client_identifier($c1,$val);
 	oci_set_client_info($c1,$val);
-	$r = oci_set_action($c1,$val);	
+	$r = oci_set_action($c1,$val);
 	if ($r) {
 		echo "Values set successfully to $val\n";
 		foreach($attr_array as $attr) {

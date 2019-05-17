@@ -20,5 +20,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Wrong Document Error

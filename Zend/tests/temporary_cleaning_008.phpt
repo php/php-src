@@ -9,7 +9,7 @@ try {
 	}
 } catch (Exception $e) {
 	echo "exception\n";
-} 
+}
 ?>
 --EXPECT--
 exception

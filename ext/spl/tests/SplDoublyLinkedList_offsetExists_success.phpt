@@ -25,7 +25,7 @@ if($list->offsetExists(2) === false) {
 	echo "PASS\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 PASS
 PASS
 PASS

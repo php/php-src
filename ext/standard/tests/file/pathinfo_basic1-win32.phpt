@@ -27,14 +27,14 @@ $paths = array (
 			'/usr/include/arpa',
 			'/usr/include/arpa/',
 			'usr/include/arpa',
-			'usr/include/arpa/',			
+			'usr/include/arpa/',
 			'c:\test\afile',
 			'c:\\test\\afile',
 			'c://test//afile',
 			'c:\test\afile\\',
 			'c:\test\prog.exe',
 			'c:\\test\\prog.exe',
-			'c:/test/prog.exe',			
+			'c:/test/prog.exe',
 			'/usr/include/arpa/inet.h',
 			'//usr/include//arpa/inet.h',
 			'\\',
@@ -71,7 +71,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
 string(0) ""

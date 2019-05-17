@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - hexa formats with array values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : hexa formats with array values ***\n";
 
-// array of array values 
+// array of array values
 $array_values = array(
   array(),
   array(0),
@@ -26,8 +26,8 @@ $array_values = array(
 );
 
 // array of hexa formats
-$hexa_formats = array(  
-  "%x", "%xx", "%lx", 
+$hexa_formats = array(
+  "%x", "%xx", "%lx",
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",
   "%30x", "%[0-9A-Fa-f]", "%*x"
@@ -36,7 +36,7 @@ $hexa_formats = array(
 $count = 1;
 foreach($array_values as $array_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($hexa_formats as $format) {
     var_dump( sprintf($format, $array_value) );
   }
@@ -45,7 +45,7 @@ foreach($array_values as $array_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : hexa formats with array values ***
 
 -- Iteration 1 --

@@ -59,7 +59,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS mbind"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   int(1)

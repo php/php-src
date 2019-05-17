@@ -29,6 +29,8 @@
 
 #ifndef USE_TIMEZONE_POINTER
 typedef void TimeZone;
+#else
+using icu::TimeZone;
 #endif
 
 typedef struct {

@@ -1,9 +1,9 @@
 --TEST--
 inet_ntop() & inet_pton() IPv6 tests
 --SKIPIF--
-<?php 
-if (!function_exists("inet_ntop")) die("skip no inet_ntop()"); 
-if (!function_exists("inet_pton")) die("skip no inet_pton()"); 
+<?php
+if (!function_exists("inet_ntop")) die("skip no inet_ntop()");
+if (!function_exists("inet_pton")) die("skip no inet_pton()");
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
@@ -33,16 +33,12 @@ foreach ($a as $address) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(3) "::1"
 string(3) "::2"
 string(4) "::35"
 string(5) "::255"
 string(6) "::1024"
-
-Warning: inet_pton(): Unrecognized address  in %s on line %d
-
-Warning: inet_ntop(): Invalid in_addr value in %s on line %d
 bool(false)
 string(36) "2001:db8:85a3:8d3:1319:8a2e:370:7344"
 string(15) "2001:db8:1234::"

@@ -18,7 +18,7 @@ var_dump( strncmp($str1, $str2, 12) );  //expected: int(5);
 
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncmp() function: Checking with the null terminated strings ***
 int(5)
 *** Done ***

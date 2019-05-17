@@ -6,7 +6,6 @@ filter_var_array() and different arguments
 <?php
 
 echo "-- (1)\n";
-var_dump(filter_var_array(NULL));
 var_dump(filter_var_array(array()));
 var_dump(filter_var_array(array(1,"blah"=>"hoho")));
 var_dump(filter_var_array(array(), -1));
@@ -49,11 +48,8 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 -- (1)
-
-Warning: filter_var_array() expects parameter 1 to be array, null given in %s on line %d
-NULL
 array(0) {
 }
 array(2) {

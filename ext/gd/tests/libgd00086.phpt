@@ -8,11 +8,10 @@ libgd #86 (Possible infinite loop in imagecreatefrompng)
 --FILE--
 <?php
 
-$im = imagecreatefrompng(dirname(__FILE__) . '/libgd00086.png');
+$im = imagecreatefrompng(__DIR__ . '/libgd00086.png');
 var_dump($im);
 ?>
 --EXPECTF--
-
 Warning: imagecreatefrompng(): gd-png:  fatal libpng error: Read Error: truncated data in %s on line %d
 
 Warning: imagecreatefrompng(): gd-png error: setjmp returns error condition in %s on line %d

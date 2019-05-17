@@ -26,7 +26,7 @@ foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $var ,  $protocol ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with emptyUnsetUndefNull values ***
 bool(false)
 bool(false)

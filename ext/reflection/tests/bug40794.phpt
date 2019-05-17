@@ -20,7 +20,7 @@ var_dump($array);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 array(3) {
   ["prop1"]=>
   string(1) "1"

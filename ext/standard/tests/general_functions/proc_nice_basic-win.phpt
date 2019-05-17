@@ -8,10 +8,6 @@ if (!defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die('skip: Only for Windows');
 }
 
-if (PHP_SAPI != 'cli') {
-	die('skip: Only for CLI');
-}
-
 if (getenv('SKIP_SLOW_TESTS')) {
 	doe('skip: Slow test');
 }
@@ -45,7 +41,7 @@ function get_priority_from_wmic() {
 
 	$f = false;
 	$m = [
-		strpos($t[0], ' ProcessId' ), 
+		strpos($t[0], ' ProcessId' ),
 		strpos($t[0], ' Priority ')
 		];
 
@@ -71,10 +67,10 @@ function get_priority_from_wmic() {
 $p = [
 	/* '<verbose name>' => ['<wmic value>', '<proc_nice value>'] */
 
-	'Idle' 		=> [4, 10], 
-	'Below normal'	=> [6, 5], 
-	'Normal'	=> [8, 0], 
-	'Above normal'	=> [10, -5], 
+	'Idle' 		=> [4, 10],
+	'Below normal'	=> [6, 5],
+	'Normal'	=> [8, 0],
+	'Above normal'	=> [10, -5],
 	'High priority'	=> [13, -10]
 	];
 
@@ -86,7 +82,7 @@ foreach ($p as $test => $data) {
 	print (($wp = get_priority_from_wmic()) === $data[0] ? 'Passed' : 'Failed (' . $wp . ')') . PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 Testing 'Idle' (10): Passed
 Testing 'Below normal' (5): Passed
 Testing 'Normal' (0): Passed

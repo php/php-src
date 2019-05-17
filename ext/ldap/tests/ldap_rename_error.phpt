@@ -15,7 +15,7 @@ var_dump(ldap_rename($link, "cn=userNotFound,$base", "cn=userZ", "$base", true))
 ?>
 ===DONE===
 --EXPECTF--
-Warning: ldap_rename() expects exactly 5 parameters, 1 given in %s on line %d
+Warning: ldap_rename() expects at least 5 parameters, 1 given in %s on line %d
 NULL
 bool(false)
 ===DONE===

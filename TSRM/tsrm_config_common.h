@@ -10,7 +10,7 @@
 #ifdef TSRM_WIN32
 # include "tsrm_config.w32.h"
 #else
-# include <tsrm_config.h>
+# include "main/php_config.h"
 # include <sys/param.h>
 #endif
 
@@ -35,9 +35,7 @@ char *alloca ();
 #include <unistd.h>
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifndef MAXPATHLEN
 # if _WIN32
@@ -69,12 +67,3 @@ char *alloca ();
 #endif
 
 #endif /* TSRM_CONFIG_COMMON_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

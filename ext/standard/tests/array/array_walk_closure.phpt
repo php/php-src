@@ -3,14 +3,6 @@ array_walk() closure tests
 --FILE--
 <?php
 
-var_dump(array_walk());
-
-$ar = false;
-var_dump(array_walk($ar, $ar));
-
-$ar = NULL;
-var_dump(array_walk($ar, $ar));
-
 $ar = ["one" => 1, "two"=>2, "three" => 3];
 var_dump(array_walk($ar, function(){ var_dump(func_get_args());}));
 
@@ -93,15 +85,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_walk() expects parameter 1 to be array, boolean given in %s on line %d
-NULL
-
-Warning: array_walk() expects parameter 1 to be array, null given in %s on line %d
-NULL
+--EXPECTF--
 array(2) {
   [0]=>
   int(1)

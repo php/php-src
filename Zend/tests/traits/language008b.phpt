@@ -25,7 +25,7 @@ $o->sayHelloWorld();
 
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Hello World!Hello World!
 Fatal error: Uncaught Error: Call to private method MyClass::sayHelloWorld() from context '' in %s:%d
 Stack trace:

@@ -109,5 +109,5 @@ $link->close();
 	$link->query('DROP USER shatest');
 	$link->query('DROP USER shatest@localhost');
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -9,7 +9,7 @@ class Base {
      echo 'Hello ';
    }
 }
- 
+
 trait SayWorld {
    public function sayHello() {
      echo 'World!';
@@ -23,5 +23,5 @@ class MyHelloWorld extends Base {
 $o = new MyHelloWorld();
 $o->sayHello();
 ?>
---EXPECTF--	
+--EXPECT--
 World!

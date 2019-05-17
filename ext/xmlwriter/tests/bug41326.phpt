@@ -1,8 +1,8 @@
 --TEST--
 Bug #41287 (Writing empty tags with Xmlwriter::WriteElement[ns])
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php
@@ -15,7 +15,6 @@ $xml->writeElement('foo', null);
 $xml->writeElement('foo2', "");
 $xml->writeElement('foo3');
 $xml->startElement('bar');
-$xml->endElement('bar');
 $xml->endElement();
 $xml->endElement();
 print $xml->flush(true);
@@ -37,7 +36,6 @@ $xw->endDocument();
 print $xw->flush(true);
 ?>
 --EXPECTF--
-Warning: XMLWriter::endElement() expects exactly 0 parameters, 1 given in %s on line %d
 <?xml version="1.0"?>
 <test>
  <foo/>
