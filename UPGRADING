@@ -524,6 +524,9 @@ The following extensions and SAPIs are affected:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
 
+- LiteSpeed:
+  . --with-litespeed becomes --enable-litespeed.
+
 - Mbstring:
   . --with-onig has been removed. Unless --disable-mbregex has been passed,
     libonig is required.
