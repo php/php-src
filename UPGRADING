@@ -498,6 +498,9 @@ The following extensions and SAPIs are affected:
 - Curl:
   . --with-curl no longer accepts a directory.
 
+- Enchant:
+  . --with-enchant no longer accepts a directory.
+
 - FPM:
   . --with-fpm-systemd now uses only pkg-config for libsystem checks. The
     libsystemd minimum required version is 209.
