@@ -9,12 +9,12 @@ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
 
 %.c: %.y
-%.c: %.l
+%.c: %.re
 
 $(builddir)/phpdbg_lexer.lo: $(srcdir)/phpdbg_parser.h
 
-$(srcdir)/phpdbg_lexer.c: $(srcdir)/phpdbg_lexer.l
-	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l)
+$(srcdir)/phpdbg_lexer.c: $(srcdir)/phpdbg_lexer.re
+	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.re)
 
 $(srcdir)/phpdbg_parser.h: $(srcdir)/phpdbg_parser.c
 $(srcdir)/phpdbg_parser.c: $(srcdir)/phpdbg_parser.y
