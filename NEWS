@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
     (Nikita)
 
+- DOM:
+  . Fixed bug #78025 (segfault when accessing properties of DOMDocumentType).
+    (cmb)
+
 - Opcache:
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
