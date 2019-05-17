@@ -755,7 +755,7 @@ ZEND_API void function_add_ref(zend_function *function);
 #define INITIAL_OP_ARRAY_SIZE 64
 
 
-/* helper functions in zend_language_scanner.l */
+/* helper functions in zend_language_scanner.re */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);

@@ -1,5 +1,5 @@
 /*
- * phpdbg_lexer.l
+ * phpdbg_lexer.re
  */
 
 #include "phpdbg.h"
