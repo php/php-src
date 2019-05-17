@@ -3,17 +3,7 @@
 # PHP distribution generator for creating PHP release packages.
 #
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
-# Adapted to git by Stanislav Malyshev <stas@php.net>
-#
-# TODO:
-# - Check if Zend parsers need fixes
-#
-# tweak zendparse to be exported through ZEND_API
-# NOTE this has to be revisited once bison supports foreign skeletons
-#      and that bison version is used. Read /usr/share/bison/README for more
-#sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.c
-#sed -i 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
-#sed -i 's,^#ifndef YYTOKENTYPE,#include "zend.h"\n#ifndef YYTOKENTYPE,g' $MY_OLDPWD/php-$VER/Zend/zend_language_parser.h
+# Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
 # Go to project root directory.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
