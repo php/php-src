@@ -81,6 +81,8 @@ ZEND_API zend_executor_globals executor_globals;
 static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2);
 static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast);
 
+static zend_long zend_default_ticks = 0;
+
 static void init_op(zend_op *op)
 {
 	MAKE_NOP(op);
@@ -301,6 +303,12 @@ static void zend_end_namespace(void) /* {{{ */ {
 }
 /* }}} */
 
+ZEND_API void zend_set_default_ticks(zend_long ticks) /* {{{ */
+{
+	zend_default_ticks = ticks > 0 ? ticks : 0;
+}
+/* }}} */
+
 void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 {
 	*prev_context = CG(file_context);
@@ -310,7 +318,7 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(current_namespace) = NULL;
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
-	FC(declarables).ticks = 0;
+	FC(declarables).ticks = zend_default_ticks;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
 }
 /* }}} */
