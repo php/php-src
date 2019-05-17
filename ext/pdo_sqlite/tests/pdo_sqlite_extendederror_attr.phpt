@@ -21,7 +21,7 @@ echo "Second Error Info:" . PHP_EOL;
 print_r($db->errorInfo());
 
 echo "Creating new PDO with Extended Result Codes turned on" . PHP_EOL;
-$db = new PDO('sqlite::memory:', '', '', [PDO::PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES => 1]);
+$db = new PDO('sqlite::memory:', '', '', [PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES => TRUE]);
 
 $db->exec("CREATE TABLE dog ( id INTEGER PRIMARY KEY, refid INTEGER, name TEXT, annoying INTEGER )");
 
