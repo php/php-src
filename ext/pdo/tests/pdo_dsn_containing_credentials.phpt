@@ -17,18 +17,34 @@ PDOTest::skip();
 <?php
 	require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-	class PDOTestDiscardCredentialParams extends PDOTest {
-		public function __construct($dsn, $user, $pass, $attr) {
-			return parent::__construct($dsn, null, null, $attr);
-		}
+	$orgDsn = getenv('PDOTEST_DSN');
+	$orgUser = getenv('PDOTEST_USER');
+	$orgPass = getenv('PDOTEST_PASS');
+
+	try
+	{
+		putenv("PDOTEST_DSN=$orgDsn;user=$orgUser;password=$orgPass");
+		putenv("PDOTEST_USER");
+		putenv("PDOTEST_PASS");
+
+		$link = PDOTest::factory();
+		echo "using credentials in dsn: done\n";
+
+
+		// test b/c - credentials in DSN are ignored when user/pass passed as separate params
+		putenv("PDOTEST_DSN=$orgDsn;user=incorrect;password=ignored");
+		putenv("PDOTEST_USER=$orgUser");
+		putenv("PDOTEST_PASS=$orgPass");
+
+		$link = PDOTest::factory();
+		echo "ignoring credentials in dsn: done\n";
 	}
-
-	$link = PDOTestDiscardCredentialParams::factory('PDO', false, null, ['user' => getenv('PDOTEST_USER'), 'password' => getenv('PDOTEST_PASS')]);
-	echo "using credentials in dsn: done\n";
-
-	// test b/c - credentials in DSN are ignored when user/pass passed as separate params
-	$link = PDOTest::factory('PDO', false, null, ['user' => 'incorrect', 'password' => 'ignored']);
-	echo "ignoring credentials in dsn: done\n";
+	finally
+	{
+		putenv("PDOTEST_DSN=$orgDsn");
+		putenv("PDOTEST_USER=$orgUser");
+		putenv("PDOTEST_PASS=$orgPass");
+	}
 ?>
 --EXPECTF--
 using credentials in dsn: done
