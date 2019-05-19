@@ -13,7 +13,7 @@ Test array_filter() function : usage variations - built-in functions as 'callbac
 
 echo "*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***\n";
 
-$input = array(0, 1, -1, 10, 100, 1000, 'Hello', null);
+$input = array(0, 1, -1, 10, 100, 1000, null);
 
 // using built-in function 'is_int' as 'callback'
 var_dump( array_filter($input, 'is_int') );
@@ -53,9 +53,7 @@ array(6) {
   [5]=>
   int(1000)
 }
-
-Warning: chr() expects parameter 1 to be int, string given in %s on line %d
-array(8) {
+array(7) {
   [0]=>
   int(0)
   [1]=>
@@ -69,8 +67,6 @@ array(8) {
   [5]=>
   int(1000)
   [6]=>
-  string(5) "Hello"
-  [7]=>
   NULL
 }
 array_filter() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name
