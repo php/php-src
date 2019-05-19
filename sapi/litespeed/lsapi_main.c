@@ -1413,7 +1413,7 @@ zend_module_entry litespeed_module_entry = {
     NULL,
     NULL,
     NULL,
-    NO_VERSION_YET,
+    PHP_VERSION,
     STANDARD_MODULE_PROPERTIES
 };
 
