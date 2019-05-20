@@ -448,7 +448,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed" PHP_VERSION,
+    "LiteSpeed",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
