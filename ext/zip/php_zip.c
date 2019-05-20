@@ -110,6 +110,13 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return path + 1;
 	}
 
+#ifdef PHP_WIN32
+	/* Windows relative path ^A-Z: */
+    if (path_len > 2 && path[1] == ':' && !IS_SLASH(path[2])) {
+		return path + 2;
+	}
+#endif /* PHP_WIN32 */
+
 	i = path_len;
 
 	while (1) {
@@ -121,8 +128,17 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 			return path;
 		}
 
-		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
-			/* i is the position of . or :, add 1 for / */
+        /* relative path indicators: ^../ ^./ /../ /./ and A-Z:/ for windows only */
+        if (
+                (i >= 3 && path[i-1] == '.' && path[i-2] == '.' && IS_SLASH(path[i-3])) /* /../ */
+                || (i >= 2 && path[i-1] == '.' && IS_SLASH(path[i-2]))                  /* /./ */
+                || (i == 2 && path[i-1] == '.' && path[i-2] == '.' )                    /* ^../ */
+                || (i == 1 && path[i-1] == '.')                                         /* ^./ */
+#ifdef PHP_WIN32
+                || (i == 2 && path[i-1] == ':')                                         /* ^A-Z:/ */
+                || (i >= 2 && path[i-1] == '.' && path[i-2] == '.' )                    /* ../ */
+#endif /* PHP_WIN32 */
+        ) {
 			path_begin = path + i + 1;
 			break;
 		}
