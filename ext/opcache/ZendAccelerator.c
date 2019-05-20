@@ -3350,6 +3350,106 @@ static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, 
 	} ZEND_HASH_FOREACH_END();
 }
 
+static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
+{
+	zend_bool ok, changed;
+	zend_class_constant *c;
+	zval *val;
+
+	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
+	do {
+		ok = 1;
+		changed = 0;
+		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+			val = &c->value;
+			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+					changed = 1;
+				} else {
+					ok = 0;
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+		if (ce->default_properties_count) {
+			uint32_t i;
+			for (i = 0; i < ce->default_properties_count; i++) {
+				val = &ce->default_properties_table[i];
+				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+					zend_property_info *prop = ce->properties_info_table[i];
+					if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
+						ok = 0;
+					}
+				}
+			}
+		}
+		if (ce->default_static_members_count) {
+			uint32_t count = ce->parent ? ce->default_static_members_count - ce->parent->default_static_members_count : ce->default_static_members_count;
+
+			val = ce->default_static_members_table + ce->default_static_members_count - 1;
+			while (count) {
+				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+					if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
+						ok = 0;
+					}
+				}
+				val--;
+				count--;
+			}
+		}
+	} while (changed && !ok);
+	EG(exception) = NULL;
+
+	return ok;
+}
+
+static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
+{
+	zend_bool ok = 1;
+	zend_property_info *prop;
+	zend_class_entry *p;
+
+	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+			zend_string *name, *lcname;
+
+			if (!ZEND_TYPE_IS_NAME(prop->type)) {
+				continue;
+			}
+
+			name = ZEND_TYPE_NAME(prop->type);
+			lcname = zend_string_tolower(name);
+			p = zend_hash_find_ptr(EG(class_table), lcname);
+			zend_string_release(lcname);
+			if (!p) {
+				ok = 0;
+				continue;
+			}
+			if (p != ce) {
+#ifdef ZEND_WIN32
+				/* On Windows we can't link with internal class, because of ASLR */
+				if (p->type == ZEND_INTERNAL_CLASS) {
+					ok = 0;
+					continue;
+				}
+#endif
+				if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+					ok = 0;
+					continue;
+				}
+				if (!(p->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+					ok = 0;
+					continue;
+				}
+			}
+
+			zend_string_release(name);
+			prop->type = ZEND_TYPE_ENCODE_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return ok;
+}
+
 static void preload_link(void)
 {
 	zval *zv;
@@ -3393,6 +3493,12 @@ static void preload_link(void)
 					/* On Windows we can't link with internal class, because of ASLR */
 					if (parent->type == ZEND_INTERNAL_CLASS) continue;
 #endif
+					if (!(parent->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+						continue;
+					}
+					if (!(parent->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+						continue;
+					}
 				}
 
 				if (ce->num_interfaces) {
@@ -3410,6 +3516,10 @@ static void preload_link(void)
 							break;
 						}
 #endif
+						if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+							found = 0;
+							break;
+						}
 					}
 					if (!found) continue;
 				}
@@ -3441,7 +3551,16 @@ static void preload_link(void)
 					/* Set filename & lineno information for inheritance errors */
 					CG(in_compilation) = 1;
 					CG(compiled_filename) = ce->info.user.filename;
-					CG(zend_lineno) = ce->info.user.line_start;
+					if (ce->parent_name
+					 && !ce->num_interfaces
+					 && !ce->num_traits
+					 && (parent->type == ZEND_INTERNAL_CLASS
+					  || parent->info.user.filename == ce->info.user.filename)) {
+						/* simulate early binding */
+						CG(zend_lineno) = ce->info.user.line_end;
+					} else {
+						CG(zend_lineno) = ce->info.user.line_start;
+					}
 					zend_do_link_class(ce, parent);
 					CG(in_compilation) = 0;
 					CG(compiled_filename) = NULL;
@@ -3449,103 +3568,25 @@ static void preload_link(void)
 					changed = 1;
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
-	} while (changed);
-
-	/* Resolve class constants */
-	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
-	do {
-		changed = 0;
-		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-			ce = Z_PTR_P(zv);
-			if (ce->type == ZEND_INTERNAL_CLASS) {
-				break;
-			}
-			if ((ce->ce_flags & ZEND_ACC_LINKED)
-			 && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-				zend_bool ok = 1;
-				zend_class_constant *c;
-				zval *val;
-
-				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					val = &c->value;
-					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
-							changed = 1;
-						} else {
-							ok = 0;
-						}
-					}
-				} ZEND_HASH_FOREACH_END();
-				if (ce->default_properties_count) {
-					uint32_t i;
-					for (i = 0; i < ce->default_properties_count; i++) {
-						val = &ce->default_properties_table[i];
-						if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-							zend_property_info *prop = ce->properties_info_table[i];
-							if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
-								ok = 0;
-							}
-						}
+			if (ce->ce_flags & ZEND_ACC_LINKED) {
+				if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+					if ((ce->ce_flags & ZEND_ACC_TRAIT) /* don't update traits */
+					 || preload_try_resolve_constants(ce)) {
+						ce->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
+						changed = 1;
 					}
 				}
-				if (ce->default_static_members_count) {
-					uint32_t count = ce->parent ? ce->default_static_members_count - ce->parent->default_static_members_count : ce->default_static_members_count;
 
-					val = ce->default_static_members_table + ce->default_static_members_count - 1;
-					while (count) {
-						if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-							if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
-								ok = 0;
-							}
-						}
-						val--;
-						count--;
+				if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+					if ((ce->ce_flags & ZEND_ACC_TRAIT) /* don't update traits */
+					 || preload_try_resolve_property_types(ce)) {
+						ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
+						changed = 1;
 					}
-				}
-				if (ok) {
-					ce->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
-	EG(exception) = NULL;
-
-	/* Resolve property types */
-	ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-		ce = Z_PTR_P(zv);
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			break;
-		}
-		if ((ce->ce_flags & ZEND_ACC_LINKED)
-		 && !(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-			zend_bool ok = 1;
-			zend_property_info *prop;
-			if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-					zend_string *name, *lcname;
-					if (!ZEND_TYPE_IS_NAME(prop->type)) {
-						continue;
-					}
-
-					name = ZEND_TYPE_NAME(prop->type);
-					lcname = zend_string_tolower(name);
-					p = zend_hash_find_ptr(EG(class_table), lcname);
-					zend_string_release(lcname);
-					if (!p) {
-						ok = 0;
-						continue;
-					}
-
-					zend_string_release(name);
-					prop->type = ZEND_TYPE_ENCODE_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
-				} ZEND_HASH_FOREACH_END();
-			}
-			if (ok) {
-				ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
 
 	/* Move unlinked clases (and with unresilved constants) back to scripts */
 	orig_dtor = EG(class_table)->pDestructor;
