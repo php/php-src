@@ -536,6 +536,7 @@ The following extensions and SAPIs are affected:
 
 - ODBC:
   . --with-iodbc no longer accepts a directory.
+  . --with-unixODBC no longer accepts a directory.
 
 - OpenSSL:
   . --with-openssl no longer accepts a directory.
