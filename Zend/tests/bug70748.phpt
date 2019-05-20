@@ -1,5 +1,5 @@
 --TEST--
-Bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.re)
+Bug #70748 (Segfault in ini_lex () at Zend/zend_ini_scanner.l)
 --FILE--
 <?php
 $ini = '[${ 	';
