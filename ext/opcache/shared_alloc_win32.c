@@ -191,7 +191,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 
 			if (execute_ex_moved) {
 				err = ERROR_INVALID_ADDRESS;
-				zend_win_error_message(ACCEL_LOG_WARNING, "execute_ex address does not match (fall-back to file cache)", err);
+				zend_win_error_message(ACCEL_LOG_WARNING, "Opcode handlers are unusable due to ASLR (fall-back to file cache)", err);
 			} else {
 				err = ERROR_INVALID_ADDRESS;
 				zend_win_error_message(ACCEL_LOG_WARNING, "Base address marks unusable memory region (fall-back to file cache)", err);
@@ -212,7 +212,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 #endif
 		if (execute_ex_moved) {
 			err = ERROR_INVALID_ADDRESS;
-			zend_win_error_message(ACCEL_LOG_FATAL, "execute_ex address does not match. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
+			zend_win_error_message(ACCEL_LOG_FATAL, "Opcode handlers are unusable due to ASLR. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
 		} else {
 			err = ERROR_INVALID_ADDRESS;
 			zend_win_error_message(ACCEL_LOG_FATAL, "Base address marks unusable memory region. Please setup opcache.file_cache and opcache.file_cache_fallback directives for more convenient Opcache usage", err);
