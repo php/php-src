@@ -89,14 +89,14 @@ sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_pars
 	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
-Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.re
-	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.re
+Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
-Zend\zend_language_scanner.c: Zend\zend_language_scanner.re
-	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.re
+Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
-sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.re
-	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.re
+sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
+	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
 
 !if "$(ZTS)" == "1"
