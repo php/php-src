@@ -4,8 +4,6 @@ PHP_ARG_WITH([enchant],
     [Include Enchant support])])
 
 if test "$PHP_ENCHANT" != "no"; then
-  PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
-
   PKG_CHECK_MODULES([ENCHANT], [enchant])
 
   PHP_EVAL_INCLINE($ENCHANT_CFLAGS)
@@ -18,4 +16,7 @@ if test "$PHP_ENCHANT" != "no"; then
     AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM, 1, [ ])
     AC_DEFINE(ENCHANT_VERSION_STRING, "1.5.x", [ ])
   ])
+
+  PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
+  PHP_SUBST(ENCHANT_SHARED_LIBADD)
 fi
