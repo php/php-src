@@ -376,6 +376,15 @@ static zend_bool try_replace_op2(
 	return 0;
 }
 
+static inline int ct_eval_binary_op(zval *result, zend_uchar binop, zval *op1, zval *op2) {
+	/* TODO: We could implement support for evaluation of + on partial arrays. */
+	if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_ARRAY(op2)) {
+		return FAILURE;
+	}
+
+	return zend_optimizer_eval_binary_op(result, binop, op1, op2);
+}
+
 static inline int zval_to_string_offset(zend_long *result, zval *op) {
 	switch (Z_TYPE_P(op)) {
 		case IS_LONG:
@@ -1383,13 +1392,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			/* TODO: We could implement support for evaluation of + on partial arrays. */
-			if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_ARRAY(op2)) {
-				SET_RESULT_BOT(result);
-				break;
-			}
-
-			if (zend_optimizer_eval_binary_op(&zv, opline->opcode, op1, op2) == SUCCESS) {
+			if (ct_eval_binary_op(&zv, opline->opcode, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
@@ -1415,7 +1418,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				SKIP_IF_TOP(op2);
 			}
 			if (!opline->extended_value) {
-				if (zend_optimizer_eval_binary_op(&zv, zend_compound_assign_to_binary_op(opline->opcode), op1, op2) == SUCCESS) {
+				if (ct_eval_binary_op(&zv, zend_compound_assign_to_binary_op(opline->opcode), op1, op2) == SUCCESS) {
 					SET_RESULT(op1, &zv);
 					SET_RESULT(result, &zv);
 					zval_ptr_dtor_nogc(&zv);
@@ -1442,7 +1445,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							break;
 						}
 
-						if (zend_optimizer_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
+						if (ct_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
 							SET_RESULT_BOT(result);
 							SET_RESULT_BOT(op1);
 							zval_ptr_dtor_nogc(&tmp);
@@ -1487,7 +1490,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							break;
 						}
 
-						if (zend_optimizer_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
+						if (ct_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
 							SET_RESULT_BOT(result);
 							SET_RESULT_BOT(op1);
 							zval_ptr_dtor_nogc(&tmp);
@@ -1739,11 +1742,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			// string for all SSA vars with some extra checks
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
-			if (IS_PARTIAL_ARRAY(op2)) {
-				SET_RESULT_BOT(result);
-				break;
-			}
-			if (zend_optimizer_eval_binary_op(&zv, ZEND_CONCAT, op1, op2) == SUCCESS) {
+			if (ct_eval_binary_op(&zv, ZEND_CONCAT, op1, op2) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
