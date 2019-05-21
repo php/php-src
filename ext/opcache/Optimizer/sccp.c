@@ -74,11 +74,7 @@
  * 16 of the SSA book.
  */
 
-#if 0
-#define SCP_DEBUG(...) php_printf(__VA_ARGS__)
-#else
-#define SCP_DEBUG(...)
-#endif
+#define SCP_DEBUG 0
 
 typedef struct _sccp_ctx {
 	scdf_ctx scdf;
@@ -102,6 +98,24 @@ typedef struct _sccp_ctx {
 
 #define MAKE_TOP(zv) (Z_TYPE_INFO_P(zv) = TOP)
 #define MAKE_BOT(zv) (Z_TYPE_INFO_P(zv) = BOT)
+
+static void scp_dump_value(zval *zv) {
+	if (IS_TOP(zv)) {
+		fprintf(stderr, " top");
+	} else if (IS_BOT(zv)) {
+		fprintf(stderr, " bot");
+	} else if (Z_TYPE_P(zv) == IS_ARRAY || IS_PARTIAL_ARRAY(zv)) {
+		fprintf(stderr, " %s[", IS_PARTIAL_ARRAY(zv) ? "partial " : "");
+		zend_dump_ht(Z_ARRVAL_P(zv));
+		fprintf(stderr, "]");
+	} else if (IS_PARTIAL_OBJECT(zv)) {
+		fprintf(stderr, " {");
+		zend_dump_ht(Z_ARRVAL_P(zv));
+		fprintf(stderr, "}");
+	} else {
+		zend_dump_const(zv);
+	}
+}
 
 static void empty_partial_array(zval *zv)
 {
@@ -139,11 +153,15 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 		return;
 	}
 
-	if (IS_BOT(new)) {
-		SCP_DEBUG("Lowering var %d to BOT\n", var);
-	} else if (!IS_PARTIAL_ARRAY(new) && !IS_PARTIAL_OBJECT(new)) {
-		SCP_DEBUG("Lowering var %d to %Z\n", var, new);
-	}
+#if SCP_DEBUG
+	fprintf(stderr, "Lowering #%d.", var);
+	zend_dump_var(scdf->op_array, IS_CV, scdf->ssa->vars[var].var);
+	fprintf(stderr, " from");
+	scp_dump_value(value);
+	fprintf(stderr, " to");
+	scp_dump_value(new);
+	fprintf(stderr, "\n");
+#endif
 
 	if (IS_TOP(value) || IS_BOT(new)) {
 		zval_ptr_dtor_nogc(value);
@@ -1979,7 +1997,9 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 		int i;
 		zval result;
 		MAKE_TOP(&result);
-		SCP_DEBUG("Handling PHI(");
+#if SCP_DEBUG
+		fprintf(stderr, "Handling phi(");
+#endif
 		if (phi->pi >= 0) {
 			ZEND_ASSERT(phi->sources[0] >= 0);
 			if (scdf_is_edge_feasible(scdf, phi->pi, phi->block)) {
@@ -1989,14 +2009,21 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 			for (i = 0; i < block->predecessors_count; i++) {
 				ZEND_ASSERT(phi->sources[i] >= 0);
 				if (scdf_is_edge_feasible(scdf, predecessors[i], phi->block)) {
-					SCP_DEBUG("val, ");
+#if SCP_DEBUG
+					scp_dump_value(&ctx->values[phi->sources[i]]);
+					fprintf(stderr, ",");
+#endif
 					join_phi_values(&result, &ctx->values[phi->sources[i]], ssa->vars[phi->ssa_var].escape_state != ESCAPE_STATE_NO_ESCAPE);
 				} else {
-					SCP_DEBUG("--, ");
+#if SCP_DEBUG
+					fprintf(stderr, " --,");
+#endif
 				}
 			}
 		}
-		SCP_DEBUG(")\n");
+#if SCP_DEBUG
+		fprintf(stderr, ")\n");
+#endif
 
 		set_value(scdf, ctx, phi->ssa_var, &result);
 		zval_ptr_dtor_nogc(&result);
@@ -2404,18 +2431,8 @@ int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zen
 			}
 			fprintf(stderr, "    #%d.", i);
 			zend_dump_var(op_array, IS_CV, ssa->vars[i].var);
-			if (Z_TYPE_P(zv) == IS_ARRAY || IS_PARTIAL_ARRAY(zv)) {
-				fprintf(stderr, " = %s[", IS_PARTIAL_ARRAY(zv) ? "partial " : "");
-				zend_dump_ht(Z_ARRVAL_P(zv));
-				fprintf(stderr, "]");
-			} else if (IS_PARTIAL_OBJECT(zv)) {
-				fprintf(stderr, " = {");
-				zend_dump_ht(Z_ARRVAL_P(zv));
-				fprintf(stderr, "}");
-			} else {
-				fprintf(stderr, " =");
-				zend_dump_const(zv);
-			}
+			fprintf(stderr, " =");
+			scp_dump_value(zv);
 			fprintf(stderr, "\n");
 		}
 	}
