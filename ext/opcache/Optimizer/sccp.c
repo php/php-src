@@ -1876,7 +1876,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				args[i] = get_op1_value(ctx, opline,
 					&ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
 				if (args[i]) {
-					if (IS_BOT(args[i])) {
+					if (IS_BOT(args[i]) || IS_PARTIAL_ARRAY(args[i])) {
 						SET_RESULT_BOT(result);
 						return;
 					} else if (IS_TOP(args[i])) {
