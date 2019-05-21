@@ -6,7 +6,7 @@ Bug #32330 (session_destroy, "Failed to initialize storage module", custom sessi
 session.use_trans_sid=0
 session.use_cookies=1
 session.name=sid
-session.save_path=/tmp
+session.save_path={TMP}
 session.gc_probability=1
 session.gc_divisor=1
 session.save_handler=files
@@ -69,17 +69,17 @@ $_SESSION['E'] = 'F';
 
 ?>
 --EXPECTF--
-open: path = /tmp, name = sid
+open: path = %s, name = sid
 read: id = %s
 gc: maxlifetime = %d
 write: id = %s, data = A|s:1:"B";
 close
-open: path = /tmp, name = sid
+open: path = %s, name = sid
 read: id = %s
 gc: maxlifetime = %d
 destroy: id = %s
 close
-open: path = /tmp, name = sid
+open: path = %s, name = sid
 read: id = %s
 gc: maxlifetime = %d
 write: id = %s, data = E|s:1:"F";
