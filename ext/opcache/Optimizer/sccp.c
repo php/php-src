@@ -1285,7 +1285,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			/* We want to avoid keeping around intermediate arrays for each SSA variable in the
 			 * ADD_ARRAY_ELEMENT chain. We do this by only keeping the array on the last opcode
 			 * and use a NULL value everywhere else. */
-			if (Z_TYPE(ctx->values[ssa_op->result_def]) == IS_NULL) {
+			if (result && Z_TYPE_P(result) == IS_NULL) {
 				SET_RESULT_BOT(result);
 				return;
 			}
