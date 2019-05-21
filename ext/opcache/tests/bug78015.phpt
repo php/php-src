@@ -63,7 +63,10 @@ array(1) {
 }
 bool(false)
 int(1)
-int(42)
+array(1) {
+  [0]=>
+  int(1)
+}
 bool(true)
 
 Notice: Array to string conversion in %s on line %d

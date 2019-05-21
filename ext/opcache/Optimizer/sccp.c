@@ -385,6 +385,22 @@ static inline int ct_eval_binary_op(zval *result, zend_uchar binop, zval *op1, z
 	return zend_optimizer_eval_binary_op(result, binop, op1, op2);
 }
 
+static inline int ct_eval_bool_cast(zval *result, zval *op) {
+	if (IS_PARTIAL_ARRAY(op)) {
+		if (zend_hash_num_elements(Z_ARRVAL_P(op)) == 0) {
+			/* An empty partial array may be non-empty at runtime, we don't know whether the
+			 * result will be true or false. */
+			return FAILURE;
+		}
+
+		ZVAL_TRUE(result);
+		return SUCCESS;
+	}
+
+	ZVAL_BOOL(result, zend_is_true(op));
+	return SUCCESS;
+}
+
 static inline int zval_to_string_offset(zend_long *result, zval *op) {
 	switch (Z_TYPE_P(op)) {
 		case IS_LONG:
@@ -446,6 +462,23 @@ static inline int ct_eval_fetch_dim(zval *result, zval *op1, zval *op2, int supp
 	return FAILURE;
 }
 
+/* op1 may be NULL here to indicate an unset value */
+static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
+	zval zv;
+	if (!(extended_value & ZEND_ISEMPTY)) {
+		ZVAL_BOOL(result, op1 && Z_TYPE_P(op1) != IS_NULL);
+		return SUCCESS;
+	} else if (!op1) {
+		ZVAL_TRUE(result);
+		return SUCCESS;
+	} else if (ct_eval_bool_cast(&zv, op1) == SUCCESS) {
+		ZVAL_BOOL(result, Z_TYPE(zv) == IS_FALSE);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
 static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
 		zval *value;
@@ -455,12 +488,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (IS_PARTIAL_ARRAY(op1) && (!value || IS_BOT(value))) {
 			return FAILURE;
 		}
-		if (!(extended_value & ZEND_ISEMPTY)) {
-			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
-		} else {
-			ZVAL_BOOL(result, !value || !zend_is_true(value));
-		}
-		return SUCCESS;
+		return ct_eval_isset_isempty(result, extended_value, value);
 	} else if (Z_TYPE_P(op1) == IS_STRING) {
 		// TODO
 		return FAILURE;
@@ -612,12 +640,7 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
-		if (!(extended_value & ZEND_ISEMPTY)) {
-			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
-		} else {
-			ZVAL_BOOL(result, !value || !zend_is_true(value));
-		}
-		return SUCCESS;
+		return ct_eval_isset_isempty(result, extended_value, value);
 	} else {
 		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
@@ -673,15 +696,6 @@ static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
 		increment_function(result);
 	} else {
 		decrement_function(result);
-	}
-	return SUCCESS;
-}
-
-static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
-	if (!(extended_value & ZEND_ISEMPTY)) {
-		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
-	} else {
-		ZVAL_BOOL(result, !zend_is_true(op1));
 	}
 	return SUCCESS;
 }
@@ -1601,12 +1615,12 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			SKIP_IF_TOP(op1);
-			if (IS_PARTIAL_ARRAY(op1)) {
-				SET_RESULT_BOT(result);
+			if (ct_eval_bool_cast(&zv, op1) == SUCCESS) {
+				SET_RESULT(result, &zv);
+				zval_ptr_dtor_nogc(&zv);
 				break;
 			}
-			ZVAL_BOOL(&zv, zend_is_true(op1));
-			SET_RESULT(result, &zv);
+			SET_RESULT_BOT(result);
 			break;
 		case ZEND_STRLEN:
 			SKIP_IF_TOP(op1);
@@ -1834,7 +1848,7 @@ static void sccp_mark_feasible_successors(
 		int block_num, zend_basic_block *block,
 		zend_op *opline, zend_ssa_op *ssa_op) {
 	sccp_ctx *ctx = (sccp_ctx *) scdf;
-	zval *op1;
+	zval *op1, zv;
 	int s;
 
 	/* We can't determine the branch target at compile-time for these */
@@ -1869,13 +1883,27 @@ static void sccp_mark_feasible_successors(
 		case ZEND_JMPZ:
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
-			s = zend_is_true(op1);
+		{
+			if (ct_eval_bool_cast(&zv, op1) == FAILURE) {
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
+				return;
+			}
+			s = Z_TYPE(zv) == IS_TRUE;
 			break;
+		}
 		case ZEND_JMPNZ:
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:
-			s = !zend_is_true(op1);
+		{
+			if (ct_eval_bool_cast(&zv, op1) == FAILURE) {
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
+				scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
+				return;
+			}
+			s = Z_TYPE(zv) == IS_FALSE;
 			break;
+		}
 		case ZEND_COALESCE:
 			s = (Z_TYPE_P(op1) == IS_NULL);
 			break;
