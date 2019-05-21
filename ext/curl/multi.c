@@ -228,7 +228,7 @@ PHP_FUNCTION(curl_multi_select)
 	}
 
 #if LIBCURL_VERSION_NUM >= 0x071c00 /* Available since 7.28.0 */
-	error = curl_multi_wait(mh->multi, NULL, 0, (unsigned long) timeout * 1000.0, &numfds);
+	error = curl_multi_wait(mh->multi, NULL, 0, (unsigned long) (timeout * 1000.0), &numfds);
 	if (CURLM_OK != error) {
 		SAVE_CURLM_ERROR(mh, error);
 		RETURN_LONG(-1);
