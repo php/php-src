@@ -48,12 +48,23 @@ function test6() {
     return $d;
 }
 
+function test7() {
+    global $x;
+    $a = ['b' => [$x]];
+    $y = 1;
+    foreach ($a['b'] as $_) {
+        $y = 2;
+    }
+    return $y;
+}
+
 var_dump(test1());
 var_dump(test2());
 var_dump(test3());
 var_dump(test4());
 var_dump(test5());
 var_dump(test6());
+var_dump(test7());
 
 ?>
 --EXPECTF--
@@ -71,3 +82,4 @@ bool(true)
 
 Notice: Array to string conversion in %s on line %d
 string(11) "Arrayfoobar"
+int(2)

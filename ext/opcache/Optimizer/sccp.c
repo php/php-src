@@ -1909,7 +1909,10 @@ static void sccp_mark_feasible_successors(
 			break;
 		case ZEND_FE_RESET_R:
 		case ZEND_FE_RESET_RW:
-			if (Z_TYPE_P(op1) != IS_ARRAY && !IS_PARTIAL_ARRAY(op1)) {
+			/* A non-empty partial array is definitely non-empty, but an
+			 * empty partial array may be non-empty at runtime. */
+			if (Z_TYPE_P(op1) != IS_ARRAY ||
+					(IS_PARTIAL_ARRAY(op1) && zend_hash_num_elements(Z_ARR_P(op1)) == 0)) {
 				scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
 				scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
 				return;
