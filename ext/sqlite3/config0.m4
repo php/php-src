@@ -21,7 +21,7 @@ if test $PHP_SQLITE3 != "no"; then
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_stmt_readonly,
   [
     PHP_EVAL_INCLINE($SQLITE_CFLAGS)
-    PHP_EVAL_LIBLINE($SQLITE_LIBS, SQLITE_SHARED_LIBADD)
+    PHP_EVAL_LIBLINE($SQLITE_LIBS, SQLITE3_SHARED_LIBADD)
     AC_DEFINE(HAVE_SQLITE3, 1, [Define to 1 if you have the sqlite3 extension enabled.])
   ], [
     AC_MSG_ERROR([Please install SQLite 3.7.4 first or check libsqlite3 is present])
