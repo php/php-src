@@ -71,6 +71,12 @@ function test8($array) {
     return $ret[0];
 }
 
+function test9() {
+    global $x;
+    $a = ['b' => [$x]];
+    return serialize($a['b']);
+}
+
 var_dump(test1());
 var_dump(test2());
 var_dump(test3());
@@ -79,6 +85,7 @@ var_dump(test5());
 var_dump(test6());
 var_dump(test7());
 var_dump(test8([1]));
+var_dump(test9());
 
 ?>
 --EXPECTF--
@@ -103,3 +110,4 @@ array(2) {
   ["y"]=>
   int(1)
 }
+string(14) "a:1:{i:0;i:1;}"
