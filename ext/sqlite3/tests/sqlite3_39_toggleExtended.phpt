@@ -1,5 +1,5 @@
 --TEST--
-SQLite3 toggle extended error function
+SQLite3 enable Extended Error Result Codes 
 --SKIPIF--
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
@@ -18,7 +18,7 @@ $result = $db->query("INSERT INTO dog VALUES (1, 'Annoying Dog', 1)");
 echo "Second Error Code: " . $db->lastErrorCode() . PHP_EOL;
 
 echo "Toggling extended error codes and re-inserting a third time" . PHP_EOL;
-$db->toggleExtendedResultCodes(true);
+$db->enableExtendedResultCodes(true);
 $result = $db->query("INSERT INTO DOG VALUES (1, 'Annoying Dog', 1)");
 echo "Third (Extended) Error Code: " . $db->lastErrorCode() . PHP_EOL;
 

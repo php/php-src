@@ -309,26 +309,31 @@ PHP_METHOD(sqlite3, lastExtendedErrorCode)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3::toggleExtendedResultCodes(bool enable)
+/* {{{ proto bool SQLite3::enableExtendedResultCodes([bool enableExceptions = true])
     Turns on or off the extended result codes feature of SQLite. */
-PHP_METHOD(sqlite3, toggleExtendedResultCodes)
+PHP_METHOD(sqlite3, enableExtendedResultCodes)
 {
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
-	zend_bool enable;
+	zend_bool enable = 1;
 	db_obj = Z_SQLITE3_DB_P(object);
+	int ret;
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &enable) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &enable) == FAILURE) {
 		return;
 	}
 
 	if (db_obj->initialised) {
-		RETURN_LONG(sqlite3_extended_result_codes(db_obj->db, enable ? 1 : 0));
-	} else {
-		RETURN_LONG(-1);
+		ret = sqlite3_extended_result_codes(db_obj->db, enable ? 1 : 0);
+		if (ret == SQLITE_OK)
+		{
+			RETURN_TRUE;
+		}
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2120,7 +2125,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_fetcharray, 0, 0, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_toggleextended, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableextended, 0, 0, 1)
 	ZEND_ARG_INFO(0, enable)
 ZEND_END_ARG_INFO()
 
@@ -2137,7 +2142,7 @@ static const zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		lastInsertRowID,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorCode,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastExtendedErrorCode,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		toggleExtendedResultCodes,	arginfo_sqlite3_toggleextended, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		enableExtendedResultCodes,	arginfo_sqlite3_enableextended, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		lastErrorMsg,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		busyTimeout,				arginfo_sqlite3_busytimeout, ZEND_ACC_PUBLIC)
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
