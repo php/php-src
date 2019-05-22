@@ -2310,8 +2310,6 @@ static void accel_reset_pcre_cache(void)
 
 static void accel_activate(void)
 {
-	zend_bool reset_pcre = 0;
-
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
@@ -2417,9 +2415,6 @@ static void accel_activate(void)
 				accel_restart_leave();
 			}
 		}
-		if (!ZCG(pcre_reseted)) {
-			reset_pcre = 1;
-		}
 		zend_shared_alloc_unlock();
 	}
 
@@ -2428,7 +2423,7 @@ static void accel_activate(void)
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-	if (ZCSG(last_restart_time) != ZCG(last_restart_time)) {
+	if (ZCG(accelerator_enabled) && ZCSG(last_restart_time) != ZCG(last_restart_time)) {
 		/* SHM was reinitialized. */
 		ZCG(last_restart_time) = ZCSG(last_restart_time);
 
@@ -2437,7 +2432,7 @@ static void accel_activate(void)
 
 		accel_reset_pcre_cache();
 		ZCG(pcre_reseted) = 0;
-	} else if (reset_pcre) {
+	} else if (!ZCG(accelerator_enabled) && !ZCG(pcre_reseted)) {
 		accel_reset_pcre_cache();
 		ZCG(pcre_reseted) = 1;
 	}
