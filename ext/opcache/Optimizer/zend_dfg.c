@@ -52,8 +52,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 				if (next < end && next->opcode == ZEND_OP_DATA) {
 					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						var_num = EX_VAR_TO_NUM(next->op1.var);
-						if (opline->opcode == ZEND_ASSIGN_OBJ_REF
-								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+						if (next->op1_type == IS_CV && (opline->opcode == ZEND_ASSIGN_OBJ_REF
+								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF)) {
 							DFG_SET(use, set_size, j, var_num);
 							DFG_SET(def, set_size, j, var_num);
 						} else {
