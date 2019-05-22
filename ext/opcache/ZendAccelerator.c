@@ -2695,14 +2695,21 @@ static void accel_move_code_to_huge_pages(void)
 		char perm[5], dev[6], name[MAXPATHLEN];
 		int ret;
 
-		ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
-		if (ret == 7 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
-			long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-			long unsigned int  seg_end = (end & ~(huge_page_size-1L));
+		while (1) {
+			ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			if (ret == 7) {
+				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
+					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
+					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
 
-			if (seg_end > seg_start) {
-				zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
-				accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, name, offset + seg_start - start);
+					if (seg_end > seg_start) {
+						zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
+						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, name, offset + seg_start - start);
+					}
+					break;
+				}
+			} else {
+				break;
 			}
 		}
 		fclose(f);
