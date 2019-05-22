@@ -643,7 +643,7 @@ SPL_METHOD(SplFixedArray, toArray)
 }
 /* }}} */
 
-/* {{{ proto object SplFixedArray::fromArray(array data[, bool save_indexes])
+/* {{{ proto object SplFixedArray::fromArray(array array[, bool save_indexes])
 */
 SPL_METHOD(SplFixedArray, fromArray)
 {
@@ -1031,7 +1031,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_fixedarray_setSize, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_fromArray, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, array)
 	ZEND_ARG_INFO(0, save_indexes)
 ZEND_END_ARG_INFO()
 

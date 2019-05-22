@@ -705,7 +705,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto int SplDoublyLinkedList::setIteratorMode(int flags)
+/* {{{ proto int SplDoublyLinkedList::setIteratorMode(int mode)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
@@ -1372,7 +1372,7 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 /*  Function/Class/Method definitions */
 ZEND_BEGIN_ARG_INFO(arginfo_dllist_setiteratormode, 0)
-	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_dllist_push, 0)
