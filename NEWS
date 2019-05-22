@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #78025 (segfault when accessing properties of DOMDocumentType).
     (cmb)
 
+- MySQLi:
+  . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
+    error message). (Sjon Hortensius)
+
 - Opcache:
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
