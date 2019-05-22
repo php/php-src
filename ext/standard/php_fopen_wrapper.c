@@ -431,18 +431,49 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 }
 /* }}} */
 
+static int php_stream_url_stater(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context) {
+	int ret = FAILURE;
+
+	if (!strncasecmp(url, "php://", sizeof("php://") - 1)) {
+		url += 6;
+	}
+
+	if (!strncasecmp(url, "temp", sizeof("temp") - 1) || !strcasecmp(url, "memory")) {
+		ssb->sb.st_mode |= S_IRUSR | S_IRGRP | S_IROTH | S_IWUSR | S_IWGRP | S_IWOTH;
+		ret = FS_IS_W | FS_IS_R;
+	} else if (!strcasecmp(url, "output") || !strcasecmp(url, "stdout") || !strcasecmp(url, "stderr")) {
+		ssb->sb.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
+		ret = FS_IS_W | FS_IS_R;
+	} else if (!strcasecmp(url, "input") || !strcasecmp(url, "stdin")) {
+		ssb->sb.st_mode |= S_IRUSR | S_IRGRP | S_IROTH;
+		ret = FS_IS_W | FS_IS_R;
+	}
+	/* else if (!strncasecmp(url, "fd/", sizeof("fd/") - 1)) {
+		 TODO implement readable\writable flags for fd/
+	} else if (!strncasecmp(url, "filter/", sizeof("filter/") - 1)) {
+		 TODO implement readable\writable flags for filter/
+	} */
+
+	/*
+	 * SUCCESS - fetched all stats
+	 * FAILURE - not implemented or not allowed stats
+	 * FS_IS_W | FS_IS_R ... - implemented not all
+	 */
+	return ret;
+}
+
 static php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
 	NULL, /* close */
-	NULL, /* fstat */
-	NULL, /* stat */
+	NULL, /* stat a wrapped stream */
+	php_stream_url_stater, /* stat an URL */
 	NULL, /* opendir */
-	"PHP",
+	"PHP", /* label */
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
 	NULL, /* rmdir */
-	NULL
+	NULL /* metadata handling */
 };
 
 PHPAPI php_stream_wrapper php_stream_php_wrapper =	{
