@@ -199,16 +199,18 @@ static zend_bool class_visible(zend_class_entry *ce) {
 static zend_class_entry *lookup_class(const zend_function *fe, zend_string *name) {
 	zend_class_entry *ce;
 	if (!CG(in_compilation)) {
-		return zend_lookup_class(name);
+		ce = zend_lookup_class(name);
+		if (ce) {
+			return ce;
+		}
+	} else {
+		ce = zend_lookup_class_ex(name, NULL, /* autoload */ 0);
+		if (ce && class_visible(ce)) {
+			return ce;
+		}
 	}
 
-	ce = zend_lookup_class_ex(name, NULL, /* autoload */ 0);
-	if (ce && class_visible(ce)) {
-		return ce;
-	}
-
-	/* When checking whether early binding is possible, the current class will not be registered
-	 * yet, so check for it explicitly. */
+	/* The current class may not be registered yet, so check for it explicitly. */
 	if (zend_string_equals_ci(fe->common.scope->name, name)) {
 		return fe->common.scope;
 	}
@@ -219,7 +221,7 @@ static zend_class_entry *lookup_class(const zend_function *fe, zend_string *name
 /* Instanceof that's safe to use on unlinked classes. For the unlinked case, we only handle
  * class identity here. */
 static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
-	if ((ce1->ce_flags & ZEND_ACC_LINKED) && (ce2->ce_flags & ZEND_ACC_LINKED)) {
+	if ((ce1->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS))) {
 		return instanceof_function(ce1, ce2);
 	}
 	return ce1 == ce2;
