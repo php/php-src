@@ -441,7 +441,10 @@ NO_PROC_OPEN_ERROR;
 						break;
 					//case 'l'
 					case 'm':
-						$valgrind = new RuntestsValgrind($environment);
+					$valgrind = new RuntestsValgrind($environment);
+						break;
+					case 'M':
+					$valgrind = new RuntestsValgrind($environment, $argv[++$i]);
 						break;
 					case 'n':
 						if (!$pass_option_n) {
@@ -565,7 +568,9 @@ Options:
     -g          Comma separated list of groups to show during test run
                 (possible values: PASS, FAIL, XFAIL, SKIP, BORK, WARN, LEAK, REDIRECT).
 
-    -m          Test for memory leaks with Valgrind.
+    -m          Test for memory leaks with Valgrind (equivalent to -M memcheck).
+
+    -M <tool>   Test for errors with Valgrind tool.
 
     -p <php>    Specify PHP executable to run.
 
@@ -3531,6 +3536,7 @@ class RuntestsValgrind
 	protected $header = '';
 	protected $version_3_3_0 = false;
 	protected $version_3_8_0 = false;
+	protected $tool = null;
 
 	public function getVersion()
 	{
@@ -3542,26 +3548,29 @@ class RuntestsValgrind
 		return $this->header;
 	}
 
-	public function __construct(array $environment)
+	public function __construct(array $environment, string $tool = 'memcheck')
 	{
-		$header = system_with_timeout('valgrind --version', $environment);
+		$this->tool = $tool;
+		$header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
 		if (!$header) {
-			error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+			error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
+                  "Please check if Valgrind is installed and the tool is named correctly.");
 		}
 		$count = 0;
 		$version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $header, 1, $count);
 		if ($count != 1) {
-			error("Valgrind returned invalid version info (\"{$header}\"), cannot proceed.");
+			error("Valgrind returned invalid version info (\"{$header}\") for {$this->tool}, cannot proceed.");
 		}
 		$this->version = $version;
-		$this->header = trim($header);
+		$this->header = sprintf(
+			"%s (%s)", trim($header), $this->tool);
 		$this->version_3_3_0 = version_compare($version, '3.3.0', '>=');
 		$this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
 	}
 
 	public function wrapCommand($cmd, $memcheck_filename, $check_all)
 	{
-		$vcmd = 'valgrind -q --tool=memcheck --trace-children=yes';
+		$vcmd = "valgrind -q --tool={$this->tool} --trace-children=yes";
 		if ($check_all) {
 			$vcmd .= ' --smc-check=all';
 		}
