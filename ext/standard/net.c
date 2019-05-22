@@ -177,17 +177,13 @@ PHP_FUNCTION(net_get_interfaces) {
 	dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
 
 	if (NO_ERROR != dwRetVal) {
-		// Avoiding dynamic allocation deliberately and
-		// and getting plain old char string if possible
-		WCHAR buf[256];
+		// Avoiding dynamic allocation deliberately
+		char buf[256];
 		DWORD err = GetLastError();
 		DWORD bufsize = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
 					     NULL, err, 0, buf, 256, NULL);
 		if (bufsize) {
-			char tmp[256];
-			memset(tmp, 0, sizeof(tmp));
-			wcstombs(tmp, buf, sizeof(tmp));
-			zend_error(E_WARNING, "GetAdaptersAddresses failed: %s", tmp);
+			zend_error(E_WARNING, "GetAdaptersAddresses failed: %s", buf);
 		}
 		FREE(pAddresses);
 		RETURN_FALSE;
