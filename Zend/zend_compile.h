@@ -269,6 +269,9 @@ typedef struct _zend_oparray_context {
 /* Children must reuse parent get_iterator()              |     |     |     */
 #define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 18) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class is being linked. Don't free strings.             |     |     |     */
+#define ZEND_ACC_LINKING_IN_PROGRESS     (1 << 19) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
