@@ -81,34 +81,8 @@ else
   else
     AC_MSG_RESULT([no])
   fi
-fi
 
-PHP_ARG_WITH([pcre-valgrind],,
-  [AS_HELP_STRING([--with-pcre-valgrind=DIR],
-    [Enable PCRE valgrind support. Developers only!])],
-  [no],
-  [no])
-
-  if test "$PHP_EXTERNAL_PCRE" != "no"; then
-    AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
-  else
-    if test "$PHP_PCRE_VALGRIND" != "no"; then
-      PHP_PCRE_VALGRIND_INCDIR=
-      AC_MSG_CHECKING([for Valgrind headers location])
-      for i in $PHP_PCRE_VALGRIND $PHP_PCRE_VALGRIND/include $PHP_PCRE_VALGRIND/local/include /usr/include /usr/local/include; do
-        if test -f $i/valgrind/memcheck.h
-        then
-          PHP_PCRE_VALGRIND_INCDIR=$i
-          break
-        fi
-      done
-      if test -z "$PHP_PCRE_VALGRIND_INCDIR"
-      then
-        AC_MSG_ERROR([Could not find valgrind/memcheck.h])
-      else
-        AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
-        PHP_ADD_INCLUDE($PHP_PCRE_VALGRIND_INCDIR)
-        AC_MSG_RESULT([$PHP_PCRE_VALGRIND_INCDIR])
-      fi
-    fi
+  if test "$PHP_VALGRIND" != "no" && test "$have_valgrind" = "yes"; then
+      AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
   fi
+fi

@@ -227,6 +227,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       version and excluded versions that aren't supported.
     - PHP_PROG_RE2C is not called in the generated configure.ac for extensions
       anymore and now takes one optional argument - minimum required version.
+    - with-pcre-valgrind and with-valgrind are merged, and valgrind detected by
+      pkgconfig
 
   c. Windows build system changes
 
