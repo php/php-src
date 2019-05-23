@@ -174,7 +174,7 @@ static zend_string *resolve_class_name(const zend_function *fe, zend_string *nam
 	zend_class_entry *ce = fe->common.scope;
 	ZEND_ASSERT(ce);
 	if (zend_string_equals_literal_ci(name, "parent") && ce->parent) {
-		if (ce->ce_flags & ZEND_ACC_LINKED) {
+		if (ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS)) {
 			return ce->parent->name;
 		} else {
 			return ce->parent_name;
