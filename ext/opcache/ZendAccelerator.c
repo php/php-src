@@ -4309,9 +4309,10 @@ static int accel_finish_startup(void)
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;
-			php_request_shutdown(NULL);
+			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 			PG(report_memleaks) = orig_report_memleaks;
 		} else {
+			zend_shared_alloc_unlock();
 			ret = FAILURE;
 		}
 #ifdef ZEND_SIGNALS
@@ -4327,8 +4328,6 @@ static int accel_finish_startup(void)
 		sapi_module.getenv = orig_getenv;
 		sapi_module.ub_write = orig_ub_write;
 		sapi_module.flush = orig_flush;
-
-		zend_shared_alloc_unlock();
 
 		sapi_activate();
 
