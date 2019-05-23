@@ -290,6 +290,9 @@ static inheritance_status zend_perform_covariant_type_check(
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else if (ZEND_TYPE_CODE(proto_type) == IS_OBJECT) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
+			/* Currently, any class name would be allowed here. We still perform a class lookup
+			 * for forward-compatibility reasons, as we may have named types in the future that
+			 * are not classes (such as enums or typedefs). */
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
 			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
 			if (!fe_ce) {

@@ -3529,6 +3529,10 @@ static void preload_link(void)
 					if (!found) continue;
 				}
 
+				/* TODO: This is much more restrictive than necessary. We only need to actually
+				 * know the types for covariant checks, but don't need them if we can ensure
+				 * compatibility through a simple string comparison. We could improve this using
+				 * a more general version of zend_can_early_bind(). */
 				if (!preload_all_types_known(ce)) {
 					continue;
 				}
