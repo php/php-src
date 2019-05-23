@@ -238,7 +238,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+			if (ce->parent_name && !(ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS))) {
 				zend_string_release_ex(ce->parent_name, 0);
 			}
 			if (ce->default_properties_table) {
@@ -298,7 +298,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
-				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				if (!(ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS))) {
 					uint32_t i;
 
 					for (i = 0; i < ce->num_interfaces; i++) {

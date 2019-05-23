@@ -1961,7 +1961,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 
 ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent) /* {{{ */
 {
-	ce->ce_flags |= ZEND_ACC_LINKED;
+	ce->ce_flags |= ZEND_ACC_LINKING_IN_PROGRESS;
 	if (parent) {
 		zend_do_inheritance(ce, parent);
 	}
@@ -1976,5 +1976,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent)
 	}
 
 	zend_build_properties_info_table(ce);
+	ce->ce_flags &= ~ZEND_ACC_LINKING_IN_PROGRESS;
+	ce->ce_flags |= ZEND_ACC_LINKED;
 }
 /* }}} */

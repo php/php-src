@@ -861,7 +861,11 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
-		return (zend_class_entry*)Z_PTR_P(zv);
+		ce = (zend_class_entry*)Z_PTR_P(zv);
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+			return NULL;
+		}
+		return ce;
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
