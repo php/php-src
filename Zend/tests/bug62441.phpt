@@ -16,4 +16,4 @@ namespace ns {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of ns\Foo::method(ns\stdClass $o) must be compatible with Iface::method(stdClass $o) in %s on line %d
+Fatal error: Declaration of ns\Foo::method(ns\stdClass $o) must be compatible with Iface::method(stdClass $o). Failed to load class ns\stdClass in %s on line %d

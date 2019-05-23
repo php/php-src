@@ -16,4 +16,4 @@ new C;
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::method(): C must be compatible with A::method(): B in %s on line %d
+Fatal error: Declaration of B::method(): C must be compatible with A::method(): B. Failed to load class C in %s on line %d
