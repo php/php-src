@@ -2693,7 +2693,7 @@ COMMAND $cmd
 		if (isset($section_text['XFAIL'])) {
 			$restype[] = 'XFAIL';
 			$info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
-		} else if ($section_text['XLEAK']) {
+		} else if (isset($section_text['XLEAK'])) {
             $restype[] = 'XLEAK';
 			$info = '  XLEAK REASON: ' . rtrim($section_text['XLEAK']);
         } else {
