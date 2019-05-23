@@ -1132,8 +1132,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			if (op2 && IS_BOT(op2)) {
 				/* Update of unknown index */
 				SET_RESULT_BOT(result);
-				if (ssa_op->op1_def >= 0
-						&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+				if (ssa_op->op1_def >= 0) {
 					empty_partial_array(&zv);
 					SET_RESULT(op1, &zv);
 					zval_ptr_dtor_nogc(&zv);
@@ -1150,8 +1149,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						|| Z_TYPE_P(op1) == IS_NULL
 						|| Z_TYPE_P(op1) == IS_FALSE
 						|| Z_TYPE_P(op1) == IS_ARRAY)
-					&& ssa_op->op1_def >= 0
-					&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+					&& ssa_op->op1_def >= 0) {
 
 					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
 						empty_partial_array(&zv);
@@ -1330,8 +1328,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			if (op2 && IS_BOT(op2)) {
 				/* Update of unknown index */
 				SET_RESULT_BOT(op1);
-				if (ssa_op->result_def >= 0
-						&& ctx->scdf.ssa->vars[ssa_op->result_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+				if (ssa_op->result_def >= 0) {
 					empty_partial_array(&zv);
 					SET_RESULT(result, &zv);
 					zval_ptr_dtor_nogc(&zv);
@@ -1345,8 +1342,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 
 				SET_RESULT_BOT(op1);
-				if (ssa_op->result_def >= 0
-						&& ctx->scdf.ssa->vars[ssa_op->result_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+				if (ssa_op->result_def >= 0) {
 					if (!result) {
 						empty_partial_array(&zv);
 					} else {
@@ -1502,9 +1498,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				}
 			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
 				if ((IS_PARTIAL_ARRAY(op1) || Z_TYPE_P(op1) == IS_ARRAY)
-						&& ssa_op->op1_def >= 0
-						&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE
-						&& op2) {
+						&& ssa_op->op1_def >= 0 && op2) {
 					zval tmp;
 					zval *data = get_op1_value(ctx, opline+1, ssa_op+1);
 
@@ -2123,7 +2117,7 @@ static void join_phi_values(zval *a, zval *b, zend_bool escape) {
 		return;
 	}
 	if (IS_PARTIAL_ARRAY(a) || IS_PARTIAL_ARRAY(b)) {
-		if (escape || join_partial_arrays(a, b) != SUCCESS) {
+		if (join_partial_arrays(a, b) != SUCCESS) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
@@ -2133,7 +2127,7 @@ static void join_phi_values(zval *a, zval *b, zend_bool escape) {
 			MAKE_BOT(a);
 		}
 	} else if (!zend_is_identical(a, b)) {
-		if (escape || join_partial_arrays(a, b) != SUCCESS) {
+		if (join_partial_arrays(a, b) != SUCCESS) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
