@@ -22,4 +22,4 @@ $c = new C;
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::method(): C must be compatible with A::method(): B. Failed to load class C in %s on line %d
+Fatal error: Could not check compatibility between B::method(): C and A::method(): B, because class C is not available in %s on line %d

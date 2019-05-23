@@ -609,9 +609,8 @@ static void ZEND_COLD emit_incompatible_method_error(
 	zend_string *child_prototype = zend_get_function_declaration(child);
 	if (status == INHERITANCE_UNRESOLVED) {
 		zend_error_at(error_level, NULL, func_lineno(child),
-			"Declaration of %s %s be compatible with %s. Failed to load class %s",
-			ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(parent_prototype),
-			ZSTR_VAL(unresolved_class));
+			"Could not check compatibility between %s and %s, because class %s is not available",
+			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype), ZSTR_VAL(unresolved_class));
 	} else {
 		zend_error_at(error_level, NULL, func_lineno(child),
 			"Declaration of %s %s be compatible with %s",

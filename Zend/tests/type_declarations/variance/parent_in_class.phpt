@@ -42,4 +42,4 @@ class B4 extends A4 {
 --EXPECTF--
 Warning: Declaration of B4::method(A4 $x) should be compatible with A4::method(P4 $x) in %s on line %d
 
-Warning: Declaration of B::method(A $x) should be compatible with A::method(parent $x). Failed to load class parent in %s on line %d
+Warning: Could not check compatibility between B::method(A $x) and A::method(parent $x), because class parent is not available in %s on line %d
