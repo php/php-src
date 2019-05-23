@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
     error message). (Sjon Hortensius)
 
+- Sockets:
+  . Fixed bug #78038 (Socket_select fails when resource array contains
+    references). (Nikita)
+
 30 May 2019, PHP 7.2.19
 
 - FPM:

@@ -853,6 +853,7 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(sock_array), element) {
+		ZVAL_DEREF(element);
 		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
@@ -881,6 +882,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 
 	array_init(&new_hash);
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(sock_array), num_key, key, element) {
+		ZVAL_DEREF(element);
 		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
