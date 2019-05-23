@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
     error message). (Sjon Hortensius)
 
+- MySQLnd:
+  . Fixed bug #77955 (Random segmentation fault in mysqlnd from php-fpm).
+    (Nikita)
+
 - Opcache:
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
