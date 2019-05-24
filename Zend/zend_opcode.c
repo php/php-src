@@ -585,7 +585,6 @@ static void emit_live_range(
 		/* Classes don't have to be destroyed. */
 		case ZEND_FETCH_CLASS:
 		case ZEND_DECLARE_ANON_CLASS:
-		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 		/* FAST_CALLs don't have to be destroyed. */
 		case ZEND_FAST_CALL:
 			return;
@@ -957,7 +956,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			}
 			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */

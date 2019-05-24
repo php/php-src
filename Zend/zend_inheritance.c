@@ -2130,10 +2130,11 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_class_entry *parent) /* {{{ */
+ZEND_API void zend_do_link_class(zend_class_entry *ce) /* {{{ */
 {
 	ce->ce_flags |= ZEND_ACC_LINKING_IN_PROGRESS;
-	if (parent) {
+	if (ce->parent_name) {
+		zend_class_entry *parent = zend_fetch_class_by_name(ce->parent_name, NULL, 0);
 		zend_do_inheritance(ce, parent);
 	}
 	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
