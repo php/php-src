@@ -3452,6 +3452,44 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 	return ok;
 }
 
+static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
+	zend_string *name, *lcname;
+	zend_bool known;
+	if (!ZEND_TYPE_IS_NAME(type)) {
+		return 1;
+	}
+
+	name = ZEND_TYPE_NAME(type);
+	if (zend_string_equals_literal_ci(name, "self") ||
+		zend_string_equals_literal_ci(name, "parent") ||
+		zend_string_equals_ci(name, ce->name)) {
+		return 1;
+	}
+
+	lcname = zend_string_tolower(name);
+	known = zend_hash_exists(EG(class_table), lcname);
+	zend_string_release(lcname);
+	return known;
+}
+
+static zend_bool preload_all_types_known(zend_class_entry *ce) {
+	zend_function *fptr;
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, fptr) {
+		uint32_t i;
+		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[-1].type)) {
+				return 0;
+			}
+		}
+		for (i = 0; i < fptr->common.num_args; i++) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[i].type)) {
+				return 0;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return 1;
+}
+
 static void preload_link(void)
 {
 	zval *zv;
@@ -3543,6 +3581,14 @@ static void preload_link(void)
 #endif
 					}
 					if (!found) continue;
+				}
+
+				/* TODO: This is much more restrictive than necessary. We only need to actually
+				 * know the types for covariant checks, but don't need them if we can ensure
+				 * compatibility through a simple string comparison. We could improve this using
+				 * a more general version of zend_can_early_bind(). */
+				if (!preload_all_types_known(ce)) {
+					continue;
 				}
 
 				zend_string *key = zend_string_tolower(ce->name);
