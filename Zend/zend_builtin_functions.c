@@ -1057,7 +1057,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
 		retval = 1;
 	} else {
-		ce = zend_lookup_class_ex(class_name, NULL, 0);
+		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (!ce) {
 			retval = 0;
 		} else {
@@ -1504,7 +1504,7 @@ ZEND_FUNCTION(class_alias)
 		return;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, autoload);
+	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
 		if (ce->type == ZEND_USER_CLASS) {
