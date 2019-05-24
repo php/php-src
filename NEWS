@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Implemented FR #62397 (disable_functions does not work with eval). (Benjamin
     Eberlei).
+  . Fixed bug #76451 (Aliases during inheritance type checks affected by
+    opcache). (Nikita)
 
 - CLI:
   . The built-in CLI server now reports the request method in log files.

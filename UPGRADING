@@ -27,16 +27,6 @@ PHP 7.4 UPGRADE NOTES
   . "fn" is now a reserved keyword. In particular it can no longer be used as a
     function or class name. It can still be used as a method or class constant
     name.
-  . Nesting ternary operators without explicit parentheses is deprecated:
-
-        // Code like
-        $a ? $b : $c ? $d : $e
-        // should be replaced by (current interpretation)
-        ($a ? $b : $c) ? $d : $e
-        // or (likely intended interpretation)
-        $a ? $b : ($c ? $d : $e)
-
-    RFC: https://wiki.php.net/rfc/ternary_associativity
   . Passing the result of a (non-reference) list() assignment by reference is
     consistently disallowed now. Previously this worked if the right hand side
     was a simple (CV) variable and did not occur as part of the list().
@@ -160,6 +150,22 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/arrow_functions_v2
 
+  . Added support for limited return type covariance and argument type
+    contravariance. The following code will now work:
+
+        class A {}
+        class B extends A {}
+
+        class Producer {
+            public function method(): A {}
+        }
+        class ChildProducer extends Producer {
+            public function method(): B {}
+        }
+
+    This feature is currently restricted to non-cyclic type references only.
+    RFC: https://wiki.php.net/rfc/covariant-returns-and-contravariant-parameters
+
   . Added support for coalesce assign (??=) operator. For example:
 
         $array['key'] ??= computeDefault();
@@ -262,10 +268,23 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Nesting ternary operators without explicit parentheses is deprecated:
+
+        // Code like
+        $a ? $b : $c ? $d : $e
+        // should be replaced by (current interpretation)
+        ($a ? $b : $c) ? $d : $e
+        // or (likely intended interpretation)
+        $a ? $b : ($c ? $d : $e)
+
+    RFC: https://wiki.php.net/rfc/ternary_associativity
   . Unbinding $this of a non-static method through a combination of
     ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
     so is equivalent to calling a non-static method statically, which has been
     deprecated since PHP 7.0.
+  . Using "parent" inside a class without parent is deprecated, and will throw
+    a compile-time error in the future. Currently an error will only be
+    generated if/when the parent is accessed at run-time.
 
 - COM:
   . Importing type libraries with case-insensitive constant registering has been
