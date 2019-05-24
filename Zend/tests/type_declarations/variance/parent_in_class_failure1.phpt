@@ -13,4 +13,6 @@ class B extends A {
 
 ?>
 --EXPECTF--
+Deprecated: Cannot use "parent" when current class scope has no parent in %s on line %d
+
 Fatal error: Could not check compatibility between B::method(A $x) and A::method(parent $x), because class parent is not available in %s on line %d
