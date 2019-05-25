@@ -2,13 +2,7 @@
 https://wiki.php.net/security
 
 ## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 7.3     | :heavy_check_mark: |
-| 7.2     | :heavy_check_mark: |
-| 7.1     | :heavy_check_mark: |
-| < 7.1   | :x:                |
+For a list of supported versions see: https://www.php.net/supported-versions.php
 
 ## Reporting a Vulnerability
 
