@@ -13,3 +13,5 @@ https://wiki.php.net/security
 ## Reporting a Vulnerability
 
 For security related issues (in PHP or our websites) please contact security@php.net.
+
+You can also submit a security bug at https://bugs.php.net/, set the "Bug Type" as "Security".
