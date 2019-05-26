@@ -2357,6 +2357,7 @@ static inline int accel_find_sapi(void)
 		"cli-server",
 		"cgi-fcgi",
 		"fpm-fcgi",
+		"fpmi-fcgi",
 		"isapi",
 		"apache2filter",
 		"apache2handler",
