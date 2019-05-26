@@ -38,6 +38,8 @@ if test "$PHP_ZIP" != "no"; then
 
   AC_DEFINE(HAVE_ZIP,1,[ ])
 
+  PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
+
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"
   PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared,, $LIBZIP_CFLAGS)
 
