@@ -1954,7 +1954,7 @@ ssize_t LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, size_t len )
 }
 
 
-#if defined(__FreeBSD__ ) || defined(__NetBSD__)
+#if defined(__FreeBSD__ )
 ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 {
     ssize_t ret;
@@ -1969,7 +1969,7 @@ ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 }
 #endif
 
-#if defined(__OpenBSD__)
+#if defined(__OpenBSD__) || defined(__NetBSD__)
 ssize_t gsendfile( int fdOut, int fdIn, off_t* off, size_t size )
 {
     ssize_t ret;
