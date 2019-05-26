@@ -116,6 +116,7 @@ if test "$PHP_ZIP" != "no"; then
     ])
 
     AC_DEFINE(HAVE_ZIP,1,[ ])
+    PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
     PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c, $ext_shared,, $LIBZIP_CFLAGS)
     PHP_SUBST(ZIP_SHARED_LIBADD)
   else
