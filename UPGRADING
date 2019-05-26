@@ -545,6 +545,8 @@ The following extensions and SAPIs are affected:
 - Libxml:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
+  . --with-libexpat-dir has been renamed to --with-expat and no longer
+    accepts a directory.
 
 - LiteSpeed:
   . --with-litespeed becomes --enable-litespeed.
