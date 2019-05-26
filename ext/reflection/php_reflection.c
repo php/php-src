@@ -512,7 +512,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 /* {{{ _const_string */
 static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 {
-	char *type = zend_zval_type_name(value);
+	const char *type = zend_zval_type_name(value);
 
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		smart_str_append_printf(str, "%s    Constant [ %s %s ] { Array }\n",
@@ -534,7 +534,7 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 static void _class_const_string(smart_str *str, char *name, zend_class_constant *c, char *indent)
 {
 	char *visibility = zend_visibility_string(Z_ACCESS_FLAGS(c->value));
-	char *type;
+	const char *type;
 
 	zval_update_constant_ex(&c->value, c->ce);
 	type = zend_zval_type_name(&c->value);
@@ -2860,7 +2860,7 @@ static zend_string *reflection_type_name(type_reference *param) {
 	} else if (ZEND_TYPE_IS_CE(param->type)) {
 		return zend_string_copy(ZEND_TYPE_CE(param->type)->name);
 	} else {
-		char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->type));
+		const char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->type));
 		return zend_string_init(name, strlen(name), 0);
 	}
 }

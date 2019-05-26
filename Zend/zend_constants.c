@@ -193,7 +193,7 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 }
 
 
-ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number)
+ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number)
 {
 	zend_constant c;
 
@@ -204,7 +204,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 }
 
 
-ZEND_API void zend_register_string_constant(const char *name, size_t name_len, char *strval, int flags, int module_number)
+ZEND_API void zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number)
 {
 	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number);
 }
