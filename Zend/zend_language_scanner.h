@@ -66,7 +66,7 @@ typedef struct _zend_heredoc_label {
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
-ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename);
+ZEND_API int zend_prepare_string_for_scanning(zval *str, const char *filename);
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding);
 ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
 ZEND_API void zend_lex_tstring(zval *zv);

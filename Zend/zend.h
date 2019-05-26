@@ -244,7 +244,7 @@ ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) Z
 ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
 ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
 
-ZEND_API char *get_zend_version(void);
+ZEND_API const char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);

@@ -95,7 +95,7 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 /* }}} */
 
 /* Argument parsing API -- andrei */
-ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
+ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 {
 	switch(type) {
 		case IS_FALSE:
@@ -130,7 +130,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 }
 /* }}} */
 
-ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
+ZEND_API const char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
 	ZVAL_DEREF(arg);
 	return zend_get_type_by_const(Z_TYPE_P(arg));
@@ -218,7 +218,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, char *name, zval *arg) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
@@ -228,7 +228,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, 
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, const char *error) /* {{{ */
 {
 	const char *space;
 	const char *class_name = get_active_class_name(&space);
