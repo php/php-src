@@ -3987,7 +3987,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_static_var_common(zend_string *var_name, zval *value, uint32_t by_ref) /* {{{ */
+static void zend_compile_static_var_common(zend_string *var_name, zval *value, uint32_t mode) /* {{{ */
 {
 	zend_op *opline;
 	if (!CG(active_op_array)->static_variables) {
@@ -4006,7 +4006,7 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(var_name);
-	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
+	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | mode;
 }
 /* }}} */
 
@@ -5554,7 +5554,7 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		zend_compile_static_var_common(var_name, &zv, var_ast->attr);
+		zend_compile_static_var_common(var_name, &zv, var_ast->attr ? ZEND_BIND_REF : 0);
 	}
 }
 /* }}} */
@@ -5565,7 +5565,7 @@ static void zend_compile_implicit_closure_uses(closure_info *info)
 	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
 		zval zv;
 		ZVAL_NULL(&zv);
-		zend_compile_static_var_common(var_name, &zv, 0);
+		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);
 	ZEND_HASH_FOREACH_END();
 }
 
