@@ -1663,7 +1663,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							 * we can do at this point. */
 							if (*(p1 + 1) == '=') {
 								++p1;
-								--str_left;
+								if (str_left > 1) {
+									--str_left;
+								}
 							}
 
 							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);
