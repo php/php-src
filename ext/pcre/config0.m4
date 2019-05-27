@@ -83,6 +83,9 @@ else
   fi
 
   if test "$PHP_VALGRIND" != "no" && test "$have_valgrind" = "yes"; then
-      AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
+      dnl Enable pcre valgrind support only in DEBUG build (it affects performance)
+      if test "$ZEND_DEBUG" = "yes"; then
+        AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
+      fi
   fi
 fi
