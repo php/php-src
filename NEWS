@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #77973 (Uninitialized read in gdImageCreateFromXbm).
     (CVE-2019-11038) (cmb)
 
+- Iconv:
+  . Fixed bug #78069 (Out-of-bounds read in iconv.c:_php_iconv_mime_decode()
+    due to integer overflow). (CVE-2019-11039). (maris dot adam)
+
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
 
