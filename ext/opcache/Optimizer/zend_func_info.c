@@ -1688,8 +1688,9 @@ int zend_func_info_rid = -1;
 uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
 	uint32_t ret = 0;
+	const zend_function *callee_func = call_info->callee_func;
 
-	if (call_info->callee_func->type == ZEND_INTERNAL_FUNCTION) {
+	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		zval *zv;
 		func_info_t *info;
 
@@ -1700,9 +1701,10 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
 				ret = info->info_func(call_info, ssa);
-			} else if (/*call_info->callee_func->common.arg_info && */
-					call_info->callee_func->common.num_args == 0 &&
-					call_info->callee_func->common.required_num_args == 0) {
+			} else if (/*callee_func->common.arg_info && */
+					callee_func->common.num_args == 0 &&
+					callee_func->common.required_num_args == 0 &&
+					!(callee_func->common.fn_flags & ZEND_ACC_VARIADIC)) {
 				if (call_info->num_args == 0) {
 					ret = info->info;
 				} else {
@@ -1718,19 +1720,19 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		}
 	} else {
 		// FIXME: the order of functions matters!!!
-		zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)call_info->callee_func);
+		zend_func_info *info = ZEND_FUNC_INFO((zend_op_array*)callee_func);
 		if (info) {
 			ret = info->return_info.type;
 		}
 	}
 	if (!ret) {
 		ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		if (call_info->callee_func->type == ZEND_INTERNAL_FUNCTION) {
+		if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 			ret |= FUNC_MAY_WARN;
 		}
-		if (call_info->callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
+		if (callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
 			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-		} else  if (call_info->callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+		} else  if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			ret |= MAY_BE_REF;
 		} else {
 			ret |= MAY_BE_RC1 | MAY_BE_RCN;
