@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #78038 (Socket_select fails when resource array contains
     references). (Nikita)
 
+- Zip:
+  . Fixed bug #76345 (zip.h not found). (Michael Maroszek)
+
 30 May 2019, PHP 7.2.19
 
 - FPM:
