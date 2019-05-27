@@ -204,7 +204,7 @@ static zend_class_entry *lookup_class(const zend_function *fe, zend_string *name
 			return ce;
 		}
 	} else {
-		ce = zend_lookup_class_ex(name, NULL, /* autoload */ 0);
+		ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (ce && class_visible(ce)) {
 			return ce;
 		}
