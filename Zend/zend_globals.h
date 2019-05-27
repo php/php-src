@@ -124,6 +124,9 @@ struct _zend_compiler_globals {
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;
+
+	HashTable *delayed_variance_obligations;
+	HashTable *delayed_autoloads;
 };
 
 

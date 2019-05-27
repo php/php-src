@@ -163,7 +163,9 @@ PHP 7.4 UPGRADE NOTES
             public function method(): B {}
         }
 
-    This feature is currently restricted to non-cyclic type references only.
+    Full variance support is only available if autoloading is used. Inside a
+    single file only non-cyclic type references are possible, because all
+    classes need to be available before they are referenced.
     RFC: https://wiki.php.net/rfc/covariant-returns-and-contravariant-parameters
 
   . Added support for coalesce assign (??=) operator. For example:
