@@ -7,17 +7,14 @@ if (!extension_loaded('sockets')) {
 }
 if (!function_exists('zend_leak_variable'))
 	die('SKIP only for debug builds');
---CONFLICTS--
-udp_port_58385
-udp_port_58386
 --FILE--
 <?php
 
-$stream0 = stream_socket_server("udp://0.0.0.0:58385", $errno, $errstr, STREAM_SERVER_BIND);
+$stream0 = stream_socket_server("udp://0.0.0.0:58394", $errno, $errstr, STREAM_SERVER_BIND);
 $sock0 = socket_import_stream($stream0);
 zend_leak_variable($stream0);
 
-$stream1 = stream_socket_server("udp://0.0.0.0:58386", $errno, $errstr, STREAM_SERVER_BIND);
+$stream1 = stream_socket_server("udp://0.0.0.0:58395", $errno, $errstr, STREAM_SERVER_BIND);
 $sock1 = socket_import_stream($stream1);
 zend_leak_variable($sock1);
 

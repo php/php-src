@@ -7,9 +7,6 @@ if (!extension_loaded('sockets')) {
 }
 if (!function_exists('zend_leak_variable'))
 	die('SKIP only for debug builds');
---CONFLICTS--
-udp_port_58385
-udp_port_58386
 --FILE--
 <?php
 
