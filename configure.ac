@@ -1224,6 +1224,13 @@ if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_THREADS_CHECKS
 fi
 
+dnl Align segments on huge page boundary
+case $host_alias in
+  *linux*)
+    EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
+    ;;
+esac
+
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $LIBS"
