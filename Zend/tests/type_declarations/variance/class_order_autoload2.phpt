@@ -1,5 +1,5 @@
 --TEST--
-Returns are covariant, but we don't allow the code due to class ordering (autoload variation)
+Class order allowed with autoloading (2)
 --FILE--
 <?php
 
@@ -18,8 +18,10 @@ spl_autoload_register(function($class) {
     }
 });
 
-$c = new C;
+// Same as autoload1 test case, but with a different autoloading root
+$b = new B;
 
 ?>
---EXPECTF--
-Fatal error: Could not check compatibility between B::method(): C and A::method(): B, because class C is not available in %s on line %d
+===DONE===
+--EXPECT--
+===DONE===

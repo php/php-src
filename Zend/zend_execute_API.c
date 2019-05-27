@@ -917,6 +917,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
 		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNRESOLVED_VARIANCE)
+					&& (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
+				return ce;
+			}
 			return NULL;
 		}
 		return ce;

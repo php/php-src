@@ -272,6 +272,9 @@ typedef struct _zend_oparray_context {
 /* Class is being linked. Don't free strings.             |     |     |     */
 #define ZEND_ACC_LINKING_IN_PROGRESS     (1 << 19) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Class has unresolved variance obligations.             |     |     |     */
+#define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 20) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
@@ -852,6 +855,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
+#define ZEND_FETCH_CLASS_ALLOW_UNRESOLVED_VARIANCE 0x0400
 
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)

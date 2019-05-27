@@ -370,6 +370,9 @@ void init_compiler(void) /* {{{ */
 	zend_hash_init(&CG(filenames_table), 8, NULL, ZVAL_PTR_DTOR, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
+
+	CG(link_depth) = 0;
+	CG(delayed_variance_obligations) = NULL;
 }
 /* }}} */
 
@@ -379,6 +382,12 @@ void shutdown_compiler(void) /* {{{ */
 	zend_stack_destroy(&CG(delayed_oplines_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_arena_destroy(CG(arena));
+
+	if (CG(delayed_variance_obligations)) {
+		zend_hash_destroy(CG(delayed_variance_obligations));
+		FREE_HASHTABLE(CG(delayed_variance_obligations));
+		CG(delayed_variance_obligations) = NULL;
+	}
 }
 /* }}} */
 
