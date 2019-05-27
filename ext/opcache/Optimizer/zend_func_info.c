@@ -1620,15 +1620,6 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
 				ret = info->info_func(call_info, ssa);
-			} else if (/*callee_func->common.arg_info && */
-					callee_func->common.num_args == 0 &&
-					callee_func->common.required_num_args == 0 &&
-					!(callee_func->common.fn_flags & ZEND_ACC_VARIADIC)) {
-				if (call_info->num_args == 0) {
-					ret = info->info;
-				} else {
-					ret = FUNC_MAY_WARN | MAY_BE_NULL;
-				}
 			} else {
 				ret = info->info;
 			}
