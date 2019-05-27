@@ -2619,7 +2619,7 @@ static void accel_gen_system_id(void)
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static int accel_remap_huge_pages(void *start, size_t size, const char *name, size_t offset)
+static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -2634,7 +2634,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			strerror(errno), errno);
 		return -1;
 	}
-	memcpy(mem, start, size);
+	memcpy(mem, start, real_size);
 
 #  ifdef MAP_HUGETLB
 	ret = mmap(start, size,
@@ -2651,7 +2651,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		ZEND_ASSERT(ret != MAP_FAILED);
 #  ifdef MADV_HUGEPAGE
 		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
-			memcpy(start, mem, size);
+			memcpy(start, mem, real_size);
 			mprotect(start, size, PROT_READ | PROT_EXEC);
 			munmap(mem, size);
 			zend_error(E_WARNING,
@@ -2660,7 +2660,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			return -1;
 		}
 #  else
-		memcpy(start, mem, size);
+		memcpy(start, mem, real_size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 		munmap(mem, size);
 		zend_error(E_WARNING,
@@ -2671,7 +2671,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 	}
 
 	if (ret == start) {
-		memcpy(start, mem, size);
+		memcpy(start, mem, real_size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 	}
 	munmap(mem, size);
@@ -2697,10 +2697,19 @@ static void accel_move_code_to_huge_pages(void)
 				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
 					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
+					long unsigned int  real_end;
+
+					ret = fscanf(f, "%lx-", &start);
+					if (ret == 1 && start == seg_end + huge_page_size) {
+						real_end = end;
+						seg_end = start;
+					} else {
+						real_end = seg_end;
+					}
 
 					if (seg_end > seg_start) {
 						zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
-						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, name, offset + seg_start - start);
+						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, real_end - seg_start, name, offset + seg_start - start);
 					}
 					break;
 				}
@@ -2734,7 +2743,7 @@ static void accel_move_code_to_huge_pages(void)
 						long unsigned int seg_end = (end & ~(huge_page_size-1L));
 						if (seg_end > seg_start) {
 							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
-							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
+							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
 						}
 					}
 					start += sz;
