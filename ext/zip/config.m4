@@ -5,6 +5,8 @@ PHP_ARG_WITH([zip],
 
 if test "$PHP_ZIP" != "no"; then
   PKG_CHECK_MODULES([LIBZIP], [libzip >= 0.11])
+
+  PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
   LIBZIP_LIBDIR=`$PKG_CONFIG --variable=libdir libzip`
 
   dnl Could not think of a simple way to check libzip for overwrite support
@@ -39,7 +41,7 @@ if test "$PHP_ZIP" != "no"; then
   AC_DEFINE(HAVE_ZIP,1,[ ])
 
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"
-  PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared,, $LIBZIP_CFLAGS)
+  PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared)
 
   PHP_SUBST(ZIP_SHARED_LIBADD)
 
