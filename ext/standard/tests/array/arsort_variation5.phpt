@@ -1,10 +1,5 @@
 --TEST--
 Test arsort() function : usage variations - sort strings
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-  die("skip Output tested contains chars that are not shown the same on windows concole (ESC and co)");
-}
 --FILE--
 <?php
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
