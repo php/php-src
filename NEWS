@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Implemented FR #72189 (Add missing CURL_VERSION_* constants). (Javier
     Spagnoletti)
 
+- EXIF:
+  . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16).
+    (CVE-2019-11040) (Stas)
+
 - FPM:
   . Fixed bug #77934 (php-fpm kill -USR2 not working). (Jakub Zelenka)
   . Fixed bug #77921 (static.php.net doesn't work anymore). (Peter Kokot)
