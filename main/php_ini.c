@@ -69,7 +69,7 @@ PHPAPI char *php_ini_scanned_files=NULL;
 
 /* {{{ php_ini_displayer_cb
  */
-static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
+static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
 	if (ini_entry->displayer) {
 		ini_entry->displayer(ini_entry, type);
@@ -117,7 +117,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 
 /* {{{ display_ini_entries
  */
-PHPAPI void display_ini_entries(zend_module_entry *module)
+PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
 	zend_ini_entry *ini_entry;
