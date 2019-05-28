@@ -122,34 +122,34 @@ static void user_tick_function_dtor(user_tick_function_entry *tick_function_entr
 
 /* {{{ arginfo */
 /* {{{ main/main.c */
-ZEND_BEGIN_ARG_INFO(arginfo_set_time_limit, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_set_time_limit, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, seconds)
 ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ main/sapi.c */
-ZEND_BEGIN_ARG_INFO(arginfo_header_register_callback, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_header_register_callback, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ main/output.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_start, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ob_start, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, user_function)
 	ZEND_ARG_INFO(0, chunk_size)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_flush, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_flush, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_clean, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_clean, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_end_flush, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_end_flush, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_end_clean, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_end_clean, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_ob_get_flush, 0)
@@ -161,27 +161,27 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ob_get_contents, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_level, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_get_level, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_ob_get_length, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ob_list_handlers, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ob_list_handlers, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_get_status, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ob_get_status, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, full_status)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_implicit_flush, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ob_implicit_flush, 0, 0, IS_VOID, 0)
 	ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_output_reset_rewrite_vars, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_output_reset_rewrite_vars, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_output_add_rewrite_var, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_output_add_rewrite_var, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
