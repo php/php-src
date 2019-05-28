@@ -2456,18 +2456,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(Z_OBJ_P(op1), &rv);
-				Z_TRY_ADDREF_P(val);
-				increment_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(Z_OBJ_P(op1), val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 
@@ -2523,18 +2512,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(Z_OBJ_P(op1), &rv);
-				Z_TRY_ADDREF_P(val);
-				decrement_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(Z_OBJ_P(op1), val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 
