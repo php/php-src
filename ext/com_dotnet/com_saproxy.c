@@ -275,10 +275,6 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 }
 
 #if 0
-static void saproxy_object_set(zval **property, zval *value)
-{
-}
-
 static zval *saproxy_object_get(zval *property)
 {
 	/* Not yet implemented in the engine */
@@ -402,7 +398,6 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_write_dimension,
 	NULL,
 	NULL, /* saproxy_object_get, */
-	NULL, /* saproxy_object_set, */
 	saproxy_property_exists,
 	saproxy_property_delete,
 	saproxy_dimension_exists,

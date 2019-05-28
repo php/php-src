@@ -175,11 +175,6 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 }
 
 #if 0
-static void com_object_set(zval **property, zval *value)
-{
-	/* Not yet implemented in the engine */
-}
-
 static zval *com_object_get(zval *property)
 {
 	/* Not yet implemented in the engine */
@@ -546,7 +541,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_write_dimension,
 	NULL,
 	NULL, /* com_object_get, */
-	NULL, /* com_object_set, */
 	com_property_exists,
 	com_property_delete,
 	com_dimension_exists,
