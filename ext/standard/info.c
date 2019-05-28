@@ -1245,7 +1245,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-/* {{{ proto void phpinfo([int what])
+/* {{{ proto bool phpinfo([int what])
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
@@ -1266,7 +1266,7 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string phpversion([string extension])
+/* {{{ proto string|false phpversion([string extension])
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
@@ -1291,7 +1291,7 @@ PHP_FUNCTION(phpversion)
 }
 /* }}} */
 
-/* {{{ proto void phpcredits([int flag])
+/* {{{ proto bool phpcredits([int flag])
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
@@ -1307,7 +1307,7 @@ PHP_FUNCTION(phpcredits)
 }
 /* }}} */
 
-/* {{{ proto string php_sapi_name(void)
+/* {{{ proto string|false php_sapi_name(void)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
@@ -1341,7 +1341,7 @@ PHP_FUNCTION(php_uname)
 
 /* }}} */
 
-/* {{{ proto string php_ini_scanned_files(void)
+/* {{{ proto string|false php_ini_scanned_files(void)
    Return comma-separated string of .ini files parsed from the additional ini dir */
 PHP_FUNCTION(php_ini_scanned_files)
 {
@@ -1357,7 +1357,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 }
 /* }}} */
 
-/* {{{ proto string php_ini_loaded_file(void)
+/* {{{ proto string|false php_ini_loaded_file(void)
    Return the actual loaded ini filename */
 PHP_FUNCTION(php_ini_loaded_file)
 {
