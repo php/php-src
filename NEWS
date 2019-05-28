@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2019, PHP 7.1.30
 
 - EXIF:
-  . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16). 
+  . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16).
   (CVE-2019-11040) (Stas)
 
 - GD:
@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - Iconv:
   . Fixed bug #78069 (Out-of-bounds read in iconv.c:_php_iconv_mime_decode()
   due to integer overflow). (CVE-2019-11039). (maris dot adam)
+
+- SQLite:
+  . Fixed bug #77967 (Bypassing open_basedir restrictions via file uris). (Stas)
 
 03 May 2019, PHP 7.1.29
 
@@ -28,8 +31,8 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
     (Stas)
-  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
-	(CVE-2019-11035) (Stas)
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value).
+    (CVE-2019-11035) (Stas)
 
 - SQLite3:
   . Added sqlite3.defensive INI directive. (BohwaZ)
