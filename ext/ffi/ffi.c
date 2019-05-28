@@ -933,9 +933,9 @@ static int zend_ffi_cdata_cast_object(zval *readobj, zval *writeobj, int type) /
 {
 	if (type == IS_STRING) {
 		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(readobj);
-		zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
+		zend_ffi_type  *ctype = ZEND_FFI_TYPE(cdata->type);
 		void           *ptr = cdata->ptr;
-		zend_ffi_type_kind kind = type->kind;
+		zend_ffi_type_kind kind = ctype->kind;
 
 again:
 	    switch (kind) {
@@ -981,13 +981,13 @@ again:
 				ZVAL_INTERNED_STR(writeobj, ZSTR_CHAR(*(unsigned char*)ptr));
 				return SUCCESS;
 			case ZEND_FFI_TYPE_ENUM:
-				kind = type->enumeration.kind;
+				kind = ctype->enumeration.kind;
 				goto again;
 			case ZEND_FFI_TYPE_POINTER:
 				if (*(void**)ptr == NULL) {
 					ZVAL_NULL(writeobj);
 					break;
-				} else if ((type->attr & ZEND_FFI_ATTR_CONST) && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
+				} else if ((ctype->attr & ZEND_FFI_ATTR_CONST) && ZEND_FFI_TYPE(ctype->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
 					ZVAL_STRING(writeobj, *(char**)ptr);
 					return SUCCESS;
 				}
