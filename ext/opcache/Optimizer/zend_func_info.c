@@ -39,25 +39,16 @@ typedef struct _func_info_t {
 	info_func_t info_func;
 } func_info_t;
 
-/* MSVC defines its own IN macro, undefine it here */
-#undef IN
-
 #define F0(name, info) \
-	{name, sizeof(name)-1, (FUNC_MAY_WARN | (info)), NULL}
-#define F1(name, info) \
-	{name, sizeof(name)-1, (FUNC_MAY_WARN | MAY_BE_RC1 | (info)), NULL}
-#define FN(name, info) \
-	{name, sizeof(name)-1, (FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_RCN | (info)), NULL}
-#define FR(name, info) \
-	{name, sizeof(name)-1, (FUNC_MAY_WARN | MAY_BE_REF | (info)), NULL}
-#define FX(name, info) \
-	{name, sizeof(name)-1, (FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | (info)), NULL}
-#define I0(name, info) \
 	{name, sizeof(name)-1, (info), NULL}
-#define I1(name, info) \
+#define F1(name, info) \
 	{name, sizeof(name)-1, (MAY_BE_RC1 | (info)), NULL}
-#define IN(name, info) \
+#define FN(name, info) \
 	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | (info)), NULL}
+#define FR(name, info) \
+	{name, sizeof(name)-1, (MAY_BE_REF | (info)), NULL}
+#define FX(name, info) \
+	{name, sizeof(name)-1, (MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | (info)), NULL}
 #define FC(name, callback) \
 	{name, sizeof(name)-1, 0, callback}
 
@@ -68,7 +59,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		uint32_t t1 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t t2 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
 		uint32_t t3 = 0;
-		uint32_t tmp = FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG;
+		uint32_t tmp = MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG;
 
 		if (call_info->num_args == 3) {
 			t3 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[2].opline);
@@ -89,7 +80,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		return tmp;
 	} else {
 		/* may warning, and return FALSE */
-		return FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
+		return MAY_BE_RC1 | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
 	}
 }
 
@@ -97,18 +88,18 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 
 static const func_info_t func_infos[] = {
 	/* zend */
-	I1("zend_version",            MAY_BE_STRING),
-	I0("gc_collect_cycles",       MAY_BE_LONG),
-	I0("gc_enabled",              MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("zend_version",            MAY_BE_STRING),
+	F0("gc_collect_cycles",       MAY_BE_LONG),
+	F0("gc_enabled",              MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("gc_enable",               MAY_BE_NULL),
 	F0("gc_disable",              MAY_BE_NULL),
 	F0("func_num_args",           MAY_BE_LONG),
 	FN("func_get_arg",            UNKNOWN_INFO),
 	F1("func_get_args",           MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
-	I0("strlen",                  MAY_BE_LONG),
-	I0("strcmp",                  MAY_BE_LONG),
+	F0("strlen",                  MAY_BE_LONG),
+	F0("strcmp",                  MAY_BE_LONG),
 	F0("strncmp",                 MAY_BE_FALSE | MAY_BE_LONG),
-	I0("strcasecmp",              MAY_BE_LONG),
+	F0("strcasecmp",              MAY_BE_LONG),
 	F0("strncasecmp",             MAY_BE_FALSE | MAY_BE_LONG),
 	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
@@ -126,19 +117,19 @@ static const func_info_t func_infos[] = {
 	F0("class_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("interface_exists",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("trait_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("function_exists",         MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
+	F0("function_exists",         MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	F0("class_alias",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I1("get_included_files",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("get_included_files",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("trigger_error",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("user_error",              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FN("set_error_handler",       MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_OBJECT | MAY_BE_OBJECT),
-	I0("restore_error_handler",   MAY_BE_TRUE),
-	I0("restore_exception_handler", MAY_BE_TRUE),
-	I1("get_declared_traits",     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	I1("get_declared_classes",    MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	I1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F0("restore_error_handler",   MAY_BE_TRUE),
+	F0("restore_exception_handler", MAY_BE_TRUE),
+	F1("get_declared_traits",     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("get_declared_classes",    MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	I1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
+	F1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("get_resource_type",       MAY_BE_NULL | MAY_BE_STRING),
 	F1("get_defined_constants",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_RESOURCE | MAY_BE_ARRAY_OF_ARRAY),
 	F0("debug_print_backtrace",   MAY_BE_NULL),
@@ -181,10 +172,10 @@ static const func_info_t func_infos[] = {
 	F0("phpinfo",                      MAY_BE_NULL | MAY_BE_TRUE),
 	F1("phpversion",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("phpcredits",                   MAY_BE_NULL | MAY_BE_TRUE),
-	I1("php_sapi_name",                MAY_BE_FALSE | MAY_BE_STRING),
+	F1("php_sapi_name",                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("php_uname",                    MAY_BE_NULL | MAY_BE_STRING),
-	I1("php_ini_scanned_files",        MAY_BE_FALSE | MAY_BE_STRING),
-	I1("php_ini_loaded_file",          MAY_BE_FALSE | MAY_BE_STRING),
+	F1("php_ini_scanned_files",        MAY_BE_FALSE | MAY_BE_STRING),
+	F1("php_ini_loaded_file",          MAY_BE_FALSE | MAY_BE_STRING),
 	F0("strnatcmp",                    MAY_BE_NULL | MAY_BE_LONG),
 	F0("strnatcasecmp",                MAY_BE_NULL | MAY_BE_LONG),
 	F0("substr_count",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
@@ -297,7 +288,7 @@ static const func_info_t func_infos[] = {
 	F0("getrandmax",                   MAY_BE_NULL | MAY_BE_LONG),
 	F0("mt_rand",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("mt_srand",                     MAY_BE_NULL),
-	I0("mt_getrandmax",                MAY_BE_LONG),
+	F0("mt_getrandmax",                MAY_BE_LONG),
 #if HAVE_GETSERVBYNAME
 	F0("getservbyname",                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 #endif
@@ -359,7 +350,7 @@ static const func_info_t func_infos[] = {
 	F0("octdec",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_DOUBLE),
 	F1("decbin",                       MAY_BE_NULL | MAY_BE_STRING),
 	F1("decoct",                       MAY_BE_NULL | MAY_BE_STRING),
-	I1("dechex",                       MAY_BE_STRING),
+	F1("dechex",                       MAY_BE_STRING),
 	F1("base_convert",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("number_format",                MAY_BE_NULL | MAY_BE_STRING),
 	F0("fmod",                         MAY_BE_NULL | MAY_BE_DOUBLE),
@@ -392,16 +383,16 @@ static const func_info_t func_infos[] = {
 	F1("quoted_printable_decode",      MAY_BE_NULL | MAY_BE_STRING),
 	F1("quoted_printable_encode",      MAY_BE_NULL | MAY_BE_STRING),
 	F1("convert_cyr_string",           MAY_BE_NULL | MAY_BE_STRING),
-	I1("get_current_user",             MAY_BE_STRING),
+	F1("get_current_user",             MAY_BE_STRING),
 	F0("set_time_limit",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("header_register_callback",     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("get_cfg_var",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	I0("magic_quotes_runtime",         MAY_BE_FALSE),
-	I0("set_magic_quotes_runtime",     MAY_BE_FALSE),
-	I0("get_magic_quotes_gpc",         MAY_BE_FALSE),
-	I0("get_magic_quotes_runtime",     MAY_BE_FALSE),
+	F0("magic_quotes_runtime",         MAY_BE_FALSE),
+	F0("set_magic_quotes_runtime",     MAY_BE_FALSE),
+	F0("get_magic_quotes_gpc",         MAY_BE_FALSE),
+	F0("get_magic_quotes_runtime",     MAY_BE_FALSE),
 	F0("error_log",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("call_user_func",               UNKNOWN_INFO),
 	FN("call_user_func_array",         UNKNOWN_INFO),
 	FN("call_user_method",             UNKNOWN_INFO),
@@ -428,7 +419,7 @@ static const func_info_t func_infos[] = {
 	FN("ini_set",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ini_alter",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("ini_restore",                  MAY_BE_NULL),
-	I1("get_include_path",             MAY_BE_FALSE | MAY_BE_STRING),
+	F1("get_include_path",             MAY_BE_FALSE | MAY_BE_STRING),
 	F1("set_include_path",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("restore_include_path",         MAY_BE_NULL),
 	F0("setcookie",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -470,18 +461,18 @@ static const func_info_t func_infos[] = {
 	F0("boolval",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FN("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
 	F0("settype",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_null",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_null",                      MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_resource",                  MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for closed resources
-	I0("is_bool",                      MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_long",                      MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_float",                     MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_int",                       MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_integer",                   MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_double",                    MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_real",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_bool",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_long",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_float",                     MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_int",                       MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_integer",                   MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_double",                    MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_real",                      MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_numeric",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_string",                    MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("is_array",                     MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_string",                    MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_array",                     MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_object",                    MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for incomplete class
 	F0("is_scalar",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_callable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -630,8 +621,8 @@ static const func_info_t func_infos[] = {
 	F0("disk_total_space",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_DOUBLE),
 	F0("disk_free_space",              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_DOUBLE),
 	F0("diskfreespace",                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_DOUBLE),
-	I0("realpath_cache_size",          MAY_BE_LONG),
-	I1("realpath_cache_get",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F0("realpath_cache_size",          MAY_BE_LONG),
+	F1("realpath_cache_get",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F0("mail",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("ezmlm_hash",                   MAY_BE_NULL | MAY_BE_LONG),
 #ifdef HAVE_SYSLOG_H
@@ -739,7 +730,7 @@ static const func_info_t func_infos[] = {
 	F0("ftok",                         MAY_BE_NULL | MAY_BE_LONG),
 #endif
 	F1("str_rot13",                    MAY_BE_NULL | MAY_BE_STRING),
-	I1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("stream_filter_register",       MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("stream_bucket_make_writeable", MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("stream_bucket_prepend",        MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -747,7 +738,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_bucket_new",            MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("output_add_rewrite_var",       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("output_reset_rewrite_vars",    MAY_BE_FALSE),
-	I1("sys_get_temp_dir",             MAY_BE_STRING),
+	F1("sys_get_temp_dir",             MAY_BE_STRING),
 
 	/* ext/date */
 	F0("strtotime",                             MAY_BE_FALSE | MAY_BE_LONG),
@@ -813,8 +804,8 @@ static const func_info_t func_infos[] = {
 	/* ext/mysqli */
 	F1("mysqli_connect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("mysqli_close",							MAY_BE_NULL | MAY_BE_TRUE),
-	I1("mysqli_connect_error",					MAY_BE_NULL | MAY_BE_STRING),
-	I0("mysqli_connect_errno",					MAY_BE_LONG),
+	F1("mysqli_connect_error",					MAY_BE_NULL | MAY_BE_STRING),
+	F0("mysqli_connect_errno",					MAY_BE_LONG),
 	F1("mysqli_get_client_stats",				MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
 	F1("mysqli_error_list",						MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 	F1("mysqli_get_links_stats",				MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
@@ -858,8 +849,8 @@ static const func_info_t func_infos[] = {
 	F0("mysqli_field_count",					MAY_BE_NULL | MAY_BE_LONG),
 	F0("mysqli_field_seek",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_field_tell",						MAY_BE_NULL | MAY_BE_LONG),
-	I1("mysqli_get_client_info",				MAY_BE_STRING),
-	I0("mysqli_get_client_version",				MAY_BE_LONG),
+	F1("mysqli_get_client_info",				MAY_BE_STRING),
+	F0("mysqli_get_client_version",				MAY_BE_LONG),
 	F1("mysqli_get_host_info",					MAY_BE_NULL | MAY_BE_STRING),
 	F0("mysqli_get_proto_info",					MAY_BE_NULL | MAY_BE_LONG),
 	F1("mysqli_get_server_info",				MAY_BE_NULL | MAY_BE_STRING),
@@ -907,7 +898,7 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_stmt_sqlstate",					MAY_BE_NULL | MAY_BE_STRING),
 	F1("mysqli_store_result",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("mysqli_thread_id",						MAY_BE_NULL | MAY_BE_LONG),
-	I0("mysqli_thread_safe",					MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("mysqli_thread_safe",					MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("mysqli_use_result",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("mysqli_warning_count",					MAY_BE_NULL | MAY_BE_LONG),
 
@@ -937,7 +928,7 @@ static const func_info_t func_infos[] = {
 	F1("curl_multi_info_read",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_RESOURCE),
 	F0("curl_multi_close",                      MAY_BE_NULL | MAY_BE_FALSE),
 	F0("curl_multi_setopt",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I1("curl_share_init",                       MAY_BE_RESOURCE),
+	F1("curl_share_init",                       MAY_BE_RESOURCE),
 	F0("curl_share_close",                      MAY_BE_NULL),
 	F0("curl_share_setopt",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("curl_file_create",                      MAY_BE_OBJECT),
@@ -971,7 +962,7 @@ static const func_info_t func_infos[] = {
 	F1("mb_strimwidth",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mb_convert_encoding",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("mb_detect_encoding",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	I1("mb_list_encodings",                     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("mb_list_encodings",                     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encoding_aliases",                   MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("mb_convert_kana",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mb_encode_mimeheader",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -1030,8 +1021,8 @@ static const func_info_t func_infos[] = {
 	/* ext/json */
 	F1("json_encode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("json_decode",                           MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	I0("json_last_error",                       MAY_BE_LONG),
-	I1("json_last_error_msg",                   MAY_BE_STRING),
+	F0("json_last_error",                       MAY_BE_LONG),
+	F1("json_last_error_msg",                   MAY_BE_STRING),
 
 	/* ext/xml */
 	FN("xml_parser_create",                     MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -1082,7 +1073,7 @@ static const func_info_t func_infos[] = {
 	F1("gzdecode",                              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("zlib_encode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("zlib_decode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	I1("zlib_get_coding_type",                  MAY_BE_FALSE | MAY_BE_STRING),
+	F1("zlib_get_coding_type",                  MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ob_gzhandler",                          MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/hash */
@@ -1101,7 +1092,7 @@ static const func_info_t func_infos[] = {
 	F1("mhash_keygen_s2k",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("mhash_get_block_size",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F1("mhash_get_hash_name",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	I0("mhash_count",                           MAY_BE_LONG),
+	F0("mhash_count",                           MAY_BE_LONG),
 	F1("mhash",                                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/sodium */
@@ -1184,7 +1175,7 @@ static const func_info_t func_infos[] = {
 
 	/* ext/session */
 	F0("session_set_cookie_params",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	I1("session_get_cookie_params",				MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
+	F1("session_get_cookie_params",				MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("session_name",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("session_module_name",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("session_set_save_handler",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1194,17 +1185,17 @@ static const func_info_t func_infos[] = {
 	F1("session_create_id",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("session_cache_limiter",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("session_cache_expire",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	I1("session_encode",						MAY_BE_FALSE | MAY_BE_STRING),
+	F1("session_encode",						MAY_BE_FALSE | MAY_BE_STRING),
 	F0("session_decode",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("session_start",							MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("session_destroy",						MAY_BE_FALSE | MAY_BE_TRUE),
-	I0("session_unset",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("session_destroy",						MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("session_unset",							MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("session_gc",							MAY_BE_FALSE | MAY_BE_LONG),
 	F0("session_write_close",					MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("session_abort",							MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("session_reset",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("session_status",						MAY_BE_NULL | MAY_BE_LONG),
-	I0("session_register_shutdown",				MAY_BE_NULL),
+	F0("session_register_shutdown",				MAY_BE_NULL),
 
 	/* ext/pgsql */
 	F1("pg_connect",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -1319,7 +1310,7 @@ static const func_info_t func_infos[] = {
 	FN("filter_var",							UNKNOWN_INFO),
 	F1("filter_input_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	I1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("filter_id",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 
 	/* ext/gettext */
@@ -1388,7 +1379,7 @@ static const func_info_t func_infos[] = {
 	F0("imagesettile",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imagesetbrush",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("imagecreate",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	I0("imagetypes",							MAY_BE_LONG),
+	F0("imagetypes",							MAY_BE_LONG),
 	F1("imagecreatefromstring",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("imagecreatefromgif",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 #ifdef HAVE_GD_JPG
@@ -1519,9 +1510,6 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 	}
 	if (!ret) {
 		ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
-			ret |= FUNC_MAY_WARN;
-		}
 		if (callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
 			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
 		} else  if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
