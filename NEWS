@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-16 May 2019, PHP 7.3.6RC1
+30 May 2019, PHP 7.3.6
 
 - cURL:
   . Implemented FR #72189 (Add missing CURL_VERSION_* constants). (Javier
