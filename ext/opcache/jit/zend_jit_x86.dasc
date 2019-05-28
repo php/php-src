@@ -9968,8 +9968,10 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, zend_op_arra
 					|	jmp >2
 					|.code
 					|2:
-				} else if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
-					|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3
+				} else {
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3
+					}
 					|	GET_ZVAL_LVAL ZREG_FCARG2a, op1_addr
 				}
 				if (HT_IS_PACKED(jumptable)) {
@@ -10050,8 +10052,10 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, zend_op_arra
 					|	jmp >2
 					|.code
 					|2:
-				} else if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_STRING)) {
-					|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >3
+				} else {
+					if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_STRING)) {
+						|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, >3
+					}
 					|	GET_ZVAL_PTR FCARG2a, op1_addr
 				}
 				|	LOAD_ADDR FCARG1a, jumptable
