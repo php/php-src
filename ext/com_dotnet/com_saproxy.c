@@ -542,7 +542,8 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	Z_PTR(I->iter.data) = I;
 
 	I->proxy = proxy;
-	ZVAL_COPY(&I->proxy_obj, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&I->proxy_obj, Z_OBJ_P(object));
 
 	I->indices = safe_emalloc(proxy->dimensions + 1, sizeof(LONG), 0);
 	for (i = 0; i < proxy->dimensions; i++) {

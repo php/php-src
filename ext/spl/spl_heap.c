@@ -1091,7 +1091,8 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 
 	zend_iterator_init(&iterator->intern.it);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs = &spl_heap_it_funcs;
 	iterator->intern.ce       = ce;
 	iterator->flags           = heap_object->flags;
@@ -1115,7 +1116,8 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
 	iterator->intern.ce       = ce;
 	iterator->flags           = heap_object->flags;

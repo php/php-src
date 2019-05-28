@@ -1108,7 +1108,7 @@ static PHP_METHOD(PDO, query)
 		}
 		/* something broke */
 		dbh->query_stmt = stmt;
-		ZVAL_COPY_VALUE(&dbh->query_stmt_zval, return_value);
+		ZVAL_OBJ(&dbh->query_stmt_zval, Z_OBJ_P(return_value));
 		Z_DELREF(stmt->database_object_handle);
 		ZVAL_UNDEF(&stmt->database_object_handle);
 		PDO_HANDLE_STMT_ERR();

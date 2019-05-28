@@ -52,7 +52,8 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 	iterator = ecalloc(1, sizeof(php_mysqli_result_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_mysqli_result_iterator_funcs;
 	iterator->result = Z_MYSQLI_P(object);
 	iterator->row_num = -1;
