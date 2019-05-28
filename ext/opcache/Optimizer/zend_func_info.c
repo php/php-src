@@ -101,27 +101,27 @@ static const func_info_t func_infos[] = {
 	F0("strncmp",                 MAY_BE_FALSE | MAY_BE_LONG),
 	F0("strcasecmp",              MAY_BE_LONG),
 	F0("strncasecmp",             MAY_BE_FALSE | MAY_BE_LONG),
-	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
+	F0("error_reporting",         MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
 	F0("defined",                 MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	FN("get_class",               MAY_BE_FALSE | MAY_BE_STRING),
 	FN("get_called_class",        MAY_BE_FALSE | MAY_BE_STRING),
 	FN("get_parrent_class",       MAY_BE_FALSE | MAY_BE_STRING),
-	F0("is_subclass_of",          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
-	F0("is_a",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
-	F1("get_class_vars",          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	FN("get_object_vars",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
+	F0("is_subclass_of",          MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
+	F0("is_a",                    MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
+	F1("get_class_vars",          MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
+	FN("get_object_vars",         MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
 	F1("get_class_methods",       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F0("method_exists",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("method_exists",           MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("property_exists",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("class_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("interface_exists",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("trait_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("class_exists",            MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("interface_exists",        MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("trait_exists",            MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("function_exists",         MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
-	F0("class_alias",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("class_alias",             MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("get_included_files",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F0("trigger_error",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("user_error",              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("trigger_error",           MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("user_error",              MAY_BE_FALSE | MAY_BE_TRUE),
 	FN("set_error_handler",       MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_OBJECT | MAY_BE_OBJECT),
 	F0("restore_error_handler",   MAY_BE_TRUE),
 	F0("restore_exception_handler", MAY_BE_TRUE),
@@ -130,13 +130,13 @@ static const func_info_t func_infos[] = {
 	F1("get_declared_interfaces", MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("get_defined_functions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_defined_vars",        MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	F1("get_resource_type",       MAY_BE_NULL | MAY_BE_STRING),
-	F1("get_defined_constants",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_RESOURCE | MAY_BE_ARRAY_OF_ARRAY),
+	F1("get_resource_type",       MAY_BE_STRING),
+	F1("get_defined_constants",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_RESOURCE | MAY_BE_ARRAY_OF_ARRAY),
 	F0("debug_print_backtrace",   MAY_BE_NULL),
-	F1("debug_backtrace",         MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
-	F1("get_loaded_extensions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("debug_backtrace",         MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
+	F1("get_loaded_extensions",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("extension_loaded",        MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("get_extension_funcs",     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("get_extension_funcs",     MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/standard */
 	FN("constant",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_STRING | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
