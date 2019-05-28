@@ -209,7 +209,7 @@ static const func_info_t func_infos[] = {
 	F0("strcoll",                      MAY_BE_LONG),
 #endif
 #ifdef HAVE_STRFMON
-	F1("money_format",                 MAY_BE_STRING),
+	F1("money_format",                 MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 	FN("substr",                       MAY_BE_FALSE | MAY_BE_STRING),
 	FN("substr_replace",               MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
@@ -246,7 +246,7 @@ static const func_info_t func_infos[] = {
 	F1("str_getcsv",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("str_pad",                      MAY_BE_NULL | MAY_BE_STRING),
 	F1("chop",                         MAY_BE_NULL | MAY_BE_STRING),
-	F1("strchr",                       MAY_BE_STRING),
+	F1("strchr",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("sprintf",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("printf",                       MAY_BE_FALSE | MAY_BE_LONG),
 	F0("vprintf",                      MAY_BE_FALSE | MAY_BE_LONG),
