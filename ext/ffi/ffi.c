@@ -897,7 +897,7 @@ static zval *zend_ffi_cdata_get(zval *object, zval *member, int read_type, void 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)
 	 || UNEXPECTED(!zend_string_equals_literal(Z_STR_P(member), "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "only 'cdata' property may be read");
-		return;
+		return &EG(uninitialized_zval);;
 	}
 
 	zend_ffi_cdata_to_zval(cdata, cdata->ptr, type, BP_VAR_R, rv, 0, 0);
@@ -913,14 +913,14 @@ static zval *zend_ffi_cdata_set(zval *object, zval *member, zval *value, void **
 #if 0
 	if (UNEXPECTED(!cdata->ptr)) {
 		zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-		return;
+		return &EG(uninitialized_zval);;
 	}
 #endif
 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)
 	 || UNEXPECTED(!zend_string_equals_literal(Z_STR_P(member), "cdata"))) {
 		zend_throw_error(zend_ffi_exception_ce, "only 'cdata' property may be set");
-		return;
+		return &EG(uninitialized_zval);;
 	}
 
 	zend_ffi_zval_to_cdata(cdata->ptr, type, value);
