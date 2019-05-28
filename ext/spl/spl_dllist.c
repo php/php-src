@@ -1360,7 +1360,8 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
 	iterator->intern.ce          = ce;
 	iterator->traverse_position  = dllist_object->traverse_position;

@@ -249,7 +249,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->it.data, Z_OBJ_P(object));
 	iterator->it.funcs = &zend_interface_iterator_funcs_iterator;
 	iterator->ce = Z_OBJCE_P(object);
 	ZVAL_UNDEF(&iterator->value);

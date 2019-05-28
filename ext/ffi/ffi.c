@@ -1815,7 +1815,8 @@ static zend_object_iterator *zend_ffi_cdata_get_iterator(zend_class_entry *ce, z
 
 	zend_iterator_init(&iter->it);
 
-	ZVAL_COPY(&iter->it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iter->it.data, Z_OBJ_P(object));
 	iter->it.funcs = &zend_ffi_cdata_it_funcs;
 	iter->key = 0;
 	iter->by_ref = by_ref;

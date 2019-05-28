@@ -1200,7 +1200,8 @@ PHP_FUNCTION(xml_set_object)
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
 	/* zval_add_ref(&parser->object); */
 
-	ZVAL_COPY(&parser->object, mythis);
+	Z_ADDREF_P(mythis);
+	ZVAL_OBJ(&parser->object, Z_OBJ_P(mythis));
 
 	RETVAL_TRUE;
 }
