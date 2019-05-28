@@ -61,44 +61,6 @@ typedef struct _func_info_t {
 #define FC(name, callback) \
 	{name, sizeof(name)-1, 0, callback}
 
-static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 1) {
-		uint32_t tmp = 0;
-		if (call_info->arg_info[0].opline) {
-			uint32_t arg_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
-
-			if (arg_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT)) {
-				tmp |= MAY_BE_LONG;
-			}
-			if (arg_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-				/* warning, and returns NULL */
-				tmp |= FUNC_MAY_WARN | MAY_BE_NULL;
-			}
-		} else {
-			tmp |= MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
-		}
-		return tmp;
-	} else if (call_info->num_args != -1) {
-		/* warning, and returns NULL */
-		return FUNC_MAY_WARN | MAY_BE_NULL;
-	} else {
-		return MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
-	}
-}
-
-static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 1) {
-		return MAY_BE_RC1 | MAY_BE_STRING;
-	} else if (call_info->num_args != -1) {
-		/* warning, and returns NULL */
-		return FUNC_MAY_WARN | MAY_BE_NULL;
-	} else {
-		return FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_STRING | MAY_BE_NULL;
-	}
-}
-
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
 	if (call_info->num_args == 2 || call_info->num_args == 3) {
@@ -131,86 +93,6 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	}
 }
 
-static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 1) {
-		return MAY_BE_FALSE | MAY_BE_TRUE;
-	} else {
-		return MAY_BE_FALSE | MAY_BE_TRUE | FUNC_MAY_WARN;
-	}
-}
-
-static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 2) {
-
-		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
-		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
-		uint32_t tmp = 0;
-
-		if ((arg1_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT)) &&
-		    (arg2_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT))) {
-			tmp |= MAY_BE_LONG;
-		}
-		if ((arg1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
-		    (arg2_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			/* warning, and returns NULL */
-			tmp |= FUNC_MAY_WARN | MAY_BE_NULL;
-		}
-		return tmp;
-	} else {
-		/* warning, and returns NULL */
-		return FUNC_MAY_WARN | MAY_BE_NULL | MAY_BE_LONG;
-	}
-}
-
-static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 3) {
-		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
-		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
-		uint32_t arg3_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[2].opline);
-		uint32_t tmp = 0;
-
-		if ((arg1_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT)) &&
-		    (arg2_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT)) &&
-		    (arg3_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT))) {
-			tmp |= MAY_BE_LONG | MAY_BE_FALSE;
-		}
-		if ((arg1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
-		    (arg2_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
-		    (arg3_info & (MAY_BE_STRING|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT))) {
-			/* warning, and returns NULL */
-			tmp |= FUNC_MAY_WARN | MAY_BE_NULL;
-		}
-		return tmp;
-	} else {
-		/* warning, and returns NULL */
-		return FUNC_MAY_WARN | MAY_BE_NULL | MAY_BE_LONG;
-	}
-}
-
-static uint32_t zend_b_s_info(const zend_call_info *call_info, const zend_ssa *ssa)
-{
-	if (call_info->num_args == 1) {
-
-		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
-		uint32_t tmp = 0;
-
-		if (arg1_info & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT)) {
-			tmp |= MAY_BE_FALSE | MAY_BE_TRUE;
-		}
-		if (arg1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			/* warning, and returns NULL */
-			tmp |= FUNC_MAY_WARN | MAY_BE_NULL;
-		}
-		return tmp;
-	} else {
-		/* warning, and returns NULL */
-		return FUNC_MAY_WARN | MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE;
-	}
-}
-
 #define UNKNOWN_INFO (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF)
 
 static const func_info_t func_infos[] = {
@@ -223,14 +105,14 @@ static const func_info_t func_infos[] = {
 	F0("func_num_args",           MAY_BE_LONG),
 	FN("func_get_arg",            UNKNOWN_INFO),
 	F1("func_get_args",           MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
-	FC("strlen",                  zend_strlen_info),
-	FC("strcmp",                  zend_l_ss_info),
-	FC("strncmp",                 zend_lb_ssn_info),
-	FC("strcasecmp",              zend_l_ss_info),
-	FC("strncasecmp",             zend_lb_ssn_info),
+	I0("strlen",                  MAY_BE_LONG),
+	I0("strcmp",                  MAY_BE_LONG),
+	F0("strncmp",                 MAY_BE_FALSE | MAY_BE_LONG),
+	I0("strcasecmp",              MAY_BE_LONG),
+	F0("strncasecmp",             MAY_BE_FALSE | MAY_BE_LONG),
 	F0("error_reporting",         MAY_BE_NULL | MAY_BE_LONG),
 	F0("define",                  MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_NULL), // TODO: inline
-	FC("defined",                 zend_b_s_info), // TODO: inline
+	F0("defined",                 MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	FN("get_class",               MAY_BE_FALSE | MAY_BE_STRING),
 	FN("get_called_class",        MAY_BE_FALSE | MAY_BE_STRING),
 	FN("get_parrent_class",       MAY_BE_FALSE | MAY_BE_STRING),
@@ -244,7 +126,7 @@ static const func_info_t func_infos[] = {
 	F0("class_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("interface_exists",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("trait_exists",            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	FC("function_exists",         zend_b_s_info), // TODO: inline
+	I0("function_exists",         MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	F0("class_alias",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	I1("get_included_files",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("trigger_error",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -262,7 +144,7 @@ static const func_info_t func_infos[] = {
 	F0("debug_print_backtrace",   MAY_BE_NULL),
 	F1("debug_backtrace",         MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_loaded_extensions",   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	FC("extension_loaded",        zend_b_s_info),
+	F0("extension_loaded",        MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("get_extension_funcs",     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 
 	/* ext/standard */
@@ -477,7 +359,7 @@ static const func_info_t func_infos[] = {
 	F0("octdec",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_DOUBLE),
 	F1("decbin",                       MAY_BE_NULL | MAY_BE_STRING),
 	F1("decoct",                       MAY_BE_NULL | MAY_BE_STRING),
-	FC("dechex",                       zend_dechex_info),
+	I1("dechex",                       MAY_BE_STRING),
 	F1("base_convert",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("number_format",                MAY_BE_NULL | MAY_BE_STRING),
 	F0("fmod",                         MAY_BE_NULL | MAY_BE_DOUBLE),
@@ -588,18 +470,18 @@ static const func_info_t func_infos[] = {
 	F0("boolval",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FN("gettype",                      MAY_BE_NULL | MAY_BE_STRING),
 	F0("settype",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	FC("is_null",                      zend_is_type_info),
+	I0("is_null",                      MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_resource",                  MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for closed resources
-	FC("is_bool",                      zend_is_type_info),
-	FC("is_long",                      zend_is_type_info),
-	FC("is_float",                     zend_is_type_info),
-	FC("is_int",                       zend_is_type_info),
-	FC("is_integer",                   zend_is_type_info),
-	FC("is_double",                    zend_is_type_info),
-	FC("is_real",                      zend_is_type_info),
+	I0("is_bool",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_long",                      MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_float",                     MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_int",                       MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_integer",                   MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_double",                    MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_real",                      MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_numeric",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	FC("is_string",                    zend_is_type_info),
-	FC("is_array",                     zend_is_type_info),
+	I0("is_string",                    MAY_BE_FALSE | MAY_BE_TRUE),
+	I0("is_array",                     MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_object",                    MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for incomplete class
 	F0("is_scalar",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_callable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
