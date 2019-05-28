@@ -2856,8 +2856,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				tmp = t1;
 				if (t1 & MAY_BE_ARRAY) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-					/* SEND_UNPACK may acquire references into the array */
-					tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					if (t1 & MAY_BE_ARRAY_OF_ANY) {
+						/* SEND_UNPACK may acquire references into the array */
+						tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					}
 				}
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
