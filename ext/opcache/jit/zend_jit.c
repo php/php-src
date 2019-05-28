@@ -664,10 +664,8 @@ static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *scri
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 
-		/* TODO: passing ZEND_OPTIMIZER_ALL_PASSES as optimization_level
-		 * may break overloaded operators (see ext/gmp/tests/overloading.phpt)
-		 */
-		if (zend_ssa_inference(&CG(arena), op_array, script, ssa, ZEND_OPTIMIZER_ALL_PASSES /*- ZEND_OPTIMIZER_IGNORE_OVERLOADING*/) != SUCCESS) {
+		uint32_t optimization_level = ZCG(accel_directives).optimization_level;
+		if (zend_ssa_inference(&CG(arena), op_array, script, ssa, optimization_level) != SUCCESS) {
 			return FAILURE;
 		}
 	}
