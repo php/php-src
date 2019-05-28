@@ -1207,9 +1207,18 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			if (ssa_op->op1_def >= 0
 					&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 				zval *data = get_op1_value(ctx, opline+1, ssa_op+1);
+				zend_ssa_var_info *var_info = &ctx->scdf.ssa->var_info[ssa_op->op1_use];
+
+				/* Don't try to propagate assignments to (potentially) typed properties. We would
+				 * need to deal with errors and type conversions first. */
+				if (!var_info->ce || (var_info->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+					SET_RESULT_BOT(result);
+					SET_RESULT_BOT(op1);
+					return;
+				}
 
 				/* If $a in $a->foo=$c is UNDEF, treat it like NULL. There is no warning. */
-				if ((ctx->scdf.ssa->var_info[ssa_op->op1_use].type & MAY_BE_ANY) == 0) {
+				if ((var_info->type & MAY_BE_ANY) == 0) {
 					op1 = &EG(uninitialized_zval);
 				}
 
