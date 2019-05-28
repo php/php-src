@@ -660,9 +660,9 @@ static int date_interval_compare_objects(zval *o1, zval *o2);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
-static zval *date_period_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
-static zval *date_period_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
-static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
+static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
+static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -5286,13 +5286,10 @@ static int date_period_is_magic_property(zend_string *name)
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
-		zend_string *name = zval_get_string(member);
 		if (date_period_is_magic_property(name)) {
 			zend_throw_error(NULL, "Retrieval of DatePeriod->%s for modification is unsupported", ZSTR_VAL(name));
-			zend_string_release(name);
 			return &EG(uninitialized_zval);
 		}
-		zend_string_release(name);
 	}
 
 	object->handlers->get_properties(object); /* build properties hash table */
@@ -5304,15 +5301,12 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 /* {{{ date_period_write_property */
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	zend_string *name = zval_get_string(member);
 	if (date_period_is_magic_property(name)) {
 		zend_throw_error(NULL, "Writing to DatePeriod->%s is unsupported", ZSTR_VAL(name));
-		zend_string_release(name);
 		return value;
 	}
-	zend_string_release(name);
 
-	std_object_handlers.write_property(object, member, value, cache_slot);
+	std_object_handlers.write_property(object, name, value, cache_slot);
 	return value;
 }
 /* }}} */
