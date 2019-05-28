@@ -1076,12 +1076,37 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
 		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
 
-#define ZEND_HASH_FILL_ADD(_val) do { \
-		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
+#define ZEND_HASH_FILL_SET(_val) \
+		ZVAL_COPY_VALUE(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_NULL() \
+		ZVAL_NULL(&__fill_bkt->val)
+
+#define ZEND_HASH_FILL_SET_LONG(_val) \
+		ZVAL_LONG(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_DOUBLE(_val) \
+		ZVAL_DOUBLE(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_STR(_val) \
+		ZVAL_STR(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_STR_COPY(_val) \
+		ZVAL_STR_COPY(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_INTERNED_STR(_val) \
+		ZVAL_INTERNED_STR(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_NEXT() do {\
 		__fill_bkt->h = (__fill_idx); \
 		__fill_bkt->key = NULL; \
 		__fill_bkt++; \
 		__fill_idx++; \
+	} while (0)
+
+#define ZEND_HASH_FILL_ADD(_val) do { \
+		ZEND_HASH_FILL_SET(_val); \
+		ZEND_HASH_FILL_NEXT(); \
 	} while (0)
 
 #define ZEND_HASH_FILL_END() \
