@@ -140,19 +140,19 @@ static const func_info_t func_infos[] = {
 
 	/* ext/standard */
 	FN("constant",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_STRING | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F1("bin2hex",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hex2bin",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("bin2hex",                      MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hex2bin",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("sleep",                        MAY_BE_FALSE | MAY_BE_LONG),
 	F0("usleep",                       MAY_BE_NULL | MAY_BE_FALSE),
 #if HAVE_NANOSLEEP
-	F0("time_nanosleep",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("time_sleep_until",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F0("time_sleep_until",             MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #if HAVE_STRPTIME
-	F1("strptime",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("strptime",                     MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 #endif
 	F0("flush",                        MAY_BE_NULL),
-	F1("wordwrap",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("wordwrap",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("htmlspecialchars",             MAY_BE_NULL | MAY_BE_STRING),
 	F1("htmlentities",                 MAY_BE_NULL | MAY_BE_STRING),
 	FN("html_entity_decode",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -290,16 +290,16 @@ static const func_info_t func_infos[] = {
 	F0("mt_srand",                     MAY_BE_NULL),
 	F0("mt_getrandmax",                MAY_BE_LONG),
 #if HAVE_GETSERVBYNAME
-	F0("getservbyname",                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("getservbyname",                MAY_BE_FALSE | MAY_BE_LONG),
 #endif
 #if HAVE_GETSERVBYPORT
-	F1("getservbyport",                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("getservbyport",                MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 #if HAVE_GETPROTOBYNAME
-	F0("getprotobyname",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("getprotobyname",               MAY_BE_FALSE | MAY_BE_LONG),
 #endif
 #if HAVE_GETPROTOBYNUMBER
-	F1("getprotobynumber",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("getprotobynumber",             MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 	F0("getmyuid",                     MAY_BE_FALSE | MAY_BE_LONG),
 	F0("getmygid",                     MAY_BE_FALSE | MAY_BE_LONG),
@@ -360,11 +360,11 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_INET_PTON
 	F1("inet_pton",                    MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-	F0("ip2long",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F1("long2ip",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F0("ip2long",                      MAY_BE_FALSE | MAY_BE_LONG),
+	F1("long2ip",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F1("getenv",                       MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
 #ifdef HAVE_PUTENV
-	F0("putenv",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("putenv",                       MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 	F1("getopt",                       MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #ifdef HAVE_GETLOADAVG
@@ -386,12 +386,12 @@ static const func_info_t func_infos[] = {
 	F1("get_current_user",             MAY_BE_STRING),
 	F0("set_time_limit",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("header_register_callback",     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("get_cfg_var",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("get_cfg_var",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F0("magic_quotes_runtime",         MAY_BE_FALSE),
 	F0("set_magic_quotes_runtime",     MAY_BE_FALSE),
 	F0("get_magic_quotes_gpc",         MAY_BE_FALSE),
 	F0("get_magic_quotes_runtime",     MAY_BE_FALSE),
-	F0("error_log",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("error_log",                    MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("call_user_func",               UNKNOWN_INFO),
 	FN("call_user_func_array",         UNKNOWN_INFO),
@@ -413,14 +413,14 @@ static const func_info_t func_infos[] = {
 	F1("highlight_file",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("show_source",                  MAY_BE_FALSE | MAY_BE_STRING),
 	F1("highlight_string",             MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
-	F1("php_strip_whitespace",         MAY_BE_FALSE | MAY_BE_STRING),
-	FN("ini_get",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("ini_get_all",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	FN("ini_set",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("php_strip_whitespace",         MAY_BE_STRING),
+	FN("ini_get",                      MAY_BE_FALSE | MAY_BE_STRING),
+	F1("ini_get_all",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	FN("ini_set",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ini_alter",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("ini_restore",                  MAY_BE_NULL),
 	F1("get_include_path",             MAY_BE_FALSE | MAY_BE_STRING),
-	F1("set_include_path",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("set_include_path",             MAY_BE_FALSE | MAY_BE_STRING),
 	F0("restore_include_path",         MAY_BE_NULL),
 	F0("setcookie",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("setrawcookie",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -431,14 +431,14 @@ static const func_info_t func_infos[] = {
 	F0("http_response_code",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("connection_aborted",           MAY_BE_LONG),
 	F0("connection_status",            MAY_BE_LONG),
-	F0("ignore_user_abort",            MAY_BE_NULL | MAY_BE_LONG),
+	F0("ignore_user_abort",            MAY_BE_LONG),
 	F1("parse_ini_file",               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("parse_ini_string",             MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #if ZEND_DEBUG
 	F1("config_get_hash",              MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #endif
-	F0("is_uploaded_file",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("move_uploaded_file",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_uploaded_file",             MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("move_uploaded_file",           MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("gethostbyaddr",                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gethostbyname",                MAY_BE_NULL | MAY_BE_STRING),
 	F1("gethostbynamel",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),

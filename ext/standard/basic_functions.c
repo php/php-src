@@ -3915,7 +3915,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 #ifdef HAVE_INET_NTOP
-/* {{{ proto string inet_ntop(string in_addr)
+/* {{{ proto string|false inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
 PHP_NAMED_FUNCTION(zif_inet_ntop)
 {
@@ -3947,7 +3947,7 @@ PHP_NAMED_FUNCTION(zif_inet_ntop)
 #endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
-/* {{{ proto string inet_pton(string ip_address)
+/* {{{ proto string|false inet_pton(string ip_address)
    Converts a human readable IP address to a packed binary string */
 PHP_NAMED_FUNCTION(php_inet_pton)
 {
@@ -3982,7 +3982,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 /* }}} */
 #endif /* HAVE_INET_PTON */
 
-/* {{{ proto int ip2long(string ip_address)
+/* {{{ proto int|false ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
@@ -4020,7 +4020,7 @@ PHP_FUNCTION(ip2long)
 }
 /* }}} */
 
-/* {{{ proto string long2ip(int proper_address)
+/* {{{ proto string|false long2ip(int proper_address)
    Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
@@ -4055,7 +4055,7 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname[, bool local_only]
+/* {{{ proto string|array|false getenv([ string varname[, bool local_only]])
    Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
@@ -4350,7 +4350,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options [, array longopts [, int &optind]])
+/* {{{ proto array|false getopt(string options [, array longopts [, int &optind]])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4626,7 +4626,7 @@ PHP_FUNCTION(time_nanosleep)
 }
 /* }}} */
 
-/* {{{ proto mixed time_sleep_until(float timestamp)
+/* {{{ proto bool time_sleep_until(float timestamp)
    Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
 {
@@ -4716,7 +4716,7 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto mixed get_cfg_var(string option_name)
+/* {{{ proto string|array|false get_cfg_var(string option_name)
    Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
@@ -4744,7 +4744,7 @@ PHP_FUNCTION(get_cfg_var)
 }
 /* }}} */
 
-/* {{{ proto int get_magic_quotes_runtime(void)
+/* {{{ proto false get_magic_quotes_runtime(void)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
@@ -4755,7 +4755,7 @@ PHP_FUNCTION(get_magic_quotes_runtime)
 }
 /* }}} */
 
-/* {{{ proto int get_magic_quotes_gpc(void)
+/* {{{ proto false get_magic_quotes_gpc(void)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
@@ -5169,7 +5169,7 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void register_shutdown_function(callback function) U
+/* {{{ proto false|null register_shutdown_function(callback function) U
    Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
 {
@@ -5383,7 +5383,7 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-/* {{{ proto string ini_get(string varname)
+/* {{{ proto string|false ini_get(string varname)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -5413,7 +5413,7 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-/* {{{ proto array ini_get_all([string extension[, bool details = true]])
+/* {{{ proto array|false ini_get_all([string extension[, bool details = true]])
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
@@ -5495,7 +5495,7 @@ static int php_ini_check_path(char *option_name, size_t option_len, char *new_op
 }
 /* }}} */
 
-/* {{{ proto string ini_set(string varname, string newvalue)
+/* {{{ proto string|false ini_set(string varname, string newvalue)
    Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
@@ -5565,7 +5565,7 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string set_include_path(string new_include_path)
+/* {{{ proto string|false set_include_path(string new_include_path)
    Sets the include_path configuration option */
 PHP_FUNCTION(set_include_path)
 {
@@ -5595,7 +5595,7 @@ PHP_FUNCTION(set_include_path)
 }
 /* }}} */
 
-/* {{{ proto string get_include_path()
+/* {{{ proto string|false get_include_path()
    Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
 {
@@ -5693,7 +5693,7 @@ PHP_FUNCTION(ignore_user_abort)
 /* }}} */
 
 #if HAVE_GETSERVBYNAME
-/* {{{ proto int getservbyname(string service, string protocol)
+/* {{{ proto int|false getservbyname(string service, string protocol)
    Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
@@ -5736,7 +5736,7 @@ PHP_FUNCTION(getservbyname)
 #endif
 
 #if HAVE_GETSERVBYPORT
-/* {{{ proto string getservbyport(int port, string protocol)
+/* {{{ proto string|false getservbyport(int port, string protocol)
    Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
@@ -5762,7 +5762,7 @@ PHP_FUNCTION(getservbyport)
 #endif
 
 #if HAVE_GETPROTOBYNAME
-/* {{{ proto int getprotobyname(string name)
+/* {{{ proto int|false getprotobyname(string name)
    Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
@@ -5786,7 +5786,7 @@ PHP_FUNCTION(getprotobyname)
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
-/* {{{ proto string getprotobynumber(int proto)
+/* {{{ proto string|false getprotobynumber(int proto)
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
@@ -6045,7 +6045,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 }
 /* }}} */
 
-/* {{{ proto array parse_ini_file(string filename [, bool process_sections [, int scanner_mode]])
+/* {{{ proto array|false parse_ini_file(string filename [, bool process_sections [, int scanner_mode]])
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
@@ -6089,7 +6089,7 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto array parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]])
+/* {{{ proto array|false parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]])
    Parse configuration string */
 PHP_FUNCTION(parse_ini_string)
 {
@@ -6146,7 +6146,7 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 #endif
 
 #ifdef HAVE_GETLOADAVG
-/* {{{ proto array sys_getloadavg()
+/* {{{ proto array|false sys_getloadavg()
 */
 PHP_FUNCTION(sys_getloadavg)
 {
