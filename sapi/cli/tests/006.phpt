@@ -97,21 +97,23 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
     Function [ <internal:pcre> function preg_replace_callback ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $callback ]
         Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> $limit ]
         Parameter #4 [ <optional> &$count ]
+        Parameter #5 [ <optional> $flags ]
       }
     }
     Function [ <internal:pcre> function preg_replace_callback_array ] {
 
-      - Parameters [4] {
+      - Parameters [5] {
         Parameter #0 [ <required> $pattern ]
         Parameter #1 [ <required> $subject ]
         Parameter #2 [ <optional> $limit ]
         Parameter #3 [ <optional> &$count ]
+        Parameter #4 [ <optional> $flags ]
       }
     }
     Function [ <internal:pcre> function preg_filter ] {

@@ -746,7 +746,7 @@ HELP;
 	$ignored_by_ext = 0;
 	sort($exts_to_test);
 	$test_dirs = array();
-	$optionals = array('tests', 'ext', 'Zend');
+	$optionals = array('Zend', 'tests', 'ext', 'sapi');
 
 	foreach ($optionals as $dir) {
 		if (is_dir($dir)) {
