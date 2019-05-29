@@ -662,6 +662,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *memb
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
 static zval *date_period_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -2161,7 +2162,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
 	date_object_handlers_period.clone_obj = date_object_clone_period;
 	date_object_handlers_period.get_properties = date_object_get_properties_period;
-	date_object_handlers_period.get_property_ptr_ptr = NULL;
+	date_object_handlers_period.get_property_ptr_ptr = date_period_get_property_ptr_ptr;
 	date_object_handlers_period.get_gc = date_object_get_gc_period;
 	date_object_handlers_period.read_property = date_period_read_property;
 	date_object_handlers_period.write_property = date_period_write_property;
@@ -5282,5 +5283,13 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 {
 	zend_throw_error(NULL, "Writing to DatePeriod properties is unsupported");
 	return value;
+}
+/* }}} */
+
+/* {{{ date_period_get_property_ptr_ptr */
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+{
+	/* Fall back to read_property handler. */
+	return NULL;
 }
 /* }}} */
