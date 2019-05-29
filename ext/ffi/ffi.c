@@ -4610,13 +4610,6 @@ static ZEND_COLD void zend_ffi_free_unset_property(zend_object *obj, zend_string
 }
 /* }}} */
 
-static zval* zend_ffi_free_get(zend_object *obj, zval *rv) /* {{{ */
-{
-	zend_ffi_use_after_free();
-	return NULL;
-}
-/* }}} */
-
 static HashTable *zend_ffi_free_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	zend_ffi_use_after_free();
@@ -4767,7 +4760,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.read_dimension       = zend_ffi_free_read_dimension;
 	zend_ffi_cdata_free_handlers.write_dimension      = zend_ffi_free_write_dimension;
 	zend_ffi_cdata_free_handlers.get_property_ptr_ptr = zend_fake_get_property_ptr_ptr;
-	zend_ffi_cdata_free_handlers.get                  = zend_ffi_free_get;
 	zend_ffi_cdata_free_handlers.has_property         = zend_ffi_free_has_property;
 	zend_ffi_cdata_free_handlers.unset_property       = zend_ffi_free_unset_property;
 	zend_ffi_cdata_free_handlers.has_dimension        = zend_ffi_free_has_dimension;

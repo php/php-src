@@ -438,22 +438,6 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 				*dest = Z_STR_P(arg);
 				return 1;
 			}
-		} else if (zobj->handlers->get) {
-			zval rv;
-			zval *z = zobj->handlers->get(zobj, &rv);
-
-			if (Z_TYPE_P(z) != IS_OBJECT) {
-				OBJ_RELEASE(zobj);
-				if (Z_TYPE_P(z) == IS_STRING) {
-					ZVAL_COPY_VALUE(arg, z);
-				} else {
-					ZVAL_STR(arg, zval_get_string_func(z));
-					zval_ptr_dtor(z);
-				}
-				*dest = Z_STR_P(arg);
-				return 1;
-			}
-			zval_ptr_dtor(z);
 		}
 		return 0;
 	} else {

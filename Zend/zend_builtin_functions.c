@@ -789,7 +789,6 @@ ZEND_FUNCTION(define)
 
 	ZVAL_UNDEF(&val_free);
 
-repeat:
 	switch (Z_TYPE_P(val)) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -810,17 +809,10 @@ repeat:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_TYPE(val_free) == IS_UNDEF) {
-				if (Z_OBJ_HT_P(val)->get) {
-					zval rv;
-					val = Z_OBJ_HT_P(val)->get(Z_OBJ_P(val), &rv);
-					ZVAL_COPY_VALUE(&val_free, val);
-					goto repeat;
-				} else if (Z_OBJ_HT_P(val)->cast_object) {
-					if (Z_OBJ_HT_P(val)->cast_object(Z_OBJ_P(val), &val_free, IS_STRING) == SUCCESS) {
-						val = &val_free;
-						break;
-					}
+			if (Z_OBJ_HT_P(val)->cast_object) {
+				if (Z_OBJ_HT_P(val)->cast_object(Z_OBJ_P(val), &val_free, IS_STRING) == SUCCESS) {
+					val = &val_free;
+					break;
 				}
 			}
 			/* no break */
