@@ -3023,6 +3023,9 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_BIND_STATIC:
 			tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
 				| ((opline->extended_value & ZEND_BIND_REF) ? MAY_BE_REF : (MAY_BE_RC1 | MAY_BE_RCN));
+			if (opline->extended_value & ZEND_BIND_IMPLICIT) {
+				tmp |= MAY_BE_UNDEF;
+			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			break;
 		case ZEND_SEND_VAR:
@@ -3086,8 +3089,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				tmp = t1;
 				if (t1 & MAY_BE_ARRAY) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-					/* SEND_UNPACK may acquire references into the array */
-					tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					if (t1 & MAY_BE_ARRAY_OF_ANY) {
+						/* SEND_UNPACK may acquire references into the array */
+						tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+					}
 				}
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
@@ -3585,7 +3590,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (!call_info) {
 					goto unknown_opcode;
 				}
-				tmp = zend_get_func_info(call_info, ssa) & ~FUNC_MAY_WARN;
+				tmp = zend_get_func_info(call_info, ssa);
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
 					func_info = ZEND_FUNC_INFO(&call_info->callee_func->op_array);

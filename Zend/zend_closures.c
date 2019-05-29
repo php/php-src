@@ -205,7 +205,7 @@ ZEND_METHOD(Closure, bind)
 			zend_string *class_name = zval_get_tmp_string(scope_arg, &tmp_class_name);
 			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
-			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
+			} else if ((ce = zend_lookup_class(class_name)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
 				RETURN_NULL();
@@ -738,7 +738,8 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
-			ZVAL_COPY(&closure->this_ptr, this_ptr);
+			Z_ADDREF_P(this_ptr);
+			ZVAL_OBJ(&closure->this_ptr, Z_OBJ_P(this_ptr));
 		}
 	}
 }

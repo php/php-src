@@ -807,7 +807,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplPriorityQueue::compare(mixed $value1, mixed $value2)
 	   compare the priorities */
 SPL_METHOD(SplPriorityQueue, compare)
 {
@@ -850,7 +850,7 @@ SPL_METHOD(SplHeap, top)
 }
 /* }}} */
 
-/* {{{ proto bool SplMinHeap::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplMinHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
 SPL_METHOD(SplMinHeap, compare)
 {
@@ -864,7 +864,7 @@ SPL_METHOD(SplMinHeap, compare)
 }
 /* }}} */
 
-/* {{{ proto bool SplMaxHeap::compare(mixed $a, mixed $b)
+/* {{{ proto bool SplMaxHeap::compare(mixed $value1, mixed $value2)
 	   compare the values */
 SPL_METHOD(SplMaxHeap, compare)
 {
@@ -1091,7 +1091,8 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 
 	zend_iterator_init(&iterator->intern.it);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs = &spl_heap_it_funcs;
 	iterator->intern.ce       = ce;
 	iterator->flags           = heap_object->flags;
@@ -1115,7 +1116,8 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
 	iterator->intern.ce       = ce;
 	iterator->flags           = heap_object->flags;
@@ -1131,8 +1133,8 @@ ZEND_BEGIN_ARG_INFO(arginfo_heap_insert, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_heap_compare, 0)
-	ZEND_ARG_INFO(0, a)
-	ZEND_ARG_INFO(0, b)
+	ZEND_ARG_INFO(0, value1)
+	ZEND_ARG_INFO(0, value2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_pqueue_insert, 0)

@@ -832,7 +832,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, int use_autoload) /* {{{ */
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *key, uint32_t flags) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
 	zval args[1], *zv;
@@ -861,13 +861,17 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
-		return (zend_class_entry*)Z_PTR_P(zv);
+		ce = (zend_class_entry*)Z_PTR_P(zv);
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+			return NULL;
+		}
+		return ce;
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
 	 * (doesn't impact functionality of __autoload()
 	*/
-	if (!use_autoload || zend_is_compiling()) {
+	if ((flags & ZEND_FETCH_CLASS_NO_AUTOLOAD) || zend_is_compiling()) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
@@ -942,7 +946,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name) /* {{{ */
 {
-	return zend_lookup_class_ex(name, NULL, 1);
+	return zend_lookup_class_ex(name, NULL, 0);
 }
 /* }}} */
 
@@ -1333,8 +1337,8 @@ check_fetch_type:
 	}
 
 	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, NULL, 0);
-	} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
+		return zend_lookup_class_ex(class_name, NULL, fetch_type);
+	} else if ((ce = zend_lookup_class_ex(class_name, NULL, fetch_type)) == NULL) {
 		if (!(fetch_type & ZEND_FETCH_CLASS_SILENT) && !EG(exception)) {
 			if (fetch_sub_type == ZEND_FETCH_CLASS_INTERFACE) {
 				zend_throw_or_error(fetch_type, NULL, "Interface '%s' not found", ZSTR_VAL(class_name));
@@ -1355,8 +1359,8 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string 
 	zend_class_entry *ce;
 
 	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
-		return zend_lookup_class_ex(class_name, key, 0);
-	} else if ((ce = zend_lookup_class_ex(class_name, key, 1)) == NULL) {
+		return zend_lookup_class_ex(class_name, key, fetch_type);
+	} else if ((ce = zend_lookup_class_ex(class_name, key, fetch_type)) == NULL) {
 		if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
 			return NULL;
 		}

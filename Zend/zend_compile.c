@@ -1121,14 +1121,16 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 	if (first_early_binding_opline != (uint32_t)-1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
 		uint32_t opline_num = first_early_binding_opline;
-		zend_class_entry *ce;
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
 			const zend_op *opline = &op_array->opcodes[opline_num];
+			zval *lcname = RT_CONSTANT(opline, opline->op1);
 			zval *parent_name = RT_CONSTANT(opline, opline->op2);
-			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0)) != NULL) {
-				do_bind_class(RT_CONSTANT(&op_array->opcodes[opline_num], op_array->opcodes[opline_num].op1), ce);
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname + 1));
+			zend_class_entry *parent_ce = zend_lookup_class_ex(Z_STR_P(parent_name), Z_STR_P(parent_name + 1), 0);
+			if (ce && parent_ce && zend_can_early_bind(ce, parent_ce)) {
+				do_bind_class(lcname, parent_ce);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
 		}
@@ -1294,10 +1296,16 @@ static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
-	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !CG(active_class_entry) && zend_is_scope_known()) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
-			fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
-			fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
+		zend_class_entry *ce = CG(active_class_entry);
+		if (!ce) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"%s\" when no class scope is active",
+				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
+				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && !ce->parent_name) {
+			zend_error(E_DEPRECATED,
+				"Cannot use \"parent\" when current class scope has no parent");
+		}
 	}
 }
 /* }}} */
@@ -3979,7 +3987,7 @@ void zend_compile_global_var(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_static_var_common(zend_string *var_name, zval *value, uint32_t by_ref) /* {{{ */
+static void zend_compile_static_var_common(zend_string *var_name, zval *value, uint32_t mode) /* {{{ */
 {
 	zend_op *opline;
 	if (!CG(active_op_array)->static_variables) {
@@ -3998,7 +4006,7 @@ static void zend_compile_static_var_common(zend_string *var_name, zval *value, u
 	opline = zend_emit_op(NULL, ZEND_BIND_STATIC, NULL, NULL);
 	opline->op1_type = IS_CV;
 	opline->op1.var = lookup_cv(var_name);
-	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | by_ref;
+	opline->extended_value = (uint32_t)((char*)value - (char*)CG(active_op_array)->static_variables->arData) | mode;
 }
 /* }}} */
 
@@ -5546,7 +5554,7 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		zend_compile_static_var_common(var_name, &zv, var_ast->attr);
+		zend_compile_static_var_common(var_name, &zv, var_ast->attr ? ZEND_BIND_REF : 0);
 	}
 }
 /* }}} */
@@ -5557,7 +5565,7 @@ static void zend_compile_implicit_closure_uses(closure_info *info)
 	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
 		zval zv;
 		ZVAL_NULL(&zv);
-		zend_compile_static_var_common(var_name, &zv, 0);
+		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);
 	ZEND_HASH_FOREACH_END();
 }
 
@@ -6272,12 +6280,14 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		/* We currently don't early-bind classes that implement interfaces or use traits */
 	 && !(ce->ce_flags & (ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 		if (extends_ast) {
-			zend_class_entry *parent_ce = zend_lookup_class_ex(ce->parent_name, NULL, 0);
+			zend_class_entry *parent_ce = zend_lookup_class_ex(
+				ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 			if (parent_ce
 			 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD) /* delay inheritance till preloading */
 			 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
 			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))
+			 && zend_can_early_bind(ce, parent_ce)
 				) {
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;

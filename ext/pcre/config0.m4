@@ -65,7 +65,7 @@ else
   pcre2lib/pcre2_newline.c pcre2lib/pcre2_ord2utf.c pcre2lib/pcre2_pattern_info.c pcre2lib/pcre2_serialize.c \
   pcre2lib/pcre2_string_utils.c pcre2lib/pcre2_study.c pcre2lib/pcre2_substitute.c  pcre2lib/pcre2_substring.c \
   pcre2lib/pcre2_tables.c pcre2lib/pcre2_ucd.c pcre2lib/pcre2_valid_utf.c pcre2lib/pcre2_xclass.c \
-  pcre2lib/pcre2_find_bracket.c pcre2lib/pcre2_convert.c pcre2lib/pcre2_extuni.c"
+  pcre2lib/pcre2_find_bracket.c pcre2lib/pcre2_convert.c pcre2lib/pcre2_extuni.c pcre2lib/pcre2_script_run.c"
   PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
   PHP_ADD_BUILD_DIR($ext_builddir/pcre2lib)
@@ -80,34 +80,11 @@ else
   else
     AC_MSG_RESULT([no])
   fi
-fi
 
-PHP_ARG_WITH([pcre-valgrind],,
-  [AS_HELP_STRING([--with-pcre-valgrind=DIR],
-    [Enable PCRE valgrind support. Developers only!])],
-  [no],
-  [no])
-
-  if test "$PHP_EXTERNAL_PCRE" != "no"; then
-    AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
-  else
-    if test "$PHP_PCRE_VALGRIND" != "no"; then
-      PHP_PCRE_VALGRIND_INCDIR=
-      AC_MSG_CHECKING([for Valgrind headers location])
-      for i in $PHP_PCRE_VALGRIND $PHP_PCRE_VALGRIND/include $PHP_PCRE_VALGRIND/local/include /usr/include /usr/local/include; do
-        if test -f $i/valgrind/memcheck.h
-        then
-          PHP_PCRE_VALGRIND_INCDIR=$i
-          break
-        fi
-      done
-      if test -z "$PHP_PCRE_VALGRIND_INCDIR"
-      then
-        AC_MSG_ERROR([Could not find valgrind/memcheck.h])
-      else
+  if test "$PHP_VALGRIND" != "no" && test "$have_valgrind" = "yes"; then
+      dnl Enable pcre valgrind support only in DEBUG build (it affects performance)
+      if test "$ZEND_DEBUG" = "yes"; then
         AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
-        PHP_ADD_INCLUDE($PHP_PCRE_VALGRIND_INCDIR)
-        AC_MSG_RESULT([$PHP_PCRE_VALGRIND_INCDIR])
       fi
-    fi
   fi
+fi

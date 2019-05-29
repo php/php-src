@@ -294,12 +294,13 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 {
 	DBG_ENTER("mysqlnd_res::free_result_contents_internal");
 
-	result->m.free_result_buffers(result);
-
 	if (result->meta) {
+		ZEND_ASSERT(zend_arena_contains(result->memory_pool->arena, result->meta));
 		result->meta->m->free_metadata(result->meta);
 		result->meta = NULL;
 	}
+
+	result->m.free_result_buffers(result);
 
 	DBG_VOID_RETURN;
 }

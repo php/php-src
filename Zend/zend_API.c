@@ -2666,7 +2666,7 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 	}
 
 	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
-	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS);
+	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS | ZEND_ACC_HAS_RETURN_TYPE);
 		func->num_args = 0;
 		func->arg_info = NULL;
 		func->handler = ZEND_FN(display_disabled_function);
@@ -2777,7 +2777,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 			*strict_class = 1;
 			ret = 1;
 		}
-	} else if ((ce = zend_lookup_class_ex(name, NULL, 1)) != NULL) {
+	} else if ((ce = zend_lookup_class(name)) != NULL) {
 		zend_class_entry *scope;
 		zend_execute_data *ex = EG(current_execute_data);
 

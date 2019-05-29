@@ -2266,8 +2266,6 @@ static void accel_reset_pcre_cache(void)
 
 int accel_activate(INIT_FUNC_ARGS)
 {
-	zend_bool reset_pcre = 0;
-
 	if (!ZCG(enabled) || !accel_startup_ok) {
 		return SUCCESS;
 	}
@@ -2365,9 +2363,6 @@ int accel_activate(INIT_FUNC_ARGS)
 				accel_restart_leave();
 			}
 		}
-		if (!ZCG(pcre_reseted)) {
-			reset_pcre = 1;
-		}
 		zend_shared_alloc_unlock();
 	}
 
@@ -2376,7 +2371,7 @@ int accel_activate(INIT_FUNC_ARGS)
 	SHM_PROTECT();
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-	if (ZCSG(last_restart_time) != ZCG(last_restart_time)) {
+	if (ZCG(accelerator_enabled) && ZCSG(last_restart_time) != ZCG(last_restart_time)) {
 		/* SHM was reinitialized. */
 		ZCG(last_restart_time) = ZCSG(last_restart_time);
 
@@ -2385,7 +2380,7 @@ int accel_activate(INIT_FUNC_ARGS)
 
 		accel_reset_pcre_cache();
 		ZCG(pcre_reseted) = 0;
-	} else if (reset_pcre) {
+	} else if (!ZCG(accelerator_enabled) && !ZCG(pcre_reseted)) {
 		accel_reset_pcre_cache();
 		ZCG(pcre_reseted) = 1;
 	}
@@ -2466,6 +2461,7 @@ static inline int accel_find_sapi(void)
 		"cli-server",
 		"cgi-fcgi",
 		"fpm-fcgi",
+		"fpmi-fcgi",
 		"apache2handler",
 		"litespeed",
 		"uwsgi",
@@ -2623,7 +2619,7 @@ static void accel_gen_system_id(void)
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static int accel_remap_huge_pages(void *start, size_t size, const char *name, size_t offset)
+static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -2638,7 +2634,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			strerror(errno), errno);
 		return -1;
 	}
-	memcpy(mem, start, size);
+	memcpy(mem, start, real_size);
 
 #  ifdef MAP_HUGETLB
 	ret = mmap(start, size,
@@ -2655,7 +2651,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 		ZEND_ASSERT(ret != MAP_FAILED);
 #  ifdef MADV_HUGEPAGE
 		if (-1 == madvise(start, size, MADV_HUGEPAGE)) {
-			memcpy(start, mem, size);
+			memcpy(start, mem, real_size);
 			mprotect(start, size, PROT_READ | PROT_EXEC);
 			munmap(mem, size);
 			zend_error(E_WARNING,
@@ -2664,7 +2660,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 			return -1;
 		}
 #  else
-		memcpy(start, mem, size);
+		memcpy(start, mem, real_size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 		munmap(mem, size);
 		zend_error(E_WARNING,
@@ -2675,7 +2671,7 @@ static int accel_remap_huge_pages(void *start, size_t size, const char *name, si
 	}
 
 	if (ret == start) {
-		memcpy(start, mem, size);
+		memcpy(start, mem, real_size);
 		mprotect(start, size, PROT_READ | PROT_EXEC);
 	}
 	munmap(mem, size);
@@ -2695,14 +2691,30 @@ static void accel_move_code_to_huge_pages(void)
 		char perm[5], dev[6], name[MAXPATHLEN];
 		int ret;
 
-		ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
-		if (ret == 7 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
-			long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
-			long unsigned int  seg_end = (end & ~(huge_page_size-1L));
+		while (1) {
+			ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			if (ret == 7) {
+				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
+					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
+					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
+					long unsigned int  real_end;
 
-			if (seg_end > seg_start) {
-				zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
-				accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, name, offset + seg_start - start);
+					ret = fscanf(f, "%lx-", &start);
+					if (ret == 1 && start == seg_end + huge_page_size) {
+						real_end = end;
+						seg_end = start;
+					} else {
+						real_end = seg_end;
+					}
+
+					if (seg_end > seg_start) {
+						zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, name);
+						accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, real_end - seg_start, name, offset + seg_start - start);
+					}
+					break;
+				}
+			} else {
+				break;
 			}
 		}
 		fclose(f);
@@ -2731,7 +2743,7 @@ static void accel_move_code_to_huge_pages(void)
 						long unsigned int seg_end = (end & ~(huge_page_size-1L));
 						if (seg_end > seg_start) {
 							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
-							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
+							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
 						}
 					}
 					start += sz;
@@ -3450,6 +3462,44 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 	return ok;
 }
 
+static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
+	zend_string *name, *lcname;
+	zend_bool known;
+	if (!ZEND_TYPE_IS_NAME(type)) {
+		return 1;
+	}
+
+	name = ZEND_TYPE_NAME(type);
+	if (zend_string_equals_literal_ci(name, "self") ||
+		zend_string_equals_literal_ci(name, "parent") ||
+		zend_string_equals_ci(name, ce->name)) {
+		return 1;
+	}
+
+	lcname = zend_string_tolower(name);
+	known = zend_hash_exists(EG(class_table), lcname);
+	zend_string_release(lcname);
+	return known;
+}
+
+static zend_bool preload_all_types_known(zend_class_entry *ce) {
+	zend_function *fptr;
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, fptr) {
+		uint32_t i;
+		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[-1].type)) {
+				return 0;
+			}
+		}
+		for (i = 0; i < fptr->common.num_args; i++) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[i].type)) {
+				return 0;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	return 1;
+}
+
 static void preload_link(void)
 {
 	zval *zv;
@@ -3541,6 +3591,14 @@ static void preload_link(void)
 #endif
 					}
 					if (!found) continue;
+				}
+
+				/* TODO: This is much more restrictive than necessary. We only need to actually
+				 * know the types for covariant checks, but don't need them if we can ensure
+				 * compatibility through a simple string comparison. We could improve this using
+				 * a more general version of zend_can_early_bind(). */
+				if (!preload_all_types_known(ce)) {
+					continue;
 				}
 
 				zend_string *key = zend_string_tolower(ce->name);
@@ -4307,9 +4365,10 @@ static int accel_finish_startup(void)
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;
-			php_request_shutdown(NULL);
+			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 			PG(report_memleaks) = orig_report_memleaks;
 		} else {
+			zend_shared_alloc_unlock();
 			ret = FAILURE;
 		}
 #ifdef ZEND_SIGNALS
@@ -4325,8 +4384,6 @@ static int accel_finish_startup(void)
 		sapi_module.getenv = orig_getenv;
 		sapi_module.ub_write = orig_ub_write;
 		sapi_module.flush = orig_flush;
-
-		zend_shared_alloc_unlock();
 
 		sapi_activate();
 

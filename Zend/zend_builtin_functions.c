@@ -527,10 +527,11 @@ ZEND_FUNCTION(func_get_args)
 						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
+						ZEND_HASH_FILL_SET(q);
 					} else {
-						q = &EG(uninitialized_zval);
+						ZEND_HASH_FILL_SET_NULL();
 					}
-					ZEND_HASH_FILL_ADD(q);
+					ZEND_HASH_FILL_NEXT();
 					p++;
 					i++;
 				}
@@ -543,10 +544,11 @@ ZEND_FUNCTION(func_get_args)
 					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
+					ZEND_HASH_FILL_SET(q);
 				} else {
-					q = &EG(uninitialized_zval);
+					ZEND_HASH_FILL_SET_NULL();
 				}
-				ZEND_HASH_FILL_ADD(q);
+				ZEND_HASH_FILL_NEXT();
 				p++;
 				i++;
 			}
@@ -980,7 +982,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
 		retval = 1;
 	} else {
-		ce = zend_lookup_class_ex(class_name, NULL, 0);
+		ce = zend_lookup_class_ex(class_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (!ce) {
 			retval = 0;
 		} else {
@@ -1423,7 +1425,7 @@ ZEND_FUNCTION(class_alias)
 		return;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, autoload);
+	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
 		if (ce->type == ZEND_USER_CLASS) {
@@ -1463,7 +1465,7 @@ ZEND_FUNCTION(get_included_files)
 }
 /* }}} */
 
-/* {{{ proto void trigger_error(string message [, int error_type])
+/* {{{ proto bool trigger_error(string message [, int error_type])
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
@@ -1940,10 +1942,11 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(arg)) {
 								Z_ADDREF_P(arg);
 							}
-							ZEND_HASH_FILL_ADD(arg);
+							ZEND_HASH_FILL_SET(arg);
 						} else {
-							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
+							ZEND_HASH_FILL_SET_NULL();
 						}
+						ZEND_HASH_FILL_NEXT();
 						i++;
 					}
 				} else {
@@ -1952,10 +1955,11 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 							if (Z_OPT_REFCOUNTED_P(p)) {
 								Z_ADDREF_P(p);
 							}
-							ZEND_HASH_FILL_ADD(p);
+							ZEND_HASH_FILL_SET(p);
 						} else {
-							ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
+							ZEND_HASH_FILL_SET_NULL();
 						}
+						ZEND_HASH_FILL_NEXT();
 						p++;
 						i++;
 					}
@@ -1968,10 +1972,11 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					if (Z_OPT_REFCOUNTED_P(p)) {
 						Z_ADDREF_P(p);
 					}
-					ZEND_HASH_FILL_ADD(p);
+					ZEND_HASH_FILL_SET(p);
 				} else {
-					ZEND_HASH_FILL_ADD(&EG(uninitialized_zval));
+					ZEND_HASH_FILL_SET_NULL();
 				}
+				ZEND_HASH_FILL_NEXT();
 				p++;
 				i++;
 			}

@@ -300,6 +300,7 @@ NO_PROC_OPEN_ERROR;
 		'WARNED' => array(),
 		'LEAKED' => array(),
 		'XFAILED' => array(),
+		'XLEAKED' => array(),
 		'SLOW' => array()
 	);
 
@@ -441,7 +442,10 @@ NO_PROC_OPEN_ERROR;
 						break;
 					//case 'l'
 					case 'm':
-						$valgrind = new RuntestsValgrind($environment);
+					$valgrind = new RuntestsValgrind($environment);
+						break;
+					case 'M':
+					$valgrind = new RuntestsValgrind($environment, $argv[++$i]);
 						break;
 					case 'n':
 						if (!$pass_option_n) {
@@ -563,9 +567,11 @@ Options:
                 with value 'bar').
 
     -g          Comma separated list of groups to show during test run
-                (possible values: PASS, FAIL, XFAIL, SKIP, BORK, WARN, LEAK, REDIRECT).
+                (possible values: PASS, FAIL, XFAIL, XLEAK, SKIP, BORK, WARN, LEAK, REDIRECT).
 
-    -m          Test for memory leaks with Valgrind.
+    -m          Test for memory leaks with Valgrind (equivalent to -M memcheck).
+
+    -M <tool>   Test for errors with Valgrind tool.
 
     -p <php>    Specify PHP executable to run.
 
@@ -1308,7 +1314,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 		$test_idx++;
 
 		if ($workerID) {
-			$PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'SLOW' => []];
+			$PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'XLEAKED' => [], 'SLOW' => []];
 			ob_start();
 		}
 
@@ -1331,7 +1337,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			}
 
 			$test_results[$index] = $result;
-			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'XLEAKED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 				fwrite($failed_tests_file, "$index\n");
 			}
 			if ($result_tests_file) {
@@ -1589,7 +1595,7 @@ escape:
 							if (!is_array($name) && $result != 'REDIR') {
 								$test_results[$index] = $result;
 
-								if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+								if ($failed_tests_file && ($result == 'XFAILED' || $result == 'XLEAKED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 									fwrite($failed_tests_file, "$index\n");
 								}
 								if ($result_tests_file) {
@@ -1817,7 +1823,7 @@ TEST $file
 				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',
-				'SKIPIF', 'XFAIL', 'CLEAN',
+				'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
 				'CREDITS', 'DESCRIPTION', 'CONFLICTS',
 			))) {
 				$bork_info = 'Unknown section "' . $section . '"';
@@ -2620,7 +2626,10 @@ COMMAND $cmd
 				if (isset($section_text['XFAIL'])) {
 					$warn = true;
 					$info = " (warn: XFAIL section but test passes)";
-				} else {
+				} else if (isset($section_text['XLEAK'])) {
+					$warn = true;
+					$info = " (warn: XLEAK section but test passes)";
+                } else {
 					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 					junit_mark_test_as('PASS', $shortname, $tested);
 					return 'PASSED';
@@ -2646,7 +2655,10 @@ COMMAND $cmd
 				if (isset($section_text['XFAIL'])) {
 					$warn = true;
 					$info = " (warn: XFAIL section but test passes)";
-				} else {
+				} if (isset($section_text['XLEAK'])) {
+					$warn = true;
+					$info = " (warn: XLEAK section but test passes)";      
+                } else {
 					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 					junit_mark_test_as('PASS', $shortname, $tested);
 					return 'PASSED';
@@ -2669,7 +2681,8 @@ COMMAND $cmd
 	}
 
 	if ($leaked) {
-		$restype[] = 'LEAK';
+        $restype[] = isset($section_text['XLEAK']) ? 
+                        'XLEAK' : 'LEAK';
 	}
 
 	if ($warn) {
@@ -2680,7 +2693,10 @@ COMMAND $cmd
 		if (isset($section_text['XFAIL'])) {
 			$restype[] = 'XFAIL';
 			$info = '  XFAIL REASON: ' . rtrim($section_text['XFAIL']);
-		} else {
+		} else if (isset($section_text['XLEAK'])) {
+            $restype[] = 'XLEAK';
+			$info = '  XLEAK REASON: ' . rtrim($section_text['XLEAK']);
+        } else {
 			$restype[] = 'FAIL';
 		}
 	}
@@ -2957,7 +2973,8 @@ function compute_summary()
 		'FAILED' => 0,
 		'BORKED' => 0,
 		'LEAKED' => 0,
-		'XFAILED' => 0
+		'XFAILED' => 0,
+		'XLEAKED' => 0
 	);
 
 	foreach ($test_results as $v) {
@@ -2982,10 +2999,11 @@ function get_summary($show_ext_summary, $show_html)
 		$x_warned = (100.0 * $sum_results['WARNED']) / $x_total;
 		$x_failed = (100.0 * $sum_results['FAILED']) / $x_total;
 		$x_xfailed = (100.0 * $sum_results['XFAILED']) / $x_total;
+		$x_xleaked = (100.0 * $sum_results['XLEAKED']) / $x_total;
 		$x_leaked = (100.0 * $sum_results['LEAKED']) / $x_total;
 		$x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
 	} else {
-		$x_warned = $x_failed = $x_passed = $x_leaked = $x_xfailed = 0;
+		$x_warned = $x_failed = $x_passed = $x_leaked = $x_xfailed = $x_xleaked = 0;
 	}
 
 	$summary = '';
@@ -3016,12 +3034,20 @@ Tests borked    : ' . sprintf('%4d (%5.1f%%)', $sum_results['BORKED'], $percent_
 	$summary .= '
 Tests skipped   : ' . sprintf('%4d (%5.1f%%)', $sum_results['SKIPPED'], $percent_results['SKIPPED']) . ' --------
 Tests warned    : ' . sprintf('%4d (%5.1f%%)', $sum_results['WARNED'], $percent_results['WARNED']) . ' ' . sprintf('(%5.1f%%)', $x_warned) . '
-Tests failed    : ' . sprintf('%4d (%5.1f%%)', $sum_results['FAILED'], $percent_results['FAILED']) . ' ' . sprintf('(%5.1f%%)', $x_failed) . '
+Tests failed    : ' . sprintf('%4d (%5.1f%%)', $sum_results['FAILED'], $percent_results['FAILED']) . ' ' . sprintf('(%5.1f%%)', $x_failed);
+
+    if ($sum_results['XFAILED']) {
+        $summary .= '
 Expected fail   : ' . sprintf('%4d (%5.1f%%)', $sum_results['XFAILED'], $percent_results['XFAILED']) . ' ' . sprintf('(%5.1f%%)', $x_xfailed);
+    }
 
 	if ($valgrind) {
 		$summary .= '
 Tests leaked    : ' . sprintf('%4d (%5.1f%%)', $sum_results['LEAKED'], $percent_results['LEAKED']) . ' ' . sprintf('(%5.1f%%)', $x_leaked);
+        if ($sum_results['XLEAKED']) {
+            $summary .= '
+Expected leak   : ' . sprintf('%4d (%5.1f%%)', $sum_results['XLEAKED'], $percent_results['XLEAKED']) . ' ' . sprintf('(%5.1f%%)', $x_xleaked);
+        }
 	}
 
 	$summary .= '
@@ -3104,6 +3130,19 @@ LEAKED TEST SUMMARY
 ---------------------------------------------------------------------
 ';
 		foreach ($PHP_FAILED_TESTS['LEAKED'] as $failed_test_data) {
+			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
+		}
+
+		$failed_test_summary .= "=====================================================================\n";
+	}
+
+	if (count($PHP_FAILED_TESTS['XLEAKED'])) {
+		$failed_test_summary .= '
+=====================================================================
+EXPECTED LEAK TEST SUMMARY
+---------------------------------------------------------------------
+';
+		foreach ($PHP_FAILED_TESTS['XLEAKED'] as $failed_test_data) {
 			$failed_test_summary .= $failed_test_data['test_name'] . $failed_test_data['info'] . "\n";
 		}
 
@@ -3385,13 +3424,13 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
-		$temp = array_intersect(array('XFAIL', 'FAIL', 'WARN'), $type);
+		$temp = array_intersect(array('XFAIL', 'XLEAK', 'FAIL', 'WARN'), $type);
 		$type = reset($temp);
 	} else {
 		$output_type = $type . 'ED';
 	}
 
-	if ('PASS' == $type || 'XFAIL' == $type) {
+	if ('PASS' == $type || 'XFAIL' == $type || 'XLEAK' == $type) {
 		junit_suite_record($suite, 'test_pass');
 	} elseif ('BORK' == $type) {
 		junit_suite_record($suite, 'test_error');
@@ -3531,6 +3570,7 @@ class RuntestsValgrind
 	protected $header = '';
 	protected $version_3_3_0 = false;
 	protected $version_3_8_0 = false;
+	protected $tool = null;
 
 	public function getVersion()
 	{
@@ -3542,26 +3582,29 @@ class RuntestsValgrind
 		return $this->header;
 	}
 
-	public function __construct(array $environment)
+	public function __construct(array $environment, string $tool = 'memcheck')
 	{
-		$header = system_with_timeout('valgrind --version', $environment);
+		$this->tool = $tool;
+		$header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
 		if (!$header) {
-			error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
+			error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
+                  "Please check if Valgrind is installed and the tool is named correctly.");
 		}
 		$count = 0;
 		$version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $header, 1, $count);
 		if ($count != 1) {
-			error("Valgrind returned invalid version info (\"{$header}\"), cannot proceed.");
+			error("Valgrind returned invalid version info (\"{$header}\") for {$this->tool}, cannot proceed.");
 		}
 		$this->version = $version;
-		$this->header = trim($header);
+		$this->header = sprintf(
+			"%s (%s)", trim($header), $this->tool);
 		$this->version_3_3_0 = version_compare($version, '3.3.0', '>=');
 		$this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
 	}
 
 	public function wrapCommand($cmd, $memcheck_filename, $check_all)
 	{
-		$vcmd = 'valgrind -q --tool=memcheck --trace-children=yes';
+		$vcmd = "valgrind -q --tool={$this->tool} --trace-children=yes";
 		if ($check_all) {
 			$vcmd .= ' --smc-check=all';
 		}
