@@ -4062,7 +4062,7 @@ already_compiled:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret) /* {{{ */
+static ZEND_COLD int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zval *ret) /* {{{ */
 {
 	zend_function *fbc = call->func;
 	zend_object *object;
