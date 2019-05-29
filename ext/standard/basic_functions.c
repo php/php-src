@@ -803,7 +803,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_unregister_tick_function, 0)
 	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_uploaded_file, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_uploaded_file, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
@@ -1304,27 +1304,27 @@ ZEND_BEGIN_ARG_INFO(arginfo_filetype, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_writable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_writable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_readable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_readable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_executable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_executable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_file, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_file, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_dir, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_dir, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_link, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_link, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
@@ -1663,15 +1663,15 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_pi, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_finite, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_finite, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_infinite, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_infinite, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_nan, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_nan, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
@@ -2527,57 +2527,57 @@ ZEND_BEGIN_ARG_INFO(arginfo_boolval, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_null, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_null, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_resource, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_resource, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_bool, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_bool, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_int, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_int, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_float, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_float, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_string, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_string, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_array, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_array, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_object, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_object, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_numeric, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_numeric, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_scalar, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_scalar, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_callable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, syntax_only)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_iterable, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_iterable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_countable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_countable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 /* }}} */
