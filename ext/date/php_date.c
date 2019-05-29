@@ -662,6 +662,7 @@ static zval *date_interval_write_property(zval *object, zval *member, zval *valu
 static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 static zval *date_period_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+static zval *date_period_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -2178,7 +2179,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
 	date_object_handlers_period.clone_obj = date_object_clone_period;
 	date_object_handlers_period.get_properties = date_object_get_properties_period;
-	date_object_handlers_period.get_property_ptr_ptr = NULL;
+	date_object_handlers_period.get_property_ptr_ptr = date_period_get_property_ptr_ptr;
 	date_object_handlers_period.get_gc = date_object_get_gc_period;
 	date_object_handlers_period.read_property = date_period_read_property;
 	date_object_handlers_period.write_property = date_period_write_property;
@@ -5202,6 +5203,20 @@ static HashTable *date_object_get_properties_period(zval *object) /* {{{ */
 
 	return props;
 } /* }}} */
+
+/* {{{ date_period_get_property_ptr_ptr */
+static zval *date_period_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+{
+    if (type != BP_VAR_IS && type != BP_VAR_R) {
+        zend_throw_error(NULL, "Retrieval of DatePeriod properties for modification is unsupported");
+        return &EG(uninitialized_zval);
+    }
+
+    Z_OBJPROP_P(object); /* build properties hash table */
+
+    return zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
+}
+/* }}} */
 
 static int php_date_period_initialize_from_hash(php_period_obj *period_obj, HashTable *myht) /* {{{ */
 {
