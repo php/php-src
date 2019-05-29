@@ -270,8 +270,8 @@ static const func_info_t func_infos[] = {
 	F0("unlink",                       MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("exec",                         MAY_BE_FALSE | MAY_BE_STRING),
 	F1("system",                       MAY_BE_FALSE | MAY_BE_STRING),
-	F1("escapeshellcmd",               MAY_BE_NULL | MAY_BE_STRING),
-	F1("escapeshellarg",               MAY_BE_NULL | MAY_BE_STRING),
+	F1("escapeshellcmd",               MAY_BE_STRING),
+	F1("escapeshellarg",               MAY_BE_STRING),
 	F1("passthru",                     MAY_BE_NULL | MAY_BE_FALSE),
 	F1("shell_exec",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
