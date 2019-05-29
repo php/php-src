@@ -402,6 +402,7 @@ PHP 7.4 UPGRADE NOTES
 
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
+  . ResourceBundle now implements Countable.
 
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.
@@ -421,6 +422,9 @@ PHP 7.4 UPGRADE NOTES
     ReflectionClass::getMethods() and ReflectionClass::getProperties(), or test
     results of Reflection...::getModifiers(), using hard-coded numeric values.
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
+
+- SimpleXML:
+  . SimpleXMLElement now implements Countable.
 
 - SQLite3:
   . The bundled libsqlite has been removed.  To build the SQLite3 extension

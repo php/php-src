@@ -74,6 +74,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Raised requirements to ICU ≥ 50.1. (cmb)
+  . Changed ResourceBundle to implement Countable. (LeSuisse)
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
@@ -120,6 +121,10 @@ PHP                                                                        NEWS
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
+
+- SimpleXML:
+  . Implemented FR #65215 (SimpleXMLElement could register as implementing
+    Countable). (LeSuisse)
 
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
