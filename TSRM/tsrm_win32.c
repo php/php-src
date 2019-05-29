@@ -458,7 +458,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	process_pair *proc;
 	char *cmd = NULL;
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
-	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
