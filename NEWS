@@ -29,11 +29,15 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug #76345 (zip.h not found). (Michael Maroszek)
 
-16 May 2019, PHP 7.3.6RC1
+30 May 2019, PHP 7.3.6
 
 - cURL:
   . Implemented FR #72189 (Add missing CURL_VERSION_* constants). (Javier
     Spagnoletti)
+
+- EXIF:
+  . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16).
+    (CVE-2019-11040) (Stas)
 
 - FPM:
   . Fixed bug #77934 (php-fpm kill -USR2 not working). (Jakub Zelenka)
@@ -41,6 +45,12 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #77943 (imageantialias($image, false); does not work). (cmb)
+  . Fixed bug #77973 (Uninitialized read in gdImageCreateFromXbm).
+    (CVE-2019-11038) (cmb)
+
+- Iconv:
+  . Fixed bug #78069 (Out-of-bounds read in iconv.c:_php_iconv_mime_decode()
+    due to integer overflow). (CVE-2019-11039). (maris dot adam)
 
 - JSON:
   . Fixed bug #77843 (Use after free with json serializer). (Nikita)
@@ -65,6 +75,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #77024 (SplFileObject::__toString() may return array). (Craig
     Duncan)
+
+- SQLite:
+  . Fixed bug #77967 (Bypassing open_basedir restrictions via file uris). (Stas)
 
 - Standard:
   . Fixed bug #77931 (Warning for array_map mentions wrong type). (Nikita)
