@@ -545,7 +545,7 @@ const php_password_algo* php_password_algo_identify_ex(const zend_string* hash, 
 	return (!algo || (algo->valid && !algo->valid(hash))) ? default_algo : algo;
 }
 
-/* {{{ proto array password_get_info(string $hash)
+/* {{{ proto array|null password_get_info(string $hash)
 Retrieves information about a given hash */
 PHP_FUNCTION(password_get_info)
 {
@@ -628,14 +628,14 @@ PHP_FUNCTION(password_verify)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(password)
 		Z_PARAM_STR(hash)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	algo = php_password_algo_identify(hash);
 	RETURN_BOOL(algo && (!algo->verify || algo->verify(password, hash)));
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, mixed algo[, array options = array()])
+/* {{{ proto string|null password_hash(string password, mixed algo[, array options = array()])
 Hash a password */
 PHP_FUNCTION(password_hash)
 {

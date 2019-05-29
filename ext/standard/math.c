@@ -283,7 +283,7 @@ static double php_expm1(double x)
 }
 /* }}}*/
 
-/* {{{ proto int abs(int number)
+/* {{{ proto int|float|false abs(int number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
@@ -308,7 +308,7 @@ PHP_FUNCTION(abs)
 }
 /* }}} */
 
-/* {{{ proto float ceil(float number)
+/* {{{ proto float|false ceil(float number)
    Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
 {
@@ -329,7 +329,7 @@ PHP_FUNCTION(ceil)
 }
 /* }}} */
 
-/* {{{ proto float floor(float number)
+/* {{{ proto float|false floor(float number)
    Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
 {
@@ -350,7 +350,7 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-/* {{{ proto float round(float number [, int precision [, int mode]])
+/* {{{ proto float|false round(float number [, int precision [, int mode]])
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
@@ -683,7 +683,7 @@ PHP_FUNCTION(log1p)
 }
 /* }}} */
 
-/* {{{ proto float log(float number, [float base])
+/* {{{ proto float|false log(float number, [float base])
    Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
 {
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(dechex)
 }
 /* }}} */
 
-/* {{{ proto string base_convert(string number, int frombase, int tobase)
+/* {{{ proto string|false base_convert(string number, int frombase, int tobase)
    Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {

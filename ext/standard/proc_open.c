@@ -248,7 +248,7 @@ PHP_FUNCTION(proc_terminate)
 		Z_PARAM_RESOURCE(zproc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sig_no)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -270,7 +270,7 @@ PHP_FUNCTION(proc_terminate)
 }
 /* }}} */
 
-/* {{{ proto int proc_close(resource process)
+/* {{{ proto int|false proc_close(resource process)
    close a process opened by proc_open */
 PHP_FUNCTION(proc_close)
 {
@@ -279,7 +279,7 @@ PHP_FUNCTION(proc_close)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zproc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -292,7 +292,7 @@ PHP_FUNCTION(proc_close)
 }
 /* }}} */
 
-/* {{{ proto array proc_get_status(resource process)
+/* {{{ proto array|false proc_get_status(resource process)
    get information about a process opened by proc_open */
 PHP_FUNCTION(proc_get_status)
 {
@@ -309,7 +309,7 @@ PHP_FUNCTION(proc_get_status)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zproc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
 		RETURN_FALSE;
@@ -399,7 +399,7 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
-/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
+/* {{{ proto resource|false proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
