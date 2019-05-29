@@ -3026,6 +3026,46 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }
 
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
+{
+	zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
+			((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
+	zend_bool ret;
+	zval tmp;
+
+	if (need_copy) {
+		ZVAL_COPY(&tmp, value);
+		value = &tmp;
+	}
+	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict);
+	if (need_copy) {
+		Z_TRY_DELREF_P(value);
+	}
+	if (!ret) {
+		zval_ptr_dtor(value);
+		return Z_REFVAL_P(variable_ptr);
+	}
+
+	variable_ptr = Z_REFVAL_P(variable_ptr);
+	if (EXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+
+		zend_copy_to_variable(variable_ptr, value, value_type, ref);
+		if (GC_DELREF(garbage) == 0) {
+			rc_dtor_func(garbage);
+		} else { /* we need to split */
+			/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+			if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+				gc_possible_root(garbage);
+			}
+		}
+		return variable_ptr;
+	}
+
+	zend_copy_to_variable(variable_ptr, value, value_type, ref);
+	return variable_ptr;
+}
+
 ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
 	zval *val = orig_val;
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
