@@ -4,7 +4,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   a. Object Handlers API
   b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
   c. TSRM changes
-  d. set() object handler
+  d. get() and set() object handlers
 
 2. Build system changes
   a. Abstract
@@ -40,9 +40,12 @@ PHP 8.0 INTERNALS UPGRADE NOTES
       - tsrm_free_interpreter_context
       - support for GNUPTH, SGI ST, and BETHREADS
                        
-  d. The set() object handler, which allowed overloading the assignment
-     operator, has been removed. There is no direct replacement for this
-     functionality, though some use-cases may be replaced by do_operation().
+  d. The get() and set() object handlers have been removed. The get() handler
+     can generally be replaced with cast_object(). Some uses of set() may be
+     replaced by do_operation(). If set() was used to overload direct
+     assignments using "=", then this is no longer supported and the
+     functionality should be provided in some other way (for example, as
+     modification of an object property).
 
 
 ========================
