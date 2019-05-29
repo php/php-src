@@ -2373,9 +2373,6 @@ ZEND_API int is_zend_ptr(const void *ptr)
 	return 0;
 }
 
-#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
-#undef _emalloc
-
 #if ZEND_MM_CUSTOM
 
 static ZEND_COLD void* ZEND_FASTCALL _malloc_custom(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -2404,7 +2401,12 @@ static ZEND_COLD void* ZEND_FASTCALL _realloc_custom(void *ptr, size_t size ZEND
 		return AG(mm_heap)->custom_heap.std._realloc(ptr, size);
 	}
 }
+#endif
 
+#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
+#undef _emalloc
+
+#if ZEND_MM_CUSTOM
 # define ZEND_MM_CUSTOM_ALLOCATOR(size) do { \
 		if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) { \
 			return _malloc_custom(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
