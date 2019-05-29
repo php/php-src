@@ -599,6 +599,13 @@ static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
 		return FAILURE;
 	}
 
+	/* Don't JIT huge functions. Apart from likely being detrimental due to the amount of
+	 * generated code, some of our analysis is recursive and will stack overflow with many
+	 * blocks. */
+	if (cfg->blocks_count > 100000) {
+		return FAILURE;
+	}
+
 	if (zend_cfg_build_predecessors(&CG(arena), cfg) != SUCCESS) {
 		return FAILURE;
 	}
