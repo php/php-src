@@ -11,14 +11,8 @@ pool:
 
 steps:
 - bash: |
-    apt-get install bison yacc valgrind re2c locales language-pack-de libgmp-dev libicu-dev
+    sudo apt-get install bison yacc valgrind re2c locales language-pack-de libgmp-dev libicu-dev
 - script: |
-    ./buildconf --force
-    ./configure --prefix=$HOME/php-install \
-                --enable-debug \
-                --enable-zts \
-                --enable-fpm
-    make
-    make install
+    travis/compile.sh
     
   displayName: 'make'
