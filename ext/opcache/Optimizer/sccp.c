@@ -2328,6 +2328,14 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				zend_ssa_remove_result_def(ssa, ssa_op);
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
+				} else if (opline->opcode == ZEND_TYPE_CHECK
+						&& !value_known(&ctx->values[ssa_op->op1_use])) {
+					/* For TYPE_CHECK we may compute the result value without knowing the
+					 * operand, based on type inference information. Make sure the operand is
+					 * freed and leave further cleanup to DCE. */
+					opline->opcode = ZEND_FREE;
+					opline->result_type = IS_UNUSED;
+					removed_ops++;
 				} else {
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;
