@@ -466,7 +466,7 @@ found:
 }
 /* }}} */
 
-static zend_never_inline void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
+static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zend_property_info *dummy;
 

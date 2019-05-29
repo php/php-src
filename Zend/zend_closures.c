@@ -412,28 +412,28 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_closure_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static zval *zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return value;
 }
 /* }}} */
 
-static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -442,7 +442,7 @@ static int zend_closure_has_property(zval *object, zval *member, int has_set_exi
 }
 /* }}} */
 
-static void zend_closure_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_closure_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }

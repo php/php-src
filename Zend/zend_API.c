@@ -2757,7 +2757,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 /* Disabled functions support */
 
-zend_op_array *display_disabled_compile_string(zval *source_string, char *filename)
+static ZEND_COLD zend_op_array *display_disabled_compile_string(zval *source_string, char *filename)
 {
 	zend_error(E_WARNING, "eval() has been disabled for security reasons");
 	return NULL;
@@ -2765,7 +2765,7 @@ zend_op_array *display_disabled_compile_string(zval *source_string, char *filena
 
 /* {{{ proto void display_disabled_function(void)
 Dummy function which displays an error when a disabled function is called. */
-ZEND_API ZEND_FUNCTION(display_disabled_function)
+ZEND_API ZEND_COLD ZEND_FUNCTION(display_disabled_function)
 {
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name());
 }
@@ -2794,7 +2794,7 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 #ifdef ZEND_WIN32
 #pragma optimize("", off)
 #endif
-static zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
+static ZEND_COLD zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
 {
 	zend_object *intern;
 

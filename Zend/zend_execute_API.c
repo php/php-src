@@ -212,7 +212,7 @@ static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
+static ZEND_COLD void zend_throw_or_error(int fetch_type, zend_class_entry *exception_ce, const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
@@ -564,7 +564,7 @@ ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
+ZEND_API ZEND_COLD int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
 {
 	char *colon;
 
