@@ -1,0 +1,22 @@
+# C/C++ with GCC
+# Build your C/C++ project with GCC using make.
+# Add steps that publish test results, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    ./buildconf --force
+    ./configure --prefix=$HOME/php-install \
+                --enable-debug \
+                --enable-zts \
+                --enable-fpm
+    make
+    make install
+    
+  displayName: 'make'
