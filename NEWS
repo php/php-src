@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.0alpha1
+- Don't deprecate SALT in password_hash, cause dev know that they should use /dev/urandom to generate random information in linux
 
 - Core:
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
