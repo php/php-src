@@ -78,75 +78,12 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref);
+
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_refcounted *ref)
 {
-	zend_refcounted *ref = NULL;
-	zval tmp;
-
-	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
-		ref = Z_COUNTED_P(value);
-		value = Z_REFVAL_P(value);
-	}
-
-	do {
-		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			zend_refcounted *garbage;
-
-			if (Z_ISREF_P(variable_ptr)) {
-				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
-						((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
-					zend_bool ret;
-					if (need_copy) {
-						ZVAL_COPY(&tmp, value);
-						value = &tmp;
-					}
-					ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict);
-					if (need_copy) {
-						Z_TRY_DELREF_P(value);
-					}
-					if (!ret) {
-						zval_ptr_dtor(value);
-						return Z_REFVAL_P(variable_ptr);
-					}
-				}
-
-				variable_ptr = Z_REFVAL_P(variable_ptr);
-				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
-					break;
-				}
-			}
-			garbage = Z_COUNTED_P(variable_ptr);
-			ZVAL_COPY_VALUE(variable_ptr, value);
-			if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
-				if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
-					Z_ADDREF_P(variable_ptr);
-				}
-			} else if (value_type & (IS_CONST|IS_CV)) {
-				if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
-					Z_ADDREF_P(variable_ptr);
-				}
-			} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
-				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-					efree_size(ref, sizeof(zend_reference));
-				} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
-					Z_ADDREF_P(variable_ptr);
-				}
-			}
-			if (GC_DELREF(garbage) == 0) {
-				rc_dtor_func(garbage);
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
-				}
-			}
-			return variable_ptr;
-		}
-	} while (0);
-
 	ZVAL_COPY_VALUE(variable_ptr, value);
-	if (ZEND_CONST_COND(value_type == IS_CONST, 0)) {
+	if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 			Z_ADDREF_P(variable_ptr);
 		}
@@ -161,6 +98,46 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			Z_ADDREF_P(variable_ptr);
 		}
 	}
+}
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
+{
+	zend_refcounted *ref = NULL;
+
+	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
+		ref = Z_COUNTED_P(value);
+		value = Z_REFVAL_P(value);
+	}
+
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+			zend_refcounted *garbage;
+
+			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict, ref);
+				}
+
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
+				}
+			}
+			garbage = Z_COUNTED_P(variable_ptr);
+			zend_copy_to_variable(variable_ptr, value, value_type, ref);
+			if (GC_DELREF(garbage) == 0) {
+				rc_dtor_func(garbage);
+			} else { /* we need to split */
+				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+					gc_possible_root(garbage);
+				}
+			}
+			return variable_ptr;
+		}
+	} while (0);
+
+	zend_copy_to_variable(variable_ptr, value, value_type, ref);
 	return variable_ptr;
 }
 
