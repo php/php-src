@@ -27,12 +27,7 @@ if test "$PHP_XML" != "no"; then
       PHP_ADD_EXTENSION_DEP(xml, libxml)
     ])
   else
-    PKG_CHECK_MODULES([EXPAT], [expat])
-
-    PHP_EVAL_INCLINE($EXPAT_CFLAGS)
-    PHP_EVAL_LIBLINE($EXPAT_LIBS, XML_SHARED_LIBADD)
-
-    AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
+    PHP_SETUP_EXPAT([XML_SHARED_LIBADD])
   fi
 
   PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
