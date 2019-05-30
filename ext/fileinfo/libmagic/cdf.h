@@ -76,9 +76,9 @@ typedef struct {
 	cdf_secid_t	h_master_sat[436/4];
 } cdf_header_t;
 
-#define CDF_SEC_SIZE(h) ((size_t)(1 << (h)->h_sec_size_p2))
+#define CDF_SEC_SIZE(h) CAST(size_t, 1 << (h)->h_sec_size_p2)
 #define CDF_SEC_POS(h, secid) (CDF_SEC_SIZE(h) + (secid) * CDF_SEC_SIZE(h))
-#define CDF_SHORT_SEC_SIZE(h)	((size_t)(1 << (h)->h_short_sec_size_p2))
+#define CDF_SHORT_SEC_SIZE(h)	CAST(size_t, 1 << (h)->h_short_sec_size_p2)
 #define CDF_SHORT_SEC_POS(h, secid) ((secid) * CDF_SHORT_SEC_SIZE(h))
 
 typedef int32_t cdf_dirid_t;
