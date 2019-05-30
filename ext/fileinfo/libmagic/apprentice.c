@@ -1093,7 +1093,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 {
 	char buffer[BUFSIZ + 1];
 	char *line = NULL;
-	ssize_t len;
+	size_t len;
 	size_t lineno = 0;
 	struct magic_entry me;
 
