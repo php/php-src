@@ -1940,7 +1940,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP
 {
 	USE_OPLINE
 	zval *varname;
-	zend_string *name, *tmp_name;
+	zend_string *name, *tmp_name = NULL;
 	zend_class_entry *ce;
 	zend_free_op free_op1;
 
@@ -1973,7 +1973,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		tmp_name = NULL;
 	} else {
 		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			varname = ZVAL_UNDEFINED_OP1();
@@ -1983,9 +1982,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP
 
 	zend_std_unset_static_property(ce, name);
 
-	if (opline->op1_type != IS_CONST) {
-		zend_tmp_string_release(tmp_name);
-	}
+	zend_tmp_string_release(tmp_name);
 	FREE_OP(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
