@@ -474,6 +474,7 @@ NO_PROC_OPEN_ERROR;
 						break;
 					case 'q':
 						putenv('NO_INTERACTION=1');
+						$environment['NO_INTERACTION'] = 1;
 						break;
 					//case 'r'
 					case 's':
@@ -1588,9 +1589,12 @@ escape:
 								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
 							}
 							$test_idx++;
-							clear_show_test();
-							echo $resultText;
-							show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
+
+							if (!isset($env['NO_INTERACTION']) || !$env['NO_INTERACTION']) {
+								clear_show_test();
+								echo $resultText;
+								show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
+							}
 
 							if (!is_array($name) && $result != 'REDIR') {
 								$test_results[$index] = $result;
