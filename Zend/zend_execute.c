@@ -4295,17 +4295,7 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		} \
 	} while (0)
 
-#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
-# pragma GCC push_options
-# pragma GCC optimize("no-gcse")
-# pragma GCC optimize("no-ivopts")
-#endif
-
 #include "zend_vm_execute.h"
-
-#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
-# pragma GCC pop_options
-#endif
 
 ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
 {
