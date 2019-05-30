@@ -388,9 +388,8 @@ ssize_t
 cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
     const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t ss = CDF_SEC_SIZE(h);
 	size_t pos = CDF_SEC_POS(h, id);
-	assert(ss == len);
+	assert(CDF_SEC_SIZE(h) == len);
 	return cdf_read(info, CAST(zend_off_t, pos), RCAST(char *, buf) + offs, len);
 }
 
@@ -398,9 +397,8 @@ ssize_t
 cdf_read_short_sector(const cdf_stream_t *sst, void *buf, size_t offs,
     size_t len, const cdf_header_t *h, cdf_secid_t id)
 {
-	size_t ss = CDF_SHORT_SEC_SIZE(h);
 	size_t pos = CDF_SHORT_SEC_POS(h, id);
-	assert(ss == len);
+	assert(CDF_SHORT_SEC_SIZE(h) == len);
 	if (pos + len > CDF_SEC_SIZE(h) * sst->sst_len) {
 		DPRINTF(("Out of bounds read %" SIZE_T_FORMAT "u > %"
 		    SIZE_T_FORMAT "u\n",
