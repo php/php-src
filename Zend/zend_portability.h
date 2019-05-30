@@ -636,4 +636,9 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_EXPAND_VA(code) code
 #endif
 
+/* On CPU with few registers, it's cheaper to reload value then use spill slot */
+#if defined(__i386__) || (defined(_WIN32) && !defined(_WIN64))
+# define ZEND_PREFER_RELOAD
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

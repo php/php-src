@@ -2801,6 +2801,9 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED)) == 0)) {
 		i_free_compiled_variables(execute_data);
 
+#ifdef ZEND_PREFER_RELOAD
+		call_info = EX_CALL_INFO();
+#endif
 		EG(current_execute_data) = EX(prev_execute_data);
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
@@ -2820,6 +2823,9 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	} else if (EXPECTED((call_info & (ZEND_CALL_CODE|ZEND_CALL_TOP)) == 0)) {
 		i_free_compiled_variables(execute_data);
 
+#ifdef ZEND_PREFER_RELOAD
+		call_info = EX_CALL_INFO();
+#endif
 		if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_clean_and_cache_symbol_table(EX(symbol_table));
 		}
@@ -2846,6 +2852,9 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
+#ifdef ZEND_PREFER_RELOAD
+		call_info = EX_CALL_INFO();
+#endif
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
@@ -2861,6 +2870,9 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	} else {
 		if (EXPECTED((call_info & ZEND_CALL_CODE) == 0)) {
 			i_free_compiled_variables(execute_data);
+#ifdef ZEND_PREFER_RELOAD
+			call_info = EX_CALL_INFO();
+#endif
 			if (UNEXPECTED(call_info & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS))) {
 				if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 					zend_clean_and_cache_symbol_table(EX(symbol_table));
