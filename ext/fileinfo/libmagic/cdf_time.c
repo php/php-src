@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: cdf_time.c,v 1.16 2017/03/29 15:57:48 christos Exp $")
+FILE_RCSID("@(#)$File: cdf_time.c,v 1.19 2019/03/12 20:43:05 christos Exp $")
 #endif
 
 #include <time.h>
@@ -69,7 +69,7 @@ cdf_getday(int year, int days)
 {
 	size_t m;
 
-	for (m = 0; m < sizeof(mdays) / sizeof(mdays[0]); m++) {
+	for (m = 0; m < __arraycount(mdays); m++) {
 		int sub = mdays[m] + (m == 1 && isleap(year));
 		if (days < sub)
 			return days;
@@ -86,14 +86,14 @@ cdf_getmonth(int year, int days)
 {
 	size_t m;
 
-	for (m = 0; m < sizeof(mdays) / sizeof(mdays[0]); m++) {
+	for (m = 0; m < __arraycount(mdays); m++) {
 		days -= mdays[m];
 		if (m == 1 && isleap(year))
 			days--;
 		if (days <= 0)
-			return (int)m;
+			return CAST(int, m);
 	}
-	return (int)m;
+	return CAST(int, m);
 }
 
 int
@@ -109,22 +109,22 @@ cdf_timestamp_to_timespec(struct timespec *ts, cdf_timestamp_t t)
 	ts->tv_nsec = (t % CDF_TIME_PREC) * 100;
 
 	t /= CDF_TIME_PREC;
-	tm.tm_sec = (int)(t % 60);
+	tm.tm_sec = CAST(int, t % 60);
 	t /= 60;
 
-	tm.tm_min = (int)(t % 60);
+	tm.tm_min = CAST(int, t % 60);
 	t /= 60;
 
-	tm.tm_hour = (int)(t % 24);
+	tm.tm_hour = CAST(int, t % 24);
 	t /= 24;
 
 	/* XXX: Approx */
-	tm.tm_year = (int)(CDF_BASE_YEAR + (t / 365));
+	tm.tm_year = CAST(int, CDF_BASE_YEAR + (t / 365));
 
 	rdays = cdf_getdays(tm.tm_year);
 	t -= rdays - 1;
-	tm.tm_mday = cdf_getday(tm.tm_year, (int)t);
-	tm.tm_mon = cdf_getmonth(tm.tm_year, (int)t);
+	tm.tm_mday = cdf_getday(tm.tm_year, CAST(int, t));
+	tm.tm_mon = cdf_getmonth(tm.tm_year, CAST(int, t));
 	tm.tm_wday = 0;
 	tm.tm_yday = 0;
 	tm.tm_isdst = 0;
@@ -173,7 +173,7 @@ cdf_ctime(const time_t *sec, char *buf)
 	if (ptr != NULL)
 		return buf;
 	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
-	    (long long)*sec);
+	    CAST(long long, *sec));
 	return buf;
 }
 

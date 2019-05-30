@@ -656,6 +656,7 @@ utime \
 vasprintf \
 asprintf \
 nanosleep \
+memmem \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
