@@ -40,6 +40,9 @@ PHP                                                                        NEWS
 - FFI:
   . Added FFI extension. (Dmitry)
 
+-Fileinfo:
+  . Fixed bug #78075 (finfo_file treats JSON file as text/plain). (Anatol)
+
 - Filter:
   . The filter extension no longer have the --with-pcre-dir on Unix builds,
     allowing the extension to be once more compiled as shared using
