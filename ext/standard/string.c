@@ -223,7 +223,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 /* }}} */
 #endif
 
-/* {{{ proto string bin2hex(string data)
+/* {{{ proto string|false bin2hex(string data)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
@@ -244,7 +244,7 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-/* {{{ proto string hex2bin(string data)
+/* {{{ proto string|false hex2bin(string data)
    Converts the hex representation of data to binary */
 PHP_FUNCTION(hex2bin)
 {
@@ -5458,7 +5458,7 @@ PHP_FUNCTION(strnatcasecmp)
 }
 /* }}} */
 
-/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]])
+/* {{{ proto int|false substr_count(string haystack, string needle [, int offset [, int length]])
    Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
