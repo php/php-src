@@ -54854,6 +54854,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 #endif
 
 
+#if (ZEND_VM_KIND != ZEND_VM_KIND_CALL) && (ZEND_GCC_VERSION >= 4000) && !defined(__clang__)
+# pragma GCC push_options
+# pragma GCC optimize("no-gcse")
+# pragma GCC optimize("no-ivopts")
+#endif
 ZEND_API void execute_ex(zend_execute_data *ex)
 {
 	DCL_OPLINE
@@ -65700,6 +65705,9 @@ zend_leave_helper_SPEC_LABEL:
 	}
 	zend_error_noreturn(E_CORE_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
+#if (ZEND_VM_KIND != ZEND_VM_KIND_CALL) && (ZEND_GCC_VERSION >= 4000) && !defined(__clang__)
+# pragma GCC pop_options
+#endif
 
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 {
