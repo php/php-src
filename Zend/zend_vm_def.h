@@ -5957,7 +5957,7 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 {
 	USE_OPLINE
 	zval *varname;
-	zend_string *name, *tmp_name;
+	zend_string *name, *tmp_name = NULL;
 	zend_class_entry *ce;
 	zend_free_op free_op1;
 
@@ -5990,7 +5990,6 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		tmp_name = NULL;
 	} else {
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			varname = ZVAL_UNDEFINED_OP1();
@@ -6000,9 +5999,7 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 
 	zend_std_unset_static_property(ce, name);
 
-	if (OP1_TYPE != IS_CONST) {
-		zend_tmp_string_release(tmp_name);
-	}
+	zend_tmp_string_release(tmp_name);
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
