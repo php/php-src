@@ -1514,7 +1514,7 @@ PHP_FUNCTION(locale_lookup)
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS", &arr, &loc_range, &loc_range_len,
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS!", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
 		RETURN_FALSE;
 	}
