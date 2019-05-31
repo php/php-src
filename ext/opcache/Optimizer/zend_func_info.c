@@ -1047,8 +1047,8 @@ static const func_info_t func_infos[] = {
 	F0("xml_parser_free",                       MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_parser_set_option",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("xml_parser_get_option",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
-	F1("utf8_encode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("utf8_decode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("utf8_encode",                           MAY_BE_STRING),
+	F1("utf8_decode",                           MAY_BE_STRING),
 
 	/* ext/zlib */
 	F0("readgzfile",                            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
@@ -1287,16 +1287,16 @@ static const func_info_t func_infos[] = {
 	F1("pg_select",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 
 	/* ext/bcmath */
-	F1("bcadd",									MAY_BE_NULL | MAY_BE_STRING),
-	F1("bcsub",									MAY_BE_NULL | MAY_BE_STRING),
-	F1("bcmul",									MAY_BE_NULL | MAY_BE_STRING),
+	F1("bcadd",									MAY_BE_STRING),
+	F1("bcsub",									MAY_BE_STRING),
+	F1("bcmul",									MAY_BE_STRING),
 	F1("bcdiv",									MAY_BE_NULL | MAY_BE_STRING),
 	F1("bcmod",									MAY_BE_NULL | MAY_BE_STRING),
 	F1("bcpowmod",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("bcpow",									MAY_BE_NULL | MAY_BE_STRING),
+	F1("bcpow",									MAY_BE_STRING),
 	F1("bcsqrt",								MAY_BE_NULL | MAY_BE_STRING),
-	F0("bccomp",								MAY_BE_NULL | MAY_BE_LONG),
-	F0("bcscale",								MAY_BE_NULL | MAY_BE_LONG),
+	F0("bccomp",								MAY_BE_LONG),
+	F0("bcscale",								MAY_BE_LONG),
 
 	/* ext/exif */
 	F1("exif_tagname",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
