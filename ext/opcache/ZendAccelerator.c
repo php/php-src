@@ -4074,11 +4074,15 @@ static int accel_preload(const char *config)
 		if (op_array) {
 			zend_execute(op_array, NULL);
 			zend_exception_restore();
-			zend_try_exception_handler();
-			if (EG(exception)) {
-				zend_exception_error(EG(exception), E_ERROR);
-				CG(unclean_shutdown) = 1;
-				ret = FAILURE;
+			if (UNEXPECTED(EG(exception))) {
+				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+					zend_user_exception_handler();
+				}
+				if (EG(exception)) {
+					zend_exception_error(EG(exception), E_ERROR);
+					CG(unclean_shutdown) = 1;
+					ret = FAILURE;
+				}
 			}
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));

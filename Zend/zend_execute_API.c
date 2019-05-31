@@ -1590,17 +1590,3 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 	return FAILURE;
 }
 /* }}} */
-
-ZEND_API int zend_forbid_dynamic_call(const char *func_name) /* {{{ */
-{
-	zend_execute_data *ex = EG(current_execute_data);
-	ZEND_ASSERT(ex != NULL && ex->func != NULL);
-
-	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
-		zend_error(E_WARNING, "Cannot call %s dynamically", func_name);
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-/* }}} */

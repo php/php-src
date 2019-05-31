@@ -762,7 +762,6 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
-ZEND_API void zend_try_exception_handler();
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
@@ -770,6 +769,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
+
+ZEND_API ZEND_COLD void zend_user_exception_handler(void);
+
+#define zend_try_exception_handler() do { \
+		if (UNEXPECTED(EG(exception))) { \
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) { \
+				zend_user_exception_handler(); \
+			} \
+		} \
+	} while (0)
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
