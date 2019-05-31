@@ -4600,21 +4600,22 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 		zend_ast *cond_ast = elem_ast->child[0];
 		zend_ast *stmt_ast = elem_ast->child[1];
 
-		znode cond_node;
-		uint32_t opnum_jmpz;
 		if (cond_ast) {
+			znode cond_node;
+			uint32_t opnum_jmpz;
 			zend_compile_expr(&cond_node, cond_ast);
 			opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
-		}
 
-		zend_compile_stmt(stmt_ast);
+			zend_compile_stmt(stmt_ast);
 
-		if (i != list->children - 1) {
-			jmp_opnums[i] = zend_emit_jump(0);
-		}
-
-		if (cond_ast) {
+			if (i != list->children - 1) {
+				jmp_opnums[i] = zend_emit_jump(0);
+			}
 			zend_update_jump_target_to_next(opnum_jmpz);
+		} else {
+			/* "else" can only occur as last element. */
+			ZEND_ASSERT(i == list->children - 1);
+			zend_compile_stmt(stmt_ast);
 		}
 	}
 
