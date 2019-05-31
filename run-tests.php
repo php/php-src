@@ -3544,7 +3544,6 @@ function junit_init_suite($suite_name)
 		'test_fail' => 0,
 		'test_error' => 0,
 		'test_skip' => 0,
-		'suites' => array(),
 		'files' => array(),
 		'execution_time' => 0,
 	);
