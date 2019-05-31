@@ -1283,7 +1283,7 @@ PHP_FUNCTION(implode)
 
 	if (arg2 == NULL) {
 		if (Z_TYPE_P(arg1) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument must be an array");
+			zend_type_error("Argument must be an array");
 			return;
 		}
 
@@ -1298,7 +1298,7 @@ PHP_FUNCTION(implode)
 			glue = zval_get_tmp_string(arg1, &tmp_glue);
 			pieces = arg2;
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid arguments passed");
+			zend_type_error("Invalid arguments passed");
 			return;
 		}
 	}
