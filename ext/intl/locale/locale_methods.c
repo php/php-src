@@ -1554,7 +1554,7 @@ PHP_FUNCTION(locale_lookup)
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS", &arr, &loc_range, &loc_range_len,
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS!", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 );
 		RETURN_FALSE;
