@@ -9,7 +9,11 @@ Carlos André Ferrari <caferrari [at] gmail [dot] com>
 --FILE--
 <?php
 $im = fopen('php://memory', 'w');
-imagepalettetotruecolor($im);
+try {
+    imagepalettetotruecolor($im);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagepalettetotruecolor(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagepalettetotruecolor(): supplied resource is not a valid Image resource

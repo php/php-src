@@ -30,7 +30,11 @@ var_dump(openssl_pkcs12_read(file_get_contents($pkcsfile), $opts, $pass));
 
 var_dump(openssl_pkcs12_export_to_file($invalid, $pkcsfile, $invalid, $pass));
 var_dump(openssl_pkcs12_export_to_file($invalid_path, $pkcsfile, $invalid_path, $pass));
-var_dump(openssl_pkcs12_export_to_file($priv_res, $pkcsfile, $cert_res, $pass));
+try {
+    var_dump(openssl_pkcs12_export_to_file($priv_res, $pkcsfile, $cert_res, $pass));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
@@ -55,7 +59,5 @@ bool(false)
 Warning: openssl_pkcs12_export_to_file(): cannot get cert from parameter 1 in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): supplied resource is not a valid OpenSSL X.509 resource in %s on line %d
-
 Warning: openssl_pkcs12_export_to_file(): cannot get cert from parameter 1 in %s on line %d
-bool(false)
+openssl_pkcs12_export_to_file(): supplied resource is not a valid OpenSSL X.509 resource

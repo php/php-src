@@ -18,7 +18,11 @@ fwrite($file_handle, "hello world");
 fclose($file_handle);
 
 // invalid file handle
-var_dump( fscanf($file_handle, "%s") );
+try {
+    var_dump( fscanf($file_handle, "%s") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // number of formats in format strings not matching the no of variables
 $file_handle = fopen($filename, 'r');
@@ -52,9 +56,7 @@ unlink($filename);
 ?>
 --EXPECTF--
 *** Testing fscanf() for error conditions ***
-
-Warning: fscanf(): supplied resource is not a valid File-Handle resource in %s on line %d
-bool(false)
+fscanf(): supplied resource is not a valid File-Handle resource
 
 Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
 int(-1)

@@ -44,8 +44,12 @@ echo "\nClose directory:\n";
 var_dump( $d->close() );
 var_dump( $d );
 
-echo "\nTest read after closing the dir:";
-var_dump( $d->read() );
+echo "\nTest read after closing the dir:\n";
+try {
+    var_dump( $d->read() );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // delete temp files
 delete_files($dir_path, 3, "私はガラスを食べられますdir_basic", 1, ".tmp");
@@ -87,6 +91,5 @@ object(Directory)#%d (2) {
 }
 
 Test read after closing the dir:
-Warning: Directory::read(): %s is not a valid Directory resource in %s on line %d
-bool(false)
+Directory::read(): %s is not a valid Directory resource
 Done

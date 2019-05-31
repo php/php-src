@@ -24,18 +24,22 @@ $file_handle = fopen(__FILE__, "r");
 fclose($file_handle);
 
 // read from closed file
-var_dump( fgets($file_handle) ); // default length
-var_dump( fgets($file_handle, 10) ); // with specific length
+try {
+    var_dump( fgets($file_handle) ); // default length
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( fgets($file_handle, 10) ); // with specific length
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : usage variations ***
 -- Testing fgets() with closed handle --
-
-Warning: fgets(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
-
-Warning: fgets(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+fgets(): supplied resource is not a valid stream resource
+fgets(): supplied resource is not a valid stream resource
 Done
