@@ -1544,6 +1544,9 @@ escape:
 									}
 								}
 							}
+							if (junit_enabled()) {
+								junit_merge_results($message["junit"]);
+							}
 							// intentional fall-through
 						case "ready":
 							// Schedule sequential tests only once we are down to one worker.
@@ -1712,8 +1715,10 @@ function run_worker() {
 			case "run_tests":
 				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
 				send_message($workerSock, [
-					"type" => "tests_finished"
+					"type" => "tests_finished",
+					"junit" => junit_enabled() ? $GLOBALS['JUNIT'] : null,
 				]);
+				junit_init();
 				break;
 			default:
 				send_message($workerSock, [
@@ -3317,28 +3322,30 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 function junit_init()
 {
 	// Check whether a junit log is wanted.
+	global $workerID;
 	$JUNIT = getenv('TEST_PHP_JUNIT');
 	if (empty($JUNIT)) {
-		$JUNIT = false;
-	} elseif (!$fp = fopen($JUNIT, 'w')) {
-		error("Failed to open $JUNIT for writing.");
-	} else {
-		$JUNIT = array(
-			'fp' => $fp,
-			'name' => 'PHP',
-			'test_total' => 0,
-			'test_pass' => 0,
-			'test_fail' => 0,
-			'test_error' => 0,
-			'test_skip' => 0,
-			'test_warn' => 0,
-			'execution_time' => 0,
-			'suites' => array(),
-			'files' => array()
-		);
+		$GLOBALS['JUNIT'] = false;
+		return;
 	}
-
-	$GLOBALS['JUNIT'] = $JUNIT;
+	if ($workerID) {
+		$fp = null;
+	} else if (!$fp = fopen($JUNIT, 'w')) {
+		error("Failed to open $JUNIT for writing.");
+	}
+	$GLOBALS['JUNIT'] = array(
+		'fp' => $fp,
+		'name' => 'PHP',
+		'test_total' => 0,
+		'test_pass' => 0,
+		'test_fail' => 0,
+		'test_error' => 0,
+		'test_skip' => 0,
+		'test_warn' => 0,
+		'execution_time' => 0,
+		'suites' => array(),
+		'files' => array()
+	);
 }
 
 function junit_save_xml()
@@ -3544,7 +3551,7 @@ function junit_init_suite($suite_name)
 		'test_fail' => 0,
 		'test_error' => 0,
 		'test_skip' => 0,
-		'suites' => array(),
+		'test_warn' => 0,
 		'files' => array(),
 		'execution_time' => 0,
 	);
@@ -3566,6 +3573,35 @@ function junit_finish_timer($file_name)
 	$start = $JUNIT['files'][$file_name]['start'];
 	$JUNIT['files'][$file_name]['total'] += microtime(true) - $start;
 	unset($JUNIT['files'][$file_name]['start']);
+}
+
+function junit_merge_results($junit)
+{
+	global $JUNIT;
+	$JUNIT['test_total'] += $junit['test_total'];
+	$JUNIT['test_pass']  += $junit['test_pass'];
+	$JUNIT['test_fail']  += $junit['test_fail'];
+	$JUNIT['test_error'] += $junit['test_error'];
+	$JUNIT['test_skip']  += $junit['test_skip'];
+	$JUNIT['test_warn']  += $junit['test_warn'];
+	$JUNIT['execution_time'] += $junit['execution_time'];
+	$JUNIT['files'] += $junit['files'];
+	foreach ($junit['suites'] as $name => $suite) {
+		if (!isset($JUNIT['suites'][$name])) {
+			$JUNIT['suites'][$name] = $suite;
+			continue;
+		}
+
+		$SUITE =& $JUNIT['suites'][$name];
+		$SUITE['test_total'] += $suite['test_total'];
+		$SUITE['test_pass']  += $suite['test_pass'];
+		$SUITE['test_fail']  += $suite['test_fail'];
+		$SUITE['test_error'] += $suite['test_error'];
+		$SUITE['test_skip']  += $suite['test_skip'];
+		$SUITE['test_warn']  += $suite['test_warn'];
+		$SUITE['execution_time'] += $suite['execution_time'];
+		$SUITE['files'] += $suite['files'];
+	}
 }
 
 class RuntestsValgrind
