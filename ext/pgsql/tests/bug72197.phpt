@@ -32,7 +32,7 @@ pg_close($conn);
 ?>
 ==DONE==
 --EXPECTF--
-pg_lo_create(): supplied resource is not a valid PostgreSQL link resource
+pg_lo_create(): supplied resource is not a valid PostgreSQL link resource%w
 int(%d)
 int(%d)
 ==DONE==
