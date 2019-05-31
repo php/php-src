@@ -236,6 +236,26 @@ PHP 8.0 UPGRADE NOTES
     "Illegal string offset 'string'" for illegal string offsets. The behavior
     of explicit casts to int/float from strings has not been changed.
     RFC: https://wiki.php.net/rfc/saner-numeric-strings
+  . Magic Methods will now have their arguments and return types
+    checked if they have them declared. The signatures should
+    match the following list:
+
+      __call(string $name, array $arguments): mixed
+      __callStatic(string $name, array $arguments): mixed
+      __clone(): void
+      __debugInfo(): ?array
+      __get(string $name): mixed
+      __invoke(mixed $arguments): mixed
+      __isset(string $name): bool
+      __serialize(): array
+      __set(string $name, mixed $value): void
+      __set_state(array $properties): object
+      __sleep(): array
+      __unserialize(array $data): void
+      __unset(string $name): void
+      __wakeup(): void
+
+    RFC: https://wiki.php.net/rfc/magic-methods-signature
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
