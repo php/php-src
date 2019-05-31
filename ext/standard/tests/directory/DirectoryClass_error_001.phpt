@@ -6,9 +6,21 @@ Directory class behaviour.
 echo "\n--> Try all methods with bad handle:\n";
 $d = new Directory(getcwd());
 $d->handle = "Havoc!";
-var_dump($d->read());
-var_dump($d->rewind());
-var_dump($d->close());
+try {
+    var_dump($d->read());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($d->rewind());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($d->close());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n--> Try all methods with no handle:\n";
 $d = new Directory(getcwd());
@@ -20,15 +32,9 @@ var_dump($d->close());
 ?>
 --EXPECTF--
 --> Try all methods with bad handle:
-
-Warning: Directory::read(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
-
-Warning: Directory::rewind(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
-
-Warning: Directory::close(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Directory::read(): supplied argument is not a valid Directory resource
+Directory::rewind(): supplied argument is not a valid Directory resource
+Directory::close(): supplied argument is not a valid Directory resource
 
 --> Try all methods with no handle:
 

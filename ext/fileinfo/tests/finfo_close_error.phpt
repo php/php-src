@@ -14,15 +14,17 @@ echo "*** Testing finfo_close() : error conditions ***\n";
 
 echo "\n-- Testing finfo_close() function with wrong resource type --\n";
 $fp = fopen( __FILE__, 'r' );
-var_dump( finfo_close( $fp ) );
+try {
+    var_dump( finfo_close( $fp ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo_close() : error conditions ***
 
 -- Testing finfo_close() function with wrong resource type --
-
-Warning: finfo_close(): supplied resource is not a valid file_info resource in %s on line %d
-bool(false)
+finfo_close(): supplied resource is not a valid file_info resource
 ===DONE===
