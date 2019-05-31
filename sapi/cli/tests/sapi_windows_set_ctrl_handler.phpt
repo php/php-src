@@ -8,6 +8,8 @@ include "skipinf.inc";
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
   die("skip this test is for Windows platforms only");
 ?>
+--XFAIL--
+Fails on AppVeyor
 --FILE--
 <?php
 
