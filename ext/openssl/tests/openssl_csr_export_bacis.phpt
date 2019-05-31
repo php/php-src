@@ -32,15 +32,15 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(openssl_csr_export($privkey, $output));
+try {
+    var_dump(openssl_csr_export($privkey, $output));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(openssl_csr_export($csr, $output, false));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 openssl_csr_export() expects parameter 1 to be resource, string given
-
-Warning: openssl_csr_export(): supplied resource is not a valid OpenSSL X.509 CSR resource in %s on line %d
-
-Warning: openssl_csr_export(): cannot get CSR from parameter 1 in %s on line %d
-bool(false)
+openssl_csr_export(): supplied resource is not a valid OpenSSL X.509 CSR resource
 bool(true)

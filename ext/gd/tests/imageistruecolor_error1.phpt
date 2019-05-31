@@ -10,7 +10,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $resource = tmpfile();
-imageistruecolor($resource);
+try {
+    imageistruecolor($resource);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imageistruecolor(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imageistruecolor(): supplied resource is not a valid Image resource

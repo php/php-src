@@ -10,8 +10,12 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 
-$result = imagestringup(tmpfile(), 1, 5, 5, 'String', 1);
+try {
+    $result = imagestringup(tmpfile(), 1, 5, 5, 'String', 1);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: imagestringup(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagestringup(): supplied resource is not a valid Image resource
