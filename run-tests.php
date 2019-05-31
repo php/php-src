@@ -1350,7 +1350,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested) {
-	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle;
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
 	// This PHP executable is *not* necessarily the same as the tested version
@@ -1593,9 +1593,9 @@ escape:
 							}
 							$test_idx++;
 
-							if (!isset($env['NO_INTERACTION']) || !$env['NO_INTERACTION']) {
-								clear_show_test();
-								echo $resultText;
+							clear_show_test();
+							echo $resultText;
+							if (!$SHOW_ONLY_GROUPS) {
 								show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
 							}
 
