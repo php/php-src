@@ -1593,8 +1593,12 @@ escape:
 							}
 							$test_idx++;
 
-							clear_show_test();
+							if (!$SHOW_ONLY_GROUPS) {
+								clear_show_test();
+							}
+
 							echo $resultText;
+
 							if (!$SHOW_ONLY_GROUPS) {
 								show_test($test_idx, count($workerProcs) . "/$workers concurrent test workers running");
 							}
@@ -1643,7 +1647,9 @@ escape:
 		}
 	}
 
-	clear_show_test();
+	if (!$SHOW_ONLY_GROUPS) {
+		clear_show_test();
+	}
 
 	kill_children($workerProcs);
 
