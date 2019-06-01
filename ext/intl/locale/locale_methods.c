@@ -1554,11 +1554,17 @@ PHP_FUNCTION(locale_lookup)
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS!", &arr, &loc_range, &loc_range_len,
+#if U_ICU_VERSION_MAJOR_NUM > 63
+# define BANG "!"
+#else
+# define BANG
+#endif	
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS" BANG, &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"locale_lookup: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
+#undef BANG
 
 	if(loc_range_len == 0) {
 		if(fallback_loc_str) {
