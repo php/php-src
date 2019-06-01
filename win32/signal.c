@@ -22,9 +22,9 @@
 #include "win32/console.h"
 
 /* true globals; only used from main thread and from kernel callback */
-zval ctrl_handler;
-DWORD ctrl_evt = (DWORD)-1;
-zend_bool *vm_interrupt_flag = NULL;
+static zval ctrl_handler;
+static DWORD ctrl_evt = (DWORD)-1;
+static zend_bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
