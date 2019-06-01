@@ -21,9 +21,10 @@
 
 #include "win32/console.h"
 
-ZEND_TLS zval ctrl_handler;
-ZEND_TLS DWORD ctrl_evt = (DWORD)-1;
-ZEND_TLS zend_bool *vm_interrupt_flag = NULL;
+/* true globals; only used from main thread and from kernel callback */
+static zval ctrl_handler;
+static DWORD ctrl_evt = (DWORD)-1;
+static zend_bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
@@ -78,7 +79,7 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 		return FALSE;
 	}
 
-	(void)InterlockedExchange((LONG*)vm_interrupt_flag, 1);
+	(void)InterlockedExchange8(vm_interrupt_flag, 1);
 
 	ctrl_evt = evt;
 
