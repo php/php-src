@@ -31,6 +31,55 @@
 
 #include "basic_functions.h"
 
+
+#if ( __amd64__ || __amd64 || __x86_64__ )
+
+static const double powers_of_ten[] = {
+        1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1,
+        1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,
+        1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
+        1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22, 1e23};
+
+/* {{{ php_intpow10
+       Returns pow(10.0, (double)power), uses fast lookup table for exact powers */
+static inline double php_intpow10(int power) {
+
+    /* Not in lookup table */
+    if (power < -8 || power > 22) {
+        return pow(10.0, (double)power);
+    }
+    return powers_of_ten[power + 8];
+}
+/* }}} */
+
+/* {{{ php_intlog10abs
+   Returns floor(log10(fabs(val))), uses the exponent of the double */
+static inline int php_intlog10abs(double value) {
+
+    if (value < 1e-8 || value > 1e22 || isnan(value)) {
+        return (int)floor(log10(value));
+    }
+
+    /* remove the sign */
+    long longval = (*(long long *)&value & 0x7FFFFFFFFFFFFFFF);
+    int result = (longval >> 52);
+
+    /* 0.302 is a close enough approximation of 1/log2(10) */
+    result = (result & 0x3FF) * 0.302;
+    if (result > 22) {
+        result -= 308;
+        if (*(long long *)&powers_of_ten[result+8] > longval) {
+            --result;
+        }
+    } else if ((*(long long *)&powers_of_ten[result+9] <= longval)){
+        ++result;
+    }
+
+    return result;
+}
+
+#else
+
 /* {{{ php_intlog10abs
    Returns floor(log10(fabs(val))), uses fast binary search */
 static inline int php_intlog10abs(double value) {
@@ -91,6 +140,8 @@ static inline double php_intpow10(int power) {
 	return powers[power];
 }
 /* }}} */
+
+#endif
 
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
