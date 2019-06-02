@@ -62,25 +62,25 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl LIBNAME=%EXTNAMECAPS% # you may want to change this
   dnl LIBSYMBOL=%EXTNAMECAPS% # you most likely want to change this
 
-  dnl If you need to check for a particular library function
-  dnl and you are using pkg-config:
+  dnl If you need to check for a particular library function (e.g. a conditional
+  dnl or version-dependent feature) and you are using pkg-config:
   dnl PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
   dnl [
-  dnl   PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
-  dnl   PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
-  dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%LIB, 1, [ ])
+  dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%_FEATURE, 1, [ ])
   dnl ],[
-  dnl   AC_MSG_ERROR([wrong %EXTNAME% lib version or lib not found])
+  dnl   AC_MSG_ERROR([FEATURE not supported by your %EXTNAME% library.])
+  dnl ], [
+  dnl   $LIBFOO_LIBS
   dnl ])
 
-  dnl If you need to check for a particular library function
-  dnl and you are not using pkg-config:
+  dnl If you need to check for a particular library function (e.g. a conditional
+  dnl or version-dependent feature) and you are not using pkg-config:
   dnl PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
   dnl [
   dnl   PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $%EXTNAMECAPS%_DIR/$PHP_LIBDIR, %EXTNAMECAPS%_SHARED_LIBADD)
-  dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%LIB,1,[ ])
+  dnl   AC_DEFINE(HAVE_%EXTNAMECAPS%_FEATURE, 1, [ ])
   dnl ],[
-  dnl   AC_MSG_ERROR([wrong %EXTNAME% lib version or lib not found])
+  dnl   AC_MSG_ERROR([FEATURE not supported by your %EXTNAME% library.])
   dnl ],[
   dnl   -L$%EXTNAMECAPS%_DIR/$PHP_LIBDIR -lm
   dnl ])
