@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
 
+- OpenSSL:
+  . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
+    (Jakub Zelenka)
+
 - Sockets:
   . Fixed bug #78038 (Socket_select fails when resource array contains
     references). (Nikita)
