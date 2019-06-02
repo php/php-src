@@ -7,12 +7,12 @@ if test "$PHP_ZIP" != "no"; then
   PKG_CHECK_MODULES([LIBZIP], [libzip >= 0.11])
 
   PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
+  PHP_EVAL_LIBLINE($LIBZIP_LIBS, ZIP_SHARED_LIBADD)
   LIBZIP_LIBDIR=`$PKG_CONFIG --variable=libdir libzip`
 
   dnl Could not think of a simple way to check libzip for overwrite support
   PHP_CHECK_LIBRARY(zip, zip_open,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(zip, $LIBZIP_LIBDIR, ZIP_SHARED_LIBADD)
     AC_DEFINE(HAVE_LIBZIP,1,[ ])
   ], [
     AC_MSG_ERROR(could not find usable libzip)
@@ -22,7 +22,6 @@ if test "$PHP_ZIP" != "no"; then
 
   PHP_CHECK_LIBRARY(zip, zip_file_set_encryption,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(zip, $LIBZIP_LIBDIR, ZIP_SHARED_LIBADD)
     AC_DEFINE(HAVE_ENCRYPTION, 1, [Libzip >= 1.2.0 with encryption support])
   ], [
     AC_MSG_WARN(Libzip >= 1.2.0 needed for encryption support)
