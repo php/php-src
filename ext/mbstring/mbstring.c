@@ -2573,6 +2573,54 @@ PHP_FUNCTION(mb_strripos)
 }
 /* }}} */
 
+/* {{{ proto boolean mb_str_begins(string haystack, string needle [, string encoding])
+   Checks if haystack begins with needle */
+PHP_FUNCTION(mb_str_begins)
+{
+    mbfl_string haystack, needle;
+    zend_string *enc_name = NULL;
+    size_t n;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|S", char( **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name) == FAILURE) {
+        return;
+    }
+
+	haystack.no_language = needle.no_language = MBSTRG(language);
+	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
+    if (!haystack.encoding) {
+        RETURN_FALSE;
+    }
+
+    if (needle.len == 0) {
+        RETURN_BOOL(1);
+    }
+
+    n = mbfl_strpos(&haystack, &needle, 0, 0);
+    if (!mbfl_is_error(n)) {
+        if (n == 0) {
+            RETURN_BOOL(1);
+        } else {
+            RETURN_BOOL(0);
+        }
+    } else {
+        switch (-n) {
+            case 1:
+                break;
+            case 4:
+                php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
+                break;
+            case 8:
+                php_error_docref(NULL, E_NOTICE, "Argument is empty");
+                break;
+            default:
+                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
+                break;
+        }
+        RETURN_BOOL(0);
+    }
+}
+/* }}} */
+
 /* {{{ proto string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
    Finds first occurrence of a string within another */
 PHP_FUNCTION(mb_strstr)
