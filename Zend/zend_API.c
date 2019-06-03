@@ -2614,12 +2614,6 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 /* Disabled functions support */
 
-static ZEND_COLD zend_op_array *display_disabled_compile_string(zval *source_string, char *filename)
-{
-	zend_error(E_WARNING, "eval() has been disabled for security reasons");
-	return NULL;
-}
-
 /* {{{ proto void display_disabled_function(void)
 Dummy function which displays an error when a disabled function is called. */
 ZEND_API ZEND_COLD ZEND_FUNCTION(display_disabled_function)
@@ -2631,12 +2625,6 @@ ZEND_API ZEND_COLD ZEND_FUNCTION(display_disabled_function)
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length) /* {{{ */
 {
 	zend_internal_function *func;
-
-	if (strcmp(function_name, "eval") == 0) {
-		zend_compile_string = display_disabled_compile_string;
-		return SUCCESS;
-	}
-
 	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
 	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS | ZEND_ACC_HAS_RETURN_TYPE);
 		func->num_args = 0;
