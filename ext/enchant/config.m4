@@ -15,6 +15,8 @@ if test "$PHP_ENCHANT" != "no"; then
   [
     AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM, 1, [ ])
     AC_DEFINE(ENCHANT_VERSION_STRING, "1.5.x", [ ])
+  ], [ ], [
+    $ENCHANT_LIBS
   ])
 
   PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
