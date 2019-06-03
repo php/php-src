@@ -84,7 +84,7 @@ jobs:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
         runTestsParameters: -dopcache.enable_cli=1
-    - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/7.4') }}:
+    - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/PHP-7.4') }}:
       - template: test.yml
         parameters:
           configurationName: ${{ parameters.configurationName }}
