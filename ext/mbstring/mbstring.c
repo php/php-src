@@ -2581,7 +2581,7 @@ PHP_FUNCTION(mb_str_begins)
     zend_string *enc_name = NULL;
     size_t n;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|S", char( **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|S", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name) == FAILURE) {
         return;
     }
 
