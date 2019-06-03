@@ -1098,7 +1098,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_RESOURCE,	"resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
 	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float")
+	_(Z_EXPECTED_DOUBLE,	"float") \
+	_(Z_EXPECTED_NUMBER,	"int or float") \
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -1343,6 +1344,22 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_LONG(dest) \
 	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
 
+
+/* no old equivalent */
+#define Z_PARAM_NUMBER_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null))) { \
+		_expected_type = Z_EXPECTED_NUMBER; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
+#define Z_PARAM_NUMBER_OR_NULL(dest) \
+	Z_PARAM_NUMBER_EX(dest, 1)
+
+#define Z_PARAM_NUMBER(dest) \
+	Z_PARAM_NUMBER_EX(dest, 0)
+
 /* old "o" */
 #define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1503,6 +1520,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest);
 
 static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
 {
@@ -1550,6 +1568,18 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 		*dest = 0.0;
 	} else {
 		return zend_parse_arg_double_slow(arg, dest);
+	}
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_number(zval *arg, zval **dest, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return zend_parse_arg_number_slow(arg, dest);
 	}
 	return 1;
 }

@@ -381,6 +381,36 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		zend_string *str = Z_STR_P(arg);
+		zend_long lval;
+		double dval;
+		zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, -1);
+		if (type == IS_LONG) {
+			ZVAL_LONG(arg, lval);
+		} else if (type == IS_DOUBLE) {
+			ZVAL_DOUBLE(arg, dval);
+		} else {
+			return 0;
+		}
+		zend_string_release(str);
+	} else if (Z_TYPE_P(arg) < IS_TRUE) {
+		ZVAL_LONG(arg, 0);
+	} else if (Z_TYPE_P(arg) == IS_TRUE) {
+		ZVAL_LONG(arg, 1);
+	} else {
+		return 0;
+	}
+	*dest = arg;
+	return 1;
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {

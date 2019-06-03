@@ -283,17 +283,15 @@ static double php_expm1(double x)
 }
 /* }}}*/
 
-/* {{{ proto int|float|false abs(int number)
+/* {{{ proto int|float abs(int number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
@@ -303,50 +301,49 @@ PHP_FUNCTION(abs)
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto float|false ceil(float number)
+/* {{{ proto float ceil(float number)
    Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
 {
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		RETURN_DOUBLE(zval_get_double(value));
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto float|false floor(float number)
+/* {{{ proto float floor(float number)
    Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
 {
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		RETURN_DOUBLE(zval_get_double(value));
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 

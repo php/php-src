@@ -2725,24 +2725,11 @@ PHP_FUNCTION(range)
 		Z_PARAM_ZVAL(zlow)
 		Z_PARAM_ZVAL(zhigh)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(zstep)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		Z_PARAM_NUMBER(zstep)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (zstep) {
-		if (Z_TYPE_P(zstep) == IS_DOUBLE) {
-			is_step_double = 1;
-		} else if (Z_TYPE_P(zstep) == IS_STRING) {
-			int type = is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0);
-			if (type == IS_DOUBLE) {
-				is_step_double = 1;
-			}
-			if (type == 0) {
-				/* bad number */
-				php_error_docref(NULL, E_WARNING, "Invalid range string - must be numeric");
-				RETURN_FALSE;
-			}
-		}
-
+		is_step_double = Z_TYPE_P(zstep) == IS_DOUBLE;
 		step = zval_get_double(zstep);
 
 		/* We only want positive step values. */
