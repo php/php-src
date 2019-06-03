@@ -875,6 +875,7 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 
 	if (cafile || capath) {
 		if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
+			ERR_clear_error();
 			if (cafile && !php_openssl_load_stream_cafile(SSL_CTX_get_cert_store(ctx), cafile)) {
 				return FAILURE;
 			}
