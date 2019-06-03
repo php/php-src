@@ -239,7 +239,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 }
 /* }}} */
 
-/* {{{ proto mixed opendir(string path[, resource context])
+/* {{{ proto resource|false opendir(string path[, resource context])
    Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
@@ -247,7 +247,7 @@ PHP_FUNCTION(opendir)
 }
 /* }}} */
 
-/* {{{ proto object dir(string directory[, resource context])
+/* {{{ proto objectđalse dir(string directory[, resource context])
    Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
@@ -255,7 +255,7 @@ PHP_FUNCTION(getdir)
 }
 /* }}} */
 
-/* {{{ proto void closedir([resource dir_handle])
+/* {{{ proto bool closedir([resource dir_handle])
    Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
@@ -390,7 +390,7 @@ PHP_FUNCTION(rewinddir)
 }
 /* }}} */
 
-/* {{{ proto string readdir([resource dir_handle])
+/* {{{ proto string|false readdir([resource dir_handle])
    Read directory entry from dir_handle */
 PHP_NAMED_FUNCTION(php_if_readdir)
 {
@@ -413,7 +413,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto array glob(string pattern [, int flags])
+/* {{{ proto array|false glob(string pattern [, int flags])
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
@@ -546,7 +546,7 @@ no_results:
 /* }}} */
 #endif
 
-/* {{{ proto array scandir(string dir [, int sorting_order [, resource context]])
+/* {{{ proto array|false scandir(string dir [, int sorting_order [, resource context]])
    List files & directories inside the specified path */
 PHP_FUNCTION(scandir)
 {

@@ -643,7 +643,7 @@ SPL_METHOD(SplFixedArray, toArray)
 }
 /* }}} */
 
-/* {{{ proto object SplFixedArray::fromArray(array data[, bool save_indexes])
+/* {{{ proto object SplFixedArray::fromArray(array array[, bool save_indexes])
 */
 SPL_METHOD(SplFixedArray, fromArray)
 {
@@ -1004,7 +1004,8 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs = &spl_fixedarray_it_funcs;
 	iterator->intern.ce = ce;
 	ZVAL_UNDEF(&iterator->intern.value);
@@ -1031,7 +1032,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_fixedarray_setSize, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_fromArray, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
+	ZEND_ARG_INFO(0, array)
 	ZEND_ARG_INFO(0, save_indexes)
 ZEND_END_ARG_INFO()
 

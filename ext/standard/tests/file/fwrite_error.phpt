@@ -29,7 +29,11 @@ var_dump( fwrite($file_handle, $data, $len) );
 // fwrite() on a file handle which is already closed
 echo "-- Testing fwrite() with closed/unset file handle --\n";
 fclose($file_handle);
-var_dump(fwrite($file_handle,"data"));
+try {
+    var_dump(fwrite($file_handle,"data"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
@@ -38,13 +42,11 @@ echo "Done\n";
 $filename = __DIR__."/fwrite_error.tmp";
 unlink( $filename );
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fwrite() : error conditions ***
 -- Testing fwrite() with invalid length arguments --
 int(0)
 int(0)
 -- Testing fwrite() with closed/unset file handle --
-
-Warning: fwrite(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+fwrite(): supplied resource is not a valid stream resource
 Done

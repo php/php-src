@@ -659,7 +659,7 @@ php_formatted_print_get_array(zval *array, int *argc)
 }
 /* }}} */
 
-/* {{{ proto string sprintf(string format [, mixed arg1 [, mixed ...]])
+/* {{{ proto string|false sprintf(string format [, mixed arg1 [, mixed ...]])
    Return a formatted string */
 PHP_FUNCTION(user_sprintf)
 {
@@ -670,7 +670,7 @@ PHP_FUNCTION(user_sprintf)
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_VARIADIC('*', args, argc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_formatted_print(format, args, argc);
 	if (result == NULL) {
@@ -680,7 +680,7 @@ PHP_FUNCTION(user_sprintf)
 }
 /* }}} */
 
-/* {{{ proto string vsprintf(string format, array args)
+/* {{{ proto string|false vsprintf(string format, array args)
    Return a formatted string */
 PHP_FUNCTION(vsprintf)
 {
@@ -691,7 +691,7 @@ PHP_FUNCTION(vsprintf)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_ZVAL(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
 
@@ -704,7 +704,7 @@ PHP_FUNCTION(vsprintf)
 }
 /* }}} */
 
-/* {{{ proto int printf(string format [, mixed arg1 [, mixed ...]])
+/* {{{ proto int|false printf(string format [, mixed arg1 [, mixed ...]])
    Output a formatted string */
 PHP_FUNCTION(user_printf)
 {
@@ -716,7 +716,7 @@ PHP_FUNCTION(user_printf)
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_VARIADIC('*', args, argc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_formatted_print(format, args, argc);
 	if (result == NULL) {
@@ -728,7 +728,7 @@ PHP_FUNCTION(user_printf)
 }
 /* }}} */
 
-/* {{{ proto int vprintf(string format, array args)
+/* {{{ proto int|false vprintf(string format, array args)
    Output a formatted string */
 PHP_FUNCTION(vprintf)
 {
@@ -740,7 +740,7 @@ PHP_FUNCTION(vprintf)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_ZVAL(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
 
@@ -755,7 +755,7 @@ PHP_FUNCTION(vprintf)
 }
 /* }}} */
 
-/* {{{ proto int fprintf(resource stream, string format [, mixed arg1 [, mixed ...]])
+/* {{{ proto int|false fprintf(resource stream, string format [, mixed arg1 [, mixed ...]])
    Output a formatted string into a stream */
 PHP_FUNCTION(fprintf)
 {
@@ -772,7 +772,7 @@ PHP_FUNCTION(fprintf)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_VARIADIC('*', args, argc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);
 
@@ -788,7 +788,7 @@ PHP_FUNCTION(fprintf)
 }
 /* }}} */
 
-/* {{{ proto int vfprintf(resource stream, string format, array args)
+/* {{{ proto int|false vfprintf(resource stream, string format, array args)
    Output a formatted string into a stream */
 PHP_FUNCTION(vfprintf)
 {
@@ -805,7 +805,7 @@ PHP_FUNCTION(vfprintf)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_ZVAL(format)
 		Z_PARAM_ZVAL(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);
 

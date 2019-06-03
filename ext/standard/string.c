@@ -223,7 +223,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 /* }}} */
 #endif
 
-/* {{{ proto string bin2hex(string data)
+/* {{{ proto string|false bin2hex(string data)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
@@ -244,7 +244,7 @@ PHP_FUNCTION(bin2hex)
 }
 /* }}} */
 
-/* {{{ proto string hex2bin(string data)
+/* {{{ proto string|false hex2bin(string data)
    Converts the hex representation of data to binary */
 PHP_FUNCTION(hex2bin)
 {
@@ -328,7 +328,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 }
 /* }}} */
 
-/* {{{ proto int strspn(string str, string mask [, int start [, int len]])
+/* {{{ proto int|false strspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
@@ -336,7 +336,7 @@ PHP_FUNCTION(strspn)
 }
 /* }}} */
 
-/* {{{ proto int strcspn(string str, string mask [, int start [, int len]])
+/* {{{ proto int|false strcspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
@@ -514,7 +514,7 @@ PHP_MINIT_FUNCTION(nl_langinfo)
 }
 /* }}} */
 
-/* {{{ proto string nl_langinfo(int item)
+/* {{{ proto string|false nl_langinfo(int item)
    Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
@@ -913,7 +913,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
+/* {{{ proto string|false wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
@@ -1135,7 +1135,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 }
 /* }}} */
 
-/* {{{ proto array explode(string separator, string str [, int limit])
+/* {{{ proto array|false explode(string separator, string str [, int limit])
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(implode)
 
 	if (arg2 == NULL) {
 		if (Z_TYPE_P(arg1) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Argument must be an array");
+			zend_type_error("Argument must be an array");
 			return;
 		}
 
@@ -1298,7 +1298,7 @@ PHP_FUNCTION(implode)
 			glue = zval_get_tmp_string(arg1, &tmp_glue);
 			pieces = arg2;
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid arguments passed");
+			zend_type_error("Invalid arguments passed");
 			return;
 		}
 	}
@@ -1310,7 +1310,7 @@ PHP_FUNCTION(implode)
 
 #define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]
 
-/* {{{ proto string strtok([string str,] string token)
+/* {{{ proto string|false strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
@@ -1623,7 +1623,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string dirname(string path[, int levels])
+/* {{{ proto string|null dirname(string path[, int levels])
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
@@ -1798,7 +1798,7 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end)
 }
 /* }}} */
 
-/* {{{ proto string stristr(string haystack, string needle[, bool part])
+/* {{{ proto string|false stristr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
@@ -1841,7 +1841,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-/* {{{ proto string strstr(string haystack, string needle[, bool part])
+/* {{{ proto string|false strstr(string haystack, string needle[, bool part])
    Finds first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
@@ -1880,7 +1880,7 @@ PHP_FUNCTION(strstr)
    An alias for strstr */
 /* }}} */
 
-/* {{{ proto int strpos(string haystack, string needle [, int offset])
+/* {{{ proto int|false strpos(string haystack, string needle [, int offset])
    Finds position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
@@ -1920,7 +1920,7 @@ PHP_FUNCTION(strpos)
 }
 /* }}} */
 
-/* {{{ proto int stripos(string haystack, string needle [, int offset])
+/* {{{ proto int|false stripos(string haystack, string needle [, int offset])
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
 {
@@ -1970,7 +1970,7 @@ PHP_FUNCTION(stripos)
 }
 /* }}} */
 
-/* {{{ proto int strrpos(string haystack, string needle [, int offset])
+/* {{{ proto int|false strrpos(string haystack, string needle [, int offset])
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
@@ -2019,7 +2019,7 @@ PHP_FUNCTION(strrpos)
 }
 /* }}} */
 
-/* {{{ proto int strripos(string haystack, string needle [, int offset])
+/* {{{ proto int|false strripos(string haystack, string needle [, int offset])
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
 {
@@ -2106,7 +2106,7 @@ PHP_FUNCTION(strripos)
 }
 /* }}} */
 
-/* {{{ proto string strrchr(string haystack, string needle)
+/* {{{ proto string|false strrchr(string haystack, string needle)
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
 {
@@ -2180,7 +2180,7 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 }
 /* }}} */
 
-/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
+/* {{{ proto string|false chunk_split(string str [, int chunklen [, string ending]])
    Returns split line */
 PHP_FUNCTION(chunk_split)
 {
@@ -2225,7 +2225,7 @@ PHP_FUNCTION(chunk_split)
 }
 /* }}} */
 
-/* {{{ proto string substr(string str, int start [, int length])
+/* {{{ proto string|false substr(string str, int start [, int length])
    Returns part of a string */
 PHP_FUNCTION(substr)
 {
@@ -2369,7 +2369,7 @@ PHP_FUNCTION(str_iends) {
 	RETURN_BOOL(1);
 }
 
-/* {{{ proto mixed substr_replace(mixed str, mixed repl, mixed start [, mixed length])
+/* {{{ proto string|array|false substr_replace(mixed str, mixed repl, mixed start [, mixed length])
    Replaces part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
@@ -2700,13 +2700,9 @@ PHP_FUNCTION(chr)
 {
 	zend_long c;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(c)
-	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
+	ZEND_PARSE_PARAMETERS_END();
 
 	c &= 0xff;
 	ZVAL_INTERNED_STR(return_value, ZSTR_CHAR(c));
@@ -3364,7 +3360,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from[, string to])
+/* {{{ proto string|false strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -4417,7 +4413,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str_len == 0) {
-		RETURN_FALSE;
+		RETURN_EMPTY_STRING();
 	}
 
 	tmp = str;
@@ -4717,7 +4713,7 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-/* {{{ proto string setlocale(mixed category, string locale [, string ...])
+/* {{{ proto string|false setlocale(mixed category, string locale [, string ...])
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
@@ -5342,7 +5338,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto mixed count_chars(string input [, int mode])
+/* {{{ proto array|string|false count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
@@ -5530,7 +5526,7 @@ PHP_FUNCTION(strnatcasecmp)
 }
 /* }}} */
 
-/* {{{ proto int substr_count(string haystack, string needle [, int offset [, int length]])
+/* {{{ proto int|false substr_count(string haystack, string needle [, int offset [, int length]])
    Returns the number of times a substring occurs in the string */
 PHP_FUNCTION(substr_count)
 {
@@ -5840,7 +5836,7 @@ static void php_string_shuffle(char *str, zend_long len) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void str_shuffle(string str)
+/* {{{ proto string str_shuffle(string str)
    Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
@@ -5948,7 +5944,7 @@ PHP_FUNCTION(str_word_count)
 /* }}} */
 
 #if HAVE_STRFMON
-/* {{{ proto string money_format(string format , float value)
+/* {{{ proto string|false money_format(string format , float value)
    Convert monetary value(s) to string */
 PHP_FUNCTION(money_format)
 {
@@ -5999,7 +5995,7 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
-/* {{{ proto array str_split(string str [, int split_length])
+/* {{{ proto array|false str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
@@ -6042,7 +6038,7 @@ PHP_FUNCTION(str_split)
 }
 /* }}} */
 
-/* {{{ proto array strpbrk(string haystack, string char_list)
+/* {{{ proto string|false strpbrk(string haystack, string char_list)
    Search a string for any of a set of characters */
 PHP_FUNCTION(strpbrk)
 {
@@ -6071,7 +6067,7 @@ PHP_FUNCTION(strpbrk)
 }
 /* }}} */
 
-/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
+/* {{{ proto int|false substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
    Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
 PHP_FUNCTION(substr_compare)
 {

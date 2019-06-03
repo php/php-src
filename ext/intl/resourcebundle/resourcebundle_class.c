@@ -441,6 +441,6 @@ void resourcebundle_register_class( void )
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 
-	zend_class_implements(ResourceBundle_ce_ptr, 1, zend_ce_traversable);
+	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_traversable, zend_ce_countable);
 }
 /* }}} */

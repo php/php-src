@@ -70,6 +70,9 @@ PHP 8.0 UPGRADE NOTES
     will now always generate a fatal error. Previously a warning was generated
     in some cases.
     RFC: https://wiki.php.net/rfc/lsp_errors
+  . The precendence of the concatenation operator has changed relative to
+    bitshifts and addition as well as subtraction.
+    RFC: https://wiki.php.net/rfc/concatenation_precedence
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

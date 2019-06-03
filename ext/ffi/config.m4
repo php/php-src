@@ -4,18 +4,14 @@ PHP_ARG_WITH([ffi],
     [Include FFI support])])
 
 if test "$PHP_FFI" != "no"; then
-  PKG_CHECK_MODULES([FFI], [libffi])
+  PKG_CHECK_MODULES([FFI], [libffi >= 3.0.11])
+
+  PHP_EVAL_INCLINE($FFI_CFLAGS)
+  PHP_EVAL_LIBLINE($FFI_LIBS, FFI_SHARED_LIBADD)
+
+  AC_DEFINE(HAVE_FFI, 1, [Have ffi support])
 
   AC_CHECK_TYPES(long double)
-
-  PHP_CHECK_LIBRARY(ffi, ffi_call,
-  [
-    PHP_EVAL_INCLINE($FFI_CFLAGS)
-    PHP_EVAL_LIBLINE($FFI_LIBS, FFI_SHARED_LIBADD)
-    AC_DEFINE(HAVE_FFI,1,[ Have ffi support ])
-  ], [
-    AC_MSG_ERROR(FFI module requires libffi)
-  ])
 
   AC_CACHE_CHECK([for fastcall calling convention], ac_cv_ffi_fastcall,
     [

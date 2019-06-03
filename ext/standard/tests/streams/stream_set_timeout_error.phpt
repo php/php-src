@@ -26,7 +26,11 @@ $microseconds = 10;
 
 echo "\n-- Testing stream_set_timeout() function with a closed socket --\n";
 fclose($client);
-var_dump( stream_set_timeout($client, $seconds) );
+try {
+    var_dump( stream_set_timeout($client, $seconds) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n-- Testing stream_set_timeout() function with a stream that does not support timeouts --\n";
 $filestream = fopen(__FILE__, "r");
@@ -41,9 +45,7 @@ echo "Done";
 *** Testing stream_set_timeout() : error conditions ***
 
 -- Testing stream_set_timeout() function with a closed socket --
-
-Warning: stream_set_timeout(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+stream_set_timeout(): supplied resource is not a valid stream resource
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)

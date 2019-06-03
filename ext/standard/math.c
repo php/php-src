@@ -283,17 +283,15 @@ static double php_expm1(double x)
 }
 /* }}}*/
 
-/* {{{ proto int abs(int number)
+/* {{{ proto int|float abs(int number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
@@ -303,8 +301,9 @@ PHP_FUNCTION(abs)
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -315,17 +314,16 @@ PHP_FUNCTION(ceil)
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		RETURN_DOUBLE(zval_get_double(value));
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -336,21 +334,20 @@ PHP_FUNCTION(floor)
 	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
-
-	convert_scalar_to_number_ex(value);
 
 	if (Z_TYPE_P(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		RETURN_DOUBLE(zval_get_double(value));
+	} else {
+		ZEND_ASSERT(0 && "Unexpected type");
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto float round(float number [, int precision [, int mode]])
+/* {{{ proto float|false round(float number [, int precision [, int mode]])
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
@@ -683,7 +680,7 @@ PHP_FUNCTION(log1p)
 }
 /* }}} */
 
-/* {{{ proto float log(float number, [float base])
+/* {{{ proto float|false log(float number, [float base])
    Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
 {
@@ -846,7 +843,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
-PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
+PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
@@ -856,16 +853,12 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	zend_long cutoff;
 	int cutlim;
 
-	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
-		return FAILURE;
-	}
-
-	s = Z_STRVAL_P(arg);
+	s = ZSTR_VAL(str);
 
 	cutoff = ZEND_LONG_MAX / base;
 	cutlim = ZEND_LONG_MAX % base;
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = ZSTR_LEN(str); i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -901,7 +894,6 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	} else {
 		ZVAL_LONG(ret, num);
 	}
-	return SUCCESS;
 }
 /* }}} */
 
@@ -975,54 +967,45 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 }
 /* }}} */
 
-/* {{{ proto int bindec(string binary_number)
+/* {{{ proto int|float bindec(string binary_number)
    Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
 {
-	zval *arg;
+	zend_string *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_string_ex(arg);
-	if (_php_math_basetozval(arg, 2, return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	_php_math_basetozval(arg, 2, return_value);
 }
 /* }}} */
 
-/* {{{ proto int hexdec(string hexadecimal_number)
+/* {{{ proto int|flat hexdec(string hexadecimal_number)
    Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
 {
-	zval *arg;
+	zend_string *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_string_ex(arg);
-	if (_php_math_basetozval(arg, 16, return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	_php_math_basetozval(arg, 16, return_value);
 }
 /* }}} */
 
-/* {{{ proto int octdec(string octal_number)
+/* {{{ proto int|float octdec(string octal_number)
    Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
 {
-	zval *arg;
+	zend_string *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_string_ex(arg);
-	if (_php_math_basetozval(arg, 8, return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	_php_math_basetozval(arg, 8, return_value);
 }
 /* }}} */
 
@@ -1077,7 +1060,7 @@ PHP_FUNCTION(dechex)
 }
 /* }}} */
 
-/* {{{ proto string base_convert(string number, int frombase, int tobase)
+/* {{{ proto string|false base_convert(string number, int frombase, int tobase)
    Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
@@ -1101,9 +1084,7 @@ PHP_FUNCTION(base_convert)
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(number, (int)frombase, &temp) == FAILURE) {
-		RETURN_FALSE;
-	}
+	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
 	result = _php_math_zvaltobase(&temp, (int)tobase);
 	RETVAL_STR(result);
 }

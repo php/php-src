@@ -803,7 +803,7 @@ PHP_FUNCTION(base64_encode)
 }
 /* }}} */
 
-/* {{{ proto string base64_decode(string str[, bool strict])
+/* {{{ proto string|false base64_decode(string str[, bool strict])
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode)
 {

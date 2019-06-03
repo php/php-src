@@ -25,13 +25,13 @@ with LiteSpeed web server.
 
 ## Building PHP with LiteSpeed SAPI
 
-You need to add `--with-litespeed` to the configure command to build PHP with
+You need to add `--enable-litespeed` to the configure command to build PHP with
 LiteSpeed SAPI, all other SAPI related configure options should be removed.
 
 For example:
 
 ```bash
-./configure --with-litespeed
+./configure --enable-litespeed
 make
 ```
 

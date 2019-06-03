@@ -1243,7 +1243,8 @@ PHP_FUNCTION(xml_set_object)
 	parser = Z_XMLPARSER_P(pind);
 
 	zval_ptr_dtor(&parser->object);
-	ZVAL_COPY(&parser->object, mythis);
+	Z_ADDREF_P(mythis);
+	ZVAL_OBJ(&parser->object, Z_OBJ_P(mythis));
 
 	RETVAL_TRUE;
 }

@@ -4,6 +4,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   a. Object Handlers API
   b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
   c. TSRM changes
+  d. get() and set() object handlers
+  e. zend_parse_parameters 'L' specifier
 
 2. Build system changes
   a. Abstract
@@ -39,6 +41,16 @@ PHP 8.0 INTERNALS UPGRADE NOTES
       - tsrm_free_interpreter_context
       - support for GNUPTH, SGI ST, and BETHREADS
                        
+  d. The get() and set() object handlers have been removed. The get() handler
+     can generally be replaced with cast_object(). Some uses of set() may be
+     replaced by do_operation(). If set() was used to overload direct
+     assignments using "=", then this is no longer supported and the
+     functionality should be provided in some other way (for example, as
+     modification of an object property).
+
+  e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
+     family of macros have been removed. Use 'l' and Z_PARAM_LONG() instead,
+     which, despite the confusing name, actually have stricter input validation.
 
 ========================
 2. Build system changes

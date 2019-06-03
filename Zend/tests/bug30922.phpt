@@ -10,4 +10,4 @@ var_dump($a instanceOf A);
 echo "ok\n";
 ?>
 --EXPECTF--
-Fatal error: Interface RecurisiveFooFar cannot implement itself in %sbug30922.php on line %d
+Fatal error: Interface 'RecurisiveFooFar' not found in %sbug30922.php on line %d

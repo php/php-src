@@ -41,7 +41,11 @@ foreach($operations as $operation) {
 /* Invalid arguments */
 $fp = fopen($file, "w");
 fclose($fp);
-var_dump(flock($fp, LOCK_SH|LOCK_NB));
+try {
+    var_dump(flock($fp, LOCK_SH|LOCK_NB));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n*** Done ***\n";
 ?>
@@ -83,8 +87,6 @@ flock() expects parameter 2 to be int, string given
 
 --- Iteration 8 ---
 flock() expects parameter 2 to be int, string given
-
-Warning: flock(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+flock(): supplied resource is not a valid stream resource
 
 *** Done ***

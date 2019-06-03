@@ -17,8 +17,7 @@ $is_child = isset($argv[1]);
 if ($is_child) {
 	function handler($evt)
 	{
-		echo "\nCaught " . get_evt_name($evt), ", wait, wait ...!\n";
-		exit;
+		exit(3);
 	}
 
 	sapi_windows_set_ctrl_handler('handler');
@@ -46,9 +45,20 @@ if ($is_child) {
 	echo "Sending ", get_evt_name($evt), " to child $child_pid\n";
 	$ret = sapi_windows_generate_ctrl_event($evt, $child_pid);
 
-	echo "Child said: \"",  trim(fread($pipes[1], 48)), "\"\n";
-
 	echo ($ret ? "Successfully" : "Unsuccessfuly"), " sent ", get_evt_name($evt), " to child $child_pid\n";
+
+	$max = 5000; $total = 0; $step = 100;
+	while(proc_get_status($proc)["running"] && $max > $total) {
+		usleep($step);
+		$total += $step;
+	}
+
+	$status = proc_get_status($proc);
+	if ($status["running"]) {
+		echo "Child $child_pid didn't exit after ${max}us\n";
+	} else {
+		echo "Child $child_pid exit with status ", $status["exitcode"], " after ${total}us\n"; 
+	}
 
 	proc_close($proc);
 }
@@ -70,6 +80,6 @@ Started child %d
 Running `tasklist /FI "PID eq %d" /NH` to check the process indeed exists:
 php.exe%w%d%s1%s
 Sending CTRL+C to child %d
-Child said: "Caught CTRL+C, wait, wait ...!"
 Successfully sent CTRL+C to child %d
+Child %d exit with status 3 after %dus
 

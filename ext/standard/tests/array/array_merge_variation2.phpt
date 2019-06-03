@@ -88,102 +88,72 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_merge()
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
-  var_dump( array_merge($arr1, $input) );
-  $iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump( array_merge($arr1, $input) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
 
 -- Iteration 2 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
 
 -- Iteration 3 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
 
 -- Iteration 4 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
 
 -- Iteration 5 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
 
 -- Iteration 6 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
 
 -- Iteration 7 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
 
 -- Iteration 8 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
 
 -- Iteration 9 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
 
 -- Iteration 10 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
 
 -- Iteration 11 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
 
 -- Iteration 12 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
 
 -- Iteration 13 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
 
 -- Iteration 14 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
 
 -- Iteration 15 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
 
 -- Iteration 16 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
 
 -- Iteration 17 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
 
 -- Iteration 18 --
 array(2) {
@@ -194,37 +164,23 @@ array(2) {
 }
 
 -- Iteration 19 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
 
 -- Iteration 20 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
 
 -- Iteration 21 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
 
 -- Iteration 22 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
+Expected parameter 2 to be an array, object given
 
 -- Iteration 23 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
 
 -- Iteration 24 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
 
 -- Iteration 25 --
-
-Warning: array_merge(): Expected parameter 2 to be an array, resource given in %s on line %d
-NULL
+Expected parameter 2 to be an array, resource given
 Done

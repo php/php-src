@@ -11,7 +11,7 @@ $a[1] = 10;
 $a[2] = 20;
 var_dump($a);
 foreach ($a as &$val) {
-	$val += 5;
+	$val->cdata += 5;
 }
 var_dump($a);
 ?>

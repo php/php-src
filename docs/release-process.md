@@ -117,7 +117,7 @@
     git push origin {release branch}
     ```
 
-12. Run: `PHPROOT=. ./scripts/dev/makedist 5.4.2RC2`, this will export the tree,
+12. Run: `./scripts/dev/makedist php-7.4.0RC2`, this will export the tree,
     create `configure` and build three tarballs (gz, bz2 and xz).
 
 13. Run `scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
@@ -213,11 +213,11 @@
 
  6. Check `./sapi/cli/php -v` output for version matching.
 
- 7. Tag the repository with the version f.e. `git tag -u YOURKEYID php-5.4.1`
+ 7. Tag the repository with the version f.e. `git tag -u YOURKEYID php-7.4.1`
 
- 8. Push the tag f.e. `git push origin php-5.4.1`.
+ 8. Push the tag f.e. `git push origin php-7.4.1`.
 
- 9. Run: `PHPROOT=. ./scripts/dev/makedist 5.4.1`, this will export the tag,
+ 9. Run: `./scripts/dev/makedist php-7.4.1`, this will export the tag,
     create configure and build three tarballs (gz, bz2 and xz). Check if the
     pear files are updated (phar). On some systems the behavior of GNU tar can
     default to produce POSIX compliant archives with PAX headers. As not every

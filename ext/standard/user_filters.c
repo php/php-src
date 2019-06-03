@@ -368,7 +368,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* set the filter property, this will be used during cleanup */
 	ZVAL_RES(&zfilter, zend_register_resource(filter, le_userfilters));
-	ZVAL_COPY_VALUE(&filter->abstract, &obj);
+	ZVAL_OBJ(&filter->abstract, Z_OBJ(obj));
 	add_property_zval(&obj, "filter", &zfilter);
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zfilter);
@@ -387,7 +387,7 @@ static void filter_item_dtor(zval *zv)
 	efree(fdat);
 }
 
-/* {{{ proto object stream_bucket_make_writeable(resource brigade)
+/* {{{ proto object|false stream_bucket_make_writeable(resource brigade)
    Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {

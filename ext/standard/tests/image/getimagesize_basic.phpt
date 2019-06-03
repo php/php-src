@@ -24,7 +24,7 @@ $imagetype_filenames = array(
       "BMP image file" => "200x100.bmp",
 
       //TIFF intel byte order
-      "TIFF intel byte order image file" => "200x100.tif",
+      "TIFF intel byte order image file" => "200x100.tiff",
 
       //JPC file
       "JPC image file" => "test1pix.jpc",
@@ -143,7 +143,7 @@ array(6) {
 array(0) {
 }
 
--- TIFF intel byte order image file (200x100.tif) --
+-- TIFF intel byte order image file (200x100.tiff) --
 array(5) {
   [0]=>
   int(200)

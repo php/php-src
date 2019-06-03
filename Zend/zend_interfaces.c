@@ -249,7 +249,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->it.data, Z_OBJ_P(object));
 	iterator->it.funcs = &zend_interface_iterator_funcs_iterator;
 	iterator->ce = Z_OBJCE_P(object);
 	ZVAL_UNDEF(&iterator->value);
@@ -291,7 +292,7 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		return SUCCESS;
 	}
 	if (class_type->num_interfaces) {
-		ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_LINKED);
+		ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS));
 		for (i = 0; i < class_type->num_interfaces; i++) {
 			if (class_type->interfaces[i] == zend_ce_aggregate || class_type->interfaces[i] == zend_ce_iterator) {
 				return SUCCESS;
@@ -321,7 +322,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
 			/* c-level get_iterator cannot be changed (exception being only Traversable is implemented) */
 			if (class_type->num_interfaces) {
-				ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_LINKED);
+				ZEND_ASSERT(class_type->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS));
 				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
 						zend_error_noreturn(E_ERROR, "Class %s cannot implement both %s and %s at the same time",

@@ -657,6 +657,7 @@ utime \
 vasprintf \
 asprintf \
 nanosleep \
+memmem \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -762,35 +763,22 @@ fi
 dnl Check valgrind support.
 PHP_ARG_WITH([valgrind],
   [whether to enable valgrind support],
-  [AS_HELP_STRING([--with-valgrind=DIR],
+  [AS_HELP_STRING([--with-valgrind],
     [Enable valgrind support])],
   [yes],
   [no])
 
 if test "$PHP_VALGRIND" != "no"; then
+  PKG_CHECK_MODULES([VALGRIND], [valgrind], [have_valgrind="yes"], [have_valgrind="no"])
 
-  AC_MSG_CHECKING([for valgrind header])
-
-  if test "$PHP_VALGRIND" = "yes"; then
-    SEARCH_PATH="/usr/local /usr"
-  else
-    SEARCH_PATH="$PHP_VALGRIND"
-  fi
-
-  SEARCH_FOR="/include/valgrind/valgrind.h"
-  for i in $SEARCH_PATH ; do
-    if test -r $i/$SEARCH_FOR; then
-      VALGRIND_DIR=$i
-    fi
-  done
-
-  if test -z "$VALGRIND_DIR"; then
-    AC_MSG_RESULT([not found])
-  else
-    AC_MSG_RESULT(found in $VALGRIND_DIR)
+  if test "$have_valgrind" = "yes"; then
+    PHP_EVAL_INCLINE($VALGRIND_CFLAGS)
     AC_DEFINE(HAVE_VALGRIND, 1, [ ])
+  else
+    if test "$with_valgrind" = "yes"; then
+      AC_MSG_ERROR([Valgrind not found. Please install Valgrind.])
+    fi
   fi
-
 fi
 
 dnl General settings.
@@ -1237,6 +1225,13 @@ TSRM_BASIC_CHECKS
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_CHECK_PTHREADS
 fi
+
+dnl Align segments on huge page boundary
+case $host_alias in
+  *linux*)
+    EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
+    ;;
+esac
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"

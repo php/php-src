@@ -11,6 +11,8 @@ namespace Foo\Bar {
 }
 ?>
 --EXPECTF--
+Deprecated: Cannot use "parent" when current class scope has no parent in %s on line %d
+
 Fatal error: Uncaught Error: Cannot use "parent" when current class scope has no parent in %s:%d
 Stack trace:
 #0 {main}

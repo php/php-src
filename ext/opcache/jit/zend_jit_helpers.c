@@ -968,15 +968,6 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 		z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv);
 		if (z != NULL) {
 
-			if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-				zval rv2;
-				zval *value = Z_OBJ_HT_P(z)->get(Z_OBJ_P(z), &rv2);
-
-				if (z == &rv) {
-					zval_ptr_dtor(&rv);
-				}
-				ZVAL_COPY_VALUE(z, value);
-			}
 			if (binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value) == SUCCESS) {
 				Z_OBJ_HT_P(object)->write_dimension(Z_OBJ_P(object), property, &res);
 			}

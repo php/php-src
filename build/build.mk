@@ -18,7 +18,6 @@
 # Makefile to generate build tools
 #
 
-subdirs = Zend TSRM
 config_h_in = main/php_config.h.in
 PHP_AUTOCONF = autoconf
 PHP_AUTOHEADER = autoheader
@@ -41,28 +40,3 @@ $(config_h_in): configure
 	@rm -f $@
 	@$(PHP_AUTOHEADER) $(PHP_AUTOCONF_FLAGS)
 	@sed -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $@ > $@.tmp && mv $@.tmp $@
-
-snapshot:
-	distname='$(DISTNAME)'; \
-	if test -z "$$distname"; then \
-		distname='php7-snapshot'; \
-	fi; \
-	myname=`basename \`pwd\`` ; \
-	cd .. && cp -rp $$myname $$distname; \
-	cd $$distname; \
-	rm -f $(subdirs) 2>/dev/null || true; \
-	for i in $(subdirs); do \
-		test -d $$i || (test -d ../$$i && cp -rp ../$$i $$i); \
-	done; \
-	find . -type l -exec rm {} \; ; \
-	$(MAKE) -f build/build.mk; \
-	cd ..; \
-	tar cf $$distname.tar $$distname; \
-	rm -rf $$distname $$distname.tar.*; \
-	bzip2 -9 $$distname.tar; \
-	md5sum $$distname.tar.bz2; \
-	sync; sleep 2; \
-	md5sum $$distname.tar.bz2; \
-	bzip2 -t $$distname.tar.bz2
-
-.PHONY: snapshot

@@ -99,222 +99,126 @@ $inputs = array(
 // loop through each element of the array for arr2
 
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( array_intersect_ukey($array1, $value, 'key_compare_func') );
-      var_dump( array_intersect_ukey($array1, $value, $array3, 'key_compare_func') );
+    echo "\n--$key--\n";
+    try {
+        var_dump( array_intersect_ukey($array1, $value, 'key_compare_func') );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    try {
+        var_dump( array_intersect_ukey($array1, $value, $array3, 'key_compare_func') );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 fclose($fp);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_ukey() : usage variation ***
 
 --int 0--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
+Expected parameter 2 to be an array, int given
 
 --int 1--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
+Expected parameter 2 to be an array, int given
 
 --int 12345--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
+Expected parameter 2 to be an array, int given
 
 --int -12345--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+Expected parameter 2 to be an array, int given
+Expected parameter 2 to be an array, int given
 
 --float 10.5--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
+Expected parameter 2 to be an array, float given
 
 --float -10.5--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
+Expected parameter 2 to be an array, float given
 
 --float 12.3456789000e10--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
+Expected parameter 2 to be an array, float given
 
 --float -12.3456789000e10--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
+Expected parameter 2 to be an array, float given
 
 --float .5--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+Expected parameter 2 to be an array, float given
+Expected parameter 2 to be an array, float given
 
 --uppercase NULL--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
+Expected parameter 2 to be an array, null given
 
 --lowercase null--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
+Expected parameter 2 to be an array, null given
 
 --lowercase true--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
+Expected parameter 2 to be an array, bool given
 
 --lowercase false--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
+Expected parameter 2 to be an array, bool given
 
 --uppercase TRUE--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
+Expected parameter 2 to be an array, bool given
 
 --uppercase FALSE--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+Expected parameter 2 to be an array, bool given
+Expected parameter 2 to be an array, bool given
 
 --empty string DQ--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --empty string SQ--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --string DQ--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --string SQ--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --mixed case string--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --heredoc--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+Expected parameter 2 to be an array, string given
+Expected parameter 2 to be an array, string given
 
 --instance of classWithToString--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
+Expected parameter 2 to be an array, object given
+Expected parameter 2 to be an array, object given
 
 --instance of classWithoutToString--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
+Expected parameter 2 to be an array, object given
+Expected parameter 2 to be an array, object given
 
 --undefined var--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
+Expected parameter 2 to be an array, null given
 
 --unset var--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
+Expected parameter 2 to be an array, null given
 
 --resource var--
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, resource given in %s on line %d
-NULL
-
-Warning: array_intersect_ukey(): Expected parameter 2 to be an array, resource given in %s on line %d
-NULL
+Expected parameter 2 to be an array, resource given
+Expected parameter 2 to be an array, resource given
 ===DONE===

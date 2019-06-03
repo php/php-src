@@ -63,15 +63,6 @@ typedef void (*zend_object_write_dimension_t)(zend_object *object, zval *offset,
 /* Used to create pointer to the property of the object, for future direct r/w access */
 typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_string *member, int type, void **cache_slot);
 
-/* Used to set object value. Can be used to override assignments and scalar
-   write ops (like ++, +=) on the object */
-typedef void (*zend_object_set_t)(zend_object *object, zval *value);
-
-/* Used to get object value. Can be used when converting object value to
- * one of the basic types and when using scalar ops (like ++, +=) on the object
- */
-typedef zval* (*zend_object_get_t)(zend_object *object, zval *rv);
-
 /* Used to check if a property of the object exists */
 /* param has_set_exists:
  * 0 (has) whether property exists and is not NULL
@@ -162,8 +153,6 @@ struct _zend_object_handlers {
 	zend_object_read_dimension_t			read_dimension;       /* required */
 	zend_object_write_dimension_t			write_dimension;      /* required */
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr; /* required */
-	zend_object_get_t						get;                  /* optional */
-	zend_object_set_t						set;                  /* optional */
 	zend_object_has_property_t				has_property;         /* required */
 	zend_object_unset_property_t			unset_property;       /* required */
 	zend_object_has_dimension_t				has_dimension;        /* required */

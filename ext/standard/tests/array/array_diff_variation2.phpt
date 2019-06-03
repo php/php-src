@@ -91,117 +91,69 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_diff
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --";
-  var_dump( array_diff($array, $input));
-  $iterator++;
+    echo "\n-- Iteration $iterator --";
+    try {
+        var_dump( array_diff($array, $input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 
--- Iteration 1 --
-Warning: array_diff(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+-- Iteration 1 --Expected parameter 2 to be an array, int given
 
--- Iteration 2 --
-Warning: array_diff(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+-- Iteration 2 --Expected parameter 2 to be an array, int given
 
--- Iteration 3 --
-Warning: array_diff(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+-- Iteration 3 --Expected parameter 2 to be an array, int given
 
--- Iteration 4 --
-Warning: array_diff(): Expected parameter 2 to be an array, int given in %s on line %d
-NULL
+-- Iteration 4 --Expected parameter 2 to be an array, int given
 
--- Iteration 5 --
-Warning: array_diff(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+-- Iteration 5 --Expected parameter 2 to be an array, float given
 
--- Iteration 6 --
-Warning: array_diff(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+-- Iteration 6 --Expected parameter 2 to be an array, float given
 
--- Iteration 7 --
-Warning: array_diff(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+-- Iteration 7 --Expected parameter 2 to be an array, float given
 
--- Iteration 8 --
-Warning: array_diff(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+-- Iteration 8 --Expected parameter 2 to be an array, float given
 
--- Iteration 9 --
-Warning: array_diff(): Expected parameter 2 to be an array, float given in %s on line %d
-NULL
+-- Iteration 9 --Expected parameter 2 to be an array, float given
 
--- Iteration 10 --
-Warning: array_diff(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+-- Iteration 10 --Expected parameter 2 to be an array, null given
 
--- Iteration 11 --
-Warning: array_diff(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+-- Iteration 11 --Expected parameter 2 to be an array, null given
 
--- Iteration 12 --
-Warning: array_diff(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+-- Iteration 12 --Expected parameter 2 to be an array, bool given
 
--- Iteration 13 --
-Warning: array_diff(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+-- Iteration 13 --Expected parameter 2 to be an array, bool given
 
--- Iteration 14 --
-Warning: array_diff(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+-- Iteration 14 --Expected parameter 2 to be an array, bool given
 
--- Iteration 15 --
-Warning: array_diff(): Expected parameter 2 to be an array, bool given in %s on line %d
-NULL
+-- Iteration 15 --Expected parameter 2 to be an array, bool given
 
--- Iteration 16 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 16 --Expected parameter 2 to be an array, string given
 
--- Iteration 17 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 17 --Expected parameter 2 to be an array, string given
 
--- Iteration 18 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 18 --Expected parameter 2 to be an array, string given
 
--- Iteration 19 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 19 --Expected parameter 2 to be an array, string given
 
--- Iteration 20 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 20 --Expected parameter 2 to be an array, string given
 
--- Iteration 21 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 21 --Expected parameter 2 to be an array, string given
 
--- Iteration 22 --
-Warning: array_diff(): Expected parameter 2 to be an array, string given in %s on line %d
-NULL
+-- Iteration 22 --Expected parameter 2 to be an array, string given
 
--- Iteration 23 --
-Warning: array_diff(): Expected parameter 2 to be an array, object given in %s on line %d
-NULL
+-- Iteration 23 --Expected parameter 2 to be an array, object given
 
--- Iteration 24 --
-Warning: array_diff(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+-- Iteration 24 --Expected parameter 2 to be an array, null given
 
--- Iteration 25 --
-Warning: array_diff(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+-- Iteration 25 --Expected parameter 2 to be an array, null given
 
--- Iteration 26 --
-Warning: array_diff(): Expected parameter 2 to be an array, resource given in %s on line %d
-NULL
+-- Iteration 26 --Expected parameter 2 to be an array, resource given
 Done

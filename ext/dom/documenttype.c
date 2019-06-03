@@ -50,7 +50,7 @@ int dom_documenttype_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	ZVAL_STRING(retval, (char *) (dtdptr->name));
+	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
 
 	return SUCCESS;
 }

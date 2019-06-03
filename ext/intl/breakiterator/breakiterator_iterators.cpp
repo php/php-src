@@ -111,7 +111,8 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 
 	zoi_with_current *zoi_iter = static_cast<zoi_with_current*>(emalloc(sizeof *zoi_iter));
 	zend_iterator_init(&zoi_iter->zoi);
-	ZVAL_COPY(&zoi_iter->zoi.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&zoi_iter->zoi.data, Z_OBJ_P(object));
 	zoi_iter->zoi.funcs = &breakiterator_iterator_funcs;
 	zoi_iter->zoi.index = 0;
 	zoi_iter->destroy_it = _breakiterator_destroy_it;
@@ -220,7 +221,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	ii->iterator->index = 0;
 
 	((zoi_with_current*)ii->iterator)->destroy_it = _breakiterator_parts_destroy_it;
-	ZVAL_COPY_VALUE(&((zoi_with_current*)ii->iterator)->wrapping_obj, object);
+	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 
 	((zoi_break_iter_parts*)ii->iterator)->bio = Z_INTL_BREAKITERATOR_P(break_iter_zv);

@@ -30,7 +30,11 @@ var_dump(count($opts)); // should be 3 certificates, priv, pub, extra optional c
 
 var_dump(openssl_pkcs12_export($invalid, $output, $invalid, $pass));
 var_dump(openssl_pkcs12_export($invalid_path, $output, $invalid_path, $pass));
-var_dump(openssl_pkcs12_export($priv_res, $output, $cert_res, $pass));
+try {
+    var_dump(openssl_pkcs12_export($priv_res, $output, $cert_res, $pass));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 //var_dump(openssl_pkcs12_export($cert, $output, $priv, $pass, array("foo")));
 ?>
 --EXPECTF--
@@ -50,7 +54,5 @@ bool(false)
 Warning: openssl_pkcs12_export(): cannot get cert from parameter 1 in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export(): supplied resource is not a valid OpenSSL X.509 resource in %s on line %d
-
 Warning: openssl_pkcs12_export(): cannot get cert from parameter 1 in %s on line %d
-bool(false)
+openssl_pkcs12_export(): supplied resource is not a valid OpenSSL X.509 resource
