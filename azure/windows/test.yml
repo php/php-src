@@ -1,0 +1,21 @@
+parameters:
+  runTestsName: ''
+  runTestsParameters: ''
+
+steps:
+  - script: azure\windows\test.bat
+    displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+    env:
+      PLATFORM: x64
+      PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+      PHP_BUILD_OBJ_DIR: c:\obj
+      PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta6
+      PHP_BUILD_CRT: vc15
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: junit.xml
+      testRunTitle: '${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+      failTaskOnFailedTests: true
+    displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'

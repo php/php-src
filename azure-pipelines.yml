@@ -19,3 +19,19 @@ jobs:
     parameters:
       configurationName: DEBUG_ZTS
       configurationParameters: '--enable-debug --enable-zts'
+  - template: azure/windows/job.yml
+    parameters:
+      configurationName: WINDOWS_RELEASE_NTS
+      configurationParameters: '--disable-debug --disable-zts'
+  - template: azure/windows/job.yml
+    parameters:
+      configurationName: WINDOWS_DEBUG_NTS
+      configurationParameters: '--enable-debug --disable-zts'
+  - template: azure/windows/job.yml
+    parameters:
+      configurationName: WINDOWS_RELEASE_ZTS
+      configurationParameters: '--disable-debug --enable-zts'
+  - template: azure/windows/job.yml
+    parameters:
+      configurationName: WINDOWS_DEBUG_ZTS
+      configurationParameters: '--enable-debug --enable-zts'

@@ -1,0 +1,22 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - script: azure\windows\build.bat
+      env:
+        PLATFORM: x64
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+        PHP_BUILD_OBJ_DIR: c:\obj
+        PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta6
+        PHP_BUILD_CRT: vc15
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
