@@ -2680,7 +2680,7 @@ PHP_FUNCTION(mb_str_ends)
 
     n = mbfl_strpos(&haystack, &needle, 0, 1);
     if (!mbfl_is_error(n)) {
-        if (n == (haystack.length - needle.length)) {
+        if (n == (haystack.len - needle.len)) {
             RETURN_BOOL(1);
         } else {
             RETURN_BOOL(0);
