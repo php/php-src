@@ -357,23 +357,16 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH([unixODBC],,
-  [AS_HELP_STRING([[--with-unixODBC[=DIR]]],
-    [Include unixODBC support [/usr/local]])])
+  [AS_HELP_STRING([--with-unixODBC],
+    [Include unixODBC support])])
 
-  AC_MSG_CHECKING(for unixODBC support)
+  AC_MSG_CHECKING(whether to build with unixODBC support)
   if test "$PHP_UNIXODBC" != "no"; then
-    if test "$PHP_UNIXODBC" = "yes"; then
-      PHP_UNIXODBC=/usr/local
-    fi
-    ODBC_INCDIR=$PHP_UNIXODBC/include
-    ODBC_LIBDIR=$PHP_UNIXODBC/$PHP_LIBDIR
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_CFLAGS=-I$ODBC_INCDIR
-    ODBC_LIBS=-lodbc
+    AC_MSG_RESULT(yes)
+    PKG_CHECK_MODULES([ODBC], [odbc])
+    PHP_EVAL_INCLINE($ODBC_CFLAGS)
     ODBC_TYPE=unixODBC
-    PHP_ODBC_CHECK_HEADER(sqlext.h)
     AC_DEFINE(HAVE_UNIXODBC,1,[ ])
-    AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT(no)
   fi

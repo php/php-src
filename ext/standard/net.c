@@ -177,7 +177,9 @@ PHP_FUNCTION(net_get_interfaces) {
 	dwRetVal = GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
 
 	if (NO_ERROR != dwRetVal) {
-		/* TODO check GetLastError() */
+		char *buf = php_win32_error_to_msg(GetLastError());
+		zend_error(E_WARNING, "GetAdaptersAddresses failed: %s", buf);
+		php_win32_error_msg_free(buf);
 		FREE(pAddresses);
 		RETURN_FALSE;
 	}

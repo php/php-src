@@ -11,6 +11,7 @@ try {
 ?>
 --INI--
 ffi.enable=1
+opcache.jit=0
 --FILE--
 <?php
 $zend = FFI::cdef("

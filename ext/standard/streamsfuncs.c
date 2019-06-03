@@ -49,7 +49,7 @@ static php_stream_context *decode_context_param(zval *contextresource);
 /* Streams based network functions */
 
 #if HAVE_SOCKETPAIR
-/* {{{ proto array stream_socket_pair(int domain, int type, int protocol)
+/* {{{ proto array|false stream_socket_pair(int domain, int type, int protocol)
    Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
@@ -61,7 +61,7 @@ PHP_FUNCTION(stream_socket_pair)
 		Z_PARAM_LONG(domain)
 		Z_PARAM_LONG(type)
 		Z_PARAM_LONG(protocol)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (0 != socketpair((int)domain, (int)type, (int)protocol, pair)) {
 		char errbuf[256];
@@ -86,7 +86,7 @@ PHP_FUNCTION(stream_socket_pair)
 /* }}} */
 #endif
 
-/* {{{ proto resource stream_socket_client(string remoteaddress [, int &errcode [, string &errstring [, double timeout [, int flags [, resource context]]]]])
+/* {{{ proto resource|false stream_socket_client(string remoteaddress [, int &errcode [, string &errstring [, double timeout [, int flags [, resource context]]]]])
    Open a client connection to a remote address */
 PHP_FUNCTION(stream_socket_client)
 {
@@ -112,7 +112,7 @@ PHP_FUNCTION(stream_socket_client)
 		Z_PARAM_DOUBLE(timeout)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE(zcontext)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
@@ -175,7 +175,7 @@ PHP_FUNCTION(stream_socket_client)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_server(string localaddress [, int &errcode [, string &errstring [, int flags [, resource context]]]])
+/* {{{ proto resource|false stream_socket_server(string localaddress [, int &errcode [, string &errstring [, int flags [, resource context]]]])
    Create a server socket bound to localaddress */
 PHP_FUNCTION(stream_socket_server)
 {
@@ -197,7 +197,7 @@ PHP_FUNCTION(stream_socket_server)
 		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE(zcontext)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
@@ -240,7 +240,7 @@ PHP_FUNCTION(stream_socket_server)
 }
 /* }}} */
 
-/* {{{ proto resource stream_socket_accept(resource serverstream, [ double timeout [, string &peername ]])
+/* {{{ proto resource|false stream_socket_accept(resource serverstream, [ double timeout [, string &peername ]])
    Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
@@ -258,7 +258,7 @@ PHP_FUNCTION(stream_socket_accept)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_DOUBLE(timeout)
 		Z_PARAM_ZVAL(zpeername)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
 
@@ -293,7 +293,7 @@ PHP_FUNCTION(stream_socket_accept)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_get_name(resource stream, bool want_peer)
+/* {{{ proto string|false stream_socket_get_name(resource stream, bool want_peer)
    Returns either the locally bound or remote name for a socket stream */
 PHP_FUNCTION(stream_socket_get_name)
 {
@@ -305,7 +305,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_BOOL(want_peer)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
 
@@ -325,7 +325,7 @@ PHP_FUNCTION(stream_socket_get_name)
 }
 /* }}} */
 
-/* {{{ proto int stream_socket_sendto(resource stream, string data [, int flags [, string target_addr]])
+/* {{{ proto int|false stream_socket_sendto(resource stream, string data [, int flags [, string target_addr]])
    Send data to a socket stream.  If target_addr is specified it must be in dotted quad (or [ipv6]) format */
 PHP_FUNCTION(stream_socket_sendto)
 {
@@ -343,7 +343,7 @@ PHP_FUNCTION(stream_socket_sendto)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_STRING(target_addr, target_addr_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 	php_stream_from_zval(stream, zstream);
 
 	if (target_addr_len) {
@@ -358,7 +358,7 @@ PHP_FUNCTION(stream_socket_sendto)
 }
 /* }}} */
 
-/* {{{ proto string stream_socket_recvfrom(resource stream, int amount [, int flags [, string &remote_addr]])
+/* {{{ proto string|false stream_socket_recvfrom(resource stream, int amount [, int flags [, string &remote_addr]])
    Receives data from a socket stream */
 PHP_FUNCTION(stream_socket_recvfrom)
 {
@@ -376,7 +376,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_ZVAL(zremote)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
 
@@ -409,7 +409,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto string stream_get_contents(resource source [, int maxlen [, int offset]])
+/* {{{ proto string|false stream_get_contents(resource source [, int maxlen [, int offset]])
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
@@ -424,7 +424,7 @@ PHP_FUNCTION(stream_get_contents)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(maxlen)
 		Z_PARAM_LONG(desiredpos)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zsrc);
 
@@ -460,7 +460,7 @@ PHP_FUNCTION(stream_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int stream_copy_to_stream(resource source, resource dest [, int maxlen [, int pos]])
+/* {{{ proto int|false stream_copy_to_stream(resource source, resource dest [, int maxlen [, int pos]])
    Reads up to maxlen bytes from source stream and writes them to dest stream. */
 PHP_FUNCTION(stream_copy_to_stream)
 {
@@ -476,7 +476,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(maxlen)
 		Z_PARAM_LONG(pos)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(src, zsrc);
 	php_stream_from_zval(dest, zdest);
@@ -495,7 +495,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_meta_data(resource fp)
+/* {{{ proto array|false stream_get_meta_data(resource fp)
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
@@ -552,7 +552,7 @@ PHP_FUNCTION(stream_get_meta_data)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_transports()
+/* {{{ proto array|false stream_get_transports()
    Retrieves list of registered socket transports */
 PHP_FUNCTION(stream_get_transports)
 {
@@ -574,7 +574,7 @@ PHP_FUNCTION(stream_get_transports)
 }
 /* }}} */
 
-/* {{{ proto array stream_get_wrappers()
+/* {{{ proto array|false stream_get_wrappers()
     Retrieves list of registered stream wrappers */
 PHP_FUNCTION(stream_get_wrappers)
 {
@@ -738,7 +738,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 }
 /* }}} */
 
-/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
+/* {{{ proto int|false stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(stream_select)
 {
@@ -959,7 +959,7 @@ static php_stream_context *decode_context_param(zval *contextresource)
 }
 /* }}} */
 
-/* {{{ proto array stream_context_get_options(resource context|resource stream)
+/* {{{ proto array|false stream_context_get_options(resource context|resource stream)
    Retrieve options for a stream/wrapper/context */
 PHP_FUNCTION(stream_context_get_options)
 {
@@ -993,7 +993,7 @@ PHP_FUNCTION(stream_context_set_option)
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_RESOURCE(zcontext)
 			Z_PARAM_ARRAY(options)
-		ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		ZEND_PARSE_PARAMETERS_END();
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
@@ -1012,7 +1012,7 @@ PHP_FUNCTION(stream_context_set_option)
 			Z_PARAM_STRING(wrappername, wrapperlen)
 			Z_PARAM_STRING(optionname, optionlen)
 			Z_PARAM_ZVAL(zvalue)
-		ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		ZEND_PARSE_PARAMETERS_END();
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(stream_context_set_params)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(zcontext)
 		Z_PARAM_ARRAY(params)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = decode_context_param(zcontext);
 	if (!context) {
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(stream_context_set_params)
 }
 /* }}} */
 
-/* {{{ proto array stream_context_get_params(resource context|resource stream)
+/* {{{ proto array|false stream_context_get_params(resource context|resource stream)
    Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
 {
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(stream_context_get_params)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zcontext)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = decode_context_param(zcontext);
 	if (!context) {
@@ -1536,7 +1536,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 }
 /* }}} */
 
-/* {{{ proto string stream_resolve_include_path(string filename)
+/* {{{ proto string|false stream_resolve_include_path(string filename)
 Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {

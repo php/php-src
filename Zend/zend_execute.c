@@ -1296,15 +1296,6 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 
 	if ((z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
 
-		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-			zval rv2;
-			zval *value = Z_OBJ_HT_P(z)->get(Z_OBJ_P(z), &rv2);
-
-			if (z == &rv) {
-				zval_ptr_dtor(&rv);
-			}
-			ZVAL_COPY_VALUE(z, value);
-		}
 		if (binary_op(&res, z, value) == SUCCESS) {
 			Z_OBJ_HT_P(object)->write_dimension(Z_OBJ_P(object), property, &res);
 		}
@@ -1783,15 +1774,6 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zend_object *
 		return;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-		zval rv2;
-		zval *value = Z_OBJ_HT_P(z)->get(Z_OBJ_P(z), &rv2);
-		if (z == &rv) {
-			zval_ptr_dtor(&rv);
-		}
-		ZVAL_COPY_VALUE(z, value);
-	}
-
 	ZVAL_COPY_DEREF(&z_copy, z);
 	ZVAL_COPY(EX_VAR(opline->result.var), &z_copy);
 	if (inc) {
@@ -1821,15 +1803,6 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zend_object *o
 		return;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-		zval rv2;
-		zval *value = Z_OBJ_HT_P(z)->get(Z_OBJ_P(z), &rv2);
-
-		if (z == &rv) {
-			zval_ptr_dtor(&rv);
-		}
-		ZVAL_COPY_VALUE(z, value);
-	}
 	ZVAL_COPY_DEREF(&z_copy, z);
 	if (inc) {
 		increment_function(&z_copy);
@@ -1858,15 +1831,6 @@ static zend_never_inline void zend_assign_op_overloaded_property(zend_object *ob
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 		return;
-	}
-	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-		zval rv2;
-		zval *value = Z_OBJ_HT_P(z)->get(Z_OBJ_P(z), &rv2);
-
-		if (z == &rv) {
-			zval_ptr_dtor(&rv);
-		}
-		ZVAL_COPY_VALUE(z, value);
 	}
 	if (binary_op(&res, z, value) == SUCCESS) {
 		object->handlers->write_property(object, name, &res, cache_slot);
@@ -3024,6 +2988,46 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
 {
 	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
+}
+
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
+{
+	zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
+			((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
+	zend_bool ret;
+	zval tmp;
+
+	if (need_copy) {
+		ZVAL_COPY(&tmp, value);
+		value = &tmp;
+	}
+	ret = zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict);
+	if (need_copy) {
+		Z_TRY_DELREF_P(value);
+	}
+	if (!ret) {
+		zval_ptr_dtor(value);
+		return Z_REFVAL_P(variable_ptr);
+	}
+
+	variable_ptr = Z_REFVAL_P(variable_ptr);
+	if (EXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+
+		zend_copy_to_variable(variable_ptr, value, value_type, ref);
+		if (GC_DELREF(garbage) == 0) {
+			rc_dtor_func(garbage);
+		} else { /* we need to split */
+			/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+			if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+				gc_possible_root(garbage);
+			}
+		}
+		return variable_ptr;
+	}
+
+	zend_copy_to_variable(variable_ptr, value, value_type, ref);
+	return variable_ptr;
 }
 
 ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
@@ -4291,17 +4295,7 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		} \
 	} while (0)
 
-#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
-# pragma GCC push_options
-# pragma GCC optimize("no-gcse")
-# pragma GCC optimize("no-ivopts")
-#endif
-
 #include "zend_vm_execute.h"
-
-#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
-# pragma GCC pop_options
-#endif
 
 ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
 {

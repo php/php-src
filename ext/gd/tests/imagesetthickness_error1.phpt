@@ -9,7 +9,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $resource = tmpfile();
-imagesetthickness($resource, 5);
+try {
+    imagesetthickness($resource, 5);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagesetthickness(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagesetthickness(): supplied resource is not a valid Image resource

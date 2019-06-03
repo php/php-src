@@ -343,47 +343,6 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest) 
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest) /* {{{ */
-{
-	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
-		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
-			return 0;
-		}
-		*dest = zend_dval_to_lval_cap(Z_DVAL_P(arg));
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
-		double d;
-		int type;
-
-		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
-			if (EXPECTED(type != 0)) {
-				if (UNEXPECTED(zend_isnan(d))) {
-					return 0;
-				}
-				*dest = zend_dval_to_lval_cap(d);
-			} else {
-				return 0;
-			}
-		}
-	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
-		*dest = 0;
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
-		*dest = 1;
-	} else {
-		return 0;
-	}
-	return 1;
-}
-/* }}} */
-
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest) /* {{{ */
-{
-	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
-		return 0;
-	}
-	return zend_parse_arg_long_cap_weak(arg, dest);
-}
-/* }}} */
-
 ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
@@ -422,6 +381,36 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /
 }
 /* }}} */
 
+ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest) /* {{{ */
+{
+	if (UNEXPECTED(ZEND_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	if (Z_TYPE_P(arg) == IS_STRING) {
+		zend_string *str = Z_STR_P(arg);
+		zend_long lval;
+		double dval;
+		zend_uchar type = is_numeric_string(ZSTR_VAL(str), ZSTR_LEN(str), &lval, &dval, -1);
+		if (type == IS_LONG) {
+			ZVAL_LONG(arg, lval);
+		} else if (type == IS_DOUBLE) {
+			ZVAL_DOUBLE(arg, dval);
+		} else {
+			return 0;
+		}
+		zend_string_release(str);
+	} else if (Z_TYPE_P(arg) < IS_TRUE) {
+		ZVAL_LONG(arg, 0);
+	} else if (Z_TYPE_P(arg) == IS_TRUE) {
+		ZVAL_LONG(arg, 1);
+	} else {
+		return 0;
+	}
+	*dest = arg;
+	return 1;
+}
+/* }}} */
+
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
@@ -438,22 +427,6 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 				*dest = Z_STR_P(arg);
 				return 1;
 			}
-		} else if (zobj->handlers->get) {
-			zval rv;
-			zval *z = zobj->handlers->get(zobj, &rv);
-
-			if (Z_TYPE_P(z) != IS_OBJECT) {
-				OBJ_RELEASE(zobj);
-				if (Z_TYPE_P(z) == IS_STRING) {
-					ZVAL_COPY_VALUE(arg, z);
-				} else {
-					ZVAL_STR(arg, zval_get_string_func(z));
-					zval_ptr_dtor(z);
-				}
-				*dest = Z_STR_P(arg);
-				return 1;
-			}
-			zval_ptr_dtor(z);
 		}
 		return 0;
 	} else {
@@ -497,7 +470,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 	switch (c) {
 		case 'l':
-		case 'L':
 			{
 				zend_long *p = va_arg(*va, zend_long *);
 				zend_bool *is_null = NULL;
@@ -506,7 +478,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+				if (!zend_parse_arg_long(arg, p, is_null, check_null)) {
 					return "int";
 				}
 			}
@@ -704,9 +676,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
-		case 'Z':
-			/* 'Z' iz not supported anymore and should be replaced with 'z' */
-			ZEND_ASSERT(c != 'Z');
+		case 'Z': /* replace with 'z' */
+		case 'L': /* replace with 'l' */
+			ZEND_ASSERT(0 && "ZPP modifier no longer supported");
 		default:
 			return "unknown";
 	}
@@ -2642,15 +2614,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 /* Disabled functions support */
 
-zend_op_array *display_disabled_compile_string(zval *source_string, char *filename)
-{
-	zend_error(E_WARNING, "eval() has been disabled for security reasons");
-	return NULL;
-}
-
 /* {{{ proto void display_disabled_function(void)
 Dummy function which displays an error when a disabled function is called. */
-ZEND_API ZEND_FUNCTION(display_disabled_function)
+ZEND_API ZEND_COLD ZEND_FUNCTION(display_disabled_function)
 {
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", get_active_function_name());
 }
@@ -2659,14 +2625,8 @@ ZEND_API ZEND_FUNCTION(display_disabled_function)
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length) /* {{{ */
 {
 	zend_internal_function *func;
-
-	if (strcmp(function_name, "eval") == 0) {
-		zend_compile_string = display_disabled_compile_string;
-		return SUCCESS;
-	}
-
 	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
-	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS);
+	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS | ZEND_ACC_HAS_RETURN_TYPE);
 		func->num_args = 0;
 		func->arg_info = NULL;
 		func->handler = ZEND_FN(display_disabled_function);
@@ -2679,7 +2639,7 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 #ifdef ZEND_WIN32
 #pragma optimize("", off)
 #endif
-static zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
+static ZEND_COLD zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
 {
 	zend_object *intern;
 
@@ -2777,7 +2737,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 			*strict_class = 1;
 			ret = 1;
 		}
-	} else if ((ce = zend_lookup_class_ex(name, NULL, 1)) != NULL) {
+	} else if ((ce = zend_lookup_class(name)) != NULL) {
 		zend_class_entry *scope;
 		zend_execute_data *ex = EG(current_execute_data);
 
@@ -4258,7 +4218,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 }
 /* }}} */
 
-ZEND_API const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
+ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
 {
 	if(ce->ce_flags & ZEND_ACC_TRAIT) {
 		return "trait";

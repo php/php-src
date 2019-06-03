@@ -174,7 +174,7 @@ class Response
     {
         // check default headers
         return (
-            $this->checkHeader('X-Powered-By', '|^PHP/7|', true) &&
+            $this->checkHeader('X-Powered-By', '|^PHP/8|', true) &&
             $this->checkHeader('Content-type', '|^' . $contentType . '(;\s?charset=\w+)?|', true)
         );
     }

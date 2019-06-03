@@ -113,7 +113,7 @@ ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_typ
 	if (resource_type_name) {
 		const char *space;
 		const char *class_name = get_active_class_name(&space);
-		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+		zend_type_error("%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
 	}
 
 	return NULL;
@@ -128,7 +128,7 @@ ZEND_API void *zend_fetch_resource(zend_resource *res, const char *resource_type
 	if (resource_type_name) {
 		const char *space;
 		const char *class_name = get_active_class_name(&space);
-		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+		zend_type_error("%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
 	}
 
 	return NULL;
@@ -140,14 +140,14 @@ ZEND_API void *zend_fetch_resource_ex(zval *res, const char *resource_type_name,
 	if (res == NULL) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space);
-			zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
+			zend_type_error("%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
 		}
 		return NULL;
 	}
 	if (Z_TYPE_P(res) != IS_RESOURCE) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space);
-			zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+			zend_type_error("%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
 		}
 		return NULL;
 	}
@@ -161,14 +161,14 @@ ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name
 	if (res == NULL) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space);
-			zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
+			zend_type_error("%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
 		}
 		return NULL;
 	}
 	if (Z_TYPE_P(res) != IS_RESOURCE) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space);
-			zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+			zend_type_error("%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
 		}
 		return NULL;
 	}

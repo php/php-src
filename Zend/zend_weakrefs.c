@@ -112,13 +112,13 @@ static void zend_weakref_free(zend_object *zo) {
 #define zend_weakref_unsupported(thing) \
 	zend_throw_error(NULL, "WeakReference objects do not support " thing);
 
-static zval* zend_weakref_no_write(zend_object *object, zend_string *member, zval *value, void **rtc) {
+static ZEND_COLD zval* zend_weakref_no_write(zend_object *object, zend_string *member, zval *value, void **rtc) {
 	zend_weakref_unsupported("properties");
 
 	return &EG(uninitialized_zval);
 }
 
-static zval* zend_weakref_no_read(zend_object *object, zend_string *member, int type, void **rtc, zval *rv) {
+static ZEND_COLD zval* zend_weakref_no_read(zend_object *object, zend_string *member, int type, void **rtc, zval *rv) {
 	if (!EG(exception)) {
 		zend_weakref_unsupported("properties");
 	}
@@ -126,19 +126,19 @@ static zval* zend_weakref_no_read(zend_object *object, zend_string *member, int 
 	return &EG(uninitialized_zval);
 }
 
-static zval *zend_weakref_no_read_ptr(zend_object *object, zend_string *member, int type, void **rtc) {
+static ZEND_COLD zval *zend_weakref_no_read_ptr(zend_object *object, zend_string *member, int type, void **rtc) {
 	zend_weakref_unsupported("property references");
 	return NULL;
 }
 
-static int zend_weakref_no_isset(zend_object *object, zend_string *member, int hse, void **rtc) {
+static ZEND_COLD int zend_weakref_no_isset(zend_object *object, zend_string *member, int hse, void **rtc) {
 	if (hse != 2) {
 		zend_weakref_unsupported("properties");
 	}
 	return 0;
 }
 
-static void zend_weakref_no_unset(zend_object *object, zend_string *member, void **rtc) {
+static ZEND_COLD void zend_weakref_no_unset(zend_object *object, zend_string *member, void **rtc) {
 	zend_weakref_unsupported("properties");
 }
 

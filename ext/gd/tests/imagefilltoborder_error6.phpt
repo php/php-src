@@ -20,8 +20,12 @@ imageellipse( $image, 50, 50, 50, 50, imagecolorallocate( $image, 0, 0, 0 ) );
 
 // Try to fill border
 $image_foo = tmpfile();
-imagefilltoborder( $image_foo, 50, 50, imagecolorallocate( $image, 0, 0, 0 ), imagecolorallocate( $image, 255, 0, 0 ) );
+try {
+    imagefilltoborder( $image_foo, 50, 50, imagecolorallocate( $image, 0, 0, 0 ), imagecolorallocate( $image, 255, 0, 0 ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: imagefilltoborder(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagefilltoborder(): supplied resource is not a valid Image resource

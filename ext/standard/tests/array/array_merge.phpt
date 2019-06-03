@@ -78,13 +78,8 @@ var_dump(array_merge($begin_array[6]));
 echo "\n*** Testing array_merge() with typecasting non-array to array ***\n";
 var_dump(array_merge($begin_array[4], (array)"type1", (array)10, (array)12.34));
 
-echo "\n*** Testing error conditions ***\n";
-/* Invalid arguments */
-try {
-    var_dump(array_merge());
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+echo "\n*** Testing array_merge without any arguments ***\n";
+var_dump(array_merge());
 
 echo "Done\n";
 ?>
@@ -746,6 +741,7 @@ array(7) {
   float(12.34)
 }
 
-*** Testing error conditions ***
-array_merge() expects at least 1 parameter, 0 given
+*** Testing array_merge without any arguments ***
+array(0) {
+}
 Done

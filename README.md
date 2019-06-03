@@ -123,7 +123,7 @@ See further documents in the repository for more information on how to
 contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
-- [PHP coding standards](/CODING_STANDARDS)
+- [PHP coding standards](/CODING_STANDARDS.md)
 - [Mailinglist rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
 

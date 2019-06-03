@@ -14,15 +14,17 @@ echo "*** Testing join() : error conditions ***\n";
 echo "\n-- Testing join() with less than expected no. of arguments --\n";
 $glue = 'string_val';
 
-var_dump( join($glue));
+try {
+    var_dump(join($glue));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing join() : error conditions ***
 
 -- Testing join() with less than expected no. of arguments --
-
-Warning: join(): Argument must be an array in %s on line %d
-NULL
+Argument must be an array
 Done

@@ -10,7 +10,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $resource = tmpfile();
-imagetruecolortopalette($resource, true, 2);
+try {
+    imagetruecolortopalette($resource, true, 2);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagetruecolortopalette(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagetruecolortopalette(): supplied resource is not a valid Image resource

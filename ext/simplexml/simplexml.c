@@ -50,13 +50,13 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
-static zval *sxe_get_value(zend_object *z, zval *rv);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter);
 static int php_sxe_iterator_valid(zend_object_iterator *iter);
 static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter);
+static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
 
 /* {{{ _node_as_zval()
  */
@@ -356,7 +356,7 @@ long_dim:
 	}
 
 	if (Z_ISUNDEF_P(rv)) {
-		ZVAL_COPY_VALUE(rv, &EG(uninitialized_zval));
+		ZVAL_NULL(rv);
 	}
 
 	return rv;
@@ -519,7 +519,12 @@ long_dim:
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
-					value = sxe_get_value(Z_OBJ_P(value), &zval_copy);
+					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
+						zend_error(E_ERROR, "Unable to cast node to string");
+						/* FIXME: Should not be fatal */
+					}
+
+					value = &zval_copy;
 					new_value = 1;
 					break;
 				}
@@ -1999,17 +2004,6 @@ SXE_METHOD(count)
 }
 /* }}} */
 
-static zval *sxe_get_value(zend_object *zobj, zval *rv) /* {{{ */
-{
-	if (sxe_object_cast_ex(zobj, rv, IS_STRING) == FAILURE) {
-		zend_error(E_ERROR, "Unable to cast node to string");
-		/* FIXME: Should not be fatal */
-	}
-
-	return rv;
-}
-/* }}} */
-
 static zend_object_handlers sxe_object_handlers;
 
 /* {{{ sxe_object_clone()
@@ -2405,7 +2399,8 @@ zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, i
 	iterator = emalloc(sizeof(php_sxe_iterator));
 	zend_iterator_init(&iterator->intern);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &php_sxe_iterator_funcs;
 	iterator->sxe = Z_SXEOBJ_P(object);
 
@@ -2693,7 +2688,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	zend_class_implements(sxe_class_entry, 1, zend_ce_traversable);
+	zend_class_implements(sxe_class_entry, 2, zend_ce_traversable, zend_ce_countable);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
@@ -2705,7 +2700,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.read_dimension = sxe_dimension_read;
 	sxe_object_handlers.write_dimension = sxe_dimension_write;
 	sxe_object_handlers.get_property_ptr_ptr = sxe_property_get_adr;
-	sxe_object_handlers.get = sxe_get_value;
 	sxe_object_handlers.has_property = sxe_property_exists;
 	sxe_object_handlers.unset_property = sxe_property_delete;
 	sxe_object_handlers.has_dimension = sxe_dimension_exists;

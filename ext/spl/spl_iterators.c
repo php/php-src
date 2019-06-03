@@ -469,7 +469,8 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.data, zobject);
+	Z_ADDREF_P(zobject);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(zobject));
 	iterator->intern.funcs = &spl_recursive_it_iterator_funcs;
 	return (zend_object_iterator*)iterator;
 }
@@ -582,7 +583,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0);
-	ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
+	ZVAL_OBJ(&intern->iterators[0].zobject, Z_OBJ_P(iterator));
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
 
@@ -1531,9 +1532,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	}
 
 	if (inc_refcount) {
-		Z_TRY_ADDREF_P(zobject);
+		Z_ADDREF_P(zobject);
 	}
-	ZVAL_COPY_VALUE(&intern->inner.zobject, zobject);
+	ZVAL_OBJ(&intern->inner.zobject, Z_OBJ_P(zobject));
 
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = Z_OBJ_P(zobject);

@@ -462,7 +462,7 @@ found:
 }
 /* }}} */
 
-static zend_never_inline void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
+static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zend_property_info *dummy;
 
@@ -1837,8 +1837,6 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_read_dimension,				/* read_dimension */
 	zend_std_write_dimension,				/* write_dimension */
 	zend_std_get_property_ptr_ptr,			/* get_property_ptr_ptr */
-	NULL,									/* get */
-	NULL,									/* set */
 	zend_std_has_property,					/* has_property */
 	zend_std_unset_property,				/* unset_property */
 	zend_std_has_dimension,					/* has_dimension */

@@ -73,13 +73,17 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(bindec($input));
+	try {
+		var_dump(bindec($input));
+	} catch (TypeError $e) {
+		echo $e->getMessage(), "\n";
+	}
 	$iterator++;
 };
 fclose($fp);
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing bindec() : usage variations ***
 
 -- Iteration 1 --
@@ -134,9 +138,7 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-
-Notice: Array to string conversion in %s on line %d
-int(0)
+bindec() expects parameter 1 to be string, array given
 
 -- Iteration 19 --
 int(0)
@@ -154,5 +156,5 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-int(%d)
+bindec() expects parameter 1 to be string, resource given
 ===Done===

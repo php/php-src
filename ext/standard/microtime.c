@@ -100,7 +100,7 @@ PHP_FUNCTION(gettimeofday)
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE
-/* {{{ proto array getrusage([int who])
+/* {{{ proto array|false getrusage([int who])
    Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {

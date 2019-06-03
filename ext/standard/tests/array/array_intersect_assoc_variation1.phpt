@@ -93,14 +93,22 @@ $arrays = array(
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
-  echo "\n-- Iteration $iterator --";
+    echo "\n-- Iteration $iterator --";
 
-  // Calling array_intersect_assoc() with default arguments
-  var_dump( array_intersect_assoc($unexpected_value, $arr2) );
+    // Calling array_intersect_assoc() with default arguments
+    try {
+        var_dump( array_intersect_assoc($unexpected_value, $arr2) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
-  // Calling array_intersect_assoc() with more arguments
-  var_dump( array_intersect_assoc($unexpected_value, $arr2, $arr3) );
-  $iterator++;
+    // Calling array_intersect_assoc() with more arguments
+    try {
+        var_dump( array_intersect_assoc($unexpected_value, $arr2, $arr3) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 }
 
 // close the file resource used
@@ -108,174 +116,78 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : Passing non-array values to $arr1 argument ***
 
--- Iteration 1 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 1 --Expected parameter 1 to be an array, int given
+Expected parameter 1 to be an array, int given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 2 --Expected parameter 1 to be an array, int given
+Expected parameter 1 to be an array, int given
 
--- Iteration 2 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 3 --Expected parameter 1 to be an array, int given
+Expected parameter 1 to be an array, int given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 4 --Expected parameter 1 to be an array, int given
+Expected parameter 1 to be an array, int given
 
--- Iteration 3 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 5 --Expected parameter 1 to be an array, float given
+Expected parameter 1 to be an array, float given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 6 --Expected parameter 1 to be an array, float given
+Expected parameter 1 to be an array, float given
 
--- Iteration 4 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 7 --Expected parameter 1 to be an array, float given
+Expected parameter 1 to be an array, float given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, int given in %s on line %d
-NULL
+-- Iteration 8 --Expected parameter 1 to be an array, float given
+Expected parameter 1 to be an array, float given
 
--- Iteration 5 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 9 --Expected parameter 1 to be an array, float given
+Expected parameter 1 to be an array, float given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 10 --Expected parameter 1 to be an array, null given
+Expected parameter 1 to be an array, null given
 
--- Iteration 6 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 11 --Expected parameter 1 to be an array, null given
+Expected parameter 1 to be an array, null given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 12 --Expected parameter 1 to be an array, bool given
+Expected parameter 1 to be an array, bool given
 
--- Iteration 7 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 13 --Expected parameter 1 to be an array, bool given
+Expected parameter 1 to be an array, bool given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 14 --Expected parameter 1 to be an array, bool given
+Expected parameter 1 to be an array, bool given
 
--- Iteration 8 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 15 --Expected parameter 1 to be an array, bool given
+Expected parameter 1 to be an array, bool given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 16 --Expected parameter 1 to be an array, string given
+Expected parameter 1 to be an array, string given
 
--- Iteration 9 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 17 --Expected parameter 1 to be an array, string given
+Expected parameter 1 to be an array, string given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, float given in %s on line %d
-NULL
+-- Iteration 18 --Expected parameter 1 to be an array, string given
+Expected parameter 1 to be an array, string given
 
--- Iteration 10 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
+-- Iteration 19 --Expected parameter 1 to be an array, string given
+Expected parameter 1 to be an array, string given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
+-- Iteration 20 --Expected parameter 1 to be an array, string given
+Expected parameter 1 to be an array, string given
 
--- Iteration 11 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
+-- Iteration 21 --Expected parameter 1 to be an array, object given
+Expected parameter 1 to be an array, object given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
+-- Iteration 22 --Expected parameter 1 to be an array, null given
+Expected parameter 1 to be an array, null given
 
--- Iteration 12 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
+-- Iteration 23 --Expected parameter 1 to be an array, null given
+Expected parameter 1 to be an array, null given
 
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
--- Iteration 13 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
--- Iteration 14 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
--- Iteration 15 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, bool given in %s on line %d
-NULL
-
--- Iteration 16 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
--- Iteration 17 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
--- Iteration 18 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
--- Iteration 19 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
--- Iteration 20 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, string given in %s on line %d
-NULL
-
--- Iteration 21 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, object given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, object given in %s on line %d
-NULL
-
--- Iteration 22 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
-
--- Iteration 23 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, null given in %s on line %d
-NULL
-
--- Iteration 24 --
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, resource given in %s on line %d
-NULL
-
-Warning: array_intersect_assoc(): Expected parameter 1 to be an array, resource given in %s on line %d
-NULL
+-- Iteration 24 --Expected parameter 1 to be an array, resource given
+Expected parameter 1 to be an array, resource given
 Done

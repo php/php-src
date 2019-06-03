@@ -7,4 +7,8 @@ escapeshellarg("hello\0world");
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: escapeshellarg(): Input string contains NULL bytes in %s on line %d
+Fatal error: Uncaught TypeError: Input string contains NULL bytes in %s:%d
+Stack trace:
+#0 %s(%d): escapeshellarg('hello\x00world')
+#1 {main}
+  thrown in %s on line %d

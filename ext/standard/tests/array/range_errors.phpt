@@ -23,7 +23,11 @@ var_dump( range(7.0, 1.0, 6.5) );
 
 echo "\n-- Testing other conditions --";
 var_dump( range(-1, -2, 2) );
-var_dump( range("a", "j", "z") );
+try {
+    var_dump( range("a", "j", "z") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump( range(0, 1, "140962482048819216326.24") );
 var_dump( range(0, 1, "140962482048819216326.24.") );
 
@@ -31,7 +35,11 @@ echo "\n-- Testing Invalid steps --";
 $step_arr = array( "string", NULL, FALSE, "", "\0" );
 
 foreach( $step_arr as $step ) {
-  var_dump( range( 1, 5, $step ) );
+    try {
+        var_dump( range( 1, 5, $step ) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 echo "Done\n";
@@ -67,29 +75,23 @@ bool(false)
 -- Testing other conditions --
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
+range() expects parameter 3 to be int or float, string given
 
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
-Warning: range(): Invalid range string - must be numeric in %s on line %d
+Notice: A non well formed numeric value encountered in %s on line %d
+
+Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
--- Testing Invalid steps --
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
+-- Testing Invalid steps --range() expects parameter 3 to be int or float, string given
 
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
 
 Warning: range(): step exceeds the specified range in %s on line %d
 bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
+range() expects parameter 3 to be int or float, string given
+range() expects parameter 3 to be int or float, string given
 Done

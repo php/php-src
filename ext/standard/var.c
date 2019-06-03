@@ -947,7 +947,8 @@ again:
 					zval *data;
 					zend_ulong index;
 
-					ZVAL_COPY(&obj, struc);
+					Z_ADDREF_P(struc);
+					ZVAL_OBJ(&obj, Z_OBJ_P(struc));
 					if (php_var_serialize_call_magic_serialize(&retval, &obj) == FAILURE) {
 						if (!EG(exception)) {
 							smart_str_appendl(buf, "N;", 2);
@@ -1009,7 +1010,9 @@ again:
 
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
-					ZVAL_COPY(&tmp, struc);
+					
+					Z_ADDREF_P(struc);
+					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
 
 					if (php_var_serialize_call_sleep(&retval, &tmp) == FAILURE) {
 						if (!EG(exception)) {

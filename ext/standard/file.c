@@ -375,7 +375,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
+/* {{{ proto array|false get_meta_tags(string filename [, bool use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 PHP_FUNCTION(get_meta_tags)
 {
@@ -520,7 +520,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
+/* {{{ proto string|false file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -578,7 +578,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
+/* {{{ proto int|false file_put_contents(string file, mixed data [, int flags [, resource context]])
    Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
@@ -720,7 +720,7 @@ PHP_FUNCTION(file_put_contents)
 
 #define PHP_FILE_BUF_SIZE	80
 
-/* {{{ proto array file(string filename [, int flags[, resource context]])
+/* {{{ proto array|false file(string filename [, int flags[, resource context]])
    Read entire file into an array */
 PHP_FUNCTION(file)
 {
@@ -816,7 +816,7 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix)
+/* {{{ proto string|false tempnam(string dir, string prefix)
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
@@ -927,7 +927,7 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ proto resource popen(string command, string mode)
+/* {{{ proto resource|false popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(unlink)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1932,7 +1932,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
+/* {{{ proto array|false fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
@@ -2293,7 +2293,7 @@ out:
 /* }}} */
 
 #if HAVE_REALPATH || defined(ZTS)
-/* {{{ proto string realpath(string path)
+/* {{{ proto string|false realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {

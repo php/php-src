@@ -224,7 +224,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 }
 /* }}} */
 
-/* {{{ proto string http_build_query(mixed formdata [, string prefix [, string arg_separator [, int enc_type]]])
+/* {{{ proto string|false http_build_query(mixed formdata [, string prefix [, string arg_separator [, int enc_type]]])
    Generates a form-encoded query string from an associative array or object. */
 PHP_FUNCTION(http_build_query)
 {
@@ -240,7 +240,7 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_STRING(prefix, prefix_len)
 		Z_PARAM_STRING(arg_sep, arg_sep_len)
 		Z_PARAM_LONG(enc_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type) == FAILURE) {
 		if (formstr.s) {

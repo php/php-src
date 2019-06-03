@@ -658,7 +658,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format[, resource context]])
+/* {{{ proto array|false get_headers(string url[, int format[, resource context]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
