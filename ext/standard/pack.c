@@ -710,7 +710,7 @@ static zend_long php_unpack(char *data, size_t size, int issigned, int *map)
  * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, q, Q, J, P, f, d, x, X, @.
  * Added g, G for little endian float and big endian float, added e, E for little endian double and big endian double.
  */
-/* {{{ proto array unpack(string format, string input)
+/* {{{ proto array|false unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
 PHP_FUNCTION(unpack)
 {

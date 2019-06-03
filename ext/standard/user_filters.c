@@ -387,7 +387,7 @@ static void filter_item_dtor(zval *zv)
 	efree(fdat);
 }
 
-/* {{{ proto object stream_bucket_make_writeable(resource brigade)
+/* {{{ proto object|false stream_bucket_make_writeable(resource brigade)
    Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {

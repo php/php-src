@@ -2413,7 +2413,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 }
 /* }}} */
 
-/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
+/* {{{ proto int|null extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
@@ -2556,7 +2556,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 }
 /* }}} */
 
-/* {{{ proto array compact(mixed var_names [, mixed ...])
+/* {{{ proto array|null compact(mixed var_names [, mixed ...])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -2592,7 +2592,7 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array array_fill(int start_key, int num, mixed val)
+/* {{{ proto array|false array_fill(int start_key, int num, mixed val)
    Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
@@ -3974,7 +3974,7 @@ PHP_FUNCTION(array_keys)
 }
 /* }}} */
 
-/* {{{ proto mixed array_key_first(array stack)
+/* {{{ proto int|string|false array_key_first(array stack)
    Get the key of the first element of the array */
 PHP_FUNCTION(array_key_first)
 {
@@ -3990,7 +3990,7 @@ PHP_FUNCTION(array_key_first)
 }
 /* }}} */
 
-/* {{{ proto mixed array_key_last(array stack)
+/* {{{ proto int|string|false array_key_last(array stack)
    Get the key of the last element of the array */
 PHP_FUNCTION(array_key_last)
 {
@@ -4159,7 +4159,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 }
 /* }}} */
 
-/* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
+/* {{{ proto array|false array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
@@ -4748,7 +4748,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			param_spec = "+f";
 			intersect_data_compare_func = php_array_user_compare;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
 		}
 
@@ -4800,7 +4800,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			fci_key = &fci2;
 			fci_key_cache = &fci2_cache;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type / key_compare_type");
 			return;
 		}
 
@@ -4814,7 +4814,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		}
 
 	} else {
-		php_error_docref(NULL, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
+		ZEND_ASSERT(0 && "Invalid behavior");
 		return;
 	}
 
@@ -5211,7 +5211,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			fci_key = &fci2;
 			fci_key_cache = &fci2_cache;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. key_compare_type is %d. This should never happen. Please report as a bug", data_compare_type, key_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type / key_compare_type");
 			return;
 		}
 
@@ -5225,7 +5225,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		}
 
 	} else {
-		php_error_docref(NULL, E_WARNING, "behavior is %d. This should never happen. Please report as a bug", behavior);
+		ZEND_ASSERT(0 && "Invalid behavior");
 		return;
 	}
 
@@ -6134,8 +6134,6 @@ PHP_FUNCTION(array_map)
 		Z_PARAM_VARIADIC('+', arrays, n_arrays)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_NULL();
-
 	if (n_arrays == 1) {
 		zend_ulong num_key;
 		zend_string *str_key;
@@ -6318,7 +6316,7 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
-/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
+/* {{{ proto array|null array_chunk(array input, int size [, bool preserve_keys])
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
@@ -6387,7 +6385,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array array_combine(array keys, array values)
+/* {{{ proto array|false array_combine(array keys, array values)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
