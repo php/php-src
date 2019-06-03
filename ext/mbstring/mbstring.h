@@ -85,6 +85,7 @@ PHP_FUNCTION(mb_strrpos);
 PHP_FUNCTION(mb_stripos);
 PHP_FUNCTION(mb_strripos);
 PHP_FUNCTION(mb_str_begins);
+PHP_FUNCTION(mb_str_ibegins);
 PHP_FUNCTION(mb_strstr);
 PHP_FUNCTION(mb_strrchr);
 PHP_FUNCTION(mb_stristr);
