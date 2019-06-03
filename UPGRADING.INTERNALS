@@ -5,6 +5,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
   c. TSRM changes
   d. get() and set() object handlers
+  e. zend_parse_parameters 'L' specifier
 
 2. Build system changes
   a. Abstract
@@ -47,6 +48,9 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      functionality should be provided in some other way (for example, as
      modification of an object property).
 
+  e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
+     family of macros have been removed. Use 'l' and Z_PARAM_LONG() insead,
+     which, despite the confusing name, actually have stricter input validation.
 
 ========================
 2. Build system changes
