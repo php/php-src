@@ -49,7 +49,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      modification of an object property).
 
   e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
-     family of macros have been removed. Use 'l' and Z_PARAM_LONG() insead,
+     family of macros have been removed. Use 'l' and Z_PARAM_LONG() instead,
      which, despite the confusing name, actually have stricter input validation.
 
 ========================
