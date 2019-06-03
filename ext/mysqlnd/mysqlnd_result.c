@@ -391,7 +391,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			}
 			break;
 		}
 
