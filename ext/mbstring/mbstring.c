@@ -2643,7 +2643,7 @@ PHP_FUNCTION(mb_str_ibegins)
         RETURN_BOOL(1);
     }
 
-    n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, haystack.encoding);
+    n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, enc_name);
     if (!mbfl_is_error(n)) {
         if (n == 0) {
             RETURN_BOOL(1);
