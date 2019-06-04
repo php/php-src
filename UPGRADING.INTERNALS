@@ -232,6 +232,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   c. Windows build system changes
 
+    . Visual Studio 2019 is utilized for the Windows builds
+
 ========================
 3. Module changes
 ========================
