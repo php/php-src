@@ -226,7 +226,6 @@ EMBED_SAPI_API void php_embed_shutdown(void)
 	sapi_shutdown();
 #ifdef ZTS
     tsrm_shutdown();
-	TSRMLS_CACHE_RESET();
 #endif
 	if (php_embed_module.ini_entries) {
 		free(php_embed_module.ini_entries);
