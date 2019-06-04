@@ -6,16 +6,16 @@ jobs:
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_NTS
-      configurationParameters: '--disable-debug --disable-zts'
+      configurationParameters: '--disable-debug --disable-maintainer-zts'
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
+      configurationParameters: '--enable-debug --disable-maintainer-zts'
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_ZTS
-      configurationParameters: '--disable-debug --enable-zts'
+      configurationParameters: '--disable-debug --enable-maintainer-zts'
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_ZTS
-      configurationParameters: '--enable-debug --enable-zts'
+      configurationParameters: '--enable-debug --enable-maintainer-zts'
