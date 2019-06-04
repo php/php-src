@@ -237,29 +237,29 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	zend_op_array *ret;
 	uint32_t line;
 	char *bufptr, *endptr;
-	int size;
+	size_t len;
+
+	/* Copy file contents before calling original compile_file,
+	 * as it may invalidate the file handle. */
+	if (zend_stream_fixup(file, &bufptr, &len) == FAILURE) {
+		if (type == ZEND_REQUIRE) {
+			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file->filename);
+			zend_bailout();
+		} else {
+			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
+		}
+	}
+
+	data.buf = estrndup(bufptr, len);
+	data.len = len;
 
 	ret = PHPDBG_G(compile_file)(file, type);
 	if (ret == NULL) {
+		efree(data.buf);
 		return ret;
 	}
 
-	if (file->type == ZEND_HANDLE_MAPPED) {
-		data.len = file->handle.stream.mmap.len;
-		data.buf = emalloc(data.len + 1);
-		memcpy(data.buf, file->handle.stream.mmap.buf, data.len);
-	} else {
-		if (file->type == ZEND_HANDLE_FILENAME) {
-			zend_stream_open(file->filename, file);
-		}
-
-		size = file->handle.stream.fsizer(file->handle.stream.handle);
-		data.buf = emalloc(size + 1);
-		data.len = file->handle.stream.reader(file->handle.stream.handle, data.buf, size);
-	}
-
-	memset(data.buf + data.len, 0, 1);
-
+	data.buf[data.len] = '\0';
 	data.line[0] = 0;
 	*(dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint32_t) * data.len)) = data;
 
