@@ -28,7 +28,6 @@ if test "$PHP_TIDY" != "no"; then
   fi
 
   TIDY_LIBDIR=$TIDY_DIR/$PHP_LIBDIR
-  AC_DEFINE(HAVE_TIDY_H, 1, [defined if tidy.h exists])
 
   PHP_CHECK_LIBRARY(tidy, tidyOptGetDoc,
   [

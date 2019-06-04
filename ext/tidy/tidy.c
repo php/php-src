@@ -28,10 +28,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#if HAVE_TIDY_H
 #include "tidy.h"
-#endif
-
 #include "tidybuffio.h"
 
 /* compatibility with older versions of libtidy */
