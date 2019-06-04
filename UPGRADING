@@ -731,7 +731,7 @@ LDAP:
     is used only when error_log is set syslog.
 
 - mbstring.regex_stack_limit
-  . New INI directive (since 7.3.6) limiting stack depth of mbstring/oniguruma
+  . New INI directive (since 7.3.5) limiting stack depth of mbstring/oniguruma
   regular expressions.
 
 ========================================
