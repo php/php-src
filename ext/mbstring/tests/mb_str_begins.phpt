@@ -41,8 +41,7 @@ var_dump(mb_str_begins($string_mb, $needle2));
 
 
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)
