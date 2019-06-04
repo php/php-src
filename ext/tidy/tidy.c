@@ -30,8 +30,6 @@
 
 #if HAVE_TIDY_H
 #include "tidy.h"
-#elif HAVE_TIDYP_H
-#include "tidyp.h"
 #endif
 
 #include "tidybuffio.h"
@@ -1105,9 +1103,6 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Tidy support", "enabled");
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
-#if HAVE_TIDYP_H
-	php_info_print_table_row(2, "libtidyp Version", (char *)tidyVersion());
-#endif
 #if HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
