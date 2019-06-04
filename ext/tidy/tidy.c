@@ -34,11 +34,7 @@
 #include "tidyp.h"
 #endif
 
-#if HAVE_TIDYBUFFIO_H
 #include "tidybuffio.h"
-#else
-#include "buffio.h"
-#endif
 
 /* compatibility with older versions of libtidy */
 #ifndef TIDY_CALL
@@ -1108,9 +1104,8 @@ static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Tidy support", "enabled");
-#if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
-#elif HAVE_TIDYP_H
+#if HAVE_TIDYP_H
 	php_info_print_table_row(2, "libtidyp Version", (char *)tidyVersion());
 #endif
 #if HAVE_TIDYRELEASEDATE
@@ -2032,7 +2027,6 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(VAR);
 	TIDY_TAG_CONST(WBR);
 	TIDY_TAG_CONST(XMP);
-# if HAVE_TIDYBUFFIO_H
 	TIDY_TAG_CONST(ARTICLE);
 	TIDY_TAG_CONST(ASIDE);
 	TIDY_TAG_CONST(AUDIO);
@@ -2061,7 +2055,6 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(TIME);
 	TIDY_TAG_CONST(TRACK);
 	TIDY_TAG_CONST(VIDEO);
-# endif
 }
 
 #endif

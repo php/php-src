@@ -12,10 +12,6 @@ if (PHP_TIDY != "no") {
 				CHECK_HEADER_ADD_INCLUDE("libtidy/tidy.h", "CFLAGS_TIDY", null, null, true)
 			)) {
 
-		if (CHECK_HEADER_ADD_INCLUDE("tidybuffio.h", "CFLAGS_TIDY")) {
-			AC_DEFINE('HAVE_TIDYBUFFIO_H', 1, 'Have tidybuffio.h header file');
-		}
-
 		EXTENSION("tidy", "tidy.c");
 		AC_DEFINE('HAVE_TIDY', 1, 'Have TIDY library');
 		AC_DEFINE('HAVE_TIDY_H', 1, "tidy include header")
