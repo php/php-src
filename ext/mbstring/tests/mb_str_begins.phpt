@@ -13,7 +13,7 @@ $euc_jp = '0123この文字列は日本語です。EUC-JPを使っています�
 
 // EUC-JP - With encoding parameter
 mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
-var_dump(mb_str_begins($euc_jp, '0123', 'EUC-JP'));
+var_dump(mb_str_begins($euc_jp, '0123こ', EUC-JP'));
 var_dump(mb_str_begins($euc_jp, '韓国語', 'EUC-JP'));
 
 // EUC-JP - No encoding parameter
