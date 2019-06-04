@@ -8,7 +8,6 @@ if test "$PHP_ZIP" != "no"; then
 
   PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
   PHP_EVAL_LIBLINE($LIBZIP_LIBS, ZIP_SHARED_LIBADD)
-  LIBZIP_LIBDIR=`$PKG_CONFIG --variable=libdir libzip`
 
   AC_DEFINE(HAVE_LIBZIP, 1, [ ])
 
@@ -18,7 +17,7 @@ if test "$PHP_ZIP" != "no"; then
   ], [
     AC_MSG_WARN(Libzip >= 1.2.0 needed for encryption support)
   ], [
-    -L$LIBZIP_LIBDIR
+    $LIBZIP_LIBS
   ])
 
   PHP_CHECK_LIBRARY(zip, zip_libzip_version,
@@ -26,7 +25,7 @@ if test "$PHP_ZIP" != "no"; then
     AC_DEFINE(HAVE_LIBZIP_VERSION, 1, [Libzip >= 1.3.1 with zip_libzip_version function])
   ], [
   ], [
-    -L$LIBZIP_LIBDIR
+    $LIBZIP_LIBS
   ])
 
   AC_DEFINE(HAVE_ZIP,1,[ ])
