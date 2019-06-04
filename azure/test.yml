@@ -21,7 +21,7 @@ steps:
           --set-timeout 120 \
           ${{ parameters.runTestsParameters }}
     displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
-    condition: and(succeeded(), failed())
+    condition: or(succeeded(), failed())
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
@@ -29,4 +29,4 @@ steps:
       testRunTitle: '${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
       failTaskOnFailedTests: true
     displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'
-    condition: and(succeeded(), failed())
+    condition: or(succeeded(), failed())
