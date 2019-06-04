@@ -57,7 +57,7 @@ jobs:
             --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \
-            --enable-zend-test=shared \
+            --enable-zend-test \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
