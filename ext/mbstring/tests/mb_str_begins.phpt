@@ -37,7 +37,7 @@ $needle1 = base64_decode('5pel5pys6Kqe');
 var_dump(mb_str_begins($string_mb, $needle1));
 
 $needle2 = base64_decode("44GT44KT44Gr44Gh44Gv44CB5LiW55WM");
-var_dump(mb_str_begin($string_mb, $needle2));
+var_dump(mb_str_begins($string_mb, $needle2));
 
 
 ?>
