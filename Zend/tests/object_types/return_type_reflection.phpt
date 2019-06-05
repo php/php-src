@@ -14,13 +14,13 @@ class Two implements One {
 function a() : object {}
 
 $returnTypeOne = (new ReflectionClass(One::class))->getMethod('a')->getReturnType();
-var_dump($returnTypeOne->isBuiltin(), (string)$returnTypeOne);
+var_dump($returnTypeOne->isBuiltin(), $returnTypeOne->getName());
 
 $returnTypeTwo = (new ReflectionClass(Two::class))->getMethod('a')->getReturnType();
-var_dump($returnTypeTwo->isBuiltin(), (string)$returnTypeTwo);
+var_dump($returnTypeTwo->isBuiltin(), $returnTypeTwo->getName());
 
 $returnTypea = (new ReflectionFunction('a'))->getReturnType();
-var_dump($returnTypea->isBuiltin(), (string)$returnTypea);
+var_dump($returnTypea->isBuiltin(), $returnTypea->getName());
 --EXPECT--
 bool(true)
 string(6) "object"
