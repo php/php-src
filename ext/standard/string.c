@@ -4849,8 +4849,8 @@ PHP_FUNCTION(setlocale)
 			plocale = &args[i];
 		}
 
-		loc = zval_get_string(plocale);
-		if (EG(exception)) {
+		loc = zval_try_get_string(plocale);
+		if (UNEXPECTED(!loc)) {
 			return;
 		}
 

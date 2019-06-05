@@ -1930,8 +1930,8 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 			bind->array.element_lengths[i] = sizeof(OCIDate);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
-			zend_string *entry_str = zval_get_string(entry);
-			if (EG(exception)) {
+			zend_string *entry_str = zval_try_get_string(entry);
+			if (UNEXPECTED(!entry_str)) {
 				efree(bind->array.element_lengths);
 				efree(bind->array.elements);
 				efree(bind);

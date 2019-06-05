@@ -4284,8 +4284,8 @@ PHP_FUNCTION(pg_copy_from)
 				PQclear(pgsql_result);
 #if HAVE_PQPUTCOPYDATA
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
-					zend_string *tmp = zval_get_string(value);
-					if (EG(exception)) {
+					zend_string *tmp = zval_try_get_string(value);
+					if (UNEXPECTED(!tmp)) {
 						return;
 					}
 					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
@@ -4309,8 +4309,8 @@ PHP_FUNCTION(pg_copy_from)
 				}
 #else
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
-					zend_string *tmp = zval_get_string(value);
-					if (EG(exception)) {
+					zend_string *tmp = zval_try_get_string(value);
+					if (UNEXPECTED(!tmp)) {
 						return;
 					}
 					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
@@ -5173,8 +5173,8 @@ PHP_FUNCTION(pg_send_execute)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zend_string *tmp_str = zval_get_string(tmp);
-				if (EG(exception)) {
+				zend_string *tmp_str = zval_try_get_string(tmp);
+				if (UNEXPECTED(!tmp)) {
 					_php_pgsql_free_params(params, num_params);
 					return;
 				}

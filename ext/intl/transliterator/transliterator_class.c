@@ -193,11 +193,12 @@ err:
 	zval tmp_member;							\
 	if( Z_TYPE_P( member ) != IS_STRING )		\
 	{											\
-		ZVAL_STR(&tmp_member,					\
-			zval_get_string_func(member));		\
+		zend_string *_str =						\
+			zval_try_get_string_func(member);	\
+		if (UNEXPECTED(!_str)) { return_fail; }	\
+		ZVAL_STR(&tmp_member, _str);			\
 		member = &tmp_member;					\
 		cache_slot = NULL;						\
-		if (EG(exception)) { return_fail; }		\
     }
 
 #define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\

@@ -873,12 +873,13 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	zip_prop_handler *hnd = NULL;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return NULL;
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);
@@ -907,12 +908,13 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 	zip_prop_handler *hnd = NULL;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return &EG(uninitialized_zval);
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);
@@ -946,12 +948,13 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 	int retval = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return 0;
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_ZIP_P(object);

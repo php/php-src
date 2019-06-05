@@ -139,8 +139,8 @@ static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_le
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_OBJECT:
-			buffer = zval_get_string(option_buffer);
-			if (EG(exception)) {
+			buffer = zval_try_get_string(option_buffer);
+			if (UNEXPECTED(!buffer)) {
 				return NULL;
 			}
 			break;

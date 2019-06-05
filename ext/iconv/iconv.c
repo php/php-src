@@ -2286,8 +2286,8 @@ PHP_FUNCTION(iconv_mime_encode)
 
 		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars") - 1)) != NULL) {
 			if (Z_TYPE_P(pzval) != IS_STRING) {
-				tmp_str = zval_get_string_func(pzval);
-				if (EG(exception)) {
+				tmp_str = zval_try_get_string_func(pzval);
+				if (UNEXPECTED(!tmp_str)) {
 					return;
 				}
 				lfchars = ZSTR_VAL(tmp_str);

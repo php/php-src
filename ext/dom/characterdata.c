@@ -104,8 +104,8 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
-	if (EG(exception)) {
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}
 

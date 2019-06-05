@@ -2275,8 +2275,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (Z_TYPE_P(classref) == IS_OBJECT) {
 					ce = Z_OBJCE_P(classref);
 				} else {
-					name = zval_get_string(classref);
-					if (EG(exception)) {
+					name = zval_try_get_string(classref);
+					if (UNEXPECTED(!name)) {
 						return;
 					}
 					if ((ce = zend_lookup_class(name)) == NULL) {
@@ -2288,8 +2288,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 					zend_string_release(name);
 				}
 
-				name = zval_get_string(method);
-				if (EG(exception)) {
+				name = zval_try_get_string(method);
+				if (UNEXPECTED(!name)) {
 					return;
 				}
 

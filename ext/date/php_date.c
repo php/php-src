@@ -2040,12 +2040,13 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	int retval = 0;
 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return 0;
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4167,12 +4168,13 @@ static zval *date_interval_read_property(zval *object, zval *member, int type, v
 	double      fvalue = -1;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return &EG(uninitialized_zval);
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4238,12 +4240,13 @@ static zval *date_interval_write_property(zval *object, zval *member, zval *valu
 	zval tmp_member;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return value;
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	obj = Z_PHPINTERVAL_P(object);
@@ -4292,12 +4295,13 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 	zval tmp_member, *ret;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-		cache_slot = NULL;
-		if (EG(exception)) {
+		zend_string *str = zval_try_get_string_func(member);
+		if (UNEXPECTED(!str)) {
 			return NULL;
 		}
+		ZVAL_STR(&tmp_member, str);
+		member = &tmp_member;
+		cache_slot = NULL;
 	}
 
 	if(zend_binary_strcmp("y", sizeof("y") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||

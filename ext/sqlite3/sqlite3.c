@@ -802,8 +802,8 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 					break;
 
 				default: {
-					zend_string *str = zval_get_string(&retval);
-					if (EG(exception)) {
+					zend_string *str = zval_try_get_string(&retval);
+					if (UNEXPECTED(!str)) {
 						ret = FAILURE;
 						break;
 					}
@@ -1487,8 +1487,8 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 				}
 
 				case SQLITE3_TEXT: {
-					zend_string *str = zval_get_string(parameter);
-					if (EG(exception)) {
+					zend_string *str = zval_try_get_string(parameter);
+					if (UNEXPECTED(!str)) {
 						return FAILURE;
 					}
 					return_code = sqlite3_bind_text(stmt_obj->stmt, param->param_number, ZSTR_VAL(str), ZSTR_LEN(str), SQLITE_TRANSIENT);

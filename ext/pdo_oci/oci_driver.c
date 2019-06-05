@@ -460,8 +460,8 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		case PDO_OCI_ATTR_ACTION:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
-			zend_string *action = zval_get_string(val);
-			if (EG(exception)) {
+			zend_string *action = zval_try_get_string(val);
+			if (UNEXPECTED(!action)) {
 				return 0;
 			}
 
@@ -481,8 +481,8 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		case PDO_OCI_ATTR_CLIENT_INFO:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
-			zend_string *client_info = zval_get_string(val);
-			if (EG(exception)) {
+			zend_string *client_info = zval_try_get_string(val);
+			if (UNEXPECTED(!client_info)) {
 				return 0;
 			}
 
@@ -502,8 +502,8 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		case PDO_OCI_ATTR_CLIENT_IDENTIFIER:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
-			zend_string *identifier = zval_get_string(val);
-			if (EG(exception)) {
+			zend_string *identifier = zval_try_get_string(val);
+			if (UNEXPECTED(!identifier)) {
 				return 0;
 			}
 
@@ -523,8 +523,8 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		case PDO_OCI_ATTR_MODULE:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
-			zend_string *module = zval_get_string(val);
-			if (EG(exception)) {
+			zend_string *module = zval_try_get_string(val);
+			if (UNEXPECTED(!module)) {
 				return 0;
 			}
 

@@ -299,8 +299,8 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
-			if (EG(exception)) {
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
 				return;
 			}
 
@@ -315,8 +315,8 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_BAIL:
 		oldint = ASSERTG(bail);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
-			if (EG(exception)) {
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
 				return;
 			}
 
@@ -331,8 +331,8 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_QUIET_EVAL:
 		oldint = ASSERTG(quiet_eval);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
-			if (EG(exception)) {
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
 				return;
 			}
 
@@ -347,8 +347,8 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_WARNING:
 		oldint = ASSERTG(warning);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
-			if (EG(exception)) {
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
 				return;
 			}
 
@@ -377,8 +377,8 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_EXCEPTION:
 		oldint = ASSERTG(exception);
 		if (ac == 2) {
-			zend_string *val = zval_get_string(value);
-			if (EG(exception)) {
+			zend_string *val = zval_try_get_string(value);
+			if (UNEXPECTED(!val)) {
 				return;
 			}
 
