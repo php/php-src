@@ -15,11 +15,11 @@ jpeg <--> gd1/gd2 conversion test
 	$cwd = __DIR__;
 
 	echo "JPEG to GD1 conversion: ";
-	echo imagegd(imagecreatefromjpeg($cwd . "/conv_test私はガラスを食べられます.jpeg"), $cwd . "/test私はガラスを食べられます.gd1") ? 'ok' : 'failed';
+	echo imagegd(imagecreatefromjpeg($cwd . "/conv_test私はガラスを食べられます.jpg"), $cwd . "/test私はガラスを食べられます.gd1") ? 'ok' : 'failed';
 	echo "\n";
 
 	echo "JPEG to GD2 conversion: ";
-	echo imagegd2(imagecreatefromjpeg($cwd . "/conv_test私はガラスを食べられます.jpeg"), $cwd . "/test私はガラスを食べられます.gd2") ? 'ok' : 'failed';
+	echo imagegd2(imagecreatefromjpeg($cwd . "/conv_test私はガラスを食べられます.jpg"), $cwd . "/test私はガラスを食べられます.gd2") ? 'ok' : 'failed';
 	echo "\n";
 
 	echo "GD1 to JPEG conversion: ";

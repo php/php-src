@@ -1,13 +1,19 @@
-AC_DEFUN([TSRM_BASIC_CHECKS],[
+dnl This file contains TSRM specific autoconf macros.
 
+dnl
+dnl TSRM_BASIC_CHECKS
+dnl
+AC_DEFUN([TSRM_BASIC_CHECKS],[
 AC_REQUIRE([AC_PROG_CC])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
 
 AC_CHECK_FUNCS(sigprocmask)
 ])
 
+dnl
+dnl TSRM_CHECK_PTH
+dnl
 AC_DEFUN([TSRM_CHECK_PTH],[
-
 AC_MSG_CHECKING(for GNU Pth)
 PTH_PREFIX="`$1 --prefix`"
 if test -z "$PTH_PREFIX"; then
@@ -20,9 +26,11 @@ LIBS="$LIBS `$1 --libs`"
 
 AC_DEFINE(GNUPTH, 1, [Whether you use GNU Pth])
 AC_MSG_RESULT(yes - installed in $PTH_PREFIX)
-
 ])
 
+dnl
+dnl TSRM_CHECK_ST
+dnl
 AC_DEFUN([TSRM_CHECK_ST],[
   if test -r "$1/include/st.h"; then
     CPPFLAGS="$CPPFLAGS -I$1/include"
@@ -40,8 +48,10 @@ AC_DEFUN([TSRM_CHECK_ST],[
   AC_DEFINE(TSRM_ST, 1, [ ])
 ])
 
+dnl
+dnl TSRM_CHECK_PTHREADS
+dnl
 AC_DEFUN([TSRM_CHECK_PTHREADS],[
-
 PTHREADS_CHECK
 
 if test "$pthreads_working" != "yes"; then
@@ -54,11 +64,13 @@ AC_MSG_CHECKING(for POSIX threads)
 AC_MSG_RESULT(yes)
 ])
 
+dnl
+dnl TSRM_THREADS_CHECKS
+dnl
+dnl For the thread implementations, we always use --with-* to maintain
+dnl consistency.
+dnl
 AC_DEFUN([TSRM_THREADS_CHECKS],[
-
-dnl For the thread implementations, we always use --with-*
-dnl to maintain consistency
-
 AC_ARG_WITH([tsrm-pth],
   [AS_HELP_STRING([[--with-tsrm-pth[=pth-config]]],
     [Use GNU Pth])],
@@ -86,5 +98,4 @@ elif test "$TSRM_ST" != "no"; then
 elif test "$TSRM_PTHREADS" != "no"; then
   TSRM_CHECK_PTHREADS
 fi
-
 ])

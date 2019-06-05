@@ -55,11 +55,9 @@ typedef struct _zend_op zend_op;
 #if SIZEOF_SIZE_T == 4
 # define ZEND_USE_ABS_JMP_ADDR      1
 # define ZEND_USE_ABS_CONST_ADDR    1
-# define ZEND_EX_USE_RUN_TIME_CACHE 1
 #else
 # define ZEND_USE_ABS_JMP_ADDR      0
 # define ZEND_USE_ABS_CONST_ADDR    0
-# define ZEND_EX_USE_RUN_TIME_CACHE 1
 #endif
 
 typedef union _znode_op {
@@ -270,6 +268,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Children must reuse parent get_iterator()              |     |     |     */
 #define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 18) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class is being linked. Don't free strings.             |     |     |     */
+#define ZEND_ACC_LINKING_IN_PROGRESS     (1 << 19) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
@@ -491,9 +492,7 @@ struct _zend_execute_data {
 	zval                 This;             /* this + call_info + num_args    */
 	zend_execute_data   *prev_execute_data;
 	zend_array          *symbol_table;
-#if ZEND_EX_USE_RUN_TIME_CACHE
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
-#endif
 };
 
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
@@ -685,25 +684,6 @@ struct _zend_execute_data {
 #define ZEND_OP_ARRAY_EXTENSION(op_array, handle) \
 	((void**)RUN_TIME_CACHE(op_array))[handle]
 
-#if ZEND_EX_USE_RUN_TIME_CACHE
-
-# define EX_RUN_TIME_CACHE() \
-	EX(run_time_cache)
-
-# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
-		EX(run_time_cache) = RUN_TIME_CACHE(op_array); \
-	} while (0)
-
-#else
-
-# define EX_RUN_TIME_CACHE() \
-	RUN_TIME_CACHE(&EX(func)->op_array)
-
-# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
-	} while (0)
-
-#endif
-
 #define IS_UNUSED	0		/* Unused operand */
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
@@ -786,7 +766,6 @@ ZEND_API void function_add_ref(zend_function *function);
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
-ZEND_API void zend_try_exception_handler();
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
@@ -794,6 +773,16 @@ ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
+
+ZEND_API ZEND_COLD void zend_user_exception_handler(void);
+
+#define zend_try_exception_handler() do { \
+		if (UNEXPECTED(EG(exception))) { \
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) { \
+				zend_user_exception_handler(); \
+			} \
+		} \
+	} while (0)
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
@@ -994,16 +983,19 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
+/* Attribute for ternary inside parentheses */
+#define ZEND_PARENTHESIZED_CONDITIONAL 1
+
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)
 #define ZEND_SYMBOL_CONST    (1<<2)
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
+#define ZEND_PARENTHESIZED_CONCAT 252 /* removed with PHP 8 */
 #define ZEND_GOTO  253
 #define ZEND_BRK   254
 #define ZEND_CONT  255
-
 
 END_EXTERN_C()
 

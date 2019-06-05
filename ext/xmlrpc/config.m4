@@ -1,14 +1,12 @@
-dnl config.m4 for extension xmlrpc
-
 PHP_ARG_WITH([xmlrpc],
-  [for XMLRPC-EPI support],
+  [whether to build with XMLRPC-EPI support],
   [AS_HELP_STRING([[--with-xmlrpc[=DIR]]],
     [Include XMLRPC-EPI support])])
 
-PHP_ARG_WITH([libexpat-dir],
-  [libexpat dir for XMLRPC-EPI],
-  [AS_HELP_STRING([--with-libexpat-dir=DIR],
-    [XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)])],
+PHP_ARG_WITH([expat],
+  [whether to build with expat support],
+  [AS_HELP_STRING([--with-expat],
+    [XMLRPC-EPI: use expat instead of libxml2])],
   [no],
   [no])
 
@@ -26,9 +24,9 @@ if test "$PHP_XMLRPC" != "no"; then
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
   dnl
-  dnl Default to libxml2 if --with-libexpat-dir is not used
+  dnl Default to libxml2 if --with-expat is not specified.
   dnl
-  if test "$PHP_LIBEXPAT_DIR" = "no"; then
+  if test "$PHP_EXPAT" = "no"; then
 
     if test "$PHP_LIBXML" = "no"; then
       AC_MSG_ERROR([XML-RPC extension requires LIBXML extension, add --with-libxml])
@@ -41,20 +39,7 @@ if test "$PHP_XMLRPC" != "no"; then
       fi
     ])
   else
-    testval=no
-    for i in $PHP_LIBEXPAT_DIR $XMLRPC_DIR /usr/local /usr; do
-      if test -f $i/$PHP_LIBDIR/libexpat.a || test -f $i/$PHP_LIBDIR/libexpat.$SHLIB_SUFFIX_NAME; then
-        AC_DEFINE(HAVE_LIBEXPAT,1,[ ])
-        PHP_ADD_LIBRARY_WITH_PATH(expat, $i/$PHP_LIBDIR, XMLRPC_SHARED_LIBADD)
-        PHP_ADD_INCLUDE($i/include)
-        testval=yes
-        break
-      fi
-    done
-
-    if test "$testval" = "no"; then
-      AC_MSG_ERROR([XML-RPC support requires libexpat. Use --with-libexpat-dir=<DIR> (deprecated!)])
-    fi
+    PHP_SETUP_EXPAT([XMLRPC_SHARED_LIBADD])
   fi
 
   dnl if iconv is shared or missing then we should build iconv ourselves
@@ -91,9 +76,9 @@ elif test "$PHP_XMLRPC" != "no"; then
   if test -r $PHP_XMLRPC/include/xmlrpc.h; then
     XMLRPC_DIR=$PHP_XMLRPC/include
   elif test -r $PHP_XMLRPC/include/xmlrpc-epi/xmlrpc.h; then
-dnl some xmlrpc-epi header files have generic file names like
-dnl queue.h or base64.h. Distributions have to create dir
-dnl for xmlrpc-epi because of this.
+    dnl Some xmlrpc-epi header files have generic file names like queue.h or
+    dnl base64.h. Distributions have to create dir for xmlrpc-epi because of
+    dnl this.
     XMLRPC_DIR=$PHP_XMLRPC/include/xmlrpc-epi
   else
     AC_MSG_CHECKING(for XMLRPC-EPI in default path)

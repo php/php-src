@@ -1,5 +1,3 @@
-dnl config.m4 for extension imap
-
 AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i

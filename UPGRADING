@@ -27,10 +27,22 @@ PHP 7.4 UPGRADE NOTES
   . "fn" is now a reserved keyword. In particular it can no longer be used as a
     function or class name. It can still be used as a method or class constant
     name.
+  . Passing the result of a (non-reference) list() assignment by reference is
+    consistently disallowed now. Previously this worked if the right hand side
+    was a simple (CV) variable and did not occur as part of the list().
+
+- BCMath:
+  . BCMath functions will now warn if a non well-formed number is passed, such
+    as "32foo". The argument will be interpreted as zero (as before).
 
 - Curl:
   . Attempting to serialize a CURLFile class will now generate an exception.
     Previously the exception was only thrown on unserialization.
+  . Using CURLPIPE_HTTP1 is deprecated, and is no longer supported as of cURL
+    7.62.0.
+  . The $version parameter of curl_version() is deprecated. If any value not
+    equal to the default CURLVERSION_NOW is passed, a warning is raised and the
+    parameter is ignored.
 
 - Date:
   . Calling var_dump() or similar on a DateTime(Immutable) instance will no
@@ -102,6 +114,17 @@ PHP 7.4 UPGRADE NOTES
 - Standard:
   . The "o" serialization format has been removed. As it is never produced by
     PHP, this may only break unserialization of manually crafted strings.
+  . Password hashing algorithm identifiers are now nullable strings rather
+    than integers.
+
+     * PASSWORD_DEFAULT was int 1; now is null
+     * PASSWORD_BCRYPT was int 1; now is string '2y'
+     * PASSWORD_ARGON2I was int 2; now is string 'argon2i'
+     * PASSWORD_ARGON2ID was int 3; now is string 'argon2id'
+
+    Applications correctly using the constants PASSWORD_DEFAULT,
+    PASSWORD_BCRYPT, PASSWORD_ARGON2I, and PASSWORD_ARGON2ID will continue to
+    function correctly.
 
 ========================================
 2. New Features
@@ -127,6 +150,22 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/arrow_functions_v2
 
+  . Added support for limited return type covariance and argument type
+    contravariance. The following code will now work:
+
+        class A {}
+        class B extends A {}
+
+        class Producer {
+            public function method(): A {}
+        }
+        class ChildProducer extends Producer {
+            public function method(): B {}
+        }
+
+    This feature is currently restricted to non-cyclic type references only.
+    RFC: https://wiki.php.net/rfc/covariant-returns-and-contravariant-parameters
+
   . Added support for coalesce assign (??=) operator. For example:
 
         $array['key'] ??= computeDefault();
@@ -136,6 +175,14 @@ PHP 7.4 UPGRADE NOTES
         }
 
     RFC: https://wiki.php.net/rfc/null_coalesce_equal_operator
+
+  . Added support for unpacking inside arrays. For example:
+
+        $arr1 = [3, 4];
+        $arr2 = [1, 2, ...$arr1, 5];
+        // $arr2 == [1, 2, 3, 4, 5]
+
+    RFC: https://wiki.php.net/rfc/spread_operator_for_array
 
   . Support for WeakReferences has been added.
     RFC: https://wiki.php.net/rfc/weakrefs
@@ -153,6 +200,17 @@ PHP 7.4 UPGRADE NOTES
   . A new extension which provides a simple way to call native functions, access
     native variables and create/access data structures defined in C libraries.
     RFC: https://wiki.php.net/rfc/ffi
+
+- GD:
+  . Added the "scatter" image filter (IMG_FILTER_SCATTER) to apply a scatter
+    filter to images. This filter has the following prototype:
+
+        imagefilter($im, IMG_FILTER_SCATTER, int $sub, int $plus, array $colors = []);
+
+    The $colors array can be populated with a set of indexed colors where to
+    apply the scatter pixel shifting on.
+
+    Note, the result of this filter is always random.
 
 - Hash:
   . Added "crc32c" hash using Castagnoli's polynomial. This crc32 variant is
@@ -199,6 +257,10 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/custom_object_serialization
 
+  . array_merge() and array_merge_recursive() may now be called without any
+    arguments, in which case they will return an empty array. This is useful
+    in conjunction with the spread operator, e.g. array_merge(...$arrays).
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -208,10 +270,23 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Nesting ternary operators without explicit parentheses is deprecated:
+
+        // Code like
+        $a ? $b : $c ? $d : $e
+        // should be replaced by (current interpretation)
+        ($a ? $b : $c) ? $d : $e
+        // or (likely intended interpretation)
+        $a ? $b : ($c ? $d : $e)
+
+    RFC: https://wiki.php.net/rfc/ternary_associativity
   . Unbinding $this of a non-static method through a combination of
     ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
     so is equivalent to calling a non-static method statically, which has been
     deprecated since PHP 7.0.
+  . Using "parent" inside a class without parent is deprecated, and will throw
+    a compile-time error in the future. Currently an error will only be
+    generated if/when the parent is accessed at run-time.
 
 - COM:
   . Importing type libraries with case-insensitive constant registering has been
@@ -232,17 +307,20 @@ PHP 7.4 UPGRADE NOTES
 
 - SPL:
   . SplFileObject::fputcsv(), ::fgetcsv() and ::setCsvControl() now accept an
-    empty string as $escape argument, which disables the propriertary PHP
+    empty string as $escape argument, which disables the proprietary PHP
     escaping mechanism. SplFileObject::getCsvControl() now may also return an
     empty string for the third array element, accordingly.
 
 - Standard:
   . fputcsv() and fgetcsv() now accept an empty string as $escape argument,
-    which disables the propriertary PHP escaping mechanism. The behavior of
+    which disables the proprietary PHP escaping mechanism. The behavior of
     str_getcsv() has been adjusted accordingly (formerly, an empty string was
     identical to using the default).
   . proc_open() on Windows can be passed a "create_process_group" option. It
     is required, if the child process is supposed to handle CTRL events.
+  . password_hash() now accepts nullable string and int as $algo argument.
+  . password_needs_rehash() now accepts nullable string and int as $algo
+    argument.
 
 ========================================
 6. New Functions
@@ -271,6 +349,9 @@ PHP 7.4 UPGRADE NOTES
     function is expected have a signature "function handler(int $event)".
   . bool sapi_windows_generate_ctrl_event(int type, int pid) - send a CTRL event
     to another process.
+  . array password_algos() - return a complete list of all registered password
+    hashing algorithms. For more details see the RFC:
+    https://wiki.php.net/rfc/password_registry
 
 ========================================
 7. New Classes and Interfaces
@@ -286,10 +367,14 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - Interbase:
-  . The interbase extension has been moved to PECL. Access to an InterBase 
-    and/or FireBird based database is still available with the PDO_Firebird 
+  . The interbase extension has been moved to PECL. Access to an InterBase
+    and/or FireBird based database is still available with the PDO_Firebird
     extension. For more details see the RFC:
     https://wiki.php.net/rfc/deprecate-and-remove-ext-interbase
+
+- WDDX:
+  . The WDDX extension has been deprecated and moved to PECL.
+    RFC: https://wiki.php.net/rfc/deprecate-and-remove-ext-wddx
 
 ========================================
 9. Other Changes to Extensions
@@ -315,6 +400,7 @@ PHP 7.4 UPGRADE NOTES
 
 - Intl:
   . The Intl extension now requires at least ICU 50.1.
+  . ResourceBundle now implements Countable.
 
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.
@@ -335,17 +421,17 @@ PHP 7.4 UPGRADE NOTES
     results of Reflection...::getModifiers(), using hard-coded numeric values.
     Use corresponding constants instead (e.g. ReflectionMethod::IS_PUBLIC).
 
+- SimpleXML:
+  . SimpleXMLElement now implements Countable.
+
 - SQLite3:
   . The bundled libsqlite has been removed.  To build the SQLite3 extension
     a system libsqlite3 ≥ 3.7.4 is now required. To build the PDO_SQLite
     extension a system libsqlite3 ≥ 3.5.0 is now required.
-  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now explicitly
-    forbidden. Formerly, serialization of instances of these classes was
-    possible, but unserialization yielded unusable objects.
+  . (Un)serialization of SQLite3, SQLite3Stmt and SQLite3Result is now
+    explicitly forbidden. Formerly, serialization of instances of these classes
+    was possible, but unserialization yielded unusable objects.
   . The @param notation can now also be used to denote SQL query parameters.
-
-- WDDX:
-  . The WDDX extension has been deprecated and moved to PECL.
 
 - Zip:
   . The bundled libzip library has been removed. A system libzip >= 0.11 is now
@@ -432,32 +518,17 @@ paths can be specified either by adding additional directories to
 PKG_CONFIG_PATH or by explicitly specifying compilation options through
 FOO_CFLAGS and FOO_LIBS.
 
-The following extensions are affected:
+The following extensions and SAPIs are affected:
 
 - Curl:
   . --with-curl no longer accepts a directory.
 
-- IMAP:
-  . --with-kerberos no longer accepts a directory.
+- Enchant:
+  . --with-enchant no longer accepts a directory.
 
-- Intl:
-  . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
-    always required.
-
-- Mbstring:
-  . --with-onig has been removed. Unless --disable-mbregex has been passed,
-    libonig is required.
-
-- OpenSSL:
-  . --with-openssl no longer accepts a directory.
-  . --with-kerberos no longer accepts a directory.
-
-- PCRE:
-  . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
-    to opt into using an external PCRE library, rather than the bundled one.
-
-- Readline:
-  . --with-libedit no longer accepts a directory.
+- FPM:
+  . --with-fpm-systemd now uses only pkg-config for libsystem checks. The
+    libsystemd minimum required version is 209.
 
 - GD:
   . --with-gd becomes --enable-gd (whether to enable the extension at all) and
@@ -470,12 +541,49 @@ The following extensions are affected:
   . --with-webp-dir becomes --with-webp.
   . --with-xpm-dir becomes --with-xpm.
 
+- IMAP:
+  . --with-kerberos no longer accepts a directory.
+
+- Intl:
+  . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
+    always required.
+
 - Libxml:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
+  . --with-libexpat-dir has been renamed to --with-expat and no longer
+    accepts a directory.
+
+- LiteSpeed:
+  . --with-litespeed becomes --enable-litespeed.
+
+- Mbstring:
+  . --with-onig has been removed. Unless --disable-mbregex has been passed,
+    libonig is required.
+
+- ODBC:
+  . --with-iodbc no longer accepts a directory.
+  . --with-unixODBC no longer accepts a directory.
+
+- OpenSSL:
+  . --with-openssl no longer accepts a directory.
+  . --with-kerberos no longer accepts a directory.
+
+- PCRE:
+  . --with-pcre-regex has been removed. Instead --with-external-pcre is provided
+    to opt into using an external PCRE library, rather than the bundled one.
+
+- PDO_SQLite:
+  . --with-pdo-sqlite no longer accepts a directory.
+
+- Readline:
+  . --with-libedit no longer accepts a directory.
 
 - Sodium:
   . --with-sodium no longer accepts a directory.
+
+- SQLite3:
+  . --with-sqlite3 no longer accepts a directory.
 
 - Zip:
   . --with-libzip has been removed.

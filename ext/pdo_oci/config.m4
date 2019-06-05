@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_oci
-
 if test -z "$SED"; then
   PHP_PDO_OCI_SED="sed";
 else
@@ -16,12 +14,15 @@ fi
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   PDO_OCI_LCS_BASE=$PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME
-  PDO_OCI_LCS=`ls $PDO_OCI_LCS_BASE.*.1 2> /dev/null | $PHP_PDO_OCI_TAIL1`  # Oracle 10g, 11g, 12c etc
+  dnl Oracle 10g, 11g, 12c etc
+  PDO_OCI_LCS=`ls $PDO_OCI_LCS_BASE.*.1 2> /dev/null | $PHP_PDO_OCI_TAIL1`
   if test -f "$PDO_OCI_LCS"; then
-    dnl Oracle 10g, 11g 12c etc.  The x.2 version libraries are named x.1 for drop in compatibility
+    dnl Oracle 10g, 11g 12c etc. The x.2 version libraries are named x.1 for
+    dnl drop in compatibility
     PDO_OCI_VERSION=`echo $PDO_OCI_LCS | $PHP_PDO_OCI_SED -e 's/.*\.\(.*\)\.1$/\1.1/'`
   elif test -f $PDO_OCI_LCS_BASE.9.0; then
-    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix for drop-in compatibility with Oracle 9.0
+    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix
+    dnl for drop-in compatibility with Oracle 9.0
     PDO_OCI_VERSION=9.0
   else
     AC_MSG_ERROR(Oracle libclntsh.$SHLIB_SUFFIX_NAME client library not found or its version is lower than 9)

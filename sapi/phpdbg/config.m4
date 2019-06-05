@@ -1,5 +1,3 @@
-dnl config.m4 for sapi phpdbg
-
 PHP_ARG_ENABLE([phpdbg],
   [for phpdbg support],
   [AS_HELP_STRING([--enable-phpdbg],

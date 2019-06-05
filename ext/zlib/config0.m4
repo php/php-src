@@ -1,5 +1,3 @@
-dnl config.m4 for extension zlib
-
 PHP_ARG_WITH([zlib],
   [for ZLIB support],
   [AS_HELP_STRING([--with-zlib],

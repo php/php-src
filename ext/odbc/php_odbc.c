@@ -417,7 +417,6 @@ static void _free_odbc_result(zend_resource *rsrc)
 {
 	odbc_result *res = (odbc_result *)rsrc->ptr;
 	int i;
-	RETCODE rc;
 
 	if (res) {
 		if (res->values) {
@@ -434,7 +433,7 @@ static void _free_odbc_result(zend_resource *rsrc)
 			SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
 						(SQLUSMALLINT) SQL_COMMIT);
 #endif
-			rc = SQLFreeStmt(res->stmt,SQL_DROP);
+			SQLFreeStmt(res->stmt,SQL_DROP);
 			/* We don't want the connection to be closed after the last statement has been closed
 			 * Connections will be closed on shutdown
 			 * zend_list_delete(res->conn_ptr->id);
@@ -856,7 +855,7 @@ PHP_MINFO_FUNCTION(odbc)
 	php_info_print_table_row(2, "ODBCVER", buf);
 #endif
 #ifndef PHP_WIN32
-	php_info_print_table_row(2, "ODBC_INCLUDE", PHP_ODBC_INCLUDE);
+	php_info_print_table_row(2, "ODBC_CFLAGS", PHP_ODBC_CFLAGS);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
 	php_info_print_table_row(2, "ODBC_LIBS", PHP_ODBC_LIBS);
 #endif

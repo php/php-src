@@ -24,7 +24,7 @@ echo "*** Testing readdir() : usage variations ***\n";
 chdir(__DIR__);
 include(__DIR__."/../file/file.inc");
 
-$path_top = __DIR__ . '/readdir_variation3';
+$path_top = __DIR__ . '/readdir_variation3-win32-mb';
 $path_sub = $path_top . '/私はガラスを食べられますsub_folder';
 mkdir($path_top);
 mkdir($path_sub);
@@ -52,7 +52,7 @@ closedir($dir_handle);
 ===DONE===
 --CLEAN--
 <?php
-$path_top = __DIR__ . '/readdir_variation3';
+$path_top = __DIR__ . '/readdir_variation3-win32-mb';
 $path_sub = $path_top . '/私はガラスを食べられますsub_folder';
 rmdir($path_sub);
 rmdir($path_top);

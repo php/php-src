@@ -35,9 +35,6 @@ if (mysqli_get_server_version($link) < 50600)
 
 	print "done!";
 ?>
---EXPECTF--
-Warning: mysqli_query(): MySQL server has gone away in %s on line %d
-
-Warning: mysqli_query(): Error reading result set's header in %s on line %d
+--EXPECT--
 [003] [2006] MySQL server has gone away
 done!

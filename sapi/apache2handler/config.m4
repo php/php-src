@@ -1,5 +1,3 @@
-dnl config.m4 for sapi apache2handler
-
 PHP_ARG_WITH([apxs2],,
   [AS_HELP_STRING([[--with-apxs2[=FILE]]],
     [Build shared Apache 2.0 Handler module. FILE is the optional pathname to
@@ -42,7 +40,7 @@ if test "$PHP_APXS2" != "no"; then
   APU_BINDIR=`$APXS -q APU_BINDIR`
   APR_BINDIR=`$APXS -q APR_BINDIR`
 
-  # Pick up ap[ru]-N-config if using httpd >=2.1
+  dnl Pick up ap[ru]-N-config if using httpd >=2.1
   APR_CONFIG=`$APXS -q APR_CONFIG 2>/dev/null ||
     echo $APR_BINDIR/apr-config`
   APU_CONFIG=`$APXS -q APU_CONFIG 2>/dev/null ||
@@ -59,7 +57,7 @@ if test "$PHP_APXS2" != "no"; then
 
   APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
-  # Test that we're trying to configure with apache 2.x
+  dnl Test that we're trying to configure with apache 2.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -le 2000000; then
     AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropriate switch --with-apxs (without the 2)])
@@ -88,10 +86,9 @@ if test "$PHP_APXS2" != "no"; then
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   *darwin*)
-    dnl When using bundles on Darwin, we must resolve all symbols.  However,
-    dnl the linker does not recursively look at the bundle loader and
-    dnl pull in its dependencies.  Therefore, we must pull in the APR
-    dnl and APR-util libraries.
+    dnl When using bundles on Darwin, we must resolve all symbols. However, the
+    dnl linker does not recursively look at the bundle loader and pull in its
+    dnl dependencies. Therefore, we must pull in the APR and APR-util libraries.
     if test -x "$APR_CONFIG"; then
         MH_BUNDLE_FLAGS="`$APR_CONFIG --ldflags --link-ld --libs`"
     fi

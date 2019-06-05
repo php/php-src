@@ -14,7 +14,7 @@ function foo($ptr) {
 }
 
 $int = FFI::new("int");
-$int = 42;
+$int->cdata = 42;
 var_dump(foo(FFI::addr($int)));
 ?>
 --EXPECTF--

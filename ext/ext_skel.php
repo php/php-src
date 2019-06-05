@@ -93,7 +93,7 @@ SOURCE AND HEADER FILE NAME
 
   php_extension_name_function()
 
-  See also CODING_STANDARDS.
+  See also CODING_STANDARDS.md.
 
 OPTIONS
 
@@ -224,6 +224,13 @@ function process_args($argv, $argc) {
 		error('Cannot pass both --onlyunix and --onlywindows');
 	} else if (!is_dir($options['skel'])) {
 		error('The skeleton directory was not found');
+	}
+
+	// Validate extension name
+	if (!preg_match('/^[a-z][a-z0-9_]+$/i', $options['ext'])) {
+		error('Invalid extension name. Valid names start with a letter,'
+			.' followed by any number of letters, numbers, or underscores.'
+			.' Using only lower case letters is preferred.');
 	}
 
 	$options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));

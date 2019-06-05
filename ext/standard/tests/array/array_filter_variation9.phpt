@@ -45,6 +45,8 @@ array(6) {
   [5]=>
   int(1000)
 }
+
+Warning: chr() expects parameter 1 to be int, string given in %s on line %d
 array(8) {
   [0]=>
   int(0)

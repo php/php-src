@@ -1,0 +1,32 @@
+parameters:
+  runTestsName: ''
+  runTestsParameters: ''
+
+steps:
+  - script: |
+      export MYSQL_TEST_USER=root
+      export MYSQL_TEST_PASSWD=root
+      export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+      export PDO_MYSQL_TEST_USER=root
+      export PDO_MYSQL_TEST_PASS=root
+      export TEST_PHP_JUNIT=junit.xml
+      export REPORT_EXIT_STATUS=no
+      export SKIP_IO_CAPTURE_TESTS=1
+      rm -rf junit.xml | true
+      php run-tests.php -P -q \
+          -j$(/usr/bin/nproc) \
+          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          --offline \
+          --show-slow 1000 \
+          --set-timeout 120 \
+          ${{ parameters.runTestsParameters }}
+    displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+    condition: or(succeeded(), failed())
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: junit.xml
+      testRunTitle: '${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+      failTaskOnFailedTests: true
+    displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'
+    condition: or(succeeded(), failed())

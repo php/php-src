@@ -14,8 +14,8 @@ function ascii2hex($ascii) {
     return $hex;
 }
 
-$html_file = fopen(realpath(__DIR__) . '/html.raw', 'r');
-$utf_8_filepath = realpath(__DIR__) . '/utf8.raw';
+$html_file = fopen(realpath(__DIR__) . '/html.data', 'r');
+$utf_8_filepath = realpath(__DIR__) . '/utf8.tmp';
 $utf_8_file = fopen($utf_8_filepath, 'w+');
 
 recode_file('html..utf8', $html_file, $utf_8_file);

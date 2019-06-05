@@ -1165,7 +1165,8 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 	zend_iterator_init(iterator);
 
 	iterator->funcs = &zend_generator_iterator_functions;
-	ZVAL_COPY(&iterator->data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->data, Z_OBJ_P(object));
 
 	return iterator;
 }

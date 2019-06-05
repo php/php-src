@@ -2792,11 +2792,7 @@ PHP_FUNCTION(chr)
 {
 	zend_long c;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(c)
 	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 
@@ -3536,6 +3532,8 @@ PHP_FUNCTION(strtr)
    Reverse a string */
 #if ZEND_INTRIN_SSSE3_NATIVE
 #include <tmmintrin.h>
+#elif defined(__aarch64__)
+#include <arm_neon.h>
 #endif
 PHP_FUNCTION(strrev)
 {
@@ -3564,6 +3562,19 @@ PHP_FUNCTION(strrev)
 		do {
 			const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
 			_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
+			p += 16;
+			e -= 16;
+		} while (e - s > 15);
+	}
+#elif defined(__aarch64__)
+	if (e - s > 15) {
+		do {
+			const uint8x16_t str = vld1q_u8((uint8_t *)(e - 15));
+			/* Synthesize rev128 with a rev64 + ext. */
+			const uint8x16_t rev = vrev64q_u8(str);
+			const uint8x16_t ext = (uint8x16_t)
+				vextq_u64((uint64x2_t)rev, (uint64x2_t)rev, 1);
+			vst1q_u8((uint8_t *)p, ext);
 			p += 16;
 			e -= 16;
 		} while (e - s > 15);
@@ -5217,6 +5228,10 @@ state_2:
 			}
 			break;
 		case '>':
+			if (depth) {
+				depth--;
+				break;
+			}
 			if (in_q) {
 				break;
 			}
@@ -5274,6 +5289,10 @@ state_3:
 	c = *p;
 	switch (c) {
 		case '>':
+			if (depth) {
+				depth--;
+				break;
+			}
 			if (in_q) {
 				break;
 			}

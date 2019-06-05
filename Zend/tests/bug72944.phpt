@@ -2,7 +2,7 @@
 Bug #72944 (Null pointer deref in zval_delref_p).
 --FILE--
 <?php
-"a"== e & $A = $A? 0 : 0 ?:0;
+("a"== e & $A = $A? 0 : 0) ?:0;
 echo "OK\n";
 ?>
 --EXPECTF--

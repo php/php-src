@@ -294,12 +294,13 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 {
 	DBG_ENTER("mysqlnd_res::free_result_contents_internal");
 
-	result->m.free_result_buffers(result);
-
 	if (result->meta) {
+		ZEND_ASSERT(zend_arena_contains(result->memory_pool->arena, result->meta));
 		result->meta->m->free_metadata(result->meta);
 		result->meta = NULL;
 	}
+
+	result->m.free_result_buffers(result);
 
 	DBG_VOID_RETURN;
 }
@@ -390,7 +391,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			}
 			break;
 		}
 

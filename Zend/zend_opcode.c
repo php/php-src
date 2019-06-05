@@ -238,7 +238,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
-			if (ce->parent_name && !(ce->ce_flags & ZEND_ACC_LINKED)) {
+			if (ce->parent_name && !(ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS))) {
 				zend_string_release_ex(ce->parent_name, 0);
 			}
 			if (ce->default_properties_table) {
@@ -298,7 +298,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
-				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				if (!(ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS))) {
 					uint32_t i;
 
 					for (i = 0; i < ce->num_interfaces; i++) {
@@ -573,6 +573,7 @@ static void emit_live_range(
 	switch (def_opline->opcode) {
 		/* These should never be the first def. */
 		case ZEND_ADD_ARRAY_ELEMENT:
+		case ZEND_ADD_ARRAY_UNPACK:
 		case ZEND_ROPE_ADD:
 			ZEND_ASSERT(0);
 			return;
@@ -699,7 +700,8 @@ static void emit_live_range(
 static zend_bool is_fake_def(zend_op *opline) {
 	/* These opcodes only modify the result, not create it. */
 	return opline->opcode == ZEND_ROPE_ADD
-		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT;
+		|| opline->opcode == ZEND_ADD_ARRAY_ELEMENT
+		|| opline->opcode == ZEND_ADD_ARRAY_UNPACK;
 }
 
 static zend_bool keeps_op1_alive(zend_op *opline) {
@@ -1047,6 +1049,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_SR:
 		case ZEND_ASSIGN_SR:
 			return (binary_op_type) shift_right_function;
+		case ZEND_PARENTHESIZED_CONCAT:
 		case ZEND_FAST_CONCAT:
 		case ZEND_CONCAT:
 		case ZEND_ASSIGN_CONCAT:

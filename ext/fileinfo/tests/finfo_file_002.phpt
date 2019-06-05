@@ -29,6 +29,8 @@ array(%d) {
   string(9) "image/gif"
   ["%s/resources/test.jpg"]=>
   string(10) "image/jpeg"
+  ["%s/test.json"]=>
+  string(16) "application/json"
   ["%s/resources/test.mp3"]=>
   string(10) "audio/mpeg"
   ["%s/resources/test.pdf"]=>

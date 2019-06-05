@@ -1,53 +1,108 @@
-dnl config.m4 for extension FFI
-
 PHP_ARG_WITH([ffi],
   [for FFI support],
   [AS_HELP_STRING([--with-ffi],
     [Include FFI support])])
 
 if test "$PHP_FFI" != "no"; then
-  if test -r $PHP_FFI/include/ffi.h; then
-    FFI_INCDIR=$PHP_FFI/include
-    FFI_LIBDIR=$PHP_FFI
-  else
-    if test -x "$PKG_CONFIG" && "$PKG_CONFIG" --exists libffi; then
-      FFI_VER=`"$PKG_CONFIG" --modversion libffi`
-      FFI_INCDIR=`"$PKG_CONFIG" --variable=includedir libffi`
-      FFI_LIBDIR=`"$PKG_CONFIG" --variable=libdir libffi`
-      AC_MSG_CHECKING(for libffi)
-      AC_MSG_RESULT(found version $FFI_VER)
-    else
-      AC_MSG_CHECKING(for libffi in default path)
-      for i in /usr/local /usr; do
-        if test -r $i/include/ffi.h; then
-          FFI_DIR=$i
-          AC_MSG_RESULT(found in $i)
-          break
-        fi
-      done
+  PKG_CHECK_MODULES([FFI], [libffi >= 3.0.11])
 
-      if test -z "$FFI_DIR"; then
-        AC_MSG_RESULT(not found)
-        AC_MSG_ERROR(Please reinstall the libffi distribution)
-      fi
+  PHP_EVAL_INCLINE($FFI_CFLAGS)
+  PHP_EVAL_LIBLINE($FFI_LIBS, FFI_SHARED_LIBADD)
 
-      FFI_INCDIR="$FFI_DIR/include"
-      FFI_LIBDIR="$FFI_DIR/$PHP_LIBDIR"
-    fi
-  fi
+  AC_DEFINE(HAVE_FFI, 1, [Have ffi support])
 
   AC_CHECK_TYPES(long double)
 
-  PHP_CHECK_LIBRARY(ffi, ffi_call,
-  [
-    PHP_ADD_INCLUDE($FFI_INCDIR)
-    PHP_ADD_LIBRARY_WITH_PATH(ffi, $FFI_LIBDIR, FFI_SHARED_LIBADD)
-    AC_DEFINE(HAVE_FFI,1,[ Have ffi support ])
-  ], [
-    AC_MSG_ERROR(FFI module requires libffi)
-  ], [
-    -L$FFI_LIBDIR
+  AC_CACHE_CHECK([for fastcall calling convention], ac_cv_ffi_fastcall,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_FASTCALL]])
+    ],
+    [ac_cv_ffi_fastcall=yes], [ac_cv_ffi_fastcall=no])
   ])
+
+  if test "$ac_cv_ffi_fastcall" = yes; then
+    AC_DEFINE(HAVE_FFI_FASTCALL,1,[Whether libffi supports fastcall calling convention])
+  fi
+
+  AC_CACHE_CHECK([for thiscall calling convention], ac_cv_ffi_thiscall,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_THISCALL]])
+    ],
+    [ac_cv_ffi_thiscall=yes], [ac_cv_ffi_thiscall=no])
+  ])
+
+  if test "$ac_cv_ffi_thiscall" = yes; then
+    AC_DEFINE(HAVE_FFI_THISCALL,1,[Whether libffi supports thiscall calling convention])
+  fi
+
+  AC_CACHE_CHECK([for stdcall calling convention], ac_cv_ffi_stdcall,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_STDCALL]])
+    ],
+    [ac_cv_ffi_stdcall=yes], [ac_cv_ffi_stdcall=no])
+  ])
+
+  if test "$ac_cv_ffi_stdcall" = yes; then
+    AC_DEFINE(HAVE_FFI_STDCALL,1,[Whether libffi supports stdcall calling convention])
+  fi
+
+  AC_CACHE_CHECK([for pascal calling convention], ac_cv_ffi_pascal,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_PASCAL]])
+    ],
+    [ac_cv_ffi_pascal=yes], [ac_cv_ffi_pascal=no])
+  ])
+
+  if test "$ac_cv_ffi_pascal" = yes; then
+    AC_DEFINE(HAVE_FFI_PASCAL,1,[Whether libffi supports pascal calling convention])
+  fi
+
+  AC_CACHE_CHECK([for register calling convention], ac_cv_ffi_register,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_REGISTER]])
+    ],
+    [ac_cv_ffi_register=yes], [ac_cv_ffi_register=no])
+  ])
+
+  if test "$ac_cv_ffi_register" = yes; then
+    AC_DEFINE(HAVE_FFI_REGISTER,1,[Whether libffi supports register calling convention])
+  fi
+
+  AC_CACHE_CHECK([for ms_cdecl calling convention], ac_cv_ffi_ms_cdecl,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_MS_CDECL]])
+    ],
+    [ac_cv_ffi_ms_cdecl=yes], [ac_cv_ffi_ms_cdecl=no])
+  ])
+
+  if test "$ac_cv_ffi_ms_cdecl" = yes; then
+    AC_DEFINE(HAVE_FFI_MS_CDECL,1,[Whether libffi supports ms_cdecl calling convention])
+  fi
+
+  AC_CACHE_CHECK([for sysv calling convention], ac_cv_ffi_sysv,
+    [
+      AC_COMPILE_IFELSE(
+        [AC_LANG_PROGRAM([[#include <ffi.h>]],
+        [[return FFI_SYSV]])
+    ],
+    [ac_cv_ffi_sysv=yes], [ac_cv_ffi_sysv=no])
+  ])
+
+  if test "$ac_cv_ffi_sysv" = yes; then
+    AC_DEFINE(HAVE_FFI_SYSV,1,[Whether libffi supports sysv calling convention])
+  fi
 
   PHP_NEW_EXTENSION(ffi, ffi.c ffi_parser.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(FFI_SHARED_LIBADD)

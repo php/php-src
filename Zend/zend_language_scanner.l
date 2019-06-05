@@ -1791,7 +1791,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	char *end;
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
+		/* base must be passed explicitly for correct parse error on Windows */
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, yytext[0] == '0' ? 8 : 10));
 		/* This isn't an assert, we need to ensure 019 isn't valid octal
 		 * Because the lexing itself doesn't do that for us
 		 */

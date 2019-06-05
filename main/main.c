@@ -961,7 +961,7 @@ PHPAPI size_t php_printf(const char *format, ...)
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
  * html error messages if correcponding ini setting (html_errors) is activated.
- * See: CODING_STANDARDS for details.
+ * See: CODING_STANDARDS.md for details.
  */
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
@@ -1160,7 +1160,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 /* }}} */
 
 /* {{{ php_error_docref0 */
-/* See: CODING_STANDARDS for details. */
+/* See: CODING_STANDARDS.md for details. */
 PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
 {
 	va_list args;
@@ -1172,7 +1172,7 @@ PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char
 /* }}} */
 
 /* {{{ php_error_docref1 */
-/* See: CODING_STANDARDS for details. */
+/* See: CODING_STANDARDS.md for details. */
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 {
 	va_list args;
@@ -1184,7 +1184,7 @@ PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, 
 /* }}} */
 
 /* {{{ php_error_docref2 */
-/* See: CODING_STANDARDS for details. */
+/* See: CODING_STANDARDS.md for details. */
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
 {
 	char *params;

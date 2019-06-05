@@ -1664,6 +1664,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				var_num = VAR_NUM(opline->result.var);
 				switch (opline->opcode) {
 					case ZEND_ADD_ARRAY_ELEMENT:
+					case ZEND_ADD_ARRAY_UNPACK:
 					case ZEND_ROPE_ADD:
 						/* these opcodes use the result as argument */
 						if (!zend_bitset_in(defined_here, var_num)) {
@@ -1781,6 +1782,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 							SET_UNUSED(opline->result);
 							break;
 						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_ADD_ARRAY_UNPACK:
 						case ZEND_ROPE_ADD:
 							zend_bitset_incl(usage, VAR_NUM(opline->result.var));
 							break;
@@ -1788,6 +1790,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				} else {
 					switch (opline->opcode) {
 						case ZEND_ADD_ARRAY_ELEMENT:
+						case ZEND_ADD_ARRAY_UNPACK:
 						case ZEND_ROPE_ADD:
 							break;
 						default:

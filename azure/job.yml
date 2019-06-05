@@ -1,0 +1,92 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - template: apt.yml
+    - script: |
+        ./buildconf --force
+        ./configure ${{ parameters.configurationParameters }} \
+            --prefix=/usr \
+            --enable-phpdbg \
+            --enable-fpm \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pgsql \
+            --with-pdo-pgsql \
+            --with-pdo-sqlite \
+            --enable-intl \
+            --without-pear \
+            --enable-gd \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --with-xpm \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --with-zlib-dir=/usr \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-tidy \
+            --with-xmlrpc \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --with-readline \
+            --enable-mbstring \
+            --with-curl \
+            --with-gettext \
+            --enable-sockets \
+            --with-bz2 \
+            --with-openssl \
+            --with-gmp \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-pspell=/usr \
+            --with-enchant=/usr \
+            --with-kerberos \
+            --enable-sysvmsg \
+            --with-ffi \
+            --enable-zend-test \
+            --enable-werror \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+      displayName: 'Configure Build'
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+      displayName: 'Install Build'
+    - script: |
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres psql -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+    - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/PHP-7.4') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'JIT'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.jit_buffer_size=16M

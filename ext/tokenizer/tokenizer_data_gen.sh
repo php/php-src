@@ -1,16 +1,20 @@
 #!/bin/sh
+#
+# Generate the tokenizer extension data file from the parser header file.
 
-INFILE="../../Zend/zend_language_parser.h"
-OUTFILE="tokenizer_data.c"
-AWK=awk
+# Go to project root directory.
+cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
-####################################################################
+infile="Zend/zend_language_parser.h"
+outfile="ext/tokenizer/tokenizer_data.c"
 
-if test ! -f "./tokenizer.c"; then
-    echo "Please run this script from within php-src/ext/tokenizer"
-    exit 0
+if test ! -f "$infile"; then
+  echo "$infile is missing." >&2
+  echo "" >&2
+  echo "Please, generate the PHP parser files by scripts/dev/genfiles" >&2
+  echo "or by running the ./configure build step." >&2
+  exit 1
 fi
-
 
 echo '/*
    +----------------------------------------------------------------------+
@@ -39,25 +43,24 @@ echo '/*
 #include "zend.h"
 #include <zend_language_parser.h>
 
-' > $OUTFILE
+' > $outfile
 
-
-echo 'void tokenizer_register_constants(INIT_FUNC_ARGS) {' >> $OUTFILE
-$AWK '
+echo 'void tokenizer_register_constants(INIT_FUNC_ARGS) {' >> $outfile
+awk '
 	/^    T_(NOELSE|ERROR)/ { next }
 	/^    T_/  { print "	REGISTER_LONG_CONSTANT(\"" $1 "\", " $1 ", CONST_CS | CONST_PERSISTENT);" }
-' < $INFILE >> $OUTFILE
-echo '	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);' >> $OUTFILE
-echo '}' >> $OUTFILE
+' < $infile >> $outfile
+echo '	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);' >> $outfile
+echo '}' >> $outfile
 
 
 echo '
 char *get_token_type_name(int token_type)
 {
 	switch (token_type) {
-' >> $OUTFILE
+' >> $outfile
 
-$AWK '
+awk '
 	/^    T_PAAMAYIM_NEKUDOTAYIM/ {
 		print "		case T_PAAMAYIM_NEKUDOTAYIM: return \"T_DOUBLE_COLON\";"
 		next
@@ -66,12 +69,12 @@ $AWK '
 	/^    T_/ {
 		print "		case " $1 ": return \"" $1 "\";"
 	}
-' < $INFILE >> $OUTFILE
+' < $infile >> $outfile
 
 echo '
 	}
 	return "UNKNOWN";
 }
-' >> $OUTFILE
+' >> $outfile
 
-echo "Wrote $OUTFILE"
+echo "Wrote $outfile"

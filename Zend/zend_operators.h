@@ -490,6 +490,19 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto (
+		"ldr x5, [%0]\n\t"
+		"adds x5, x5, 1\n\t"
+		"bvs %l1\n"
+		"str x5, [%0]"
+		:
+		: "r"(&op1->value)
+		: "x5", "cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 #elif PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
 	long lresult;
 	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
@@ -536,6 +549,19 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		:
 		: "r"(&op1->value)
 		: "cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto (
+		"ldr x5, [%0]\n\t"
+		"subs x5 ,x5, 1\n\t"
+		"bvs %l1\n"
+		"str x5, [%0]"
+		:
+		: "r"(&op1->value)
+		: "x5", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -600,6 +626,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		  "n"(IS_LONG),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"adds	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -690,6 +736,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		  "n"(IS_LONG),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+#elif defined(HAVE_ASM_GOTO) && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"subs	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL

@@ -16,6 +16,7 @@ License v3.01.
 
 [![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
+[![Build Status](https://dev.azure.com/krakjoe/php/_apis/build/status/php.php-src?branchName=PHP-7.4)](https://dev.azure.com/krakjoe/php/_build/latest?definitionId=1&branchName=PHP-7.4)
 
 ## Documentation
 
@@ -123,7 +124,7 @@ See further documents in the repository for more information on how to
 contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
-- [PHP coding standards](/CODING_STANDARDS)
+- [PHP coding standards](/CODING_STANDARDS.md)
 - [Mailinglist rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
 

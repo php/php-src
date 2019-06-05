@@ -1,5 +1,3 @@
-dnl config.m4 for extension recode
-
 PHP_ARG_WITH([recode],
   [for recode support],
   [AS_HELP_STRING([[--with-recode[=DIR]]],

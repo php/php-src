@@ -1,5 +1,3 @@
-dnl config.m4 for extension openssl
-
 PHP_ARG_WITH([openssl],
   [for OpenSSL support],
   [AS_HELP_STRING([--with-openssl],

@@ -1,5 +1,3 @@
-dnl config.m4 for extension soap
-
 PHP_ARG_ENABLE([soap],
   [whether to enable SOAP support],
   [AS_HELP_STRING([--enable-soap],

@@ -255,7 +255,7 @@ array(16) {
     ["mime"]=>
     string(29) "application/x-shockwave-flash"
   }
-  ["test4pix.tif"]=>
+  ["test4pix.tiff"]=>
   array(5) {
     [0]=>
     int(4)

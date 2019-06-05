@@ -1,5 +1,3 @@
-dnl config.m4 for extension curl
-
 PHP_ARG_WITH([curl],
   [for cURL support],
   [AS_HELP_STRING([--with-curl],

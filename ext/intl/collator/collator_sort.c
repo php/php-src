@@ -323,7 +323,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 
 	/* Save specified collator in the request-global (?) variable. */
 	ZVAL_COPY_VALUE(&saved_collator, &INTL_G( current_collator ));
-	ZVAL_COPY_VALUE(&INTL_G( current_collator ), object);
+	ZVAL_OBJ(&INTL_G( current_collator ), Z_OBJ_P(object));
 
 	/* Sort specified array. */
 	zend_hash_sort(hash, collator_compare_func, renumber);

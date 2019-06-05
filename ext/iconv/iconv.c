@@ -540,7 +540,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	char *out_p;
 	iconv_t cd;
 	size_t result;
-	zend_string *ret, *out_buffer;
+	zend_string *out_buffer;
 
 	*out = NULL;
 
@@ -1648,7 +1648,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							 * we can do at this point. */
 							if (*(p1 + 1) == '=') {
 								++p1;
-								--str_left;
+								if (str_left > 1) {
+									--str_left;
+								}
 							}
 
 							err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl);

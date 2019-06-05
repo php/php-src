@@ -1,5 +1,3 @@
-dnl config.m4 for extension sockets
-
 PHP_ARG_ENABLE([sockets],
   [whether to enable sockets support],
   [AS_HELP_STRING([--enable-sockets],

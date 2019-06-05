@@ -55,6 +55,6 @@ array(16) {
   string(9) "image/psd"
   ["test4pix.swf"]=>
   string(29) "application/x-shockwave-flash"
-  ["test4pix.tif"]=>
+  ["test4pix.tiff"]=>
   string(10) "image/tiff"
 }

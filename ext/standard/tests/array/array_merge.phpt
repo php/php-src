@@ -80,10 +80,12 @@ var_dump(array_merge($begin_array[4], (array)"type1", (array)10, (array)12.34));
 
 echo "\n*** Testing error conditions ***";
 /* Invalid arguments */
-var_dump(array_merge());
 var_dump(array_merge(100, 200));
 var_dump(array_merge($begin_array[0], $begin_array[1], 100));
 var_dump(array_merge($begin_array[0], $begin_array[1], $arr4));
+
+echo "\n*** Testing array_merge without any arguments ***\n";
+var_dump(array_merge());
 
 echo "Done\n";
 ?>
@@ -746,9 +748,6 @@ array(7) {
 }
 
 *** Testing error conditions ***
-Warning: array_merge() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
 Warning: array_merge(): Expected parameter 1 to be an array, int given in %s on line %d
 NULL
 
@@ -759,4 +758,8 @@ Notice: Undefined variable: arr4 in %s on line %d
 
 Warning: array_merge(): Expected parameter 3 to be an array, null given in %s on line %d
 NULL
+
+*** Testing array_merge without any arguments ***
+array(0) {
+}
 Done

@@ -7,12 +7,16 @@ PHP                                                                        NEWS
     collection). (Alexandru Patranescu, Nikita, Dmitry)
   . Fixed bug #77877 (call_user_func() passes $this to static methods).
     (Dmitry)
-  . Implemented request #76148 (Add array_key_exists() to the list of
-    specially compiled functions). (Majkl578)
+  . Implemented FR #76148 (Add array_key_exists() to the list of specially
+    compiled functions). (Majkl578)
   . Fixed bug #76430 (__METHOD__ inconsistent outside of method).
     (Ryan McCullagh, Nikita)
   . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
     created on the fly). (David Walker)
+  . Fixed bug #71030 (Self-assignment in list() may have inconsistent behavior).
+    (Nikita)
+  . Fixed bug #76451 (Aliases during inheritance type checks affected by
+    opcache). (Nikita)
 
 - CLI:
   . The built-in CLI server now reports the request method in log files.
@@ -25,6 +29,8 @@ PHP                                                                        NEWS
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
     (Pierrick)
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
+  . Deprecated CURLPIPE_HTTP1. (cmb)
+  . Deprecated $version parameter of curl_version(). (cmb)
 
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
@@ -32,15 +38,19 @@ PHP                                                                        NEWS
 - FFI:
   . Added FFI extension. (Dmitry)
 
+-Fileinfo:
+  . Fixed bug #78075 (finfo_file treats JSON file as text/plain). (Anatol)
+
 - Filter:
-  . The filter extension no longer have the --with-pcre-dir on Unix builds, 
-    allowing the extension to be once more compiled as shared using 
+  . The filter extension no longer have the --with-pcre-dir on Unix builds,
+    allowing the extension to be once more compiled as shared using
     ./configure. (Kalle)
 
 - FPM:
   . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
 
 - GD:
+  . Implemented the scatter filter (IMG_FILTER_SCATTER). (Kalle)
   . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
     (cmb)
   . Fixed bug #76324 (cannot detect recent versions of freetype with
@@ -62,6 +72,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Raised requirements to ICU ≥ 50.1. (cmb)
+  . Changed ResourceBundle to implement Countable. (LeSuisse)
   . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
     (cmb)
 
@@ -108,7 +119,11 @@ PHP                                                                        NEWS
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
-  
+
+- SimpleXML:
+  . Implemented FR #65215 (SimpleXMLElement could register as implementing
+    Countable). (LeSuisse)
+
 - Sockets:
   . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
 
@@ -132,6 +147,8 @@ PHP                                                                        NEWS
   . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
   . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
   . Implemented FR #77377 (No way to handle CTRL+C in Windows). (Anatol)
+  . Implemented password hashing registry RFC:
+    https://wiki.php.net/rfc/password_registry. (Sara)
 
 - Reflection:
   . Fixed bug #76737 (Unserialized reflection objects are broken, they

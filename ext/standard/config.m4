@@ -284,14 +284,14 @@ fi
 dnl
 dnl Check for available functions
 dnl
-dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
-dnl as soon as we support C99.
+dnl log2 could be used to improve the log function, however it requires C99. The
+dnl check for log2 should be turned on, as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
 AC_FUNC_FNMATCH
 
 dnl
-dnl Check if there is a support means of creating a new process
-dnl and defining which handles it receives
+dnl Check if there is a support means of creating a new process and defining
+dnl which handles it receives
 dnl
 AC_CHECK_FUNCS(fork CreateProcess, [
   php_can_support_proc_open=yes
@@ -335,7 +335,8 @@ fi
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
-dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
+dnl ext/standard/php_dns.h will collect these in a single define
+dnl HAVE_FULL_DNS_FUNCS
 dnl
 PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
 PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)

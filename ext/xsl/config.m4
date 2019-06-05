@@ -1,5 +1,3 @@
-dnl config.m4 for extension xsl
-
 PHP_ARG_WITH([xsl],
   [for XSL support],
   [AS_HELP_STRING([[--with-xsl[=DIR]]],

@@ -104,6 +104,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			unsigned int i;
 			for (i = 0; i < S->out_sqlda.sqld; i++) {
 				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
+				if (var->sqlind) {
+					efree(var->sqlind);
+				}
 				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
