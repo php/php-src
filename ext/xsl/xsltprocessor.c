@@ -759,14 +759,17 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 		intern = Z_XSL_P(id);
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_value), string_key, entry) {
 			zval tmp;
+			zend_string *str;
+
 			if (string_key == NULL) {
 				php_error_docref(NULL, E_WARNING, "Invalid parameter array");
 				RETURN_FALSE;
 			}
-			ZVAL_STR(&tmp, zval_get_string(entry));
-			if (EG(exception)) {
+			str = zval_try_get_string(entry);
+			if (UNEXPECTED(!str)) {
 				return;
 			}
+			ZVAL_STR(&tmp, str);
 			zend_hash_update(intern->parameter, string_key, &tmp);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
@@ -849,8 +852,8 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 		intern = Z_XSL_P(id);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array_value), entry) {
-			zend_string *str = zval_get_string(entry);
-			if (EG(exception)) {
+			zend_string *str = zval_try_get_string(entry);
+			if (UNEXPECTED(!str)) {
 				return;
 			}
 			ZVAL_LONG(&new_string, 1);

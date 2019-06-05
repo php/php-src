@@ -1539,8 +1539,8 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (Z_TYPE_P(value) != IS_STRING) {
 		/* Convert to string, just the time to pick the 1st byte */
-		zend_string *tmp = zval_get_string_func(value);
-		if (UNEXPECTED(EG(exception))) {
+		zend_string *tmp = zval_try_get_string_func(value);
+		if (UNEXPECTED(!tmp)) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -3989,11 +3989,13 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_STR(&tmp_inc_filename, zval_get_string_func(inc_filename));
-		inc_filename = &tmp_inc_filename;
-		if (UNEXPECTED(EG(exception))) {
+		zend_string *tmp = zval_try_get_string_func(inc_filename);
+
+		if (UNEXPECTED(!tmp)) {
 			return NULL;
 		}
+		ZVAL_STR(&tmp_inc_filename, tmp);
+		inc_filename = &tmp_inc_filename;
 	}
 
 	switch (type) {

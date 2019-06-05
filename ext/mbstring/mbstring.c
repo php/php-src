@@ -807,8 +807,8 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 		bauto = 0;
 		n = 0;
 		ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-			zend_string *encoding_str = zval_get_string(hash_entry);
-			if (EG(exception)) {
+			zend_string *encoding_str = zval_try_get_string(hash_entry);
+			if (UNEXPECTED(!encoding_str)) {
 				ret = FAILURE;
 				break;
 			}
@@ -3243,8 +3243,8 @@ PHP_FUNCTION(mb_convert_encoding)
 				_from_encodings = NULL;
 
 				ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-					zend_string *encoding_str = zval_get_string(hash_entry);
-					if (EG(exception)) {
+					zend_string *encoding_str = zval_try_get_string(hash_entry);
+					if (UNEXPECTED(!encoding_str)) {
 						if (_from_encodings) {
 							efree(_from_encodings);
 						}

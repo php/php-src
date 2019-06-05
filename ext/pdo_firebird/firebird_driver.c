@@ -465,8 +465,8 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
-				if (EG(exception)) {
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
 					return 0;
 				}
 				if (H->date_format) {
@@ -479,8 +479,8 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
-				if (EG(exception)) {
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
 					return 0;
 				}
 				if (H->time_format) {
@@ -493,8 +493,8 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
-				if (EG(exception)) {
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
 					return 0;
 				}
 				if (H->timestamp_format) {

@@ -2675,8 +2675,8 @@ static X509_STORE *php_openssl_setup_verify(zval *calist)
 
 	if (calist && (Z_TYPE_P(calist) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(calist), item) {
-			zend_string *str = zval_get_string(item);
-			if (EG(exception)) {
+			zend_string *str = zval_try_get_string(item);
+			if (UNEXPECTED(!str)) {
 				return NULL;
 			}
 
@@ -3160,8 +3160,8 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			if (strindex) {
 				int nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
-					zend_string *str_item = zval_get_string(item);
-					if (EG(exception)) {
+					zend_string *str_item = zval_try_get_string(item);
+					if (UNEXPECTED(!str_item)) {
 						return FAILURE;
 					}
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
@@ -3243,8 +3243,8 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 				nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
-					zend_string *str_item = zval_get_string(item);
-					if (EG(exception)) {
+					zend_string *str_item = zval_try_get_string(item);
+					if (UNEXPECTED(!str_item)) {
 						return FAILURE;
 					}
 					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)ZSTR_VAL(str_item), -1, -1, 0)) {
@@ -5387,8 +5387,8 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	/* tack on extra headers */
 	if (zheaders) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
-			zend_string *str = zval_get_string(zcertval);
-			if (EG(exception)) {
+			zend_string *str = zval_try_get_string(zcertval);
+			if (UNEXPECTED(!str)) {
 				goto clean_exit;
 			}
 			if (strindex) {
@@ -5607,8 +5607,8 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		int ret;
 
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
-			zend_string *str = zval_get_string(hval);
-			if (EG(exception)) {
+			zend_string *str = zval_try_get_string(hval);
+			if (UNEXPECTED(!str)) {
 				goto clean_exit;
 			}
 			if (strindex) {

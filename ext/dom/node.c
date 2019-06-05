@@ -330,8 +330,8 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
-	if (EG(exception)) {
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}
 
@@ -724,8 +724,8 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			str = zval_get_string(newval);
-			if (EG(exception)) {
+			str = zval_try_get_string(newval);
+			if (UNEXPECTED(!str)) {
 				return FAILURE;
 			}
 
@@ -861,8 +861,8 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
-	if (EG(exception)) {
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}
 

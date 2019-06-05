@@ -590,14 +590,15 @@ try_again:
 
 ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op)
 {
-	if (Z_TYPE_P(op) != IS_STRING) {
-		zend_string *str = zval_get_string_func(op);
-		if (UNEXPECTED(EG(exception))) {
-			return 0;
-		}
-		zval_ptr_dtor(op);
-		ZVAL_STR(op, str);
+	zend_string *str;
+
+	ZEND_ASSERT(Z_TYPE_P(op) != IS_STRING);
+	str = zval_try_get_string_func(op);
+	if (UNEXPECTED(!str)) {
+		return 0;
 	}
+	zval_ptr_dtor(op);
+	ZVAL_STR(op, str);
 	return 1;
 }
 
@@ -848,7 +849,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op) /* {{{ */
+static zend_always_inline zend_string* __zval_get_string_func(zval *op, zend_bool try) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -880,7 +881,7 @@ try_again:
 			if (!EG(exception)) {
 				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
 			}
-			return ZSTR_EMPTY_ALLOC();
+			return try ? NULL : ZSTR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
@@ -893,13 +894,15 @@ try_again:
 }
 /* }}} */
 
+ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op) /* {{{ */
+{
+	return __zval_get_string_func(op, 0);
+}
+/* }}} */
+
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
 {
-	zend_string *str = zval_get_string_func(op);
-	if (UNEXPECTED(EG(exception))) {
-		return NULL;
-	}
-	return str;
+	return __zval_get_string_func(op, 1);
 }
 /* }}} */
 

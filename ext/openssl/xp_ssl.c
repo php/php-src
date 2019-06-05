@@ -1484,8 +1484,8 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 				return FAILURE;
 			}
 
-			local_cert_str = zval_get_string(local_cert);
-			if (EG(exception)) {
+			local_cert_str = zval_try_get_string(local_cert);
+			if (UNEXPECTED(!local_cert_str)) {
 				return FAILURE;
 			}
 			if (!VCWD_REALPATH(ZSTR_VAL(local_cert_str), resolved_cert_path_buff)) {
@@ -1506,8 +1506,8 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 				return FAILURE;
 			}
 
-			local_pk_str = zval_get_string(local_pk);
-			if (EG(exception)) {
+			local_pk_str = zval_try_get_string(local_pk);
+			if (UNEXPECTED(!local_pk_str)) {
 				return FAILURE;
 			}
 			if (!VCWD_REALPATH(ZSTR_VAL(local_pk_str), resolved_pk_path_buff)) {
