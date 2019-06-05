@@ -2,7 +2,8 @@
 SPL: FilesystemIterator and clone
 --FILE--
 <?php
-$a = new FileSystemIterator(__DIR__);
+// Let's hope nobody writes into this directory while testing...
+$a = new FileSystemIterator(__DIR__ . '/..');
 $b = clone $a;
 var_dump((string)$b == (string)$a);
 var_dump($a->key() == $b->key());
