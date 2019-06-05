@@ -1123,20 +1123,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV, bin
 
 ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, SPEC(DIM_OBJ), binary_op_type binary_op)
 {
-#if defined(ZEND_VM_SPEC) && (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR)
-	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
-#elif defined(ZEND_VM_SPEC) && (OP2_TYPE == IS_UNUSED)
-	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
-	}
-
-	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
-#else
-# if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
-#  if !defined(ZEND_VM_SPEC)
-	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
-#  endif
 
 	if (EXPECTED(opline->extended_value == 0)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_simple_helper, binary_op, binary_op);
@@ -1144,15 +1131,11 @@ ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, CONST|TMP|VAR|UNUSED|THIS|CV
 	if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
 	}
-#  if !defined(ZEND_VM_SPEC) || OP2_TYPE == IS_CONST || OP2_TYPE == (IS_TMP_VAR|IS_VAR)
 	if (UNEXPECTED(opline->extended_value == ZEND_ASSIGN_STATIC_PROP)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_static_prop_helper, binary_op, binary_op);
 	}
-#  endif
-# endif
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_obj_helper, binary_op, binary_op);
-#endif
 }
 
 ZEND_VM_HANDLER(23, ZEND_ASSIGN_ADD, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|UNUSED|NEXT|CV, DIM_OBJ|CACHE_SLOT, SPEC(DIM_OBJ))
@@ -5590,7 +5573,7 @@ ZEND_VM_HANDLER(208, ZEND_ADD_ARRAY_UNPACK, ANY, ANY)
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	
-ZEND_VM_C_LABEL(add_again):
+ZEND_VM_C_LABEL(add_unpack_again):
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(op1);
 		zval *val;
@@ -5679,7 +5662,7 @@ ZEND_VM_C_LABEL(add_again):
 		}
 	} else if (EXPECTED(Z_ISREF_P(op1))) {
 		op1 = Z_REFVAL_P(op1);
-		ZEND_VM_C_GOTO(add_again);
+		ZEND_VM_C_GOTO(add_unpack_again);
 	} else {
 		zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
 	}
