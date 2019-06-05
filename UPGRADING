@@ -563,7 +563,8 @@ The following extensions and SAPIs are affected:
 
 - ODBC:
   . --with-iodbc no longer accepts a directory.
-  . --with-unixODBC no longer accepts a directory.
+  . --with-unixODBC without directory now use pkg-config (preferred).
+    Directory is still accepted for old versions without libodbc.pc.
 
 - OpenSSL:
   . --with-openssl no longer accepts a directory.
