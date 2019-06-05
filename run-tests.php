@@ -197,7 +197,7 @@ NO_PROC_OPEN_ERROR;
 		$environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
 	}
 
-	if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
+	if (!getenv('TEST_PHPDBG_EXECUTABLE') && $php !== null) {
 		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
 			$phpdbg = realpath(dirname($php) . "/phpdbg.exe");
 		} elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
@@ -668,7 +668,7 @@ HELP;
 			$environment['TEST_PHP_EXECUTABLE'] = $php;
 		}
 
-		if (strlen($conf_passed)) {
+		if ($conf_passed !== null) {
 			if (substr(PHP_OS, 0, 3) == "WIN") {
 				$pass_options .= " -c " . escapeshellarg($conf_passed);
 			} else {
