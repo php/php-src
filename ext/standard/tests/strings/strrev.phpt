@@ -13,7 +13,9 @@ strrev() function
 	var_dump(strrev(NULL));
 	var_dump(strrev(""));
 ?>
---EXPECT--
+--EXPECTF--
 string(32) "ec6df70f2569891eae50321a9179eb82"
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 string(0) ""

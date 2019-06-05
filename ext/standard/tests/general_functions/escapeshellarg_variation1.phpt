@@ -75,7 +75,7 @@ foreach($inputs as $input) {
 };
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 *** Testing escapeshellarg() : usage variations ***
 
 -- Iteration 1 --
@@ -109,9 +109,13 @@ string(12) "'0.01234567'"
 string(5) "'0.5'"
 
 -- Iteration 11 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(2) "''"
 
 -- Iteration 12 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(2) "''"
 
 -- Iteration 13 --
@@ -133,8 +137,12 @@ string(2) "''"
 string(2) "''"
 
 -- Iteration 19 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(2) "''"
 
 -- Iteration 20 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(2) "''"
 ===Done===

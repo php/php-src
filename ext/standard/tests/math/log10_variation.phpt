@@ -51,6 +51,8 @@ float(3)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(3)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(-INF)
 float(0)
 float(-INF)

@@ -94,15 +94,27 @@ Warning: str_word_count() expects parameter 2 to be int, string given in %s on l
 NULL
 string(55) "Hello friend, you're  
     looking          good today!"
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(5)
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(6)
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(5)
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 
 Warning: str_word_count() expects parameter 3 to be string, array given in %s on line %d
 NULL
 
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
 Warning: str_word_count() expects parameter 3 to be string, object given in %s on line %d
 NULL
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(7)
 array(5) {
   [0]=>

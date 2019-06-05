@@ -438,25 +438,61 @@ bool(true)
 
 --- With NULL ---
 -- Iteration 0 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
 NULL
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 -- Iteration 1 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fnmatch() expects parameter 2 to be a valid path, string given in %s on line %d
 NULL
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 -- Iteration 2 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
 bool(true)
 
@@ -484,7 +520,11 @@ NULL
 Warning: fnmatch() expects parameter 1 to be a valid path, string given in %s on line %d
 NULL
 -- Iteration 4 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 
@@ -493,7 +533,11 @@ NULL
 bool(true)
 bool(false)
 -- Iteration 5 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 

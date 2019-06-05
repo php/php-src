@@ -34,7 +34,7 @@ foreach($values as $value) {
 };
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 *** Testing expm1() : basic functionality ***
 
 -- Iteration 1 --
@@ -71,5 +71,7 @@ float(1.718281828459)
 float(0)
 
 -- Iteration 12 --
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
 ===Done===

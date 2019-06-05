@@ -234,12 +234,20 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 22 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 23 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
@@ -251,12 +259,20 @@ NULL
 Warning: stripos() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 -- Iteration 25 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 26 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)

@@ -47,6 +47,8 @@ array(6) {
 }
 
 Warning: chr() expects parameter 1 to be int, string given in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 array(8) {
   [0]=>
   int(0)

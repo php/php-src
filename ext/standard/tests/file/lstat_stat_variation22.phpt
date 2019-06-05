@@ -32,6 +32,8 @@ echo "Done";
 ?>
 --EXPECTF--
 *** testing stat ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -42,6 +44,8 @@ bool(false)
 Warning: stat(): stat failed for | in %s on line %d
 bool(false)
 *** testing lstat ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

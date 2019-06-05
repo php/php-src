@@ -33,8 +33,8 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECT--
- number_format tests.....multiple character decimal point
+--EXPECTF--
+number_format tests.....multiple character decimal point
 string(13) "1 234&#183;57"
 string(14) "-1 234&#183;57"
 string(18) "12 346 578&#183;00"
@@ -44,6 +44,8 @@ string(19) "402 653 183&#183;00"
 string(19) "123 456 789&#183;00"
 string(11) "123&#183;46"
 string(11) "123&#183;46"
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 string(9) "0&#183;00"
 string(9) "1&#183;00"
 string(9) "0&#183;00"
@@ -58,6 +60,8 @@ string(28) "402&thinsp;653&thinsp;183.00"
 string(28) "123&thinsp;456&thinsp;789.00"
 string(6) "123.46"
 string(6) "123.46"
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 string(4) "0.00"
 string(4) "1.00"
 string(4) "0.00"
@@ -72,6 +76,8 @@ string(33) "402&thinsp;653&thinsp;183&#183;00"
 string(33) "123&thinsp;456&thinsp;789&#183;00"
 string(11) "123&#183;46"
 string(11) "123&#183;46"
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 string(9) "0&#183;00"
 string(9) "1&#183;00"
 string(9) "0&#183;00"

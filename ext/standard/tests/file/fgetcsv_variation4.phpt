@@ -92,12 +92,16 @@ echo "Done\n";
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -106,12 +110,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -120,12 +128,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -134,12 +146,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -148,12 +164,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -162,12 +182,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -176,6 +200,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -183,12 +209,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -197,12 +227,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -211,12 +245,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -225,12 +263,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -239,12 +281,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -253,12 +299,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -267,12 +317,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -281,6 +335,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -288,12 +344,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -302,12 +362,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -316,12 +380,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -330,12 +398,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -344,12 +416,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -358,12 +434,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -372,12 +452,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -386,6 +470,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -393,12 +479,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -407,12 +497,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -421,12 +515,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -435,12 +533,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -449,12 +551,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -463,12 +569,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -477,12 +587,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -491,6 +605,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -498,12 +614,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -512,12 +632,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -526,12 +650,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -540,12 +668,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -554,12 +686,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -568,12 +704,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -582,12 +722,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -596,6 +740,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -603,12 +749,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -617,12 +767,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -631,12 +785,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -645,12 +803,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -659,12 +821,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -673,12 +839,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -687,12 +857,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -701,6 +875,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -708,12 +884,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -722,12 +902,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -736,12 +920,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -750,12 +938,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -764,12 +956,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -778,12 +974,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -792,12 +992,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -806,6 +1010,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -813,12 +1019,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -827,12 +1037,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -841,12 +1055,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -855,12 +1073,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -869,12 +1091,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -883,12 +1109,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -897,12 +1127,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -911,6 +1145,8 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -918,12 +1154,16 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fgetcsv(): enclosure must be a character in %s on line %d
 bool(false)

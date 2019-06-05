@@ -15,9 +15,11 @@ nl2br() function
 	var_dump(nl2br("\n\r\n\n\n\n\r\r\r\r\n\r"));
 
 ?>
---EXPECT--
+--EXPECTF--
 string(4) "test"
 string(0) ""
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 string(8) "<br />
 "

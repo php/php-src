@@ -58,10 +58,14 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 
 Warning: is_readable() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 Done

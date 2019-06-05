@@ -79,7 +79,7 @@ for ($x = 0; $x < count($min); $x++) {
 	}
 }
 ?>
---EXPECT--
+--EXPECTF--
 mt_rand() tests with default min and max value (i.e 0 thru 2147483647)
 PASSED: range min = 0  max = 2147483647
 
@@ -94,6 +94,206 @@ PASSED: range min = 256 max = 448
 Non-numeric cases
 PASSED range min = 1 max = 100
 PASSED range min = 0 max = 100
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 PASSED range min = 0 max = 100
 PASSED range min = 10 max = 100
 PASSED range min = 10 max = 100

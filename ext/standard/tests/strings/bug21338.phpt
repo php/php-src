@@ -5,6 +5,7 @@ Bug #20934 (html_entity_decode() crash when "" is passed)
 	var_dump(html_entity_decode(NULL));
 	var_dump(html_entity_decode(""));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 string(0) ""

@@ -22,6 +22,8 @@ echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing filesize(): usage variations ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

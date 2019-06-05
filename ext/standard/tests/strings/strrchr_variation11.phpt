@@ -92,39 +92,39 @@ echo "*** Done ***";
 *** Testing strrchr() function: with unexpected inputs for haystack and needle ***
 -- Iteration 1 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 2 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 10 --
 
@@ -148,25 +148,25 @@ Warning: strrchr() expects parameter 1 to be string, array given in %s on line %
 NULL
 -- Iteration 15 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 16 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 17 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 18 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 19 --
 
 Notice: Object of class sample could not be converted to int in %s on line %d
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 20 --
 bool(false)
@@ -174,11 +174,15 @@ bool(false)
 bool(false)
 -- Iteration 22 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 23 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 24 --
 
@@ -186,10 +190,14 @@ Warning: strrchr() expects parameter 1 to be string, resource given in %s on lin
 NULL
 -- Iteration 25 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 -- Iteration 26 --
 
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: strrchr(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
 *** Done ***

@@ -67,7 +67,7 @@ fclose($file_handle);  //closing the file handle
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"
@@ -92,11 +92,19 @@ string(2) "01"
 -- Iteration 11 --
 string(2) "00"
 -- Iteration 12 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
 -- Iteration 13 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
 -- Iteration 14 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
 -- Iteration 15 --
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(2) "00"
 ===DONE===

@@ -12,7 +12,7 @@ var_dump(parse_ini_string(NULL));
 var_dump(parse_ini_string("\0"));
 
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   ["a"]=>
   string(0) ""
@@ -31,6 +31,8 @@ array(1) {
 }
 array(0) {
 }
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 array(0) {
 }
 array(0) {

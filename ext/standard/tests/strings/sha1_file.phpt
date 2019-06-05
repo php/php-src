@@ -92,6 +92,8 @@ bool(false)
 
 -- NULL as filename --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: sha1_file(): Filename cannot be empty in %s on line %d
 bool(false)
 

@@ -228,7 +228,9 @@ For mode '-1.45' count is => int(3)
 For mode '2' count is => int(3)
 For mode '1' count is => int(9)
 For mode '' count is => int(3)
-For mode '' count is => int(3)
+For mode '' count is => 
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+int(3)
 
 -- Testing error conditions --
 Warning: count() expects at least 1 parameter, 0 given in %s on line %d
@@ -239,13 +241,13 @@ NULL
 
 Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
 
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 Done

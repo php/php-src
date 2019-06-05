@@ -303,10 +303,16 @@ string(16) "6368722832353429"
 string(16) "6368722832353529"
 
 *** Testing htmlentities() with NULL as first,second and third argument ***
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(42) "&sbquo;&dagger;&trade;&Yuml;&euro;&sbquo;Å"
 string(0) ""
 string(0) ""
 string(0) ""
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(0) ""
 
 *** Checking for proper memory allocation with long string ***

@@ -9,6 +9,9 @@ var_dump(file_get_contents($tmp_empty_file, NULL, NULL, NULL, 10));
 unlink($tmp_empty_file);
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
+Deprecated: Passing null to argument of type bool is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(0) ""
 ==DONE==

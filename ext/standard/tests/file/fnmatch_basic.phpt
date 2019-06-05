@@ -31,7 +31,7 @@ var_dump( fnmatch(NULL, NULL) );
 
 echo "\n*** Done ***\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fnmatch() with file ***
 bool(true)
 bool(true)
@@ -44,6 +44,10 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(true)
 
 *** Done ***

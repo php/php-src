@@ -68,15 +68,19 @@ int(2)
 
 -- 3rd or 4th arg as NULL --
 
-Warning: substr_count() expects parameter 3 to be int, string given %s on line %d
+Warning: substr_count() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
-Warning: substr_count() expects parameter 3 to be int, string given %s on line %d
+Warning: substr_count() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
-Warning: substr_count() expects parameter 3 to be int, string given %s on line %d
+Warning: substr_count() expects parameter 3 to be int, string given in %s on line %d
 NULL
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(0)
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 int(2)
 
 -- overlapped substrings --

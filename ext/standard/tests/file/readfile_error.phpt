@@ -39,6 +39,8 @@ bool(false)
 
 -- Testing readfile() with invalid arguments --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: readfile(): Filename cannot be empty in %s on line %d
 bool(false)
 
@@ -56,6 +58,6 @@ bool(false)
 
 -- Testing readfile() with non-existent file --
 
-Warning: readfile(%s/non_existent_file.tmp): failed to open stream: %s in %s on line %d
+Warning: readfile(%s/non_existent_file.tmp): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 Done

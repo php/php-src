@@ -27,7 +27,7 @@ foreach($values as $value) {
 
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 -- Iteration 1 --
 float(22026.465794807)
 
@@ -62,5 +62,7 @@ float(2.718281828459)
 float(1)
 
 -- Iteration 12 --
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(1)
 ===Done===

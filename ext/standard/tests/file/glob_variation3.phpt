@@ -16,7 +16,8 @@ var_dump(glob("$path/directly_not_exists"));
 var_dump(empty(ini_get('open_basedir')));
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 array(0) {
 }
 array(0) {

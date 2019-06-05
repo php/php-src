@@ -42,9 +42,11 @@ function runtest() {
 }
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 File written in working directory
 File written in working directory
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 File written in working directory
 File written in working directory
 ===DONE===

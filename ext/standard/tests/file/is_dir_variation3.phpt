@@ -39,6 +39,8 @@ echo "\n*** Done ***";
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 

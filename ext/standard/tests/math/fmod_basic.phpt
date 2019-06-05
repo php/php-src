@@ -38,7 +38,7 @@ for ($i = 0; $i < count($values1); $i++) {
 	}
 }
 ?>
---EXPECT--
+--EXPECTF--
 iteration 0
 float(0)
 float(0)
@@ -49,6 +49,8 @@ float(0)
 float(0)
 float(1.7)
 float(4)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)
@@ -63,6 +65,8 @@ float(-0)
 float(-0)
 float(-1.7)
 float(-4)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(-0)
 float(NAN)
@@ -77,6 +81,8 @@ float(0.5)
 float(0.5)
 float(2.2)
 float(4.5)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0.5)
 float(NAN)
@@ -91,6 +97,8 @@ float(-0.5)
 float(-0.5)
 float(-2.2)
 float(-4.5)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(-0.5)
 float(NAN)
@@ -105,6 +113,8 @@ float(0)
 float(0)
 float(1.7)
 float(4)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)
@@ -119,6 +129,8 @@ float(0)
 float(0)
 float(1.7)
 float(4)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)
@@ -133,6 +145,8 @@ float(0)
 float(0)
 float(1.7)
 float(4)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)
@@ -147,6 +161,8 @@ float(0.5)
 float(0.5)
 float(2.2)
 float(4.5)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0.5)
 float(NAN)
@@ -161,22 +177,50 @@ float(0.5)
 float(0.5)
 float(2.2)
 float(4.5)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0.5)
 float(NAN)
 
 iteration 9
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 
 iteration 10
@@ -189,6 +233,8 @@ float(1)
 float(1)
 float(1)
 float(1)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)
@@ -203,6 +249,8 @@ float(0)
 float(0)
 float(0)
 float(0)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)

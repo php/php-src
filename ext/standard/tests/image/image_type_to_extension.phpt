@@ -95,6 +95,8 @@ bool(false)
 
 Warning: image_type_to_extension() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type bool is deprecated in %s on line %d
 bool(false)
 
 Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s on line %d

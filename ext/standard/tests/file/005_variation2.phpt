@@ -77,6 +77,8 @@ echo "Done";
 *** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***
 
 *** testing touch ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -86,8 +88,14 @@ bool(true)
 *** testing file info ***
 -- File '' --
 -- File access time is => 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 -- File modification time is => 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 -- inode change time is => 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 
 -- File '' --
 -- File access time is => 

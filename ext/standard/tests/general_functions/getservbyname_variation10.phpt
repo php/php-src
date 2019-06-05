@@ -26,11 +26,19 @@ foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $service, $var  ) );
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Test substituting argument 2 with emptyUnsetUndefNull values ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
-bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)

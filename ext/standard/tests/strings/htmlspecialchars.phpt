@@ -304,10 +304,16 @@ string(16) "6368722832353429"
 string(16) "6368722832353529"
 
 *** Testing htmlspecialchars() with NULL as first, second and third argument ***
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(10) "&lt;br&gt;"
 string(10) "&lt;br&gt;"
 string(10) "&lt;br&gt;"
 string(10) "&lt;br&gt;"
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 string(0) ""
 
 *** Checking a long string for proper memory allocation ***

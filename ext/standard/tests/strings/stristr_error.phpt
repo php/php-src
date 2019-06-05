@@ -50,6 +50,8 @@ NULL
 
 -- Testing stristr() function with empty haystack --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: stristr(): Empty needle in %s on line %d
 bool(false)
 

@@ -85,7 +85,7 @@ echo "*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "Done\n";
---EXPECT--
+--EXPECTF--
 *** Testing possible variations in path and suffix ***
 
 --Iteration 1--
@@ -95,6 +95,8 @@ string(3) "bar"
 string(3) "bar"
 
 --Iteration 3--
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(3) "bar"
 
 --Iteration 4--
@@ -113,6 +115,8 @@ string(7) "bar.tar"
 string(7) "bar.tar"
 
 --Iteration 9--
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(7) "bar.tar"
 
 --Iteration 10--
@@ -158,6 +162,8 @@ string(7) "My Pics"
 string(10) "My Pics.gz"
 
 --Iteration 24--
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(10) "My Pics.gz"
 
 --Iteration 25--
@@ -215,6 +221,10 @@ string(1) " "
 string(1) " "
 
 --Iteration 43--
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 
 --Iteration 44--
@@ -230,5 +240,7 @@ string(0) ""
 string(0) ""
 
 --Iteration 48--
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 Done

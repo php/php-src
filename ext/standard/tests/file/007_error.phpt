@@ -165,6 +165,8 @@ Warning: feof() expects parameter 1 to be resource, object given in %s on line %
 bool(false)
 -- Iteration 7 --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fopen(): Filename cannot be empty in %s on line %d
 bool(false)
 

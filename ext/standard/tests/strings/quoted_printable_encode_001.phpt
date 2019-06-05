@@ -28,6 +28,8 @@ NULL
 Warning: quoted_printable_encode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 string(1) "1"
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 string(0) ""
 Done

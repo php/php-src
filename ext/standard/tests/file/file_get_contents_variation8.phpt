@@ -58,6 +58,8 @@ Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 3 --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: file_get_contents(): Filename cannot be empty in %s on line %d
 bool(false)
 -- Iteration 4 --

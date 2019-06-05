@@ -21,7 +21,7 @@ var_dump(srand(false));
 var_dump(srand(NULL));
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 *** Testing srand() : basic functionality ***
 NULL
 NULL
@@ -30,5 +30,7 @@ NULL
 NULL
 NULL
 NULL
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 NULL
 ===Done===

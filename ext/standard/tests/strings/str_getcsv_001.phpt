@@ -30,7 +30,7 @@ var_dump(str_getcsv(''));
 print "-----\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
   string(1) "f"
@@ -103,6 +103,8 @@ array(1) {
   string(3) " " "
 }
 -----
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 array(1) {
   [0]=>
   NULL

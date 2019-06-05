@@ -35,7 +35,7 @@ foreach($values as $value) {
 
 ?>
 ===Done===
---EXPECT--
+--EXPECTF--
 *** Testing log1p() : basic functionality ***
 
  LOG1p tests
@@ -68,6 +68,8 @@ float(3.1966302159209)
 float(3.1966302159209)
 
 -- log1p  --
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
 
 -- log1p 1 --

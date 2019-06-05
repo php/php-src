@@ -66,6 +66,8 @@ string(17) "ng heredoc string"
  *** Output for Normal Behaviour ***
 string(10) "ltrim test"
 string(13) "   ltrim test"
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(18) "        ltrim test"
 string(18) "        ltrim test"
 string(10) "ltrim test"
@@ -78,6 +80,8 @@ string(10) "ltrim test"
 string(5) "12345"
 
  *** Output for  NULL argument) ***
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""
 
 Done

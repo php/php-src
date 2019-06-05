@@ -51,6 +51,8 @@ float(INF)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(INF)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(1)
 float(1.543080635)
 float(1)

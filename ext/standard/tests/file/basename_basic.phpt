@@ -64,7 +64,7 @@ foreach ($file_paths as $file_path) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(3) "bar"
 string(3) "bar"
 string(3) "bar"
@@ -98,4 +98,6 @@ string(1) " "
 string(1) " "
 string(0) ""
 string(0) ""
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(0) ""

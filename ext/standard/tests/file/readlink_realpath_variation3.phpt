@@ -42,12 +42,12 @@ echo "Done\n";
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-%s
+bool(false)
 -- Iteration2 --
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-%s
+bool(false)
 -- Iteration3 --
 
 Warning: readlink(): %s in %s on line %d
@@ -60,12 +60,20 @@ bool(false)
 string(%d) "%s"
 -- Iteration5 --
 
-Warning: readlink(): %s in %s on line %d
-bool(false)
-string(%d) "%s"
--- Iteration6 --
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+string(%d) "%s"
+-- Iteration6 --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
+Warning: readlink(): %s in %s on line %d
+bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 string(%d) "%s"
 Done

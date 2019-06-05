@@ -18,6 +18,8 @@ bool(false)
 
 Notice: Undefined variable: a in %s on line %d
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: str_word_count(): Invalid format value -1 in %s on line %d
 bool(false)
 

@@ -51,6 +51,8 @@ float(NAN)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(NAN)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
 float(INF)
 float(0)

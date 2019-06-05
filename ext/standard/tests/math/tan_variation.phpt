@@ -51,6 +51,8 @@ float(1.470324156)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(1.470324156)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(0)
 float(1.557407725)
 float(0)

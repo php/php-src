@@ -51,6 +51,8 @@ float(7.60090221)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(7.60090221)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(NAN)
 float(0)
 float(NAN)

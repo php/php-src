@@ -77,6 +77,8 @@ echo "Done\n";
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -84,6 +86,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -93,6 +97,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -100,6 +106,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -109,6 +117,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -116,6 +126,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -125,6 +137,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -132,6 +146,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -141,6 +157,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -148,6 +166,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -157,6 +177,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -164,6 +186,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -173,6 +197,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -180,6 +206,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -189,6 +217,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -196,6 +226,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -205,6 +237,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -212,6 +246,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -221,6 +257,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -228,6 +266,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -237,6 +277,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -244,6 +286,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -253,6 +297,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -260,6 +306,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -269,6 +317,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -276,6 +326,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -285,6 +337,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -292,6 +346,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -301,6 +357,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -308,6 +366,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -317,6 +377,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -324,6 +386,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -333,6 +397,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -340,6 +406,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -349,6 +417,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -356,6 +426,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -365,6 +437,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -372,6 +446,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -381,6 +457,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -388,6 +466,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -397,6 +477,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -404,6 +486,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -413,6 +497,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -420,6 +506,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -429,6 +517,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -436,6 +526,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -445,6 +537,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -452,6 +546,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -461,6 +557,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -468,6 +566,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -477,6 +577,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -484,6 +586,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -493,6 +597,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -500,6 +606,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -509,6 +617,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -516,6 +626,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -525,6 +637,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -532,6 +646,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -541,6 +657,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -548,6 +666,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -557,6 +677,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -564,6 +686,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -573,6 +697,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -580,6 +706,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -589,6 +717,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -596,6 +726,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -605,6 +737,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -612,6 +746,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -621,6 +757,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -628,6 +766,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -637,6 +777,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -644,6 +786,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -653,6 +797,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -660,6 +806,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -669,6 +817,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -676,6 +826,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -685,6 +837,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -692,6 +846,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -701,6 +857,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -708,6 +866,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -717,6 +877,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -724,6 +886,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -733,6 +897,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -740,6 +906,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -749,6 +917,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -756,6 +926,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -765,6 +937,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -772,6 +946,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -781,6 +957,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -788,6 +966,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -797,6 +977,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -804,6 +986,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -813,6 +997,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -820,6 +1006,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -829,6 +1017,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -836,6 +1026,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -845,6 +1037,8 @@ string(0) ""
 
 -- file opened in r+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -852,6 +1046,8 @@ bool(false)
 string(0) ""
 
 -- file opened in r+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -861,6 +1057,8 @@ string(0) ""
 
 -- file opened in r+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -868,6 +1066,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -877,6 +1077,8 @@ string(0) ""
 
 -- file opened in a+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -884,6 +1086,8 @@ bool(false)
 string(0) ""
 
 -- file opened in a+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -893,6 +1097,8 @@ string(0) ""
 
 -- file opened in w+ --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -900,6 +1106,8 @@ bool(false)
 string(0) ""
 
 -- file opened in w+b --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -909,6 +1117,8 @@ string(0) ""
 
 -- file opened in w+t --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -916,6 +1126,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+ --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
@@ -925,6 +1137,8 @@ string(0) ""
 
 -- file opened in x+b --
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
+
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)
 int(0)
@@ -932,6 +1146,8 @@ bool(false)
 string(0) ""
 
 -- file opened in x+t --
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 
 Warning: fputcsv(): enclosure must be a character in %s on line %d
 bool(false)

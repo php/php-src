@@ -54,7 +54,6 @@ for ($x = 0; $x < count($min); $x++) {
 echo "\nNon-numeric cases\n";
 $min = array(true,
 			 false,
-			 null,
 			 "10",
 			 "10.5");
 

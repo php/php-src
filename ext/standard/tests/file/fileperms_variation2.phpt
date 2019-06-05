@@ -56,6 +56,8 @@ bool(false)
 Warning: fileperms(): stat failed for 1 in %s on line %d
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 
 Warning: fileperms() expects parameter 1 to be a valid path, resource given in %s on line %d

@@ -29,8 +29,8 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECT--
- LOG tests...no base
+--EXPECTF--
+LOG tests...no base
 float(3.1354942159291)
 float(NAN)
 float(3.1548704948923)
@@ -40,6 +40,8 @@ float(3.1354942159291)
 float(3.1354942159291)
 float(3.1548704948923)
 float(3.1548704948923)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(-INF)
 float(0)
 float(-INF)
@@ -54,6 +56,8 @@ float(2.2617809780285)
 float(2.2617809780285)
 float(2.275758008814)
 float(2.275758008814)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(-INF)
 float(0)
 float(-INF)

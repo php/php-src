@@ -74,7 +74,9 @@ Y:23 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.224370722238)
 
-Y:23 X: float(23)
+Y:23 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23)
 
 Y:23 X:1 float(23.021728866443)
 
@@ -102,7 +104,9 @@ Y:-23 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.224370722238)
 
-Y:-23 X: float(23)
+Y:-23 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23)
 
 Y:-23 X:1 float(23.021728866443)
 
@@ -130,7 +134,9 @@ Y:23.45 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.483360779461)
 
-Y:23.45 X: float(23.45)
+Y:23.45 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23.45)
 
 Y:23.45 X:1 float(23.471312276905)
 
@@ -158,7 +164,9 @@ Y:-23.45 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.483360779461)
 
-Y:-23.45 X: float(23.45)
+Y:-23.45 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23.45)
 
 Y:-23.45 X:1 float(23.471312276905)
 
@@ -186,7 +194,9 @@ Y:23 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.224370722238)
 
-Y:23 X: float(23)
+Y:23 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23)
 
 Y:23 X:1 float(23.021728866443)
 
@@ -214,7 +224,9 @@ Y:23 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.224370722238)
 
-Y:23 X: float(23)
+Y:23 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23)
 
 Y:23 X:1 float(23.021728866443)
 
@@ -242,7 +254,9 @@ Y:23 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.224370722238)
 
-Y:23 X: float(23)
+Y:23 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23)
 
 Y:23 X:1 float(23.021728866443)
 
@@ -270,7 +284,9 @@ Y:23.45 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.483360779461)
 
-Y:23.45 X: float(23.45)
+Y:23.45 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23.45)
 
 Y:23.45 X:1 float(23.471312276905)
 
@@ -298,7 +314,9 @@ Y:2.345e1 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(40.483360779461)
 
-Y:2.345e1 X: float(23.45)
+Y:2.345e1 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(23.45)
 
 Y:2.345e1 X:1 float(23.471312276905)
 
@@ -348,6 +366,8 @@ float(40.224370722238)
 
 Y:23abc X: 
 Notice: A non well formed numeric value encountered in %s on line %d
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 float(23)
 
 Y:23abc X:1 
@@ -358,33 +378,61 @@ Y:23abc X:
 Notice: A non well formed numeric value encountered in %s on line %d
 float(23)
 
-Y: X:33 float(33)
+Y: X:33 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(33)
 
-Y: X:-33 float(33)
+Y: X:-33 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(33)
 
-Y: X:33.45 float(33.45)
+Y: X:33.45 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(33.45)
 
-Y: X:-33.45 float(33.45)
+Y: X:-33.45 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(33.45)
 
-Y: X:39 float(39)
+Y: X:39 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(39)
 
-Y: X:31 float(31)
+Y: X:31 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(31)
 
-Y: X:33 float(33)
+Y: X:33 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(33)
 
-Y: X:43.45 float(43.45)
+Y: X:43.45 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(43.45)
 
-Y: X:1.345e1 float(13.45)
+Y: X:1.345e1 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(13.45)
 
 Y: X:33abc 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+
 Notice: A non well formed numeric value encountered in %s on line %d
 float(33)
 
-Y: X: float(0)
+Y: X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 
-Y: X:1 float(1)
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(0)
 
-Y: X: float(0)
+Y: X:1 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(1)
+
+Y: X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(0)
 
 Y:1 X:33 float(33.015148038438)
 
@@ -408,7 +456,9 @@ Y:1 X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(33.015148038438)
 
-Y:1 X: float(1)
+Y:1 X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(1)
 
 Y:1 X:1 float(1.4142135623731)
 
@@ -436,7 +486,9 @@ Y: X:33abc
 Notice: A non well formed numeric value encountered in %s on line %d
 float(33)
 
-Y: X: float(0)
+Y: X: 
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
+float(0)
 
 Y: X:1 float(1)
 

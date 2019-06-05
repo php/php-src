@@ -23,6 +23,10 @@ Simone Gentili (sensorario@gmail.com)
 --EXPECTF--
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line %d
 bool(false)
 
 Warning: getservbyport() expects parameter 1 to be int, array given in %s on line %d

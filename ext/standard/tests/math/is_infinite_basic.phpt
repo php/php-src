@@ -22,7 +22,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(false)
 bool(false)
@@ -32,6 +32,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Passing null to argument of type float is deprecated in %s on line %d
 bool(false)
 bool(false)
 bool(false)

@@ -13,7 +13,7 @@ var_dump(mt_srand(true));
 var_dump(mt_srand(false));
 var_dump(mt_srand(NULL));
 ?>
---EXPECT--
+--EXPECTF--
 NULL
 NULL
 NULL
@@ -21,4 +21,6 @@ NULL
 NULL
 NULL
 NULL
+
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
 NULL

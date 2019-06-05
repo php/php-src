@@ -103,6 +103,8 @@ bool(false)
 
 Notice: Undefined variable: file_content_type in %s on line %d
 
+Deprecated: Passing null to argument of type int is deprecated in %s on line %d
+
 Warning: fread(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 
