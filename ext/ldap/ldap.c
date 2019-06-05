@@ -53,9 +53,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
-#ifdef HAVE_LDAP_SASL_H
-#include <sasl.h>
-#elif defined(HAVE_LDAP_SASL_SASL_H)
+#ifdef HAVE_LDAP_SASL
 #include <sasl/sasl.h>
 #endif
 
