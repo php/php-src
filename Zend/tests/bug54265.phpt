@@ -8,7 +8,7 @@ function my_errorhandler($errno,$errormsg) {
   echo "EROOR: $errormsg\n";
 }
 set_error_handler("my_errorhandler");
-$my_var = str_repeat("A",$my_var[0]->errormsg = "xyz");
+$my_var = array_fill_keys(["A"], $my_var[0]->errormsg = "xyz");
 echo "ok\n";
 ?>
 --EXPECT--

@@ -30,25 +30,37 @@ Notice: Undefined variable: ref in %sbug43201.php on line 14
 
 Notice: Undefined variable: undef in %sbug43201.php on line 16
 
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Notice: Undefined variable: undef in %sbug43201.php on line 16
 
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Notice: Undefined variable: undef in %sbug43201.php on line 16
 
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
+
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Notice: Undefined variable: undef in %sbug43201.php on line 16
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Notice: Undefined variable: undef in %sbug43201.php on line 16
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Notice: Undefined variable: undef in %sbug43201.php on line 16
+
+Deprecated: Passing null to argument of type string is deprecated in %s on line 16
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 ok

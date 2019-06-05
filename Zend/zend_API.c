@@ -364,6 +364,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "Passing null to argument of type bool is deprecated");
+		}
 		*dest = zend_is_true(arg);
 	} else {
 		return 0;
@@ -411,6 +414,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "Passing null to argument of type int is deprecated");
+		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
@@ -452,6 +458,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "Passing null to argument of type int is deprecated");
+		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
@@ -487,6 +496,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "Passing null to argument of type float is deprecated");
+		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1.0;
@@ -512,6 +524,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest) /
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest) /* {{{ */
 {
 	if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "Passing null to argument of type string is deprecated");
+		}
 		convert_to_string(arg);
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
