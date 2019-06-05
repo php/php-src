@@ -62,6 +62,8 @@ jobs:
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
       displayName: 'Configure Build'
+    - script: make clean >/dev/null
+      displayName: 'Make Clean'
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - script: |
