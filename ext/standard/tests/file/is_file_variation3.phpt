@@ -9,44 +9,51 @@ Test is_file() function: usage variations - invalid filenames
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 
-function flatten($variable) {
-    \ob_start();
-    \var_dump($variable);
-    $flattened =
-        \ob_get_contents();
-    \ob_end_clean();
-    return \trim($flattened);
-}
+$file_path = __DIR__;
+$file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
 
-foreach([
+echo "*** Testing Invalid file types ***\n";
+$filenames = array(
   /* Invalid filenames */
   -2.34555,
   " ",
   "",
-  true,
-  false,
-  null,
+  TRUE,
+  FALSE,
+  NULL,
+  $file_handle,
 
   /* scalars */
   1234,
-  0,
+  0
+);
 
-  /* resource */
-  fopen(__FILE__, "r")
-] as $filename ) {
-  printf(
-      "%s: %d\n",
-      flatten($filename), @is_file($filename));
+/* loop through to test each element the above array */
+foreach( $filenames as $filename ) {
+  var_dump( is_file($filename) );
   clearstatcache();
 }
+fclose($file_handle);
+
+echo "\n*** Done ***";
+?>
+--CLEAN--
+<?php
+$file_path = __DIR__;
+unlink($file_path."/is_file_variation3.tmp");
 ?>
 --EXPECTF--
-float(-2.34555): 0
-string(1) " ": 0
-string(0) "": 0
-bool(true): 0
-bool(false): 0
-NULL: 0
-int(1234): 0
-int(0): 0
-resource(%d) of type (stream): 0
+*** Testing Invalid file types ***
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+Warning: is_file() expects parameter 1 to be a valid path, resource given in %s on line %d
+NULL
+bool(false)
+bool(false)
+
+*** Done ***
