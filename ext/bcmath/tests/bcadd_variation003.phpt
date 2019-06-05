@@ -15,12 +15,27 @@ echo bcadd("-2.1", "~!@@##^*()_")."\n";
 echo bcadd("~!@@##^*()_", "2.1")."\n";
 echo bcadd("~!@@##^*()_", "-2.1")."\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 -2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 -2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 -2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 2
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 -2

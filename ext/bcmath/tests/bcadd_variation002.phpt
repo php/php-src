@@ -10,7 +10,18 @@ echo bcadd("eeee", "eeeefff")."\n";
 echo bcadd("eeee", "%%%$^&&*(*())")."\n";
 echo bcadd("eeee", "~!@@##^*()_")."\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 0
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 0
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
+
+Warning: bcadd(): bcmath function argument is not well-formed in %s on line %d
 0

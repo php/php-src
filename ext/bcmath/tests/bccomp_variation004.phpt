@@ -10,11 +10,20 @@ echo bccomp("2", "!@@#$%^&*(()")."\n";
 echo bccomp("!@@#$%^&*(()", "2")."\n";
 echo bccomp("!@@#$%^&*(()", "-2")."\n";
 echo bccomp("1@#$%%%^&*", "2.1")."\n";
-echo bccomp("-2.1", "1@#$%%%^&*");
+echo bccomp("-2.1", "1@#$%%%^&*")."\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: bccomp(): bcmath function argument is not well-formed in %s on line %d
 1
+
+Warning: bccomp(): bcmath function argument is not well-formed in %s on line %d
 -1
+
+Warning: bccomp(): bcmath function argument is not well-formed in %s on line %d
 1
+
+Warning: bccomp(): bcmath function argument is not well-formed in %s on line %d
 -1
+
+Warning: bccomp(): bcmath function argument is not well-formed in %s on line %d
 -1
