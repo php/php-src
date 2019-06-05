@@ -567,6 +567,9 @@ The following extensions and SAPIs are affected:
   . --with-icu-dir has been removed. If --enable-intl is passed, then libicu is
     always required.
 
+- Ldap:
+  . --with-ldap-sasl no longer accepts a directory.
+
 - Libxml:
   . --with-libxml-dir has been removed.
   . --enable-libxml becomes --with-libxml.
