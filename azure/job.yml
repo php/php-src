@@ -5,7 +5,7 @@ parameters:
 jobs:
   - job: ${{ parameters.configurationName }}
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'nevis'
     steps:
     - checkout: self
       fetchDepth: 1
