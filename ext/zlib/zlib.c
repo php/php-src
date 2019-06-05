@@ -777,7 +777,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 						size_t i;
 
 						*++ptr = zval_get_string(cur);
-						if (!*ptr || ZSTR_LEN(*ptr) == 0) {
+						if (!*ptr || ZSTR_LEN(*ptr) == 0 || EG(exception)) {
 							if (*ptr) {
 								efree(*ptr);
 							}
@@ -785,7 +785,9 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 								efree(ptr);
 							}
 							efree(strings);
-							php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
+							if (!EG(exception)) {
+								php_error_docref(NULL, E_WARNING, "dictionary entries must be non-empty strings");
+							}
 							return 0;
 						}
 						for (i = 0; i < ZSTR_LEN(*ptr); i++) {

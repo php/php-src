@@ -1529,6 +1529,11 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
 	zend_string	 		*result;			/* Function result */
 
+	/* Abort on pending exception, e.g. thrown from __toString(). */
+	if (UNEXPECTED(EG(exception))) {
+		return NULL;
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
 		return NULL;

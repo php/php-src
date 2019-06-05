@@ -4108,7 +4108,9 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		case IS_OBJECT:
-			convert_to_string_ex(param);
+			if (!try_convert_to_string(param)) {
+				return 0;
+			}
 			/* fallthrough */
 		case IS_STRING:
 			return 1;

@@ -4418,7 +4418,9 @@ PHP_FUNCTION(exif_read_data)
 
 		ret = exif_read_from_stream(&ImageInfo, p_stream, read_thumbnail, read_all);
 	} else {
-		convert_to_string(stream);
+		if (!try_convert_to_string(stream)) {
+			return;
+		}
 
 		if (!Z_STRLEN_P(stream)) {
 			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");
@@ -4588,7 +4590,9 @@ PHP_FUNCTION(exif_thumbnail)
 
 		ret = exif_read_from_stream(&ImageInfo, p_stream, 1, 0);
 	} else {
-		convert_to_string(stream);
+		if (!try_convert_to_string(stream)) {
+			return;
+		}
 
 		if (!Z_STRLEN_P(stream)) {
 			exif_error_docref(NULL EXIFERR_CC, &ImageInfo, E_WARNING, "Filename cannot be empty");

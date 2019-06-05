@@ -15,4 +15,8 @@ $class = new ReflectionClass('A');
 echo $class;
 ?>
 --EXPECTF--
-Fatal error: Method ReflectionClass::__toString() must not throw an exception, caught Error: Undefined constant 'PHP_SELF' in %s on line %d
+Fatal error: Uncaught Error: Undefined constant 'PHP_SELF' in %s:%d
+Stack trace:
+#0 %s(%d): ReflectionClass->__toString()
+#1 {main}
+  thrown in %s on line %d

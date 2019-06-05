@@ -807,8 +807,13 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 		bauto = 0;
 		n = 0;
 		ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-			convert_to_string_ex(hash_entry);
-			if (strcasecmp(Z_STRVAL_P(hash_entry), "auto") == 0) {
+			zend_string *encoding_str = zval_get_string(hash_entry);
+			if (EG(exception)) {
+				ret = FAILURE;
+				break;
+			}
+
+			if (strcasecmp(ZSTR_VAL(encoding_str), "auto") == 0) {
 				if (!bauto) {
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
@@ -821,7 +826,7 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 					}
 				}
 			} else {
-				const mbfl_encoding *encoding = mbfl_name2encoding(Z_STRVAL_P(hash_entry));
+				const mbfl_encoding *encoding = mbfl_name2encoding(ZSTR_VAL(encoding_str));
 				if (encoding) {
 					*entry++ = encoding;
 					n++;
@@ -830,6 +835,7 @@ php_mb_parse_encoding_array(zval *array, const mbfl_encoding ***return_list, siz
 				}
 			}
 			i--;
+			zend_string_release(encoding_str);
 		} ZEND_HASH_FOREACH_END();
 		if (n > 0) {
 			if (return_list) {
@@ -1917,7 +1923,9 @@ PHP_FUNCTION(mb_detect_order)
 				}
 				break;
 			default:
-				convert_to_string_ex(arg1);
+				if (!try_convert_to_string(arg1)) {
+					return;
+				}
 				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0)) {
 					if (list) {
 						efree(list);
@@ -3223,7 +3231,9 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (Z_TYPE_P(input) != IS_STRING && Z_TYPE_P(input) != IS_ARRAY) {
-		convert_to_string(input);
+		if (!try_convert_to_string(input)) {
+			return;
+		}
 	}
 
 	if (arg_old) {
@@ -3233,8 +3243,13 @@ PHP_FUNCTION(mb_convert_encoding)
 				_from_encodings = NULL;
 
 				ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-
-					convert_to_string_ex(hash_entry);
+					zend_string *encoding_str = zval_get_string(hash_entry);
+					if (EG(exception)) {
+						if (_from_encodings) {
+							efree(_from_encodings);
+						}
+						return;
+					}
 
 					if ( _from_encodings) {
 						l = strlen(_from_encodings);
@@ -3245,6 +3260,7 @@ PHP_FUNCTION(mb_convert_encoding)
 					} else {
 						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
 					}
+					zend_string_release(encoding_str);
 				} ZEND_HASH_FOREACH_END();
 
 				if (_from_encodings != NULL && !strlen(_from_encodings)) {
@@ -3254,7 +3270,10 @@ PHP_FUNCTION(mb_convert_encoding)
 				s_free = _from_encodings;
 				break;
 			default:
-				convert_to_string(arg_old);
+				if (!try_convert_to_string(arg_old)) {
+					return;
+				}
+
 				_from_encodings = Z_STRVAL_P(arg_old);
 				break;
 			}
@@ -3430,7 +3449,9 @@ PHP_FUNCTION(mb_detect_encoding)
 			}
 			break;
 		default:
-			convert_to_string(encoding_list);
+			if (!try_convert_to_string(encoding_list)) {
+				return;
+			}
 			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRLEN_P(encoding_list), &list, &size, 0)) {
 				if (list) {
 					efree(list);
@@ -3839,7 +3860,9 @@ PHP_FUNCTION(mb_convert_variables)
 			php_mb_parse_encoding_array(zfrom_enc, &elist, &elistsz, 0);
 			break;
 		default:
-			convert_to_string_ex(zfrom_enc);
+			if (!try_convert_to_string(zfrom_enc)) {
+				return;
+			}
 			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0);
 			break;
 	}

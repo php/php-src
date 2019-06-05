@@ -592,7 +592,10 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		PQclear(pgsql_result);
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
 			size_t query_len;
-			convert_to_string_ex(tmp);
+			if (!try_convert_to_string(tmp)) {
+				efree(query);
+				return;
+			}
 
 			if (buffer_len < Z_STRLEN_P(tmp)) {
 				buffer_len = Z_STRLEN_P(tmp);

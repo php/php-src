@@ -1330,6 +1330,11 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		smart_str_appendl(&str, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 	}
 
+	/* Exception thrown during a string conversion. */
+	if (EG(exception)) {
+		goto cleanup;
+	}
+
 	smart_str_0(&str);
 
 	if (ZEND_NUM_ARGS() == 1) { /* new style, using connection string */
@@ -3045,7 +3050,6 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	switch (Z_TYPE_P(field)) {
 		case IS_STRING:
-			convert_to_string_ex(field);
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
 			if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
 				php_error_docref(NULL, E_WARNING, "Bad column offset specified");
@@ -4280,22 +4284,23 @@ PHP_FUNCTION(pg_copy_from)
 				PQclear(pgsql_result);
 #if HAVE_PQPUTCOPYDATA
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
-					zval tmp;
-					ZVAL_COPY(&tmp, value);
-					convert_to_string_ex(&tmp);
-					query = (char *)emalloc(Z_STRLEN(tmp) + 2);
-					strlcpy(query, Z_STRVAL(tmp), Z_STRLEN(tmp) + 2);
-					if(Z_STRLEN(tmp) > 0 && *(query + Z_STRLEN(tmp) - 1) != '\n') {
-						strlcat(query, "\n", Z_STRLEN(tmp) + 2);
+					zend_string *tmp = zval_get_string(value);
+					if (EG(exception)) {
+						return;
+					}
+					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
+					strlcpy(query, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 2);
+					if (ZSTR_LEN(tmp) > 0 && *(query + ZSTR_LEN(tmp) - 1) != '\n') {
+						strlcat(query, "\n", ZSTR_LEN(tmp) + 2);
 					}
 					if (PQputCopyData(pgsql, query, (int)strlen(query)) != 1) {
 						efree(query);
-						zval_ptr_dtor_str(&tmp);
+						zend_string_release(tmp);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
-					zval_ptr_dtor_str(&tmp);
+					zend_string_release(tmp);
 				} ZEND_HASH_FOREACH_END();
 
 				if (PQputCopyEnd(pgsql, NULL) != 1) {
@@ -4304,22 +4309,23 @@ PHP_FUNCTION(pg_copy_from)
 				}
 #else
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
-					zval tmp;
-					ZVAL_COPY(&tmp, value);
-					convert_to_string_ex(&tmp);
-					query = (char *)emalloc(Z_STRLEN(tmp) + 2);
-					strlcpy(query, Z_STRVAL(tmp), Z_STRLEN(tmp) + 2);
-					if(Z_STRLEN(tmp) > 0 && *(query + Z_STRLEN(tmp) - 1) != '\n') {
-						strlcat(query, "\n", Z_STRLEN(tmp) + 2);
+					zend_string *tmp = zval_get_string(value);
+					if (EG(exception)) {
+						return;
+					}
+					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
+					strlcpy(query, ZSTR_LVAL(tmp), ZSTR_LEN(tmp) + 2);
+					if (ZSTR_LEN(tmp) > 0 && *(query + ZSTR_LEN(tmp) - 1) != '\n') {
+						strlcat(query, "\n", ZSTR_LEN(tmp) + 2);
 					}
 					if (PQputline(pgsql, query)==EOF) {
 						efree(query);
-						zval_ptr_dtor_str(&tmp);
+						zend_string_release(tmp);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
-					zval_ptr_dtor_str(&tmp);
+					zend_string_release(tmp);
 				} ZEND_HASH_FOREACH_END();
 
 				if (PQputline(pgsql, "\\.\n") == EOF) {
@@ -5167,17 +5173,13 @@ PHP_FUNCTION(pg_send_execute)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zval tmp_val;
-				ZVAL_COPY(&tmp_val, tmp);
-				convert_to_string(&tmp_val);
-				if (Z_TYPE(tmp_val) != IS_STRING) {
-					php_error_docref(NULL, E_WARNING,"Error converting parameter");
-					zval_ptr_dtor(&tmp_val);
+				zend_string *tmp_str = zval_get_string(tmp);
+				if (EG(exception)) {
 					_php_pgsql_free_params(params, num_params);
-					RETURN_FALSE;
+					return;
 				}
-				params[i] = estrndup(Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
-				zval_ptr_dtor(&tmp_val);
+				params[i] = estrndup(ZSTR_VAL(tmp_str), ZSTR_LEN(tmp_str));
+				zend_string_release(tmp_str);
 			}
 
 			i++;
@@ -6103,8 +6105,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						break;
 
 					case IS_LONG:
-						ZVAL_LONG(&new_val, Z_LVAL_P(val));
-						convert_to_string_ex(&new_val);
+						ZVAL_STR(&new_val, zend_long_to_str(Z_LVAL_P(val)));
 						break;
 
 					case IS_DOUBLE:
@@ -6412,8 +6413,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						break;
 
 					case IS_LONG:
-						ZVAL_LONG(&new_val, Z_LVAL_P(val));
-						convert_to_string_ex(&new_val);
+						ZVAL_STR(&new_val, zend_long_to_str(Z_LVAL_P(val)));
 						break;
 
 					case IS_DOUBLE:

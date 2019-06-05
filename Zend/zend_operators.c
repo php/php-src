@@ -561,19 +561,23 @@ try_again:
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			zval_ptr_dtor(op);
-			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
+			ZVAL_INTERNED_STR(op, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 			break;
 		case IS_OBJECT: {
-			zval dst;
+			zval tmp;
 
-			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
-			zval_ptr_dtor(op);
-
-			if (Z_TYPE(dst) == IS_STRING) {
-				ZVAL_COPY_VALUE(op, &dst);
-			} else {
-				ZVAL_NEW_STR(op, zend_string_init("Object", sizeof("Object")-1, 0));
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &tmp, IS_STRING) == SUCCESS) {
+					zval_ptr_dtor(op);
+					ZVAL_COPY_VALUE(op, &tmp);
+					return;
+				}
 			}
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+			}
+			zval_ptr_dtor(op);
+			ZVAL_EMPTY_STRING(op);
 			break;
 		}
 		case IS_REFERENCE:
@@ -583,6 +587,19 @@ try_again:
 	}
 }
 /* }}} */
+
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op)
+{
+	if (Z_TYPE_P(op) != IS_STRING) {
+		zend_string *str = zval_get_string_func(op);
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
+		zval_ptr_dtor(op);
+		ZVAL_STR(op, str);
+	}
+	return 1;
+}
 
 static void convert_scalar_to_array(zval *op) /* {{{ */
 {
@@ -852,7 +869,7 @@ try_again:
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			return zend_string_init("Array", sizeof("Array")-1, 0);
+			return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object) {
@@ -860,7 +877,9 @@ try_again:
 					return Z_STR(tmp);
 				}
 			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+			}
 			return ZSTR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
@@ -871,6 +890,16 @@ try_again:
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
+}
+/* }}} */
+
+ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
+{
+	zend_string *str = zval_get_string_func(op);
+	if (UNEXPECTED(EG(exception))) {
+		return NULL;
+	}
+	return str;
 }
 /* }}} */
 

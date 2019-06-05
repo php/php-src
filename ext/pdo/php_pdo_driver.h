@@ -215,7 +215,7 @@ static inline zend_string *pdo_attr_strval(zval *options, enum pdo_attribute_typ
 	zval *v;
 
 	if (options && (v = zend_hash_index_find(Z_ARRVAL_P(options), option_name))) {
-		return zval_get_string(v);
+		return zval_try_get_string(v);
 	}
 	return defval ? zend_string_copy(defval) : NULL;
 }

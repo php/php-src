@@ -461,6 +461,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *action = zval_get_string(val);
+			if (EG(exception)) {
+				return 0;
+			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 				(dvoid *) ZSTR_VAL(action), (ub4) ZSTR_LEN(action),
@@ -479,6 +482,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *client_info = zval_get_string(val);
+			if (EG(exception)) {
+				return 0;
+			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 				(dvoid *) ZSTR_VAL(client_info), (ub4) ZSTR_LEN(client_info),
@@ -497,6 +503,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *identifier = zval_get_string(val);
+			if (EG(exception)) {
+				return 0;
+			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 				(dvoid *) ZSTR_VAL(identifier), (ub4) ZSTR_LEN(identifier),
@@ -515,6 +524,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *module = zval_get_string(val);
+			if (EG(exception)) {
+				return 0;
+			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
 				(dvoid *) ZSTR_VAL(module), (ub4) ZSTR_LEN(module),

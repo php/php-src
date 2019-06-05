@@ -12,12 +12,19 @@ error_reporting(8191);
 echo "Object with no __toString():\n";
 $obj = new stdClass;
 echo "Try 1:\n";
-printf($obj);
+try {
+    printf($obj);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 printf("\n");
 
 echo "\nTry 2:\n";
-printf($obj . "\n");
-
+try {
+    printf($obj . "\n");
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n\nObject with bad __toString():\n";
 class badToString {
@@ -25,30 +32,38 @@ class badToString {
 		return 0;
 	}
 }
+
 $obj = new badToString;
 echo "Try 1:\n";
-printf($obj);
+try {
+    printf($obj);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 printf("\n");
 
 echo "\nTry 2:\n";
-printf($obj . "\n");
+try {
+    printf($obj . "\n");
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
 Object with no __toString():
 Try 1:
-Error: 4096 - Object of class stdClass could not be converted to string
-Object
+Object of class stdClass could not be converted to string
+
 
 Try 2:
-Error: 4096 - Object of class stdClass could not be converted to string
-
+Object of class stdClass could not be converted to string
 
 
 Object with bad __toString():
 Try 1:
-Error: 4096 - Method badToString::__toString() must return a string value
+Method badToString::__toString() must return a string value
 
 
 Try 2:
-Error: 4096 - Method badToString::__toString() must return a string value
+Method badToString::__toString() must return a string value

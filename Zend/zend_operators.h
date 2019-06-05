@@ -258,6 +258,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
+ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
 static zend_always_inline zend_long zval_get_long(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
@@ -281,6 +282,35 @@ static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 	if (UNEXPECTED(tmp)) {
 		zend_string_release_ex(tmp, 0);
 	}
+}
+
+/* Like zval_get_string, but returns NULL if the conversion fails with an exception. */
+static zend_always_inline zend_string *zval_try_get_string(zval *op) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		return Z_STR_P(op);
+	} else {
+		return zval_try_get_string_func(op);
+	}
+}
+
+/* Like zval_get_tmp_string, but returns NULL if the conversion fails with an exception. */
+static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_string **tmp) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		*tmp = NULL;
+		return Z_STR_P(op);
+	} else {
+		return *tmp = zval_try_get_string_func(op);
+	}
+}
+
+/* Like convert_to_string(), but returns whether the conversion succeeded and does not modify the
+ * zval in-place if it fails. */
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op);
+static zend_always_inline zend_bool try_convert_to_string(zval *op) {
+	if (Z_TYPE_P(op) == IS_STRING) {
+		return 1;
+	}
+	return _try_convert_to_string(op);
 }
 
 /* Compatibility macros for 7.2 and below */

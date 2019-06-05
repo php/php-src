@@ -411,7 +411,10 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 					break;
 
 				default:
-					convert_to_string_ex(&retval);
+					if (!try_convert_to_string(&retval)) {
+						ret = FAILURE;
+						break;
+					}
 					sqlite3_result_text(context, Z_STRVAL(retval), Z_STRLEN(retval), SQLITE_TRANSIENT);
 					break;
 			}

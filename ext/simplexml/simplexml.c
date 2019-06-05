@@ -260,6 +260,9 @@ long_dim:
 			if (Z_TYPE_P(member) != IS_STRING) {
 				ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 				member = &tmp_zv;
+				if (EG(exception)) {
+					return &EG(uninitialized_zval);
+				}
 			}
 			name = Z_STRVAL_P(member);
 		}
@@ -457,6 +460,10 @@ long_dim:
 		} else {
 			if (Z_TYPE_P(member) != IS_STRING) {
 				trim_str = zval_get_string_func(member);
+				if (EG(exception)) {
+					return &EG(error_zval);
+				}
+
 				ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
 				zend_string_release_ex(trim_str, 0);
 				member = &tmp_zv;
@@ -682,7 +689,6 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 	zval            member;
 
 	sxe = php_sxe_fetch_object(object);
-
 	GET_NODE(sxe, node);
 	name = ZSTR_VAL(zname);
 	node = sxe_get_element_by_name(sxe, node, &name, &type);
@@ -722,6 +728,9 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
 		ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 		member = &tmp_zv;
+		if (EG(exception)) {
+			return 0;
+		}
 	}
 
 	sxe = php_sxe_fetch_object(object);
@@ -843,6 +852,9 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, zend_bool ele
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
 		ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 		member = &tmp_zv;
+		if (EG(exception)) {
+			return;
+		}
 	}
 
 	sxe = php_sxe_fetch_object(object);

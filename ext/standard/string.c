@@ -2334,6 +2334,10 @@ PHP_FUNCTION(substr_replace)
 		convert_to_long_ex(from);
 	}
 
+	if (EG(exception)) {
+		return;
+	}
+
 	if (argc > 3) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
@@ -3358,7 +3362,9 @@ PHP_FUNCTION(strtr)
 			php_strtr_array(return_value, str, pats);
 		}
 	} else {
-		convert_to_string_ex(from);
+		if (!try_convert_to_string(from)) {
+			return;
+		}
 
 		RETURN_STR(php_strtr_ex(str,
 				  Z_STRVAL_P(from),
@@ -4278,6 +4284,10 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		convert_to_string_ex(replace);
 	}
 
+	if (EG(exception)) {
+		return;
+	}
+
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
@@ -4680,6 +4690,9 @@ PHP_FUNCTION(setlocale)
 		}
 
 		loc = zval_get_string(plocale);
+		if (EG(exception)) {
+			return;
+		}
 
 		if (!strcmp("0", ZSTR_VAL(loc))) {
 			zend_string_release_ex(loc, 0);

@@ -1915,7 +1915,6 @@ zval *php_snmp_read_property(zend_object *object, zend_string *name, int type, v
 	int ret;
 
 	obj = php_snmp_fetch_object(object);
-
 	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->read_func) {
@@ -1941,7 +1940,6 @@ zval *php_snmp_write_property(zend_object *object, zend_string *name, zval *valu
 	php_snmp_prop_handler *hnd;
 
 	obj = php_snmp_fetch_object(object);
-
 	hnd = zend_hash_find_ptr(&php_snmp_properties, name);
 
 	if (hnd && hnd->write_func) {

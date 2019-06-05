@@ -247,7 +247,11 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 		*pce = NULL;
 		return 1;
 	}
-	convert_to_string_ex(arg);
+	if (!try_convert_to_string(arg)) {
+		*pce = NULL;
+		return 0;
+	}
+
 	*pce = zend_lookup_class(Z_STR_P(arg));
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
@@ -618,7 +622,11 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					*pce = NULL;
 					break;
 				}
-				convert_to_string_ex(arg);
+				if (!try_convert_to_string(arg)) {
+					*pce = NULL;
+					return "valid class name";
+				}
+
 				if ((lookup = zend_lookup_class(Z_STR_P(arg))) == NULL) {
 					*pce = NULL;
 				} else {
@@ -696,6 +704,9 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 
 	expected_type = zend_parse_arg_impl(arg_num, arg, va, spec, &error);
 	if (expected_type) {
+		if (EG(exception)) {
+			return FAILURE;
+		}
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
 			const char *space;
 			const char *class_name = get_active_class_name(&space);
@@ -3047,7 +3058,7 @@ try_again:
 			}
 
 			if (obj == NULL || method == NULL || Z_TYPE_P(method) != IS_STRING) {
-				return zend_string_init("Array", sizeof("Array")-1, 0);
+				return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
@@ -3055,7 +3066,7 @@ try_again:
 			} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 				return zend_create_method_string(Z_OBJCE_P(obj)->name, Z_STR_P(method));
 			} else {
-				return zend_string_init("Array", sizeof("Array")-1, 0);
+				return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 			}
 		}
 		case IS_OBJECT:
