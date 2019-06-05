@@ -2706,13 +2706,9 @@ PHP_FUNCTION(mb_str_ends)
         RETURN_BOOL(1);
     }
 
-    n = mbfl_strpos(&haystack, &needle, 0, 1);
+    n = mbfl_strpos(&haystack, &needle, haystack.len-needle.len, 0);
     if (!mbfl_is_error(n)) {
-        if (n == (haystack.len - needle.len)) {
-            RETURN_BOOL(1);
-        } else {
-            RETURN_BOOL(0);
-        }
+        RETURN_BOOL(1);
     } else {
         switch (-n) {
             case 1:
