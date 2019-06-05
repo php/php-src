@@ -306,6 +306,12 @@ PHP 7.4 UPGRADE NOTES
   . ldap_control_paged_result_response and ldap_control_paged_result are
     deprecated. Pagination controls can be sent along with ldap_search instead.
 
+- Reflection:
+  . Calls to ReflectionType::__toString() now generate a deprecation notice.
+    This method has been deprecated in favor of ReflectionNamedType::getName()
+    in the documentation since PHP 7.1, but did not throw a deprecation notice
+    for technical reasons.
+
 ========================================
 5. Changed Functions
 ========================================

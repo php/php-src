@@ -6665,10 +6665,7 @@ static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
-	/* ReflectionType::__toString() is deprecated, but we currently do not mark it as such
-	 * due to bad interaction with the PHPUnit error handler and exceptions in __toString().
-	 * See PR2137. */
-	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, ZEND_ACC_DEPRECATED)
 	PHP_FE_END
 };
 
