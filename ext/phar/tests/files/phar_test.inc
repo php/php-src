@@ -35,11 +35,11 @@ foreach($files as $name => $cont)
 	if (empty($ulen)) $ulen = strlen($cont);
 	if (empty($clen)) $clen = strlen($comp);
 	if (empty($crc32))$crc32= crc32((binary)$cont);
-	if (isset($meta)) $meta = serialize($meta);
+	$meta = isset($meta) ? serialize($meta) : '';
 
 	// write manifest entry
 	$manifest .= pack('V', strlen($name)) . (binary)$name;
-	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . (binary)$meta;
+	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . $meta;
 
 	// globals
 	$gflags |= $flags;
