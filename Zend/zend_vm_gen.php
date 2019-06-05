@@ -820,6 +820,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 		"/ZEND_VM_C_GOTO\(\s*([A-Za-z_]*)\s*\)/m" => "goto \\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec)):""),
 		"/^#(\s*)if\s+1\s*\\|\\|.*[^\\\\]$/m" => "#\\1if 1",
 		"/^#(\s*)if\s+0\s*&&.*[^\\\\]$/m" => "#\\1if 0",
+		"/^#(\s*)elif\s+1\s*\\|\\|.*[^\\\\]$/m" => "#\\1elif 1",
+		"/^#(\s*)elif\s+0\s*&&.*[^\\\\]$/m" => "#\\1elif 0",
 		"/^#(\s*)ifdef\s+ZEND_VM_EXPORT\s*\n/m" => $export?"#\\1if 1\n":"#\\1if 0\n",
 		"/^#(\s*)ifndef\s+ZEND_VM_EXPORT\s*\n/m" => $export?"#\\1if 0\n":"#\\1if 1\n",
 		"/OP_DATA_TYPE/" => $op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
@@ -855,6 +857,26 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 		"/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
 			($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
 			: "\\0",
+		"/zend_binary_assign_op_helper/" =>
+			isset($extra_spec['DIM_OBJ']) ?
+				(
+					$extra_spec['DIM_OBJ'] < 2 ?
+					(
+						$extra_spec['DIM_OBJ'] == 0 ?
+						"zend_binary_assign_op_simple_helper"
+						:
+						"zend_binary_assign_op_dim_helper"
+					)
+					:
+					(
+						$extra_spec['DIM_OBJ'] == 2 ?
+						"zend_binary_assign_op_obj_helper"
+						:
+						"zend_binary_assign_op_static_prop_helper"
+					)
+				)
+				:
+				"zend_binary_assign_op_helper",
 	);
 	$code = preg_replace(array_keys($specialized_replacements), array_values($specialized_replacements), $code);
 
@@ -1089,6 +1111,18 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 		return;
 	}
 
+	// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
+	// handlers, that call unspecialized helper, anyway.
+	if ($spec &&
+	    isset($extra_spec["DIM_OBJ"]) &&
+	    $extra_spec["DIM_OBJ"] == 3) {
+		if ($op1 == 'CONST' && $op2 == 'CONST') {
+			$op1 = $op2 = 'ANY';
+		} else {
+			return;
+		}
+	}
+
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1164,6 +1198,22 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 		return;
 	}
 
+	if ($spec && $name === "zend_binary_assign_op_helper") {
+		return;
+	}
+
+	// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
+	// handlers, that call unspecialized helper, anyway.
+	if ($spec &&
+	    isset($extra_spec["DIM_OBJ"]) &&
+	    $extra_spec["DIM_OBJ"] == 3) {
+		if ($op1 == 'CONST' && $op2 == 'CONST') {
+			$op1 = $op2 = 'ANY';
+		} else {
+			return;
+		}
+	}
+	
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1375,6 +1425,13 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						$list[$label] = null;
 						$label++;
 						return;
+					}
+
+					// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
+					// handlers, that call unspecialized helper, anyway.
+					if (isset($extra_spec["DIM_OBJ"]) &&
+					    $extra_spec["DIM_OBJ"] == 3) {
+						$op1 = $op2 = 'ANY';
 					}
 
 					// Emit pointer to specialized handler
