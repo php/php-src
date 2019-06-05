@@ -42,7 +42,7 @@
 #  undef EINPROGRESS
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
-# define EINPROGRESS	WSAEWOULDBLOCK
+# define EINPROGRESS WSAEINPROGRESS
 # define fsync _commit
 # define ftruncate(a, b) chsize(a, b)
 #endif /* defined(PHP_WIN32) */
