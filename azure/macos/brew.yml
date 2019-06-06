@@ -1,0 +1,14 @@
+parameters:
+  packages: ''
+
+steps:
+  - script: |
+      /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      brew install autoconf \
+                   automake \
+                   libtool \
+                   bison@3.4 \
+                   mysql \
+                   openssl \
+                   re2c
+    displayName: 'brew'

@@ -6,19 +6,19 @@ trigger:
       - master
 
 jobs:
-  - template: azure/job.yml
+  - template: azure/macos/job.yml
     parameters:
       configurationName: RELEASE_NTS
       configurationParameters: '--disable-debug --disable-zts'
-  - template: azure/job.yml
-    parameters:
-      configurationName: DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
-  - template: azure/job.yml
-    parameters:
-      configurationName: RELEASE_ZTS
-      configurationParameters: '--disable-debug --enable-zts'
-  - template: azure/job.yml
-    parameters:
-      configurationName: DEBUG_ZTS
-      configurationParameters: '--enable-debug --enable-zts'
+#  - template: azure/job.yml
+#    parameters:
+#      configurationName: DEBUG_NTS
+#      configurationParameters: '--enable-debug --disable-zts'
+#  - template: azure/job.yml
+#    parameters:
+#      configurationName: RELEASE_ZTS
+#      configurationParameters: '--disable-debug --enable-zts'
+#  - template: azure/job.yml
+#    parameters:
+#      configurationName: DEBUG_ZTS
+#      configurationParameters: '--enable-debug --enable-zts'
