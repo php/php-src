@@ -68,6 +68,8 @@ jobs:
         make -j$(sysctl -n hw.ncpu) >/dev/null
       displayName: 'Make Build'
     - script: |
+        sudo mkdir -p /usr/lib/php/extensions
+        sudo chmod 777 /usr/lib/php/extensions
         sudo make install
         sudo mkdir     /etc/php.d
         sudo chmod 777 /etc/php.d
