@@ -5,10 +5,10 @@ parameters:
 steps:
   - script: |
       export MYSQL_TEST_USER=root
-      export MYSQL_TEST_PASSWD=root
+      export MYSQL_TEST_PASSWD=
       export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
       export PDO_MYSQL_TEST_USER=root
-      export PDO_MYSQL_TEST_PASS=root
+      export PDO_MYSQL_TEST_PASS=
       export TEST_PHP_JUNIT=junit.xml
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
