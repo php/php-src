@@ -57,7 +57,7 @@ jobs:
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \
-            --with-pspell=/usr \
+            --with-pspell=/usr/local/opt/aspell \
             --with-enchant=/usr \
             --with-kerberos \
             --enable-sysvmsg \
