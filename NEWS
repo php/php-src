@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug #78038 (Socket_select fails when resource array contains
     references). (Nikita)
 
+- Sodium:
+  . Fixed bug #78114 (segfault when calling sodium_* functions from eval). (cmb)
+
 - Zip:
   . Fixed bug #76345 (zip.h not found). (Michael Maroszek)
 
