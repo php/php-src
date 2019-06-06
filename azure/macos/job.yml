@@ -39,7 +39,7 @@ jobs:
             --enable-soap \
             --enable-xmlreader \
             --with-xsl \
-            --with-tidy \
+            --with-tidy=/usr/local/opt/tidyp \
             --with-xmlrpc \
             --enable-sysvsem \
             --enable-sysvshm \

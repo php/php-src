@@ -28,7 +28,8 @@ steps:
                    t1lib \
                    gd \
                    libzip \
-                   gmp
+                   gmp \
+                   tidyp
       brew link icu4c gettext --force
       brew services start mysql
       brew services start postgresql
