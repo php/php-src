@@ -17,5 +17,6 @@ steps:
                    enchant \
                    libffi \
                    libpng \
-                   webp
+                   webp \
+                   freetype
     displayName: 'brew'
