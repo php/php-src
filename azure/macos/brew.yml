@@ -25,6 +25,7 @@ steps:
                    zlib \
                    t1lib \
                    gd \
-                   libzip
+                   libzip \
+                   gmp
       brew link icu4c gettext --force
     displayName: 'brew'

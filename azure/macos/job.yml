@@ -51,7 +51,7 @@ jobs:
             --enable-sockets \
             --with-bz2=/usr/local/opt/bzip2 \
             --with-openssl \
-            --with-gmp \
+            --with-gmp=/usr/local/opt/gmp \
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \
