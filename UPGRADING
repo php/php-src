@@ -597,6 +597,9 @@ The following extensions and SAPIs are affected:
 - SQLite3:
   . --with-sqlite3 no longer accepts a directory.
 
+- XSL:
+  . --with-xsl no longer accepts a directory.
+
 - Zip:
   . --with-libzip has been removed.
   . --enable-zip becomes --with-zip.
