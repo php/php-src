@@ -2752,7 +2752,7 @@ ZEND_VM_HANDLER(202, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
 			prop = &EG(uninitialized_zval);
 		}
 	} else if (UNEXPECTED(prop_info->type)) {
-		prop = zend_assign_to_typed_property_reference(prop_info, prop, value_ptr);
+		prop = zend_assign_to_typed_property_reference(prop_info, prop, value_ptr EXECUTE_DATA_CC);
 	} else {
 		zend_assign_to_variable_reference(prop, value_ptr);
 	}
