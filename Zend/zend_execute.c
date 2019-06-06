@@ -1150,6 +1150,7 @@ static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, 
 	for (i = 0; i < num_args; ++i) {
 		dummy_cache_slot = NULL;
 		if (UNEXPECTED(!zend_verify_arg_type(fbc, i + 1, p, NULL, &dummy_cache_slot, 1))) {
+			zend_throw_error(NULL, "Internal function arginfo verification failed, but function did not throw");
 			EG(current_execute_data) = call->prev_execute_data;
 			zend_vm_stack_free_args(call);
 			return 0;
@@ -4442,13 +4443,6 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 			break;
 	}
 	return ret;
-}
-
-ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
-{
-	void *dummy_cache_slot = NULL;
-
-	zend_verify_arg_type(zf, arg_num, arg, NULL, &dummy_cache_slot, 1);
 }
 
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)

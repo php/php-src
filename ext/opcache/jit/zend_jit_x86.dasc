@@ -7680,26 +7680,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// EG(current_execute_data) = execute_data;
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, RX, r1
 
-		if (!func || (func->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (!func) {
-				|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS
-				|	jnz >1
-				|.cold_code
-			}
-			|1:
-			|	mov FCARG1a, RX
-			|	EXT_CALL zend_jit_verify_internal_arg_types_helper, r0
-			|	test r0, r0
-			|	je >8
-			|	LOAD_ZVAL_ADDR FCARG2a, res_addr // reload
-			if (!func) {
-				|	mov r0, EX:RX->func // reload
-				|	jmp >1
-				|.code
-			}
-			|1:
-		}
-
 		zend_jit_reset_opline(Dst, NULL);
 
 		|	// fbc->internal_function.handler(call, ret);
