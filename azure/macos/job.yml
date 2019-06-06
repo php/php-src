@@ -44,7 +44,7 @@ jobs:
             --enable-sysvshm \
             --enable-shmop \
             --enable-pcntl \
-            --with-readline \
+            --with-readline=/usr/local/opt/readline \
             --enable-mbstring \
             --with-curl \
             --with-gettext==/usr/local/opt/gettext \
@@ -52,6 +52,7 @@ jobs:
             --with-bz2=/usr/local/opt/bzip2 \
             --with-openssl \
             --with-gmp=/usr/local/opt/gmp \
+            --with-iconv=/usr/local/opt/libiconv \
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \

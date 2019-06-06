@@ -10,6 +10,7 @@ steps:
                    libtool \
                    bison@3.4 \
                    mysql \
+                   postgresql \
                    re2c \
                    pkg-config \
                    krb5 \
@@ -21,11 +22,14 @@ steps:
                    freetype \
                    intltool \
                    icu4c \
-                   libedit \
+                   readline \
+                   libiconv \
                    zlib \
                    t1lib \
                    gd \
                    libzip \
                    gmp
       brew link icu4c gettext --force
+      brew services start mysql
+      brew services start postgresql
     displayName: 'brew'
