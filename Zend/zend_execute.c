@@ -585,7 +585,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	ZVAL_REF(variable_ptr, ref);
 }
 
-static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr)
+static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr EXECUTE_DATA_DC)
 {
 	if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
 		return &EG(uninitialized_zval);
@@ -2830,7 +2830,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		}
 
 		if (UNEXPECTED(prop_info)) {
-			variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr);
+			variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr EXECUTE_DATA_CC);
 		} else {
 			zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		}
