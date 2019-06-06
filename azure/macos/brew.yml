@@ -8,7 +8,7 @@ steps:
       brew install autoconf \
                    automake \
                    libtool \
-                   bison@3.1 \
+                   bison \
                    mysql \
                    postgresql \
                    re2c \

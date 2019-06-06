@@ -64,7 +64,9 @@ jobs:
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
       displayName: 'Configure Build'
-    - script: make -j$(sysctl -n hw.ncpu) >/dev/null
+    - script: |
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        make -j$(sysctl -n hw.ncpu) >/dev/null
       displayName: 'Make Build'
     - script: |
         sudo make install
