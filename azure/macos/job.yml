@@ -76,8 +76,8 @@ jobs:
       displayName: 'Install Build'
     - script: |
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
+        psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        psql -c "CREATE DATABASE test;"
       displayName: 'Setup'
     - template: test.yml
       parameters:
