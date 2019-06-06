@@ -11,5 +11,6 @@ steps:
                    mysql \
                    re2c \
                    pkg-config \
-                   krb5
+                   krb5 \
+                   bzip2
     displayName: 'brew'
