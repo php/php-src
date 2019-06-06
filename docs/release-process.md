@@ -146,12 +146,7 @@
 
     Note: Remember to update the sha256 checksum information.
 
- 2. Update `web/php.git/include/version.inc` (X_Y=major_minor version number)
-
-    * `$PHP_X_Y_RC = "5.4.0RC1"` (should be set to `false` before)
-    * `$PHP_X_Y_RC_DATE = "06 September 2007"`
-
- 3. Skip this step for non stable releases after GA of minor or major versions
+ 2. Skip this step for non stable releases after GA of minor or major versions
     (e.g. announce 7.3.0RC1, but not 7.3.1RC1):
 
     Add a short notice to phpweb stating that there is a new release, and
@@ -168,18 +163,18 @@
       "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"
       ```
 
- 4. Commit and push changes to qa and web.
+ 3. Commit and push changes to qa and web.
 
     Wait for web and qa sites to update with new information before sending
     announce.
 
- 5. Send **separate** emails **To** `internals@lists.php.net` and
+ 4. Send **separate** emails **To** `internals@lists.php.net` and
     `php-general@lists.php.net` lists pointing out "the location of the release"
     and "the possible release date of either the next RC, or the final release".
     Include in this information the verification information output by
     `gen_verify_stub`.
 
- 6. Send **separate** emails (see example http://news.php.net/php.pear.qa/5201)
+ 5. Send **separate** emails (see example http://news.php.net/php.pear.qa/5201)
     **To** `php-qa@lists.php.net` and `primary-qa-tester@lists.php.net`. These
     emails are to notify the selected projects about a new release so that they
     can make sure their projects keep working. Make sure that you have been
@@ -268,11 +263,10 @@
     * `$PHP_X_Y_VERSION` to the correct version
     * `$PHP_X_Y_DATE` to the release date
     * `$PHP_X_Y_SHA256` array and update all the SHA256 sums
-    * Set `$PHP_X_Y_RC` to false!
+    * `$PHP_X_Y_TAGS` array should include 'security' if this is a security
+      release
     * Make sure there are no outdated "notes" or edited "date" keys in the
       `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
-    * Only for the first revision of a major or minor release bump
-      `$PHP_X_VERSION`, `$PHP_X_DATE` and `$PHP_X_RC_DATE`.
 
  3. Create the release file (releases/x_y_z.php)
 
