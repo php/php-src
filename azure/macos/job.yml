@@ -56,7 +56,7 @@ jobs:
             --enable-calendar \
             --enable-ftp \
             --with-pspell=/usr/local/opt/aspell \
-            --with-enchant=/usr \
+            --with-enchant=/usr/local/opt/enchant \
             --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \
