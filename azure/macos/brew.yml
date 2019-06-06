@@ -10,5 +10,6 @@ steps:
                    bison@3.4 \
                    mysql \
                    openssl \
-                   re2c
+                   re2c \
+                   pkg-config
     displayName: 'brew'
