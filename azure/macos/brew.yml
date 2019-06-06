@@ -14,5 +14,6 @@ steps:
                    pkg-config \
                    krb5 \
                    bzip2 \
-                   enchant
+                   enchant \
+                   libffi
     displayName: 'brew'
