@@ -22,3 +22,7 @@ jobs:
     parameters:
       configurationName: DEBUG_ZTS
       configurationParameters: '--enable-debug --enable-maintainer-zts'
+  - template: azure/macos/job.yml
+    parameters:
+      configurationName: MACOS_DEBUG_NTS
+      configurationParameters: '--enable-debug --disable-maintainer-zts'
