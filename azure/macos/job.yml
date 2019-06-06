@@ -47,7 +47,7 @@ jobs:
             --with-readline \
             --enable-mbstring \
             --with-curl \
-            --with-gettext \
+            --with-gettext==/usr/local/opt/gettext \
             --enable-sockets \
             --with-bz2=/usr/local/opt/bzip2 \
             --with-openssl \
