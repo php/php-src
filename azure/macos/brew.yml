@@ -1,0 +1,36 @@
+parameters:
+  packages: ''
+
+steps:
+  - script: |
+      /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      # see https://formulae.brew.sh/ for package names
+      brew install autoconf \
+                   automake \
+                   libtool \
+                   bison \
+                   mysql \
+                   postgresql \
+                   re2c \
+                   pkg-config \
+                   krb5 \
+                   bzip2 \
+                   enchant \
+                   libffi \
+                   libpng \
+                   webp \
+                   freetype \
+                   intltool \
+                   icu4c \
+                   readline \
+                   libiconv \
+                   zlib \
+                   t1lib \
+                   gd \
+                   libzip \
+                   gmp \
+                   tidyp \
+                   libxml2\
+                   openssl@1.1
+      brew link icu4c gettext --force
+    displayName: 'brew'
