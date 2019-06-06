@@ -18,5 +18,13 @@ steps:
                    libffi \
                    libpng \
                    webp \
-                   freetype
+                   freetype \
+                   intltool \
+                   icu4c \
+                   libedit \
+                   zlib \
+                   t1lib \
+                   gd \
+                   libzip
+      brew link icu4c gettext --force
     displayName: 'brew'
