@@ -15,5 +15,6 @@ steps:
                    krb5 \
                    bzip2 \
                    enchant \
-                   libffi
+                   libffi \
+                   libpng
     displayName: 'brew'
