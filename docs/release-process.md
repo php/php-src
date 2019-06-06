@@ -263,7 +263,8 @@
     * `$PHP_X_Y_VERSION` to the correct version
     * `$PHP_X_Y_DATE` to the release date
     * `$PHP_X_Y_SHA256` array and update all the SHA256 sums
-    * `4PHP_X_Y_TAGS` array should include 'security' if this is a security release
+    * `$PHP_X_Y_TAGS` array should include 'security' if this is a security
+      release
     * Make sure there are no outdated "notes" or edited "date" keys in the
       `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
 
