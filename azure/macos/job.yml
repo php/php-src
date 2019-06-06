@@ -48,7 +48,7 @@ jobs:
             --with-curl \
             --with-gettext \
             --enable-sockets \
-            --with-bz2 \
+            --with-bz2=/usr/local/opt/bzip2 \
             --with-openssl \
             --with-gmp \
             --enable-bcmath \
