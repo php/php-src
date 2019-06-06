@@ -2601,11 +2601,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
-	zval *property;
-	zval *container;
-	zval variable, *variable_ptr = &variable;
-	zval *value_ptr;
-	void **cache_addr;
+	zval *property, *container, *value_ptr;
 
 	SAVE_OPLINE();
 
@@ -2617,59 +2613,24 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	cache_addr = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
-
-	zend_fetch_property_address(variable_ptr, container, OP1_TYPE, property, OP2_TYPE, cache_addr, BP_VAR_W, 0, 0 OPLINE_CC EXECUTE_DATA_CC);
-	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
-		variable_ptr = Z_INDIRECT_P(variable_ptr);
-	}
-
 	value_ptr = GET_OP_DATA_ZVAL_PTR_PTR(BP_VAR_W);
 
-	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
-		variable_ptr = &EG(uninitialized_zval);
-	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		variable_ptr = &EG(uninitialized_zval);
-	} else if (OP_DATA_TYPE == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
-		variable_ptr = &EG(uninitialized_zval);
-	} else if (OP_DATA_TYPE == IS_VAR &&
-	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
-			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
+	if (ZEND_VM_SPEC) {
+		if (OP1_TYPE == IS_UNUSED) {
+			if (OP2_TYPE == IS_CONST) {
+				zend_assign_to_property_reference_this_const(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			} else {
+				zend_assign_to_property_reference_this_var(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			}
+		} else {
+			if (OP2_TYPE == IS_CONST) {
+				zend_assign_to_property_reference_var_const(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			} else {
+				zend_assign_to_property_reference_var_var(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			}
 		}
 	} else {
-		zend_property_info *prop_info = NULL;
-
-		if (OP2_TYPE == IS_CONST) {
-			prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
-		} else {
-			prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
-		}
-
-		do {
-			if (UNEXPECTED(prop_info)) {
-				if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
-					variable_ptr = &EG(uninitialized_zval);
-					break;
-				}
-
-				if (Z_ISREF_P(variable_ptr)) {
-					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
-				}
-			}
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-			if (prop_info) {
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
-			}
-		} while (0);
-	}
-
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+		zend_assign_to_property_reference(container, OP1_TYPE, property, OP2_TYPE, value_ptr OPLINE_CC EXECUTE_DATA_CC);
 	}
 
 	FREE_OP1_VAR_PTR();
@@ -2702,22 +2663,10 @@ ZEND_VM_HANDLER(202, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
 		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(prop, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
 			prop = &EG(uninitialized_zval);
 		}
+	} else if (UNEXPECTED(prop_info->type)) {
+		prop = zend_assign_to_typed_property_reference(prop_info, prop, value_ptr);
 	} else {
-		do {
-			if (UNEXPECTED(prop_info->type)) {
-				if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
-					prop = &EG(uninitialized_zval);
-					break;
-				}
-				if (Z_ISREF_P(prop)) {
-					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
-				}
-			}
-			zend_assign_to_variable_reference(prop, value_ptr);
-			if (prop_info->type) {
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
-			}
-		} while (0);
+		zend_assign_to_variable_reference(prop, value_ptr);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
