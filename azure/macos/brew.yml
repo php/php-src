@@ -16,5 +16,6 @@ steps:
                    bzip2 \
                    enchant \
                    libffi \
-                   libpng
+                   libpng \
+                   webp
     displayName: 'brew'
