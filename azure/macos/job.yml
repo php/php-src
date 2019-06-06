@@ -11,7 +11,7 @@ jobs:
       fetchDepth: 1
     - template: brew.yml
     - script: |
-        export PATH="/usr/local/opt/bison304/bin:$PATH"
+        export PATH="/usr/local/opt/bison/bin:$PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
