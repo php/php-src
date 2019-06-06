@@ -13,7 +13,7 @@ iterator_count('1');
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to iterator_count() must implement interface Traversable, string given in %s:%d
+Fatal error: Uncaught TypeError: iterator_count() expects parameter 1 to be Traversable, string given in %s:%d
 Stack trace:
 #0 %s(%d): iterator_count('1')
 #1 {main}

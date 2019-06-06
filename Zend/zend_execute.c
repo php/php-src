@@ -888,6 +888,34 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 	}
 }
 
+#if ZEND_DEBUG
+/* Used to sanity-check internal arginfo types without performing any actual type conversions. */
+static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(zend_uchar type_hint, zval *arg)
+{
+	switch (type_hint) {
+		case _IS_BOOL: {
+			zend_bool dest;
+			return zend_parse_arg_bool_weak(arg, &dest);
+		}
+		case IS_LONG: {
+			zend_long dest;
+			return zend_parse_arg_long_weak(arg, &dest);
+		}
+		case IS_DOUBLE: {
+			double dest;
+			return zend_parse_arg_double_weak(arg, &dest);
+		}
+		case IS_STRING:
+			/* We don't call cast_object here, because this check must be side-effect free. As this
+			 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
+			 * more than actually allowed here. */
+			return Z_TYPE_P(arg) < IS_STRING || Z_TYPE_P(arg) == IS_OBJECT;
+		default:
+			return 0;
+	}
+}
+#endif
+
 static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict, zend_bool is_internal_arg)
 {
 	if (UNEXPECTED(strict)) {
@@ -903,6 +931,11 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		}
 		return 0;
 	}
+#if ZEND_DEBUG
+	if (is_internal_arg) {
+		return zend_verify_weak_scalar_type_hint_no_sideeffect(type_hint, arg);
+	}
+#endif
 	return zend_verify_weak_scalar_type_hint(type_hint, arg);
 }
 
@@ -1083,7 +1116,7 @@ static zend_always_inline zend_bool zend_check_type(
 	 * because this case is already checked at compile-time. */
 }
 
-static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot, zend_bool is_internal)
+static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
 	zend_class_entry *ce;
@@ -1097,7 +1130,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	}
 
 	ce = NULL;
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, is_internal))) {
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
 	}
@@ -1140,21 +1173,29 @@ static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, u
 	return 1;
 }
 
-static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
+static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
 {
 	uint32_t i;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	zval *p = ZEND_CALL_ARG(call, 1);
-	void *dummy_cache_slot;
+	zval *arg = ZEND_CALL_ARG(call, 1);
 
 	for (i = 0; i < num_args; ++i) {
-		dummy_cache_slot = NULL;
-		if (UNEXPECTED(!zend_verify_arg_type(fbc, i + 1, p, NULL, &dummy_cache_slot, 1))) {
-			EG(current_execute_data) = call->prev_execute_data;
-			zend_vm_stack_free_args(call);
+		zend_arg_info *cur_arg_info;
+		zend_class_entry *ce = NULL;
+		void *dummy_cache_slot = NULL;
+
+		if (EXPECTED(i < fbc->common.num_args)) {
+			cur_arg_info = &fbc->common.arg_info[i];
+		} else if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+			cur_arg_info = &fbc->common.arg_info[fbc->common.num_args];
+		} else {
+			break;
+		}
+
+		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, NULL, fbc->common.scope, 0, /* is_internal_arg */ 1))) {
 			return 0;
 		}
-		p++;
+		arg++;
 	}
 	return 1;
 }
@@ -4444,14 +4485,7 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 	return ret;
 }
 
-ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
-{
-	void *dummy_cache_slot = NULL;
-
-	zend_verify_arg_type(zf, arg_num, arg, NULL, &dummy_cache_slot, 1);
-}
-
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
-	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot, 0);
+	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }

@@ -19,7 +19,7 @@ var_dump(intlcal_roll(1, 2, 3));
 Warning: IntlCalendar::roll(): intlcal_roll: invalid field in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_roll() must be an instance of IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_roll() expects parameter 1 to be IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_roll(1, 2, 3)
 #1 {main}

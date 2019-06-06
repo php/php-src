@@ -14,7 +14,7 @@ var_dump(intlgregcal_get_gregorian_change(1));
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to intlgregcal_get_gregorian_change() must be an instance of IntlGregorianCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlgregcal_get_gregorian_change() expects parameter 1 to be IntlGregorianCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlgregcal_get_gregorian_change(1)
 #1 {main}
