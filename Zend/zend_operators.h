@@ -287,7 +287,9 @@ static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 /* Like zval_get_string, but returns NULL if the conversion fails with an exception. */
 static zend_always_inline zend_string *zval_try_get_string(zval *op) {
 	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
-		return zend_string_copy(Z_STR_P(op));
+		zend_string *ret = zend_string_copy(Z_STR_P(op));
+		ZEND_ASSUME(ret != NULL);
+		return ret;
 	} else {
 		return zval_try_get_string_func(op);
 	}
@@ -296,8 +298,10 @@ static zend_always_inline zend_string *zval_try_get_string(zval *op) {
 /* Like zval_get_tmp_string, but returns NULL if the conversion fails with an exception. */
 static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_string **tmp) {
 	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		zend_string *ret = Z_STR_P(op);
 		*tmp = NULL;
-		return Z_STR_P(op);
+		ZEND_ASSUME(ret != NULL);
+		return ret;
 	} else {
 		return *tmp = zval_try_get_string_func(op);
 	}
