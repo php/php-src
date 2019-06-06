@@ -65,9 +65,9 @@ error: 0, IntlCalendar::after() expects exactly 1 parameter, 0 given
 
 error: 0, IntlCalendar::before() expects exactly 1 parameter, 0 given
 
-error: 0, Argument 1 passed to IntlCalendar::after() must be an instance of IntlCalendar, int given
+error: 0, IntlCalendar::after() expects parameter 1 to be IntlCalendar, int given
 
-error: 0, Argument 1 passed to IntlCalendar::before() must be an instance of IntlCalendar, int given
+error: 0, IntlCalendar::before() expects parameter 1 to be IntlCalendar, int given
 
 error: 0, IntlCalendar::after() expects exactly 1 parameter, 2 given
 

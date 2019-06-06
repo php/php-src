@@ -16,7 +16,7 @@ var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_P
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: wrong display type in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_display_name() must be an instance of IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: intltz_get_display_name() expects parameter 1 to be IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_display_name(NULL, 1, false, 'pt_PT')
 #1 {main}
