@@ -925,9 +925,19 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	buf->st_mode = 0;
 
 	if (!is_dir) {
-		DWORD type;
-		if (GetBinaryTypeW(pathw, &type)) {
+		if (pathw_len >= 4 &&
+			pathw[pathw_len-4] == L'.') {
+			if (_wcsnicmp(pathw+pathw_len-3, L"exe", 3) == 0 ||
+			_wcsnicmp(pathw+pathw_len-3, L"com", 3) == 0) {
+				DWORD type;
+				if (GetBinaryTypeW(pathw, &type)) {
+					buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
+				}
+			/* The below is actually incorrect, but keep for BC. */
+			} else if (_wcsnicmp(pathw+pathw_len-3, L"bat", 3) == 0 ||
+				_wcsnicmp(pathw+pathw_len-3, L"cmd", 3) == 0) {
 				buf->st_mode  |= (S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
+			}
 		}
 	}
 
