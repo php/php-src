@@ -870,7 +870,8 @@ try_again:
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
+			return (try && UNEXPECTED(EG(exception))) ?
+				NULL : ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object) {
