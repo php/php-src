@@ -77,6 +77,10 @@ jobs:
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
       displayName: 'Install Build'
     - script: |
+        brew services start mysql
+        brew services start postgresql
+        createdb `whoami`
+        createuser -s postgres
         mysql -uroot -e "CREATE DATABASE IF NOT EXISTS test"
         psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
         psql -U postgres -c "CREATE DATABASE test;"

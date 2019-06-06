@@ -31,8 +31,4 @@ steps:
                    gmp \
                    tidyp
       brew link icu4c gettext --force
-      brew services start mysql
-      brew services start postgresql
-      createdb `whoami`
-      createuser -s postgres
     displayName: 'brew'
