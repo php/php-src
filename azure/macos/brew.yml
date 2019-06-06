@@ -8,7 +8,6 @@ steps:
       brew install autoconf \
                    automake \
                    libtool \
-                   bison@3.1 \
                    mysql \
                    postgresql \
                    re2c \
@@ -33,4 +32,13 @@ steps:
       brew link icu4c gettext --force
       brew services start mysql
       brew services start postgresql
+      
+      mkdir -p /usr/local/src/bison
+      cd /usr/local/src/bison
+      wget https://ftp.gnu.org/gnu/bison/bison-3.0.4.tar.gz
+      tar xfv bison-3.0.4.tar.gz
+      cd bison-3.0.4
+      ./configure --disable-dependency-trackin --prefix=/usr/local/opt/bison304
+      make
+      sudo make install
     displayName: 'brew'
