@@ -4079,7 +4079,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		}
 	}
 
-ZEND_VM_C_LABEL(fcall_end):
+ZEND_VM_C_LABEL(fcall_end): ZEND_ATTRIBUTE_UNUSED;
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		OBJ_RELEASE(Z_OBJ(call->This));
 	}
@@ -8154,7 +8154,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		}
 	}
 
-ZEND_VM_C_LABEL(call_trampoline_end):
+ZEND_VM_C_LABEL(call_trampoline_end): ZEND_ATTRIBUTE_UNUSED;
 	execute_data = EG(current_execute_data);
 
 	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type) || (call_info & ZEND_CALL_TOP)) {

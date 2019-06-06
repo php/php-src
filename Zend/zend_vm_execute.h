@@ -1333,7 +1333,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 	}
 
-fcall_end:
+fcall_end: ZEND_ATTRIBUTE_UNUSED;
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		OBJ_RELEASE(Z_OBJ(call->This));
 	}
@@ -1431,7 +1431,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 	}
 
-fcall_end:
+fcall_end: ZEND_ATTRIBUTE_UNUSED;
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		OBJ_RELEASE(Z_OBJ(call->This));
 	}
@@ -2470,7 +2470,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		}
 	}
 
-call_trampoline_end:
+call_trampoline_end: ZEND_ATTRIBUTE_UNUSED;
 	execute_data = EG(current_execute_data);
 
 	if (!EX(func) || !ZEND_USER_CODE(EX(func)->type) || (call_info & ZEND_CALL_TOP)) {

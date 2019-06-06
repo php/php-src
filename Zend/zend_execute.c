@@ -1140,7 +1140,7 @@ static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, u
 	return 1;
 }
 
-static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
+static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_types(zend_function *fbc, zend_execute_data *call)
 {
 	uint32_t i;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
