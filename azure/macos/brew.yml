@@ -11,5 +11,6 @@ steps:
                    mysql \
                    openssl \
                    re2c \
-                   pkg-config
+                   pkg-config \
+                   krb5
     displayName: 'brew'
