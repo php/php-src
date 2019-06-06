@@ -79,6 +79,7 @@ jobs:
     - script: |
         brew services start mysql
         brew services start postgresql
+        sleep 2
         createdb `whoami`
         createuser -s postgres
         mysql -uroot -e "CREATE DATABASE IF NOT EXISTS test"
