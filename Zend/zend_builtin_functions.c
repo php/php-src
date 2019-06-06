@@ -135,7 +135,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_object_vars, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_object_vars, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, obj)
 ZEND_END_ARG_INFO()
 
@@ -1099,7 +1099,7 @@ ZEND_FUNCTION(get_object_vars)
 	zobj = Z_OBJ_P(obj);
 	properties = zobj->handlers->get_properties(zobj);
 	if (properties == NULL) {
-		RETURN_FALSE;
+		RETURN_EMPTY_ARRAY();
 	}
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties && !GC_IS_RECURSIVE(properties)) {
