@@ -31,6 +31,7 @@ steps:
                        libreadline-dev \
                        libldap2-dev \
                        libsasl2-dev \
+                       libargon2-0-dev \
                        postgresql \
                        postgresql-contrib \
                        ${{ parameters.packages }}

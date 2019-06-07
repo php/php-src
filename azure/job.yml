@@ -58,6 +58,7 @@ jobs:
             --enable-zend-test \
             --with-ldap \
             --with-ldap-sasl \
+            --with-password-argon2 \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
