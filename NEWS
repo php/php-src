@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - Sodium:
   . Fixed bug #78114 (segfault when calling sodium_* functions from eval). (cmb)
 
+- Standard:
+  . Fixed bug #77135 (Extract with EXTR_SKIP should skip $this).
+    (Craig Duncan, Dmitry)
+
 - Zip:
   . Fixed bug #76345 (zip.h not found). (Michael Maroszek)
 
