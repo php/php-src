@@ -9,24 +9,36 @@ spl_autoload_register(function($class) {
         class A {
             public function method(): X {}
         }
+        var_dump(new A);
     } else if ($class == 'B') {
         class B extends A {
             public function method(): Y {}
         }
+        var_dump(new B);
     } else if ($class == 'X') {
         interface X {
             public function method(): A;
         }
+        var_dump(interface_exists('X'));
     } else if ($class == 'Y') {
         interface Y extends X {
             public function method(): B;
         }
+        var_dump(interface_exists('Y'));
     }
 });
 
-$b = new B;
+var_dump(new B);
 
 ?>
 ===DONE===
 --EXPECT--
+object(A)#2 (0) {
+}
+bool(true)
+bool(true)
+object(B)#2 (0) {
+}
+object(B)#2 (0) {
+}
 ===DONE===
