@@ -371,7 +371,6 @@ void init_compiler(void) /* {{{ */
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 
-	CG(link_depth) = 0;
 	CG(delayed_variance_obligations) = NULL;
 	CG(delayed_autoloads) = NULL;
 }

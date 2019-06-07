@@ -2341,11 +2341,7 @@ static void resolve_delayed_variance_obligations() {
 	while (changed) {
 		changed = 0;
 
-		// TODO link_depth increment necessary?
-		CG(link_depth)++;
 		load_delayed_classes();
-		CG(link_depth)--;
-
 		zend_hash_apply_with_arguments(all_obligations, check_variance_obligations, 1, &changed);
 
 		if (zend_hash_num_elements(all_obligations) == 0) {
@@ -2394,7 +2390,6 @@ static void report_variance_errors(zend_class_entry *ce) {
 
 ZEND_API void zend_do_link_class(zend_class_entry *ce) /* {{{ */
 {
-	CG(link_depth)++;
 	if (ce->parent_name) {
 		zend_class_entry *parent = zend_fetch_class_by_name(
 			ce->parent_name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED);
@@ -2415,15 +2410,14 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce) /* {{{ */
 
 	zend_build_properties_info_table(ce);
 
-	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
-		ce->ce_flags |= ZEND_ACC_LINKED;
+	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
+		resolve_delayed_variance_obligations();
+		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+			report_variance_errors(ce);
+		}
 	}
 
-	CG(link_depth)--;
-	resolve_delayed_variance_obligations();
-	if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-		report_variance_errors(ce);
-	}
+	ce->ce_flags |= ZEND_ACC_LINKED;
 }
 
 /* Check whether early binding is prevented due to unresolved types in inheritance checks. */
