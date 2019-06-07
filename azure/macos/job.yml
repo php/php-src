@@ -68,7 +68,7 @@ jobs:
         make -j$(sysctl -n hw.ncpu) >/dev/null
       displayName: 'Make Build'
     - script: |
-        make install
+        sudo make install
         sudo mkdir     /etc/php.d
         sudo chmod 777 /etc/php.d
         echo mysqli.default_socket=/tmp/mysql.sock     > /etc/php.d/mysqli.ini
