@@ -2649,7 +2649,9 @@ PHP_FUNCTION(mb_str_begins)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos. Error code: ".$n);
+				char buffer[42];
+				sprintf(buffer, "Unknown error in mb_strpos. Error code: %s", n);
+                php_error_docref(NULL, E_WARNING, buffer);
                 break;
         }
         RETURN_BOOL(0);
@@ -2728,7 +2730,9 @@ PHP_FUNCTION(mb_str_ends)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos. Error code: ".$n);
+				char buffer[42];
+				sprintf(buffer, "Unknown error in mb_strpos. Error code: %s", n);
+                php_error_docref(NULL, E_WARNING, buffer);
                 break;
         }
         RETURN_BOOL(0);
