@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
     error message). (Sjon Hortensius)
+  . Fixed bug #38546 (bindParam incorrect processing of bool types).
+    (camporter)
 
 - MySQLnd:
   . Fixed bug #77955 (Random segmentation fault in mysqlnd from php-fpm).
