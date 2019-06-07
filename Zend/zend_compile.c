@@ -373,6 +373,7 @@ void init_compiler(void) /* {{{ */
 
 	CG(link_depth) = 0;
 	CG(delayed_variance_obligations) = NULL;
+	CG(delayed_autoloads) = NULL;
 }
 /* }}} */
 
@@ -387,6 +388,11 @@ void shutdown_compiler(void) /* {{{ */
 		zend_hash_destroy(CG(delayed_variance_obligations));
 		FREE_HASHTABLE(CG(delayed_variance_obligations));
 		CG(delayed_variance_obligations) = NULL;
+	}
+	if (CG(delayed_autoloads)) {
+		zend_hash_destroy(CG(delayed_autoloads));
+		FREE_HASHTABLE(CG(delayed_autoloads));
+		CG(delayed_autoloads) = NULL;
 	}
 }
 /* }}} */

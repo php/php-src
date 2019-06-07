@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_float.h"
 #include "zend_weakrefs.h"
+#include "zend_inheritance.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -916,11 +917,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			zend_string_release_ex(lc_name, 0);
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
-			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNRESOLVED_VARIANCE)
-					&& (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
-				return ce;
-			}
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED)) &&
+				!(flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED)) {
 			return NULL;
 		}
 		return ce;

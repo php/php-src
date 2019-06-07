@@ -127,6 +127,7 @@ struct _zend_compiler_globals {
 
 	uint32_t link_depth;
 	HashTable *delayed_variance_obligations;
+	HashTable *delayed_autoloads;
 };
 
 
