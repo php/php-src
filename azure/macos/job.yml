@@ -39,6 +39,7 @@ jobs:
             --with-xsl \
             --with-tidy=/usr/local/opt/tidyp \
             --with-xmlrpc \
+            --with-libxml \
             --enable-sysvsem \
             --enable-sysvshm \
             --enable-shmop \
