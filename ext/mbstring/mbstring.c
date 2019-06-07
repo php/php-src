@@ -11,7 +11,7 @@
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
-   +-------------------------------------------------------------- --------+
+   +----------------------------------------------------------------------+
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
    |         Rui Hirokawa <hirokawa@php.net>                              |
    |         Hironori Sato <satoh@jpnnet.com>                             |
@@ -2641,7 +2641,7 @@ PHP_FUNCTION(mb_str_begins)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos. Error code: ".$n");
+                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos. Error code: ".$n);
                 break;
         }
         RETURN_BOOL(0);
