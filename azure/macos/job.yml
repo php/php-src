@@ -17,7 +17,7 @@ jobs:
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
         ./buildconf --force
         ./configure ${{ parameters.configurationParameters }} \
-            --prefix=/usr \
+            --prefix=/usr/local \
             --enable-phpdbg \
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
@@ -68,8 +68,6 @@ jobs:
         make -j$(sysctl -n hw.ncpu) >/dev/null
       displayName: 'Make Build'
     - script: |
-        mkdir -p /usr/lib/php/extensions
-        chmod 777 /usr/lib/php/extensions
         make install
         sudo mkdir     /etc/php.d
         sudo chmod 777 /etc/php.d
