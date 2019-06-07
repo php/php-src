@@ -1,6 +1,9 @@
 trigger:
-  - PHP-7.4
-  - master
+  batch: true
+  branches:
+    include:
+      - PHP-7.4
+      - master
 
 jobs:
   - template: azure/job.yml
