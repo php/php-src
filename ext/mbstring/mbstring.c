@@ -2631,6 +2631,7 @@ PHP_FUNCTION(mb_str_begins)
             RETURN_BOOL(0);
         }
     } else {
+		char buffer[42];
         switch (-n) {
             case 1:
                 break;
@@ -2641,7 +2642,6 @@ PHP_FUNCTION(mb_str_begins)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-				char buffer[42];
 				sprintf(buffer, "Unknown error in mb_strpos. Error code: %zu", n);
                 php_error_docref(NULL, E_WARNING, buffer);
                 break;
