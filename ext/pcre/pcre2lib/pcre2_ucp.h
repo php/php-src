@@ -124,7 +124,6 @@ enum {
 /* These are the script identifications. */
 
 enum {
-  ucp_Unknown,
   ucp_Arabic,
   ucp_Armenian,
   ucp_Bengali,

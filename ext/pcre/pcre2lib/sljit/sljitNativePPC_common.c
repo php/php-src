@@ -42,7 +42,7 @@ typedef sljit_u32 sljit_ins;
 #include <sys/cache.h>
 #endif
 
-#if (defined _CALL_ELF && _CALL_ELF == 2)
+#if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
 #define SLJIT_PASS_ENTRY_ADDR_TO_CALL 1
 #endif
 

@@ -585,8 +585,6 @@ typedef struct pcre2_real_match_context {
 #endif
   int    (*callout)(pcre2_callout_block *, void *);
   void    *callout_data;
-  int    (*substitute_callout)(pcre2_substitute_callout_block *, void *);
-  void    *substitute_callout_data;
   PCRE2_SIZE offset_limit;
   uint32_t heap_limit;
   uint32_t match_limit;
@@ -658,8 +656,7 @@ typedef struct pcre2_real_match_data {
   PCRE2_SIZE       leftchar;      /* Offset to leftmost code unit */
   PCRE2_SIZE       rightchar;     /* Offset to rightmost code unit */
   PCRE2_SIZE       startchar;     /* Offset to starting code unit */
-  uint8_t          matchedby;     /* Type of match (normal, JIT, DFA) */
-  uint8_t          flags;         /* Various flags */
+  uint16_t         matchedby;     /* Type of match (normal, JIT, DFA) */
   uint16_t         oveccount;     /* Number of pairs */
   int              rc;            /* The return code from the match */
   PCRE2_SIZE       ovector[131072]; /* Must be last in the structure */
