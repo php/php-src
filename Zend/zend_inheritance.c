@@ -2322,7 +2322,6 @@ static void resolve_delayed_variance_obligations(zend_class_entry *ce) {
 	obligations = zend_hash_index_find_ptr(all_obligations, num_key);
 	ZEND_ASSERT(obligations != NULL);
 
-	load_delayed_classes();
 	zend_hash_apply(obligations, check_variance_obligation);
 	if (zend_hash_num_elements(obligations) == 0) {
 		ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_VARIANCE;
@@ -2385,14 +2384,18 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce) /* {{{ */
 
 	zend_build_properties_info_table(ce);
 
+	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
+		ce->ce_flags |= ZEND_ACC_LINKED;
+		return;
+	}
+
+	load_delayed_classes();
 	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 		resolve_delayed_variance_obligations(ce);
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			report_variance_errors(ce);
 		}
 	}
-
-	ce->ce_flags |= ZEND_ACC_LINKED;
 }
 
 /* Check whether early binding is prevented due to unresolved types in inheritance checks. */
