@@ -15,6 +15,9 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
+// To test error cases.
+$db->exec("SET sql_mode='STRICT_TRANS_TABLES'");
+
 $db->exec("DROP TABLE IF EXISTS test");
 
 $query = "CREATE TABLE test(
