@@ -2631,7 +2631,6 @@ PHP_FUNCTION(mb_str_begins)
             RETURN_BOOL(0);
         }
     } else {
-		char buffer[42];
         switch (-n) {
             case 1:
                 break;
@@ -2642,8 +2641,7 @@ PHP_FUNCTION(mb_str_begins)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-				sprintf(buffer, "Unknown error in mb_strpos. Error code: %zu", n);
-                php_error_docref(NULL, E_WARNING, buffer);
+                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
                 break;
         }
         RETURN_BOOL(0);
@@ -2712,7 +2710,6 @@ PHP_FUNCTION(mb_str_ends)
     if (!mbfl_is_error(n)) {
         RETURN_BOOL(1);
     } else {
-		char buffer[42];
         switch (-n) {
             case 1:
                 break;
@@ -2723,9 +2720,7 @@ PHP_FUNCTION(mb_str_ends)
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
             default:
-				
-				sprintf(buffer, "Unknown error in mb_strpos. Error code: %zu", n);
-                php_error_docref(NULL, E_WARNING, buffer);
+                php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
                 break;
         }
         RETURN_BOOL(0);
