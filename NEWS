@@ -13,8 +13,6 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #77956 (When mysqli.allow_local_infile = Off, use a meaningful
     error message). (Sjon Hortensius)
-  . Fixed bug #38546 (bindParam incorrect processing of bool types).
-    (camporter)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
@@ -23,6 +21,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug #78038 (Socket_select fails when resource array contains
     references). (Nikita)
+
+- Standard:
+  . Fixed bug #77135 (Extract with EXTR_SKIP should skip $this).
+    (Craig Duncan, Dmitry)
 
 - Zip:
   . Fixed bug #76345 (zip.h not found). (Michael Maroszek)
