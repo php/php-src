@@ -77,7 +77,7 @@ jobs:
     - script: |
         brew services start mysql
         brew services start postgresql
-        sleep 20
+        while [[ ! -e /tmp/mysql.sock ]]; do sleep 1; done
         createdb `whoami`
         createuser -s postgres
         mysql -uroot -e "CREATE DATABASE IF NOT EXISTS test"
