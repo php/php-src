@@ -32,6 +32,7 @@ steps:
                    libzip \
                    gmp \
                    tidyp \
-                   libxml2
+                   libxml2\
+                   openssl@1.1
       brew link icu4c gettext --force
     displayName: 'brew'
