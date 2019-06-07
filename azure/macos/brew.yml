@@ -11,7 +11,7 @@ steps:
                    automake \
                    libtool \
                    bison \
-                   mysql \
+                   mysql@5.7 \
                    postgresql \
                    re2c \
                    pkg-config \

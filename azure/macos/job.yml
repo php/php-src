@@ -81,12 +81,12 @@ jobs:
         echo pdo_mysql.default_socket=/tmp/mysql.sock  > /etc/php.d/pdo_mysql.ini
       displayName: 'Install Build'
     - script: |
-        brew services start mysql
+        brew services start mysql@5.7
         brew services start postgresql
         while [[ ! -e /tmp/mysql.sock ]]; do sleep 1; done
         createdb `whoami`
         createuser -s postgres
-        mysql -uroot -e "CREATE DATABASE IF NOT EXISTS test"
+        $(brew --prefix mysql@5.7)/bin/mysql -uroot -e "CREATE DATABASE IF NOT EXISTS test"
         psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
         psql -U postgres -c "CREATE DATABASE test;"
       displayName: 'Setup'
