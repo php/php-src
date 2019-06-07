@@ -201,7 +201,7 @@ static zend_bool class_visible(zend_class_entry *ce) {
 	}
 }
 
-static zend_class_entry *lookup_class(zend_string *name, zend_class_entry *current_ce) {
+static zend_class_entry *lookup_class(const zend_function *fe, zend_string *name) {
 	zend_class_entry *ce;
 	if (!CG(in_compilation)) {
 		uint32_t flags = ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD;
@@ -223,8 +223,8 @@ static zend_class_entry *lookup_class(zend_string *name, zend_class_entry *curre
 		}
 
 		/* The current class may not be registered yet, so check for it explicitly. */
-		if (zend_string_equals_ci(current_ce->name, name)) {
-			return current_ce;
+		if (zend_string_equals_ci(fe->common.scope->name, name)) {
+			return fe->common.scope;
 		}
 	}
 
@@ -287,8 +287,7 @@ typedef enum {
 static inheritance_status zend_perform_covariant_type_check(
 		zend_string **unresolved_class,
 		const zend_function *fe, zend_arg_info *fe_arg_info,
-		const zend_function *proto, zend_arg_info *proto_arg_info,
-		zend_class_entry *current_ce) /* {{{ */
+		const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	zend_type fe_type = fe_arg_info->type, proto_type = proto_arg_info->type;
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_type) && ZEND_TYPE_IS_SET(proto_type));
@@ -312,8 +311,8 @@ static inheritance_status zend_perform_covariant_type_check(
 
 		/* Make sure to always load both classes, to avoid only registering one of them as
 		 * a delayed autoload. */
-		fe_ce = lookup_class(fe_class_name, current_ce);
-		proto_ce = lookup_class(proto_class_name, current_ce);
+		fe_ce = lookup_class(fe, fe_class_name);
+		proto_ce = lookup_class(proto, proto_class_name);
 		if (!fe_ce) {
 			*unresolved_class = fe_class_name;
 			return INHERITANCE_UNRESOLVED;
@@ -327,7 +326,7 @@ static inheritance_status zend_perform_covariant_type_check(
 	} else if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
-			zend_class_entry *fe_ce = lookup_class(fe_class_name, current_ce);
+			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
 			if (!fe_ce) {
 				*unresolved_class = fe_class_name;
 				return INHERITANCE_UNRESOLVED;
@@ -344,7 +343,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			 * for forward-compatibility reasons, as we may have named types in the future that
 			 * are not classes (such as enums or typedefs). */
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
-			zend_class_entry *fe_ce = lookup_class(fe_class_name, current_ce);
+			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
 			if (!fe_ce) {
 				*unresolved_class = fe_class_name;
 				return INHERITANCE_UNRESOLVED;
@@ -363,8 +362,7 @@ static inheritance_status zend_perform_covariant_type_check(
 static inheritance_status zend_do_perform_arg_type_hint_check(
 		zend_string **unresolved_class,
 		const zend_function *fe, zend_arg_info *fe_arg_info,
-		const zend_function *proto, zend_arg_info *proto_arg_info,
-		zend_class_entry *current_ce) /* {{{ */
+		const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (!ZEND_TYPE_IS_SET(fe_arg_info->type)) {
 		/* Child with no type is always compatible */
@@ -379,13 +377,12 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 	/* Contravariant type check is performed as a covariant type check with swapped
 	 * argument order. */
 	return zend_perform_covariant_type_check(
-		unresolved_class, proto, proto_arg_info, fe, fe_arg_info, current_ce);
+		unresolved_class, proto, proto_arg_info, fe, fe_arg_info);
 }
 /* }}} */
 
 static inheritance_status zend_do_perform_implementation_check(
-		zend_string **unresolved_class, const zend_function *fe, const zend_function *proto,
-		zend_class_entry *current_ce) /* {{{ */
+		zend_string **unresolved_class, const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
 	inheritance_status status, local_status;
@@ -456,7 +453,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_do_perform_arg_type_hint_check(
-			unresolved_class, fe, fe_arg_info, proto, proto_arg_info, current_ce);
+			unresolved_class, fe, fe_arg_info, proto, proto_arg_info);
 		if (local_status == INHERITANCE_ERROR) {
 			return INHERITANCE_ERROR;
 		}
@@ -479,8 +476,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_perform_covariant_type_check(
-			unresolved_class, fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1,
-			current_ce);
+			unresolved_class, fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
 		if (local_status == INHERITANCE_ERROR) {
 			return INHERITANCE_ERROR;
 		}
@@ -497,7 +493,7 @@ static inheritance_status perform_delayable_implementation_check(
 		zend_string **unresolved_class, zend_class_entry *ce,
 		const zend_function *fe, const zend_function *proto, zend_bool always_error) {
 	inheritance_status status = zend_do_perform_implementation_check(
-		unresolved_class, fe, proto, ce);
+		unresolved_class, fe, proto);
 	if (status == INHERITANCE_UNRESOLVED) {
 		add_compatibility_obligation(ce, fe, proto, always_error);
 	}
@@ -698,7 +694,7 @@ static void ZEND_COLD emit_incompatible_method_error_or_warning(
 		 (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) ||
 		((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
 		 (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		  zend_perform_covariant_type_check(&unresolved_class, child, child->common.arg_info - 1, parent, parent->common.arg_info - 1, child->common.scope) != INHERITANCE_SUCCESS))
+		  zend_perform_covariant_type_check(&unresolved_class, child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) != INHERITANCE_SUCCESS))
 	) {
 		error_level = E_COMPILE_ERROR;
 		error_verb = "must";
@@ -2270,9 +2266,8 @@ static void add_compatibility_obligation(
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
-static int check_variance_obligation(zval *zv, void *arg) {
+static int check_variance_obligation(zval *zv) {
 	variance_obligation *obligation = Z_PTR_P(zv);
-	zend_class_entry *ce = (zend_class_entry *) arg;
 	if (obligation->type == OBLIGATION_DEPENDENCY) {
 		if (!(obligation->dependency_ce->ce_flags & ZEND_ACC_LINKED)) {
 			return ZEND_HASH_APPLY_KEEP;
@@ -2280,7 +2275,7 @@ static int check_variance_obligation(zval *zv, void *arg) {
 	} else {
 		zend_string *unresolved_class;
 		inheritance_status status = zend_do_perform_implementation_check(
-			&unresolved_class, obligation->child_fn, obligation->parent_fn, ce);
+			&unresolved_class, obligation->child_fn, obligation->parent_fn);
 		if (status == INHERITANCE_UNRESOLVED) {
 			return ZEND_HASH_APPLY_KEEP;
 		}
@@ -2299,7 +2294,7 @@ static int check_variance_obligations(
 	HashTable *obligations = Z_PTR_P(zv);
 	zend_class_entry *ce = (zend_class_entry *) (uintptr_t) hash_key->h;
 	zend_bool *changed = va_arg(args, zend_bool *);
-	zend_hash_apply_with_argument(obligations, check_variance_obligation, ce);
+	zend_hash_apply(obligations, check_variance_obligation);
 	if (zend_hash_num_elements(obligations)) {
 		return ZEND_HASH_APPLY_KEEP;
 	}
@@ -2374,7 +2369,7 @@ static void report_variance_errors(zend_class_entry *ce) {
 
 		/* Just used to fetch the unresolved_class in this case. */
 		status = zend_do_perform_implementation_check(
-			&unresolved_class, obligation->child_fn, obligation->parent_fn, ce);
+			&unresolved_class, obligation->child_fn, obligation->parent_fn);
 		ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
 		emit_incompatible_method_error_or_warning(
 			obligation->child_fn, obligation->parent_fn,
@@ -2433,7 +2428,7 @@ zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce)
 		) {
 			continue;
 		}
-		if (zend_do_perform_implementation_check(&unresolved_class, func, parent_func, ce) == INHERITANCE_UNRESOLVED) {
+		if (zend_do_perform_implementation_check(&unresolved_class, func, parent_func) == INHERITANCE_UNRESOLVED) {
 			return 0;
 		}
 	} ZEND_HASH_FOREACH_END();
