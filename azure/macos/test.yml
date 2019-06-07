@@ -13,7 +13,7 @@ steps:
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
       rm -rf junit.xml | true
-      php run-tests.php -P -q \
+      /usr/local/bin/php run-tests.php -P -q \
           -j$(sysctl -n hw.ncpu) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
