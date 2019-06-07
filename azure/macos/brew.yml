@@ -3,6 +3,8 @@ parameters:
 
 steps:
   - script: |
+      xcode-select --install
+      xcode-select -p
       /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
       # see https://formulae.brew.sh/ for package names
       brew install autoconf \
