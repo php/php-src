@@ -2650,7 +2650,7 @@ PHP_FUNCTION(mb_str_begins)
                 break;
             default:
 				char buffer[42];
-				sprintf(buffer, "Unknown error in mb_strpos. Error code: %s", n);
+				sprintf(buffer, "Unknown error in mb_strpos. Error code: %d", n);
                 php_error_docref(NULL, E_WARNING, buffer);
                 break;
         }
@@ -2731,7 +2731,7 @@ PHP_FUNCTION(mb_str_ends)
                 break;
             default:
 				char buffer[42];
-				sprintf(buffer, "Unknown error in mb_strpos. Error code: %s", n);
+				sprintf(buffer, "Unknown error in mb_strpos. Error code: %d", n);
                 php_error_docref(NULL, E_WARNING, buffer);
                 break;
         }
