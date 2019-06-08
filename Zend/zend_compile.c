@@ -5555,6 +5555,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			}
 		}
 
+		CG(zend_lineno) = zend_ast_get_lineno(var_ast);
+
 		zend_compile_static_var_common(var_name, &zv, var_ast->attr ? ZEND_BIND_REF : 0);
 	}
 }
