@@ -671,7 +671,6 @@ static const func_info_t func_infos[] = {
 	F0("stream_set_write_buffer",      MAY_BE_FALSE | MAY_BE_LONG),
 	F0("set_file_buffer",              MAY_BE_FALSE | MAY_BE_LONG),
 	F0("stream_set_chunk_size",        MAY_BE_FALSE | MAY_BE_LONG),
-	F0("set_socket_blocking",          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("stream_set_blocking",          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("socket_set_blocking",          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("stream_get_meta_data",         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
