@@ -1,0 +1,99 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    pool:
+      vmImage: 'macOS-10.14'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - template: brew.yml
+    - script: |
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxml2/lib/pkgconfig"
+        ./buildconf --force
+        ./configure ${{ parameters.configurationParameters }} \
+            --prefix=/usr/local \
+            --enable-phpdbg \
+            --enable-fpm \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pgsql \
+            --with-pdo-pgsql \
+            --with-pdo-sqlite \
+            --without-pear \
+            --enable-gd \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --with-zlib-dir=/usr \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-tidy=/usr/local/opt/tidyp \
+            --with-xmlrpc \
+            --with-libxml \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --with-readline=/usr/local/opt/readline \
+            --enable-mbstring \
+            --with-curl \
+            --with-gettext==/usr/local/opt/gettext \
+            --enable-sockets \
+            --with-bz2=/usr/local/opt/bzip2 \
+            --with-openssl \
+            --with-gmp=/usr/local/opt/gmp \
+            --with-iconv=/usr/local/opt/libiconv \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-pspell=/usr/local/opt/aspell \
+            --with-kerberos \
+            --enable-sysvmsg \
+            --with-ffi \
+            --enable-zend-test \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+      displayName: 'Configure Build'
+    - script: |
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        make -j$(sysctl -n hw.ncpu)
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/tmp/mysql.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/tmp/mysql.sock  > /etc/php.d/pdo_mysql.ini
+      displayName: 'Install Build'
+    - script: |
+        brew services start postgresql
+        createdb `whoami`
+        createuser -s postgres
+        psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
+        psql -U postgres -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+    - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/PHP-7.4') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'JIT'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.jit_buffer_size=16M
