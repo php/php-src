@@ -2029,8 +2029,8 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_stmt_affected_rows(object stmt)
-   Return the number of rows affected in the last query for the given link */
+/* {{{ proto string|int|false mysqli_stmt_affected_rows(object stmt)
+   Return the number of rows affected in the last query for the given link. */
 PHP_FUNCTION(mysqli_stmt_affected_rows)
 {
 	MY_STMT			*stmt;
