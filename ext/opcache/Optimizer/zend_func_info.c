@@ -1545,7 +1545,7 @@ static const func_info_t func_infos[] = {
 	F0("imagegd",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imagegd2",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imagedestroy",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("magecolorallocate",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorallocate",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("imagepalettecopy",						MAY_BE_NULL | MAY_BE_FALSE),
 	F0("imagecolorat",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("imagecolorclosest",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
