@@ -993,21 +993,6 @@ static const func_info_t func_infos[] = {
 	F0("mb_ereg_search_getpos",                 MAY_BE_LONG),
 	F0("mb_ereg_search_setpos",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 
-	F0("mbregex_encoding",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("mbereg",                                MAY_BE_FALSE | MAY_BE_LONG),
-	F0("mberegi",                               MAY_BE_FALSE | MAY_BE_LONG),
-	F1("mbereg_replace",                        MAY_BE_FALSE | MAY_BE_STRING),
-	F1("mberegi_replace",                       MAY_BE_FALSE | MAY_BE_STRING),
-	F1("mbsplit",                               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F0("mbereg_match",                          MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("mbereg_search",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("mbereg_search_pos",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F1("mbereg_search_regs",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_STRING),
-	F0("mbereg_search_init",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("mbereg_search_getregs",                 MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_STRING),
-	F0("mbereg_search_getpos",                  MAY_BE_LONG),
-	F0("mbereg_search_setpos",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-
 	/* ext/iconv */
 	F1("iconv",                                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iconv_get_encoding",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
