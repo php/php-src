@@ -3,45 +3,32 @@
 root = true
 
 [*]
+trim_trailing_whitespace = true
+insert_final_newline     = true
+end_of_line              = lf
+charset                  = utf-8
 tab_width                = 4
 
-[*.{c,h,y,awk,w32,bat,mk,frag,cpp}]
-charset                  = utf-8
-end_of_line              = lf
+[{*.{awk,bat,c,cpp,d,h,l,mk,re,skl,w32,y},Makefile*}]
 indent_size              = 4
 indent_style             = tab
-trim_trailing_whitespace = true
-insert_final_newline     = true
 
-[*.{php,phpt,inc}]
-charset                  = utf-8
-end_of_line              = lf
+[*.{dtd,html,inc,php,phpt,rng,wsdl,xml,xsd,xsl}]
 indent_size              = 4
 indent_style             = space
-trim_trailing_whitespace = true
-insert_final_newline     = true
 
-[*.{yml,m4,sh}]
-charset                  = utf-8
-end_of_line              = lf
+[*.{ac,m4,sh,yml}]
 indent_size              = 2
 indent_style             = space
-trim_trailing_whitespace = true
-insert_final_newline     = true
 
 [*.md]
-charset                  = utf-8
-end_of_line              = lf
 indent_style             = space
-trim_trailing_whitespace = true
-insert_final_newline     = true
 max_line_length          = 80
 
 [COMMIT_EDITMSG]
-charset                  = utf-8
-end_of_line              = lf
 indent_size              = 4
 indent_style             = space
-trim_trailing_whitespace = true
-insert_final_newline     = true
 max_line_length          = 80
+
+[*.patch]
+trim_trailing_whitespace = false
