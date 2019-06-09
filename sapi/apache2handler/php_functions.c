@@ -559,6 +559,6 @@ zend_module_entry php_apache_module = {
 	NULL,
 	NULL,
 	PHP_MINFO(apache),
-	NULL,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
