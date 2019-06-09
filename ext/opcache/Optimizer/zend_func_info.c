@@ -1092,7 +1092,7 @@ static const func_info_t func_infos[] = {
 	F0("mysqli_select_db",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("mysqli_sqlstate",						MAY_BE_NULL | MAY_BE_STRING),
 	F0("mysqli_ssl_set",						MAY_BE_NULL | MAY_BE_TRUE),
-	F1("mysqli_stat",							MAY_BE_NULL | MAY_BE_STRING),
+	F1("mysqli_stat",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("mysqli_refresh",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_stmt_attr_set",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_stmt_attr_get",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
