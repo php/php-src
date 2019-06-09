@@ -1666,7 +1666,7 @@ PHP_FUNCTION(dirname)
 }
 /* }}} */
 
-/* {{{ proto array pathinfo(string path[, int options])
+/* {{{ proto array|string pathinfo(string path[, int options])
    Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
 {

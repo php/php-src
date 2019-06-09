@@ -194,7 +194,7 @@ static const func_info_t func_infos[] = {
 	FN("nl2br",                        MAY_BE_STRING),
 	F1("basename",                     MAY_BE_STRING),
 	F1("dirname",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("pathinfo",                     MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("pathinfo",                     MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
 	F1("stripslashes",                 MAY_BE_STRING),
 	F1("stripcslashes",                MAY_BE_STRING),
 	F1("strstr",                       MAY_BE_FALSE | MAY_BE_STRING),
