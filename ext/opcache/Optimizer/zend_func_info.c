@@ -942,7 +942,7 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_query",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_OBJECT),
 	F0("mysqli_multi_query",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_set_charset",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("mysqli_get_charset", 					MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
+	F1("mysqli_get_charset", 					MAY_BE_NULL | MAY_BE_OBJECT),
 	F0("mysqli_begin_transaction",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_savepoint",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("mysqli_release_savepoint",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
