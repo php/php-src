@@ -16,7 +16,7 @@ License v3.01.
 
 [![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
-[![Build Status](https://dev.azure.com/krakjoe/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/krakjoe/php/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=master)
 
 ## Documentation
 
