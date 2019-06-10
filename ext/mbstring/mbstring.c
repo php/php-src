@@ -2727,6 +2727,9 @@ PHP_FUNCTION(mb_str_ends)
             case 8:
                 php_error_docref(NULL, E_NOTICE, "Argument is empty");
                 break;
+			case 16:
+				php_error_docref(NULL, E_WARNING, "Unknown needle, haystack error");
+				break;
             default:
                 php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
                 break;
