@@ -5453,6 +5453,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
 		}
 
+		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
+
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
 		opline->op2_type = IS_CV;
 		opline->op2.var = lookup_cv(var_name);
