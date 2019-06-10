@@ -2705,6 +2705,10 @@ PHP_FUNCTION(mb_str_ends)
     if (needle.len == 0) {
         RETURN_BOOL(1);
     }
+	
+	if (needle.len > haystack.len) {
+		RETURN_BOOL(0);	
+	}
 
     n = mbfl_strpos(&haystack, &needle, haystack.len-needle.len, 0);
     if (!mbfl_is_error(n)) {
