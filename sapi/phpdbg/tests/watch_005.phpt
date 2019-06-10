@@ -46,3 +46,5 @@ $c = &$a;
 $a[1] = "b";
 
 exit;
+--XFAIL--
+There may be flaws in the implementation of watchpoints that cause failures

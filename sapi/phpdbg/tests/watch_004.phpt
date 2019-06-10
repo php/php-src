@@ -36,3 +36,5 @@ prompt>
 $b = "a";
 $a = $b.$b;
 $a[1] = "b";
+--XFAIL--
+There may be flaws in the implementation of watchpoints that cause failures

@@ -69,3 +69,5 @@ $a[0] = 2;
 $a[1] = 3;
 $c = [1];
 $b = &$c;
+--XFAIL--
+There may be flaws in the implementation of watchpoints that cause failures

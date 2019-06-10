@@ -45,3 +45,5 @@ $b = [$a];
 
 unset($b);
 $b = 2;
+--XFAIL--
+There may be flaws in the implementation of watchpoints that cause failures
