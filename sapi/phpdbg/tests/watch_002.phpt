@@ -30,3 +30,5 @@ $a[0] = 1;
 $a[0] = 2;
 
 $a = [0 => 3, 1 => 4];
+--XFAIL--
+There may be flaws in the implementation of watchpoints that cause failures
