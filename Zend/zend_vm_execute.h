@@ -398,19 +398,24 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 #undef LOAD_OPLINE
 #undef LOAD_OPLINE_EX
 #undef SAVE_OPLINE
+#undef SAVE_OPLINE_EX
 #define DCL_OPLINE
 #ifdef ZEND_VM_IP_GLOBAL_REG
 # define OPLINE opline
 # define USE_OPLINE
 # define LOAD_OPLINE() opline = EX(opline)
+# define LOAD_OPLINE_EX()
 # define LOAD_NEXT_OPLINE() opline = EX(opline) + 1
 # define SAVE_OPLINE() EX(opline) = opline
+# define SAVE_OPLINE_EX() SAVE_OPLINE()
 #else
 # define OPLINE EX(opline)
 # define USE_OPLINE const zend_op *opline = EX(opline);
 # define LOAD_OPLINE()
+# define LOAD_OPLINE_EX()
 # define LOAD_NEXT_OPLINE() ZEND_VM_INC_OPCODE()
 # define SAVE_OPLINE()
+# define SAVE_OPLINE_EX()
 #endif
 #undef HANDLE_EXCEPTION
 #undef HANDLE_EXCEPTION_LEAVE
@@ -460,12 +465,12 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_th
 	HANDLE_EXCEPTION();
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_abstract_method_helper_SPEC(zend_function *fbc ZEND_OPCODE_HANDLER_ARGS_DC)
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_abstract_method_helper_SPEC(zend_function *_fbc ZEND_OPCODE_HANDLER_ARGS_DC)
 {
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(_fbc->common.scope->name), ZSTR_VAL(_fbc->common.function_name));
 	UNDEF_RESULT();
 	HANDLE_EXCEPTION();
 }
@@ -1064,7 +1069,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-	LOAD_OPLINE();
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1087,7 +1092,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	call->prev_execute_data = execute_data;
 	execute_data = call;
 	i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-	LOAD_OPLINE();
+	LOAD_OPLINE_EX();
 
 	ZEND_VM_ENTER_EX();
 }
@@ -1111,7 +1116,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		LOAD_OPLINE();
+		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
 	} else {
@@ -1187,7 +1192,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
-		LOAD_OPLINE();
+		LOAD_OPLINE_EX();
 
 		ZEND_VM_ENTER_EX();
 	} else {
@@ -1276,11 +1281,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			LOAD_OPLINE();
+			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
 			execute_data = EX(prev_execute_data);
-			LOAD_OPLINE();
+			SAVE_OPLINE_EX();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}
@@ -1371,11 +1376,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			LOAD_OPLINE();
+			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
 			execute_data = EX(prev_execute_data);
-			LOAD_OPLINE();
+			SAVE_OPLINE_EX();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}
@@ -2404,11 +2409,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-			LOAD_OPLINE();
+			LOAD_OPLINE_EX();
 			ZEND_VM_ENTER_EX();
 		} else {
 			execute_data = EX(prev_execute_data);
-			LOAD_OPLINE();
+			SAVE_OPLINE_EX();
 			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call);
 		}

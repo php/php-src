@@ -3466,9 +3466,6 @@ static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array,
 	EX(run_time_cache) = RUN_TIME_CACHE(op_array);
 
 	EG(current_execute_data) = execute_data;
-#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
-	EX(opline) = opline;
-#endif
 }
 /* }}} */
 
