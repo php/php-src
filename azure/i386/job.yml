@@ -77,14 +77,6 @@ jobs:
         sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
         sudo -u postgres psql -c "CREATE DATABASE test;"
       displayName: 'Setup'
-#    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: this will be uncommented on merge, we don't want to docker pull request builds
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'phpazuredevops'
-        repository: ${{ variables['Build.SourceBranch'] }}
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: ${{ parameters.configurationName }}
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
