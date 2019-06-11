@@ -1,5 +1,11 @@
 --TEST--
 Test multiple watch elements pointing to the same watchpoint
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+}
+?>
 --PHPDBG--
 b 4
 r
@@ -69,5 +75,3 @@ $a[0] = 2;
 $a[1] = 3;
 $c = [1];
 $b = &$c;
---XFAIL--
-There may be flaws in the implementation of watchpoints that cause failures

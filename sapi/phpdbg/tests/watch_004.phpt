@@ -1,5 +1,11 @@
 --TEST--
 Test detection of inline string manipulations on zval watch
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+}
+?>
 --INI--
 opcache.optimization_level=0
 --PHPDBG--
@@ -36,5 +42,3 @@ prompt>
 $b = "a";
 $a = $b.$b;
 $a[1] = "b";
---XFAIL--
-There may be flaws in the implementation of watchpoints that cause failures

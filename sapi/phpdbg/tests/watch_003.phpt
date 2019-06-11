@@ -1,5 +1,11 @@
 --TEST--
 Test simple watchpoint with replace
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+}
+?>
 --PHPDBG--
 b 6
 r
@@ -37,5 +43,3 @@ $a[0] = 1;
 $a[0] = 2;
 
 $a = [0 => 3, 1 => 4];
---XFAIL--
-There may be flaws in the implementation of watchpoints that cause failures

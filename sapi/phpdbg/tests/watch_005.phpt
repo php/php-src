@@ -1,5 +1,11 @@
 --TEST--
 Test proper watch comparisons when having multiple levels of indirection from a zval to its value
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+}
+?>
 --PHPDBG--
 b 3
 r
@@ -46,5 +52,3 @@ $c = &$a;
 $a[1] = "b";
 
 exit;
---XFAIL--
-There may be flaws in the implementation of watchpoints that cause failures
