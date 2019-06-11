@@ -106,7 +106,7 @@ static const func_info_t func_infos[] = {
 	F0("defined",                 MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	FN("get_class",               MAY_BE_FALSE | MAY_BE_STRING),
 	FN("get_called_class",        MAY_BE_FALSE | MAY_BE_STRING),
-	FN("get_parrent_class",       MAY_BE_FALSE | MAY_BE_STRING),
+	FN("get_parent_class",        MAY_BE_FALSE | MAY_BE_STRING),
 	F0("is_subclass_of",          MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	F0("is_a",                    MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline
 	F1("get_class_vars",          MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
