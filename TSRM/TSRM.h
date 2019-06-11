@@ -159,14 +159,10 @@ TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
 TSRM_API const char *tsrm_api_name(void);
 
-#if defined(__cplusplus) && __cplusplus > 199711L
-# define TSRM_TLS thread_local
+#ifdef TSRM_WIN32
+# define TSRM_TLS __declspec(thread)
 #else
-# ifdef TSRM_WIN32
-#  define TSRM_TLS __declspec(thread)
-# else
-#  define TSRM_TLS __thread
-# endif
+# define TSRM_TLS __thread
 #endif
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
