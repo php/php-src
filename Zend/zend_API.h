@@ -408,17 +408,19 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval 
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
-ZEND_API int add_index_long(zval *arg, zend_ulong idx, zend_long n);
-ZEND_API int add_index_null(zval *arg, zend_ulong idx);
-ZEND_API int add_index_bool(zval *arg, zend_ulong idx, int b);
-ZEND_API int add_index_resource(zval *arg, zend_ulong idx, zend_resource *r);
-ZEND_API int add_index_double(zval *arg, zend_ulong idx, double d);
-ZEND_API int add_index_str(zval *arg, zend_ulong idx, zend_string *str);
-ZEND_API int add_index_string(zval *arg, zend_ulong idx, const char *str);
-ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
+ZEND_API int add_index_long(zval *arg, zend_ulong index, zend_long n);
+ZEND_API int add_index_null(zval *arg, zend_ulong index);
+ZEND_API int add_index_bool(zval *arg, zend_ulong index, int b);
+ZEND_API int add_index_resource(zval *arg, zend_ulong index, zend_resource *r);
+ZEND_API int add_index_double(zval *arg, zend_ulong index, double d);
+ZEND_API int add_index_str(zval *arg, zend_ulong index, zend_string *str);
+ZEND_API int add_index_string(zval *arg, zend_ulong index, const char *str);
+ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
 
-#define add_index_zval(arg, index, value) \
-	(zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE)
+static zend_always_inline int add_index_zval(zval *arg, zend_ulong index, zval *value)
+{
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE;
+}
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
 ZEND_API int add_next_index_null(zval *arg);
@@ -429,8 +431,10 @@ ZEND_API int add_next_index_str(zval *arg, zend_string *str);
 ZEND_API int add_next_index_string(zval *arg, const char *str);
 ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length);
 
-#define add_next_index_zval(arg, value) \
-	(zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE)
+static zend_always_inline int add_next_index_zval(zval *arg, zval *value)
+{
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE;
+}
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
