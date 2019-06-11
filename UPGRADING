@@ -337,6 +337,12 @@ PHP 7.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Core:
+  . Added get_mangled_object_vars($object) function, which returns the mangled
+    object properties. It returns the same result as (array) $object, with the
+    exception that it ignores overloaded array casts, such as used by
+    ArrayObject.
+
 - OpenSSL:
   . Added openssl_x509_verify(mixed cert, mixed key) function that verifies the
     signature of the certificate using a public key. A wrapper around the
