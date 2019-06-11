@@ -124,6 +124,11 @@ struct _zend_compiler_globals {
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;
+
+	HashTableShape *shape_table;
+	uint32_t        shape_table_size;
+	uint32_t        shape_table_top;
+	uint32_t        persistent_shape_table_top;
 };
 
 

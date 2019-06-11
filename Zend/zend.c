@@ -651,6 +651,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
+
+	zend_shape_table_startup();
 }
 /* }}} */
 
@@ -676,6 +678,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = NULL;
 		compiler_globals->map_ptr_size = 0;
 	}
+	zend_shape_table_shutdown();
 }
 /* }}} */
 
@@ -911,6 +914,8 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 # else
 #  error "Unknown ZEND_MAP_PTR_KIND"
 # endif
+
+	zend_shape_table_startup();
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1072,6 +1077,7 @@ void zend_shutdown(void) /* {{{ */
 		CG(map_ptr_size) = 0;
 	}
 #endif
+	zend_shape_table_shutdown();
 	zend_destroy_rsrc_list_dtors();
 }
 /* }}} */

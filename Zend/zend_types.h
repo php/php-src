@@ -267,7 +267,12 @@ struct _zend_array {
 	uint32_t          nInternalPointer;
 	zend_long         nNextFreeElement;
 	dtor_func_t       pDestructor;
+	uint32_t          nShape; /* index in CG(shape_table), (HashTableShape) */
 };
+
+#define ZEND_NO_SHAPE 0
+
+typedef struct _HashTableShape HashTableShape;
 
 /*
  * HashTable Data Layout

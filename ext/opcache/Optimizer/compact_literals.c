@@ -625,6 +625,31 @@ literals_handle_static_prop:
 						}
 					}
 					break;
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				case ZEND_ASSIGN_DIM:
+				case ZEND_UNSET_DIM:
+				case ZEND_FETCH_DIM_R:
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_DIM_RW:
+				case ZEND_FETCH_DIM_IS:
+				case ZEND_FETCH_DIM_FUNC_ARG:
+				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_LIST_R:
+				case ZEND_FETCH_LIST_W:
+					if (opline->op2_type == IS_CONST) {
+						// op2 property
+						if (opline->op1_type == IS_UNUSED &&
+						    property_slot[opline->op2.constant] >= 0) {
+							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
+						} else {
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
+							cache_size += 2 * sizeof(void *);
+							if (opline->op1_type == IS_UNUSED) {
+								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
+							}
+						}
+					}
+					break;
 				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 					if (opline->op2_type == IS_CONST) {
 						// op2 property

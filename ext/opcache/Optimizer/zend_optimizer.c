@@ -575,6 +575,8 @@ handle_static_prop:
 					zend_optimizer_add_literal(op_array, val);
 					Z_EXTRA(op_array->literals[opline->op2.constant]) = ZEND_EXTRA_VALUE;
 					break;
+				} else {
+					opline->extended_value = alloc_cache_slots(op_array, 2) | (opline->extended_value & ZEND_ISEMPTY);
 				}
 			}
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
