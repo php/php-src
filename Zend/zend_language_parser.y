@@ -42,7 +42,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 %}
 
-%pure-parser
+%define api.pure full
 %expect 0
 
 %code requires {
