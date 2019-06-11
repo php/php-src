@@ -7122,45 +7122,20 @@ ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, CONST, ANY)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	do_bind_class(RT_CONSTANT(opline, opline->op1), NULL);
+	do_bind_class(RT_CONSTANT(opline, opline->op1));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(140, ZEND_DECLARE_INHERITED_CLASS, CONST, CONST)
-{
-	zend_class_entry *parent;
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
-	                                 Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1),
-	                                 ZEND_FETCH_CLASS_EXCEPTION);
-	if (UNEXPECTED(parent == NULL)) {
-		ZEND_ASSERT(EG(exception));
-		HANDLE_EXCEPTION();
-	}
-	do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-ZEND_VM_HANDLER(145, ZEND_DECLARE_INHERITED_CLASS_DELAYED, CONST, CONST)
+ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, ANY)
 {
 	USE_OPLINE
 	zval *zce, *orig_zce;
-	zend_class_entry *parent;
 
 	SAVE_OPLINE();
 	if ((zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1)) == NULL ||
 	    ((orig_zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)+1), 1)) != NULL &&
 	     Z_CE_P(zce) != Z_CE_P(orig_zce))) {
-		parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
-	                                 Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1),
-	                                 ZEND_FETCH_CLASS_EXCEPTION);
-		if (UNEXPECTED(parent == NULL)) {
-			ZEND_ASSERT(EG(exception));
-			HANDLE_EXCEPTION();
-		}
-		do_bind_class(RT_CONSTANT(opline, opline->op1), parent);
+		do_bind_class(RT_CONSTANT(opline, opline->op1));
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -7181,36 +7156,7 @@ ZEND_VM_HANDLER(171, ZEND_DECLARE_ANON_CLASS, ANY, ANY, JMP_ADDR)
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
-	zend_do_link_class(ce, NULL);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-ZEND_VM_HANDLER(172, ZEND_DECLARE_ANON_INHERITED_CLASS, CONST, CONST, JMP_ADDR)
-{
-	zval *zv;
-	zend_class_entry *ce, *parent;
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
-	ZEND_ASSERT(zv != NULL);
-	ce = Z_CE_P(zv);
-	Z_CE_P(EX_VAR(opline->result.var)) = ce;
-
-	if (ce->ce_flags & ZEND_ACC_LINKED) {
-		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
-		ZEND_VM_CONTINUE();
-	}
-
-	parent = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)),
-	                                 Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1),
-	                                 ZEND_FETCH_CLASS_EXCEPTION);
-	if (UNEXPECTED(parent == NULL)) {
-		ZEND_ASSERT(EG(exception));
-		HANDLE_EXCEPTION();
-	}
-
-	zend_do_link_class(ce, parent);
+	zend_do_link_class(ce);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -7406,7 +7352,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 			case ZEND_FETCH_CLASS:
 			case ZEND_DECLARE_ANON_CLASS:
-			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				break; /* return value is zend_class_entry pointer */
 
 			default:

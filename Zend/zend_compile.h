@@ -269,8 +269,14 @@ typedef struct _zend_oparray_context {
 /* Children must reuse parent get_iterator()              |     |     |     */
 #define ZEND_ACC_REUSE_GET_ITERATOR      (1 << 18) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class is being linked. Don't free strings.             |     |     |     */
-#define ZEND_ACC_LINKING_IN_PROGRESS     (1 << 19) /*  X  |     |     |     */
+/* Parent class is resolved (CE).                         |     |     |     */
+#define ZEND_ACC_RESOLVED_PARENT         (1 << 19) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Interfaces are resolved (CEs).                         |     |     |     */
+#define ZEND_ACC_RESOLVED_INTERFACES     (1 << 20) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class has unresolved variance obligations.             |     |     |     */
+#define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 28...30)                       |     |     |     */
 /* ==============                                         |     |     |     */
@@ -291,7 +297,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_HAS_FINALLY_BLOCK       (1 << 15) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* "main" op_array with                                   |     |     |     */
-/* ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes           |     |     |     */
+/* ZEND_DECLARE_CLASS_DELAYED opcodes                     |     |     |     */
 #define ZEND_ACC_EARLY_BINDING           (1 << 16) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
@@ -741,7 +747,7 @@ zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 void zend_do_free(znode *op1);
 
 ZEND_API int do_bind_function(zval *lcname);
-ZEND_API int do_bind_class(zval *lcname, zend_class_entry *parent_ce);
+ZEND_API int do_bind_class(zval *lcname);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline);
 
@@ -848,6 +854,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
+#define ZEND_FETCH_CLASS_ALLOW_UNLINKED 0x0400
 
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
@@ -1024,7 +1031,7 @@ END_EXTERN_C()
  * may apper in run-time */
 #define ZEND_COMPILE_IGNORE_INTERNAL_CLASSES    (1<<4)
 
-/* generate ZEND_DECLARE_INHERITED_CLASS_DELAYED opcode to delay early binding */
+/* generate ZEND_DECLARE_CLASS_DELAYED opcode to delay early binding */
 #define ZEND_COMPILE_DELAYED_BINDING            (1<<5)
 
 /* disable constant substitution at compile-time */

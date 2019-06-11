@@ -467,7 +467,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					}
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:
@@ -1185,7 +1184,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					}
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:

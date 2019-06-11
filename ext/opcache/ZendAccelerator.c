@@ -3623,7 +3623,7 @@ static void preload_link(void)
 					} else {
 						CG(zend_lineno) = ce->info.user.line_start;
 					}
-					zend_do_link_class(ce, parent);
+					zend_do_link_class(ce);
 					CG(in_compilation) = 0;
 					CG(compiled_filename) = NULL;
 
@@ -3726,8 +3726,7 @@ static void preload_link(void)
 		while (opline != end) {
 			switch (opline->opcode) {
 				case ZEND_DECLARE_CLASS:
-				case ZEND_DECLARE_INHERITED_CLASS:
-				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
+				case ZEND_DECLARE_CLASS_DELAYED:
 					key = Z_STR_P(RT_CONSTANT(opline, opline->op1) + 1);
 					if (!zend_hash_exists(&script->script.class_table, key)) {
 						MAKE_NOP(opline);

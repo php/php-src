@@ -287,9 +287,7 @@ static zend_bool can_replace_op2(
 		const zend_op_array *op_array, zend_op *opline, zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		/* Do not accept CONST */
-		case ZEND_DECLARE_INHERITED_CLASS:
-		case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-		case ZEND_DECLARE_ANON_INHERITED_CLASS:
+		case ZEND_DECLARE_CLASS_DELAYED:
 		case ZEND_BIND_LEXICAL:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
@@ -1948,7 +1946,6 @@ static void sccp_mark_feasible_successors(
 		case ZEND_ASSERT_CHECK:
 		case ZEND_CATCH:
 		case ZEND_DECLARE_ANON_CLASS:
-		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);

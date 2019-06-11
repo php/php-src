@@ -7156,7 +7156,6 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 				case ZEND_ASSERT_CHECK:
 				case ZEND_CATCH:
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					return 1;
