@@ -7,8 +7,6 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - checkout: self
-      fetchDepth: 1
     - template: apt.yml
     - script: |
         ./buildconf --force

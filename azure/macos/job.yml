@@ -7,8 +7,6 @@ jobs:
     pool:
       vmImage: 'macOS-10.14'
     steps:
-    - checkout: self
-      fetchDepth: 1
     - template: brew.yml
     - script: |
         export PATH="/usr/local/opt/bison/bin:$PATH"
