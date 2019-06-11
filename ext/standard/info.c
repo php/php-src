@@ -770,7 +770,7 @@ PHPAPI void php_print_info(int flag)
 	}
 
 	if (flag & PHP_INFO_GENERAL) {
-		char *zend_version = get_zend_version();
+		const char *zend_version = get_zend_version();
 		char temp_api[10];
 
 		php_uname = php_get_uname('a');
