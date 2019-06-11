@@ -393,7 +393,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 		tz->type[0].isgmtcnt
 		);
 	for (i = 0; i < tz->bit64.timecnt; i++) {
-		printf ("%016lX (%20ld) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
+		printf ("%016" PRIX64 " (%20" PRId64 ") = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 			tz->trans[i], tz->trans[i], tz->trans_idx[i],
 			(long int) tz->type[tz->trans_idx[i]].offset,
 			tz->type[tz->trans_idx[i]].isdst,
@@ -404,7 +404,7 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 			);
 	}
 	for (i = 0; i < tz->bit64.leapcnt; i++) {
-		printf ("%016lX (%20ld) = %d\n",
+		printf ("%016" PRIX64 " (%20ld) = %d\n",
 			tz->leap_times[i].trans,
 			(long) tz->leap_times[i].trans,
 			tz->leap_times[i].offset);
