@@ -29,6 +29,8 @@ steps:
                        libxslt1-dev \
                        libpq-dev \
                        libreadline-dev \
+                       libldap2-dev \
+                       libsasl2-dev \
                        postgresql \
                        postgresql-contrib \
                        ${{ parameters.packages }}
