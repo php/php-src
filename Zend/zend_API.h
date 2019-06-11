@@ -1159,6 +1159,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, const c
 			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
 				if (_error_code == ZPP_ERROR_WRONG_CALLBACK) { \
 					zend_wrong_callback_error(_i, _error); \
+					efree(_error); \
 				} else if (_error_code == ZPP_ERROR_WRONG_CLASS) { \
 					zend_wrong_parameter_class_error(_i, _error, _arg); \
 				} else if (_error_code == ZPP_ERROR_WRONG_ARG) { \
