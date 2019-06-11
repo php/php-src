@@ -370,7 +370,6 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 /* Unary operations */
 #define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
-#define gmp_unary_ui_op(op)      _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
 static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 {
@@ -960,21 +959,6 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 
 	INIT_GMP_RETVAL(gmpnum_result);
 	gmp_op(gmpnum_result, zval_get_long(a_arg));
-}
-/* }}} */
-
-/* {{{ _gmp_unary_ui_op
-   Execute GMP unary operation.
-*/
-static inline void _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_ui_op_t gmp_op)
-{
-	zval *a_arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
-	}
-
-	gmp_zval_unary_ui_op(return_value, a_arg, gmp_op);
 }
 /* }}} */
 
