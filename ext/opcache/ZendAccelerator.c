@@ -1753,6 +1753,27 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 }
 #endif
 
+int check_persistent_script_access(zend_persistent_script *persistent_script)
+{
+    char *phar_path, *ptr;
+    int ret;
+    if (ZSTR_LEN(persistent_script->script.filename)<8 || memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", 7))
+        return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
+    else {
+        /* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
+        phar_path = malloc(ZSTR_LEN(persistent_script->script.filename)+1-7);
+        strncpy(phar_path, ZSTR_VAL(persistent_script->script.filename)+7, ZSTR_LEN(persistent_script->script.filename)+1-7);
+        if ((ptr = strstr(phar_path, ".phar/")) != NULL)
+        {
+            *(ptr+5) = 0; // strip path inside .phar file
+        }
+        ret = access(phar_path, R_OK) != 0;
+        free(phar_path);
+        return ret;
+    }
+}
+
+
 /* zend_compile() replacement */
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 {
@@ -1872,7 +1893,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	if (EXPECTED(persistent_script != NULL) &&
 	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
 	    file_handle->type == ZEND_HANDLE_FILENAME &&
-	    UNEXPECTED(access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0)) {
+	    UNEXPECTED(check_persistent_script_access(persistent_script))) {
 		if (type == ZEND_REQUIRE) {
 			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
 			zend_bailout();
