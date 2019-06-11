@@ -414,9 +414,9 @@ ZEND_API int add_index_str(zval *arg, zend_ulong index, zend_string *str);
 ZEND_API int add_index_string(zval *arg, zend_ulong index, const char *str);
 ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
 
-static zend_always_inline int add_index_zval(zval *arg, zend_ulong index, zval *value)
+static zend_always_inline void add_index_zval(zval *arg, zend_ulong index, zval *value)
 {
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE;
+	zend_hash_index_update(Z_ARRVAL_P(arg), index, value);
 }
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
