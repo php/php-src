@@ -1,0 +1,103 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+      fetchDepth: 1
+    - template: apt.yml
+    - script: |
+        ./buildconf --force
+        export CFLAGS=-m32
+        export CXXFLAGS=-m32
+        export LDFLAGS=-L/usr/lib/i386-linux-gnu
+        export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
+        ./configure ${{ parameters.configurationParameters }} \
+            --prefix=/usr \
+            --enable-phpdbg \
+            --enable-fpm \
+            --enable-intl \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pgsql \
+            --with-pdo-pgsql \
+            --with-pdo-sqlite \
+            --without-pear \
+            --enable-gd \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --with-xpm \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --with-zlib-dir=/usr \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-tidy \
+            --with-xmlrpc \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --with-readline \
+            --enable-mbstring \
+            --with-curl \
+            --with-gettext \
+            --enable-sockets \
+            --with-bz2 \
+            --with-openssl \
+            --with-gmp \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-pspell=/usr \
+            --with-enchant=/usr \
+            --with-kerberos \
+            --enable-sysvmsg \
+            --with-ffi \
+            --enable-zend-test \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+      displayName: 'Configure Build'
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+      displayName: 'Install Build'
+    - script: |
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres psql -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+#    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: this will be uncommented on merge, we don't want to docker pull request builds
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'phpazuredevops'
+        repository: ${{ variables['Build.SourceBranch'] }}
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: ${{ parameters.configurationName }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+    - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/PHP-7.4') }}:
+      - template: test.yml
+        parameters:
+          configurationName: ${{ parameters.configurationName }}
+          runTestsName: 'JIT'
+          runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.jit_buffer_size=16M
