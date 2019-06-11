@@ -1,5 +1,11 @@
 --TEST--
 Test simple recursive watchpoint
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+}
+?>
 --INI--
 opcache.optimization_level=0
 --PHPDBG--
@@ -45,5 +51,3 @@ $b = [$a];
 
 unset($b);
 $b = 2;
---XFAIL--
-There may be flaws in the implementation of watchpoints that cause failures
