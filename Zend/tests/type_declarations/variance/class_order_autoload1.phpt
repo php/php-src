@@ -1,5 +1,5 @@
 --TEST--
-Returns are covariant, but we don't allow the code due to class ordering (autoload variation)
+Class order allowed with autoloading (1)
 --FILE--
 <?php
 
@@ -8,18 +8,30 @@ spl_autoload_register(function($class) {
         class A {
             public function method() : B {}
         }
+        var_dump(new A);
     } else if ($class == 'B') {
         class B extends A {
             public function method() : C {}
         }
+        var_dump(new B);
     } else {
         class C extends B {
         }
+        var_dump(new C);
     }
 });
 
-$c = new C;
+var_dump(new C);
 
 ?>
---EXPECTF--
-Fatal error: Could not check compatibility between B::method(): C and A::method(): B, because class C is not available in %s on line %d
+===DONE===
+--EXPECT--
+object(A)#2 (0) {
+}
+object(B)#2 (0) {
+}
+object(C)#2 (0) {
+}
+object(C)#2 (0) {
+}
+===DONE===
