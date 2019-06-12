@@ -217,8 +217,13 @@ char *alloca();
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
 
-#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
+#if ZEND_GCC_VERSION >= 4003 || __has_attribute(unused)
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
+#else
+# define ZEND_ATTRIBUTE_UNUSED
+#endif
+
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_COLD __attribute__((cold))
 # define ZEND_HOT __attribute__((hot))
 # ifdef __OPTIMIZE__
@@ -229,7 +234,6 @@ char *alloca();
 #  define ZEND_OPT_SPEED
 # endif
 #else
-# define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_COLD
 # define ZEND_HOT
 # define ZEND_OPT_SIZE
