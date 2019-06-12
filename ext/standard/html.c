@@ -494,47 +494,6 @@ static inline size_t php_utf32_utf8(unsigned char *buf, unsigned k)
 }
 /* }}} */
 
-/* {{{ php_mb2_int_to_char
- * Convert back big endian int representation of sequence of one or two 8-bit code units. */
-static inline size_t php_mb2_int_to_char(unsigned char *buf, unsigned k)
-{
-	assert(k <= 0xFFFFU);
-	/* one or two bytes */
-	if (k <= 0xFFU) { /* 1 */
-		buf[0] = k;
-		return 1U;
-	} else { /* 2 */
-		buf[0] = k >> 8;
-		buf[1] = k & 0xFFU;
-		return 2U;
-	}
-}
-/* }}} */
-
-/* {{{ php_mb3_int_to_char
- * Convert back big endian int representation of sequence of one to three 8-bit code units.
- * For EUC-JP. */
-static inline size_t php_mb3_int_to_char(unsigned char *buf, unsigned k)
-{
-	assert(k <= 0xFFFFFFU);
-	/* one to three bytes */
-	if (k <= 0xFFU) { /* 1 */
-		buf[0] = k;
-		return 1U;
-	} else if (k <= 0xFFFFU) { /* 2 */
-		buf[0] = k >> 8;
-		buf[1] = k & 0xFFU;
-		return 2U;
-	} else {
-		buf[0] = k >> 16;
-		buf[1] = (k >> 8) & 0xFFU;
-		buf[2] = k & 0xFFU;
-		return 3U;
-	}
-}
-/* }}} */
-
-
 /* {{{ unimap_bsearc_cmp
  * Binary search of unicode code points in unicode <--> charset mapping.
  * Returns the code point in the target charset (whose mapping table was given) or 0 if
