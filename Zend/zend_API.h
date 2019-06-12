@@ -627,24 +627,24 @@ END_EXTERN_C()
 #define RETVAL_FALSE  					ZVAL_FALSE(return_value)
 #define RETVAL_TRUE   					ZVAL_TRUE(return_value)
 
-#define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
-#define RETURN_NULL() 					{ RETVAL_NULL(); return;}
-#define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
-#define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
-#define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
-#define RETURN_INTERNED_STR(s)			{ RETVAL_INTERNED_STR(s); return; }
-#define RETURN_NEW_STR(s)				{ RETVAL_NEW_STR(s); return; }
-#define RETURN_STR_COPY(s)				{ RETVAL_STR_COPY(s); return; }
-#define RETURN_STRING(s) 				{ RETVAL_STRING(s); return; }
-#define RETURN_STRINGL(s, l) 			{ RETVAL_STRINGL(s, l); return; }
-#define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
-#define RETURN_RES(r) 					{ RETVAL_RES(r); return; }
-#define RETURN_ARR(r) 					{ RETVAL_ARR(r); return; }
-#define RETURN_EMPTY_ARRAY()			{ RETVAL_EMPTY_ARRAY(); return; }
-#define RETURN_OBJ(r) 					{ RETVAL_OBJ(r); return; }
-#define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
-#define RETURN_FALSE  					{ RETVAL_FALSE; return; }
-#define RETURN_TRUE   					{ RETVAL_TRUE; return; }
+#define RETURN_BOOL(b) 					do { RETVAL_BOOL(b); return; } while (0)
+#define RETURN_NULL() 					do { RETVAL_NULL(); return;} while (0)
+#define RETURN_LONG(l) 					do { RETVAL_LONG(l); return; } while (0)
+#define RETURN_DOUBLE(d) 				do { RETVAL_DOUBLE(d); return; } while (0)
+#define RETURN_STR(s) 					do { RETVAL_STR(s); return; } while (0)
+#define RETURN_INTERNED_STR(s)			do { RETVAL_INTERNED_STR(s); return; } while (0)
+#define RETURN_NEW_STR(s)				do { RETVAL_NEW_STR(s); return; } while (0)
+#define RETURN_STR_COPY(s)				do { RETVAL_STR_COPY(s); return; } while (0)
+#define RETURN_STRING(s) 				do { RETVAL_STRING(s); return; } while (0)
+#define RETURN_STRINGL(s, l) 			do { RETVAL_STRINGL(s, l); return; } while (0)
+#define RETURN_EMPTY_STRING() 			do { RETVAL_EMPTY_STRING(); return; } while (0)
+#define RETURN_RES(r) 					do { RETVAL_RES(r); return; } while (0)
+#define RETURN_ARR(r) 					do { RETVAL_ARR(r); return; } while (0)
+#define RETURN_EMPTY_ARRAY()			do { RETVAL_EMPTY_ARRAY(); return; } while (0)
+#define RETURN_OBJ(r) 					do { RETVAL_OBJ(r); return; } while (0)
+#define RETURN_ZVAL(zv, copy, dtor)		do { RETVAL_ZVAL(zv, copy, dtor); return; } while (0)
+#define RETURN_FALSE  					do { RETVAL_FALSE; return; } while (0)
+#define RETURN_TRUE   					do { RETVAL_TRUE; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
