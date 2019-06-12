@@ -64,13 +64,13 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t, pcre2_code *);
 PHPAPI void php_pcre_free_match_data(pcre2_match_data *);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
-	HashTable pcre_cache;
+	HashTable pcre_permanent_cache;
+	HashTable pcre_request_cache;
 	zend_long backtrack_limit;
 	zend_long recursion_limit;
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	zend_bool jit;
 #endif
-	zend_bool per_request_cache;
 	int  error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;
