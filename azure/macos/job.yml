@@ -69,18 +69,7 @@ jobs:
       displayName: 'Make Build'
     - script: |
         sudo make install
-        sudo mkdir     /etc/php.d
-        sudo chmod 777 /etc/php.d
-        echo mysqli.default_socket=/tmp/mysql.sock     > /etc/php.d/mysqli.ini
-        echo pdo_mysql.default_socket=/tmp/mysql.sock  > /etc/php.d/pdo_mysql.ini
       displayName: 'Install Build'
-    - script: |
-        brew services start postgresql
-        createdb `whoami`
-        createuser -s postgres
-        psql -U postgres -c "ALTER USER postgres PASSWORD 'postgres';"
-        psql -U postgres -c "CREATE DATABASE test;"
-      displayName: 'Setup'
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
