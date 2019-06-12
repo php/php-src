@@ -28,7 +28,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 %}
 
-%pure-parser
+%define api.pure full
 %define parse.error verbose
 
 %code requires {

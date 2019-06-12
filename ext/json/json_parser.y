@@ -46,7 +46,7 @@ int json_yydebug = 1;
 
 }
 
-%pure-parser
+%define api.pure full
 %define api.prefix {php_json_yy}
 %lex-param  { php_json_parser *parser  }
 %parse-param { php_json_parser *parser }
