@@ -77,7 +77,11 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(hexdec($input));
+	try {
+		var_dump(hexdec($input));
+	} catch (TypeError $e) {
+		echo $e->getMessage(), "\n";
+	}
 	$iterator++;
 };
 fclose($fp);
@@ -144,9 +148,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-
-Notice: Array to string conversion in %s on line %d
-int(170)
+hexdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
 int(2748)
@@ -164,5 +166,5 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-%s
+hexdec() expects parameter 1 to be string, resource given
 ===Done===
