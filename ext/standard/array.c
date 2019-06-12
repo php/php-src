@@ -3918,7 +3918,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_ZVAL(input, 1, 0)
+		RETURN_ZVAL(input, 1, 0);
 	}
 
 	/* Initialize return array */

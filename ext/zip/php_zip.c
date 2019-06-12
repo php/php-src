@@ -1286,7 +1286,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 			RETURN_NEW_STR(buffer);
 		} else {
 			zend_string_efree(buffer);
-			RETURN_EMPTY_STRING()
+			RETURN_EMPTY_STRING();
 		}
 	} else {
 		RETURN_FALSE;

@@ -4244,7 +4244,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 
 		efree(colors);
 	} else {
-		RETURN_BOOL(gdImageScatter(im, (int) scatter_sub, (int) scatter_plus))
+		RETURN_BOOL(gdImageScatter(im, (int) scatter_sub, (int) scatter_plus));
 	}
 }
 
