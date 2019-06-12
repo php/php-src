@@ -463,8 +463,9 @@ static int _php_mcast_join_leave(
 			sizeof(greq));
 #else
 	if (sock->type == AF_INET) {
-		struct ip_mreq mreq = {{0}};
+		struct ip_mreq mreq;
 		struct in_addr addr;
+		memset(&mreq, 0, sizeof(struct ip_mreq));
 
 		assert(group_len == sizeof(struct sockaddr_in));
 
@@ -483,7 +484,8 @@ static int _php_mcast_join_leave(
 	}
 #if HAVE_IPV6
 	else if (sock->type == AF_INET6) {
-		struct ipv6_mreq mreq = {{0}};
+		struct ipv6_mreq mreq;
+		memset(&mreq, 0, sizeof(struct ipv6_mreq));
 
 		assert(group_len == sizeof(struct sockaddr_in6));
 
