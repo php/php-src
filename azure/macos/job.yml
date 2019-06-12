@@ -60,7 +60,6 @@ jobs:
             --enable-sysvmsg \
             --with-ffi \
             --enable-zend-test \
-            --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d
       displayName: 'Configure Build'
