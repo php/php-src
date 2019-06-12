@@ -56,70 +56,11 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #endif
 
 #ifdef PHP_WIN32
-#define MYSQLND_LLU_SPEC "%I64u"
-#define MYSQLND_LL_SPEC "%I64d"
 #define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
-
-#if __i386__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __ia64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __powerpc64__ || __ppc64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if (__powerpc__ || __ppc__ ) && !(__powerpc64__ || __ppc64__)
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __x86_64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390x__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390__ && !__s390x__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifdef _AIX
-#define MYSQLND_LL_SPEC "%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifndef MYSQLND_LL_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LL_SPEC "%li"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LL_SPEC "%lli"
-  #endif
-#endif
-
-#ifndef MYSQLND_LLU_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LLU_SPEC "%lu"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LLU_SPEC "%llu"
-   #endif
-#endif /* MYSQLND_LLU_SPEC*/
-
 
 #define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
