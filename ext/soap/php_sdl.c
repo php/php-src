@@ -1181,10 +1181,10 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 #define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
 #define WSDL_CACHE_SKIP(n,buf)         *buf += n;
 
-#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,val & 0xff); \
-                                       smart_str_appendc(buf,(val >> 8) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 16) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 24) & 0xff);
+#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,(char)(val & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 8) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 16) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 24) & 0xff));
 #define WSDL_CACHE_PUT_1(val,buf)      smart_str_appendc(buf,val);
 #define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,(char*)val,n);
 
