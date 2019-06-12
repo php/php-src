@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0alpha1
+13 Jun 2019, PHP 7.4.0alpha1
 
 - Core:
   . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
