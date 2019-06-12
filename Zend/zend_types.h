@@ -770,17 +770,17 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 			(b) ? IS_TRUE : IS_FALSE;	\
 	} while (0)
 
-#define ZVAL_LONG(z, l) {				\
+#define ZVAL_LONG(z, l) do {			\
 		zval *__z = (z);				\
 		Z_LVAL_P(__z) = l;				\
 		Z_TYPE_INFO_P(__z) = IS_LONG;	\
-	}
+	} while (0)
 
-#define ZVAL_DOUBLE(z, d) {				\
+#define ZVAL_DOUBLE(z, d) do {			\
 		zval *__z = (z);				\
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
-	}
+	} while (0)
 
 #define ZVAL_STR(z, s) do {						\
 		zval *__z = (z);						\

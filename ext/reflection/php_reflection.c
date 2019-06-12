@@ -5507,7 +5507,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 1);
 		if (member_p) {
-			RETURN_BOOL(!Z_ISUNDEF_P(member_p))
+			RETURN_BOOL(!Z_ISUNDEF_P(member_p));
 		}
 		RETURN_FALSE;
 	} else {

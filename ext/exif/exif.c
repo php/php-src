@@ -2681,7 +2681,7 @@ PHP_FUNCTION(exif_tagname)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(szTemp)
+	RETURN_STRING(szTemp);
 }
 /* }}} */
 

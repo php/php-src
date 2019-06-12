@@ -1413,7 +1413,7 @@ SXE_METHOD(registerXPathNamespace)
 	}
 
 	if (xmlXPathRegisterNs(sxe->xpath, (xmlChar *)prefix, (xmlChar *)ns_uri) != 0) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
