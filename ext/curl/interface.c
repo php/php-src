@@ -47,27 +47,17 @@
 # ifdef PHP_WIN32
 #  define PHP_CURL_NEED_OPENSSL_TSL
 #  include <openssl/crypto.h>
-# else /* !PHP_WIN32 */
-#  if defined(HAVE_CURL_OPENSSL)
-#   if defined(HAVE_OPENSSL_CRYPTO_H)
-#    define PHP_CURL_NEED_OPENSSL_TSL
-#    include <openssl/crypto.h>
-#   else
-#    warning \
+# elif defined(HAVE_CURL_OPENSSL)
+#  if defined(HAVE_OPENSSL_CRYPTO_H)
+#   define PHP_CURL_NEED_OPENSSL_TSL
+#   include <openssl/crypto.h>
+#  else
+#   warning \
 	"libcurl was compiled with OpenSSL support, but configure could not find " \
 	"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
 	"cause random crashes on SSL requests"
-#   endif
-#  elif defined(HAVE_CURL_GNUTLS)
-    /* Modern versions of GnuTLS use the nette backend rather than gcrypt, so there
-	 * is nothing to do here anymore. */
-#  else
-#   warning \
-	"libcurl was compiled with SSL support, but configure could not determine which" \
-	"library was used; thus no SSL crypto locking callbacks will be set, which may " \
-	"cause random crashes on SSL requests"
-#  endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
-# endif /* PHP_WIN32 */
+#  endif
+# endif /* HAVE_CURL_OPENSSL */
 #endif /* ZTS && HAVE_CURL_SSL */
 /* }}} */
 
