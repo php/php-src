@@ -73,7 +73,6 @@ CREDIT_LINE("System V Semaphores", "Tom May");
 CREDIT_LINE("System V Shared Memory", "Christian Cartus");
 CREDIT_LINE("tidy", "John Coggeshall, Ilia Alshanetsky");
 CREDIT_LINE("tokenizer", "Andrei Zmievski, Johannes Schlueter");
-CREDIT_LINE("WDDX", "Andrei Zmievski");
 CREDIT_LINE("XMLReader", "Rob Richards");
 CREDIT_LINE("xmlrpc", "Dan Libby");
 CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen, Sterling Hughes");
