@@ -1228,7 +1228,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	}
 
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_FALSE
+	RETURN_FALSE;
 }
 /* }}} end dom_node_remove_child */
 

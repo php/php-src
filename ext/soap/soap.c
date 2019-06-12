@@ -2250,7 +2250,7 @@ PHP_FUNCTION(is_soap_fault)
 	    instanceof_function(Z_OBJCE_P(fault), soap_fault_class_entry)) {
 		RETURN_TRUE;
 	}
-	RETURN_FALSE
+	RETURN_FALSE;
 }
 /* }}} */
 
