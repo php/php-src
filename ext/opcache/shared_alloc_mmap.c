@@ -91,7 +91,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		return ALLOC_FAILURE;
 	}
 
-success:
+success: ZEND_ATTRIBUTE_UNUSED;
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment) + sizeof(void *));
 	if (!*shared_segments_p) {
