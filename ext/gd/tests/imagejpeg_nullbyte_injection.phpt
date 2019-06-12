@@ -1,9 +1,5 @@
 --TEST--
 Testing null byte injection in imagejpeg
---CLEAN--
-$tempdir = sys_get_temp_dir(). '/php-gdtest';
-foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
-rmdir($tempdir);
 --SKIPIF--
 <?php
 if(!extension_loaded('gd')){ die('skip gd extension not available'); }
@@ -12,13 +8,16 @@ if (!isset($support['JPEG Support']) || $support['JPEG Support'] === false) {
 	print 'skip jpeg support not available';
 }
 ?>
+--CLEAN--
+$tempdir = sprintf("%s/%s", sys_get_temp_dir(), preg_replace("~\.php$~", null, __FILE__));
+foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
+rmdir($tempdir);
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
 
-
-$tempdir = sys_get_temp_dir(). '/php-gdtest';
-if (!file_exists($tempdir) && !is_dir($tempdir)) {
+$tempdir = sprintf("%s/%s", sys_get_temp_dir(), preg_replace("~\.php$~", null, __FILE__));
+if (!is_dir($tempdir)) {
 	mkdir ($tempdir, 0777, true);
 }
 
@@ -29,7 +28,7 @@ echo "\nimagejpeg TEST\n";
 imagejpeg($image, $temp);
 var_dump(file_exists($tempdir. "/test1"));
 var_dump(file_exists($tempdir. "/test1.tmp"));
-foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
+?>
 --EXPECTF--
 imagejpeg TEST
 
