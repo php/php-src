@@ -155,8 +155,8 @@ static void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
-	zend_long * threshold = &MYSQLND_G(debug_ecalloc_fail_threshold);
 #if PHP_DEBUG
+	zend_long * threshold = &MYSQLND_G(debug_ecalloc_fail_threshold);
 	TRACE_ALLOC_ENTER(mysqlnd_ecalloc_name);
 
 	{
