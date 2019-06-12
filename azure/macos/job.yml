@@ -17,7 +17,7 @@ jobs:
         ./buildconf --force
         ./configure ${{ parameters.configurationParameters }} \
             --prefix=/usr/local \
-            --enable-phpdbg \
+            --disable-phpdbg \
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
