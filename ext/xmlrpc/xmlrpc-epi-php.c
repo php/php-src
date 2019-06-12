@@ -1267,7 +1267,7 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str) /* {{{ */
 			}
 		}
 	}
-	return xmlrpc_none;
+	return xmlrpc_vector_none;
 }
 /* }}} */
 

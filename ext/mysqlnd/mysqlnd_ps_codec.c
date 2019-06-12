@@ -79,7 +79,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 #if SIZEOF_ZEND_LONG==4
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");
-			tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
+			tmp_len = sprintf((char *)&tmp, "%" PRIu64, uval);
 		} else
 #endif /* #if SIZEOF_LONG==4 */
 		{
@@ -87,7 +87,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 				ZVAL_LONG(zv, (zend_long) uval); /* the cast is safe, we are in the range */
 			} else {
 				DBG_INF("stringify");
-				tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
+				tmp_len = sprintf((char *)&tmp, "%" PRIu64, uval);
 				DBG_INF_FMT("value=%s", tmp);
 			}
 		}
@@ -109,7 +109,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 #if SIZEOF_ZEND_LONG==4
 		if ((L64(2147483647) < (int64_t) lval) || (L64(-2147483648) > (int64_t) lval)) {
 			DBG_INF("stringify");
-			tmp_len = sprintf((char *)&tmp, MYSQLND_LL_SPEC, lval);
+			tmp_len = sprintf((char *)&tmp, "%" PRIi64, lval);
 		} else
 #endif /* SIZEOF */
 		{
