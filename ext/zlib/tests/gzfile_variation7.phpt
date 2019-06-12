@@ -29,15 +29,15 @@ foreach ( $variation_array as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-Warning: gzfile(string): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(): failed to open stream (string): No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(string): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(): failed to open stream (string): No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(sTrInG): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(): failed to open stream (sTrInG): No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(hello world): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(): failed to open stream (hello world): No such file or directory in %s on line %d
 bool(false)
 ===DONE===

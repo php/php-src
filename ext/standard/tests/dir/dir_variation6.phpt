@@ -48,10 +48,10 @@ echo "Done";
 *** Testing dir() : open a non-existent directory ***
 -- opening previously removed directory --
 
-Warning: dir(%s): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s): %s in %s on line %d
 bool(false)
 -- opening non-existent directory --
 
-Warning: dir(%s): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s): %s in %s on line %d
 bool(false)
 Done

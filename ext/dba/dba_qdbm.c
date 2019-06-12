@@ -100,7 +100,7 @@ DBA_UPDATE_FUNC(qdbm)
 	}
 
 	if (dpecode != DP_EKEEP) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", dperrmsg(dpecode));
+		php_error_docref(NULL, E_WARNING, "%s for key-value pair (%s, %s)", dperrmsg(dpecode), key, val);
 	}
 
 	return FAILURE;

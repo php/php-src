@@ -103,15 +103,15 @@ object(Directory)#%d (2) {
 
 -- With invalid paths --
 
-Warning: dir(%s/dir_variation91/sub_dir12/sub_dir111/..): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s/dir_variation91/sub_dir12/sub_dir111/..): %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/dir_variation92/sub_dir21/../dir_variation91): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s/dir_variation92/sub_dir21/../dir_variation91): %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s/dir_variation92/sub_dir21/../../dir_variation91/sub_dir12/..): %s in %s on line %d
 bool(false)
 
-Warning: dir(%s/dir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s/dir_variation91/sub_dir11/sub_dir111/../../dir_variation92/sub_dir21/..): %s in %s on line %d
 bool(false)
 Done

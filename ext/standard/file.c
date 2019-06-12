@@ -954,7 +954,7 @@ PHP_FUNCTION(popen)
 
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
-		php_error_docref2(NULL, command, posix_mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s with command \"%s\" and POSIX mode %s", strerror(errno), command, posix_mode);
 		efree(posix_mode);
 		RETURN_FALSE;
 	}
@@ -962,7 +962,7 @@ PHP_FUNCTION(popen)
 	stream = php_stream_fopen_from_pipe(fp, mode);
 
 	if (stream == NULL)	{
-		php_error_docref2(NULL, command, mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s with command \"%s\" and mode %s", strerror(errno), command, mode);
 		RETVAL_FALSE;
 	} else {
 		php_stream_to_zval(stream, return_value);

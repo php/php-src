@@ -88,12 +88,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: file(%sfileVar8.dir/fileVar8Sub/..///fileVar8Sub//..//../fileVar8Sub/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(): failed to open stream (%sfileVar8.dir/fileVar8Sub/..///fileVar8Sub//..//../fileVar8Sub/FileGetContentsVar7.tmp): No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file(%sfileVar8.dir/fileVar8Sub/BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(): failed to open stream (%sfileVar8.dir/fileVar8Sub/BADDIR/FileGetContentsVar7.tmp): No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -122,7 +122,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: file(BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(): failed to open stream (BADDIR/FileGetContentsVar7.tmp): No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

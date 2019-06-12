@@ -40,7 +40,7 @@ NULL
 Warning: popen() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: popen(abc.txt,rw): %s on line %d
+Warning: popen(): %s with command "abc.txt" and POSIX mode rw in %s on line %d
 bool(false)
 
 Warning: pclose() expects exactly 1 parameter, 0 given in %s on line %d

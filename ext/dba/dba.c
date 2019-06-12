@@ -710,7 +710,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (ac==2) {
 		hptr = DBA_G(default_hptr);
 		if (!hptr) {
-			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No default handler selected");
+			php_error_docref(NULL, E_WARNING, "No default handler selected for path \"%s\" with mode %s",
+					Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 			FREENOW;
 			RETURN_FALSE;
 		}
@@ -719,7 +720,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (!hptr->name) {
-		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL(args[2]));
+		php_error_docref(NULL, E_WARNING, "No such handler: %s for path \"%s\" with mode %s",
+				Z_STRVAL(args[2]), Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -750,13 +752,15 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
+				php_error_docref(NULL, E_NOTICE, "Handler %s does locking internally with path %s with mode %s",
+						hptr->name, Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 			}
 			break;
 		default:
 		case '-':
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
+				php_error_docref(NULL, E_WARNING, "Locking cannot be disabled for handler %s with path %s with mode %s",
+						hptr->name, Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -827,7 +831,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			file_mode = "w+b";
 			break;
 		default:
-			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
+			/* Mode is second argument and path is first argument */
+			php_error_docref(NULL, E_WARNING, "Illegal DBA mode %s for path \"%s\"", Z_STRVAL(args[1]), Z_STRVAL(args[0]));
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -840,17 +845,23 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (*pmode=='t') {
 		pmode++;
 		if (!lock_flag) {
-			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)");
+			php_error_docref(NULL, E_WARNING,
+					"Cannot combine modifiers - (no lock) and t (test lock) for path \"%s\" with mode %s",
+					Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 			FREENOW;
 			RETURN_FALSE;
 		}
 		if (!lock_mode) {
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
+				php_error_docref(NULL, E_WARNING,
+						"Handler %s uses its own locking which doesn't support mode modifier t (test lock) for path \"%s\" with mode %s",
+						hptr->name, Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 				FREENOW;
 				RETURN_FALSE;
 			} else {
-				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
+				php_error_docref(NULL, E_WARNING,
+						"Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete for path \"%s\" with mode %s",
+						hptr->name, Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -859,7 +870,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 	if (*pmode) {
-		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
+		/* Mode is second argument and path is first argument */
+		php_error_docref(NULL, E_WARNING, "Illegal DBA mode %s for path \"%s\"", Z_STRVAL(args[1]), Z_STRVAL(args[0]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -993,7 +1005,8 @@ restart:
 
 	if (error || hptr->open(info, &error) != SUCCESS) {
 		dba_close(info);
-		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
+		php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s%s%s for path \"%s\" with mode %s",
+				hptr->name, error?": ":"", error?error:"", Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -1005,7 +1018,8 @@ restart:
 	if (persistent) {
 		if (zend_register_persistent_resource(key, keylen, info, le_pdb) == NULL) {
 			dba_close(info);
-			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
+			php_error_docref(NULL, E_WARNING, "Could not register persistent resource for path \"%s\" with mode %s",
+					Z_STRVAL(args[0]), Z_STRVAL(args[1]));
 			FREENOW;
 			RETURN_FALSE;
 		}

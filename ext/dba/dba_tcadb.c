@@ -120,7 +120,7 @@ DBA_UPDATE_FUNC(tcadb)
 		return SUCCESS;
 	}
 
-	php_error_docref2(NULL, key, val, E_WARNING, "Error updating data");
+	php_error_docref(NULL, E_WARNING, "Error updating data for key-value pair (%s, %s)", key, val);
 	return FAILURE;
 }
 

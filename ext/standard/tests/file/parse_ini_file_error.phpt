@@ -37,11 +37,11 @@ bool(false)
 
 -- Testing parse_ini_file() function with more than expected no. of arguments --
 
-Warning: parse_ini_file(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): failed to open stream (%s): No such file or directory in %s on line %d
 bool(false)
 
 -- Testing parse_ini_file() function with a non-existent file --
 
-Warning: parse_ini_file(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(): failed to open stream (%s): No such file or directory in %s on line %d
 bool(false)
 Done

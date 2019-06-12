@@ -130,7 +130,7 @@ Size of destination file => int(3500)
 -- Iteration 7 --
 Size of source file => int(3500)
 Copy operation => 
-Warning: copy(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: copy(): failed to open stream (%s): No such file or directory in %s on line %d
 bool(false)
 Existence of destination file => bool(false)
 

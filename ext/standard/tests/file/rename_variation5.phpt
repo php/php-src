@@ -70,7 +70,7 @@ bool(true)
 
 -- Renaming existing link to existing directory name --
 
-Warning: rename(%s,%s): Is a directory in %s on line %d
+Warning: rename(): (%s) Is a directory in %s on line %d
 bool(false)
 
 -- Renaming existing link to existing file name --
@@ -78,7 +78,7 @@ bool(true)
 
 -- Renaming existing file to existing directory name --
 
-Warning: rename(%s,%s): Is a directory in %s on line %d
+Warning: rename(): (%s) Is a directory in %s on line %d
 bool(false)
 
 -- Renaming existing file to existing link name --
@@ -86,11 +86,11 @@ bool(true)
 
 -- Renaming existing directory to existing file name --
 
-Warning: rename(%s,%s): Not a directory in %s on line %d
+Warning: rename(): (%s) Not a directory in %s on line %d
 bool(false)
 
 -- Renaming existing directory to existing link name --
 
-Warning: rename(%s,%s): Not a directory in %s on line %d
+Warning: rename(): (%s) Not a directory in %s on line %d
 bool(false)
 Done

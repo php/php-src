@@ -59,7 +59,7 @@ string(3) "bar"
 == Stream
 string(3) "foo"
 
-Warning: file_get_contents(%s): failed to open stream: operation failed in %s on line %d
+Warning: file_get_contents(): failed to open stream (%s): operation failed in %s on line %d
 bool(false)
 string(3) "bar"
 == Done

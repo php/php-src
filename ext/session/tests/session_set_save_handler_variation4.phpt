@@ -80,6 +80,6 @@ array(3) {
 }
 Destroy [%s,%s]
 
-Warning: unlink(%s): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory (%s) in %s on line %d
 Close [%s,PHPSESSID]
 bool(true)

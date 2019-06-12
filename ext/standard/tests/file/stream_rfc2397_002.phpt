@@ -51,7 +51,7 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://): rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 array(7) {
@@ -72,15 +72,15 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://;base64): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://;base64): rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 
-Warning: fopen(data://foo,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://foo,): rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 
-Warning: fopen(data://foo=bar,): failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://foo=bar,): rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 array(8) {
@@ -103,7 +103,7 @@ array(8) {
 }
 NULL
 
-Warning: fopen(data://text/plain;foo,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://text/plain;foo,): rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 array(9) {
@@ -128,7 +128,7 @@ array(9) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bla,): failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://text/plain;foo=bar;bla,): rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 array(9) {
@@ -153,7 +153,7 @@ array(9) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bar=baz): failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen(): failed to open stream (data://text/plain;foo=bar;bar=baz): rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
 NULL
 NULL
 array(10) {

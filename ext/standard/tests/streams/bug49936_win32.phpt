@@ -20,11 +20,11 @@ var_dump(opendir($dir));
 Warning: opendir(): connect() failed: %s
  in %s on line %d
 
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
+Warning: opendir(): failed to open dir (ftp://...@localhost/): operation failed in %s on line %d
 bool(false)
 
 Warning: opendir(): connect() failed: %s
  in %s on line %d
 
-Warning: opendir(ftp://...@localhost/): failed to open dir: operation failed in %s on line %d
+Warning: opendir(): failed to open dir (ftp://...@localhost/): operation failed in %s on line %d
 bool(false)

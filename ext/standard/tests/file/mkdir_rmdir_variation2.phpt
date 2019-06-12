@@ -60,7 +60,7 @@ bool(true)
 *** Testing rmdir() on a non-empty directory ***
 bool(true)
 
-Warning: rmdir(%s/mkdir_variation2/): %s on line %d
+Warning: rmdir(): Directory not empty (%s/mkdir_variation2/) in %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***

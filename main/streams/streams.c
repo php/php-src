@@ -207,7 +207,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	}
 
 	php_strip_url_passwd(tmp);
-	php_error_docref1(NULL, tmp, E_WARNING, "%s: %s", caption, msg);
+	php_error_docref(NULL, E_WARNING, "%s (%s): %s", caption, tmp, msg);
 	efree(tmp);
 	if (free_msg) {
 		efree(msg);
@@ -2097,8 +2097,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				if (options & REPORT_ERRORS) {
 					char *tmp = estrdup(path);
 					php_strip_url_passwd(tmp);
-					php_error_docref1(NULL, tmp, E_WARNING, "could not make seekable - %s",
-							tmp);
+					php_error_docref(NULL, E_WARNING, "Error with argument tmp: could not make seekable - %s", tmp);
 					efree(tmp);
 
 					options ^= REPORT_ERRORS;

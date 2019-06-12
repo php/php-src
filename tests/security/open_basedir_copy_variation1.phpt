@@ -28,6 +28,6 @@ bool(true)
 Warning: copy(): open_basedir restriction in effect. File(../bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 
-Warning: unlink(copy.txt): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory (copy.txt) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [copy] ***

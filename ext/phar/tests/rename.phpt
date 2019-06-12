@@ -29,4 +29,4 @@ echo file_get_contents($pname . '/a') . "\n";
 a
 a
 
-Warning: file_get_contents(phar://%srename.phar.php/a): failed to open stream: phar error: "a" is not a file in phar "%srename.phar.php" in %srename.php on line %d
+Warning: file_get_contents(): failed to open stream (phar://%srename.phar.php/a): phar error: "a" is not a file in phar "%srename.phar.php" in %srename.php on line %d

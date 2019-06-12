@@ -95,21 +95,21 @@ file in root
 
 --c--
 
-Warning: fopen(c\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (c\fopen_variation10.tmp): No such file or directory in %s on line %d
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --\--
 
-Warning: fopen(\\fopen_variation10.tmp): failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(): failed to open stream (\\fopen_variation10.tmp): Invalid argument in %s on line %d
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 --/--
 
-Warning: fopen(/\fopen_variation10.tmp): failed to open stream: Invalid argument in %s on line %d
+Warning: fopen(): failed to open stream (/\fopen_variation10.tmp): Invalid argument in %s on line %d
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
@@ -119,7 +119,7 @@ file in fopen10.tmpdirTwo
 
 --c:adir--
 
-Warning: fopen(c:adir\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (c:adir\fopen_variation10.tmp): No such file or directory in %s on line %d
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
@@ -141,7 +141,7 @@ file in fopen10.tmpDir
 
 --/sortout--
 
-Warning: fopen(/sortout\fopen_variation10.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (/sortout\fopen_variation10.tmp): No such file or directory in %s on line %d
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d

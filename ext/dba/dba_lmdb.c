@@ -112,7 +112,7 @@ DBA_FETCH_FUNC(lmdb)
 		rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	}
 	if (rc) {
-		php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 		return NULL;
 	}
 
@@ -122,7 +122,7 @@ DBA_FETCH_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return NULL;
@@ -149,7 +149,7 @@ DBA_UPDATE_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s for key-value pair (%s, %s)", mdb_strerror(rc), key, val);
 		return FAILURE;
 	}
 
@@ -161,7 +161,7 @@ DBA_UPDATE_FUNC(lmdb)
 	rc = mdb_put(LMDB_IT(txn), LMDB_IT(dbi), &k, &v, mode == 1 ? MDB_NOOVERWRITE : 0);
 	if (rc) {
 		if (MDB_KEYEXIST != rc) {
-			php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s for key-value pair (%s, %s)", mdb_strerror(rc), key, val);
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
@@ -169,7 +169,7 @@ DBA_UPDATE_FUNC(lmdb)
 
 	rc = mdb_txn_commit(LMDB_IT(txn));
 	if (rc) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s for key-value pair (%s, %s)", mdb_strerror(rc), key, val);
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
 	}
@@ -188,7 +188,7 @@ DBA_EXISTS_FUNC(lmdb)
 		rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	}
 	if (rc) {
-		php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 		return FAILURE;
 	}
 
@@ -198,7 +198,7 @@ DBA_EXISTS_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
@@ -220,7 +220,7 @@ DBA_DELETE_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 		return FAILURE;
 	}
 
@@ -231,14 +231,14 @@ DBA_DELETE_FUNC(lmdb)
 	if (!rc) {
 		rc = mdb_txn_commit(LMDB_IT(txn));
 		if (rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 			mdb_txn_abort(LMDB_IT(txn));
 			return FAILURE;
 		}
 		return SUCCESS;
 	}
 
-	php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+	php_error_docref(NULL, E_WARNING, "Error %s on key \"%s\"", mdb_strerror(rc), key);
 
 	return FAILURE;
 }

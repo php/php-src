@@ -32,6 +32,6 @@ echo "Done\n";
 bool(true)
 bool(false)
 
-Warning: unlink(%s/unlink_variation4.tmp): %s in %s on line %d
+Warning: unlink(): No such file or directory (%s/unlink_variation4.tmp) in %s on line %d
 bool(false)
 Done

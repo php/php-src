@@ -37,7 +37,7 @@ bool(false)
 Warning: bzopen(): 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported. in %s on line %d
 bool(false)
 
-Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
+Warning: bzopen(): failed to open stream (no_such_file): No such file or directory in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 Done

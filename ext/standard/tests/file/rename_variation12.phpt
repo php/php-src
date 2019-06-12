@@ -89,12 +89,12 @@ bool(true)
 
 -- Iteration 5 --
 
-Warning: rename(%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/renameMe.tmp,%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(): No such file or directory (%s/renameVar11/renameVar11Sub/..///renameVar11Sub//..//../renameVar11Sub/renameMe.tmp) in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: rename(%s/renameVar11/renameVar11Sub/BADDIR/renameMe.tmp,%s/renameVar11/renameVar11Sub/BADDIR/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(): No such file or directory (%s/renameVar11/renameVar11Sub/BADDIR/renameMe.tmp) in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -115,7 +115,7 @@ bool(true)
 
 -- Iteration 11 --
 
-Warning: rename(BADDIR/renameMe.tmp,BADDIR/IwasRenamed.tmp): %s in %s on line %d
+Warning: rename(): No such file or directory (BADDIR/renameMe.tmp) in %s on line %d
 bool(false)
 
 *** Done ***

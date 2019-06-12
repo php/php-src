@@ -30,6 +30,6 @@ echo "Done";
 --EXPECTF--
 *** Testing dir() : open a file instead of a directory ***
 
-Warning: dir(%s): failed to open dir: %s in %s on line %d
+Warning: dir(): failed to open dir (%s): %s in %s on line %d
 bool(false)
 Done

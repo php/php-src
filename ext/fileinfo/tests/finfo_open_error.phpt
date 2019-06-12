@@ -31,9 +31,9 @@ try {
 --EXPECTF--
 *** Testing finfo_open() : error functionality ***
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line 12
+Warning: finfo_open(): failed to open stream (%sfoobarfile): No such file or directory in %sfinfo_open_error.php on line 12
 
-Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %sfinfo_open_error.php on line 12
+Warning: finfo_open(): failed to open stream (%sfoobarfile): No such file or directory in %sfinfo_open_error.php on line 12
 
 Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %sfinfo_open_error.php on line 12
 bool(false)

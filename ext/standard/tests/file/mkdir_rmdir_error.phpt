@@ -53,6 +53,6 @@ bool(false)
 
 *** Testing rmdir() on non-existent directory ***
 
-Warning: rmdir(temp): No such file or directory in %s on line %d
+Warning: rmdir(): No such file or directory (temp) in %s on line %d
 bool(false)
 Done

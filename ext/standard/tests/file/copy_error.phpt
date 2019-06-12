@@ -23,7 +23,7 @@ echo "*** Done ***\n";
 --EXPECTF--
 *** Testing copy() function: error conditions --
 
-Warning: copy(/no/file): failed to open stream: No such file or directory in %s on line %d
+Warning: copy(): failed to open stream (/no/file): No such file or directory in %s on line %d
 bool(false)
 
 Warning: copy() expects at least 2 parameters, 0 given in %s on line %d

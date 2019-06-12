@@ -50,7 +50,7 @@ rmdir(__DIR__."/rename_basic_dir1");
 --EXPECTF--
 *** Testing rename() on non-existing file ***
 
-Warning: rename(%s/non_existent_file.tmp,%s/rename_variation8_new.tmp): The system cannot find the file specified. (code: 2) in %s on line %d
+Warning: rename(): The system cannot find the file specified. (%s/non_existent_file.tmp) (code: 2) in %s on line %d
 bool(false)
 bool(false)
 bool(false)
@@ -62,7 +62,7 @@ bool(true)
 
 *** Testing rename() on non-existing directory ***
 
-Warning: rename(%s/non_existent_dir,%s/rename_basic_dir2): The system cannot find the file specified. (code: 2) in %s on line %d
+Warning: rename(): The system cannot find the file specified. (%s/non_existent_dir) (code: 2) in %s on line %d
 bool(false)
 bool(false)
 bool(false)

@@ -57,5 +57,5 @@ Warning: opendir() expects parameter 1 to be a valid path, array given in %sopen
 ..
 foo
 
-Warning: opendir(phar://%sopendir_edgecases.phar.php/oops): failed to open dir: %s in phar://%sopendir_edgecases.phar.php/foo on line %d
+Warning: opendir(): failed to open dir (phar://%sopendir_edgecases.phar.php/oops): %s in phar://%sopendir_edgecases.phar.php/foo on line %d
 ===DONE===

@@ -982,7 +982,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef PHP_WIN32
 	if (!dir) {
-		php_win32_docref2_from_error(GetLastError(), path, path);
+		php_win32_docref_from_error_with_param(GetLastError(), path);
 	}
 
 	if (dir && dir->finished) {
@@ -1148,7 +1148,7 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, 
 	ret = VCWD_UNLINK(url);
 	if (ret == -1) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
+			php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url);
 		}
 		return 0;
 	}
@@ -1169,11 +1169,13 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
+		php_error_docref(NULL, E_WARNING,
+				"The filename, directory name, or volume label syntax is incorrect. (%s) (code: 123)", url_from);
 		return 0;
 	}
 	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
-		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
+		php_error_docref(NULL, E_WARNING,
+				"The filename, directory name, or volume label syntax is incorrect. (%s) (code: 123)", url_to);
 		return 0;
 	}
 #endif
@@ -1214,7 +1216,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 					 * access to the file in the meantime.
 					 */
 					if (VCWD_CHOWN(url_to, sb.st_uid, sb.st_gid)) {
-						php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+						php_error_docref(NULL, E_WARNING, "%s from %s to %s", strerror(errno), url_from, url_to);
 						if (errno != EPERM) {
 							success = 0;
 						}
@@ -1222,7 +1224,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 					if (success) {
 						if (VCWD_CHMOD(url_to, sb.st_mode)) {
-							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+							php_error_docref(NULL, E_WARNING, "%s from %s to %s", strerror(errno), url_from, url_to);
 							if (errno != EPERM) {
 								success = 0;
 							}
@@ -1233,10 +1235,10 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 						VCWD_UNLINK(url_from);
 					}
 				} else {
-					php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+					php_error_docref(NULL, E_WARNING, "%s from %s to %s", strerror(errno), url_from, url_to);
 				}
 			} else {
-				php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+				php_error_docref(NULL, E_WARNING, "%s from %s to %s", strerror(errno), url_from, url_to);
 			}
 #  if !defined(ZTS) && !defined(TSRM_WIN32)
 			umask(oldmask);
@@ -1246,11 +1248,16 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 # endif
 #endif
 
+		/* If error is "Is directory" or "Not a directory" then faulty argument is url_to */
+		if (errno == EISDIR || errno == ENOTDIR) {
+			php_error_docref(NULL, E_WARNING, "(%s) %s", url_to, strerror(errno));
+		} else {
 #ifdef PHP_WIN32
-		php_win32_docref2_from_error(GetLastError(), url_from, url_to);
+			php_win32_docref_from_error_with_param(GetLastError(), url_from);
 #else
-		php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
+			php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url_from);
 #endif
+		}
 		return 0;
 	}
 
@@ -1357,13 +1364,13 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url, strlen(url))) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
+		php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url);
 		return 0;
 	}
 #endif
 
 	if (VCWD_RMDIR(url) < 0) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url);
 		return 0;
 	}
 
@@ -1385,7 +1392,8 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 
 #ifdef PHP_WIN32
 	if (!php_win32_check_trailing_space(url, strlen(url))) {
-		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
+		/* Seems no tests is covering this section */
+		php_error_docref(NULL, E_WARNING, "%s with URI (%s)", strerror(ENOENT), url);
 		return 0;
 	}
 #endif
@@ -1404,7 +1412,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			if (VCWD_ACCESS(url, F_OK) != 0) {
 				FILE *file = VCWD_FOPEN(url, "w");
 				if (file == NULL) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to create file %s because %s", url, strerror(errno));
+					php_error_docref(NULL, E_WARNING, "Unable to create file %s because %s", url, strerror(errno));
 					return 0;
 				}
 				fclose(file);
@@ -1417,7 +1425,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 		case PHP_STREAM_META_OWNER:
 			if(option == PHP_STREAM_META_OWNER_NAME) {
 				if(php_get_uid_by_name((char *)value, &uid) != SUCCESS) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to find uid for %s", (char *)value);
+					php_error_docref(NULL, E_WARNING, "Unable to find uid for %s at %s", (char *)value, url);
 					return 0;
 				}
 			} else {
@@ -1429,7 +1437,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 		case PHP_STREAM_META_GROUP_NAME:
 			if(option == PHP_STREAM_META_GROUP_NAME) {
 				if(php_get_gid_by_name((char *)value, &gid) != SUCCESS) {
-					php_error_docref1(NULL, url, E_WARNING, "Unable to find gid for %s", (char *)value);
+					php_error_docref(NULL, E_WARNING, "Unable to find gid for %s at %s", (char *)value, url);
 					return 0;
 				}
 			} else {
@@ -1443,11 +1451,11 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			ret = VCWD_CHMOD(url, mode);
 			break;
 		default:
-			php_error_docref1(NULL, url, E_WARNING, "Unknown option %d for stream_metadata", option);
+			php_error_docref(NULL, E_WARNING, "Unknown option %d for stream_metadata at URI %s", option, url);
 			return 0;
 	}
 	if (ret == -1) {
-		php_error_docref1(NULL, url, E_WARNING, "Operation failed: %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "(%s) Operation failed: %s", url, strerror(errno));
 		return 0;
 	}
 	php_clear_stat_cache(0, NULL, 0);

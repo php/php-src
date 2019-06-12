@@ -34,12 +34,12 @@ unlink(__DIR__."/copy_variation14.tmp");
 ?>
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of non-existing source in existing destination ***
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/nosuchfile.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
 *** Test copy() function: Trying to create copy of an existing source in non-existing destination ***
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/nodir/copy_nosuchfile.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 int(1500)

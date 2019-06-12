@@ -40,6 +40,6 @@ NULL
 
 -- Testing exif_imagetype() function with an unknown file  --
 
-Warning: exif_imagetype(%s/foo.jpg): failed to open stream: No such file or directory in %s on line %d
+Warning: exif_imagetype(): failed to open stream (%s/foo.jpg): No such file or directory in %s on line %d
 bool(false)
 ===Done===

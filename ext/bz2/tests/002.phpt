@@ -83,12 +83,12 @@ bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(): failed to open stream (bz_open_002.txt): Bad file %s in %s on line %d
 
 Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
 bool(false)
 
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(): failed to open stream (bz_open_002.txt): Bad file %s in %s on line %d
 
 Warning: bzopen(): first parameter has to be string or file-resource in %s on line %d
 bool(false)

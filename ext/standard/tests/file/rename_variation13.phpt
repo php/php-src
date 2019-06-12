@@ -64,42 +64,42 @@ echo "\n*** Done ***\n";
 -- testing '-1' --
 bool(true)
 
-Warning: rename(-1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(): No such file or directory (-1) in %s on line %d
 bool(false)
 -- testing '1' --
 bool(true)
 
-Warning: rename(1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(): No such file or directory (1) in %s on line %d
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
+Warning: rename(): %r(Invalid argument|No such file or directory)%r (%s/renameVar13/afile.tmp) in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
-bool(false)
--- testing '' --
-
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
-bool(false)
-
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
+Warning: rename(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
+Warning: rename(): %r(Invalid argument|No such file or directory)%r (%s/renameVar13/afile.tmp) in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
+Warning: rename(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
+bool(false)
+-- testing '' --
+
+Warning: rename(): %r(Invalid argument|No such file or directory)%r (%s/renameVar13/afile.tmp) in %s on line %d
+bool(false)
+
+Warning: rename(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
 bool(false)
 -- testing ' ' --
 bool(true)
 
-Warning: rename( ,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(): No such file or directory ( ) in %s on line %d
 bool(false)
 -- testing '%s' --
 
-Warning: rename() %s in %s on line %d
+Warning: rename() expects parameter 2 to be a valid path, string given in %s on line %d
 bool(false)
 
 Warning: file_exists() expects parameter 1 to be a valid path, string given in %s on line %d
@@ -117,17 +117,17 @@ Warning: rename() expects parameter 1 to be a valid path, array given in %s on l
 bool(false)
 -- testing '/no/such/file/dir' --
 
-Warning: rename(%s/renameVar13/afile.tmp,/no/such/file/dir): No such file or directory in %s on line %d
+Warning: rename(): No such file or directory (%s/renameVar13/afile.tmp) in %s on line %d
 bool(false)
 
-Warning: rename(/no/such/file/dir,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(): No such file or directory (/no/such/file/dir) in %s on line %d
 bool(false)
 -- testing 'php/php' --
 
-Warning: rename(%s/renameVar13/afile.tmp,php/php): %s directory in %s on line %d
+Warning: rename(): No such file or directory (%s/renameVar13/afile.tmp) in %s on line %d
 bool(false)
 
-Warning: rename(php/php,%s/renameVar13/afile.tmp): %s directory in %s on line %d
+Warning: rename(): No such file or directory (php/php) in %s on line %d
 bool(false)
 
 *** Done ***

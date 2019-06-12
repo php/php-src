@@ -56,19 +56,19 @@ bool(true)
 bool(true)
 int(1500)
 
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/copy*17.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/*_variation17.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/copy_variation*.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/*.tmp): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 *** Done ***

@@ -26,18 +26,18 @@ foreach ( $variation as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-Warning: readgzfile(10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(): failed to open stream (10.5): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(-10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(): failed to open stream (-10.5): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(): failed to open stream (123456789000): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(-123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(): failed to open stream (-123456789000): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readgzfile(0.5): failed to open stream: No such file or directory in %s on line %d
+Warning: readgzfile(): failed to open stream (0.5): No such file or directory in %s on line %d
 bool(false)
 ===DONE===

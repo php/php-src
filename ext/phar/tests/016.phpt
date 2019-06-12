@@ -28,12 +28,12 @@ var_dump(file_get_contents($pname . '/d'));
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Warning: file_get_contents(phar://%s/a): failed to open stream: phar error: internal corruption of phar "%s" (actual filesize mismatch on file "a") in %s on line %d
+Warning: file_get_contents(): failed to open stream (phar://%s/a): phar error: internal corruption of phar "%s" (actual filesize mismatch on file "a") in %s on line %d
 bool(false)
 
-Warning: file_get_contents(phar://%s/b): failed to open stream: phar error: internal corruption of phar "%s" (actual filesize mismatch on file "b") in %s on line %d
+Warning: file_get_contents(): failed to open stream (phar://%s/b): phar error: internal corruption of phar "%s" (actual filesize mismatch on file "b") in %s on line %d
 bool(false)
 string(1) "*"
 
-Warning: file_get_contents(phar://%s/d): failed to open stream: phar error: internal corruption of phar "%s" (actual filesize mismatch on file "d") in %s on line %d
+Warning: file_get_contents(): failed to open stream (phar://%s/d): phar error: internal corruption of phar "%s" (actual filesize mismatch on file "d") in %s on line %d
 bool(false)

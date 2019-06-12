@@ -43,7 +43,7 @@ echo "Done\n";
 Warning: php_strip_whitespace() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: php_strip_whitespace(%sphp_strip_whitespace.dat): failed to open stream: No such file or directory in %s on line %d
+Warning: php_strip_whitespace(): failed to open stream (%sphp_strip_whitespace.dat): No such file or directory in %s on line %d
 string(0) ""
 string(18) "/* test comment */"
 string(9) "<?php  ?>"

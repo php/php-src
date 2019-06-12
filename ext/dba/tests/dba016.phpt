@@ -23,5 +23,5 @@ $db_file1 = dba_popen($db_filename, 'n-t', 'flatfile');
 --EXPECTF--
 database handler: flatfile
 
-Warning: dba_popen(%stest0.dbm,n-t): You cannot combine modifiers - (no lock) and t (test lock) in %sdba016.php on line %d
+Warning: dba_popen(): Cannot combine modifiers - (no lock) and t (test lock) for path "%stest0.dbm" with mode n-t in %sdba016.php on line %d
 ===DONE===

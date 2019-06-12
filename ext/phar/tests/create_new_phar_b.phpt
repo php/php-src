@@ -17,9 +17,9 @@ include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.ph
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
-Warning: file_put_contents(phar://%screate_new_phar_b.phar.php/a.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %screate_new_phar_b.php on line %d
+Warning: file_put_contents(): failed to open stream (phar://%screate_new_phar_b.phar.php/a.php): phar error: write operations disabled by the php.ini setting phar.readonly in %screate_new_phar_b.php on line %d
 
-Warning: include(phar://%screate_new_phar_b.phar.php/a.php): failed to open stream: %s in %screate_new_phar_b.php on line %d
+Warning: include(): failed to open stream (phar://%screate_new_phar_b.phar.php/a.php): %s in %screate_new_phar_b.php on line %d
 
 Warning: include(): Failed opening 'phar://%screate_new_phar_b.phar.php/a.php' for inclusion (include_path='%s') in %screate_new_phar_b.php on line %d
 

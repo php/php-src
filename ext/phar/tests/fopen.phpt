@@ -38,5 +38,5 @@ include $fname;
 --EXPECTF--
 Warning: fopen() expects at least 2 parameters, 0 given in %sfopen.php on line %d
 hihi
-Warning: fopen(notfound.txt): failed to open stream: No such file or directory in phar://%sfopen.phar.php/index.php on line %d
+Warning: fopen(): failed to open stream (notfound.txt): No such file or directory in phar://%sfopen.phar.php/index.php on line %d
 ===DONE===

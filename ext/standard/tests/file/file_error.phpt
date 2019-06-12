@@ -41,7 +41,7 @@ NULL
 array(0) {
 }
 
-Warning: file(temp.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file(): failed to open stream (temp.tmp): No such file or directory in %s on line %d
 bool(false)
 
 --- Done ---

@@ -76,15 +76,15 @@ bool(true)
 
 -- Testing unlink() on invalid arguments --
 
-Warning: unlink(): %s in %s on line %d
+Warning: unlink(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(): %s in %s on line %d
+Warning: unlink(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(): %s in %s on line %d
+Warning: unlink(): %r(Invalid argument|No such file or directory)%r () in %s on line %d
 bool(false)
 bool(false)
 
@@ -96,11 +96,11 @@ bool(false)
 
 -- Testing unlink() on non-existent file --
 
-Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory (%s/non_existent_file.tmp) in %s on line %d
 bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): %s in %s on line %d
+Warning: unlink(): %r(Is a directory|Operation not permitted)%r (%s/unlink_error) in %s on line %d
 bool(false)
 Done

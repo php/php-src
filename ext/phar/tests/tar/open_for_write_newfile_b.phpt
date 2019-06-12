@@ -42,14 +42,14 @@ include $alias . '/b/new.php';
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
-Warning: fopen(phar://%sopen_for_write_newfile_b.phar.tar/b/new.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_newfile_b.php on line %d
+Warning: fopen(): failed to open stream (phar://%sopen_for_write_newfile_b.phar.tar/b/new.php): phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_newfile_b.php on line %d
 
 Warning: fwrite() expects parameter 1 to be resource, bool given in %sopen_for_write_newfile_b.php on line %d
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %sopen_for_write_newfile_b.php on line %d
 This is b/c
 
-Warning: include(phar://%sopen_for_write_newfile_b.phar.tar/b/new.php): failed to open stream: phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_b.phar.tar" in %sopen_for_write_newfile_b.php on line %d
+Warning: include(): failed to open stream (phar://%sopen_for_write_newfile_b.phar.tar/b/new.php): phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_b.phar.tar" in %sopen_for_write_newfile_b.php on line %d
 
 Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.tar/b/new.php' for inclusion (include_path='%s') in %sopen_for_write_newfile_b.php on line %d
 

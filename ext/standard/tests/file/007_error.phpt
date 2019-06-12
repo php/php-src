@@ -105,7 +105,7 @@ bool(false)
 -- Testing fopen(), fclose() & feof() with invalid arguments --
 -- Iteration 1 --
 
-Warning: fopen(string): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (string): No such file or directory in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, string given in %s on line %d
@@ -115,7 +115,7 @@ Warning: feof() expects parameter 1 to be resource, string given in %s on line %
 bool(false)
 -- Iteration 2 --
 
-Warning: fopen(10): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (10): No such file or directory in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, int given in %s on line %d
@@ -125,7 +125,7 @@ Warning: feof() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 -- Iteration 3 --
 
-Warning: fopen(10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (10.5): No such file or directory in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, float given in %s on line %d
@@ -135,7 +135,7 @@ Warning: feof() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 -- Iteration 4 --
 
-Warning: fopen(1): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(): failed to open stream (1): No such file or directory in %s on line %d
 bool(false)
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d

@@ -27,7 +27,7 @@ http_server_kill($pid);
 ?>
 ==DONE==
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:22348/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
+Warning: file_get_contents(): failed to open stream (http://127.0.0.1:22348/): HTTP request failed! HTTP/1.0 404 Not Found%a
 bool(false)
 array(5) {
   [0]=>

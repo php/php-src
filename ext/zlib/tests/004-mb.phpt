@@ -18,7 +18,7 @@ echo "Done\n";
 Warning: gzfile() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: gzfile(nonexistent_file_gzfile): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(): failed to open stream (nonexistent_file_gzfile): No such file or directory in %s on line %d
 bool(false)
 
 Warning: gzfile() expects at most 2 parameters, 3 given in %s on line %d

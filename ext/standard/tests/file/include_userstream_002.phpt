@@ -99,8 +99,8 @@ include "test2://hello";
 
 Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %sinclude_userstream_002.php on line 10
 
-Warning: fopen(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 10
+Warning: fopen(): failed to open stream (test1://hello): no suitable wrapper could be found in %sinclude_userstream_002.php on line 10
 
-Warning: include(test2://hello): failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 89
+Warning: include(): failed to open stream (test2://hello): "test::stream_open" call failed in %sinclude_userstream_002.php on line 89
 
 Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %sinclude_userstream_002.php on line 89

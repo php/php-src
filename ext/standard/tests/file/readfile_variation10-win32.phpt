@@ -47,11 +47,11 @@ foreach($names_arr as $key => $value) {
 
 -- Filename: -1 --
 
-Warning: readfile(-1): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (-1): No such file or directory in %s on line %d
 
 -- Filename: TRUE --
 
-Warning: readfile(1): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (1): No such file or directory in %s on line %d
 
 -- Filename: FALSE --
 
@@ -67,7 +67,7 @@ Warning: readfile(): Filename cannot be empty in %s on line %d
 
 -- Filename: " " --
 
-Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
+Warning: readfile(): failed to open stream ( ): Permission denied in %s on line %d
 
 -- Filename: \0 --
 
@@ -79,9 +79,9 @@ Warning: readfile() expects parameter 1 to be a valid path, array given in %s on
 
 -- Filename: /no/such/file/dir --
 
-Warning: readfile(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (/no/such/file/dir): No such file or directory in %s on line %d
 
 -- Filename: php/php --
 
-Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (php/php): No such file or directory in %s on line %d
 ===Done===

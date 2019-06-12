@@ -10,7 +10,7 @@ stream_wrapper_register('error',ErrorWrapper::class);
 file_get_contents('error://test');
 ?>
 --EXPECTF--
-Warning: file_get_contents(error://test): failed to open stream: operation failed in %sbug77664.php on line %d
+Warning: file_get_contents(): failed to open stream (error://test): operation failed in %sbug77664.php on line %d
 
 Fatal error: Uncaught Error: Undefined class constant 'self::INVALID' in %sbug77664.php:%d
 Stack trace:

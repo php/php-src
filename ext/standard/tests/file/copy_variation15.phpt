@@ -55,7 +55,7 @@ rmdir(__DIR__."/copy_variation15");
 ?>
 --EXPECTF--
 *** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***
-Warning: copy(%s): %s
+Warning: copy(): failed to open stream (%s/copy_copy_variation15.tmp): Permission denied in %s on line %d
 bool(false)
 bool(false)
 int(300)

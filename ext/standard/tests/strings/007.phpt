@@ -14,7 +14,7 @@ var_dump(ob_get_contents());
 ?>
 ===DONE===
 --EXPECTF--
-Warning: php_strip_whitespace(%s): failed to open stream: File name too long in %s007.php on line %d
+Warning: php_strip_whitespace(): failed to open stream (%s): File name too long in %s007.php on line %d
 string(0) ""
 bool(false)
 ===DONE===

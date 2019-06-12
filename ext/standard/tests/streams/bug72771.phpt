@@ -18,6 +18,6 @@ var_dump($ds);
 ?>
 ==DONE==
 --EXPECTF--
-Warning: opendir(ftps://127.0.0.1:%d/): failed to open dir: Server doesn't support FTPS. in %s on line %d
+Warning: opendir(): failed to open dir (ftps://127.0.0.1:%d/): Server doesn't support FTPS. in %s on line %d
 bool(false)
 ==DONE==

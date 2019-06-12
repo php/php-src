@@ -127,10 +127,10 @@ bool(false)
 Warning: parse_ini_file() expects at most 3 parameters, 4 given in %sparse_ini_file.php on line 7
 bool(false)
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 8
+Warning: parse_ini_file(): failed to open stream (%sparse_ini_file.dat): No such file or directory in %sparse_ini_file.php on line 8
 bool(false)
 
-Warning: parse_ini_file(%sparse_ini_file.dat): failed to open stream: No such file or directory in %sparse_ini_file.php on line 9
+Warning: parse_ini_file(): failed to open stream (%sparse_ini_file.dat): No such file or directory in %sparse_ini_file.php on line 9
 bool(false)
 array(1) {
   ["test"]=>

@@ -99,11 +99,11 @@ bool(false)
 
 -- Testing unlink() on non-existent file --
 
-Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
+Warning: unlink(): No such file or directory (%s/non_existent_file.tmp) in %s on line %d
 bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): Is a directory in %s on line %d
+Warning: unlink(): Is a directory (%s/unlink_error) in %s on line %d
 bool(false)
 Done

@@ -79,7 +79,7 @@ echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
 
-Warning: file_get_contents(phar://%sfgc_edgecases.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
+Warning: file_get_contents(): failed to open stream (phar://%sfgc_edgecases.phar.php/oops): phar error: path "oops" is a directory in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
 
 Warning: file_get_contents(): Failed to seek to position 50000 in the stream in phar://%sfgc_edgecases.phar.php/foo/hi on line %d
 <?php

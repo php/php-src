@@ -51,25 +51,25 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
-Warning: opendir(%s/opendir_var*,%s/opendir_var*): %s in %s on line %d
+Warning: opendir(): The operation completed successfully. (%s/opendir_var*) (code: 0) in %s on line %d
 
-Warning: opendir(%s/opendir_var*): failed to open dir: %s in %s on line %d
+Warning: opendir(): failed to open dir (%s/opendir_var*): %s in %s on line %d
 bool(false)
 
-Warning: opendir(%s/*,%s/*): %s in %s on line %d
+Warning: opendir(): The operation completed successfully. (%s/*) (code: 0) in %s on line %d
 
-Warning: opendir(%s/*): failed to open dir: %s in %s on line %d
+Warning: opendir(): failed to open dir (%s/*): %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: opendir(%s/opendir_variation6/sub_dir?,%s/opendir_variation6/sub_dir?): %s in %s on line %d
+Warning: opendir(): The operation completed successfully. (%s/opendir_variation6/sub_dir?) (code: 0) in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: opendir(): failed to open dir (%s/opendir_variation6/sub_dir?): %s in %s on line %d
 bool(false)
 
-Warning: opendir(%s/opendir_variation6/sub?dir1,%s/opendir_variation6/sub?dir1): %s in %s on line %d
+Warning: opendir(): The operation completed successfully. (%s/opendir_variation6/sub?dir1) (code: 0) in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: opendir(): failed to open dir (%s/opendir_variation6/sub?dir1): %s in %s on line %d
 bool(false)
 ===DONE===

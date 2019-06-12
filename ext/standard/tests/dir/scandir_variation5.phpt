@@ -84,14 +84,14 @@ rmdir($parent_dir_path);
 
 -- After restricting 1st level parent directory --
 
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
+Warning: scandir(): failed to open dir (%s/scandir_variation5/sub_dir/child_dir): %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- After restricting parent directory --
 
-Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
+Warning: scandir(): failed to open dir (%s/scandir_variation5/sub_dir/child_dir): %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)

@@ -27,12 +27,12 @@ Warning: Wrong parameter count for dba_open() in %sdba011.php on line %d
 NULL
 resource(%d) of type (dba)
 
-Warning: dba_open(%stest0.dbm,n): No such handler: bogus in %sdba011.php on line %d
+Warning: dba_open(): No such handler: bogus for path "%stest0.dbm" with mode n in %sdba011.php on line %d
 bool(false)
 
-Warning: dba_open(%stest0.dbm,q): Illegal DBA mode in %sdba011.php on line %d
+Warning: dba_open(): Illegal DBA mode q for path "%stest0.dbm" in %sdba011.php on line %d
 bool(false)
 
-Warning: dba_open(%stest0.dbm,nq): Illegal DBA mode in %sdba011.php on line %d
+Warning: dba_open(): Illegal DBA mode nq for path "%stest0.dbm" in %sdba011.php on line %d
 bool(false)
 resource(%d) of type (dba)

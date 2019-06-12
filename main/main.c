@@ -962,7 +962,7 @@ PHPAPI size_t php_printf(const char *format, ...)
 /* }}} */
 
 /* {{{ php_verror */
-/* php_verror is called from php_error_docref<n> functions.
+/* php_verror is called from the php_error_docref function.
  * Its purpose is to unify error messages and automatically generate clickable
  * html error messages if correcponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS.md for details.
@@ -1175,37 +1175,8 @@ PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char 
 }
 /* }}} */
 
-/* {{{ php_error_docref1 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
-{
-	va_list args;
-
-	va_start(args, format);
-	php_verror(docref, param1, type, format, args);
-	va_end(args);
-}
-/* }}} */
-
-/* {{{ php_error_docref2 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)
-{
-	char *params;
-	va_list args;
-
-	spprintf(&params, 0, "%s,%s", param1, param2);
-	va_start(args, format);
-	php_verror(docref, params ? params : "...", type, format, args);
-	va_end(args);
-	if (params) {
-		efree(params);
-	}
-}
-/* }}} */
-
 #ifdef PHP_WIN32
-PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
+PHPAPI ZEND_COLD void php_win32_docref_from_error_with_param(DWORD error, const char *param) {
 	char *buf = php_win32_error_to_msg(error);
 	size_t buf_len;
 
@@ -1214,7 +1185,7 @@ PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *para
 		buf[buf_len - 1] = '\0';
 		buf[buf_len - 2] = '\0';
 	}
-	php_error_docref2(NULL, param1, param2, E_WARNING, "%s (code: %lu)", buf, error);
+	php_error_docref(NULL, E_WARNING, "%s (%s) (code: %lu)", buf, param, error);
 	php_win32_error_msg_free(buf);
 }
 #endif

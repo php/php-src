@@ -40,7 +40,7 @@ echo "Done\n";
 Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: highlight_file(%shighlight_file.dat): failed to open stream: No such file or directory in %s on line %d
+Warning: highlight_file(): failed to open stream (%shighlight_file.dat): No such file or directory in %s on line %d
 
 Warning: highlight_file(): Failed opening '%shighlight_file.dat' for highlighting in %s on line %d
 bool(false)

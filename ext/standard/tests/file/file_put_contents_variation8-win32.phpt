@@ -73,7 +73,7 @@ Failed to write data to: ""
 
 -- Filename: " " --
 
-Warning: file_put_contents( ): failed to open stream: Permission denied in %s on line %d
+Warning: file_put_contents(): failed to open stream ( ): Permission denied in %s on line %d
 Failed to write data to: " "
 
 -- Filename: \0 --
@@ -88,11 +88,11 @@ Failed to write data to: array()
 
 -- Filename: /no/such/file/dir --
 
-Warning: file_put_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): failed to open stream (/no/such/file/dir): %s in %s on line %d
 Failed to write data to: /no/such/file/dir
 
 -- Filename: php/php --
 
-Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(): failed to open stream (php/php): %s in %s on line %d
 Failed to write data to: php/php
 ===Done===

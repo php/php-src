@@ -107,10 +107,10 @@ DBA_UPDATE_FUNC(gdbm)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref2(NULL, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			php_error_docref(NULL, E_WARNING, "%s for key-value pair (%s, %s)", gdbm_strerror(gdbm_errno), key, val);
 			return FAILURE;
 		default:
-			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
+			php_error_docref(NULL, E_WARNING, "Unknown return value for key-value pair (%s, %s)", key, val);
 			return FAILURE;
 	}
 }

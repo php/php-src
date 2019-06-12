@@ -93,7 +93,7 @@ DBA_UPDATE_FUNC(inifile)
 	INIFILE_DONE;
 	switch(res) {
 	case -1:
-		php_error_docref1(NULL, key, E_WARNING, "Operation not possible");
+		php_error_docref(NULL, E_WARNING, "Operation impossible with key \"%s\"", key);
 		return FAILURE;
 	default:
 	case 0:

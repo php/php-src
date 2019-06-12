@@ -105,7 +105,7 @@ Connection: close
 "
 -- Test: fail after 2 redirections --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(): failed to open stream (http://127.0.0.1:12342/foo/bar): Redirection limit reached, aborting in %s
 bool(false)
 string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
@@ -118,7 +118,7 @@ Connection: close
 "
 -- Test: fail at first redirection --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(): failed to open stream (http://127.0.0.1:12342/foo/bar): Redirection limit reached, aborting in %s
 bool(false)
 string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342
@@ -127,7 +127,7 @@ Connection: close
 "
 -- Test: fail at first redirection (2) --
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: Redirection limit reached, aborting in %s
+Warning: fopen(): failed to open stream (http://127.0.0.1:12342/foo/bar): Redirection limit reached, aborting in %s
 bool(false)
 string(%d) "GET /foo/bar HTTP/1.0
 Host: 127.0.0.1:12342

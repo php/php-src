@@ -18,6 +18,6 @@ var_dump($ds);
 ?>
 ==DONE==
 --EXPECTF--
-Warning: file_get_contents(ftp://127.0.0.1:%d/bug73457): failed to open stream: Failed to set up data channel: Connection refused in %s on line %d
+Warning: file_get_contents(): failed to open stream (ftp://127.0.0.1:%d/bug73457): Failed to set up data channel: Connection refused in %s on line %d
 bool(false)
 ==DONE==

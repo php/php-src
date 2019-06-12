@@ -20,7 +20,7 @@ var_dump(opendir($path, $context));
 ?>
 ==DONE==
 --EXPECTF--
-Warning: opendir(ftps://127.0.0.1:%d/bogusdir): failed to open dir: FTP server reports 250 /bogusdir: No such file or directory
+Warning: opendir(): failed to open dir (ftps://127.0.0.1:%d/bogusdir): FTP server reports 250 /bogusdir: No such file or directory
  in %s on line %d
 bool(false)
 ==DONE==

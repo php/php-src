@@ -66,17 +66,17 @@ foreach($checks as $check)
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-1:Error: file_put_contents(phar://%s//): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-2:Error: file_put_contents(phar://%s/.): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-3:Error: file_put_contents(phar://%s/../): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-4:Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: file "" in phar "%s" cannot be empty
+1:Error: file_put_contents(): failed to open stream (phar://%s//): phar error: file "" in phar "%s" cannot be empty
+2:Error: file_put_contents(): failed to open stream (phar://%s/.): phar error: file "" in phar "%s" cannot be empty
+3:Error: file_put_contents(): failed to open stream (phar://%s/../): phar error: file "" in phar "%s" cannot be empty
+4:Error: file_put_contents(): failed to open stream (phar://%s/a/..): phar error: file "" in phar "%s" cannot be empty
 5:
 6:
 7:
 8:
-9:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-10:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
+9:Error: file_put_contents(): failed to open stream (phar://%s): phar error: invalid path "%s" contains illegal character
+10:Error: file_put_contents(): failed to open stream (phar://%s): phar error: invalid path "%s" contains illegal character
+11:Error: file_put_contents(): failed to open stream (phar://%s): phar error: invalid path "%s" contains illegal character
+12:Error: file_put_contents(): failed to open stream (phar://%s): phar error: invalid path "%s" contains illegal character
+13:Error: file_put_contents(): failed to open stream (phar://%s): phar error: invalid path "%s" contains illegal character
 Error: Phar::offsetSet() expects parameter 1 to be a valid path, string given===DONE===

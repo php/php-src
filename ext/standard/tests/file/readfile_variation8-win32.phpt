@@ -86,11 +86,11 @@ The File Contents
 The File Contents
 -- %s\readfileVar8\readfileVar8Sub\..\\\readfileVar8Sub\\..\\..\readfileVar8Sub --
 
-Warning: readfile(%s\readfileVar8\readfileVar8Sub\..\\\readfileVar8Sub\\..\\..\readfileVar8Sub\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (%s\readfileVar8\readfileVar8Sub\..\\\readfileVar8Sub\\..\\..\readfileVar8Sub\fileToRead.tmp): No such file or directory in %s on line %d
 
 -- %s\readfileVar8\readfileVar8Sub\BADDIR --
 
-Warning: readfile(%s\readfileVar8\readfileVar8Sub\BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (%s\readfileVar8\readfileVar8Sub\BADDIR\fileToRead.tmp): No such file or directory in %s on line %d
 
 -- readfileVar8\readfileVar8Sub --
 The File Contents
@@ -102,7 +102,7 @@ The File Contents
 The File Contents
 -- BADDIR --
 
-Warning: readfile(BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(): failed to open stream (BADDIR\fileToRead.tmp): No such file or directory in %s on line %d
 
 -- /%s/readfileVar8/readfileVar8Sub --
 The File Contents
