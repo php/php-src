@@ -7,6 +7,9 @@ PHP_ARG_WITH([pgsql],
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
 
+  dnl pg_config is still the default way to retrieve build options
+  dnl pkgconfig support was only introduced in 9.3
+
   AC_MSG_CHECKING(for pg_config)
   for i in $PHP_PGSQL $PHP_PGSQL/bin /usr/local/pgsql/bin /usr/local/bin /usr/bin ""; do
 	if test -x $i/pg_config; then
