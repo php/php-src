@@ -406,36 +406,18 @@ AC_CHECK_DECLS([arc4random_buf])
 dnl
 dnl Check for argon2
 dnl
-PHP_ARG_WITH([password-argon2],
-  [for Argon2 support],
-  [AS_HELP_STRING([[--with-password-argon2[=DIR]]],
-    [Include Argon2 support in password_*. DIR is the Argon2 shared library
-    path])])
+PHP_ARG_WITH([argon2],
+  [whether to build with Argon2 support],
+  [AS_HELP_STRING([--with-argon2],
+    [Build with Argon2 support])])
 
-if test "$PHP_PASSWORD_ARGON2" != "no"; then
-  AC_MSG_CHECKING([for Argon2 library])
-  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
-    if test -r $i/include/argon2.h; then
-      ARGON2_DIR=$i;
-      AC_MSG_RESULT(found in $i)
-      break
-    fi
-  done
+if test "$PHP_ARGON2" != "no"; then
+  PKG_CHECK_MODULES([ARGON2], [libargon2])
 
-  if test -z "$ARGON2_DIR"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
-  fi
+  PHP_EVAL_INCLINE($ARGON2_CFLAGS)
+  PHP_EVAL_LIBLINE($ARGON2_LIBS, ARGON2_SHARED_LIBADD)
 
-  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
-  PHP_ADD_INCLUDE($ARGON2_DIR/include)
-
-  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
-    LIBS="$LIBS -largon2"
-    AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
-  ], [
-    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libraries >= 20161029 are installed])
-  ])
+  AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
 fi
 
 dnl
