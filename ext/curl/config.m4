@@ -26,9 +26,9 @@ if test "$PHP_CURL" != "no"; then
     AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
 
     save_CFLAGS="$CFLAGS"
-    CFLAGS=$CURL_CFLAGS
+    CFLAGS="$CFLAGS $CURL_CFLAGS"
     save_LDFLAGS="$LDFLAGS"
-    LDFLAGS=$CURL_LIBS
+    LDFLAGS="$LDFLAGS $CURL_LIBS"
 
     AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
