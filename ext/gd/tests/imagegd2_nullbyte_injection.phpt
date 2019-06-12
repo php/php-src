@@ -7,9 +7,11 @@ Testing null byte injection in imagegd2
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
-var_dump(imagegd2($image, "./foo\0bar"));
-?>
+try {
+    imagegd($image, "./foo\0bar");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
-Warning: imagegd2() expects parameter 2 to be a valid path, string given in %s on line %d
-NULL
+imagegd() expects parameter 2 to be a valid path, string given
