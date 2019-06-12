@@ -406,12 +406,12 @@ AC_CHECK_DECLS([arc4random_buf])
 dnl
 dnl Check for argon2
 dnl
-PHP_ARG_WITH([argon2],
+PHP_ARG_WITH([password-argon2],
   [whether to build with Argon2 support],
-  [AS_HELP_STRING([--with-argon2],
+  [AS_HELP_STRING([--with-password-argon2],
     [Build with Argon2 support])])
 
-if test "$PHP_ARGON2" != "no"; then
+if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PKG_CHECK_MODULES([ARGON2], [libargon2])
 
   PHP_EVAL_INCLINE($ARGON2_CFLAGS)
