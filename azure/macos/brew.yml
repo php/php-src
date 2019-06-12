@@ -9,8 +9,6 @@ steps:
                    automake \
                    libtool \
                    bison \
-                   mysql \
-                   postgresql \
                    re2c \
                    pkg-config \
                    krb5 \
@@ -31,6 +29,7 @@ steps:
                    gmp \
                    tidyp \
                    libxml2\
-                   openssl@1.1
+                   openssl@1.1 \
+                   postgresql
       brew link icu4c gettext --force
     displayName: 'brew'
