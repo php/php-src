@@ -1,11 +1,25 @@
 <?php
+function verify_entries($zip, $entries = []) {
+    $verified = true;
+    $found    = [];
 
-function dump_entries_name($z) {
-	for($i=0; $i<$z->numFiles; $i++) {
-	    $sb = $z->statIndex($i);
-	    echo $i . ' ' . $sb['name'] . "\n";
-	}
+    for ($index = 0; $index < $zip->numFiles; $index++) {
+        $stat = $zip->statIndex($index);
+
+        if (!in_array($stat["name"], $entries)) {
+            $verified = false;
+        }
+        
+        $found[] = $stat["name"];
+    }
+
+    if (!$verified) {
+        var_dump($found);
+    }
+
+    return $verified;
 }
+
 /* recursively remove a directoryy */
 function rmdir_rf($dir) {
 	if ($handle = opendir($dir)) {
