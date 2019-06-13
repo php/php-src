@@ -17,7 +17,6 @@
  */
 
 #include "php_gd.h"
-#include "Zend/zend_exceptions.h"
 
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
 
@@ -140,7 +139,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
-				zend_throw_exception(zend_ce_type_error, "Invalid 2nd parameter, filename must not contain null bytes", 0);
+				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
 				return;
 			}
 
