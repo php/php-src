@@ -11,8 +11,11 @@ if (!isset($support['WBMP Support']) || $support['WBMP Support'] === false) {
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
-var_dump(imagewbmp($image, "./foo\0bar"));
+try {
+    imagewbmp($image, "./foo\0bar");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagewbmp(): Invalid 2nd parameter, filename must not contain null bytes in %s on line %d
-bool(false)
+--EXPECT--
+Invalid 2nd parameter, filename must not contain null bytes
