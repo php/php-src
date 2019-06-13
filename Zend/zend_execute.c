@@ -2819,7 +2819,7 @@ static zend_never_inline void zend_assign_to_property_reference_var_const(zval *
 
 static zend_never_inline void zend_assign_to_property_reference_this_var(zval *container, zval *prop_ptr, zval *value_ptr OPLINE_DC EXECUTE_DATA_DC)
 {
-	zend_assign_to_property_reference(container, IS_VAR, prop_ptr, IS_CONST, value_ptr
+	zend_assign_to_property_reference(container, IS_UNUSED, prop_ptr, IS_VAR, value_ptr
 		OPLINE_CC EXECUTE_DATA_CC);
 }
 
