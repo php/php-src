@@ -10518,6 +10518,18 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			break;
 	}
 
+#if ZTS
+	/* %r0 is used to check EG(vm_interrupt) */
+	{
+		uint32_t b = ssa->cfg.map[line];
+
+		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
+		 && ssa->cfg.blocks[b].start == line) {
+			ZEND_REGSET_INCL(regset, ZREG_R0);
+		}
+	}
+#endif
+
 	return regset;
 }
 
