@@ -24,10 +24,12 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 
-#if defined(__FreeBSD__)
-#include <sys/thr.h>
+#if defined(__darwin__)
+# include <pthread.h>
+#elif defined(__FreeBSD__)
+# include <sys/thr.h>
 #elif defined(__NetBSD__)
-#include <lwp.h>
+# include <lwp.h>
 #endif
 
 #include "zend_elf.h"
@@ -177,9 +179,13 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		static uint64_t id = 1;
 		zend_perf_jitdump_load_record rec;
 		size_t len = strlen(name);
-		uint32_t thread_id;
+		uint32_t thread_id = 0;
 #if defined(__linux__)
 		thread_id = syscall(SYS_gettid);
+#elif defined(__darwin__)
+		uint64_t thread_id_u64;
+		pthread_threadid_np(NULL, &thread_id_u64);
+		thread_id = (uint32_t) thread_id_u64;
 #elif defined(__FreeBSD__)
 		long tid;
 		thr_self(&tid);
