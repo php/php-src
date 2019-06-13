@@ -1,7 +1,5 @@
 --TEST--
-Bug #78106: PHP Fatal error: Uncaught Error: Class 'Phpfastcache\Config\Config' not found
---XFAIL--
-Not fixed yet
+Bug #78106: Path resolution fails if opcache disabled during request
 --FILE--
 <?php
 
