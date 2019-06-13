@@ -672,7 +672,7 @@ HELP;
 			if (substr(PHP_OS, 0, 3) == "WIN") {
 				$pass_options .= " -c " . escapeshellarg($conf_passed);
 			} else {
-				$pass_options .= " -c '$conf_passed'";
+				$pass_options .= " -c '" . realpath($conf_passed) . "'";
 			}
 		}
 
@@ -2122,6 +2122,8 @@ TEST $file
 	}
 
 	settings2params($ini_settings);
+
+	$env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
 
 	// Check if test should be skipped.
 	$info = '';
