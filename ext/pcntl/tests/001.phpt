@@ -27,7 +27,7 @@ function test_exit_signal(){
 	$pid=pcntl_fork();
 
 	if ($pid==0) {
-		sleep(10);
+		sleep(60);
 		exit;
 	} else {
 		$options=0;
