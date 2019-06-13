@@ -1635,3 +1635,9 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zval *var_ptr, zend_refere
 		ZVAL_COPY_VALUE(var_ptr, ret);
 	}
 }
+
+static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
+{
+	ZVAL_NEW_REF(arg, arg);
+	zend_error(E_NOTICE, "Only variables should be passed by reference");
+}
