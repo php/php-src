@@ -1761,14 +1761,13 @@ int check_persistent_script_access(zend_persistent_script *persistent_script)
         return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
     else {
         /* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
-        phar_path = malloc(ZSTR_LEN(persistent_script->script.filename)+1-7);
-        strncpy(phar_path, ZSTR_VAL(persistent_script->script.filename)+7, ZSTR_LEN(persistent_script->script.filename)+1-7);
+        phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+7);
         if ((ptr = strstr(phar_path, ".phar/")) != NULL)
         {
             *(ptr+5) = 0; // strip path inside .phar file
         }
         ret = access(phar_path, R_OK) != 0;
-        free(phar_path);
+        efree(phar_path);
         return ret;
     }
 }
