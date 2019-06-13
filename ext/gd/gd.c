@@ -1314,6 +1314,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_WEBP
 	php_info_print_table_row(2, "WebP Support", "enabled");
 #endif
+#ifdef HAVE_GD_BMP
+	php_info_print_table_row(2, "BMP Support", "enabled");
+#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
