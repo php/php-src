@@ -608,9 +608,6 @@ The following extensions and SAPIs are affected:
 - SQLite3:
   . --with-sqlite3 no longer accepts a directory.
 
-- Standard:
-  . --with-password-argon2 no longer accepts a directory.
-
 - XSL:
   . --with-xsl no longer accepts a directory.
 
