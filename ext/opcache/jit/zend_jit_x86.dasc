@@ -103,6 +103,12 @@
 #include "Zend/zend_cpuinfo.h"
 #include "jit/zend_jit_x86.h"
 
+/* The generated code may contain tautological comparisons, ignore them. */
+#if defined(__clang__)
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
+
 const char* zend_reg_name[] = {
 #if defined(__x86_64__) || defined(_M_X64)
 	"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
@@ -10532,6 +10538,10 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 
 	return regset;
 }
+
+#if defined(__clang__)
+# pragma clang diagnostic pop
+#endif
 
 /*
  * Local variables:
