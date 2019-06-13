@@ -11,8 +11,11 @@ if (!isset($support['JPEG Support']) || $support['JPEG Support'] === false) {
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
-var_dump(imagejpeg($image, "./foo\0bar"));
+try {
+    imagejpeg($image, "./foo\0bar");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagejpeg(): Invalid 2nd parameter, filename must not contain null bytes in %s on line %d
-bool(false)
+--EXPECT--
+Invalid 2nd parameter, filename must not contain null bytes

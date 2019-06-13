@@ -11,8 +11,11 @@ if (!isset($support['PNG Support']) || $support['PNG Support'] === false) {
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
-var_dump(imagepng($image, "./foo\0bar"));
+try {
+    imagepng($image, "./foo\0bar");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
-Warning: imagepng(): Invalid 2nd parameter, filename must not contain null bytes in %s on line %d
-bool(false)
+Invalid 2nd parameter, filename must not contain null bytes
