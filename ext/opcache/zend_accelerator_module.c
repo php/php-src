@@ -244,6 +244,7 @@ static ZEND_INI_MH(OnEnable)
 			return FAILURE;
 		} else {
 			*p = 0;
+			ZCG(accelerator_enabled) = 0;
 			return SUCCESS;
 		}
 	}
