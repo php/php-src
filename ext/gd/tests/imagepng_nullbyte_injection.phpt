@@ -8,10 +8,6 @@ if (!isset($support['PNG Support']) || $support['PNG Support'] === false) {
 	print 'skip png support not available';
 }
 ?>
---CLEAN--
-$tempdir = sprintf("%s/%s", sys_get_temp_dir(), preg_replace("~\.php$~", null, __FILE__));
-foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
-rmdir($tempdir);
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
