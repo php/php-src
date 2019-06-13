@@ -2360,7 +2360,6 @@ static void accel_activate(void)
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
-					ZCG(accelerator_enabled) = 0;
 					return;
 				}
 			}
