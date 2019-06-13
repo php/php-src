@@ -8022,15 +8022,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 			|	jnz >7
 			|	SAVE_VALID_OPLINE opline
-			|.if X64
-				|	LOAD_ZVAL_ADDR CARG1, arg_addr
-				|	EXT_CALL zend_jit_only_vars_by_reference, r0
-			|.else
-				|	sub r4, 8
-				|	PUSH_ZVAL_ADDR arg_addr, r0
-				|	EXT_CALL zend_jit_only_vars_by_reference, r0
-				|	add r4, 16
-			|.endif
+			|	LOAD_ZVAL_ADDR FCARG1a, arg_addr
+			|	EXT_CALL zend_jit_only_vars_by_reference, r0
 			if (!zend_jit_check_exception(Dst)) {
 				return 0;
 			}
@@ -8067,15 +8060,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	je >7
 		}
 		|	SAVE_VALID_OPLINE opline
-		|.if X64
-			|	LOAD_ZVAL_ADDR CARG1, arg_addr
-			|	EXT_CALL zend_jit_only_vars_by_reference, r0
-		|.else
-			|	sub r4, 8
-			|	PUSH_ZVAL_ADDR arg_addr, r0
-			|	EXT_CALL zend_jit_only_vars_by_reference, r0
-			|	add r4, 16
-		|.endif
+		|	LOAD_ZVAL_ADDR FCARG1a, arg_addr
+		|	EXT_CALL zend_jit_only_vars_by_reference, r0
 		if (!zend_jit_check_exception(Dst)) {
 			return 0;
 		}
