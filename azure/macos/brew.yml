@@ -4,13 +4,17 @@ parameters:
 steps:
   - script: |
       /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-      # see https://formulae.brew.sh/ for package names
-      brew install autoconf \
+    displayName: 'Install Homebrew'
+  - script: |
+      brew install pkg-config \
+                   autoconf \
                    automake \
                    libtool \
                    bison \
-                   re2c \
-                   pkg-config \
+                   re2c
+    displayName: 'Install Build Tools'
+  - script: |
+      brew install openssl@1.1 \
                    krb5 \
                    bzip2 \
                    enchant \
@@ -20,7 +24,6 @@ steps:
                    freetype \
                    intltool \
                    icu4c \
-                   readline \
                    libiconv \
                    zlib \
                    t1lib \
@@ -28,8 +31,8 @@ steps:
                    libzip \
                    gmp \
                    tidyp \
-                   libxml2\
-                   openssl@1.1 \
+                   libxml2 \
+                   libxslt \
                    postgresql
       brew link icu4c gettext --force
-    displayName: 'brew'
+    displayName: 'Install Build Dependencies'

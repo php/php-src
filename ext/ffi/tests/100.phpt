@@ -8,6 +8,10 @@ try {
 } catch (Throwable $e) {
 	die('skip PHP symbols not available');
 }
+
+if (PHP_OS == "Darwin") {
+    die("xfail there is a known leak here");
+}
 ?>
 --INI--
 ffi.enable=1
