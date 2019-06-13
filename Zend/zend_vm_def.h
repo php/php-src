@@ -4536,6 +4536,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM)
 	}
 
 	SAVE_OPLINE();
+	ZVAL_NEW_REF(arg, arg);
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -4576,6 +4577,7 @@ ZEND_VM_HOT_SEND_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
 	}
 
 	SAVE_OPLINE();
+	ZVAL_NEW_REF(arg, arg);
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

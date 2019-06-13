@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78151 (Segfault caused by indirect expressions in PHP 7.4a1).
     (Nikita)
+  . Fixed bug #78154 (SEND_VAR_NO_REF does not always send reference). (Nikita)
 
 13 Jun 2019, PHP 7.4.0alpha1
 
