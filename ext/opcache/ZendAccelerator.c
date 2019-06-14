@@ -432,7 +432,7 @@ static zend_always_inline zend_string *accel_find_interned_string(zend_string *s
 
 	if (!ZCG(counted)) {
 		if (!ZCG(accelerator_enabled) || accel_activate_add() == FAILURE) {
-			return str;
+			return NULL;
 		}
 		ZCG(counted) = 1;
 	}
@@ -754,10 +754,9 @@ static void accel_use_shm_interned_strings(void)
 	if (ZCSG(interned_strings).saved_top == NULL) {
 		accel_copy_permanent_strings(accel_new_interned_string);
 	} else {
+		ZCG(counted) = 1;
 		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);
-		if (ZCG(counted)) {
-			accel_deactivate_sub();
-		}
+		ZCG(counted) = 0;
 	}
 	accel_interned_strings_save_state();
 
@@ -1187,7 +1186,11 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 						cwd_len = ZCG(cwd_key_len) = buf + sizeof(buf) - 1 - res;
 						cwd = ZCG(cwd_key);
 						memcpy(ZCG(cwd_key), res, cwd_len + 1);
+					} else {
+						return NULL;
 					}
+				} else {
+					return NULL;
 				}
 			}
 		}
@@ -1226,7 +1229,11 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 						include_path_len = ZCG(include_path_key_len) = buf + sizeof(buf) - 1 - res;
 						include_path = ZCG(include_path_key);
 						memcpy(ZCG(include_path_key), res, include_path_len + 1);
+					} else {
+						return NULL;
 					}
+				} else {
+					return NULL;
 				}
 			}
 		}
@@ -2325,6 +2332,7 @@ static void accel_reset_pcre_cache(void)
 static void accel_activate(void)
 {
 	if (!ZCG(enabled) || !accel_startup_ok) {
+		ZCG(accelerator_enabled) = 0;
 		return;
 	}
 
@@ -2352,6 +2360,7 @@ static void accel_activate(void)
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	if (file_cache_only) {
+		ZCG(accelerator_enabled) = 0;
 		return;
 	}
 #endif
