@@ -4,6 +4,9 @@ Test pcntl wait functionality
 <?php
 	if (!extension_loaded("pcntl")) print "skip";
 	elseif (!function_exists("posix_kill")) print "skip posix_kill() not available";
+    if (PHP_OS == "Darwin") {
+        die("skip do not run on darwin");
+    }
 ?>
 --FILE--
 <?php
