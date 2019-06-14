@@ -16,7 +16,7 @@ jobs:
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
             --prefix=/usr \
-            --disable-phpdbg \
+            --enable-phpdbg \
             --enable-fpm \
             --enable-intl \
             --with-pdo-mysql=mysqlnd \
