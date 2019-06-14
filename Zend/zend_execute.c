@@ -888,6 +888,34 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 	}
 }
 
+#if ZEND_DEBUG
+/* Used to sanity-check internal arginfo types without performing any actual type conversions. */
+static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(zend_uchar type_hint, zval *arg)
+{
+	switch (type_hint) {
+		case _IS_BOOL: {
+			zend_bool dest;
+			return zend_parse_arg_bool_weak(arg, &dest);
+		}
+		case IS_LONG: {
+			zend_long dest;
+			return zend_parse_arg_long_weak(arg, &dest);
+		}
+		case IS_DOUBLE: {
+			double dest;
+			return zend_parse_arg_double_weak(arg, &dest);
+		}
+		case IS_STRING:
+			/* We don't call cast_object here, because this check must be side-effect free. As this
+			 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
+			 * more than actually allowed here. */
+			return Z_TYPE_P(arg) < IS_STRING || Z_TYPE_P(arg) == IS_OBJECT;
+		default:
+			return 0;
+	}
+}
+#endif
+
 static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict, zend_bool is_internal_arg)
 {
 	if (UNEXPECTED(strict)) {
@@ -903,6 +931,11 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		}
 		return 0;
 	}
+#if ZEND_DEBUG
+	if (is_internal_arg) {
+		return zend_verify_weak_scalar_type_hint_no_sideeffect(type_hint, arg);
+	}
+#endif
 	return zend_verify_weak_scalar_type_hint(type_hint, arg);
 }
 
