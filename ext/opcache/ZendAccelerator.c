@@ -1757,14 +1757,17 @@ int check_persistent_script_access(zend_persistent_script *persistent_script)
 {
     char *phar_path, *ptr;
     int ret;
-    if (ZSTR_LEN(persistent_script->script.filename)<8 || memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", 7))
+    if ((ZSTR_LEN(persistent_script->script.filename)<sizeof("phar://.phar")) ||
+         memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", sizeof("phar://")-1)) {
+
         return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
-    else {
+
+    } else {
         /* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
-        phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+7);
+        phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+sizeof("phar://")-1);
         if ((ptr = strstr(phar_path, ".phar/")) != NULL)
         {
-            *(ptr+5) = 0; // strip path inside .phar file
+            *(ptr+sizeof(".phar/")-2) = 0; /* strip path inside .phar file */
         }
         ret = access(phar_path, R_OK) != 0;
         efree(phar_path);
