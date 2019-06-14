@@ -961,6 +961,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		}
 		request_started = 1;
 		CG(start_lineno) = lineno;
+
+		zend_register_bool_constant(
+			ZEND_STRL("PHP_CLI_PROCESS_TITLE"),
+			is_ps_title_available() == PS_TITLE_SUCCESS,
+			CONST_CS, 0);
+
 		*arg_excp = arg_free; /* reconstuct argv */
 
 		if (hide_argv) {
