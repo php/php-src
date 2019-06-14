@@ -1083,7 +1083,7 @@ static zend_always_inline zend_bool zend_check_type(
 	 * because this case is already checked at compile-time. */
 }
 
-static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot, zend_bool is_internal)
+static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
 	zend_class_entry *ce;
@@ -1097,7 +1097,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 	}
 
 	ce = NULL;
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, is_internal))) {
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
 	}
@@ -1144,18 +1144,25 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 {
 	uint32_t i;
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	zval *p = ZEND_CALL_ARG(call, 1);
-	void *dummy_cache_slot;
+	zval *arg = ZEND_CALL_ARG(call, 1);
 
 	for (i = 0; i < num_args; ++i) {
-		dummy_cache_slot = NULL;
-		if (UNEXPECTED(!zend_verify_arg_type(fbc, i + 1, p, NULL, &dummy_cache_slot, 1))) {
-			zend_throw_error(NULL, "Internal function arginfo verification failed, but function did not throw");
-			EG(current_execute_data) = call->prev_execute_data;
-			zend_vm_stack_free_args(call);
+		zend_arg_info *cur_arg_info;
+		zend_class_entry *ce = NULL;
+		void *dummy_cache_slot = NULL;
+
+		if (EXPECTED(i < fbc->common.num_args)) {
+			cur_arg_info = &fbc->common.arg_info[i];
+		} else if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+			cur_arg_info = &fbc->common.arg_info[fbc->common.num_args];
+		} else {
+			break;
+		}
+
+		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, NULL, fbc->common.scope, 0, /* is_internal_arg */ 1))) {
 			return 0;
 		}
-		p++;
+		arg++;
 	}
 	return 1;
 }
@@ -4447,5 +4454,5 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
-	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot, 0);
+	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }

@@ -1129,6 +1129,16 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
+
+#if ZEND_DEBUG
+		/* Type checks for internal functions are usually only performed by zpp.
+		 * In debug mode we additionally run arginfo checks to detect cases where
+		 * arginfo and zpp went out of sync. */
+		zend_bool wrong_arg_types =
+			(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
@@ -1136,21 +1146,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				zend_verify_internal_return_type(call->func, ret));
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
-
-			/* Type checks for internal functions are usually only performed by zpp.
-			 * In debug mode we additionally run arginfo checks to detect cases where
-			 * arginfo and zpp went out of sync. */
-			if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-			 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
-				zend_vm_stack_free_call_frame(call);
-				zend_rethrow_exception(execute_data);
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
-			}
 		}
 #endif
 
@@ -1208,6 +1208,16 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
+
+#if ZEND_DEBUG
+		/* Type checks for internal functions are usually only performed by zpp.
+		 * In debug mode we additionally run arginfo checks to detect cases where
+		 * arginfo and zpp went out of sync. */
+		zend_bool wrong_arg_types =
+			(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
@@ -1215,21 +1225,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				zend_verify_internal_return_type(call->func, ret));
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
-
-			/* Type checks for internal functions are usually only performed by zpp.
-			 * In debug mode we additionally run arginfo checks to detect cases where
-			 * arginfo and zpp went out of sync. */
-			if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-			 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
-				zend_vm_stack_free_call_frame(call);
-				zend_rethrow_exception(execute_data);
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
-			}
 		}
 #endif
 
@@ -1297,6 +1297,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
+#if ZEND_DEBUG
+		/* Type checks for internal functions are usually only performed by zpp.
+		 * In debug mode we additionally run arginfo checks to detect cases where
+		 * arginfo and zpp went out of sync. */
+		zend_bool wrong_arg_types =
+			(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 		ret = 0 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
@@ -1309,19 +1318,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				zend_verify_internal_return_type(call->func, ret));
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
-
-			/* Type checks for internal functions are usually only performed by zpp.
-			 * In debug mode we additionally run arginfo checks to detect cases where
-			 * arginfo and zpp went out of sync. */
-			if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-			 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
-				UNDEF_RESULT();
-				goto fcall_end;
-			}
 		}
 #endif
 
@@ -1395,6 +1396,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
 
+#if ZEND_DEBUG
+		/* Type checks for internal functions are usually only performed by zpp.
+		 * In debug mode we additionally run arginfo checks to detect cases where
+		 * arginfo and zpp went out of sync. */
+		zend_bool wrong_arg_types =
+			(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 		ret = 1 ? EX_VAR(opline->result.var) : &retval;
 		ZVAL_NULL(ret);
 
@@ -1407,19 +1417,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				zend_verify_internal_return_type(call->func, ret));
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
-
-			/* Type checks for internal functions are usually only performed by zpp.
-			 * In debug mode we additionally run arginfo checks to detect cases where
-			 * arginfo and zpp went out of sync. */
-			if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-			 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
-				UNDEF_RESULT();
-				goto fcall_end;
-			}
 		}
 #endif
 
@@ -2430,6 +2432,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 		EG(current_execute_data) = call;
 
+#if ZEND_DEBUG
+		/* Type checks for internal functions are usually only performed by zpp.
+		 * In debug mode we additionally run arginfo checks to detect cases where
+		 * arginfo and zpp went out of sync. */
+		zend_bool wrong_arg_types =
+			(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 		if (ret == NULL) {
 			ZVAL_NULL(&retval);
 			ret = &retval;
@@ -2444,20 +2455,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 				zend_verify_internal_return_type(call->func, ret));
 			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
-
-			/* Type checks for internal functions are usually only performed by zpp.
-			 * In debug mode we additionally run arginfo checks to detect cases where
-			 * arginfo and zpp went out of sync. */
-			if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
-			 && UNEXPECTED(!zend_verify_internal_arg_types(fbc, call))) {
-				zend_vm_stack_free_call_frame(call);
-				UNDEF_RESULT();
-				goto call_trampoline_end;
-			}
 		}
 #endif
 
