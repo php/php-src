@@ -12,7 +12,7 @@ function test_exit_waits(){
 
 	$pid=pcntl_fork();
 	if ($pid==0) {
-		sleep(1);
+		while(1);
 		exit(-1);
 	} else {
 		$options=0;
@@ -27,7 +27,7 @@ function test_exit_signal(){
 	$pid=pcntl_fork();
 
 	if ($pid==0) {
-		sleep(60);
+        while(1);
 		exit;
 	} else {
 		$options=0;
@@ -49,7 +49,7 @@ function test_stop_signal(){
 	$pid=pcntl_fork();
 
 	if ($pid==0) {
-		sleep(1);
+		while(1);
 		exit;
 	} else {
 		$options=WUNTRACED;
