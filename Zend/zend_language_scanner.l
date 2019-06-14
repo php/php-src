@@ -2032,6 +2032,10 @@ string:
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
+		if (CG(short_tags_notice) == 0) {
+			zend_error(E_DEPRECATED, "PHP short tags are deprecated. This message will not be printed for further short tags uses. First usage");
+			CG(short_tags_notice) = 1;
+		}
 		BEGIN(ST_IN_SCRIPTING);
 		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_OPEN_TAG);

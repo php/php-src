@@ -7,6 +7,7 @@ short_open_tag=on
 echo "Used a short tag\n";
 ?>
 Finished
---EXPECT--
+--EXPECTF--
+Deprecated: PHP short tags are deprecated. This message will not be printed for further short tags uses. First usage in %s on line %d
 Used a short tag
 Finished
