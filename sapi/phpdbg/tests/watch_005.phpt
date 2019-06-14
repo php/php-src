@@ -3,7 +3,7 @@ Test proper watch comparisons when having multiple levels of indirection from a 
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE == 4) {
-    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
 }
 ?>
 --PHPDBG--

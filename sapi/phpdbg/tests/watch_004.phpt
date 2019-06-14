@@ -3,7 +3,7 @@ Test detection of inline string manipulations on zval watch
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE == 4) {
-    die("xfail There may be flaws in the implementation of watchpoints that cause failures")
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
 }
 ?>
 --INI--
