@@ -1880,16 +1880,22 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	int key_length;
 	int from_shared_memory; /* if the script we've got is stored in SHM */
 
-	if (!file_handle->filename || !ZCG(enabled) || !accel_startup_ok) {
+	if (!file_handle->filename || !ZCG(accelerator_enabled)) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
+		ZCG(cache_opline) = NULL;
+		ZCG(cache_persistent_script) = NULL;
 		return accelerator_orig_compile_file(file_handle, type);
 	} else if (file_cache_only) {
+		ZCG(cache_opline) = NULL;
+		ZCG(cache_persistent_script) = NULL;
 		return file_cache_compile_file(file_handle, type);
 	} else if (!ZCG(accelerator_enabled) ||
 	           (ZCSG(restart_in_progress) && accel_restart_is_active())) {
 		if (ZCG(accel_directives).file_cache) {
 			return file_cache_compile_file(file_handle, type);
 		}
+		ZCG(cache_opline) = NULL;
+		ZCG(cache_persistent_script) = NULL;
 		return accelerator_orig_compile_file(file_handle, type);
 	}
 
@@ -1916,10 +1922,14 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			/* try to find cached script by key */
 			key = accel_make_persistent_key(file_handle->filename, strlen(file_handle->filename), &key_length);
 			if (!key) {
+				ZCG(cache_opline) = NULL;
+				ZCG(cache_persistent_script) = NULL;
 				return accelerator_orig_compile_file(file_handle, type);
 			}
 			persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		} else if (UNEXPECTED(is_stream_path(file_handle->filename) && !is_cacheable_stream_path(file_handle->filename))) {
+			ZCG(cache_opline) = NULL;
+			ZCG(cache_persistent_script) = NULL;
 			return accelerator_orig_compile_file(file_handle, type);
 		}
 
@@ -3986,6 +3996,7 @@ static int accel_preload(const char *config)
 	char *orig_open_basedir;
 
 	ZCG(enabled) = 0;
+	ZCG(accelerator_enabled) = 0;
 	orig_open_basedir = PG(open_basedir);
 	PG(open_basedir) = NULL;
 	preload_orig_compile_file = accelerator_orig_compile_file;
