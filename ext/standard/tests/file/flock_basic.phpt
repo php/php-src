@@ -11,22 +11,26 @@ Description: PHP supports a portable way of locking complete files
 echo "*** Testing flock() fun with file and dir ***\n";
 $file_path = __DIR__;
 
-$file_handle = fopen("$file_path/lock.tmp", "w");
+$lock_file = preg_replace("~\.phpt?$~", null, __FILE__);
+
+$file_handle = fopen($lock_file, "w");
 var_dump(flock($file_handle, LOCK_SH|LOCK_NB));
 var_dump(flock($file_handle, LOCK_UN));
 var_dump(flock($file_handle, LOCK_EX));
 var_dump(flock($file_handle, LOCK_UN));
 fclose($file_handle);
-unlink("$file_path/lock.tmp");
+unlink($lock_file);
 
-mkdir("$file_path/dir");
-$dir_handle = opendir("$file_path/dir");
+$lock_dir = sprintf("%s.dir", preg_replace("~\.phpt?$~", null, __FILE__));
+
+mkdir($lock_dir);
+$dir_handle = opendir($lock_dir);
 var_dump(flock($dir_handle, LOCK_SH|LOCK_NB));
 var_dump(flock($dir_handle, LOCK_UN));
 var_dump(flock($dir_handle, LOCK_EX));
 var_dump(flock($dir_handle, LOCK_UN));
 closedir($dir_handle);
-rmdir("$file_path/dir");
+rmdir($lock_dir);
 
 echo "\n*** Done ***\n";
 ?>

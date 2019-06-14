@@ -12,9 +12,12 @@ if (fileowner($filename) == 0) {
     unlink ($filename);
     die('SKIP Test cannot be run as root.');
 }
+if (@socket_create_listen(80)) {
+    die('SKIP Test cannot be run in environment that will allow binding to port 80 (azure)');
+}
 --FILE--
 <?php
-$sock = socket_create_listen(PHP_OS == "Darwin" ? 427 : 80);
+$sock = socket_create_listen(80);
 --EXPECTF--
 Warning: socket_create_listen(): unable to bind to given address [13]: Permission denied in %s on line %d
 --CLEAN--
