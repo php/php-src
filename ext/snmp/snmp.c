@@ -618,7 +618,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 			break;
 
 		case ASN_OPAQUE_DOUBLE:		/* 0x79, asn1.h */
-			snprintf(buf, buflen, "%Lf", *vars->val.doubleVal);
+			snprintf(buf, buflen, "%f", *vars->val.doubleVal);
 			ZVAL_STRING(&val, buf);
 			break;
 
@@ -955,7 +955,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 		if (st & SNMP_CMD_SET) {
 			if (Z_TYPE_P(type) == IS_STRING && Z_TYPE_P(value) == IS_STRING) {
 				if (Z_STRLEN_P(type) != 1) {
-					php_error_docref(NULL, E_WARNING, "Bogus type '%s', should be single char, got %u", Z_STRVAL_P(type), Z_STRLEN_P(type));
+					php_error_docref(NULL, E_WARNING, "Bogus type '%s', should be single char, got %zu", Z_STRVAL_P(type), Z_STRLEN_P(type));
 					efree(objid_query->vars);
 					return FALSE;
 				}
@@ -994,7 +994,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 					if (idx_type < Z_ARRVAL_P(type)->nNumUsed) {
 						convert_to_string_ex(tmp_type);
 						if (Z_STRLEN_P(tmp_type) != 1) {
-							php_error_docref(NULL, E_WARNING, "'%s': bogus type '%s', should be single char, got %u", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRLEN_P(tmp_type));
+							php_error_docref(NULL, E_WARNING, "'%s': bogus type '%s', should be single char, got %zu", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRLEN_P(tmp_type));
 							efree(objid_query->vars);
 							return FALSE;
 						}
