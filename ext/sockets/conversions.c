@@ -1015,13 +1015,6 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 	char			*bufp = buf;
 	uint32_t		i = 1;
 
-	/*if (msg->msg_flags & MSG_CTRUNC) {
-		php_error_docref0(NULL, E_WARNING, "The MSG_CTRUNC flag is present; will not "
-				"attempt to read control messages");
-		ZVAL_FALSE(zv);
-		return;
-	}*/
-
 	array_init(zv);
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
