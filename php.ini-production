@@ -603,6 +603,7 @@ html_errors = On
 ;   ascii (all printable ASCII characters and NL)
 ;   no-ctrl (all characters except control characters)
 ;   all (all characters)
+;   raw (like "all", but messages are not split at newlines)
 ; http://php.net/syslog.filter
 ;syslog.filter = ascii
 

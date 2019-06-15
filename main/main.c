@@ -346,6 +346,10 @@ static PHP_INI_MH(OnSetLogFilter)
 		PG(syslog_filter) = PHP_SYSLOG_FILTER_ASCII;
 		return SUCCESS;
 	}
+	if (!strcmp(filter, "raw")) {
+		PG(syslog_filter) = PHP_SYSLOG_FILTER_RAW;
+		return SUCCESS;
+	}
 
 	return FAILURE;
 }
