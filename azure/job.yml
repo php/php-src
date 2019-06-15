@@ -7,6 +7,9 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: |
+        echo "Build.SourceVersionMessage: ${{ variables['Build.SourceVersionMessage'] }}"
+      displayName: 'Does this contain anything useful?'
     - template: apt.yml
     - script: |
         ./buildconf --force
