@@ -1318,17 +1318,17 @@ static const func_info_t func_infos[] = {
 #endif
 
 	/* ext/ctype */
-	F0("ctype_alnum",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_alpha",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_cntrl",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_digit",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_lower",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_graph",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_print",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_punct",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_space",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_upper",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_xdigit",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_alnum",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_alpha",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_cntrl",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_digit",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_lower",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_graph",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_print",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_punct",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_space",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_upper",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("ctype_xdigit",							MAY_BE_FALSE | MAY_BE_TRUE),
 
 	/* ext/fileinfo */
 	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
