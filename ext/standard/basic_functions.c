@@ -758,6 +758,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_print_r, 0, 0, 1)
 	ZEND_ARG_INFO(0, return)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_println, 0, 0, 1)
+	ZEND_ARG_INFO(0, message)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_connection_aborted, 0)
 ZEND_END_ARG_INFO()
 
@@ -3027,6 +3031,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(var_export,														arginfo_var_export)
 	PHP_FE(debug_zval_dump,													arginfo_debug_zval_dump)
 	PHP_FE(print_r,															arginfo_print_r)
+	PHP_FE(println,															arginfo_println)
 	PHP_FE(memory_get_usage,												arginfo_memory_get_usage)
 	PHP_FE(memory_get_peak_usage,											arginfo_memory_get_peak_usage)
 
@@ -5652,6 +5657,20 @@ PHP_FUNCTION(print_r)
 		zend_print_zval_r(var, 0);
 		RETURN_TRUE;
 	}
+}
+/* }}} */
+
+/* {{{ proto void println(string message) */
+PHP_FUNCTION(println)
+{
+	zend_string *message;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	PHPWRITE(ZSTR_VAL(message), ZSTR_LEN(message));
+	PHPWRITE(PHP_EOL, sizeof(PHP_EOL) - 1);
 }
 /* }}} */
 

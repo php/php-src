@@ -101,6 +101,7 @@ PHP_FUNCTION(set_include_path);
 PHP_FUNCTION(restore_include_path);
 
 PHP_FUNCTION(print_r);
+PHP_FUNCTION(println);
 PHP_FUNCTION(fprintf);
 PHP_FUNCTION(vfprintf);
 
