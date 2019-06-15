@@ -6,6 +6,10 @@ trigger:
       - master
 
 jobs:
+  - job:
+    script: |
+        echo "Build.SourceVersionMessage: ${{ variables['Build.SourceVersionMessage'] }}"
+    displayName: 'Does this contain anything useful?'
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_NTS
