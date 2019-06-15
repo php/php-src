@@ -22,7 +22,7 @@ jobs:
     parameters:
       configurationName: MACOS_DEBUG_NTS
       configurationParameters: '--enable-debug --disable-zts'
-  - ${{ if or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Type'], 'Schedule')) }}:
+  - ${{ if or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['CI'], 'ALL')) }}:
     - template: azure/job.yml
       parameters:
         configurationName: DEBUG_ZTS
