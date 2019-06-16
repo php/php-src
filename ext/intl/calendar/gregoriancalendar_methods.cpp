@@ -45,7 +45,7 @@ static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 	return (GregorianCalendar*)co->ucal;
 }
 
-static void _php_intlgregcal_constructor_body(
+extern "C" void _php_intlgregcal_constructor_body(
     INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {
 	zval		*tz_object	= NULL;
