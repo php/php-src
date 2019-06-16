@@ -4637,30 +4637,30 @@ PHP_FUNCTION(time_nanosleep)
    Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
 {
-	double d_ts, c_ts;
+	double target_secs;
 	struct timeval tm;
 	struct timespec php_req, php_rem;
+	uint64_t current_ns, target_ns, diff_ns;
+	const uint64_t ns_per_sec = 1000000000;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(d_ts)
+		Z_PARAM_DOUBLE(target_secs)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
 	}
 
-	c_ts = (double)(d_ts - tm.tv_sec - tm.tv_usec / 1000000.00);
-	if (c_ts < 0) {
+	target_ns = (uint64_t) (target_secs * ns_per_sec);
+	current_ns = ((uint64_t) tm.tv_sec) * ns_per_sec + ((uint64_t) tm.tv_usec) * 1000;
+	if (target_ns < current_ns) {
 		php_error_docref(NULL, E_WARNING, "Sleep until to time is less than current time");
 		RETURN_FALSE;
 	}
 
-	php_req.tv_sec = (time_t) c_ts;
-	if (php_req.tv_sec > c_ts) { /* rounding up occurred */
-		php_req.tv_sec--;
-	}
-	/* 1sec = 1000000000 nanoseconds */
-	php_req.tv_nsec = (long) ((c_ts - php_req.tv_sec) * 1000000000.00);
+	diff_ns = target_ns - current_ns;
+	php_req.tv_sec = (time_t) (diff_ns / ns_per_sec);
+	php_req.tv_nsec = (long) (diff_ns % ns_per_sec);
 
 	while (nanosleep(&php_req, &php_rem)) {
 		if (errno == EINTR) {
