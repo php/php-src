@@ -4662,14 +4662,16 @@ PHP_FUNCTION(time_sleep_until)
 	/* 1sec = 1000000000 nanoseconds */
 	php_req.tv_nsec = (long) ((c_ts - php_req.tv_sec) * 1000000000.00);
 
-	while (nanosleep(&php_req, &php_rem)) {
-		if (errno == EINTR) {
+	do {
+		int rc = nanosleep(&php_req, &php_rem);
+
+		if ((rc == FAILURE) && (errno == EINTR)) {
 			php_req.tv_sec = php_rem.tv_sec;
 			php_req.tv_nsec = php_rem.tv_nsec;
 		} else {
 			RETURN_FALSE;
 		}
-	}
+	} while (1);
 
 	RETURN_TRUE;
 }
