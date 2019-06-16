@@ -99,6 +99,9 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # ifdef MAP_ALIGNED_SUPER
 #    define MAP_HUGETLB MAP_ALIGNED_SUPER
 # endif
+# ifdef __APPLE__
+#    include <mach/vm_statistics.h>
+# endif
 #endif
 
 #ifndef REAL_PAGE_SIZE
@@ -451,9 +454,13 @@ static void *zend_mm_mmap(size_t size)
 #else
 	void *ptr;
 
-#ifdef MAP_HUGETLB
+#if defined(MAP_HUGETLB) || (defined(__APPLE__) && defined(VM_FLAGS_SUPERPAGE_SIZE_2MB))
 	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
+#ifndef __APPLE__
 		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
+#else
+		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, VM_FLAGS_SUPERPAGE_SIZE_2MB, 0);
+#endif
 		if (ptr != MAP_FAILED) {
 			return ptr;
 		}
