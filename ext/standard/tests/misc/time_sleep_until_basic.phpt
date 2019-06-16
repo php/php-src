@@ -32,5 +32,3 @@ Michele Orselli mo@ideato.it
 --EXPECT--
 bool(true)
 bool(true)
---XFAIL--
-gettimeofday cannot be used to reliably implement high precision process synchronization
