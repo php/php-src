@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 echo "*** Testing unlink() : variation ***\n";
 
-$workDir = "unlinkVar8.tmp";
+$workDir = "unlinkVar10.tmp";
 $tmpDir = "subDir.tmp";
 $dirToLinkTo = $workDir.'/'."linkme.tmp";
 
@@ -83,24 +83,24 @@ function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
 ===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
--- unlinking soft link unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link ./unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link ./unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link unlinkVar8.tmp/../unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp/../unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/./unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/./unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link /%s/unlinkVar8.tmp/../unlinkVar8.tmp/subDir.tmp --
+-- unlinking soft link /%s/unlinkVar10.tmp/../unlinkVar10.tmp/subDir.tmp --
 directory unlinked
--- unlinking soft link unlinkVar8.tmp//subDir.tmp --
+-- unlinking soft link unlinkVar10.tmp//subDir.tmp --
 directory unlinked
--- unlinking soft link /%s//unlinkVar8.tmp//subDir.tmp --
+-- unlinking soft link /%s//unlinkVar10.tmp//subDir.tmp --
 directory unlinked
 
 --- try to unlink a directory ---
 
-Warning: unlink(unlinkVar8.tmp/linkme.tmp): %s in %s on line %d
+Warning: unlink(unlinkVar10.tmp/linkme.tmp): %s in %s on line %d
 ===DONE===
