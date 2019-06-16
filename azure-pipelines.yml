@@ -20,7 +20,7 @@ jobs:
       configurationParameters: '--enable-debug --enable-maintainer-zts'
   - template: azure/macos/job.yml
     parameters:
-      configurationName: MACOS_DEBUG_NTS_TMP
+      configurationName: MACOS_DEBUG_TS_TMP
       configurationParameters: '--enable-debug --enable-maintainer-zts'
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: azure/job.yml
