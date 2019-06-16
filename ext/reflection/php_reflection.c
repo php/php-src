@@ -2954,6 +2954,8 @@ ZEND_METHOD(reflection_method, __construct)
 	size_t name_len, tmp_len;
 	zval ztmp;
 
+	const zend_object_handlers *obj_handlers = NULL;
+
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
 		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 			return;
@@ -2996,6 +2998,7 @@ ZEND_METHOD(reflection_method, __construct)
 
 		case IS_OBJECT:
 			ce = Z_OBJCE_P(classname);
+			obj_handlers = Z_OBJ_HT_P(classname);
 			break;
 
 		default:
@@ -3017,6 +3020,20 @@ ZEND_METHOD(reflection_method, __construct)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj))) != NULL)
 	{
 		/* do nothing, mptr already set */
+	} else if (obj_handlers != NULL && obj_handlers->get_method != NULL) {
+		// a get_method object handler exists, so try to get the method from it
+		zend_string *method_string = zend_string_init(lcname, name_len, 0);
+
+		mptr = obj_handlers->get_method(&Z_OBJ_P(classname), method_string, NULL);
+		zend_string_efree(method_string);
+
+		if (mptr == NULL) {
+			efree(lcname);
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Method %s::%s() does not exist", ZSTR_VAL(ce->name), name_str);
+			return;
+		}
+
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
