@@ -5709,7 +5709,7 @@ static int zend_ffi_validate_func_ret_type(zend_ffi_type *type) /* {{{ */
 }
 /* }}} */
 
-void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args) /* {{{ */
+void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *nested_dcl) /* {{{ */
 {
 	zend_ffi_type *type;
 	zend_ffi_type *ret_type;
@@ -5725,6 +5725,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args) /* {{{ */
 			arg_type = ZEND_FFI_TYPE(arg_type);
 			if (arg_type->kind == ZEND_FFI_TYPE_VOID) {
 				if (zend_hash_num_elements(args) != 1) {
+					zend_ffi_cleanup_dcl(nested_dcl);
 					zend_ffi_cleanup_dcl(dcl);
 					zend_hash_destroy(args);
 					pefree(args, FFI_G(persistent));
@@ -5743,6 +5744,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args) /* {{{ */
 	}
 
 	if (zend_ffi_validate_func_ret_type(ret_type) != SUCCESS) {
+		zend_ffi_cleanup_dcl(nested_dcl);
 		zend_ffi_cleanup_dcl(dcl);
 		if (args) {
 			zend_hash_destroy(args);
@@ -5799,6 +5801,12 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args) /* {{{ */
 #endif
 		default:
 			type->func.abi = FFI_DEFAULT_ABI;
+			zend_ffi_cleanup_dcl(nested_dcl);
+			if (args) {
+				zend_hash_destroy(args);
+				pefree(args, FFI_G(persistent));
+			}
+			_zend_ffi_type_dtor(type);
 			zend_ffi_parser_error("unsupported calling convention line %d", FFI_G(line));
 			break;
 	}
