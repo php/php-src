@@ -23,6 +23,6 @@ steps:
       testResultsFormat: 'JUnit'
       testResultsFiles: junit.xml
       testRunTitle: '${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
-      failTaskOnFailedTests: false
+      failTaskOnFailedTests: true
     displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'
     condition: or(succeeded(), failed())
