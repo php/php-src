@@ -109,6 +109,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 zend_accel_shared_globals *accel_shared_globals = NULL;
 
 /* true globals, no need for thread safety */
+char accel_system_id[32];
 zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
@@ -2584,9 +2585,6 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
-
-	/* TODO refactor to init this just once. */
-	accel_gen_system_id();
 }
 
 #define ZEND_BIN_ID "BIN_" ZEND_TOSTR(SIZEOF_INT) ZEND_TOSTR(SIZEOF_LONG) ZEND_TOSTR(SIZEOF_SIZE_T) ZEND_TOSTR(SIZEOF_ZEND_LONG) ZEND_TOSTR(ZEND_MM_ALIGNMENT)
@@ -2595,7 +2593,7 @@ static void accel_gen_system_id(void)
 {
 	PHP_MD5_CTX context;
 	unsigned char digest[16], c;
-	char *md5str = ZCG(system_id);
+	char *md5str = accel_system_id;
 	int i;
 
 	PHP_MD5Init(&context);
@@ -2795,13 +2793,13 @@ static int accel_startup(zend_extension *extension)
 # endif
 #endif
 
+	accel_gen_system_id();
+
 	if (start_accel_module() == FAILURE) {
 		accel_startup_ok = 0;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
 		return FAILURE;
 	}
-
-	accel_gen_system_id();
 
 #ifdef HAVE_HUGE_CODE_PAGES
 	if (ZCG(accel_directives).huge_code_pages &&
