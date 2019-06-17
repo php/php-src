@@ -2710,9 +2710,18 @@ PHP_FUNCTION(mb_str_ends)
 		RETURN_BOOL(0);	
 	}
 
-    n = mbfl_strpos(&haystack, &needle, haystack.len-needle.len, 0);
-    if (!mbfl_is_error(n)) {
+    mbfl_string haystack_tail;
+    haystack_tail.encoding = haystack.encoding;
+    haystack_tail.no_language = haystack.no_language;
+    unsigned char* haystack_tail_val = haystack.val + sizeof(char) * (haystack.len - needle.len);
+    haystack_tail.val = haystack_tail_val;
+    haystack_tail.len = needle.len;
+
+    n = mbfl_strpos(&haystack_tail, &needle, 0, 0);
+    if (!mbfl_is_error(n) && n == 0) {
         RETURN_BOOL(1);
+    } else if (!mbfl_is_error(n)) {
+        RETURN_BOOL(0);
     } else {
         switch (-n) {
             case 1:
