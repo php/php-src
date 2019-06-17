@@ -2419,7 +2419,7 @@ static PHP_FUNCTION(preg_quote)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(delim)
+		Z_PARAM_STR_EX(delim, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Nothing to do if we got an empty string */
