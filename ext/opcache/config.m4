@@ -46,6 +46,9 @@ if test "$PHP_OPCACHE" != "no"; then
     echo 'int i;' > conftest.$ac_ext
     if AC_TRY_EVAL(ac_compile); then
       case `/usr/bin/file conftest.o` in
+        *"Mach-O 64-bit"*)
+          DASM_FLAGS="-D X64APPLE=1 -D X64=1"
+        ;;
         *64-bit*)
           DASM_FLAGS="-D X64=1"
         ;;

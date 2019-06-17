@@ -175,6 +175,14 @@ static void* dasm_labels[zend_lb_MAX];
 |		mov reg, aword [0x2c]
 |		mov reg, aword [reg + tsrm_tls_index]
 |		mov reg, aword [reg + tsrm_tls_offset]
+|	.elif X64APPLE
+|		gs
+||		if (tsrm_ls_cache_tcb_offset) {
+|			mov reg, aword [tsrm_ls_cache_tcb_offset]
+||		} else {
+|			mov reg, aword [tsrm_tls_index]
+|			mov reg, aword [reg + tsrm_tls_offset]
+||		}
 |	.elif X64
 |		fs
 ||		if (tsrm_ls_cache_tcb_offset) {
@@ -2563,6 +2571,16 @@ static int zend_jit_setup(void)
 			return FAILURE;
 		}
 	} while(0);
+# elif defined(__APPLE__) && defined(__x86_64__)
+	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		size_t *ti;
+		__asm__(
+			"leaq __tsrm_ls_cache(%%rip),%0"
+			: "=r" (ti));
+		tsrm_tls_offset = ti[2];
+		tsrm_tls_index = ti[1] * 8;
+	}
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
