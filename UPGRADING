@@ -370,6 +370,8 @@ PHP 7.4 UPGRADE NOTES
   . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. If TRUE is
     passed as parameter, query parameters will be replaced in the return value
     by their currently bound value, if libsqlite ≥ 3.14 is used.
+  . Added SQLite3::backup() to create database backups via the SQLite3 online
+    backup API.
 
 - Standard
   . bool sapi_windows_set_ctrl_handler(callable handler, [, bool add = true]) -

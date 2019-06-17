@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
     (Nikita)
 
+- SQLite3:
+  . Implement FR ##70950 (Make SQLite3 Online Backup API available). (BohwaZ)
+
 13 Jun 2019, PHP 7.4.0alpha1
 
 - Core:
