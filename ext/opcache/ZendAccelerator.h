@@ -206,7 +206,6 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
-	char                    system_id[32];
 	HashTable               xlat_table;
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
@@ -270,6 +269,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
+extern char accel_system_id[32];
 extern zend_bool accel_startup_ok;
 extern zend_bool file_cache_only;
 #if ENABLE_FILE_CACHE_FALLBACK

@@ -74,7 +74,7 @@ static char *create_name_with_username(char *name)
 	if (!uname) {
 		return NULL;
 	}
-	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, accel_system_id);
 
 	free(uname);
 
@@ -96,7 +96,7 @@ static char *get_mmap_base_file(void)
 	if ('\\' == windir[l-1]) {
 		l--;
 	}
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, accel_system_id);
 
 	free(uname);
 
