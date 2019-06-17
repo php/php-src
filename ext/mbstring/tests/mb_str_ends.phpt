@@ -24,7 +24,7 @@ var_dump(mb_str_ends($euc_jp, '韓国語'));
 mb_internal_encoding('UTF-8');
 $string_ascii = 'abc def';
 
-//Japanese string in UTF-8
+// Japanese string in UTF-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 
 var_dump(mb_str_ends($string_ascii, 'f', 'ISO-8859-1'));
@@ -33,7 +33,7 @@ var_dump(mb_str_ends($string_ascii, 'e', 'ISO-8859-1'));
 var_dump(mb_str_ends($string_ascii, 'def'));
 var_dump(mb_str_ends($string_ascii, 'de'));
 
-$needle1 = base64_decode('JnjgII=');
+$needle1 = base64_decode('77yZ44CC');
 var_dump(mb_str_ends($string_mb, $needle1));
 
 $needle2 = base64_decode("44GT44KT44Gr44Gh44Gv44CB5LiW55WM");
