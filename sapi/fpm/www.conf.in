@@ -114,7 +114,7 @@ pm.max_children = 5
 
 ; The number of child processes created on startup.
 ; Note: Used only when pm is set to 'dynamic'
-; Default Value: min_spare_servers + (max_spare_servers - min_spare_servers) / 2
+; Default Value: (min_spare_servers + max_spare_servers) / 2
 pm.start_servers = 2
 
 ; The desired minimum number of idle server processes.
