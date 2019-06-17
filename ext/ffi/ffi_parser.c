@@ -271,7 +271,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl);
 static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len);
 static int parse_pointer(int sym, zend_ffi_dcl *dcl);
-static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl);
+static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl);
 static int parse_parameter_declaration(int sym, HashTable **args);
 static int parse_type_name(int sym, zend_ffi_dcl *dcl);
 static int parse_attributes(int sym, zend_ffi_dcl *dcl);
@@ -2579,7 +2579,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 		yy_error_sym("unexpected", sym);
 	}
 	if (sym == YY__LBRACK || sym == YY__LPAREN) {
-		sym = parse_array_or_function_declarators(sym, dcl);
+		sym = parse_array_or_function_declarators(sym, dcl, &nested_dcl);
 	}
 	if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);
 	return sym;
@@ -2604,7 +2604,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 		nested = 1;
 	}
 	if (sym == YY__LBRACK || sym == YY__LPAREN) {
-		sym = parse_array_or_function_declarators(sym, dcl);
+		sym = parse_array_or_function_declarators(sym, dcl, &nested_dcl);
 	}
 	if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);
 	return sym;
@@ -2634,7 +2634,7 @@ static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **n
 		yy_error_sym("unexpected", sym);
 	}
 	if (sym == YY__LBRACK || sym == YY__LPAREN) {
-		sym = parse_array_or_function_declarators(sym, dcl);
+		sym = parse_array_or_function_declarators(sym, dcl, &nested_dcl);
 	}
 	if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);
 	return sym;
@@ -2654,7 +2654,7 @@ static int parse_pointer(int sym, zend_ffi_dcl *dcl) {
 	return sym;
 }
 
-static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl) {
+static int parse_array_or_function_declarators(int sym, zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl) {
 	int   sym2;
 	const unsigned char *save_pos;
 	const unsigned char *save_text;
@@ -2777,7 +2777,7 @@ _yy_state_104:
 		}
 		sym = get_sym();
 		if (sym == YY__LBRACK || sym == YY__LPAREN) {
-			sym = parse_array_or_function_declarators(sym, dcl);
+			sym = parse_array_or_function_declarators(sym, dcl, nested_dcl);
 		}
 		dcl->attr |= attr;
 		zend_ffi_make_array_type(dcl, &len);
@@ -2839,10 +2839,10 @@ _yy_state_114:
 		}
 		sym = get_sym();
 		if (sym == YY__LBRACK || sym == YY__LPAREN) {
-			sym = parse_array_or_function_declarators(sym, dcl);
+			sym = parse_array_or_function_declarators(sym, dcl, nested_dcl);
 		}
 		dcl->attr |= attr;
-		zend_ffi_make_func_type(dcl, args);
+		zend_ffi_make_func_type(dcl, args, nested_dcl);
 	} else {
 		yy_error_sym("unexpected", sym);
 	}
