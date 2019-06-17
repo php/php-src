@@ -359,6 +359,11 @@ zend.enable_gc = On
 ; Default: ""
 ;zend.script_encoding =
 
+; Add stack traces to fatal errors and exceptions. This	could potentially contain
+; sensitive information and should not be enabled in a production environment.
+; Default: Off
+;zend.log_exception_trace = Off
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;

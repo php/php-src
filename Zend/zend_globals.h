@@ -127,6 +127,8 @@ struct _zend_compiler_globals {
 
 	HashTable *delayed_variance_obligations;
 	HashTable *delayed_autoloads;
+
+	zend_bool log_exception_trace;
 };
 
 

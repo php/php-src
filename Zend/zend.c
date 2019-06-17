@@ -174,6 +174,7 @@ ZEND_INI_BEGIN()
 #ifdef ZEND_SIGNALS
 	STD_ZEND_INI_BOOLEAN("zend.signal_check", "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
+	STD_ZEND_INI_BOOLEAN("zend.log_exception_trace",	"0",    ZEND_INI_ALL,		OnUpdateBool, log_exception_trace, zend_compiler_globals, compiler_globals)
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */

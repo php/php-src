@@ -664,10 +664,11 @@ ZEND_METHOD(exception, __toString)
 {
 	zval trace, *exception;
 	zend_class_entry *base_ce;
-	zend_string *str;
+	zend_string *str, *tmpstr;
 	zend_fcall_info fci;
 	zval rv, tmp;
 	zend_string *fname;
+	size_t str_len;
 
 	DEFAULT_0_PARAMS;
 
@@ -704,17 +705,31 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (ZSTR_LEN(message) > 0) {
-			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT
-					"\nStack trace:\n%s%s%s",
-					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(message), ZSTR_VAL(file), line,
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
+			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT,
+					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(message), ZSTR_VAL(file), line);
 		} else {
-			str = zend_strpprintf(0, "%s in %s:" ZEND_LONG_FMT
-					"\nStack trace:\n%s%s%s",
-					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(file), line,
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
+			str = zend_strpprintf(0, "%s in %s:" ZEND_LONG_FMT,
+					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(file), line);
+		}
+
+		if (CG(log_exception_trace)) {
+			/* Add the strack trace */
+			str_len = ZSTR_LEN(str);
+			tmpstr = ZSTR_EMPTY_ALLOC();
+			tmpstr = zend_strpprintf(0, "\nStack trace:\n%s",
+				(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n");
+			str = zend_string_extend(str, str_len + ZSTR_LEN(tmpstr), 0);
+			memcpy(ZSTR_VAL(str) + str_len, ZSTR_VAL(tmpstr), ZSTR_LEN(tmpstr));
+			zend_string_release_ex(tmpstr, 0);
+		}
+
+		if(ZSTR_LEN(prev_str) > 0) {
+			str_len = ZSTR_LEN(str);
+			tmpstr = ZSTR_EMPTY_ALLOC();
+			tmpstr = zend_strpprintf(0, "\n\nNext %s", ZSTR_VAL(prev_str));
+			str = zend_string_extend(str, str_len + ZSTR_LEN(tmpstr), 0);
+			memcpy(ZSTR_VAL(str) + str_len, ZSTR_VAL(tmpstr), ZSTR_LEN(tmpstr));
+			zend_string_release_ex(tmpstr, 0);
 		}
 
 		zend_string_release_ex(prev_str, 0);
