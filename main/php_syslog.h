@@ -34,6 +34,7 @@
 #define PHP_SYSLOG_FILTER_ALL		0
 #define PHP_SYSLOG_FILTER_NO_CTRL	1
 #define PHP_SYSLOG_FILTER_ASCII		2
+#define PHP_SYSLOG_FILTER_RAW		3
 
 BEGIN_EXTERN_C()
 PHPAPI void php_syslog(int, const char *format, ...);
