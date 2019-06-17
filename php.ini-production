@@ -359,6 +359,12 @@ zend.enable_gc = On
 ; Default: ""
 ;zend.script_encoding =
 
+; Allows to include or exclude arguments from stack traces generated for exceptions
+; Default: Off
+; In production, it is recommended to turn this setting on to prohibit the output 
+; of sensitive information in stack traces
+zend.exception_ignore_args = On
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;

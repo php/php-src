@@ -234,6 +234,8 @@ struct _zend_executor_globals {
 
 	HashTable weakrefs;
 
+	zend_bool exception_ignore_args;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

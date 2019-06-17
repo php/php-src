@@ -212,7 +212,9 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	object_properties_init(object, class_type);
 
 	if (EG(current_execute_data)) {
-		zend_fetch_debug_backtrace(&trace, skip_top_traces, 0, 0);
+		zend_fetch_debug_backtrace(&trace,
+			skip_top_traces,
+			EG(exception_ignore_args) ? DEBUG_BACKTRACE_IGNORE_ARGS : 0, 0);
 	} else {
 		array_init(&trace);
 	}
