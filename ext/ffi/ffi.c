@@ -5757,6 +5757,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 				zend_hash_destroy(args);
 				pefree(args, FFI_G(persistent));
 			}
+			type->func.args = NULL;
 			_zend_ffi_type_dtor(type);
 			zend_ffi_parser_error("unsupported calling convention line %d", FFI_G(line));
 			break;
