@@ -661,6 +661,10 @@ The following extensions and SAPIs are affected:
 14. Other Changes
 ========================================
 
+- Core:
+  . Add zend.exception_ignore_args to force the omission of arguments from
+    stack traces collected for exceptions.
+
 ========================================
 15. Performance Improvements
 ========================================

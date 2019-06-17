@@ -354,6 +354,10 @@ zend.enable_gc = On
 ; Default: ""
 ;zend.script_encoding =
 
+; Allows to include or exclude arguments from stack traces generated for exceptions
+; Default: Off
+zend.exception_ignore_args = Off
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;
@@ -1578,6 +1582,8 @@ zend.assertions = 1
 ; error_reporting(0) around the eval().
 ; http://php.net/assert.quiet-eval
 ;assert.quiet_eval = 0
+
+
 
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
