@@ -62,6 +62,22 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 #endif
 #endif
 
+static time_t php_time()
+{
+#ifdef HAVE_GETTIMEOFDAY
+    struct timeval tm;
+
+    if (UNEXPECTED(gettimeofday(&tm, NULL) != SUCCESS)) {
+        /* fallback, can't reasonably happen */
+        return time(NULL);
+    }
+
+    return tm.tv_sec;
+#else
+    return time(NULL);
+#endif
+}
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
@@ -1265,7 +1281,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (ZEND_NUM_ARGS() == 1) {
-		ts = time(NULL);
+		ts = php_time();
 	}
 
 	RETURN_STR(php_format_date(ZSTR_VAL(format), ZSTR_LEN(format), ts, localtime));
@@ -1430,7 +1446,7 @@ PHP_FUNCTION(idate)
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
-		ts = time(NULL);
+		ts = php_time();
 	}
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
@@ -1502,7 +1518,7 @@ PHP_FUNCTION(strtotime)
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(now,
-		(ZEND_NUM_ARGS() == 2) ? (timelib_sll) preset_ts : (timelib_sll) time(NULL));
+		(ZEND_NUM_ARGS() == 2) ? (timelib_sll) preset_ts : (timelib_sll) php_time());
 
 	t = timelib_strtotime(ZSTR_VAL(times), ZSTR_LEN(times), &error,
 		DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
@@ -1545,12 +1561,12 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	/* Initialize structure with current time */
 	now = timelib_time_ctor();
 	if (gmt) {
-		timelib_unixtime2gmt(now, (timelib_sll) time(NULL));
+		timelib_unixtime2gmt(now, (timelib_sll) php_time());
 	} else {
 		tzi = get_timezone_info();
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(now, (timelib_sll) time(NULL));
+		timelib_unixtime2local(now, (timelib_sll) php_time());
 	}
 	/* Fill in the new data */
 	switch (ZEND_NUM_ARGS()) {
@@ -1651,7 +1667,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time_offset *offset = NULL;
 	zend_string 		*buf;
 
-	timestamp = (zend_long) time(NULL);
+	timestamp = (zend_long) php_time();
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(format)
@@ -1755,7 +1771,7 @@ PHP_FUNCTION(gmstrftime)
    Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
-	RETURN_LONG((zend_long)time(NULL));
+	RETURN_LONG((zend_long)php_time());
 }
 /* }}} */
 
@@ -1763,7 +1779,7 @@ PHP_FUNCTION(time)
    Returns the results of the C system call localtime as an associative array if the associative_array argument is set to 1 other wise it is a regular array */
 PHP_FUNCTION(localtime)
 {
-	zend_long timestamp = (zend_long)time(NULL);
+	zend_long timestamp = (zend_long)php_time();
 	zend_bool associative = 0;
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
@@ -1812,7 +1828,7 @@ PHP_FUNCTION(localtime)
    Get date/time information */
 PHP_FUNCTION(getdate)
 {
-	zend_long timestamp = (zend_long)time(NULL);
+	zend_long timestamp = (zend_long)php_time();
 	timelib_tzinfo *tzi;
 	timelib_time   *ts;
 

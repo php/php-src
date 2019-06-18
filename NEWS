@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed #78173 (XML-RPC mutates immutable objects during encoding). (Asher
     Baker)
 
+- Date:
+  . Fixed #69044 (discrepency between time and microtime). (krakjoe)
+
 27 Jun 2019, PHP 7.2.20
 
 - Core:
