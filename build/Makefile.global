@@ -142,6 +142,12 @@ prof-clean:
 prof-use:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
 
+%_arginfo.h: %.stub.php
+	php scripts/dev/gen_stub.php $<
+
+# As we don't track includes, this is just a heuristic
+%.c: %_arginfo.h
+	touch $@
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:
