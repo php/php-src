@@ -5,10 +5,6 @@ PHP                                                                        NEWS
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
 
-- Opcache:
-  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
-    (Nikita)
-
 27 Jun 2019, PHP 7.3.7
 
 - Core:
@@ -32,6 +28,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
+  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
+    (Nikita)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
