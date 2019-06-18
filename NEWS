@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+20 Jun 2019, PHP 7.3.7RC2
+
+- Opcache:
+  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
+    (Nikita)
+
 13 Jun 2019, PHP 7.3.7RC1
 
 - Core:
