@@ -32,7 +32,7 @@ var_dump(mb_str_iends($string_ascii, 'e', 'ISO-8859-1'));
 var_dump(mb_str_iends($string_ascii, 'DeF'));
 var_dump(mb_str_iends($string_ascii, 'de'));
 
-$needle1 = base64_decode('JnjgII=');
+$needle1 = base64_decode('77yZ44CC');
 var_dump(mb_str_iends($string_mb, $needle1));
 
 $needle2 = base64_decode("44GT44KT44Gr44Gh44Gv44CB5LiW55WM");
