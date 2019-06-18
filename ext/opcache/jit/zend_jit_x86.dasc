@@ -241,7 +241,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			mov IP, aword [IP + (struct.._offset + offsetof(zend_..struct, field))]
 ||		} else {
 |			LOAD_TSRM_CACHE RX
-|			mov RX, aword [RX + (struct.._offset + offsetof(zend_..struct, field))]
+|			lea RX, aword [RX + (struct.._offset + offsetof(zend_..struct, field))]
 |			mov aword EX->opline, RX
 ||		}
 |	.else
