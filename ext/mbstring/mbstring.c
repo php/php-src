@@ -2774,9 +2774,16 @@ PHP_FUNCTION(mb_str_iends)
         RETURN_BOOL(1);
     }
 
-    n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, enc_name);
+    mbfl_string haystack_tail;
+    haystack_tail.encoding = haystack.encoding;
+    haystack_tail.no_language = haystack.no_language;
+    unsigned char* haystack_tail_val = haystack.val + sizeof(char) * (haystack.len - needle.len);
+    haystack_tail.val = haystack_tail_val;
+    haystack_tail.len = needle.len;
+
+    n = php_mb_stripos(0, (char *)haystack_tail.val, haystack_tail.len, (char *)needle.val, needle.len, 0, enc_name);
     if (!mbfl_is_error(n)) {
-        if (n == (haystack.len - needle.len)) {
+        if (n == 0) {
             RETURN_BOOL(1);
         } else {
             RETURN_BOOL(0);
