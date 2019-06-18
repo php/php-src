@@ -4081,9 +4081,24 @@ static int accel_preload(const char *config)
 			ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit();
 		}
 
+		/* Cleanup executor */
+		EG(flags) |= EG_FLAGS_IN_SHUTDOWN;
+
+		php_call_shutdown_functions();
+		zend_call_destructors();
+		php_free_shutdown_functions();
+
 		/* Release stored values to avoid dangling pointers */
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 		zend_hash_init(&EG(symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+
+#if ZEND_DEBUG
+		if (gc_enabled() && !CG(unclean_shutdown)) {
+			gc_collect_cycles();
+		}
+#endif
+
+		zend_objects_store_free_object_storage(&EG(objects_store), 1);
 
 		/* Inheritance errors may be thrown during linking */
 		zend_try {

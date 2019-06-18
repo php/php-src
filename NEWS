@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
     (Nikita)
+  . Fixed bug #78175 (Preloading segfaults at preload time and at runtime).
+    (Dmitry)
 
 - SQLite3:
   . Implement FR ##70950 (Make SQLite3 Online Backup API available). (BohwaZ)
