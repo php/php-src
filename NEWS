@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.21
 
-- Opcache:
-  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
-    (Nikita)
 
 27 Jun 2019, PHP 7.2.20
 
@@ -21,6 +18,10 @@ PHP                                                                        NEWS
     error message). (Sjon Hortensius)
   . Fixed bug #38546 (bindParam incorrect processing of bool types).
     (camporter)
+
+- Opcache:
+  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
+    (Nikita)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
