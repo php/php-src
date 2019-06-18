@@ -77,6 +77,8 @@ PHPAPI time_t php_time()
 }
 
 /* {{{ arginfo */
+#include "php_date_arginfo.h"
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, timestamp)
@@ -202,10 +204,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_format, 0, 0, 1)
-	ZEND_ARG_INFO(0, format)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_modify, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, modify)
@@ -237,9 +235,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_date_method_timezone_get, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, timezone)
@@ -253,17 +248,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_offset_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_date_method_offset_get, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_diff, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, object2)
-	ZEND_ARG_INFO(0, absolute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_diff, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, absolute)
 ZEND_END_ARG_INFO()
 
@@ -319,9 +306,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timestamp_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_date_method_timestamp_get, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -479,49 +463,49 @@ static const zend_function_entry date_functions[] = {
 };
 
 static const zend_function_entry date_funcs_interface[] = {
-	PHP_ABSTRACT_ME(DateTimeInterface, format, arginfo_date_method_format)
-	PHP_ABSTRACT_ME(DateTimeInterface, getTimezone, arginfo_date_method_timezone_get)
-	PHP_ABSTRACT_ME(DateTimeInterface, getOffset, arginfo_date_method_offset_get)
-	PHP_ABSTRACT_ME(DateTimeInterface, getTimestamp, arginfo_date_method_timestamp_get)
-	PHP_ABSTRACT_ME(DateTimeInterface, diff, arginfo_date_method_diff)
-	PHP_ABSTRACT_ME(DateTimeInterface, __wakeup, NULL)
+	PHP_ABSTRACT_ME(DateTimeInterface, format, arginfo_DateTimeInterface_format)
+	PHP_ABSTRACT_ME(DateTimeInterface, getTimezone, arginfo_DateTimeInterface_getTimezone)
+	PHP_ABSTRACT_ME(DateTimeInterface, getOffset, arginfo_DateTimeInterface_getOffset)
+	PHP_ABSTRACT_ME(DateTimeInterface, getTimestamp, arginfo_DateTimeInterface_getTimestamp)
+	PHP_ABSTRACT_ME(DateTimeInterface, diff, arginfo_DateTimeInterface_diff)
+	PHP_ABSTRACT_ME(DateTimeInterface, __wakeup, arginfo_DateTimeInterface___wakeup)
 	PHP_FE_END
 };
 
 static const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_PUBLIC)
-	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateTime,			__wakeup,			arginfo_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		arginfo_date_set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(DateTime,			createFromImmutable,	arginfo_date_method_create_from_immutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
+	PHP_ME_MAPPING(format,		date_format,		arginfo_DateTimeInterface_format, 0)
 	PHP_ME_MAPPING(modify,		date_modify,		arginfo_date_method_modify, 0)
 	PHP_ME_MAPPING(add,			date_add,			arginfo_date_method_add, 0)
 	PHP_ME_MAPPING(sub,			date_sub,			arginfo_date_method_sub, 0)
-	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_date_method_timezone_get, 0)
+	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_DateTimeInterface_getTimezone, 0)
 	PHP_ME_MAPPING(setTimezone, date_timezone_set,	arginfo_date_method_timezone_set, 0)
-	PHP_ME_MAPPING(getOffset,	date_offset_get,	arginfo_date_method_offset_get, 0)
+	PHP_ME_MAPPING(getOffset,	date_offset_get,	arginfo_DateTimeInterface_getOffset, 0)
 	PHP_ME_MAPPING(setTime,		date_time_set,		arginfo_date_method_time_set, 0)
 	PHP_ME_MAPPING(setDate,		date_date_set,		arginfo_date_method_date_set, 0)
 	PHP_ME_MAPPING(setISODate,	date_isodate_set,	arginfo_date_method_isodate_set, 0)
 	PHP_ME_MAPPING(setTimestamp,	date_timestamp_set, arginfo_date_method_timestamp_set, 0)
-	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_date_method_timestamp_get, 0)
-	PHP_ME_MAPPING(diff,			date_diff, arginfo_date_method_diff, 0)
+	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_DateTimeInterface_getTimestamp, 0)
+	PHP_ME_MAPPING(diff,			date_diff, arginfo_DateTimeInterface_diff, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry date_funcs_immutable[] = {
 	PHP_ME(DateTimeImmutable, __construct,   arginfo_date_create, ZEND_ACC_PUBLIC)
-	PHP_ME(DateTime, __wakeup,       NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateTime, __wakeup,       arginfo_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeImmutable, __set_state,   arginfo_date_set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_immutable_from_format, arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors,    date_get_last_errors,    arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(format,           date_format,             arginfo_date_method_format, 0)
-	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_date_method_timezone_get, 0)
-	PHP_ME_MAPPING(getOffset,	date_offset_get,	arginfo_date_method_offset_get, 0)
-	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_date_method_timestamp_get, 0)
-	PHP_ME_MAPPING(diff,			date_diff, arginfo_date_method_diff, 0)
+	PHP_ME_MAPPING(format,           date_format,             arginfo_DateTimeInterface_format, 0)
+	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_DateTimeInterface_getTimezone, 0)
+	PHP_ME_MAPPING(getOffset,	date_offset_get,	arginfo_DateTimeInterface_getOffset, 0)
+	PHP_ME_MAPPING(getTimestamp,	date_timestamp_get, arginfo_DateTimeInterface_getTimestamp, 0)
+	PHP_ME_MAPPING(diff,			date_diff, arginfo_DateTimeInterface_diff, 0)
 	PHP_ME(DateTimeImmutable, modify,        arginfo_date_method_modify, 0)
 	PHP_ME(DateTimeImmutable, add,           arginfo_date_method_add, 0)
 	PHP_ME(DateTimeImmutable, sub,           arginfo_date_method_sub, 0)

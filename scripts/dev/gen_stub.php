@@ -124,10 +124,10 @@ class FuncInfo {
     }
 }
 
-function parseFunction(Stmt\Function_ $func) : FuncInfo {
+function parseFunctionLike(string $name, Node\FunctionLike $func): FuncInfo {
     $args = [];
     $numRequiredArgs = 0;
-    foreach ($func->params as $i => $param) {
+    foreach ($func->getParams() as $i => $param) {
         $args[] = new ArgInfo(
             $param->var->name,
             $param->byRef,
@@ -139,10 +139,24 @@ function parseFunction(Stmt\Function_ $func) : FuncInfo {
         }
     }
 
+    $returnType = $func->getReturnType();
     $return = new ReturnInfo(
-        $func->byRef,
-        $func->returnType ? Type::fromNode($func->returnType) : null);
-    return new FuncInfo($func->name->toString(), $args, $return, $numRequiredArgs);
+        $func->returnsByRef(),
+        $returnType ? Type::fromNode($returnType) : null);
+    return new FuncInfo($name, $args, $return, $numRequiredArgs);
+}
+
+function parseClass(Stmt\Class_ $class): ClassInfo {
+    $funcs = [];
+    $className = $class->name->toString();
+    foreach ($class as $stmt) {
+        if (!$stmt instanceof Stmt\ClassMethod) {
+            throw new Exception("Not implemented");
+        }
+
+        $funcs[] = parseFunctionLike($className . '_' . $stmt->name->toString(), $stmt);
+    }
+    return new ClassInfo($className, $funcs);
 }
 
 /** @return FuncInfo[] */
@@ -167,12 +181,26 @@ function parseStubFile(string $fileName) {
             continue;
         }
 
-        if (!$stmt instanceof Stmt\Function_) {
-            throw new Exception("Unexpected node {$stmt->getType()}");
+        if ($stmt instanceof Stmt\Function_) {
+            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt);
+            continue;
+        }
+
+        if ($stmt instanceof Stmt\ClassLike) {
+            $className = $stmt->name->toString();
+            foreach ($stmt->stmts as $classStmt) {
+                if (!$classStmt instanceof Stmt\ClassMethod) {
+                    throw new Exception("Not implemented {$classStmt->getType()}");
+                }
+
+                $funcInfos[] = parseFunctionLike(
+                    $className . '_' . $classStmt->name->toString(), $classStmt);
+            }
+            continue;
         }
 
         // TODO Collect #if?
-        $funcInfos[] = parseFunction($stmt);
+        throw new Exception("Unexpected node {$stmt->getType()}");
     }
 
     return $funcInfos;
@@ -210,7 +238,11 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
-                throw new Exception("Not implemented");
+                $code .= sprintf(
+                    "\tZEND_ARG_OBJ_INFO(%d, %s, %s, %d)\n",
+                    $argInfo->byRef, $argInfo->name,
+                    $argInfo->type->name, $argInfo->type->isNullable
+                );
             }
         } else {
             $code .= sprintf("\tZEND_ARG_INFO(%d, %s)\n", $argInfo->byRef, $argInfo->name);
@@ -223,7 +255,8 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
 
 /** @param FuncInfo[] $funcInfos */
 function generateArginfoCode(array $funcInfos): string {
-    return implode("\n\n", array_map('funcInfoToCode', $funcInfos));
+    $code = "/* This is a generated file, edit the .stub.php file instead. */\n\n";
+    return $code . implode("\n\n", array_map('funcInfoToCode', $funcInfos));
 }
 
 function initPhpParser() {
