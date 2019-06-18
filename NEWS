@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.21
 
+- XMLRPC:
+  . Fixed #78173 (XML-RPC mutates immutable objects during encoding). (Asher
+    Baker)
 
 27 Jun 2019, PHP 7.2.20
 
