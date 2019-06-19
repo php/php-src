@@ -466,6 +466,7 @@ static PHP_METHOD(PDOStatement, execute)
 				if (!Z_ISUNDEF(param.parameter)) {
 					zval_ptr_dtor(&param.parameter);
 				}
+				PDO_HANDLE_STMT_ERR();
 				RETURN_FALSE;
 			}
 		} ZEND_HASH_FOREACH_END();
