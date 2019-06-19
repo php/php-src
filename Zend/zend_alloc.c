@@ -591,7 +591,7 @@ static zend_always_inline void zend_mm_bitset_reset_range(zend_mm_bitset *bitset
 
 		if (pos != end) {
 			/* reset bits from "bit" to ZEND_MM_BITSET_LEN-1 */
-			tmp = ~((Z_L(1) << bit) - 1);
+			tmp = ~((Z_UL(1) << bit) - 1);
 			bitset[pos++] &= ~tmp;
 			while (pos != end) {
 				/* set all bits */

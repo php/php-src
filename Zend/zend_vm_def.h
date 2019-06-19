@@ -227,7 +227,9 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(6, ZEND_SL, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)
 			&& EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)
 			&& EXPECTED((zend_ulong)Z_LVAL_P(op2) < SIZEOF_ZEND_LONG * 8)) {
-		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(op1) << Z_LVAL_P(op2));
+		/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+		ZVAL_LONG(EX_VAR(opline->result.var),
+			(zend_long) ((zend_ulong) Z_LVAL_P(op1) << Z_LVAL_P(op2)));
 		ZEND_VM_NEXT_OPCODE();
 	}
 

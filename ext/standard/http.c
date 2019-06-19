@@ -130,8 +130,10 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					p += key_prefix_len;
 				}
 
-				memcpy(p, num_prefix, num_prefix_len);
-				p += num_prefix_len;
+				if (num_prefix) {
+					memcpy(p, num_prefix, num_prefix_len);
+					p += num_prefix_len;
+				}
 
 				memcpy(p, ekey, ekey_len);
 				p += ekey_len;
@@ -162,7 +164,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				smart_str_appendl(formstr, arg_sep, arg_sep_len);
 			}
 			/* Simple key=value */
-			smart_str_appendl(formstr, key_prefix, key_prefix_len);
+			if (key_prefix) {
+				smart_str_appendl(formstr, key_prefix, key_prefix_len);
+			}
 			if (key) {
 				zend_string *ekey;
 				if (enc_type == PHP_QUERY_RFC3986) {
@@ -179,7 +183,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				}
 				smart_str_append_long(formstr, idx);
 			}
-			smart_str_appendl(formstr, key_suffix, key_suffix_len);
+			if (key_suffix) {
+				smart_str_appendl(formstr, key_suffix, key_suffix_len);
+			}
 			smart_str_appendl(formstr, "=", 1);
 			switch (Z_TYPE_P(zdata)) {
 				case IS_STRING: {

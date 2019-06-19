@@ -2703,7 +2703,7 @@ PHP_FUNCTION(array_fill_keys)
 	} while (0)
 
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
-		zend_ulong __calc_size = (start - end) / lstep; \
+		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
 			RETURN_FALSE; \
@@ -2860,7 +2860,7 @@ long_str:
 		}
 
 		if (low > high) { 		/* Negative steps */
-			if ((zend_ulong)(low - high) < lstep) {
+			if ((zend_ulong)low - high < lstep) {
 				err = 1;
 				goto err;
 			}
@@ -2874,7 +2874,7 @@ long_str:
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if ((zend_ulong)(high - low) < lstep) {
+			if ((zend_ulong)high - low < lstep) {
 				err = 1;
 				goto err;
 			}

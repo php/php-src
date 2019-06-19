@@ -512,7 +512,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_FAKE_CLOSURE       (1 << 23)
 #define ZEND_CALL_GENERATOR          (1 << 24)
 #define ZEND_CALL_DYNAMIC            (1 << 25)
-#define ZEND_CALL_SEND_ARG_BY_REF    (1 << 31)
+#define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)
 #define ZEND_CALL_NESTED_CODE        (ZEND_CALL_CODE | ZEND_CALL_NESTED)

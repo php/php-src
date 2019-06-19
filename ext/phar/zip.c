@@ -147,8 +147,15 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
-	cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
-	ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	if (tm->tm_year >= 1980) {
+		cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
+		ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	} else {
+		/* This is the earliest date/time supported by zip. */
+		cdate = (1<<5) + 1; /* 1980-01-01 */
+		ctime = 0; /* 00:00:00 */
+	}
+
 	PHAR_SET_16(dtime, ctime);
 	PHAR_SET_16(ddate, cdate);
 }

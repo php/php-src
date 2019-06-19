@@ -586,7 +586,9 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 							stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
 									stream->is_persistent);
 						}
-						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+						if (bucket->buflen) {
+							memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+						}
 						stream->writepos += bucket->buflen;
 
 						php_stream_bucket_unlink(bucket);
