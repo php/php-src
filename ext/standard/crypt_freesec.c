@@ -607,7 +607,7 @@ des_cipher(const char *in, char *out, uint32_t salt, int count,
 }
 
 char *
-_crypt_extended_r(const char *key, const char *setting,
+_crypt_extended_r(const unsigned char *key, const char *setting,
 	struct php_crypt_extended_data *data)
 {
 	int		i;
