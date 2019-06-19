@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
 
+- Date:
+  . Fixed #69044 (discrepency between time and microtime). (krakjoe)
+
 27 Jun 2019, PHP 7.3.7
 
 - Core:
