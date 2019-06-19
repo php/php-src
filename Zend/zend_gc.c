@@ -78,13 +78,13 @@
 #endif
 
 /* GC_INFO layout */
-#define GC_ADDRESS  0x0fffff
-#define GC_COLOR    0x300000
+#define GC_ADDRESS  0x0fffffu
+#define GC_COLOR    0x300000u
 
-#define GC_BLACK    0x000000 /* must be zero */
-#define GC_WHITE    0x100000
-#define GC_GREY     0x200000
-#define GC_PURPLE   0x300000
+#define GC_BLACK    0x000000u /* must be zero */
+#define GC_WHITE    0x100000u
+#define GC_GREY     0x200000u
+#define GC_PURPLE   0x300000u
 
 /* GC_INFO access */
 #define GC_REF_ADDRESS(ref) \

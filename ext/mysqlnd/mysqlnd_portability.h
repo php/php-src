@@ -191,10 +191,10 @@ typedef union {
                   (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
                   (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
                   ((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)  (int32_t) (((int32_t) ((zend_uchar) (A)[0])) +\
-                              (((int32_t) ((zend_uchar) (A)[1]) << 8)) +\
-                              (((int32_t) ((zend_uchar) (A)[2]) << 16)) +\
-                              (((int32_t) ((int16_t) (A)[3]) << 24)))
+#define sint4korr(A)  (int32_t) (((uint32_t) ((A)[0])) +\
+                              (((uint32_t) ((A)[1]) << 8)) +\
+                              (((uint32_t) ((A)[2]) << 16)) +\
+                              (((uint32_t) ((A)[3]) << 24)))
 
 #define sint8korr(A)  (int64_t) uint8korr(A)
 #define uint2korr(A)  (uint16_t) (((uint16_t) ((zend_uchar) (A)[0])) +\

@@ -66,16 +66,16 @@
 PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 {
 	size_t len = 45;
-	char *p, *s, *e, *ee;
+	unsigned char *p, *s, *e, *ee;
 	zend_string *dest;
 
 	/* encoded length is ~ 38% greater than the original
        Use 1.5 for easier calculation.
     */
 	dest = zend_string_safe_alloc(src_len/2, 3, 46, 0);
-	p = ZSTR_VAL(dest);
-	s = src;
-	e = src + src_len;
+	p = (unsigned char *) ZSTR_VAL(dest);
+	s = (unsigned char *) src;
+	e = s + src_len;
 
 	while ((s + 3) < e) {
 		ee = s + len;
@@ -122,7 +122,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 	*p++ = '\n';
 	*p = '\0';
 
-	dest = zend_string_truncate(dest, p - ZSTR_VAL(dest), 0);
+	dest = zend_string_truncate(dest, (char *) p - ZSTR_VAL(dest), 0);
 	return dest;
 }
 /* }}} */

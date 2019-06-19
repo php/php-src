@@ -138,7 +138,7 @@ int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 		if (endian) {
 			n = c & 0xff;
 		} else {
-			n = (c & 0xff) << 24;
+			n = (unsigned) (c & 0xff) << 24;
 		}
 		filter->cache = n;
 		filter->status++;
