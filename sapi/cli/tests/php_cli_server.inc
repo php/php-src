@@ -40,33 +40,32 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 		$handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
 	}
 
-    // note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
-    //       it might not be listening yet...need to wait until fsockopen() call returns
-    $error = "Unable to connect to server\n";
+    // note: here we check the process is running
     for ($i=0; $i < 60; $i++) {
         usleep(50000); // 50ms per try
         $status = proc_get_status($handle);
-        $fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT);
+
         // Failure, the server is no longer running
         if (!($status && $status['running'])) {
             $error = "Server is not running\n";
             break;
         }
-        // Success, Connected to servers
-        if ($fp) {
-            $error = '';
-            break;
-        }
     }
 
-    if ($fp) {
-        fclose($fp);
-    }
-
-    if ($error) {
+php_cli_server_start_error:
+    if (isset($error)) {
         echo $error;
         proc_terminate($handle);
         exit(1);
+    }
+
+    // note: here we check the server is listening, even when the server prints
+    //          listening on %s:%d
+    //       it may not be ready to accept connections
+    if (!fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT)) {
+        $error =
+            "Server is not accepting connections\n";
+        goto php_cli_server_start_error;
     }
 
     register_shutdown_function(
