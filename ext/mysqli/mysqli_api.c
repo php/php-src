@@ -639,7 +639,7 @@ PHP_FUNCTION(mysqli_change_user)
 		RETURN_FALSE;
 	}
 #if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
-	if (mysql_get_server_version(mysql->mysql) < 501023L) {
+	if (mysql_get_server_version(mysql->mysql) < 50123L) {
 		/*
 		  Request the current charset, or it will be reset to the system one.
 		  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug :
