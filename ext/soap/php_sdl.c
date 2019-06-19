@@ -1178,7 +1178,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 #define WSDL_CACHE_VERSION 0x10
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
-#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
+#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;
 #define WSDL_CACHE_GET_1(ret,type,buf) ret = (type)(**buf); (*buf)++;
 #define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
 #define WSDL_CACHE_SKIP(n,buf)         *buf += n;
