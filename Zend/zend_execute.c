@@ -2836,6 +2836,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		if (prop_op_type == IS_CONST) {
 			prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 		} else {
+			ZVAL_DEREF(container);
 			prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
 		}
 
