@@ -74,8 +74,6 @@ PHP_FUNCTION(set_time_limit);
 PHP_FUNCTION(header_register_callback);
 
 PHP_FUNCTION(get_cfg_var);
-PHP_FUNCTION(get_magic_quotes_runtime);
-PHP_FUNCTION(get_magic_quotes_gpc);
 
 PHP_FUNCTION(error_log);
 PHP_FUNCTION(error_get_last);

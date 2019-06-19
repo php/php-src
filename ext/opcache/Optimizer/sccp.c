@@ -795,9 +795,7 @@ static inline int ct_eval_func_call(
 	int overflow;
 
 	if (num_args == 0) {
-		if (zend_string_equals_literal(name, "get_magic_quotes_gpc")
-				|| zend_string_equals_literal(name, "get_magic_quotes_gpc_runtime")
-				|| zend_string_equals_literal(name, "php_sapi_name")
+		if (zend_string_equals_literal(name, "php_sapi_name")
 				|| zend_string_equals_literal(name, "imagetypes")
 				|| zend_string_equals_literal(name, "phpversion")) {
 			/* pass */
