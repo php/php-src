@@ -231,8 +231,16 @@ static void php_converter_to_u_callback(const void *context,
 	zval zargs[4];
 
 	ZVAL_LONG(&zargs[0], reason);
-	ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
-	ZVAL_STRINGL(&zargs[2], codeUnits, length);
+	if (args->source) {
+		ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
+	} else {
+		ZVAL_EMPTY_STRING(&zargs[1]);
+	}
+	if (codeUnits) {
+		ZVAL_STRINGL(&zargs[2], codeUnits, length);
+	} else {
+		ZVAL_EMPTY_STRING(&zargs[2]);
+	}
 	ZVAL_LONG(&zargs[3], *pErrorCode);
 
 	objval->to_cb.param_count    = 4;

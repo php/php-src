@@ -116,7 +116,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	int len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
-	memcpy(nscat, ns, ns_len);
+	if (ns) {
+		memcpy(nscat, ns, ns_len);
+	}
 	nscat[ns_len] = ':';
 	memcpy(nscat+ns_len+1, type, type_len);
 	nscat[len] = '\0';
