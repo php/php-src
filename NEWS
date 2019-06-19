@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #78151 (Segfault caused by indirect expressions in PHP 7.4a1).
     (Nikita)
   . Fixed bug #78154 (SEND_VAR_NO_REF does not always send reference). (Nikita)
+  . Fixed bug #78182 (Segmentation fault during by-reference property
+    assignment). (Nikita)
 
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
