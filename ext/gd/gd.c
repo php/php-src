@@ -1443,19 +1443,19 @@ PHP_FUNCTION(imageloadfont)
 	body_size_check = php_stream_tell(stream) - hdr_size;
 	php_stream_seek(stream, i, SEEK_SET);
 
+	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
+		efree(font);
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+
 	body_size = font->w * font->h * font->nchars;
 	if (body_size != body_size_check) {
 		font->w = FLIPWORD(font->w);
 		font->h = FLIPWORD(font->h);
 		font->nchars = FLIPWORD(font->nchars);
 		body_size = font->w * font->h * font->nchars;
-	}
-
-	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
-		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
-		efree(font);
-		php_stream_close(stream);
-		RETURN_FALSE;
 	}
 
 	if (body_size != body_size_check) {
