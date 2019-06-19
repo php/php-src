@@ -62,7 +62,7 @@ static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; 
 #endif
 #endif
 
-static time_t php_time()
+PHPAPI time_t php_time()
 {
 #ifdef HAVE_GETTIMEOFDAY
     struct timeval tm;
