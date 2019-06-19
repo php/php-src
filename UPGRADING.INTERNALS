@@ -21,6 +21,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   r. TSRM environment locking
   s. Typed references support
   t. Exceptions thrown by string conversions.
+  u. Removed uint and ulong typedefs
 
 2. Build system changes
   a. Abstract
@@ -207,6 +208,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   t. convert_to_string() and zval_get_string() are now more likely to result in
      an exception. For instructions on how to gracefully handle this see
      https://wiki.php.net/rfc/tostring_exceptions#extension_guidelines.
+
+  u. The Windows typedefs uint and ulong are no longer available, and have to be
+     replaced with standard types.
 
 ========================
 2. Build system changes
