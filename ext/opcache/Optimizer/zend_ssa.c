@@ -221,15 +221,6 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 }
 /* }}} */
 
-static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a > ZEND_LONG_MAX - b)
-		|| (b < 0 && a < ZEND_LONG_MIN - b);
-}
-static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a < ZEND_LONG_MIN + b)
-		|| (b < 0 && a > ZEND_LONG_MAX + b);
-}
-
 /* e-SSA construction: Pi placement (Pi is actually a Phi with single
  * source and constraint).
  * Order of Phis is importent, Pis must be placed before Phis
@@ -291,7 +282,7 @@ static void place_essa_pis(
 			}
 
 			if (var1 >= 0 && var2 >= 0) {
-				if (!sub_will_overflow(val1, val2) && !sub_will_overflow(val2, val1)) {
+				if (!zend_sub_will_overflow(val1, val2) && !zend_sub_will_overflow(val2, val1)) {
 					zend_long tmp = val1;
 					val1 -= val2;
 					val2 -= tmp;
@@ -316,7 +307,7 @@ static void place_essa_pis(
 				} else {
 					var1 = -1;
 				}
-				if (!add_will_overflow(val2, add_val2)) {
+				if (!zend_add_will_overflow(val2, add_val2)) {
 					val2 += add_val2;
 				} else {
 					var1 = -1;
@@ -337,7 +328,7 @@ static void place_essa_pis(
 				} else {
 					var2 = -1;
 				}
-				if (!add_will_overflow(val1, add_val1)) {
+				if (!zend_add_will_overflow(val1, add_val1)) {
 					val1 += add_val1;
 				} else {
 					var2 = -1;
