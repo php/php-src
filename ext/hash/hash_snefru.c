@@ -123,8 +123,8 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context, const unsigned char 
 	int i, j;
 
 	for (i = 0, j = 0; i < 32; i += 4, ++j) {
-		context->state[8+j] =	((input[i] & 0xff) << 24) | ((input[i+1] & 0xff) << 16) |
-								((input[i+2] & 0xff) << 8) | (input[i+3] & 0xff);
+		context->state[8+j] =	((unsigned)input[i] << 24) | ((unsigned)input[i+1] << 16) |
+								((unsigned)input[i+2] << 8) | (unsigned)input[i+3];
 	}
 	Snefru(context->state);
 	ZEND_SECURE_ZERO(&context->state[8], sizeof(uint32_t) * 8);
