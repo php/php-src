@@ -1757,7 +1757,8 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 		zval_ptr_dtor(result);
 	}
 
-	ZVAL_LONG(result, op1_lval << op2_lval);
+	/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+	ZVAL_LONG(result, (zend_long) ((zend_ulong) op1_lval << op2_lval));
 	return SUCCESS;
 }
 /* }}} */
