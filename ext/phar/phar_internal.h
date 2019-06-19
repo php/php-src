@@ -511,8 +511,8 @@ static inline void phar_set_inode(phar_entry_info *entry) /* {{{ */
 
 	tmp_len = MIN(MAXPATHLEN, entry->filename_len + entry->phar->fname_len);
 
+	len1 = MIN(entry->phar->fname_len, tmp_len);
 	if (entry->phar->fname) {
-		len1 = MIN(entry->phar->fname_len, tmp_len);
 		memcpy(tmp, entry->phar->fname, len1);
 	}
 
