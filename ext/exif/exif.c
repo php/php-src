@@ -1457,28 +1457,29 @@ static signed short php_ifd_get16s(void *value, int motorola_intel)
 /* }}} */
 
 /* {{{ php_ifd_get32s
- * Convert a 32 bit signed value from file's native byte order */
-static int php_ifd_get32s(void *value, int motorola_intel)
+ * Convert a 32 bit unsigned value from file's native byte order */
+static unsigned php_ifd_get32u(void *void_value, int motorola_intel)
 {
+	uchar *value = (uchar *) void_value;
 	if (motorola_intel) {
-		return  (((char  *)value)[0] << 24)
-			  | (((uchar *)value)[1] << 16)
-			  | (((uchar *)value)[2] << 8 )
-			  | (((uchar *)value)[3]      );
+		return  ((unsigned)value[0] << 24)
+			  | ((unsigned)value[1] << 16)
+			  | ((unsigned)value[2] << 8 )
+			  | ((unsigned)value[3]      );
 	} else {
-		return  (((char  *)value)[3] << 24)
-			  | (((uchar *)value)[2] << 16)
-			  | (((uchar *)value)[1] << 8 )
-			  | (((uchar *)value)[0]      );
+		return  ((unsigned)value[3] << 24)
+			  | ((unsigned)value[2] << 16)
+			  | ((unsigned)value[1] << 8 )
+			  | ((unsigned)value[0]      );
 	}
 }
 /* }}} */
 
 /* {{{ php_ifd_get32u
- * Write 32 bit unsigned value to data */
-static unsigned php_ifd_get32u(void *value, int motorola_intel)
+ * Convert a 32 bit signed value from file's native byte order */
+static unsigned php_ifd_get32s(void *value, int motorola_intel)
 {
-	return (unsigned)php_ifd_get32s(value, motorola_intel) & 0xffffffff;
+	return (int) php_ifd_get32u(value, motorola_intel);
 }
 /* }}} */
 
