@@ -238,6 +238,14 @@ DEFINE_SSA_OP_DEF_INFO(result)
 #define OP2_DATA_DEF_INFO()     (_ssa_op2_def_info(op_array, ssa, (opline+1)))
 #define RES_INFO()              (_ssa_result_def_info(op_array, ssa, opline))
 
+static zend_always_inline zend_bool zend_add_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a > ZEND_LONG_MAX - b)
+		|| (b < 0 && a < ZEND_LONG_MIN - b);
+}
+static zend_always_inline zend_bool zend_sub_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a < ZEND_LONG_MIN + b)
+		|| (b < 0 && a > ZEND_LONG_MAX + b);
+}
 
 BEGIN_EXTERN_C()
 
