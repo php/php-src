@@ -3035,7 +3035,7 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 	int digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
 	zend_uchar type;
-	zend_long tmp_lval = 0;
+	zend_ulong tmp_lval = 0;
 	int neg = 0;
 
 	if (!length) {
@@ -3143,7 +3143,7 @@ process_double:
 			if (neg) {
 				tmp_lval = -tmp_lval;
 			}
-			*lval = tmp_lval;
+			*lval = (zend_long) tmp_lval;
 		}
 
 		return IS_LONG;
