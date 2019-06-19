@@ -45,7 +45,7 @@ typedef struct {
 	size_t   pattern_len;
 } glob_s_t;
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -53,11 +53,7 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *ple
 		if (plen) {
 			*plen = pglob->path_len;
 		}
-		if (copy) {
-			return estrndup(pglob->path, pglob->path_len);
-		} else {
-			return pglob->path;
-		}
+		return pglob->path;
 	} else {
 		if (plen) {
 			*plen = 0;
@@ -67,7 +63,7 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *ple
 }
 /* }}} */
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -75,11 +71,7 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *
 		if (plen) {
 			*plen = pglob->pattern_len;
 		}
-		if (copy) {
-			return estrndup(pglob->pattern, pglob->pattern_len);
-		} else {
-			return pglob->pattern;
-		}
+		return pglob->pattern;
 	} else {
 		if (plen) {
 			*plen = 0;
