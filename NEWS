@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #78154 (SEND_VAR_NO_REF does not always send reference). (Nikita)
 
+- Date:
+  . Fixed #69044 (discrepency between time and microtime). (krakjoe)
+
 - Opcache:
   . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
     (Nikita)
