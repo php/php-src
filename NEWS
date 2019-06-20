@@ -9,9 +9,6 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
-- Opcache:
-  . Fixed bug #78185 (File cache no longer works). (Dmitry)
-
 27 Jun 2019, PHP 7.2.20
 
 - Core:
@@ -31,6 +28,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
     (Nikita)
+  . Fixed bug #78185 (File cache no longer works). (Dmitry)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
