@@ -4070,7 +4070,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					int hdr_use = SOAP_LITERAL;
 					zval *hdr_ret = &h->retval;
 					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
-					char *hdr_name = Z_STRVAL(h->function_name);
+					char *hdr_name = Z_TYPE(h->function_name) == IS_STRING
+						? Z_STRVAL(h->function_name) : NULL;
 					HashTable *ht = NULL;
 
 					if (Z_TYPE(h->retval) == IS_OBJECT &&
