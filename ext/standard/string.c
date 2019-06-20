@@ -2316,10 +2316,10 @@ PHP_FUNCTION(str_begins) {
         RETURN_BOOL(0);
     }
 
-	for (i = 0; i < needle->len; i++) 
-		if (haystack->val[i] != needle->val[i]) 
-			RETURN_BOOL(0);
-	RETURN_BOOL(1);
+    for (i = 0; i < needle->len; i++) 
+        if (haystack->val[i] != needle->val[i]) 
+            RETURN_BOOL(0);
+        RETURN_BOOL(1);
 }
 
 /* {{{ proto boolean str_ibegins(string haystack, string needle)
@@ -2337,10 +2337,10 @@ PHP_FUNCTION(str_ibegins) {
         RETURN_BOOL(0);
     }
 
-	for (i = 0; i < needle->len; i++) 
-		if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
-			RETURN_BOOL(0); 
-	RETURN_BOOL(1);
+    for (i = 0; i < needle->len; i++) 
+        if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
+            RETURN_BOOL(0); 
+    RETURN_BOOL(1);
 }
 
 /* {{{ proto boolean str_ends(string haystack, string needle)
@@ -2358,10 +2358,10 @@ PHP_FUNCTION(str_ends) {
         RETURN_BOOL(0);
     }
 
-	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
-		if (haystack->val[i] != needle->val[j]) 
-			RETURN_BOOL(0);
-	RETURN_BOOL(1);
+    for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
+        if (haystack->val[i] != needle->val[j]) 
+            RETURN_BOOL(0);
+    RETURN_BOOL(1);
 }
 
 /* {{{ proto boolean str_iends(string haystack, string needle)
@@ -2379,9 +2379,9 @@ PHP_FUNCTION(str_iends) {
         RETURN_BOOL(0);
     }
 
-	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
-		if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
-			RETURN_BOOL(0);
+    for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
+        if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
+            RETURN_BOOL(0);
 	RETURN_BOOL(1);
 }
 
