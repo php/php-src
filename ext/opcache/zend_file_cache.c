@@ -775,7 +775,7 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '\\';
 	memcpy(filename + 1 + len, md5uname, 32);
-	len += 32;
+	len += 1 + 32;
 	filename[len] = '\\';
 
 	memcpy(filename + len + 1, ZCG(system_id), 32);
