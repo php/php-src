@@ -627,6 +627,9 @@ static int zend_inference_calc_binary_op_range(
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
+				/* Suppress uninit variable warnings, these will only be used if the overflow
+				 * flags are all false. */
+				t1 = t2 = t3 = t4 = 0;
 				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_min, t1, dummy, t1_overflow);
 				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_max, t2, dummy, t2_overflow);
 				ZEND_SIGNED_MULTIPLY_LONG(op1_max, op2_min, t3, dummy, t3_overflow);
