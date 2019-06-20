@@ -1817,6 +1817,12 @@ PHP_FUNCTION(imagelayereffect)
 }
 /* }}} */
 
+#define CHECK_RGB_RANGE(component, name) \
+	if (component < 0 || component > 255) { \
+		php_error_docref(NULL, E_WARNING, #name " component is out of range"); \
+		RETURN_FALSE; \
+	}
+
 /* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
    Allocate a color with an alpha level.  Works for true color and palette based images */
 PHP_FUNCTION(imagecolorallocatealpha)
@@ -1833,6 +1839,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	CHECK_RGB_RANGE(red, Red);
+	CHECK_RGB_RANGE(green, Green);
+	CHECK_RGB_RANGE(blue, Blue);
 
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
@@ -2809,7 +2819,6 @@ PHP_FUNCTION(imagedestroy)
 }
 /* }}} */
 
-
 /* {{{ proto int imagecolorallocate(resource im, int red, int green, int blue)
    Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
@@ -2826,6 +2835,10 @@ PHP_FUNCTION(imagecolorallocate)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	CHECK_RGB_RANGE(red, Red);
+	CHECK_RGB_RANGE(green, Green);
+	CHECK_RGB_RANGE(blue, Blue);
 
 	ct = gdImageColorAllocate(im, red, green, blue);
 	if (ct < 0) {
