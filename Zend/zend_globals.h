@@ -136,7 +136,9 @@ struct _zend_executor_globals {
 
 	/* symbol table cache */
 	zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];
+	/* Pointer to one past the end of the symtable_cache */
 	zend_array **symtable_cache_limit;
+	/* Pointer to first unused symtable_cache slot */
 	zend_array **symtable_cache_ptr;
 
 	zend_array symbol_table;		/* main symbol table */
