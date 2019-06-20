@@ -248,14 +248,21 @@ PHP_FUNCTION(gethostbynamel)
 	}
 
 	hp = php_network_gethostbyname(hostname);
-	if (hp == NULL || hp->h_addr_list == NULL) {
+	if (!hp) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
-		in = *(struct in_addr *) hp->h_addr_list[i];
+	for (i = 0; hp->h_addr_list[i] != 0 ; i++) {
+		/* On macos h_addr_list entries may be misaligned. */
+		struct in_addr *h_addr_entry; /* Don't call this h_addr, it's a macro! */
+		memcpy(&h_addr_entry, &hp->h_addr_list[i], sizeof(struct in_addr *));
+		if (!h_addr_entry) {
+			return;
+		}
+
+		in = *h_addr_entry;
 		add_next_index_string(return_value, inet_ntoa(in));
 	}
 }
@@ -265,16 +272,22 @@ PHP_FUNCTION(gethostbynamel)
 static zend_string *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
+	struct in_addr *h_addr_0; /* Don't call this h_addr, it's a macro! */
 	struct in_addr in;
 	char *address;
 
 	hp = php_network_gethostbyname(name);
-
-	if (!hp || !*(hp->h_addr_list)) {
+	if (!hp) {
 		return zend_string_init(name, strlen(name), 0);
 	}
 
-	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
+	/* On macos h_addr_list entries may be misaligned. */
+	memcpy(&h_addr_0, &hp->h_addr_list[0], sizeof(struct in_addr *));
+	if (!h_addr_0) {
+		return zend_string_init(name, strlen(name), 0);
+	}
+
+	memcpy(&in.s_addr, h_addr_0, sizeof(in.s_addr));
 
 	address = inet_ntoa(in);
 	return zend_string_init(address, strlen(address), 0);
