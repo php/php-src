@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
+- OPcache:
+  . Fixed #78189 (file cache strips last character of uname hash). (cmb)
+
 04 Jul 2019, PHP 7.3.7
 
 - Core:
