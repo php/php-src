@@ -10,6 +10,8 @@ jobs:
     - template: apt.yml
     - script: |
         ./buildconf --force
+        export CFLAGS="-fsanitize=undefined -fsanitize=address"
+        export LDFLAGS="-fsanitize=undefined -fsanitize=address"
         ./configure ${{ parameters.configurationParameters }} \
             --prefix=/usr \
             --enable-phpdbg \
