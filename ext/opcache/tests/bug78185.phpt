@@ -15,6 +15,11 @@ foreach (glob(__DIR__ . '/*/' . __DIR__ . '/*.bin') as $p) {
 <?php
 foreach (glob(__DIR__ . '/*/' . __DIR__ . '/*.bin') as $p) {
 	unlink($p);
+	$p = dirname($p);
+	while(strlen($p) > strlen(__DIR__)) {
+		rmdir($p);
+		$p = dirname($p);
+	}
 }
 ?>
 --EXPECTF--
