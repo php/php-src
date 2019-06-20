@@ -1638,7 +1638,7 @@ static zend_object* zend_ffi_add(zend_ffi_cdata *base_cdata, zend_ffi_type *base
 	}
 	cdata->ptr = &cdata->ptr_holder;
 	cdata->ptr_holder = ptr +
-		offset * ZEND_FFI_TYPE(ptr_type)->size;
+		(ptrdiff_t) (offset * ZEND_FFI_TYPE(ptr_type)->size);
 	cdata->flags = base_cdata->flags & ZEND_FFI_FLAG_CONST;
 	return &cdata->std;
 }
