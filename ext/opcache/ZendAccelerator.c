@@ -1918,6 +1918,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		ZCG(cache_opline) = NULL;
 		ZCG(cache_persistent_script) = NULL;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		if (file_handle->filename
+		 && ZCG(accel_directives).file_cache
+		 && ZCG(enabled) && accel_startup_ok) {
+			return file_cache_compile_file(file_handle, type);
+		}
+#endif
 		return accelerator_orig_compile_file(file_handle, type);
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	} else if (file_cache_only) {
