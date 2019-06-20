@@ -254,7 +254,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	array_init(return_value);
 
-	for (i = 0; hp->h_addr_list[i] != 0 ; i++) {
+	for (i = 0;; i++) {
 		/* On macos h_addr_list entries may be misaligned. */
 		struct in_addr *h_addr_entry; /* Don't call this h_addr, it's a macro! */
 		memcpy(&h_addr_entry, &hp->h_addr_list[i], sizeof(struct in_addr *));
