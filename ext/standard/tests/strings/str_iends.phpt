@@ -9,8 +9,10 @@ $testStr = "beginningMiddleEnd";
 var_dump(str_iends($testStr, "End"));
 var_dump(str_iends($testStr, "end"));
 var_dump(str_iends($testStr, "en"));
+var_dump(str_iends($testStr, $testStr."a"));
 ?>
 --EXPECT--
 bool(true)
 bool(true)
+bool(false)
 bool(false)
