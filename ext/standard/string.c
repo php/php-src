@@ -2304,8 +2304,8 @@ truncate_len:
 /* {{{ proto boolean str_begins(string haystack, string needle)
    Checks if haystack begins with needle */
 PHP_FUNCTION(str_begins) {
-	zend_string *haystack, *needle;
-	int i;
+    zend_string *haystack, *needle;
+    int i;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
@@ -2319,14 +2319,14 @@ PHP_FUNCTION(str_begins) {
     for (i = 0; i < needle->len; i++) 
         if (haystack->val[i] != needle->val[i]) 
             RETURN_BOOL(0);
-        RETURN_BOOL(1);
+    RETURN_BOOL(1);
 }
 
 /* {{{ proto boolean str_ibegins(string haystack, string needle)
    Performs case insensitive check to determine if haystack begins with needle */
 PHP_FUNCTION(str_ibegins) {
-	zend_string *haystack, *needle;
-	int i;
+    zend_string *haystack, *needle;
+    int i;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
@@ -2346,8 +2346,8 @@ PHP_FUNCTION(str_ibegins) {
 /* {{{ proto boolean str_ends(string haystack, string needle)
    Checks if haystack ends with needle */
 PHP_FUNCTION(str_ends) {
-	zend_string *haystack, *needle;
-	int i, j;
+    zend_string *haystack, *needle;
+    int i, j;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
@@ -2367,8 +2367,8 @@ PHP_FUNCTION(str_ends) {
 /* {{{ proto boolean str_iends(string haystack, string needle)
    Performs case insensitive check to determine if haystack ends with needle */
 PHP_FUNCTION(str_iends) {
-	zend_string *haystack, *needle;
-	int i, j;
+    zend_string *haystack, *needle;
+    int i, j;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
