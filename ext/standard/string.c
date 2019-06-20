@@ -1814,8 +1814,6 @@ static int php_needle_char(zval *needle, char *target)
 			*target = '\1';
 			return SUCCESS;
 		case IS_DOUBLE:
-			*target = (char)(int)Z_DVAL_P(needle);
-			return SUCCESS;
 		case IS_OBJECT:
 			*target = (char) zval_get_long(needle);
 			return SUCCESS;
