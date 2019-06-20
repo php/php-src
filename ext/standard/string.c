@@ -2382,7 +2382,7 @@ PHP_FUNCTION(str_iends) {
     for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
         if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
             RETURN_BOOL(0);
-	RETURN_BOOL(1);
+    RETURN_BOOL(1);
 }
 
 /* {{{ proto string|array|false substr_replace(mixed str, mixed repl, mixed start [, mixed length])
