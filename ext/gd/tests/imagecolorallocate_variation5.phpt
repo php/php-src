@@ -45,7 +45,7 @@ foreach($values as $key => $value) {
 };
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Octal 000--
@@ -59,9 +59,15 @@ int(657930)
 int(657930)
 
 --Octal -012--
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
 bool(false)
-int(652810)
-int(657910)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
 
 --Octal 0377--
 int(16714250)
@@ -79,9 +85,15 @@ int(657930)
 int(657930)
 
 --Hexa-decimal -0xA--
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
 bool(false)
-int(652810)
-int(657910)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
 
 --Hexa-decimal 0xFF--
 int(16714250)

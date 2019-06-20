@@ -621,23 +621,23 @@ static int zend_inference_calc_binary_op_range(
 			break;
 		case ZEND_MUL:
 			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				double dummy;
+				zend_long t1_overflow, t2_overflow, t3_overflow, t4_overflow;
 				op1_min = OP1_MIN_RANGE();
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				t1 = op1_min * op2_min;
-				t2 = op1_min * op2_max;
-				t3 = op1_max * op2_min;
-				t4 = op1_max * op2_max;
+				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_min, t1, dummy, t1_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_max, t2, dummy, t2_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_max, op2_min, t3, dummy, t3_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_max, op2_max, t4, dummy, t4_overflow);
+				(void) dummy;
+
 				// FIXME: more careful overflow checks?
-				if (OP1_RANGE_UNDERFLOW() ||
-					OP2_RANGE_UNDERFLOW() ||
-					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()  ||
-					(double)t1 != (double)op1_min * (double)op2_min ||
-					(double)t2 != (double)op1_min * (double)op2_max ||
-					(double)t3 != (double)op1_max * (double)op2_min ||
-					(double)t4 != (double)op1_max * (double)op2_max) {
+				if (OP1_RANGE_UNDERFLOW() || OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() || OP2_RANGE_OVERFLOW()  ||
+					t1_overflow || t2_overflow || t3_overflow || t4_overflow
+				) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
