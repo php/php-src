@@ -2312,6 +2312,10 @@ PHP_FUNCTION(str_begins) {
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
 
+    if (needle->len > haystack->len) {
+        RETURN_BOOL(0);
+    }
+
 	for (i = 0; i < needle->len; i++) 
 		if (haystack->val[i] != needle->val[i]) 
 			RETURN_BOOL(0);
@@ -2329,6 +2333,10 @@ PHP_FUNCTION(str_ibegins) {
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
 
+    if (needle->len > haystack->len) {
+        RETURN_BOOL(0);
+    }
+
 	for (i = 0; i < needle->len; i++) 
 		if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
 			RETURN_BOOL(0); 
@@ -2345,6 +2353,10 @@ PHP_FUNCTION(str_ends) {
         Z_PARAM_STR(haystack)
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
+    
+    if (needle->len > haystack->len) {
+        RETURN_BOOL(0);
+    }
 
 	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
 		if (haystack->val[i] != needle->val[j]) 
@@ -2362,6 +2374,10 @@ PHP_FUNCTION(str_iends) {
         Z_PARAM_STR(haystack)
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
+
+    if (needle->len > haystack->len) {
+        RETURN_BOOL(0);
+    }
 
 	for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
 		if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
