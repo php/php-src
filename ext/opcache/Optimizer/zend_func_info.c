@@ -360,7 +360,7 @@ static const func_info_t func_infos[] = {
 	FN("ltrim",                        MAY_BE_NULL | MAY_BE_STRING),
 	F1("strip_tags",                   MAY_BE_NULL | MAY_BE_STRING),
 	F0("similar_text",                 MAY_BE_NULL | MAY_BE_LONG),
-	F1("explode",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
+	F1("explode",                      MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("implode",                      MAY_BE_NULL | MAY_BE_STRING),
 	FN("join",                         MAY_BE_NULL | MAY_BE_STRING),
 	FN("setlocale",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),

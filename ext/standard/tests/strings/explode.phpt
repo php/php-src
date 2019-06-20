@@ -10,19 +10,19 @@ error_reporting=2047
 echo var_export(explode("\1", "a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE);
 echo md5(var_export(explode("\1", "a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE));
 echo "\n";
-var_dump(@explode("", ""));
-var_dump(@explode("", NULL));
-var_dump(@explode(NULL, ""));
-var_dump(@explode("a", ""));
-var_dump(@explode("a", "a"));
-var_dump(@explode("a", NULL));
-var_dump(@explode(NULL, "a"));
-var_dump(@explode("abc", "acb"));
-var_dump(@explode("somestring", "otherstring"));
-var_dump(@explode("somestring", "otherstring", -1));
-var_dump(@explode("a", "aaaaaa"));
-var_dump(@explode("==", str_repeat("-=".ord(0)."=-", 10)));
-var_dump(@explode("=", str_repeat("-=".ord(0)."=-", 10)));
+var_dump(explode("", ""));
+var_dump(explode("", NULL));
+var_dump(explode(NULL, ""));
+var_dump(explode("a", ""));
+var_dump(explode("a", "a"));
+var_dump(explode("a", NULL));
+var_dump(explode(NULL, "a"));
+var_dump(explode("abc", "acb"));
+var_dump(explode("somestring", "otherstring"));
+var_dump(explode("somestring", "otherstring", -1));
+var_dump(explode("a", "aaaaaa"));
+var_dump(explode("==", str_repeat("-=".ord(0)."=-", 10)));
+var_dump(explode("=", str_repeat("-=".ord(0)."=-", 10)));
 //////////////////////////////////////
 var_dump(explode(":","a lazy dog:jumps:over:",-1));
 var_dump(explode(":","a lazy dog:jumps:over", -1));
@@ -40,9 +40,18 @@ array (
   3 => '1',
   4 => 'd',
 )d6bee42a771449205344c0938ad4f035
-bool(false)
-bool(false)
-bool(false)
+array(1) {
+  [0]=>
+  string(0) ""
+}
+array(1) {
+  [0]=>
+  string(0) ""
+}
+array(1) {
+  [0]=>
+  string(0) ""
+}
 array(1) {
   [0]=>
   string(0) ""
@@ -57,7 +66,10 @@ array(1) {
   [0]=>
   string(0) ""
 }
-bool(false)
+array(1) {
+  [0]=>
+  string(1) "a"
+}
 array(1) {
   [0]=>
   string(3) "acb"

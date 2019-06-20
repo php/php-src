@@ -87,31 +87,263 @@ echo "Done\n";
 --EXPECTF--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+array(56) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+  [2]=>
+  string(1) "3"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "N"
+  [5]=>
+  string(1) "U"
+  [6]=>
+  string(1) "L"
+  [7]=>
+  string(1) "L"
+  [8]=>
+  string(1) "2"
+  [9]=>
+  string(1) "3"
+  [10]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [12]=>
+  string(1) "c"
+  [13]=>
+  string(1) "d"
+  [14]=>
+  string(1) "0"
+  [15]=>
+  string(1) "0"
+  [16]=>
+  string(1) "0"
+  [17]=>
+  string(1) "0"
+  [18]=>
+  string(1) "0"
+  [19]=>
+  string(1) "T"
+  [20]=>
+  string(1) "R"
+  [21]=>
+  string(1) "U"
+  [22]=>
+  string(1) "E"
+  [23]=>
+  string(1) "F"
+  [24]=>
+  string(1) "A"
+  [25]=>
+  string(1) "L"
+  [26]=>
+  string(1) "S"
+  [27]=>
+  string(1) "E"
+  [28]=>
+  string(1) "-"
+  [29]=>
+  string(1) "1"
+  [30]=>
+  string(1) "1"
+  [31]=>
+  string(1) "."
+  [32]=>
+  string(1) "2"
+  [33]=>
+  string(1) "3"
+  [34]=>
+  string(1) "4"
+  [35]=>
+  string(1) "4"
+  [36]=>
+  string(1) "4"
+  [37]=>
+  string(1) "4"
+  [38]=>
+  string(1) "t"
+  [39]=>
+  string(1) "r"
+  [40]=>
+  string(1) "u"
+  [41]=>
+  string(1) "e"
+  [42]=>
+  string(1) "-"
+  [43]=>
+  string(1) "1"
+  [44]=>
+  string(1) "1"
+  [45]=>
+  string(1) "."
+  [46]=>
+  string(1) "2"
+  [47]=>
+  string(1) "4"
+  [48]=>
+  string(1) "%"
+  [49]=>
+  string(1) "P"
+  [50]=>
+  string(1) "H"
+  [51]=>
+  string(1) "P"
+  [52]=>
+  string(1) "%"
+  [53]=>
+  string(1) "Z"
+  [54]=>
+  string(1) "E"
+  [55]=>
+  string(1) "N"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
 -- Iteration 2 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+array(56) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+  [2]=>
+  string(1) "3"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "N"
+  [5]=>
+  string(1) "U"
+  [6]=>
+  string(1) "L"
+  [7]=>
+  string(1) "L"
+  [8]=>
+  string(1) "2"
+  [9]=>
+  string(1) "3"
+  [10]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [12]=>
+  string(1) "c"
+  [13]=>
+  string(1) "d"
+  [14]=>
+  string(1) "0"
+  [15]=>
+  string(1) "0"
+  [16]=>
+  string(1) "0"
+  [17]=>
+  string(1) "0"
+  [18]=>
+  string(1) "0"
+  [19]=>
+  string(1) "T"
+  [20]=>
+  string(1) "R"
+  [21]=>
+  string(1) "U"
+  [22]=>
+  string(1) "E"
+  [23]=>
+  string(1) "F"
+  [24]=>
+  string(1) "A"
+  [25]=>
+  string(1) "L"
+  [26]=>
+  string(1) "S"
+  [27]=>
+  string(1) "E"
+  [28]=>
+  string(1) "-"
+  [29]=>
+  string(1) "1"
+  [30]=>
+  string(1) "1"
+  [31]=>
+  string(1) "."
+  [32]=>
+  string(1) "2"
+  [33]=>
+  string(1) "3"
+  [34]=>
+  string(1) "4"
+  [35]=>
+  string(1) "4"
+  [36]=>
+  string(1) "4"
+  [37]=>
+  string(1) "4"
+  [38]=>
+  string(1) "t"
+  [39]=>
+  string(1) "r"
+  [40]=>
+  string(1) "u"
+  [41]=>
+  string(1) "e"
+  [42]=>
+  string(1) "-"
+  [43]=>
+  string(1) "1"
+  [44]=>
+  string(1) "1"
+  [45]=>
+  string(1) "."
+  [46]=>
+  string(1) "2"
+  [47]=>
+  string(1) "4"
+  [48]=>
+  string(1) "%"
+  [49]=>
+  string(1) "P"
+  [50]=>
+  string(1) "H"
+  [51]=>
+  string(1) "P"
+  [52]=>
+  string(1) "%"
+  [53]=>
+  string(1) "Z"
+  [54]=>
+  string(1) "E"
+  [55]=>
+  string(1) "N"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
 -- Iteration 3 --
 array(1) {
   [0]=>
@@ -213,18 +445,134 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+array(56) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(1) "2"
+  [2]=>
+  string(1) "3"
+  [3]=>
+  string(1) "4"
+  [4]=>
+  string(1) "N"
+  [5]=>
+  string(1) "U"
+  [6]=>
+  string(1) "L"
+  [7]=>
+  string(1) "L"
+  [8]=>
+  string(1) "2"
+  [9]=>
+  string(1) "3"
+  [10]=>
+  string(1) "a"
+  [11]=>
+  string(1) "b"
+  [12]=>
+  string(1) "c"
+  [13]=>
+  string(1) "d"
+  [14]=>
+  string(1) "0"
+  [15]=>
+  string(1) "0"
+  [16]=>
+  string(1) "0"
+  [17]=>
+  string(1) "0"
+  [18]=>
+  string(1) "0"
+  [19]=>
+  string(1) "T"
+  [20]=>
+  string(1) "R"
+  [21]=>
+  string(1) "U"
+  [22]=>
+  string(1) "E"
+  [23]=>
+  string(1) "F"
+  [24]=>
+  string(1) "A"
+  [25]=>
+  string(1) "L"
+  [26]=>
+  string(1) "S"
+  [27]=>
+  string(1) "E"
+  [28]=>
+  string(1) "-"
+  [29]=>
+  string(1) "1"
+  [30]=>
+  string(1) "1"
+  [31]=>
+  string(1) "."
+  [32]=>
+  string(1) "2"
+  [33]=>
+  string(1) "3"
+  [34]=>
+  string(1) "4"
+  [35]=>
+  string(1) "4"
+  [36]=>
+  string(1) "4"
+  [37]=>
+  string(1) "4"
+  [38]=>
+  string(1) "t"
+  [39]=>
+  string(1) "r"
+  [40]=>
+  string(1) "u"
+  [41]=>
+  string(1) "e"
+  [42]=>
+  string(1) "-"
+  [43]=>
+  string(1) "1"
+  [44]=>
+  string(1) "1"
+  [45]=>
+  string(1) "."
+  [46]=>
+  string(1) "2"
+  [47]=>
+  string(1) "4"
+  [48]=>
+  string(1) "%"
+  [49]=>
+  string(1) "P"
+  [50]=>
+  string(1) "H"
+  [51]=>
+  string(1) "P"
+  [52]=>
+  string(1) "%"
+  [53]=>
+  string(1) "Z"
+  [54]=>
+  string(1) "E"
+  [55]=>
+  string(1) "N"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(1) {
+  [0]=>
+  string(57) "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
+array(2) {
+  [0]=>
+  string(1) "1"
+  [1]=>
+  string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
+}
 -- Iteration 8 --
 array(2) {
   [0]=>

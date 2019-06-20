@@ -1066,7 +1066,24 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
-	if (p2 == NULL) {
+	/* If delimiter is empty */
+	if (zend_string_equals_literal(delim, "")) {
+		int string_length = ZSTR_LEN(str);
+		int iterations = limit;
+		if (limit > string_length) {
+			iterations = string_length;
+		}
+		iterations--; /* Explode behavior is that limit'th element is the remainder of the string */
+		size_t l =  string_length - iterations;
+
+		while (iterations-- > 0) {
+			add_next_index_stringl(return_value, p1, 1);
+			p1++;
+		}
+
+		ZVAL_STRINGL(&tmp, p1, l);
+		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+	} else if (p2 == NULL) {
 		ZVAL_STR_COPY(&tmp, str);
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
@@ -1103,7 +1120,16 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
-	if (p2 == NULL) {
+	if (zend_string_equals_literal(delim, "")) { /* If delimiter is empty */
+		long int iterations = ZSTR_LEN(str) + limit; /* limit is negative */
+		/* Do nothing if absolute value of limit is larger or equal to string length to return an empty array */
+		if (iterations > 0) {
+			while (iterations-- > 0) {
+				add_next_index_stringl(return_value, p1, 1);
+				p1++;
+			}
+		}
+	} else if (p2 == NULL) {
 		/*
 		do nothing since limit <= -1, thus if only one chunk - 1 + (limit) <= 0
 		by doing nothing we return empty array
@@ -1149,11 +1175,6 @@ PHP_FUNCTION(explode)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (ZSTR_LEN(delim) == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
-	}
 
 	array_init(return_value);
 
