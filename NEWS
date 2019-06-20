@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
+- Opcache:
+  . Fixed bug #78185 (File cache no longer works). (Dmitry)
+
 27 Jun 2019, PHP 7.2.20
 
 - Core:
