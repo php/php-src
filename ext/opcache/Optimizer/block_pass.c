@@ -1912,17 +1912,11 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "before block pass", &cfg);
 	}
 
-	if (op_array->last_var || op_array->T) {
-		bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
-		Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
-		same_t = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
-		usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
-	} else {
-		bitset_len = 0;
-		Tsource = NULL;
-		same_t = NULL;
-		usage = NULL;
-	}
+	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
+	Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
+	same_t = zend_arena_alloc(&ctx->arena, op_array->last_var + op_array->T);
+	usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
+
 	blocks = cfg.blocks;
 	end = blocks + cfg.blocks_count;
 	for (pass = 0; pass < PASSES; pass++) {
