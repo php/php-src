@@ -132,8 +132,8 @@ void init_executor(void) /* {{{ */
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
 
-	EG(symtable_cache_ptr) = EG(symtable_cache) - 1;
-	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE - 1;
+	EG(symtable_cache_ptr) = EG(symtable_cache);
+	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE;
 	EG(no_extensions) = 0;
 
 	EG(function_table) = CG(function_table);
@@ -398,10 +398,10 @@ void shutdown_executor(void) /* {{{ */
 
 		zend_cleanup_internal_classes();
 
-		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+		while (EG(symtable_cache_ptr) > EG(symtable_cache)) {
+			EG(symtable_cache_ptr)--;
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
-			EG(symtable_cache_ptr)--;
 		}
 
 		zend_hash_destroy(&EG(included_files));
@@ -1416,9 +1416,8 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 	}
 
 	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_HAS_SYMBOL_TABLE);
-	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
-		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
-		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
+	if (EG(symtable_cache_ptr) > EG(symtable_cache)) {
+		symbol_table = ex->symbol_table = *(--EG(symtable_cache_ptr));
 		if (!ex->func->op_array.last_var) {
 			return symbol_table;
 		}

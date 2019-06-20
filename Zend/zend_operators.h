@@ -225,10 +225,12 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const
 		p -= needle_len;
 
 		do {
-			if ((p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1)) && ne == p[needle_len-1]) {
-				if (!memcmp(needle + 1, p + 1, needle_len - 2)) {
-					return p;
-				}
+			p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1);
+			if (!p) {
+				return NULL;
+			}
+			if (ne == p[needle_len-1] && !memcmp(needle + 1, p + 1, needle_len - 2)) {
+				return p;
 			}
 		} while (p-- >= haystack);
 

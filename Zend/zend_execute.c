@@ -3347,7 +3347,7 @@ ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */
 		zend_symtable_clean(symbol_table);
-		*(++EG(symtable_cache_ptr)) = symbol_table;
+		*(EG(symtable_cache_ptr)++) = symbol_table;
 	}
 }
 /* }}} */

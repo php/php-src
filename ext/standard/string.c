@@ -2057,7 +2057,7 @@ PHP_FUNCTION(strripos)
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + (size_t)offset;
+			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
 		}
 		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
 		lowered = tolower(*ZSTR_VAL(needle));

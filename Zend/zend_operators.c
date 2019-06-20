@@ -1238,6 +1238,9 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
+#ifdef __clang__
+__attribute__((no_sanitize("float-divide-by-zero")))
+#endif
 ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy, op2_copy;
