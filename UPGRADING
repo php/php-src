@@ -354,6 +354,12 @@ PHP 7.4 UPGRADE NOTES
     exception that it ignores overloaded array casts, such as used by
     ArrayObject.
 
+- GD:
+  . Added imagecreatefromtga() function, which allows to read images in TGA
+    format. TGA support is now also indicated by gd_info() and imagetypes().
+    Note that TGA images are not recognized by imagecreatefromstring() and
+    getimagesize().
+
 - OpenSSL:
   . Added openssl_x509_verify(mixed cert, mixed key) function that verifies the
     signature of the certificate using a public key. A wrapper around the
