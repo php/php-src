@@ -6,6 +6,7 @@ if (!extension_loaded("pcntl")) die("skip");
 if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
 if (!defined("CLONE_NEWPID")) die("skip flag unavailable");
+if (getenv("SKIP_ASAN")) die("skip asan chokes on this");
 if (posix_getuid() !== 0 &&
     (!defined("CLONE_NEWUSER") ||
     (pcntl_unshare(CLONE_NEWUSER) == false && pcntl_get_last_error() == PCNTL_EPERM))) {
