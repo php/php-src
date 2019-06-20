@@ -7,13 +7,23 @@ opcache.file_cache={PWD}
 opcache.file_cache_only=1
 --FILE--
 <?php
-foreach (glob(__DIR__ . '/*/' . __DIR__ . '/*.bin') as $p) {
+if (substr(PHP_OS, 0, 3) !== 'WIN') {
+	$pattern = __DIR__ . '/*/' . __DIR__ . '/*78185.php.bin';
+} else {
+	$pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*78185.php.bin';
+}
+foreach (glob($pattern) as $p) {
 	var_dump($p);
 }
 ?>
 --CLEAN--
 <?php
-foreach (glob(__DIR__ . '/*/' . __DIR__ . '/*.bin') as $p) {
+if (substr(PHP_OS, 0, 3) !== 'WIN') {
+	$pattern = __DIR__ . '/*/' . __DIR__ . '/*78185.php.bin';
+} else {
+	$pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*78185.php.bin';
+}
+foreach (glob($pattern) as $p) {
 	unlink($p);
 	$p = dirname($p);
 	while(strlen($p) > strlen(__DIR__)) {
