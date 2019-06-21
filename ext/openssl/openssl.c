@@ -5150,7 +5150,7 @@ clean_exit:
 	BIO_free(in);
 	BIO_free(dataout);
 	PKCS7_free(p7);
-	sk_X509_free(others);
+	sk_X509_pop_free(others, X509_free);
 }
 /* }}} */
 
