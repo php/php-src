@@ -1661,9 +1661,6 @@ phpdbg_main:
 	phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold"));
 	phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green"));
 
-	/* set default prompt */
-	phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
-
 	if (settings > (zend_phpdbg_globals *) 0x2) {
 #ifdef ZTS
 		zend_phpdbg_globals *ptr = TSRMG_BULK_STATIC(phpdbg_globals_id, zend_phpdbg_globals *);
@@ -1672,6 +1669,9 @@ phpdbg_main:
 		phpdbg_globals = *settings;
 #endif
 		free(settings);
+	} else {
+		/* set default prompt */
+		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 	}
 
 	/* set flags from command line */
