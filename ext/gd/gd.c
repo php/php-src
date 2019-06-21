@@ -1029,7 +1029,11 @@ zend_module_entry gd_module_entry = {
 	"gd",
 	gd_functions,
 	PHP_MINIT(gd),
+#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+	PHP_MSHUTDOWN(gd),
+#else
 	NULL,
+#endif
 	NULL,
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 	PHP_RSHUTDOWN(gd),
@@ -1236,6 +1240,17 @@ PHP_MINIT_FUNCTION(gd)
 
 	return SUCCESS;
 }
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+PHP_MSHUTDOWN_FUNCTION(gd)
+{
+	gdFontCacheMutexShutdown();
+	return SUCCESS;
+}
+#endif
 /* }}} */
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
