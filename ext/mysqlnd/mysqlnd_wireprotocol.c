@@ -392,6 +392,7 @@ php_mysqlnd_greet_read(void * _packet)
 	packet->server_capabilities = uint2korr(p);
 	p+= 2;
 	BAIL_IF_NO_MORE_DATA;
+	DBG_INF_FMT("4.1 server_caps=%u\n", (uint32_t) packet->server_capabilities);
 
 	packet->charset_no = uint1korr(p);
 	p++;
@@ -421,7 +422,8 @@ php_mysqlnd_greet_read(void * _packet)
 		p--;
 
     	/* Additional 16 bits for server capabilities */
-		packet->server_capabilities |= uint2korr(pad_start) << 16;
+		DBG_INF_FMT("additional 5.5+ caps=%u\n", (uint32_t) uint2korr(pad_start));
+		packet->server_capabilities |= ((uint32_t) uint2korr(pad_start)) << 16;
 		/* And a length of the server scramble in one byte */
 		packet->authentication_plugin_data.l = uint1korr(pad_start + 2);
 		if (packet->authentication_plugin_data.l > SCRAMBLE_LENGTH) {
