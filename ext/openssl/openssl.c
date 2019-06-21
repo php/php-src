@@ -3029,8 +3029,6 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		}
 
 		RETVAL_TRUE;
-
-		PKCS12_free(p12);
 	} else {
 		php_openssl_store_errors();
 	}
@@ -3044,6 +3042,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	}
 	if (cert) {
 		X509_free(cert);
+	}
+	if (p12) {
+		PKCS12_free(p12);
 	}
 }
 /* }}} */
