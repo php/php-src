@@ -2102,6 +2102,9 @@ cleanup:
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
+	if (spki) {
+		NETSCAPE_SPKI_free(spki);
+	}
 }
 /* }}} */
 
@@ -3097,8 +3100,6 @@ PHP_FUNCTION(openssl_pkcs12_read)
 		}
 
 		RETVAL_TRUE;
-
-		PKCS12_free(p12);
 	} else {
 		php_openssl_store_errors();
 	}
@@ -3112,6 +3113,9 @@ PHP_FUNCTION(openssl_pkcs12_read)
 	}
 	if (cert) {
 		X509_free(cert);
+	}
+	if (p12) {
+		PKCS12_free(p12);
 	}
 }
 /* }}} */
@@ -3697,7 +3701,10 @@ PHP_FUNCTION(openssl_csr_get_subject)
 
 	array_init(return_value);
 	php_openssl_add_assoc_name_entry(return_value, NULL, subject, use_shortnames);
-	return;
+
+	if (!csr_resource) {
+		X509_REQ_free(csr);
+	}
 }
 /* }}} */
 
@@ -3709,16 +3716,16 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	zend_bool use_shortnames = 1;
 	zend_resource *csr_resource;
 
-	X509_REQ * csr;
+	X509_REQ *orig_csr, *csr;
 	EVP_PKEY *tpubkey;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zcsr, &use_shortnames) == FAILURE) {
 		return;
 	}
 
-	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource);
+	orig_csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource);
 
-	if (csr == NULL) {
+	if (orig_csr == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -3728,15 +3735,23 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	 * a private key, it will be returned including the private part.
 	 * If we duplicate it, then we get just the public part which is
 	 * the same behavior as for OpenSSL 1.0 */
-	csr = X509_REQ_dup(csr);
+	csr = X509_REQ_dup(orig_csr);
+#else
+	csr = orig_csr;
 #endif
+
 	/* Retrieve the public key from the CSR */
 	tpubkey = X509_REQ_get_pubkey(csr);
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100
-	/* We need to free the CSR as it was duplicated */
-	X509_REQ_free(csr);
-#endif
+	if (csr != orig_csr) {
+		/* We need to free the duplicated CSR */
+		X509_REQ_free(csr);
+	}
+
+	if (!csr_resource) {
+		/* We also need to free the original CSR if it was freshly created */
+		X509_REQ_free(orig_csr);
+	}
 
 	if (tpubkey == NULL) {
 		php_openssl_store_errors();
@@ -4439,7 +4454,7 @@ PHP_FUNCTION(openssl_pkey_new)
 			EC_KEY *eckey = NULL;
 			EC_GROUP *group = NULL;
 			EC_POINT *pnt = NULL;
-			const BIGNUM *d;
+			BIGNUM *d = NULL;
 			pkey = EVP_PKEY_new();
 			if (pkey) {
 				eckey = EC_KEY_new();
@@ -4487,6 +4502,8 @@ PHP_FUNCTION(openssl_pkey_new)
 							php_openssl_store_errors();
 							goto clean_exit;
 						}
+
+						BN_free(d);
 					} else if ((x = zend_hash_str_find(Z_ARRVAL_P(data), "x", sizeof("x") - 1)) != NULL &&
 							Z_TYPE_P(x) == IS_STRING &&
 							(y = zend_hash_str_find(Z_ARRVAL_P(data), "y", sizeof("y") - 1)) != NULL &&
@@ -4531,6 +4548,9 @@ PHP_FUNCTION(openssl_pkey_new)
 				php_openssl_store_errors();
 			}
 clean_exit:
+			if (d != NULL) {
+				BN_free(d);
+			}
 			if (pnt != NULL) {
 				EC_POINT_free(pnt);
 			}
@@ -5267,7 +5287,7 @@ clean_exit:
 	BIO_free(in);
 	BIO_free(dataout);
 	PKCS7_free(p7);
-	sk_X509_free(others);
+	sk_X509_pop_free(others, X509_free);
 }
 /* }}} */
 
