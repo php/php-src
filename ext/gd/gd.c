@@ -995,7 +995,7 @@ zend_module_entry gd_module_entry = {
 	"gd",
 	gd_functions,
 	PHP_MINIT(gd),
-	NULL,
+	PHP_MSHUTDOWN(gd),
 	NULL,
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 	PHP_RSHUTDOWN(gd),
@@ -1200,6 +1200,17 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS",   0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
 #endif
 
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(gd)
+{
+#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+	gdFontCacheMutexShutdown();
+#endif
 	return SUCCESS;
 }
 /* }}} */
