@@ -3652,6 +3652,7 @@ static void preload_link(void)
 		} else {
 			continue;
 		}
+		ce->ce_flags &= ~ZEND_ACC_PRELOADED;
 		script = zend_hash_find_ptr(preload_scripts, ce->info.user.filename);
 		ZEND_ASSERT(script);
 		zend_hash_add(&script->script.class_table, key, zv);

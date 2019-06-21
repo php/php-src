@@ -6313,6 +6313,11 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	ce->name = name;
 	zend_initialize_class_data(ce, 1);
 
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		ce->ce_flags |= ZEND_ACC_PRELOADED;
+		ZEND_MAP_PTR_NEW(ce->static_members_table);
+	}
+
 	ce->ce_flags |= decl->flags;
 	ce->info.user.filename = zend_get_compiled_filename();
 	ce->info.user.line_start = decl->start_lineno;
