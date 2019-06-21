@@ -200,6 +200,13 @@ safe:
 				/* parameter was not defined */
 				ret = -1;
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
+
+				strlcpy(stmt->dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+				if (stmt->dbh->query_stmt) {
+					stmt->dbh->query_stmt = NULL;
+					zval_ptr_dtor(&stmt->dbh->query_stmt_zval);
+				}
+
 				goto clean_up;
 			}
 			if (stmt->dbh->methods->quoter) {

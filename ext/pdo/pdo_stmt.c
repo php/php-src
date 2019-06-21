@@ -136,6 +136,13 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 				return 1;
 			}
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
+
+			strlcpy(stmt->dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+			if (stmt->dbh->query_stmt) {
+				stmt->dbh->query_stmt = NULL;
+				zval_ptr_dtor(&stmt->dbh->query_stmt_zval);
+			}
+
 			return 0;
 		}
 
@@ -152,6 +159,13 @@ static inline int rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_pa
 			return 1;
 		} ZEND_HASH_FOREACH_END();
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
+
+		strlcpy(stmt->dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+		if (stmt->dbh->query_stmt) {
+			stmt->dbh->query_stmt = NULL;
+			zval_ptr_dtor(&stmt->dbh->query_stmt_zval);
+		}
+
 		return 0;
 	}
 	return 1;
