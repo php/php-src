@@ -827,6 +827,7 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 		buffer_active = 0;
 		if (cert && X509_STORE_add_cert(cert_store, cert)) {
 			++certs_added;
+			X509_free(cert);
 		}
 		goto cert_start;
 	}
