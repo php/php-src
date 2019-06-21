@@ -101,6 +101,7 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   rscale = MAX(scale, power->n_scale);
   if ( !bc_compare(modulus, BCG(_one_)) )
     {
+      bc_free_num (&temp);
       temp = bc_new_num (1, scale);
     }
   else
