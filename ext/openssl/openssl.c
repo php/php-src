@@ -2076,6 +2076,9 @@ cleanup:
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
+	if (spki) {
+		NETSCAPE_SPKI_free(spki);
+	}
 }
 /* }}} */
 
