@@ -919,9 +919,9 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FREE_ON_RETURN     (1<<0)
 #define ZEND_FREE_SWITCH        (1<<1)
 
-#define ZEND_SEND_BY_VAL     0
-#define ZEND_SEND_BY_REF     1
-#define ZEND_SEND_PREFER_REF 2
+#define ZEND_SEND_BY_VAL     0u
+#define ZEND_SEND_BY_REF     1u
+#define ZEND_SEND_PREFER_REF 2u
 
 #define ZEND_DIM_IS 1
 
