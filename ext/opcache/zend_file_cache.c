@@ -903,7 +903,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 #ifdef HAVE_JIT
 	/* FIXME: dump jited codes out to file cache? */
-	if (ZCG(accel_directives).jit) {
+	if (ZCG(jit_enabled)) {
 		return FAILURE;
 	}
 #endif

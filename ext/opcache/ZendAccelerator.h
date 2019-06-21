@@ -220,6 +220,9 @@ typedef struct _zend_accel_globals {
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
 	zend_bool               is_immutable_class;
+#ifdef HAVE_JIT
+	zend_bool               jit_enabled;
+#endif
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;

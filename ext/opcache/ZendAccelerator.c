@@ -2946,11 +2946,11 @@ static int accel_post_startup(void)
 #ifdef HAVE_JIT
 		if (ZCG(accel_directives).jit &&
 		    ZCG(accel_directives).jit_buffer_size &&
-		    ZSMMG(reserved)) {
-			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached);
+		    ZSMMG(reserved) &&
+			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached) == SUCCESS) {
+			ZCG(jit_enabled) = 1;
 		} else {
-			ZCG(accel_directives).jit = 0;
-			ZCG(accel_directives).jit_buffer_size = 0;
+			ZCG(jit_enabled) = 0;
 		}
 #endif
 		zend_shared_alloc_save_state();
