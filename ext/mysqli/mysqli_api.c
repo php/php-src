@@ -970,7 +970,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 			zval *result;
 			/* it must be a reference, isn't it? */
 			if (Z_ISREF(stmt->result.vars[i])) {
-				result = stmt->result.vars[i];
+				result = &stmt->result.vars[i];
 			} else {
 				continue; // but be safe ...
 			}
@@ -1083,7 +1083,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						break;
 				}
 			} else {
-				ZEND_TRY_REF_ASSIGN_NULL(result);
+				ZEND_TRY_ASSIGN_REF_NULL(result);
 			}
 		}
 	} else {
