@@ -22757,9 +22757,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 
 				UNDEF_RESULT();
@@ -22874,9 +22874,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -22991,9 +22991,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -23107,9 +23107,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 
 				UNDEF_RESULT();
@@ -25239,9 +25239,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -25356,9 +25356,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -25473,9 +25473,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -25589,9 +25589,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -26878,9 +26878,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 
 				UNDEF_RESULT();
@@ -26995,9 +26995,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -27112,9 +27112,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -27228,9 +27228,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 
 				UNDEF_RESULT();
@@ -29245,9 +29245,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -29362,9 +29362,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -29479,9 +29479,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -29595,9 +29595,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -40693,9 +40693,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 
 				UNDEF_RESULT();
@@ -40810,9 +40810,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -40927,9 +40927,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -41043,9 +41043,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = RT_CONSTANT(opline, opline->op2);
 
 				UNDEF_RESULT();
@@ -44533,9 +44533,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -44650,9 +44650,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -44767,9 +44767,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -44883,9 +44883,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -46617,9 +46617,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 
 				UNDEF_RESULT();
@@ -46734,9 +46734,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -46851,9 +46851,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -46967,9 +46967,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = NULL;
 
 				UNDEF_RESULT();
@@ -50002,9 +50002,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();
@@ -50119,9 +50119,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -50236,9 +50236,9 @@ try_assign_dim_array:
 				zval_ptr_dtor_nogc(free_op_data);
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				UNDEF_RESULT();
@@ -50352,9 +50352,9 @@ try_assign_dim_array:
 
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
 				UNDEF_RESULT();

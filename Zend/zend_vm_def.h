@@ -2501,9 +2501,9 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			zend_property_info *error_prop;
-			if (Z_ISREF_P(orig_object_ptr) && (error_prop = zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) != NULL) {
-				zend_throw_auto_init_in_ref_error(error_prop, "array");
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_check_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
 				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 				FREE_UNFETCHED_OP_DATA();
 				UNDEF_RESULT();
