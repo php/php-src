@@ -1407,7 +1407,7 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 	}
 	if (current->hint) {
 		hint = current->hint->reg;
-		if (current->hint->used_as_hint == current) {
+		if (hint != ZREG_NONE && current->hint->used_as_hint == current) {
 			ZEND_REGSET_EXCL(*hints, hint);
 		}
 	}
