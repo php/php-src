@@ -44,9 +44,6 @@ require_once('skipifconnectfailure.inc');
 		if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
 			printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
 		}
-		if ($link->stat != NULL) {
-			printf("[009] NULL expected because of error.\n");
-		}
 	} else {
 		if ($link->info != NULL) {
 			printf("[008] Time for wonders - libmysql has started to support SELECT, change test\n");
@@ -123,8 +120,6 @@ object(mysqli)#%d (%d) {
   string(%d) "%s"
   ["server_version"]=>
   int(%d)
-  ["stat"]=>
-  %s
   ["sqlstate"]=>
   string(5) "HY000"
   ["protocol_version"]=>

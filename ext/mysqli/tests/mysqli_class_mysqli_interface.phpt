@@ -53,7 +53,7 @@ require_once('skipifconnectfailure.inc');
 		'set_charset'			=> true,
 		'set_opt'				=> true,
 		'ssl_set'				=> true,
-		'stat'					=> true,
+		'stat'   				=> true,
 		'stmt_init'				=> true,
 		'store_result'			=> true,
 		'thread_safe'			=> true,
@@ -109,7 +109,6 @@ require_once('skipifconnectfailure.inc');
 		"server_info"		=> true,
 		"server_version"	=> true,
 		"sqlstate"			=> true,
-		"stat"				=> true,
 		"thread_id"			=> true,
 		"warning_count"		=> true,
 	);
@@ -200,11 +199,6 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
 
-	assert(soundex(mysqli_stat($link)) == soundex($mysqli->stat));
-	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
-		$mysqli->stat, gettype($mysqli->stat),
-		mysqli_stat($link), gettype(mysqli_stat($link)));
-
 	assert(mysqli_get_host_info($link) === $mysqli->host_info);
 	printf("mysqli->host_info = '%s'/%s ('%s'/%s)\n",
 		$mysqli->host_info, gettype($mysqli->host_info),
@@ -288,7 +282,6 @@ mysqli->error = ''/string (''/string)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/string ('00000'/string)
-mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/string ('%s'/string)
 mysqli->info = ''/NULL (''/NULL)
 mysqli->thread_id = '%d'/integer ('%d'/integer)

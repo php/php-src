@@ -1,7 +1,7 @@
 <?php
 	/*
 	Default values are "localhost", "root",
-	database "stest" and empty password.
+	database "test" and empty password.
 	Change the MYSQL_TEST environment values
 	if you want to use another configuration
 	*/
