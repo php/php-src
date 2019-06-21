@@ -658,7 +658,8 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 		zend_get_unmangled_property_name(prop->name));
 }
 
-static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref);
+static zend_never_inline zend_bool zend_verify_ref_stdClass_assignable(zend_reference *ref);
+static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
 
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
@@ -697,10 +698,8 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *ob
 		return NULL;
 	}
 
-	if (ref) {
-		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
-		if (error_prop) {
-			zend_throw_auto_init_in_ref_error(error_prop, "stdClass");
+	if (ref && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(ref))) {
+		if (UNEXPECTED(!zend_verify_ref_stdClass_assignable(Z_REF_P(ref)))) {
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
@@ -2169,9 +2168,7 @@ fetch_from_array:
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (type != BP_VAR_UNSET) {
 				if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-					zend_property_info *error_prop = zend_check_ref_array_assignable(ref);
-					if (UNEXPECTED(error_prop != NULL)) {
-						zend_throw_auto_init_in_ref_error(error_prop, "array");
+					if (UNEXPECTED(!zend_verify_ref_array_assignable(ref))) {
 						ZVAL_ERROR(result);
 						return;
 					}
@@ -2599,36 +2596,30 @@ static zend_always_inline zend_bool check_type_stdClass_assignable(zend_type typ
 
 /* Checks whether an array can be assigned to the reference. Returns conflicting property if
  * assignment is not possible, NULL otherwise. */
-static zend_always_inline zend_property_info *i_zend_check_ref_array_assignable(zend_reference *ref) {
+static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_reference *ref) {
 	zend_property_info *prop;
-	if (!ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-		return NULL;
-	}
+	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		if (!check_type_array_assignable(prop->type)) {
-			return prop;
+			zend_throw_auto_init_in_ref_error(prop, "array");
+			return 0;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-	return NULL;
+	return 1;
 }
 
 /* Checks whether an stdClass can be assigned to the reference. Returns conflicting property if
  * assignment is not possible, NULL otherwise. */
-static zend_always_inline zend_property_info *i_zend_check_ref_stdClass_assignable(zend_reference *ref) {
+static zend_never_inline zend_bool zend_verify_ref_stdClass_assignable(zend_reference *ref) {
 	zend_property_info *prop;
-	if (!ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-		return NULL;
-	}
+	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		if (!check_type_stdClass_assignable(prop->type)) {
-			return prop;
+			zend_throw_auto_init_in_ref_error(prop, "stdClass");
+			return 0;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-	return NULL;
-}
-
-ZEND_API zend_property_info* ZEND_FASTCALL zend_check_ref_array_assignable(zend_reference *ref) {
-	return i_zend_check_ref_array_assignable(ref);
+	return 1;
 }
 
 static zend_property_info *zend_object_fetch_property_type_info(
@@ -3083,7 +3074,8 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	return -1;
 }
 
-static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict) {
+ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
+{
 	zend_property_info *prop;
 
 	/* The value must satisfy each property type, and coerce to the same value for each property
@@ -3121,11 +3113,6 @@ static zend_always_inline zend_bool i_zend_verify_ref_assignable_zval(zend_refer
 	}
 
 	return 1;
-}
-
-ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict)
-{
-	return i_zend_verify_ref_assignable_zval(ref, zv, strict);
 }
 
 ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref)
@@ -4484,9 +4471,4 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 			break;
 	}
 	return ret;
-}
-
-ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
-{
-	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
