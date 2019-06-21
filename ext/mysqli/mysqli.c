@@ -605,7 +605,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "insert_id",			sizeof("insert_id") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_info", 		sizeof("server_info") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_version", 	sizeof("server_version") - 1, ZEND_ACC_PUBLIC);
-	zend_declare_property_null(ce, "stat", 				sizeof("stat") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "sqlstate", 			sizeof("sqlstate") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "protocol_version", 	sizeof("protocol_version") - 1,  ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "thread_id",			sizeof("thread_id") - 1, ZEND_ACC_PUBLIC);
