@@ -449,6 +449,8 @@ static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_na
 
 			if (php_openssl_matches_wildcard_name(subject_name, (const char *)cert_name)) {
 				OPENSSL_free(cert_name);
+				sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
+
 				return 1;
 			}
 			OPENSSL_free(cert_name);
@@ -461,6 +463,8 @@ static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_na
 					san->d.iPAddress->data[3]
 				);
 				if (strcasecmp(subject_name, (const char*)ipbuffer) == 0) {
+					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
+
 					return 1;
 				}
 			}
@@ -470,6 +474,8 @@ static zend_bool php_openssl_matches_san_list(X509 *peer, const char *subject_na
 			 */
 		}
 	}
+
+	sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
 
 	return 0;
 }
