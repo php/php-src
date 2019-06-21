@@ -1121,7 +1121,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	zval  tmp;
 
 	if (zend_string_equals_literal(delim, "")) { /* If delimiter is empty */
-		long int iterations = ZSTR_LEN(str) + limit; /* limit is negative */
+		zend_long iterations = ZSTR_LEN(str) + limit; /* limit is negative */
 		/* Do nothing if absolute value of limit is larger or equal to string length to return an empty array */
 		if (iterations > 0) {
 			while (iterations-- > 0) {
