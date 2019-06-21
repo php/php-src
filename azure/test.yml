@@ -15,6 +15,7 @@ steps:
       export USE_ZEND_ALLOC=0
       export SKIP_PERF_SENSITIVE=1 # Tests too slow due to ubsan
       export LSAN_OPTIONS=suppressions=$PWD/azure/lsan-suppressions.txt:print_suppressions=0
+      export SKIP_ASAN=1
       rm -rf junit.xml | true
       php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
