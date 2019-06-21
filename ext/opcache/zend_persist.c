@@ -1071,7 +1071,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	zend_accel_store_interned_string(script->script.filename);
 
-#if defined(__AVX__) || defined(__SSE2__)
+#if defined(__AVX__) || defined(__SSE2__) || defined(__aarch64__)
 	/* Align to 64-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
 #else

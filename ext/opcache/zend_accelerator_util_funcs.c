@@ -718,6 +718,18 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 	} while (dqsrc != end);
 }
 # endif
+#elif defined(__aarch64__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	const void *end = src + size;
+	/* Check that the number of bytes to be copied is a multiple of 64. */
+	ZEND_ASSERT(0 == (size % 64));
+	do {
+		memcpy(dest, src, 64);
+		src += 64;
+		dest += 64;
+	} while (src != end);
+}
 #endif
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
@@ -734,9 +746,13 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		ZCG(current_persistent_script) = persistent_script;
 		ZCG(arena_mem) = NULL;
 		if (EXPECTED(persistent_script->arena_size)) {
-#if defined(__AVX__) || defined(__SSE2__)
+#if defined(__AVX__) || defined(__SSE2__) || defined(__aarch64__)
 			/* Target address must be aligned to 64-byte boundary */
+# if defined(__AVX__) || defined(__SSE2__)
 			_mm_prefetch(persistent_script->arena_mem, _MM_HINT_NTA);
+# elif defined(__GNUC__)
+			__builtin_prefetch(persistent_script->arena_mem, 0, 0);
+# endif
 			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size + 64);
 			ZCG(arena_mem) = (void*)(((zend_uintptr_t)ZCG(arena_mem) + 63L) & ~63L);
 			fast_memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
