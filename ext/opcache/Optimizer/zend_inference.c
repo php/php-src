@@ -535,12 +535,16 @@ static inline zend_bool zend_abs_range(
 	return 1;
 }
 
+static inline zend_long safe_shift_left(zend_long n, zend_long s) {
+	return (zend_long) ((zend_ulong) n << (zend_ulong) s);
+}
+
 static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
 	/* This considers shifts that shift in the sign bit to be overflowing as well */
 	if (n >= 0) {
-		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) < n;
+		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;
 	} else {
-		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) > n;
+		return s >= SIZEOF_ZEND_LONG * 8 || safe_shift_left(n, s) > n;
 	}
 }
 
@@ -758,10 +762,10 @@ static int zend_inference_calc_binary_op_range(
 						tmp->min = ZEND_LONG_MIN;
 						tmp->max = ZEND_LONG_MAX;
 					} else {
-						t1 = op1_min << op2_min;
-						t2 = op1_min << op2_max;
-						t3 = op1_max << op2_min;
-						t4 = op1_max << op2_max;
+						t1 = safe_shift_left(op1_min, op2_min);
+						t2 = safe_shift_left(op1_min, op2_max);
+						t3 = safe_shift_left(op1_max, op2_min);
+						t4 = safe_shift_left(op1_max, op2_max);
 						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
 					}
