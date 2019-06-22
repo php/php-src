@@ -461,7 +461,7 @@ PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *pa
 		per the current knowledge.
 		
 		This check is to be extended as new VS versions come out. */
-	if (14 == major && PHP_LINKER_MINOR < minor || PHP_LINKER_MAJOR != major)
+	if (14 == major && PHP_LINKER_MINOR > minor || PHP_LINKER_MAJOR != major)
 #else
 	if (PHP_LINKER_MAJOR != major)
 #endif
