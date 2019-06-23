@@ -448,7 +448,6 @@ AC_CHECK_HEADERS([net/if.h],[], [],
   #endif
   #include <net/if.h>
 ])
-AC_CHECK_HEADERS([netdb.h])
 AC_MSG_CHECKING([for usable getifaddrs])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/types.h>
