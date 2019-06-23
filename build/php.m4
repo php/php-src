@@ -1838,9 +1838,7 @@ AC_DEFUN([PHP_PROG_BISON], [
 
   case $php_bison_check in
     ""|invalid[)]
-      if test -f "$abs_srcdir/Zend/zend_language_parser.h" && test -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_WARN([bison $php_bison_required_version is required if you want to regenerate PHP parsers (excluded versions: $php_bison_excluded_versions)])
-      else
+      if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" && test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
         AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
@@ -1895,9 +1893,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
 
   case $php_re2c_check in
     ""|invalid[)]
-      if test -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_WARN([re2c $php_re2c_required_version is required if you want to regenerate PHP lexers.])
-      else
+      if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
         AC_MSG_ERROR([re2c $php_re2c_required_version is required to generate PHP lexers.])
       fi
 
