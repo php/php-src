@@ -394,9 +394,7 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive);
 ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
-#if HAVE_STRCOLL
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
-#endif
 
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);

@@ -1969,7 +1969,6 @@ ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2) /*
 }
 /* }}} */
 
-#if HAVE_STRCOLL
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2) /* {{{ */
 {
 	zend_string *tmp_str1, *tmp_str2;
@@ -1982,7 +1981,6 @@ ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2) 
 	return ret;
 }
 /* }}} */
-#endif
 
 ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2) /* {{{ */
 {
