@@ -1838,7 +1838,7 @@ AC_DEFUN([PHP_PROG_BISON], [
 
   case $php_bison_check in
     ""|invalid[)]
-      if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" && test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
+      if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" || test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
         AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
