@@ -1,8 +1,5 @@
 dnl Check for headers needed by timelib
-AC_CHECK_HEADERS([ \
-strings.h \
-io.h
-])
+AC_CHECK_HEADERS([io.h])
 
 dnl Check for strtoll, atoll
 AC_CHECK_FUNCS(strtoll atoll)

@@ -126,16 +126,7 @@ dnl
 AC_DEFUN([LIBZEND_BASIC_CHECKS],[
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS(
-inttypes.h \
-stdint.h \
-malloc.h \
-unistd.h \
-sys/types.h \
-sys/time.h \
-unix.h \
-cpuid.h \
-dlfcn.h)
+AC_CHECK_HEADERS([cpuid.h])
 
 dnl
 dnl LIBZEND_DLSYM_CHECK
