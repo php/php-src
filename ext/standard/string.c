@@ -701,7 +701,6 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 /* }}} */
 
-#ifdef HAVE_STRCOLL
 /* {{{ proto int strcoll(string str1, string str2)
    Compares two strings using the current locale */
 PHP_FUNCTION(strcoll)
@@ -717,7 +716,6 @@ PHP_FUNCTION(strcoll)
 	                    (const char *) ZSTR_VAL(s2)));
 }
 /* }}} */
-#endif
 
 /* {{{ php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',

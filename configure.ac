@@ -641,7 +641,6 @@ statfs \
 statvfs \
 std_syslog \
 strcasecmp \
-strcoll \
 strdup \
 strerror \
 strnlen \

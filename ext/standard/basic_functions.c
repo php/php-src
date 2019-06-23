@@ -2162,12 +2162,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_nl_langinfo, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_STRCOLL
 ZEND_BEGIN_ARG_INFO(arginfo_strcoll, 0)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_trim, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
@@ -2803,10 +2801,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(substr_compare,													arginfo_substr_compare)
 	PHP_FE(utf8_encode, 													arginfo_utf8_encode)
 	PHP_FE(utf8_decode, 													arginfo_utf8_decode)
-
-#ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															arginfo_strcoll)
-#endif
 
 #ifdef HAVE_STRFMON
 	PHP_FE(money_format,													arginfo_money_format)
@@ -4140,10 +4135,10 @@ PHP_FUNCTION(getenv)
 #else
 
     tsrm_env_lock();
-    
+
 	/* system method returns a const */
 	ptr = getenv(str);
-	
+
 	if (ptr) {
 		RETVAL_STRING(ptr);
 	}
