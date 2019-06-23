@@ -17,7 +17,6 @@ list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
 
 $fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
 if (!$fp) {
   die("connect failed");
 }
