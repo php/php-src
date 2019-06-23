@@ -35,7 +35,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       if test -x "$PCRE2_CONF"; then
         AC_MSG_CHECKING(for PCRE2 10.30 or greater)
         PCRE2_VER=`$PCRE2_CONF --version`
-        if test "`echo $PCRE2_VER | sed 's,\.,,g'`" -lt 1030; then
+        if test "`echo $PCRE2_VER | $SED 's/\([[0-9]]*\)\.\([[0-9]]*\).*/\1\2/g'`" -lt "1030"; then
           AC_MSG_ERROR(PCRE2 version 10.30 or later is required to compile php with PCRE2 support)
         else
           AC_MSG_RESULT($PCRE2_VER)
