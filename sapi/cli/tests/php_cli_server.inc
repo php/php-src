@@ -109,21 +109,4 @@ php_cli_server_start_error:
 
     return $handle;
 }
-
-function php_cli_server_stop($handle) {
-    $success = FALSE;
-    if ($handle) {
-        proc_terminate($handle);
-        /* Wait for server to shutdown */
-        for ($i = 0; $i < 60; $i++) {
-            $status = proc_get_status($handle);
-            if (!($status && $status['running'])) {
-                $success = TRUE;
-                break;
-            }
-            usleep(50000);
-        }
-    }
-    return $success;
-}
 ?>
