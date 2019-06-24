@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
+- Standard:
+  . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
+
 27 Jun 2019, PHP 7.4.0alpha2
 
 - Core:

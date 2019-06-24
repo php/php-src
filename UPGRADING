@@ -279,6 +279,12 @@ PHP 7.4 UPGRADE NOTES
     arguments, in which case they will return an empty array. This is useful
     in conjunction with the spread operator, e.g. array_merge(...$arrays).
 
+  . proc_open() now accepts an array instead of a string for the command. In
+    this case the process will be opened directly (without going through a
+    shell) and PHP will take care of any necessary argument escaping.
+
+        proc_open(['php', '-r', 'echo "Hello World\n";'], $descriptors, $pipes);
+
 ========================================
 3. Changes in SAPI modules
 ========================================
