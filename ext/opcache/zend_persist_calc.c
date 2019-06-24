@@ -141,6 +141,10 @@ static void zend_persist_zval_calc(zval *z)
 				zend_persist_ast_calc(Z_ASTVAL_P(z));
 			}
 			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);
+			ZEND_ASSERT(Z_TYPE_P(z) != IS_RESOURCE);
+			break;
 	}
 }
 
