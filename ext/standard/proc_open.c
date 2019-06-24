@@ -956,7 +956,9 @@ PHP_FUNCTION(proc_open)
 
 		if (argv) {
 			/* execvpe() is non-portable, use environ instead. */
-			environ = env.envarray;
+			if (env.envarray) {
+				environ = env.envarray;
+			}
 			execvp(command, argv);
 		} else {
 			if (env.envarray) {
