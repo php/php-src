@@ -45,7 +45,7 @@ void list_entry_destructor(zval *ptr);
 void plist_entry_destructor(zval *ptr);
 
 void zend_clean_module_rsrc_dtors(int module_number);
-int zend_init_rsrc_list(void);
+ZEND_API int zend_init_rsrc_list(void); /* Exported for phar hack */
 int zend_init_rsrc_plist(void);
 void zend_close_rsrc_list(HashTable *ht);
 void zend_destroy_rsrc_list(HashTable *ht);
