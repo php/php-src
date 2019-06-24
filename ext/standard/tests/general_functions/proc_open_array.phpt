@@ -32,6 +32,22 @@ $proc = proc_open($cmd, $ds, $pipes, null, $env);
 fpassthru($pipes[1]);
 proc_close($proc);
 
+echo "\nCheck that arguments are correctly passed through:\n";
+$args = [
+    "Simple",
+    "White space\ttab\nnewline",
+    "Nul\0bytes", // Should be cut off
+    '"Quoted"',
+    'Qu"ot"ed',
+    '\\Back\\slash\\',
+    '\\\\Back\\\\slash\\\\',
+    '\\"Qu\\"ot\\"ed\\"',
+];
+$cmd = [$php, '-r', 'var_export(array_slice($argv, 1));', '--', ...$args];
+$proc = proc_open($cmd, $ds, $pipes);
+fpassthru($pipes[1]);
+proc_close($proc);
+
 ?>
 --EXPECTF--
 Empty command array:
@@ -47,3 +63,16 @@ bool(false)
 Explicit environment:
 bool(false)
 string(5) "ENV_2"
+
+Check that arguments are correctly passed through:
+array (
+  0 => 'Simple',
+  1 => 'White space	tab
+newline',
+  2 => 'Nul',
+  3 => '"Quoted"',
+  4 => 'Qu"ot"ed',
+  5 => '\\Back\\slash\\',
+  6 => '\\\\Back\\\\slash\\\\',
+  7 => '\\"Qu\\"ot\\"ed\\"',
+)
