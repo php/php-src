@@ -463,7 +463,7 @@ static char *create_win_command_from_args(HashTable *args) {
 PHP_FUNCTION(proc_open)
 {
 	zval *command_zv;
-	char *command, *cwd=NULL;
+	char *command = NULL, *cwd = NULL;
 	size_t cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
@@ -549,6 +549,9 @@ PHP_FUNCTION(proc_open)
 			zend_string_release(arg_str);
 		} ZEND_HASH_FOREACH_END();
 		argv[i] = NULL;
+
+		/* As the array is non-empty, we should have found a command. */
+		ZEND_ASSERT(command);
 #endif
 	} else {
 		convert_to_string(command_zv);
