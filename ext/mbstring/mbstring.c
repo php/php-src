@@ -3409,10 +3409,11 @@ PHP_FUNCTION(mb_convert_encoding)
 
 static char *mbstring_convert_case(
 		int case_mode, const char *str, size_t str_len, size_t *ret_len,
-		const mbfl_encoding *enc) {
+		const mbfl_encoding *enc, HashTable **offset_table) {
 	return php_unicode_convert_case(
 		case_mode, str, str_len, ret_len, enc,
-		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar),
+		offset_table);
 }
 
 /* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
@@ -3443,7 +3444,7 @@ PHP_FUNCTION(mb_convert_case)
 		return;
 	}
 
-	newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc, NULL);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3475,7 +3476,7 @@ PHP_FUNCTION(mb_strtoupper)
 		RETURN_FALSE;
 	}
 
-	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc, NULL);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3509,7 +3510,7 @@ PHP_FUNCTION(mb_strtolower)
 		RETURN_FALSE;
 	}
 
-	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc, NULL);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -5304,6 +5305,44 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nby
 }
 /* }}} */
 
+static size_t to_orig_offset(size_t new_offset, HashTable *offset_table) {
+	zend_ulong orig_offset_key;
+	zval *new_offset_zv;
+	size_t last_orig_offset = 0, last_new_offset = 0;
+	if (!offset_table) {
+		return new_offset;
+	}
+
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(offset_table, orig_offset_key, new_offset_zv) {
+		if (Z_LVAL_P(new_offset_zv) > new_offset) {
+			break;
+		}
+
+		last_orig_offset = orig_offset_key;
+		last_new_offset = Z_LVAL_P(new_offset_zv);
+	} ZEND_HASH_FOREACH_END();
+	return last_orig_offset + (new_offset - last_new_offset);
+}
+
+static size_t to_new_offset(size_t orig_offset, HashTable *offset_table) {
+	zend_ulong orig_offset_key;
+	zval *new_offset_zv;
+	size_t last_orig_offset = 0, last_new_offset = 0;
+	if (!offset_table) {
+		return orig_offset;
+	}
+
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(offset_table, orig_offset_key, new_offset_zv) {
+		if (orig_offset_key > orig_offset) {
+			break;
+		}
+
+		last_orig_offset = orig_offset_key;
+		last_new_offset = Z_LVAL_P(new_offset_zv);
+	} ZEND_HASH_FOREACH_END();
+	return last_new_offset + (orig_offset - last_orig_offset);
+}
+
 /* {{{ MBSTRING_API int php_mb_stripos()
  */
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, zend_string *from_encoding)
@@ -5311,6 +5350,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 	size_t n = (size_t) -1;
 	mbfl_string haystack, needle;
 	const mbfl_encoding *enc;
+	HashTable *offset_table;
 
 	enc = php_mb_get_encoding(from_encoding);
 	if (!enc) {
@@ -5325,11 +5365,8 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 	needle.encoding = enc;
 
 	do {
-		/* We're using simple case-folding here, because we'd have to deal with remapping of
-		 * offsets otherwise. */
-
 		size_t len = 0;
-		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
+		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_haystack, old_haystack_len, &len, enc, &offset_table);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5340,7 +5377,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
-		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
+		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD, (char *)old_needle, old_needle_len, &len, enc, NULL);
 		needle.len = len;
 
 		if (!needle.val) {
@@ -5352,23 +5389,41 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		}
 
  		if (offset != 0) {
- 			size_t haystack_char_len = mbfl_strlen(&haystack);
+			mbfl_string orig_haystack;
+			size_t orig_haystack_len;
+
+			orig_haystack.val = (unsigned char *) old_haystack;
+			orig_haystack.len = old_haystack_len;
+			orig_haystack.no_language = MBSTRG(language);
+			orig_haystack.encoding = enc;
+ 			orig_haystack_len = mbfl_strlen(&orig_haystack);
 
  			if (mode) {
-				if ((offset > 0 && (size_t)offset > haystack_char_len) ||
-					(offset < 0 && (size_t)(-offset) > haystack_char_len)) {
+				if ((offset > 0 && (size_t)offset > orig_haystack_len) ||
+					(offset < 0 && (size_t)(-offset) > orig_haystack_len)) {
  					php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
  					break;
  				}
  			} else {
 				if (offset < 0) {
-					offset += (zend_long)haystack_char_len;
+					offset += (zend_long)orig_haystack_len;
 				}
-				if (offset < 0 || (size_t)offset > haystack_char_len) {
+				if (offset < 0 || (size_t)offset > orig_haystack_len) {
  					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
  					break;
  				}
  			}
+
+			if (offset_table) {
+				if (offset < 0) {
+					size_t haystack_len = mbfl_strlen(&haystack);
+					offset += orig_haystack_len;
+					offset = to_new_offset(offset, offset_table);
+					offset -= haystack_len;
+				} else {
+					offset = to_new_offset(offset, offset_table);
+				}
+			}
 		}
 
 		n = mbfl_strpos(&haystack, &needle, offset, mode);
@@ -5382,7 +5437,16 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		efree(needle.val);
 	}
 
-	return n;
+	if (offset_table) {
+		zend_hash_destroy(offset_table);
+		FREE_HASHTABLE(offset_table);
+	}
+
+	if (mbfl_is_error(n)) {
+		return n;
+	}
+
+	return to_orig_offset(n, offset_table);
 }
 /* }}} */
 

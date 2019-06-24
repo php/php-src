@@ -305,6 +305,9 @@ struct convert_case_data {
 	enum mbfl_no_encoding no_encoding;
 	int case_mode;
 	int title_mode;
+	size_t orig_offset;
+	size_t new_offset;
+	HashTable **offset_table;
 };
 
 static int convert_case_filter(int c, void *void_data)
@@ -374,15 +377,33 @@ static int convert_case_filter(int c, void *void_data)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	for (i = 0; i < len; i++) {
-		(*data->next_filter->filter_function)(out[i], data->next_filter);
+	if (EXPECTED(len == 1)) {
+		(*data->next_filter->filter_function)(*out, data->next_filter);
+		data->orig_offset++;
+		data->new_offset++;
+	} else {
+		for (i = 0; i < len; i++) {
+			(*data->next_filter->filter_function)(out[i], data->next_filter);
+		}
+		data->orig_offset++;
+		data->new_offset += len;
+		if (data->offset_table) {
+			zval zv_new_offset;
+			if (!*data->offset_table) {
+				ALLOC_HASHTABLE(*data->offset_table);
+				zend_hash_init(*data->offset_table, 0, NULL, NULL, 0);
+			}
+			ZVAL_LONG(&zv_new_offset, data->new_offset);
+			zend_hash_index_update(*data->offset_table, data->orig_offset, &zv_new_offset);
+		}
 	}
 	return 0;
 }
 
 MBSTRING_API char *php_unicode_convert_case(
 		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar)
+		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar,
+		HashTable **offset_table)
 {
 	struct convert_case_data data;
 	mbfl_convert_filter *from_wchar, *to_wchar;
@@ -390,6 +411,10 @@ MBSTRING_API char *php_unicode_convert_case(
 
 	mbfl_memory_device device;
 	mbfl_memory_device_init(&device, srclen + 1, 0);
+
+	if (offset_table) {
+		*offset_table = NULL;
+	}
 
 	/* encoding -> wchar filter */
 	to_wchar = mbfl_convert_filter_new(src_encoding,
@@ -418,6 +443,9 @@ MBSTRING_API char *php_unicode_convert_case(
 	data.no_encoding = src_encoding->no_encoding;
 	data.case_mode = case_mode;
 	data.title_mode = 0;
+	data.orig_offset = 0;
+	data.new_offset = 0;
+	data.offset_table = offset_table;
 
 	{
 		/* feed data */
