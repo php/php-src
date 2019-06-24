@@ -2140,9 +2140,6 @@ TEST $file
 			if ($valgrind) {
 				$env['USE_ZEND_ALLOC'] = '0';
 				$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
-			} else {
-				$env['USE_ZEND_ALLOC'] = '1';
-				$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 			}
 
 			junit_start_timer($shortname);
@@ -2444,9 +2441,6 @@ TEST $file
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
 		$cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
-	} else {
-		$env['USE_ZEND_ALLOC'] = '1';
-		$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 	}
 
 	if ($DETAILED) echo "
