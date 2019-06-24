@@ -7,7 +7,7 @@ class Loader {
 			return self::$loader;
 		}
 		return self::$loader = new Loader();
-	}		
+	}
 
 	static function getCounter() {
 		static $counter = 0;

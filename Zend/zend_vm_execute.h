@@ -47533,7 +47533,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 
 	ht = ZEND_MAP_PTR_GET(EX(func)->op_array.static_variables_ptr);
 	if (!ht) {
-		ZEND_ASSERT(EX(func)->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
+		ZEND_ASSERT(EX(func)->op_array.fn_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED));
 		ht = zend_array_dup(EX(func)->op_array.static_variables);
 		ZEND_MAP_PTR_SET(EX(func)->op_array.static_variables_ptr, ht);
 	} else if (GC_REFCOUNT(ht) > 1) {

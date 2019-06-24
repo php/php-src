@@ -3176,7 +3176,6 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 			}
 			if (copy) {
 				_zend_hash_append_ptr(dst, p->key, function);
-				function->common.fn_flags |= ZEND_ACC_PRELOADED;
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3210,15 +3209,7 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 				}
 			}
 			if (copy) {
-				zend_function *function;
-
-				ce->ce_flags |= ZEND_ACC_PRELOADED;
 				_zend_hash_append_ptr(dst, p->key, ce);
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
-					if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-						function->common.fn_flags |= ZEND_ACC_PRELOADED;
-					}
-				} ZEND_HASH_FOREACH_END();
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3481,6 +3472,7 @@ static void preload_link(void)
 	uint32_t i;
 	zend_op_array *op_array;
 	dtor_func_t orig_dtor;
+	zend_function *function;
 
 	/* Resolve class dependencies */
 	do {
@@ -3653,6 +3645,12 @@ static void preload_link(void)
 			continue;
 		}
 		ce->ce_flags &= ~ZEND_ACC_PRELOADED;
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
+			if (EXPECTED(function->type == ZEND_USER_FUNCTION)
+			 && function->common.scope == ce) {
+				function->common.fn_flags &= ~ZEND_ACC_PRELOADED;
+			}
+		} ZEND_HASH_FOREACH_END();
 		script = zend_hash_find_ptr(preload_scripts, ce->info.user.filename);
 		ZEND_ASSERT(script);
 		zend_hash_add(&script->script.class_table, key, zv);
