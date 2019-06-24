@@ -79,7 +79,7 @@ ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int f
 
 ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);
 
-ZEND_API int zend_ts_hash_rehash(TsHashTable *ht);
+ZEND_API void zend_ts_hash_rehash(TsHashTable *ht);
 
 #if ZEND_DEBUG
 /* debug */
