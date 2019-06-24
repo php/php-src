@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - GD:
   . Added TGA read support. (cmb)
 
+- MySQLi:
+  . Fixed bug #67348 (Reading $dbc->stat modifies $dbc->affected_rows).
+    (Derick)
+
 - Opcache:
   . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
     (Nikita)

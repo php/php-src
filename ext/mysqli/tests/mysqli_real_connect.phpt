@@ -207,8 +207,6 @@ object(mysqli)#%d (%d) {
   bool(false)
   ["server_version"]=>
   bool(false)
-  ["stat"]=>
-  bool(false)
   ["sqlstate"]=>
   bool(false)
   ["protocol_version"]=>
