@@ -3176,7 +3176,6 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 			}
 			if (copy) {
 				_zend_hash_append_ptr(dst, p->key, function);
-				function->common.fn_flags |= ZEND_ACC_PRELOADED;
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3210,15 +3209,7 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 				}
 			}
 			if (copy) {
-				zend_function *function;
-
-				ce->ce_flags |= ZEND_ACC_PRELOADED;
 				_zend_hash_append_ptr(dst, p->key, ce);
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
-					if (EXPECTED(function->type == ZEND_USER_FUNCTION)) {
-						function->common.fn_flags |= ZEND_ACC_PRELOADED;
-					}
-				} ZEND_HASH_FOREACH_END();
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3481,6 +3472,7 @@ static void preload_link(void)
 	uint32_t i;
 	zend_op_array *op_array;
 	dtor_func_t orig_dtor;
+	zend_function *function;
 
 	/* Resolve class dependencies */
 	do {
@@ -3652,6 +3644,13 @@ static void preload_link(void)
 		} else {
 			continue;
 		}
+		ce->ce_flags &= ~ZEND_ACC_PRELOADED;
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, function) {
+			if (EXPECTED(function->type == ZEND_USER_FUNCTION)
+			 && function->common.scope == ce) {
+				function->common.fn_flags &= ~ZEND_ACC_PRELOADED;
+			}
+		} ZEND_HASH_FOREACH_END();
 		script = zend_hash_find_ptr(preload_scripts, ce->info.user.filename);
 		ZEND_ASSERT(script);
 		zend_hash_add(&script->script.class_table, key, zv);
@@ -4006,6 +4005,8 @@ static int accel_preload(const char *config)
 	int ret;
 	uint32_t orig_compiler_options;
 	char *orig_open_basedir;
+	size_t orig_map_ptr_last;
+	zval *zv;
 
 	ZCG(enabled) = 0;
 	ZCG(accelerator_enabled) = 0;
@@ -4021,6 +4022,8 @@ static int accel_preload(const char *config)
 	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 //	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+
+	orig_map_ptr_last = CG(map_ptr_last);
 
 	/* Compile and execute proloading script */
 	memset(&file_handle, 0, sizeof(file_handle));
@@ -4105,10 +4108,58 @@ static int accel_preload(const char *config)
 
 		zend_objects_store_free_object_storage(&EG(objects_store), 1);
 
+		/* Cleanup static variables of preloaded functions */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+			zend_op_array *op_array = Z_PTR_P(zv);
+			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			}
+			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_PRELOADED);
+			if (op_array->static_variables) {
+				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+				if (ht) {
+					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+					zend_array_destroy(ht);
+					ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* Cleanup static properties and variables of preloaded classes */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+			zend_class_entry *ce = Z_PTR_P(zv);
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			}
+			ZEND_ASSERT(ce->ce_flags & ZEND_ACC_PRELOADED);
+			if (ce->default_static_members_count) {
+				zend_cleanup_internal_class_data(ce);
+			}
+			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+				zend_op_array *op_array;
+
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+					if (op_array->type == ZEND_USER_FUNCTION) {
+						if (op_array->static_variables) {
+							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+							if (ht) {
+								ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+								zend_array_destroy(ht);
+								ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+							}
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		CG(map_ptr_last) = orig_map_ptr_last;
+
 		/* Inheritance errors may be thrown during linking */
 		zend_try {
 			preload_link();
 		} zend_catch {
+			CG(map_ptr_last) = orig_map_ptr_last;
 			ret = FAILURE;
 			goto finish;
 		} zend_end_try();
@@ -4234,6 +4285,8 @@ static int accel_preload(const char *config)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
+	} else {
+		CG(map_ptr_last) = orig_map_ptr_last;
 	}
 
 finish:

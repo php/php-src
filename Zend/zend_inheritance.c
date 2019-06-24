@@ -1178,7 +1178,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
 			if (CE_STATIC_MEMBERS(parent_ce) == NULL) {
-				ZEND_ASSERT(parent_ce->ce_flags & ZEND_ACC_IMMUTABLE);
+				ZEND_ASSERT(parent_ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED));
 				zend_class_init_statics(parent_ce);
 			}
 			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;

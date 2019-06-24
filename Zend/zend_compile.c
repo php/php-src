@@ -5877,8 +5877,14 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
-	ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
-	ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		op_array->fn_flags |= ZEND_ACC_PRELOADED;
+		ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+		ZEND_MAP_PTR_NEW(op_array->static_variables_ptr);
+	} else {
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
+		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
+	}
 
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;
@@ -6312,6 +6318,11 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	ce->type = ZEND_USER_CLASS;
 	ce->name = name;
 	zend_initialize_class_data(ce, 1);
+
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		ce->ce_flags |= ZEND_ACC_PRELOADED;
+		ZEND_MAP_PTR_NEW(ce->static_members_table);
+	}
 
 	ce->ce_flags |= decl->flags;
 	ce->info.user.filename = zend_get_compiled_filename();

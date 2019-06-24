@@ -247,6 +247,10 @@ static void zend_persist_zval(zval *z)
 				efree(old_ref);
 			}
 			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(z) != IS_OBJECT);
+			ZEND_ASSERT(Z_TYPE_P(z) != IS_RESOURCE);
+			break;
 	}
 }
 
