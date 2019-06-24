@@ -130,37 +130,33 @@ static void phar_split_cache_list(void) /* {{{ */
 	for (key = php_strtok_r(tmp, ds, &lasts);
 			key;
 			key = php_strtok_r(NULL, ds, &lasts)) {
+		size_t len;
 		end = strchr(key, DEFAULT_DIR_SEPARATOR);
-
 		if (end) {
-			if (SUCCESS == phar_open_from_filename(key, end - key, NULL, 0, 0, &phar, NULL)) {
-finish_up:
-				phar->phar_pos = i++;
-				php_stream_close(phar->fp);
-				phar->fp = NULL;
-			} else {
-finish_error:
-				PHAR_G(persist) = 0;
-				PHAR_G(manifest_cached) = 0;
-				efree(tmp);
-				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-				HT_INVALIDATE(&PHAR_G(phar_fname_map));
-				zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-				HT_INVALIDATE(&PHAR_G(phar_alias_map));
-				zend_hash_destroy(&cached_phars);
-				zend_hash_destroy(&cached_alias);
-				zend_hash_graceful_reverse_destroy(&EG(regular_list));
-				memset(&EG(regular_list), 0, sizeof(HashTable));
-				/* free cached manifests */
-				PHAR_G(request_init) = 0;
-				return;
-			}
+			len = end - key;
 		} else {
-			if (SUCCESS == phar_open_from_filename(key, strlen(key), NULL, 0, 0, &phar, NULL)) {
-				goto finish_up;
-			} else {
-				goto finish_error;
-			}
+			len = strlen(key);
+		}
+
+		if (SUCCESS == phar_open_from_filename(key, len, NULL, 0, 0, &phar, NULL)) {
+			phar->phar_pos = i++;
+			php_stream_close(phar->fp);
+			phar->fp = NULL;
+		} else {
+			PHAR_G(persist) = 0;
+			PHAR_G(manifest_cached) = 0;
+			efree(tmp);
+			zend_hash_destroy(&(PHAR_G(phar_fname_map)));
+			HT_INVALIDATE(&PHAR_G(phar_fname_map));
+			zend_hash_destroy(&(PHAR_G(phar_alias_map)));
+			HT_INVALIDATE(&PHAR_G(phar_alias_map));
+			zend_hash_destroy(&cached_phars);
+			zend_hash_destroy(&cached_alias);
+			zend_hash_graceful_reverse_destroy(&EG(regular_list));
+			memset(&EG(regular_list), 0, sizeof(HashTable));
+			/* free cached manifests */
+			PHAR_G(request_init) = 0;
+			return;
 		}
 	}
 
