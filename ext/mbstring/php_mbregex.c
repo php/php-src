@@ -1157,7 +1157,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				if (zend_eval_stringl(ZSTR_VAL(eval_str), ZSTR_LEN(eval_str), &v, description) == FAILURE) {
 					efree(description);
 					zend_throw_error(NULL, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_str));
-					onig_region_free(regs, 0);
+					onig_region_free(regs, 1);
 					smart_str_free(&out_buf);
 					smart_str_free(&eval_buf);
 					RETURN_FALSE;
