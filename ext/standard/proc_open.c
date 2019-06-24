@@ -34,6 +34,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
+#include "zend_smart_string.h"
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -399,6 +400,64 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
+#ifdef PHP_WIN32
+static void append_backslashes(smart_string *str, size_t num_bs) {
+	size_t i;
+	for (i = 0; i < num_bs; i++) {
+		smart_string_appendc(str, '\\');
+	}
+}
+
+/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments */
+static void append_win_escaped_arg(smart_string *str, char *arg) {
+	char c;
+	size_t num_bs = 0;
+	smart_string_appendc(str, '"');
+	while ((c = *arg)) {
+		if (c == '\\') {
+			num_bs++;
+		} else {
+			if (c == '"') {
+				/* Backslashes before " need to be doubled. */
+				num_bs = num_bs * 2 + 1;
+			}
+			append_backslashes(str, num_bs);
+			smart_string_appendc(str, c);
+			num_bs = 0;
+		}
+		arg++;
+	}
+	append_backslashes(str, num_bs * 2);
+	smart_string_appendc(str, '"');
+}
+
+static char *create_win_command_from_args(HashTable *args) {
+	smart_string str = {0};
+	zval *arg_zv;
+	zend_bool is_prog_name = 1;
+
+	ZEND_HASH_FOREACH_VAL(args, arg_zv) {
+		zend_string *arg_str = zval_try_get_string(arg_zv);
+		if (!arg_str) {
+			smart_string_free(&str);
+			return NULL;
+		}
+
+		if (!is_prog_name) {
+			smart_string_appendc(&str, ' ');
+		}
+
+		// TODO Do we need special handling for the program name?
+		append_win_escaped_arg(&str, ZSTR_VAL(arg_str));
+
+		is_prog_name = 0;
+		zend_string_release(arg_str);
+	} ZEND_HASH_FOREACH_END();
+	smart_string_0(&str);
+	return str.c;
+}
+#endif
+
 /* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
@@ -463,7 +522,11 @@ PHP_FUNCTION(proc_open)
 		}
 
 #ifdef PHP_WIN32
-		TODO
+		bypass_shell = 1;
+		command = create_win_command_from_args(Z_ARRVAL_P(command_zv));
+		if (!command) {
+			return;
+		}
 #else
 		argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
 		i = 0;
@@ -501,6 +564,7 @@ PHP_FUNCTION(proc_open)
 			}
 		}
 
+		/* TODO Deprecate in favor of array command? */
 		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
