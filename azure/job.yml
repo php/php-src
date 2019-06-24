@@ -4,6 +4,7 @@ parameters:
 
 jobs:
   - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: 100
     pool:
       vmImage: 'ubuntu-latest'
     steps:
