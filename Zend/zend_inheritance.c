@@ -398,16 +398,12 @@ static inheritance_status zend_do_perform_implementation_check(
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	if ((fe->common.fn_flags & ZEND_ACC_CTOR)
+	ZEND_ASSERT(!((fe->common.fn_flags & ZEND_ACC_CTOR)
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)) {
-		return INHERITANCE_SUCCESS;
-	}
+			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)));
 
 	/* If the prototype method is private do not enforce a signature */
-	if (proto->common.fn_flags & ZEND_ACC_PRIVATE) {
-		return INHERITANCE_SUCCESS;
-	}
+	ZEND_ASSERT(!(proto->common.fn_flags & ZEND_ACC_PRIVATE));
 
 	/* check number of arguments */
 	if (proto->common.required_num_args < fe->common.required_num_args
