@@ -718,6 +718,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
+	zend_function *proto;
 
 	if (UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
 		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
@@ -751,55 +752,50 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
-	do {
-		if (!(parent_flags & ZEND_ACC_PRIVATE)) {
-			zend_function *proto = parent->common.prototype ?
-				parent->common.prototype : parent;
+	if (parent_flags & ZEND_ACC_PRIVATE) {
+		return;
+	}
 
-			if (!(parent_flags & ZEND_ACC_CTOR)) {
-				if (!proto) {
-					proto = parent;
-				}
-			} else if (proto) {
-				/* ctors only have a prototype if is abstract (or comes from an interface) */
-				/* and if that is the case, we want to check inheritance against it */
-				if (proto->common.fn_flags & ZEND_ACC_ABSTRACT) {
-					parent = proto;
-				} else {
-					break;
-				}
-			} else {
-				break;
-			}
-			if (child_zv && child->common.prototype != proto) {
-				do {
-					if (child->common.scope != ce
-					 && child->type == ZEND_USER_FUNCTION
-					 && !child->op_array.static_variables) {
-						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-							/* Few parent interfaces contain the same method */
-							break;
-						} else {
-							/* op_array wasn't duplicated yet */
-							zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-							memcpy(new_function, child, sizeof(zend_op_array));
-							Z_PTR_P(child_zv) = child = new_function;
-						}
-					}
-					child->common.prototype = proto;
-				} while (0);
-			}
-			/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-			if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-				zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
-					"Access level to %s::%s() must be %s (as in class %s)%s",
-					ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
-			}
+	proto = parent->common.prototype ?
+		parent->common.prototype : parent;
 
-			perform_delayable_implementation_check(
-				ce, child, parent, /*always_error*/0);
+	if (parent_flags & ZEND_ACC_CTOR) {
+		/* ctors only have a prototype if is abstract (or comes from an interface) */
+		/* and if that is the case, we want to check inheritance against it */
+		if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			return;
 		}
-	} while (0);
+		parent = proto;
+	}
+
+	if (child_zv && child->common.prototype != proto) {
+		do {
+			if (child->common.scope != ce
+			 && child->type == ZEND_USER_FUNCTION
+			 && !child->op_array.static_variables) {
+				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+					/* Few parent interfaces contain the same method */
+					break;
+				} else {
+					/* op_array wasn't duplicated yet */
+					zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+					memcpy(new_function, child, sizeof(zend_op_array));
+					Z_PTR_P(child_zv) = child = new_function;
+				}
+			}
+			child->common.prototype = proto;
+		} while (0);
+	}
+
+	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
+	if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
+		zend_error_at_noreturn(E_COMPILE_ERROR, NULL, func_lineno(child),
+			"Access level to %s::%s() must be %s (as in class %s)%s",
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+	}
+
+	perform_delayable_implementation_check(
+		ce, child, parent, /*always_error*/0);
 }
 /* }}} */
 
@@ -2399,11 +2395,10 @@ zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce)
 
 			/* ctors only have a prototype if is abstract (or comes from an interface) */
 			/* and if that is the case, we want to check inheritance against it */
-			if (proto->common.fn_flags & ZEND_ACC_ABSTRACT) {
-				parent_func = proto;
-			} else {
+			if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 				continue;
 			}
+			parent_func = proto;
 		}
 
 		zv = zend_hash_find_ex(&ce->function_table, key, 1);
