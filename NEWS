@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 
 - OPcache:
   . Fixed #78189 (file cache strips last character of uname hash). (cmb)
+  . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
 27 Jun 2019, PHP 7.2.20
 
