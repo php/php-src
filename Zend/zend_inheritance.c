@@ -2362,11 +2362,11 @@ static void report_variance_errors(zend_class_entry *ce) {
 	zend_hash_index_del(all_obligations, num_key);
 }
 
-ZEND_API void zend_do_link_class(zend_class_entry *ce) /* {{{ */
+ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
 {
 	if (ce->parent_name) {
 		zend_class_entry *parent = zend_fetch_class_by_name(
-			ce->parent_name, NULL, ZEND_FETCH_CLASS_ALLOW_UNLINKED);
+			ce->parent_name, lc_parent_name, ZEND_FETCH_CLASS_ALLOW_UNLINKED);
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);
 		}

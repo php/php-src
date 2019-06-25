@@ -3582,7 +3582,7 @@ static void preload_link(void)
 					} else {
 						CG(zend_lineno) = ce->info.user.line_start;
 					}
-					zend_do_link_class(ce);
+					zend_do_link_class(ce, NULL);
 					CG(in_compilation) = 0;
 					CG(compiled_filename) = NULL;
 

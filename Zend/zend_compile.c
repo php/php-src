@@ -1057,7 +1057,7 @@ ZEND_API int do_bind_function(zval *lcname) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int do_bind_class(zval *lcname) /* {{{ */
+ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 {
 	zend_class_entry *ce;
 	zval *rtd_key, *zv;
@@ -1084,7 +1084,7 @@ ZEND_API int do_bind_class(zval *lcname) /* {{{ */
 		return FAILURE;
 	}
 
-	zend_do_link_class(ce);
+	zend_do_link_class(ce, lc_parent_name);
 	return SUCCESS;
 }
 /* }}} */
@@ -1151,9 +1151,11 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 			const zend_op *opline = &op_array->opcodes[opline_num];
 			zval *lcname = RT_CONSTANT(opline, opline->op1);
 			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname + 1));
-			zend_class_entry *parent_ce = zend_lookup_class(ce->parent_name);
+			zend_string *lc_parent_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+			zend_class_entry *parent_ce = zend_lookup_class_ex(ce->parent_name, lc_parent_name, 0);
+
 			if (ce && parent_ce && zend_can_early_bind(ce, parent_ce)) {
-				do_bind_class(lcname);
+				do_bind_class(lcname, lc_parent_name);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
 		}
@@ -6457,6 +6459,13 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	}
 
 	opline = get_next_op();
+
+	if (ce->parent_name) {
+		/* Lowercased parent name */
+		zend_string *lc_parent_name = zend_string_tolower(ce->parent_name);
+		opline->op2_type = IS_CONST;
+		LITERAL_STR(opline->op2, lc_parent_name);
+	}
 
 	opline->op1_type = IS_CONST;
 	LITERAL_STR(opline->op1, lcname);
