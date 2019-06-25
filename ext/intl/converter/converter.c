@@ -820,7 +820,7 @@ static PHP_METHOD(UConverter, transcode) {
 
 		if (U_SUCCESS(error) &&
 			(ret = php_converter_do_convert(dest_cnv, src_cnv, str, str_len, NULL)) != NULL) {
-			RETURN_NEW_STR(ret);
+			RETVAL_NEW_STR(ret);
 		}
 
 		if (U_FAILURE(error)) {

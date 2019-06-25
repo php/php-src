@@ -206,7 +206,7 @@ void plist_entry_destructor(zval *zv)
 	free(res);
 }
 
-int zend_init_rsrc_list(void)
+ZEND_API int zend_init_rsrc_list(void)
 {
 	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
 	EG(regular_list).nNextFreeElement = 0;

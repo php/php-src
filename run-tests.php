@@ -63,7 +63,7 @@ function main()
 	if (getenv("TEST_PHP_WORKER")) {
 		$workerID = intval(getenv("TEST_PHP_WORKER"));
 		run_worker();
-		die;
+		return;
 	}
 
 	define('INIT_DIR', getcwd());
@@ -733,7 +733,7 @@ HELP;
 				exit(1);
 			}
 
-			exit(0);
+			return;
 		}
 	}
 
@@ -1731,11 +1731,9 @@ function run_worker() {
 					"type" => "error",
 					"msg" => "Unrecognised message type: $command[type]"
 				]);
-				die;
+				break 2;
 		}
 	}
-
-	die;
 }
 
 //

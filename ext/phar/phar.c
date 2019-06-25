@@ -113,7 +113,7 @@ static void phar_split_cache_list(void) /* {{{ */
 
 	/* fake request startup */
 	PHAR_G(request_init) = 1;
-	zend_hash_init(&EG(regular_list), 0, NULL, NULL, 0);
+	zend_init_rsrc_list();
 	EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
 
 	PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);

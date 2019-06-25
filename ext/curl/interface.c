@@ -3432,11 +3432,12 @@ PHP_FUNCTION(curl_getinfo)
 					case CURLINFO_SLIST:
 					{
 						struct curl_slist *slist;
-						array_init(return_value);
 						if (curl_easy_getinfo(ch->cp, option, &slist) == CURLE_OK) {
-							while (slist) {
-								add_next_index_string(return_value, slist->data);
-								slist = slist->next;
+							struct curl_slist *current = slist;
+							array_init(return_value);
+							while (current) {
+								add_next_index_string(return_value, current->data);
+								current = current->next;
 							}
 							curl_slist_free_all(slist);
 						} else {
