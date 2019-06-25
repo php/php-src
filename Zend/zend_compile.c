@@ -1152,12 +1152,13 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 					if (UNEXPECTED(!zv)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
 					} else {
-						ce->ce_flags |= ZEND_ACC_LINKED;
 						zend_do_inheritance(ce, parent_ce);
 						zend_build_properties_info_table(ce);
 						if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 							zend_verify_abstract_class(ce);
 						}
+						ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
+						ce->ce_flags |= ZEND_ACC_LINKED;
 					}
 				}
 			}
@@ -6337,12 +6338,13 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				) {
 				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
 					CG(zend_lineno) = decl->end_lineno;
-					ce->ce_flags |= ZEND_ACC_LINKED;
 					zend_do_inheritance(ce, parent_ce);
 					zend_build_properties_info_table(ce);
 					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 						zend_verify_abstract_class(ce);
 					}
+					ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
+					ce->ce_flags |= ZEND_ACC_LINKED;
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
 					return NULL;
