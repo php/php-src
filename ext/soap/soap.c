@@ -1485,7 +1485,7 @@ PHP_METHOD(SoapServer, handle)
 	int soap_version, old_soap_version;
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
-	xmlDocPtr doc_request=NULL, doc_return;
+	xmlDocPtr doc_request = NULL, doc_return = NULL;
 	zval function_name, *params, *soap_obj, retval;
 	char *fn_name, cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
@@ -1760,8 +1760,6 @@ PHP_METHOD(SoapServer, handle)
 		}
 	}
 
-	doc_return = NULL;
-
 	/* Process soap headers */
 	if (soap_headers != NULL) {
 		soapHeader *header = soap_headers;
@@ -1913,8 +1911,6 @@ PHP_METHOD(SoapServer, handle)
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 		}
 
-		xmlFreeDoc(doc_return);
-
 		if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
 			sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 		} else {
@@ -1935,6 +1931,10 @@ fail:
 	SOAP_GLOBAL(class_map) = old_class_map;
 	SOAP_GLOBAL(typemap) = old_typemap;
 	SOAP_GLOBAL(features) = old_features;
+
+	if (doc_return) {
+		xmlFreeDoc(doc_return);
+	}
 
 	/* Free soap headers */
 	zval_ptr_dtor(&retval);
