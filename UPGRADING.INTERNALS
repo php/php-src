@@ -243,6 +243,14 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       anymore and now takes one optional argument - minimum required version.
     - with-pcre-valgrind and with-valgrind are merged, and valgrind detected by
       pkgconfig
+    - Removed unused AC_PROG_CC_C_O check and the NO_MINUS_C_MINUS_O symbol.
+    - Obsolescant checks for pre-C89 headers and functions have been removed.
+      The following symbols are therefore no longer defined by the PHP build
+      system at the configure step and shouldn't be used anymore:
+      HAVE_SETLOCALE, HAVE_LOCALECONV, HAVE_STRSTR, HAVE_STRTOL, HAVE_STRBRK,
+      HAVE_PERROR, HAVE_STRFTIME, HAVE_TZNAME, HAVE_STDARG_H, HAVE_STRING_H,
+      HAVE_STDLIB_H, HAVE_SYS_VARARGS_H, HAVE_STDARG_H, HAVE_ASSERT_H,
+      HAVE_SYS_DIR_H, TM_IN_SYS_TIME.
 
   c. Windows build system changes
 

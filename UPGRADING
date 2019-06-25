@@ -58,6 +58,8 @@ PHP 7.4 UPGRADE NOTES
 - MySQLi:
   . The embedded server functionality has been removed. It was broken since
     at least PHP 7.0.
+  . The mysqli::$stat property has been removed so the bug #67348 could be
+    fixed. Property neither was documented in the PHP manual.
 
 - Openssl:
   . The openssl_random_pseudo_bytes() function will now throw an exception in
