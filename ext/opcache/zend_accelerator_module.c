@@ -504,11 +504,11 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Cached keys", buf);
 			snprintf(buf, sizeof(buf), "%" PRIu32, ZCSG(hash).max_num_entries);
 			php_info_print_table_row(2, "Max keys", buf);
-			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(oom_restarts));
+			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
-			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(hash_restarts));
+			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(hash_restarts));
 			php_info_print_table_row(2, "Hash keys restarts", buf);
-			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(manual_restarts));
+			snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, ZCSG(manual_restarts));
 			php_info_print_table_row(2, "Manual restarts", buf);
 		}
 	}
