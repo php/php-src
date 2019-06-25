@@ -5,6 +5,9 @@ pspell configs
 if (!extension_loaded('pspell')) die('skip');
 if (!@pspell_new('en')) die('skip English dictionary is not available');
 ?>
+--INI--
+; pspell leaks memory for invalid dictionaries
+report_memleaks=0
 --FILE--
 <?php
 
