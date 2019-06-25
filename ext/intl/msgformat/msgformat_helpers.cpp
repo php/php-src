@@ -343,20 +343,24 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			zval nullzv, *zvptr = &nullzv;
-			ZVAL_NULL(zvptr);
-			used_tz = timezone_process_timezone_argument(zvptr, &err, "msgfmt_format");
+			zval nullzv;
+			ZVAL_NULL(&nullzv);
+			used_tz = timezone_process_timezone_argument(&nullzv, &err, "msgfmt_format");
 			if (used_tz == NULL) {
 				continue;
 			}
 		}
 
-		df->setTimeZone(*used_tz);
+		df->adoptTimeZone(used_tz->clone());
 	}
 
 	if (U_SUCCESS(err.code)) {
 		mfo->mf_data.tz_set = 1;
 	}
+
+  if (used_tz) {
+    delete used_tz;
+  }
 }
 
 U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
