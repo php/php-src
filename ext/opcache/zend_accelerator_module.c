@@ -498,11 +498,11 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
-			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_direct_entries);
+			snprintf(buf, sizeof(buf), "%" PRIu32, ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
-			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_entries);
+			snprintf(buf, sizeof(buf), "%" PRIu32, ZCSG(hash).num_entries);
 			php_info_print_table_row(2, "Cached keys", buf);
-			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).max_num_entries);
+			snprintf(buf, sizeof(buf), "%" PRIu32, ZCSG(hash).max_num_entries);
 			php_info_print_table_row(2, "Max keys", buf);
 			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
