@@ -2316,9 +2316,19 @@ zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce)
 		zval *zv;
 		zend_string *unresolved_class;
 
-		if ((parent_flags & ZEND_ACC_PRIVATE) ||
-			((parent_flags & ZEND_ACC_CTOR) && !(parent_flags & ZEND_ACC_ABSTRACT))) {
+		if (parent_flags & ZEND_ACC_PRIVATE) {
 			continue;
+		} else if (parent_flags & ZEND_ACC_CTOR) {
+			zend_function *proto = parent_func->common.prototype ?
+				parent_func->common.prototype : parent_func;
+
+			/* ctors only have a prototype if is abstract (or comes from an interface) */
+			/* and if that is the case, we want to check inheritance against it */
+			if (proto->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				parent_func = proto;
+			} else {
+				continue;
+			}
 		}
 
 		zv = zend_hash_find_ex(&ce->function_table, key, 1);
