@@ -450,10 +450,12 @@ static inheritance_status zend_do_perform_implementation_check(
 
 		local_status = zend_do_perform_arg_type_hint_check(
 			unresolved_class, fe, fe_arg_info, proto, proto_arg_info);
-		if (local_status == INHERITANCE_ERROR) {
-			return INHERITANCE_ERROR;
-		}
-		if (local_status == INHERITANCE_UNRESOLVED) {
+
+		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
+			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
+				return INHERITANCE_ERROR;
+			}
+			ZEND_ASSERT(local_status == INHERITANCE_UNRESOLVED);
 			status = INHERITANCE_UNRESOLVED;
 		}
 
@@ -473,10 +475,12 @@ static inheritance_status zend_do_perform_implementation_check(
 
 		local_status = zend_perform_covariant_type_check(
 			unresolved_class, fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
-		if (local_status == INHERITANCE_ERROR) {
-			return INHERITANCE_ERROR;
-		}
-		if (local_status == INHERITANCE_UNRESOLVED) {
+
+		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
+			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
+				return INHERITANCE_ERROR;
+			}
+			ZEND_ASSERT(local_status == INHERITANCE_UNRESOLVED);
 			status = INHERITANCE_UNRESOLVED;
 		}
 	}
@@ -702,7 +706,8 @@ static void perform_delayable_implementation_check(
 	if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 		if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 			add_compatibility_obligation(ce, fe, proto, always_error);
-		} else if (status == INHERITANCE_ERROR) {
+		} else {
+			ZEND_ASSERT(status == INHERITANCE_ERROR);
 			if (always_error) {
 				emit_incompatible_method_error(
 					E_COMPILE_ERROR, "must", fe, proto, status, unresolved_class);
@@ -2262,10 +2267,12 @@ static int check_variance_obligation(zval *zv) {
 		zend_string *unresolved_class;
 		inheritance_status status = zend_do_perform_implementation_check(
 			&unresolved_class, obligation->child_fn, obligation->parent_fn);
-		if (status == INHERITANCE_UNRESOLVED) {
-			return ZEND_HASH_APPLY_KEEP;
-		}
-		if (status == INHERITANCE_ERROR) {
+
+		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
+			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
+				return ZEND_HASH_APPLY_KEEP;
+			}
+			ZEND_ASSERT(status == INHERITANCE_ERROR);
 			emit_incompatible_method_error_or_warning(
 				obligation->child_fn, obligation->parent_fn, status, unresolved_class,
 				obligation->always_error);
@@ -2402,9 +2409,16 @@ zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce)
 		}
 
 		zv = zend_hash_find_ex(&ce->function_table, key, 1);
-		if (zv
-		 && zend_do_perform_implementation_check(&unresolved_class, Z_FUNC_P(zv), parent_func) == INHERITANCE_UNRESOLVED) {
-			return 0;
+		if (zv) {
+			zend_function *child_func = Z_FUNC_P(zv);
+			inheritance_status status;
+
+			status = zend_do_perform_implementation_check(
+					&unresolved_class, child_func, parent_func);
+
+			if (UNEXPECTED(status == INHERITANCE_UNRESOLVED)) {
+				return 0;
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
 	return 1;
