@@ -838,7 +838,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			while (*p == ' ') p++;
 			while (*p) {
 				char sep = ' ';
-				char *buf = emalloc(end - p + 1), *q = buf;
+				char *buf = emalloc(end - p + 2), *q = buf;
 
 				if (*p == '<') {
 					/* use as STDIN */
