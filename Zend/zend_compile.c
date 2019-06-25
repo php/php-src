@@ -1150,12 +1150,26 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 		while (opline_num != (uint32_t)-1) {
 			const zend_op *opline = &op_array->opcodes[opline_num];
 			zval *lcname = RT_CONSTANT(opline, opline->op1);
-			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname + 1));
-			zend_string *lc_parent_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
-			zend_class_entry *parent_ce = zend_lookup_class_ex(ce->parent_name, lc_parent_name, 0);
+			zval *zv = zend_hash_find_ex(EG(class_table), Z_STR_P(lcname + 1), 1);
 
-			if (ce && parent_ce && zend_can_early_bind(ce, parent_ce)) {
-				do_bind_class(lcname, lc_parent_name);
+			if (zv) {
+				zend_class_entry *ce = Z_CE_P(zv);
+				zend_string *lc_parent_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+				zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), lc_parent_name, 1);
+
+				if (parent_ce && zend_can_early_bind(ce, parent_ce)) {
+					zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
+					if (UNEXPECTED(!zv)) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+					} else {
+						ce->ce_flags |= ZEND_ACC_LINKED;
+						zend_do_inheritance(ce, parent_ce);
+						zend_build_properties_info_table(ce);
+						if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+							zend_verify_abstract_class(ce);
+						}
+					}
+				}
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
 		}

@@ -7034,16 +7034,23 @@ ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, CONST, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, ANY)
+ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 {
 	USE_OPLINE
-	zval *zce, *orig_zce;
+	zval *lcname, *zv;
 
 	SAVE_OPLINE();
-	if ((zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1)) == NULL ||
-	    ((orig_zce = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)+1), 1)) != NULL &&
-	     Z_CE_P(zce) != Z_CE_P(orig_zce))) {
-		do_bind_class(RT_CONSTANT(opline, opline->op1), (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
+	lcname = RT_CONSTANT(opline, opline->op1);
+	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(lcname + 1), 1);
+
+	if (zv) {
+		zend_class_entry *ce = Z_CE_P(zv);
+		zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
+		if (UNEXPECTED(!zv)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		} else {
+			zend_do_link_class(ce, Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
