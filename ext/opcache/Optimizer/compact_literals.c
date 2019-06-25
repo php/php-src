@@ -270,9 +270,14 @@ literals_handle_static_prop:
 					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
 					break;
 				case ZEND_DECLARE_FUNCTION:
+					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					break;
 				case ZEND_DECLARE_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1);
+					}
 					break;
 				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 				case ZEND_ASSIGN_DIM:
