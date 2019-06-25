@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
     (Joshua Westerheide)
 
+- FTP:
+  . Fixed bug #77124 (FTP with SSL memory leak). (Nikita)
+
 - PDO_Sqlite:
   . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)

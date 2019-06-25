@@ -289,9 +289,10 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
 
 		ftp->ssl_handle = SSL_new(ctx);
+		SSL_CTX_free(ctx);
+
 		if (ftp->ssl_handle == NULL) {
 			php_error_docref(NULL, E_WARNING, "failed to create the SSL handle");
-			SSL_CTX_free(ctx);
 			return 0;
 		}
 
