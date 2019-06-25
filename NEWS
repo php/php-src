@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0alpha2
+27 Jun 2019, PHP 7.4.0alpha2
 
 - Core:
   . Fixed bug #78151 (Segfault caused by indirect expressions in PHP 7.4a1).
