@@ -2328,14 +2328,17 @@ zend_bool zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_function *parent_func;
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent_func) {
 		uint32_t parent_flags = parent_func->common.fn_flags;
-		zend_function *func = zend_hash_find_ptr(&ce->function_table, key);
+		zval *zv;
 		zend_string *unresolved_class;
-		if (!func || (parent_flags & ZEND_ACC_PRIVATE) ||
-			((parent_flags & ZEND_ACC_CTOR) && !(parent_flags & ZEND_ACC_ABSTRACT))
-		) {
+
+		if ((parent_flags & ZEND_ACC_PRIVATE) ||
+			((parent_flags & ZEND_ACC_CTOR) && !(parent_flags & ZEND_ACC_ABSTRACT))) {
 			continue;
 		}
-		if (zend_do_perform_implementation_check(&unresolved_class, func, parent_func) == INHERITANCE_UNRESOLVED) {
+
+		zv = zend_hash_find_ex(&ce->function_table, key, 1);
+		if (zv
+		 && zend_do_perform_implementation_check(&unresolved_class, Z_FUNC_P(zv), parent_func) == INHERITANCE_UNRESOLVED) {
 			return 0;
 		}
 	} ZEND_HASH_FOREACH_END();
