@@ -11,7 +11,13 @@ $ds = [
 ];
 
 echo "Empty command array:";
-$proc = proc_open([], $ds, $pipes);
+var_dump(proc_open([], $ds, $pipes));
+
+echo "\nNul byte in program name:";
+var_dump(proc_open(["php\0oops"], $ds, $pipes));
+
+echo "\nNul byte in argument:";
+var_dump(proc_open(["php", "arg\0oops"], $ds, $pipes));
 
 echo "\nBasic usage:\n";
 $proc = proc_open([$php, '-r', 'echo "Hello World!\n";'], $ds, $pipes);
@@ -36,7 +42,6 @@ echo "\nCheck that arguments are correctly passed through:\n";
 $args = [
     "Simple",
     "White space\ttab\nnewline",
-    "Nul\0bytes", // Should be cut off
     '"Quoted"',
     'Qu"ot"ed',
     '\\Back\\slash\\',
@@ -52,6 +57,15 @@ proc_close($proc);
 --EXPECTF--
 Empty command array:
 Warning: proc_open(): Command array must have at least one element in %s on line %d
+bool(false)
+
+Nul byte in program name:
+Warning: proc_open(): Command array element 1 contains a null byte in %s on line %d
+bool(false)
+
+Nul byte in argument:
+Warning: proc_open(): Command array element 2 contains a null byte in %s on line %d
+bool(false)
 
 Basic usage:
 Hello World!
@@ -69,10 +83,9 @@ array (
   0 => 'Simple',
   1 => 'White space	tab
 newline',
-  2 => 'Nul',
-  3 => '"Quoted"',
-  4 => 'Qu"ot"ed',
-  5 => '\\Back\\slash\\',
-  6 => '\\\\Back\\\\slash\\\\',
-  7 => '\\"Qu\\"ot\\"ed\\"',
+  2 => '"Quoted"',
+  3 => 'Qu"ot"ed',
+  4 => '\\Back\\slash\\',
+  5 => '\\\\Back\\\\slash\\\\',
+  6 => '\\"Qu\\"ot\\"ed\\"',
 )
