@@ -531,32 +531,60 @@ again:
 }
 /* }}} */
 
+static uint64_t zend_ffi_bit_field_read(void *ptr, zend_ffi_field *field) /* {{{ */
+{
+	size_t bit = field->first_bit;
+	size_t last_bit = bit + field->bits - 1;
+	uint8_t *p = (uint8_t *) ptr + bit / 8;
+	uint8_t *last_p = (uint8_t *) ptr + last_bit / 8;
+	size_t pos = bit % 8;
+	size_t insert_pos = 0;
+	uint8_t mask;
+	uint64_t val = 0;
+
+	/* Bitfield fits into a single byte */
+	if (p == last_p) {
+		mask = (1U << field->bits) - 1U;
+		return (*p >> pos) & mask;
+	}
+
+	/* Read partial prefix byte */
+	if (pos != 0) {
+		size_t num_bits = 8 - pos;
+		mask = ((1U << num_bits) - 1U) << pos;
+		val = (*p++ >> pos) & mask;
+		insert_pos += num_bits;
+	}
+
+	/* Read full bytes */
+	while (p < last_p) {
+		val |= *p++ << insert_pos;
+		insert_pos += 8;
+	}
+
+	/* Read partial suffix byte */
+	if (p == last_p) {
+		size_t num_bits = last_bit % 8 + 1;
+		mask = (1U << num_bits) - 1U;
+		val |= (*p & mask) << insert_pos;
+	}
+
+	return val;
+}
+
 static void zend_ffi_bit_field_to_zval(void *ptr, zend_ffi_field *field, zval *rv) /* {{{ */
 {
-	uint64_t *p1 = (uint64_t *)((char*)ptr + (field->first_bit / 64) * 8);
-	uint64_t *p2 = (uint64_t *)((char*)ptr + ((field->first_bit + field->bits - 1) / 64) * 8);
-	uint64_t pos = field->first_bit % 64;
-	uint64_t shift = 64 - (field->bits % 64);
-	uint64_t val;
-
-	if (p1 == p2) {
-		if (field->bits == 64) {
-			val = *p1;
-			shift = 0;
-		} else {
-			val = *p1 << (shift - pos);
-		}
-	} else {
-		val = (*p1 >> pos) | (*p2 << (64 - pos));
-	}
+	uint64_t val = zend_ffi_bit_field_read(ptr, field);
 	if (ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_CHAR
 	 || ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_SINT8
 	 || ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_SINT16
 	 || ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_SINT32
 	 || ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_SINT64) {
-		val = (int64_t)val >> shift;
-	} else {
-		val = val >> shift;
+		/* Sign extend */
+		uint64_t shift = 64 - (field->bits % 64);
+		if (shift != 0) {
+			val = (int64_t)(val << shift) >> shift;
+		}
 	}
 	ZVAL_LONG(rv, val);
 }
@@ -564,25 +592,43 @@ static void zend_ffi_bit_field_to_zval(void *ptr, zend_ffi_field *field, zval *r
 
 static int zend_ffi_zval_to_bit_field(void *ptr, zend_ffi_field *field, zval *value) /* {{{ */
 {
-	uint64_t *p1 = (uint64_t *)((char*)ptr + (field->first_bit / 64) * 8);
-	uint64_t *p2 = (uint64_t *)((char*)ptr + ((field->first_bit + field->bits - 1) / (8 * 8)) * 8);
-	uint64_t pos = field->first_bit % 64;
-	uint64_t mask;
 	uint64_t val = zval_get_long(value);
+	size_t bit = field->first_bit;
+	size_t last_bit = bit + field->bits - 1;
+	uint8_t *p = (uint8_t *) ptr + bit / 8;
+	uint8_t *last_p = (uint8_t *) ptr + last_bit / 8;
+	size_t pos = bit % 8;
+	uint8_t mask;
 
-	if (p1 == p2) {
-		if (field->bits == 64) {
-			*p1 = val;
-		} else {
-			mask = ((1ULL << field->bits) - 1ULL) << pos;
-			*p1 = (*p1 & ~mask) | ((val << pos) & mask);
-		}
-	} else {
-		mask = ((1ULL << (64 - pos)) - 1ULL) << pos;
-		*p1 = (*p1 & ~mask) | ((val << pos) & mask);
-		mask = (1ULL << pos) - 1ULL;
-		*p2 = (*p2 & ~mask) | ((val >> (64 - pos)) & mask);
+	/* Bitfield fits into a single byte */
+	if (p == last_p) {
+		mask = ((1U << field->bits) - 1U) << pos;
+		*p = (*p & ~mask) | ((val << pos) & mask);
+		return SUCCESS;
 	}
+
+	/* Write partial prefix byte */
+	if (pos != 0) {
+		size_t num_bits = 8 - pos;
+		mask = ((1U << num_bits) - 1U) << pos;
+		*p = (*p & ~mask) | ((val << pos) & mask);
+		p++;
+		val >>= num_bits;
+	}
+
+	/* Write full bytes */
+	while (p < last_p) {
+		*p++ = val;
+		val >>= 8;
+	}
+
+	/* Write partial suffix byte */
+	if (p == last_p) {
+		size_t num_bits = last_bit % 8 + 1;
+		mask = (1U << num_bits) - 1U;
+		*p = (*p & ~mask) | (val & mask);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
