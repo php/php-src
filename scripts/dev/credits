@@ -26,8 +26,8 @@ do
 */
 
 END
-  # Do not process skeleton #
+  # Do not process skeleton
   files=`find "$what" -name CREDITS | grep -v "$what"/skeleton/CREDITS`
-  awk "$awkprog" $files | sort -f | uniq >> $file
+  awk "$awkprog" $files | LC_ALL=C sort -f | uniq >> $file
   echo "Updated $file"
 done
