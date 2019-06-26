@@ -84,7 +84,8 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
+	return php_stream_free(stream,
+		PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_RSRC_DTOR);
 }
 #elif defined(HAVE_FOPENCOOKIE)
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
@@ -126,7 +127,8 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
+	return php_stream_free(stream,
+		PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_RSRC_DTOR);
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 

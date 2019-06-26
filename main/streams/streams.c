@@ -361,14 +361,21 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	int ret = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
-	php_stream_context *context = NULL;
+	php_stream_context *context;
 
-	/* on an resource list destruction, the context, another resource, may have
-	 * already been freed (if it was created after the stream resource), so
-	 * don't reference it */
-	if (EG(active)) {
-		context = PHP_STREAM_CONTEXT(stream);
+	/* During shutdown resources may be released before other resources still holding them.
+	 * When only resoruces are referenced this is not a problem, because they are refcounted
+	 * and will only be fully freed once the refcount drops to zero. However, if php_stream*
+	 * is held directly, we don't have this guarantee. To avoid use-after-free we ignore all
+	 * stream free operations in shutdown unless they come from the resource list destruction,
+	 * or by freeing an enclosed stream (in which case resource list destruction will not have
+	 * freed it). */
+	if ((EG(flags) & EG_FLAGS_IN_SHUTDOWN) &&
+			!(close_options & (PHP_STREAM_FREE_RSRC_DTOR|PHP_STREAM_FREE_IGNORE_ENCLOSING))) {
+		return 1;
 	}
+
+	context = PHP_STREAM_CONTEXT(stream);
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
 		preserve_handle = 1;
