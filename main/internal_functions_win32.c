@@ -112,9 +112,7 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_CTYPE
 	,phpext_ctype_ptr
 #endif
-#if HAVE_DATE
 	,phpext_date_ptr
-#endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
 #endif
@@ -153,9 +151,7 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_XML
 	,phpext_xml_ptr
 #endif
-#if HAVE_SPL
 	,phpext_spl_ptr
-#endif
 #if HAVE_XML && HAVE_XMLREADER
 	,phpext_xmlreader_ptr
 #endif
