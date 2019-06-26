@@ -82,16 +82,17 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
-	zend_bool is_handling_safe = 1;
 
 #ifdef ZTS
 	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
-		is_handling_safe = 0;
+	if (tsrm_is_shutdown()) {
+		/* Forward to default handler handler */
+		zend_signal_handler(signo, siginfo, context);
+		return;
 	}
 #endif
 
-	if (EXPECTED(is_handling_safe && SIGG(active))) {
+	if (EXPECTED(SIGG(active))) {
 		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
 			if (UNEXPECTED(SIGG(blocked))) {
 				SIGG(blocked) = 0;
@@ -176,7 +177,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+	if (tsrm_is_shutdown()) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
 	} else
