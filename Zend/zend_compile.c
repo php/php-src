@@ -1157,19 +1157,8 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 				zend_string *lc_parent_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 				zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), lc_parent_name, 1);
 
-				if (parent_ce && zend_can_early_bind(ce, parent_ce)) {
-					zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
-					if (UNEXPECTED(!zv)) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
-					} else {
-						zend_do_inheritance(ce, parent_ce);
-						zend_build_properties_info_table(ce);
-						if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
-							zend_verify_abstract_class(ce);
-						}
-						ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
-						ce->ce_flags |= ZEND_ACC_LINKED;
-					}
+				if (parent_ce) {
+					zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv);
 				}
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -6447,22 +6436,15 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 			if (parent_ce
 			 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD) /* delay inheritance till preloading */
 			 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
-			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))
-			 && zend_can_early_bind(ce, parent_ce)
-				) {
-				if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
-					CG(zend_lineno) = decl->end_lineno;
-					zend_do_inheritance(ce, parent_ce);
-					zend_build_properties_info_table(ce);
-					if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
-						zend_verify_abstract_class(ce);
-					}
-					ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
-					ce->ce_flags |= ZEND_ACC_LINKED;
+			 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))) {
+
+				CG(zend_lineno) = decl->end_lineno;
+				if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
 					CG(zend_lineno) = ast->lineno;
 					zend_string_release(lcname);
 					return NULL;
 				}
+				CG(zend_lineno) = ast->lineno;
 			}
 		} else {
 			if (EXPECTED(zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL)) {
