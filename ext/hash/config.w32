@@ -6,6 +6,7 @@ if (PHP_MHASH != 'no') {
 	AC_DEFINE('PHP_MHASH_BC', 1);
 }
 
+// Defined for BC.
 AC_DEFINE('HAVE_HASH_EXT', 1);
 
 PHP_HASH = 'yes';

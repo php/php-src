@@ -19,9 +19,7 @@
 */
 
 #include "phar_internal.h"
-#ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash_sha.h"
-#endif
 
 #ifdef PHAR_HAVE_OPENSSL
 /* OpenSSL includes */
@@ -1598,7 +1596,6 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			*signature_len = phar_hex_str((const char*)sig, sig_len, signature);
 		}
 		break;
-#ifdef PHAR_HASH_OK
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -1679,14 +1676,6 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			*signature_len = phar_hex_str((const char*)digest, sizeof(digest), signature);
 			break;
 		}
-#else
-		case PHAR_SIG_SHA512:
-		case PHAR_SIG_SHA256:
-			if (error) {
-				spprintf(error, 0, "unsupported signature");
-			}
-			return FAILURE;
-#endif
 		case PHAR_SIG_SHA1: {
 			unsigned char digest[20];
 			PHP_SHA1_CTX  context;
@@ -1790,7 +1779,6 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 	}
 
 	switch(phar->sig_flags) {
-#ifdef PHAR_HASH_OK
 		case PHAR_SIG_SHA512: {
 			unsigned char digest[64];
 			PHP_SHA512_CTX context;
@@ -1821,15 +1809,6 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			*signature_length = 32;
 			break;
 		}
-#else
-		case PHAR_SIG_SHA512:
-		case PHAR_SIG_SHA256:
-			if (error) {
-				spprintf(error, 0, "unable to write to phar \"%s\" with requested hash type", phar->fname);
-			}
-
-			return FAILURE;
-#endif
 		case PHAR_SIG_OPENSSL: {
 			unsigned char *sigbuf;
 #ifdef PHAR_HAVE_OPENSSL

@@ -842,7 +842,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 				efree(sig);
 			}
 			break;
-#if PHAR_HASH_OK
 			case PHAR_SIG_SHA512: {
 				unsigned char digest[64];
 
@@ -897,17 +896,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 				}
 				break;
 			}
-#else
-			case PHAR_SIG_SHA512:
-			case PHAR_SIG_SHA256:
-				efree(savebuf);
-				php_stream_close(fp);
-
-				if (error) {
-					spprintf(error, 0, "phar \"%s\" has a unsupported signature", fname);
-				}
-				return FAILURE;
-#endif
 			case PHAR_SIG_SHA1: {
 				unsigned char digest[20];
 
@@ -3122,18 +3110,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		}
 
 		switch(phar->sig_flags) {
-#ifndef PHAR_HASH_OK
-			case PHAR_SIG_SHA512:
-			case PHAR_SIG_SHA256:
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to write contents of file \"%s\" to new phar \"%s\" with requested hash type", entry->filename, phar->fname);
-				}
-				return EOF;
-#endif
 			default: {
 				char *digest = NULL;
 				size_t digest_len;
@@ -3624,9 +3600,7 @@ static const zend_module_dep phar_deps[] = {
 	ZEND_MOD_OPTIONAL("openssl")
 	ZEND_MOD_OPTIONAL("zlib")
 	ZEND_MOD_OPTIONAL("standard")
-#if defined(HAVE_HASH) && !defined(COMPILE_DL_HASH)
 	ZEND_MOD_REQUIRED("hash")
-#endif
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
 };

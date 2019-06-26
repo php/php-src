@@ -3,7 +3,6 @@ Phar: verify signature parsing works
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("hash")) die("skip extension hash conflicts");
 $arr = Phar::getSupportedSignatures();
 if (!in_array("OpenSSL", $arr)) die("skip openssl support required");
 if (!in_array('SHA-256', $arr)) die("skip hash extension loaded shared");
