@@ -28,7 +28,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      defined "handler" callback should be used instead. This "handler" callback
      should also take care about function cleanup. See ext/zend_test/test.c
      for example.
-  
+
   c. The following things have been removed from TSRM:
       - TSRMLS_DC
       - TSRMLS_D
@@ -41,7 +41,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
       - tsrm_set_interpreter_context
       - tsrm_free_interpreter_context
       - support for GNUPTH, SGI ST, and BETHREADS
-                       
+
   d. The get() and set() object handlers have been removed. The get() handler
      can generally be replaced with cast_object(). Some uses of set() may be
      replaced by do_operation(). If set() was used to overload direct
@@ -62,9 +62,11 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 ========================
 
   a. Abstract
+    - Symbol HAVE_HASH_EXT is removed and is no longer defined. It should be
+      considered to have hash extension always available since PHP 7.4.
 
   b. Unix build system changes
-  
+
     1.  --enable-maintainer-zts is renamed --enable-zts for parity with Windows
         and as recognition that ZTS is not a "maintainer" or experimental feature.
 
