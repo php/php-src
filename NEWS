@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.21
 
+- PDO_Sqlite:
+  . Fixed #78192 (SegFault when reuse statement after schema has changed).
+    (Vincent Quatrevieux)
+
 - XMLRPC:
   . Fixed #78173 (XML-RPC mutates immutable objects during encoding). (Asher
     Baker)
