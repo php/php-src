@@ -222,6 +222,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - The filter extension no longer exposes the --with-pcre-dir configure
       argument and therefore allows shared builds with ./configure for Unix
       builds.
+    - Symbols HAVE_DATE, HAVE_REFLECTION, and HAVE_SPL have been removed. It
+      should be considered to have these extensions always available by default.
 
   b. Unix build system changes
     - configure --help now also outputs --program-suffix and --program-prefix
