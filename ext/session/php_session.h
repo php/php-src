@@ -20,10 +20,7 @@
 #define PHP_SESSION_H
 
 #include "ext/standard/php_var.h"
-
-#if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-# include "ext/hash/php_hash.h"
-#endif
+#include "ext/hash/php_hash.h"
 
 #define PHP_SESSION_API 20161017
 
