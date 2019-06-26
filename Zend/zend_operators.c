@@ -1015,8 +1015,11 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 {
 	if (add_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
-	} else {
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return add_function_slow(result, op1, op2);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
 	}
 }
 /* }}} */
@@ -1088,68 +1091,205 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 {
 	if (sub_function_fast(result, op1, op2) == SUCCESS) {
 		return SUCCESS;
-	} else {
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return sub_function_slow(result, op1, op2);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
+	}
+}
+/* }}} */
+
+static zend_always_inline int mul_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+
+	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
+		zend_long overflow;
+
+		ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1),Z_LVAL_P(op2), Z_LVAL_P(result),Z_DVAL_P(result),overflow);
+		Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+		return SUCCESS;
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
+		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+		return SUCCESS;
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
+		ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
+		return SUCCESS;
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
+		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zval op1_copy, op2_copy;
+	int converted = 0;
+
+	while (1) {
+		if (Z_ISREF_P(op1)) {
+			op1 = Z_REFVAL_P(op1);
+		} else if (Z_ISREF_P(op2)) {
+			op2 = Z_REFVAL_P(op2);
+		} else if (!converted) {
+			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL, mul_function);
+
+			if (EXPECTED(op1 != op2)) {
+				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+			} else {
+				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op2 = op1;
+			}
+			if (EG(exception)) {
+				if (result != op1) {
+					ZVAL_UNDEF(result);
+				}
+				return FAILURE;
+			}
+			converted = 1;
+		} else {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			zend_throw_error(NULL, "Unsupported operand types");
+			return FAILURE; /* unknown datatype */
+		}
+
+		if (mul_function_fast(result, op1, op2) == SUCCESS) {
+			return SUCCESS;
+		}
 	}
 }
 /* }}} */
 
 ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
+	if (mul_function_fast(result, op1, op2) == SUCCESS) {
+		return SUCCESS;
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
+		return mul_function_slow(result, op1, op2);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
+	}
+}
+/* }}} */
+
+static zend_always_inline int pow_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+
+	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
+		if (Z_LVAL_P(op2) >= 0) {
+			zend_long l1 = 1, l2 = Z_LVAL_P(op1), i = Z_LVAL_P(op2);
+
+			if (i == 0) {
+				ZVAL_LONG(result, 1L);
+				return SUCCESS;
+			} else if (l2 == 0) {
+				ZVAL_LONG(result, 0);
+				return SUCCESS;
+			}
+
+			while (i >= 1) {
+				zend_long overflow;
+				double dval = 0.0;
+
+				if (i % 2) {
+					--i;
+					ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
+					if (overflow) {
+						ZVAL_DOUBLE(result, dval * pow(l2, i));
+						return SUCCESS;
+					}
+				} else {
+					i /= 2;
+					ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
+					if (overflow) {
+						ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
+						return SUCCESS;
+					}
+				}
+			}
+			/* i == 0 */
+			ZVAL_LONG(result, l1);
+		} else {
+			ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+		}
+		return SUCCESS;
+
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
+		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
+		return SUCCESS;
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
+		ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+		return SUCCESS;
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
+		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+static zend_never_inline int ZEND_FASTCALL pow_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
+{
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
 	while (1) {
-		zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+		if (Z_ISREF_P(op1)) {
+			op1 = Z_REFVAL_P(op1);
+		} else if (Z_ISREF_P(op2)) {
+			op2 = Z_REFVAL_P(op2);
+		} else if (!converted) {
+			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW, pow_function);
 
-		if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
-			zend_long overflow;
-
-			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1),Z_LVAL_P(op2), Z_LVAL_P(result),Z_DVAL_P(result),overflow);
-			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
-			return SUCCESS;
-
-		} else {
-			if (Z_ISREF_P(op1)) {
-				op1 = Z_REFVAL_P(op1);
-			} else if (Z_ISREF_P(op2)) {
-				op2 = Z_REFVAL_P(op2);
-			} else if (!converted) {
-				ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL, mul_function);
-
-				if (EXPECTED(op1 != op2)) {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+			if (EXPECTED(op1 != op2)) {
+				if (Z_TYPE_P(op1) == IS_ARRAY) {
+					ZVAL_LONG(result, 0);
+					return SUCCESS;
 				} else {
 					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = op1;
 				}
-				if (EG(exception)) {
-					if (result != op1) {
-						ZVAL_UNDEF(result);
-					}
-					return FAILURE;
+				if (Z_TYPE_P(op2) == IS_ARRAY) {
+					ZVAL_LONG(result, 1L);
+					return SUCCESS;
+				} else {
+					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
 				}
-				converted = 1;
 			} else {
+				if (Z_TYPE_P(op1) == IS_ARRAY) {
+					ZVAL_LONG(result, 0);
+					return SUCCESS;
+				} else {
+					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				}
+				op2 = op1;
+			}
+			if (EG(exception)) {
 				if (result != op1) {
 					ZVAL_UNDEF(result);
 				}
-				zend_throw_error(NULL, "Unsupported operand types");
-				return FAILURE; /* unknown datatype */
+				return FAILURE;
 			}
+			converted = 1;
+		} else {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			zend_throw_error(NULL, "Unsupported operand types");
+			return FAILURE;
+		}
+
+		if (pow_function_fast(result, op1, op2) == SUCCESS) {
+			return SUCCESS;
 		}
 	}
 }
@@ -1157,108 +1297,13 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 
 ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	int converted = 0;
-
-	while (1) {
-		zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
-
-		if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
-			if (Z_LVAL_P(op2) >= 0) {
-				zend_long l1 = 1, l2 = Z_LVAL_P(op1), i = Z_LVAL_P(op2);
-
-				if (i == 0) {
-					ZVAL_LONG(result, 1L);
-					return SUCCESS;
-				} else if (l2 == 0) {
-					ZVAL_LONG(result, 0);
-					return SUCCESS;
-				}
-
-				while (i >= 1) {
-					zend_long overflow;
-					double dval = 0.0;
-
-					if (i % 2) {
-						--i;
-						ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
-						if (overflow) {
-							ZVAL_DOUBLE(result, dval * pow(l2, i));
-							return SUCCESS;
-						}
-					} else {
-						i /= 2;
-						ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
-						if (overflow) {
-							ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
-							return SUCCESS;
-						}
-					}
-				}
-				/* i == 0 */
-				ZVAL_LONG(result, l1);
-			} else {
-				ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
-			}
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-			ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-			ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-			ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
-			return SUCCESS;
-
-		} else {
-			if (Z_ISREF_P(op1)) {
-				op1 = Z_REFVAL_P(op1);
-			} else if (Z_ISREF_P(op2)) {
-				op2 = Z_REFVAL_P(op2);
-			} else if (!converted) {
-				ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW, pow_function);
-
-				if (EXPECTED(op1 != op2)) {
-					if (Z_TYPE_P(op1) == IS_ARRAY) {
-						ZVAL_LONG(result, 0);
-						return SUCCESS;
-					} else {
-						op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					}
-					if (Z_TYPE_P(op2) == IS_ARRAY) {
-						ZVAL_LONG(result, 1L);
-						return SUCCESS;
-					} else {
-						op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
-					}
-				} else {
-					if (Z_TYPE_P(op1) == IS_ARRAY) {
-						ZVAL_LONG(result, 0);
-						return SUCCESS;
-					} else {
-						op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					}
-					op2 = op1;
-				}
-				if (EG(exception)) {
-					if (result != op1) {
-						ZVAL_UNDEF(result);
-					}
-					return FAILURE;
-				}
-				converted = 1;
-			} else {
-				if (result != op1) {
-					ZVAL_UNDEF(result);
-				}
-				zend_throw_error(NULL, "Unsupported operand types");
-				return FAILURE;
-			}
-		}
+	if (pow_function_fast(result, op1, op2) == SUCCESS) {
+		return SUCCESS;
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
+		return pow_function_slow(result, op1, op2);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
 	}
 }
 /* }}} */
@@ -1266,92 +1311,111 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 #ifdef __clang__
 __attribute__((no_sanitize("float-divide-by-zero")))
 #endif
-ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_always_inline int div_function_fast(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+
+	if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
+		if (Z_LVAL_P(op2) == 0) {
+			zend_error(E_WARNING, "Division by zero");
+			ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
+			return SUCCESS;
+		} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
+			/* Prevent overflow error/crash */
+			ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
+			return SUCCESS;
+		}
+		if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
+			ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
+		} else {
+			ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
+		}
+		return SUCCESS;
+
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
+		if (Z_DVAL_P(op2) == 0) {
+			zend_error(E_WARNING, "Division by zero");
+		}
+		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
+		return SUCCESS;
+
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
+		if (Z_LVAL_P(op2) == 0) {
+			zend_error(E_WARNING, "Division by zero");
+		}
+		ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
+		return SUCCESS;
+
+	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
+		if (Z_DVAL_P(op2) == 0) {
+			zend_error(E_WARNING, "Division by zero");
+		}
+		ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
+		return SUCCESS;
+
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
+
+static zend_never_inline int ZEND_FASTCALL div_function_slow(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy, op2_copy;
 	int converted = 0;
 
 	while (1) {
-		zend_uchar type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
+		if (Z_ISREF_P(op1)) {
+			op1 = Z_REFVAL_P(op1);
+		} else if (Z_ISREF_P(op2)) {
+			op2 = Z_REFVAL_P(op2);
+		} else if (!converted) {
+			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV, div_function);
 
-		if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_LONG))) {
-			if (Z_LVAL_P(op2) == 0) {
-				zend_error(E_WARNING, "Division by zero");
-				ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1) / (double) Z_LVAL_P(op2)));
-				return SUCCESS;
-			} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
-				/* Prevent overflow error/crash */
-				ZVAL_DOUBLE(result, (double) ZEND_LONG_MIN / -1);
-				return SUCCESS;
-			}
-			if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
-				ZVAL_LONG(result, Z_LVAL_P(op1) / Z_LVAL_P(op2));
+			if (EXPECTED(op1 != op2)) {
+				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
 			} else {
-				ZVAL_DOUBLE(result, ((double) Z_LVAL_P(op1)) / Z_LVAL_P(op2));
+				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op2 = op1;
 			}
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-			if (Z_DVAL_P(op2) == 0) {
-				zend_error(E_WARNING, "Division by zero");
-			}
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-			if (Z_LVAL_P(op2) == 0) {
-				zend_error(E_WARNING, "Division by zero");
-			}
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
-			return SUCCESS;
-
-		} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-			if (Z_DVAL_P(op2) == 0) {
-				zend_error(E_WARNING, "Division by zero");
-			}
-			ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
-			return SUCCESS;
-
-		} else {
-			if (Z_ISREF_P(op1)) {
-				op1 = Z_REFVAL_P(op1);
-			} else if (Z_ISREF_P(op2)) {
-				op2 = Z_REFVAL_P(op2);
-			} else if (!converted) {
-				ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV, div_function);
-
-				if (EXPECTED(op1 != op2)) {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
-				} else {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = op1;
-				}
-				if (EG(exception)) {
-					if (result != op1) {
-						ZVAL_UNDEF(result);
-					}
-					return FAILURE;
-				}
-				converted = 1;
-			} else {
+			if (EG(exception)) {
 				if (result != op1) {
 					ZVAL_UNDEF(result);
 				}
-				zend_throw_error(NULL, "Unsupported operand types");
-				return FAILURE; /* unknown datatype */
+				return FAILURE;
 			}
+			converted = 1;
+		} else {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			zend_throw_error(NULL, "Unsupported operand types");
+			return FAILURE; /* unknown datatype */
+		}
+
+		if (div_function_fast(result, op1, op2) == SUCCESS) {
+			return SUCCESS;
 		}
 	}
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	zend_long op1_lval, op2_lval;
+	if (div_function_fast(result, op1, op2) == SUCCESS) {
+		return SUCCESS;
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
+		return div_function_slow(result, op1, op2);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
+	}
+}
+/* }}} */
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, mod_function);
-
+static zend_always_inline int mod_function_long(zval *result, zend_long op1_lval, zend_long op2_lval, zend_bool assign) /* {{{ */
+{
 	if (op2_lval == 0) {
 		/* modulus by zero */
 		if (EG(current_execute_data) && !CG(in_compilation)) {
@@ -1359,13 +1423,13 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 		} else {
 			zend_error_noreturn(E_ERROR, "Modulo by zero");
 		}
-		if (op1 != result) {
+		if (!assign) {
 			ZVAL_UNDEF(result);
 		}
 		return FAILURE;
 	}
 
-	if (op1 == result) {
+	if (assign) {
 		zval_ptr_dtor(result);
 	}
 
@@ -1377,6 +1441,24 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 
 	ZVAL_LONG(result, op1_lval % op2_lval);
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_long op1_lval, op2_lval;
+
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG && Z_TYPE_P(op2) == IS_LONG)) {
+		op1_lval = Z_LVAL_P(op1);
+		op2_lval = Z_LVAL_P(op2);
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, mod_function);
+	} else {
+		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		return FAILURE;
+	}
+
+	return mod_function_long(result, op1_lval, op2_lval, op1 == result);
 }
 /* }}} */
 

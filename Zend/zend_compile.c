@@ -5161,6 +5161,28 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
+		} else if (zend_string_equals_literal_ci(name, "strict_operators")) {
+			zval value_zv;
+
+			if (FAILURE == zend_declare_is_first_statement(ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_operators declaration must be "
+													 "the very first statement in the script");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_operators declaration must not "
+													 "use block mode");
+			}
+
+			zend_const_expr_to_zval(&value_zv, value_ast);
+
+			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_operators declaration must have 0 or 1 as its value");
+			}
+
+			if (Z_LVAL(value_zv) == 1) {
+				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_OPERATORS;
+			}
 
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
@@ -5893,7 +5915,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
 	}
 
-	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
+	op_array->fn_flags |= (orig_op_array->fn_flags & (ZEND_ACC_STRICT_TYPES | ZEND_ACC_STRICT_OPERATORS));
 	op_array->fn_flags |= decl->flags;
 	op_array->line_start = decl->start_lineno;
 	op_array->line_end = decl->end_lineno;

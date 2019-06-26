@@ -337,6 +337,9 @@ typedef struct _zend_oparray_context {
 /* function is a destructor                               |     |     |     */
 #define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* op_array uses strict operators                         |     |     |     */
+#define ZEND_ACC_STRICT_OPERATORS        (1U << 30) /*    |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
@@ -582,6 +585,9 @@ struct _zend_execute_data {
 
 #define ZEND_RET_USES_STRICT_TYPES() \
 	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
+
+#define ZEND_USES_STRICT_OPERATORS() \
+	(((EG(current_execute_data) ? EG(current_execute_data)->func->common.fn_flags : CG(active_op_array)->fn_flags) & ZEND_ACC_STRICT_OPERATORS) != 0)
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
