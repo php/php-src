@@ -104,7 +104,10 @@ static void _close_ldap_link(zend_resource *rsrc) /* {{{ */
 {
 	ldap_linkdata *ld = (ldap_linkdata *)rsrc->ptr;
 
-	ldap_unbind_ext(ld->link, NULL, NULL);
+	/* We use ldap_destroy rather than ldap_unbind here, because ldap_unbind
+	 * will skip the destructor entirely if a critical client control is set. */
+	ldap_destroy(ld->link);
+
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	zval_ptr_dtor(&ld->rebindproc);
 #endif
