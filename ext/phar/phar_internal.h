@@ -59,10 +59,8 @@
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
 #include "php_phar.h"
-#ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
-#endif
 
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
