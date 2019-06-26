@@ -70,7 +70,8 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
 		}
-		if (EXPECTED(!func->op_array.static_variables)) {
+		if (EXPECTED(!func->op_array.static_variables)
+		 || (func->op_array.fn_flags & ZEND_ACC_PRIVATE)) {
 			/* reuse the same op_array structure */
 			return func;
 		}
