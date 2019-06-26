@@ -2161,8 +2161,6 @@ phpdbg_out:
 			Z_PTR_P(zv) = (void*)PHPDBG_G(orig_url_wrap_php);
 		}
 
-		php_module_shutdown();
-
 #ifndef _WIN32
 		/* force override (no zend_signals) to prevent crashes due to signal recursion in SIGSEGV/SIGBUS handlers */
 		signal(SIGSEGV, SIG_DFL);
@@ -2172,6 +2170,8 @@ phpdbg_out:
 		php_stream_stdio_ops.write = PHPDBG_G(php_stdiop_write);
 #endif
 	}
+
+	php_module_shutdown();
 
 	sapi_shutdown();
 
