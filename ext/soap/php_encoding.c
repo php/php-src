@@ -1519,7 +1519,13 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 						text = xmlNewText(BAD_CAST(str_val));
 						xmlAddChild(dummy, text);
 						ZVAL_NULL(&data);
-						master_to_zval(&data, attr->encode, dummy);
+						/* TODO: There are other places using dummy nodes -- generalize? */
+						zend_try {
+							master_to_zval(&data, attr->encode, dummy);
+						} zend_catch {
+							xmlFreeNode(dummy);
+							zend_bailout();
+						} zend_end_try();
 						xmlFreeNode(dummy);
 						set_zval_property(ret, attr->name, &data);
 					}
