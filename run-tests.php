@@ -517,6 +517,12 @@ NO_PROC_OPEN_ERROR;
 					case '--shuffle':
 						$shuffle = true;
 						break;
+					case '--asan':
+						$environment['USE_ZEND_ALLOC'] = 0;
+						$environment['USE_TRACKED_ALLOC'] = 1;
+						$environment['SKIP_ASAN'] = 1;
+						$environment['SKIP_PERF_SENSITIVE'] = 1;
+						break;
 					//case 'w'
 					case '-':
 						// repeat check with full switch
