@@ -87,7 +87,7 @@ static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ *
 }
 /* }}} */
 
-static zend_always_inline zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce) /* {{{ */
+static zend_always_inline zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce, zend_bool is_interface) /* {{{ */
 {
 	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
 		return zend_duplicate_internal_function(func, ce);
@@ -95,7 +95,8 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
 		}
-		if (EXPECTED(!func->op_array.static_variables)
+		if (is_interface
+		 || EXPECTED(!func->op_array.static_variables)
 		 || (func->op_array.fn_flags & ZEND_ACC_PRIVATE)) {
 			/* reuse the same op_array structure */
 			return func;
@@ -841,57 +842,43 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 }
 /* }}} */
 
-static void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
+static zend_never_inline void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
 {
 	do_inheritance_check_on_method_ex(child, parent, ce, child_zv, 0, 0);
 }
 /* }}} */
 
-static zend_function *do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce) /* {{{ */
+static zend_always_inline void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, zend_bool is_interface, zend_bool checked) /* {{{ */
 {
 	zval *child = zend_hash_find_ex(&ce->function_table, key, 1);
 
 	if (child) {
 		zend_function *func = (zend_function*)Z_PTR_P(child);
 
-		if (UNEXPECTED(func == parent)) {
+		if (is_interface && UNEXPECTED(func == parent)) {
 			/* The same method in interface may be inherited few times */
-			return NULL;
+			return;
 		}
 
-		do_inheritance_check_on_method(func, parent, ce, child);
-		return NULL;
-	}
-
-	if (parent->common.fn_flags & (ZEND_ACC_ABSTRACT)) {
-		ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-	}
-
-	return zend_duplicate_function(parent, ce);
-}
-/* }}} */
-
-static void do_inherit_checked_methods(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
-{
-	zend_string *key;
-	zend_function *parent;
-
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, parent) {
-		zval *child = zend_hash_find_ex(&ce->function_table, key, 1);
-
-		if (child) {
-			zend_function *func = (zend_function*)Z_PTR_P(child);
-			do_inheritance_check_on_method_ex(func, parent, ce, child, 0, 1);
+		if (checked) {
+			do_inheritance_check_on_method_ex(func, parent, ce, child, 0, checked);
 		} else {
-
-			if (parent->common.fn_flags & (ZEND_ACC_ABSTRACT)) {
-				ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-			}
-
-			parent =  zend_duplicate_function(parent, ce);
-			_zend_hash_append_ptr(&ce->function_table, key, parent);
+			do_inheritance_check_on_method(func, parent, ce, child);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} else {
+
+		if (is_interface || (parent->common.fn_flags & (ZEND_ACC_ABSTRACT))) {
+			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+		}
+
+		parent = zend_duplicate_function(parent, ce, is_interface);
+
+		if (!is_interface) {
+			_zend_hash_append_ptr(&ce->function_table, key, parent);
+		} else {
+			zend_hash_add_new_ptr(&ce->function_table, key, parent);
+		}
+	}
 }
 /* }}} */
 
@@ -1326,14 +1313,12 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			zend_hash_num_elements(&parent_ce->function_table), 0);
 
 		if (checked) {
-			do_inherit_checked_methods(ce, parent_ce);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
+				do_inherit_method(key, func, ce, 0, 1);
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
-				zend_function *new_func = do_inherit_method(key, func, ce);
-
-				if (new_func) {
-					_zend_hash_append_ptr(&ce->function_table, key, new_func);
-				}
+				do_inherit_method(key, func, ce, 0, 0);
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
@@ -1382,12 +1367,32 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 }
 /* }}} */
 
+static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
+{
+	zend_function *func;
+	zend_string *key;
+	zend_class_constant *c;
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
+		do_inherit_iface_constant(key, c, ce, iface);
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
+		do_inherit_method(key, func, ce, 1, 0);
+	} ZEND_HASH_FOREACH_END();
+
+	do_implement_interface(ce, iface);
+	if (iface->num_interfaces) {
+		zend_do_inherit_interfaces(ce, iface);
+	}
+}
+/* }}} */
+
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	uint32_t i, ignore = 0;
 	uint32_t current_iface_num = ce->num_interfaces;
 	uint32_t parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
-	zend_function *func;
 	zend_string *key;
 	zend_class_constant *c;
 
@@ -1420,22 +1425,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
-			do_inherit_iface_constant(key, c, ce, iface);
-		} ZEND_HASH_FOREACH_END();
-
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
-			zend_function *new_func = do_inherit_method(key, func, ce);
-
-			if (new_func) {
-				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		do_implement_interface(ce, iface);
-		if (iface->num_interfaces) {
-			zend_do_inherit_interfaces(ce, iface);
-		}
+		do_interface_implementation(ce, iface);
 	}
 }
 /* }}} */
@@ -1444,7 +1434,6 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 {
 	zend_class_entry **interfaces, *iface;
 	uint32_t num_interfaces = 0;
-	zend_function *func;
 	zend_string *key;
 	zend_class_constant *c;
 	uint32_t i, j;
@@ -1503,24 +1492,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 
 	i = ce->parent ? ce->parent->num_interfaces : 0;
 	for (; i < ce->num_interfaces; i++) {
-		iface = ce->interfaces[i];
-
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
-			do_inherit_iface_constant(key, c, ce, iface);
-		} ZEND_HASH_FOREACH_END();
-
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
-			zend_function *new_func = do_inherit_method(key, func, ce);
-
-			if (new_func) {
-				zend_hash_add_new_ptr(&ce->function_table, key, new_func);
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		do_implement_interface(ce, iface);
-		if (iface->num_interfaces) {
-			zend_do_inherit_interfaces(ce, iface);
-		}
+		do_interface_implementation(ce, ce->interfaces[i]);
 	}
 }
 /* }}} */
