@@ -12,9 +12,6 @@ curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 if (!curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
---INI--
-; We're intentionally leaking resources here
-report_memleaks=0
 --FILE--
 <?php
 function do_stuff($url) {
