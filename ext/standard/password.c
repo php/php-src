@@ -672,7 +672,7 @@ PHP_FUNCTION(password_needs_rehash)
 		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	new_algo = php_password_algo_find_zval_ex(znew_algo, NULL);
+	new_algo = php_password_algo_find_zval(znew_algo);
 	if (!new_algo) {
 		/* Unknown new algorithm, never prompt to rehash. */
 		RETURN_FALSE;
