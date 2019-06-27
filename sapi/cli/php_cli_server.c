@@ -1181,7 +1181,7 @@ static void php_cli_server_logf(const char *format, ...) /* {{{ */
 	efree(buf);
 } /* }}} */
 
-static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr) /* {{{ */
+static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr, zend_bool reuse_port) /* {{{ */
 {
 	php_socket_t retval = SOCK_ERR;
 	int err = 0;
@@ -1230,6 +1230,17 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 			setsockopt(retval, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 		}
 #endif
+
+		if (reuse_port) {
+#ifdef SO_REUSEPORT
+			int val = 1;
+			setsockopt(retval, SOL_SOCKET, SO_REUSEPORT, (char*)&val, sizeof(val));
+#else
+			sapi_cli_server_log_message(
+				"requested reuse of port is not supported on this platform", 0);
+#endif
+		}
+
 
 		if (bind(retval, sa, *socklen) == SOCK_CONN_ERR) {
 			err = php_socket_errno();
@@ -2231,7 +2242,7 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 	pefree(p, 1);
 } /* }}} */
 
-static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
+static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router, zend_bool reuse_port) /* {{{ */
 {
 	int retval = SUCCESS;
 	char *host = NULL;
@@ -2280,7 +2291,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		goto out;
 	}
 
-	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr);
+	server_sock = php_network_listen_socket(host, &port, SOCK_STREAM, &server->address_family, &server->socklen, &errstr, reuse_port);
 	if (server_sock == SOCK_ERR) {
 		php_cli_server_logf("Failed to listen on %s:%d (reason: %s)", host, port, errstr ? ZSTR_VAL(errstr) : "?");
 		if (errstr) {
@@ -2524,6 +2535,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 #endif
 	const char *router = NULL;
 	char document_root_buf[MAXPATHLEN];
+    zend_bool reuse_port = 0;
 
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2))!=-1) {
 		switch (c) {
@@ -2548,6 +2560,10 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 				} while ('"' == document_root_tmp[k] || ' ' == document_root_tmp[k]);
 				document_root = document_root_tmp;
 #endif
+				break;
+
+			case 'P':
+				reuse_port = 1;
 				break;
 		}
 	}
@@ -2581,7 +2597,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		router = argv[php_optind];
 	}
 
-	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router)) {
+	if (FAILURE == php_cli_server_ctor(&server, server_bind_address, document_root, router, reuse_port)) {
 		return 1;
 	}
 	sapi_module.phpinfo_as_text = 0;
@@ -2594,10 +2610,16 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 		}
 
 		printf("PHP %s Development Server started at %s"
-				"Listening on http://%s\n"
+				"Listening on http://%s%s\n"
 				"Document root is %s\n"
 				"Press Ctrl-C to quit.\n",
-				PHP_VERSION, buf, server_bind_address, document_root);
+				PHP_VERSION, buf, server_bind_address,
+#ifdef SO_REUSEPORT
+				reuse_port ? " (reusable)" : "",
+#else
+				reuse_port ? " (not reusable)" : "",
+#endif
+				document_root);
 	}
 
 #if defined(SIGINT)

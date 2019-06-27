@@ -157,6 +157,7 @@ const opt_struct OPTIONS[] = {
 	{'s', 0, "syntax-highlighting"},
 	{'S', 1, "server"},
 	{'t', 1, "docroot"},
+	{'P', 0, "reuse-port"},
 	{'w', 0, "strip"},
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
@@ -518,6 +519,7 @@ static void php_cli_usage(char *argv0)
 				"  -H               Hide any passed arguments from external tools.\n"
 				"  -S <addr>:<port> Run with built-in web server.\n"
 				"  -t <docroot>     Specify document root <docroot> for built-in web server.\n"
+				"  -P               Allow port reuse for built-in web server.\n"
 				"  -s               Output HTML syntax highlighted source.\n"
 				"  -v               Version number\n"
 				"  -w               Output source with stripped comments and whitespace.\n"
