@@ -12,10 +12,7 @@ steps:
       export TEST_PHP_JUNIT=junit.xml
       export REPORT_EXIT_STATUS=no
       export SKIP_IO_CAPTURE_TESTS=1
-      export USE_ZEND_ALLOC=0
-      export SKIP_PERF_SENSITIVE=1 # Tests too slow due to ubsan
       export LSAN_OPTIONS=suppressions=$PWD/azure/lsan-suppressions.txt:print_suppressions=0
-      export SKIP_ASAN=1
       rm -rf junit.xml | true
       php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
@@ -23,6 +20,7 @@ steps:
           --offline \
           --show-slow 1000 \
           --set-timeout 120 \
+          --asan \
           ${{ parameters.runTestsParameters }}
     displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
     condition: or(succeeded(), failed())
