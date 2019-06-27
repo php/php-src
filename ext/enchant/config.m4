@@ -11,10 +11,16 @@ if test "$PHP_ENCHANT" != "no"; then
 
   AC_DEFINE(HAVE_ENCHANT, 1, [ ])
 
+  PHP_CHECK_LIBRARY(enchant, enchant_get_version,
+  [
+    AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ ])
+  ], [ ], [
+    $ENCHANT_LIBS
+  ])
+
   PHP_CHECK_LIBRARY(enchant, enchant_broker_set_param,
   [
     AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM, 1, [ ])
-    AC_DEFINE(ENCHANT_VERSION_STRING, "1.5.x", [ ])
   ], [ ], [
     $ENCHANT_LIBS
   ])
