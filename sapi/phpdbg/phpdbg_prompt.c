@@ -421,7 +421,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				if (PHPDBG_G(exec)) {
 					phpdbg_notice("exec", "type=\"unset\" context=\"%s\"", "Unsetting old execution context: %s", PHPDBG_G(exec));
-					efree(PHPDBG_G(exec));
+					free(PHPDBG_G(exec));
 					PHPDBG_G(exec) = NULL;
 					PHPDBG_G(exec_len) = 0L;
 				}
@@ -436,7 +436,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				VCWD_CHDIR_FILE(res);
 
-				*SG(request_info).argv = PHPDBG_G(exec);
+				*SG(request_info).argv = estrndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 				php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
@@ -534,9 +534,9 @@ int phpdbg_compile_stdin(zend_string *code) {
 	}
 
 	if (PHPDBG_G(exec)) {
-		efree(PHPDBG_G(exec));
+		free(PHPDBG_G(exec));
 	}
-	PHPDBG_G(exec) = estrdup("Standard input code");
+	PHPDBG_G(exec) = strdup("Standard input code");
 	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
 	{ /* remove leading ?> from source */
 		int i;

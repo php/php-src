@@ -249,7 +249,7 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	}
 
 	if (PHPDBG_G(exec)) {
-		efree(PHPDBG_G(exec));
+		free(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
 	}
 
@@ -325,11 +325,11 @@ static PHP_FUNCTION(phpdbg_exec)
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
 					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
-					efree(PHPDBG_G(exec));
+					free(PHPDBG_G(exec));
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = estrndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec) = strndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
 				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {

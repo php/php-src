@@ -154,7 +154,7 @@ PHPDBG_API char *phpdbg_resolve_path(const char *path) /* {{{ */
 		return NULL;
 	}
 
-	return estrdup(resolved_name);
+	return strdup(resolved_name);
 } /* }}} */
 
 PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
