@@ -266,6 +266,7 @@ struct _zend_mm_heap {
 			void      *(*_realloc)(void*, size_t  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 		} debug;
 	} custom_heap;
+	HashTable *tracked_allocs;
 #endif
 };
 
@@ -2182,6 +2183,11 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 }
 #endif
 
+#if ZEND_MM_CUSTOM
+static void *tracked_malloc(size_t size);
+static void tracked_free_all();
+#endif
+
 void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 {
 	zend_mm_chunk *p;
@@ -2189,12 +2195,19 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
-		if (full) {
-			if (ZEND_DEBUG && heap->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-				heap->custom_heap.debug._free(heap ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
-			} else {
-				heap->custom_heap.std._free(heap);
+		if (heap->custom_heap.std._malloc == tracked_malloc) {
+			if (silent) {
+				tracked_free_all();
 			}
+			zend_hash_clean(heap->tracked_allocs);
+			if (full) {
+				zend_hash_destroy(heap->tracked_allocs);
+				free(heap->tracked_allocs);
+			}
+		}
+
+		if (full) {
+			free(heap);
 		}
 		return;
 	}
@@ -2661,6 +2674,42 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
 
+#if ZEND_MM_CUSTOM
+static void *tracked_malloc(size_t size)
+{
+	void *ptr = __zend_malloc(size);
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	return ptr;
+}
+
+static void tracked_free(void *ptr) {
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	free(ptr);
+}
+
+static void *tracked_realloc(void *ptr, size_t new_size) {
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	ptr = __zend_realloc(ptr, new_size);
+	h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	return ptr;
+}
+
+static void tracked_free_all() {
+	HashTable *tracked_allocs = AG(mm_heap)->tracked_allocs;
+	zend_ulong h;
+	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
+		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
+		free(ptr);
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
 	char *tmp;
@@ -2668,12 +2717,23 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp && !zend_atoi(tmp, 0)) {
-		alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
-		memset(alloc_globals->mm_heap, 0, sizeof(zend_mm_heap));
-		alloc_globals->mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		alloc_globals->mm_heap->custom_heap.std._malloc = __zend_malloc;
-		alloc_globals->mm_heap->custom_heap.std._free = free;
-		alloc_globals->mm_heap->custom_heap.std._realloc = __zend_realloc;
+		zend_bool tracked = (tmp = getenv("USE_TRACKED_ALLOC")) && zend_atoi(tmp, 0);
+		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
+		memset(mm_heap, 0, sizeof(zend_mm_heap));
+		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		if (!tracked) {
+			/* Use system allocator. */
+			mm_heap->custom_heap.std._malloc = __zend_malloc;
+			mm_heap->custom_heap.std._free = free;
+			mm_heap->custom_heap.std._realloc = __zend_realloc;
+		} else {
+			/* Use system allocator and track allocations for auto-free. */
+			mm_heap->custom_heap.std._malloc = tracked_malloc;
+			mm_heap->custom_heap.std._free = tracked_free;
+			mm_heap->custom_heap.std._realloc = tracked_realloc;
+			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
+			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
+		}
 		return;
 	}
 #endif
