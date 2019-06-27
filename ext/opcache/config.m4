@@ -92,8 +92,6 @@ if test "$PHP_OPCACHE" != "no"; then
     AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
   ])
 
-  AC_CHECK_HEADERS([unistd.h sys/uio.h])
-
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>

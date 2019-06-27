@@ -437,12 +437,14 @@ ieeefp.h \
 langinfo.h \
 limits.h \
 locale.h \
+malloc.h \
 monetary.h \
 netdb.h \
 poll.h \
 pwd.h \
 resolv.h \
 signal.h \
+strings.h \
 syslog.h \
 sysexits.h \
 sys/ioctl.h \
@@ -458,6 +460,7 @@ sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
 sys/sysexits.h \
+sys/uio.h \
 sys/wait.h \
 sys/loadavg.h \
 termios.h \
