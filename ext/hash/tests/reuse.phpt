@@ -1,7 +1,5 @@
 --TEST--
 Hash: Attempt to reuse a closed hash context
---SKIPIF--
-<?php if (!extension_loaded('hash')) echo 'skip';
 --FILE--
 <?php
 

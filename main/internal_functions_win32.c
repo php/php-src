@@ -116,9 +116,7 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_FTP
 	,phpext_ftp_ptr
 #endif
-#if HAVE_HASH
 	,phpext_hash_ptr
-#endif
 #if HAVE_ICONV
 	,phpext_iconv_ptr
 #endif
