@@ -10,7 +10,7 @@ Description: PHP supports a portable way of locking complete files
 
 echo "*** Testing error conditions ***\n";
 
-$file = preg_replace("~\.phpt?$~", null, __FILE__);
+$file = preg_replace("~\.phpt?$~", '.tmp', __FILE__);
 $fp = fopen($file, "w");
 
 /* array of operatons */
@@ -52,7 +52,7 @@ echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-$file = __DIR__."/flock.tmp";
+$file = __DIR__."/flock_error.tmp";
 unlink($file);
 ?>
 --EXPECTF--
