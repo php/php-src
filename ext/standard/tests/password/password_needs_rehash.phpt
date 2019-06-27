@@ -33,7 +33,11 @@ var_dump(password_needs_rehash('$2y$'.$cost.'$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.o
 // Should Issue Needs Rehash, Since Foo is cast to 0...
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 'foo')));
 
+// CRYPT_MD5
+var_dump(password_needs_rehash(crypt('Example', '$1$'), PASSWORD_DEFAULT));
 
+// CRYPT_SHA512 with 5000
+var_dump(password_needs_rehash(crypt('Example', '$6$rounds=5000$aa$'), PASSWORD_DEFAULT));
 
 echo "OK!";
 ?>
@@ -41,13 +45,15 @@ echo "OK!";
 bool(true)
 bool(true)
 bool(true)
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 bool(false)
 bool(false)
 bool(true)
 bool(true)
 bool(false)
+bool(true)
+bool(true)
 bool(true)
 OK!
