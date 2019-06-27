@@ -1,7 +1,5 @@
 --TEST--
 Testing Basic behaviour of strcoll()
---SKIPIF--
-<?php if (!function_exists('strcoll')) die('skip strcoll function not available') ?>
 --CREDITS--
 Sebastian Schürmann
 sebs@php.net

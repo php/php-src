@@ -327,7 +327,6 @@ static int php_array_reverse_key_compare_string_natural(const void *a, const voi
 }
 /* }}} */
 
-#if HAVE_STRCOLL
 static int php_array_key_compare_string_locale(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f = (Bucket *) a;
@@ -355,7 +354,6 @@ static int php_array_reverse_key_compare_string_locale(const void *a, const void
 	return php_array_key_compare_string_locale(b, a);
 }
 /* }}} */
-#endif
 
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
@@ -528,7 +526,6 @@ static int php_array_reverse_natural_case_compare(const void *a, const void *b) 
 }
 /* }}} */
 
-#if HAVE_STRCOLL
 static int php_array_data_compare_string_locale(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f;
@@ -558,7 +555,6 @@ static int php_array_reverse_data_compare_string_locale(const void *a, const voi
 	return php_array_data_compare_string_locale(b, a);
 }
 /* }}} */
-#endif
 
 static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
 {
@@ -603,7 +599,6 @@ static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse)
 			}
 			break;
 
-#if HAVE_STRCOLL
 		case PHP_SORT_LOCALE_STRING:
 			if (reverse) {
 				return php_array_reverse_key_compare_string_locale;
@@ -611,7 +606,6 @@ static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse)
 				return php_array_key_compare_string_locale;
 			}
 			break;
-#endif
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -669,7 +663,6 @@ static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse
 			}
 			break;
 
-#if HAVE_STRCOLL
 		case PHP_SORT_LOCALE_STRING:
 			if (reverse) {
 				return php_array_reverse_data_compare_string_locale;
@@ -677,7 +670,6 @@ static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse
 				return php_array_data_compare_string_locale;
 			}
 			break;
-#endif
 
 		case PHP_SORT_REGULAR:
 		default:
@@ -5687,9 +5679,7 @@ PHP_FUNCTION(array_multisort)
 				case PHP_SORT_NUMERIC:
 				case PHP_SORT_STRING:
 				case PHP_SORT_NATURAL:
-#if HAVE_STRCOLL
 				case PHP_SORT_LOCALE_STRING:
-#endif
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */

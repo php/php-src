@@ -206,9 +206,7 @@ static const func_info_t func_infos[] = {
 	F1("str_split",                    MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("strpbrk",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("substr_compare",               MAY_BE_FALSE | MAY_BE_LONG),
-#ifdef HAVE_STRCOLL
 	F0("strcoll",                      MAY_BE_LONG),
-#endif
 #ifdef HAVE_STRFMON
 	F1("money_format",                 MAY_BE_FALSE | MAY_BE_STRING),
 #endif
