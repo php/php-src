@@ -19,7 +19,6 @@ steps:
           --offline \
           --show-slow 1000 \
           --set-timeout 120 \
-          --asan \
           ${{ parameters.runTestsParameters }}
     displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
     condition: or(succeeded(), failed())
