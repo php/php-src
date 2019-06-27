@@ -162,6 +162,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 					do {
 						if (zend_ptr_stack_num_elements(&plist->free_links)) {
+							/* If we have an initialized (but unconnected) mysql resource,
+							 * close it before we reuse an existing persistent resource. */
+							if (mysql->mysql) {
+								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
+							}
+
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
