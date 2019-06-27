@@ -13,8 +13,6 @@ jobs:
     - template: apt.yml
     - script: |
         ./buildconf --force
-        export CFLAGS="-fsanitize=undefined -fsanitize=address"
-        export LDFLAGS="-fsanitize=undefined -fsanitize=address"
         ./configure ${{ parameters.configurationParameters }} \
             --prefix=/usr \
             --enable-phpdbg \
@@ -90,6 +88,6 @@ jobs:
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
-        runTestsParameters: >
+        runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
           -d zend_extension=opcache.so -d opcache.enable_cli=1

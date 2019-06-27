@@ -9,7 +9,7 @@ jobs:
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_NTS
-      configurationParameters: >
+      configurationParameters: >-
           --enable-debug --disable-maintainer-zts
           CFLAGS='-fsanitize=undefined,address'
           LDFLAGS='-fsanitize=undefined,address'
@@ -18,7 +18,7 @@ jobs:
   - template: azure/job.yml
     parameters:
       configurationName: DEBUG_ZTS
-      configurationParameters: >
+      configurationParameters: >-
           --enable-debug --enable-maintainer-zts
           CFLAGS='-fsanitize=undefined,address'
           LDFLAGS='-fsanitize=undefined,address'
@@ -27,7 +27,7 @@ jobs:
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_NTS
-      configurationParameters: >
+      configurationParameters: >-
           --disable-debug --disable-maintainer-zts
           CFLAGS='-fsanitize=undefined,address'
           LDFLAGS='-fsanitize=undefined,address'
@@ -36,7 +36,7 @@ jobs:
   - template: azure/job.yml
     parameters:
       configurationName: RELEASE_ZTS
-      configurationParameters: >
+      configurationParameters: >-
           --disable-debug --enable-maintainer-zts
           CFLAGS='-fsanitize=undefined,address'
           LDFLAGS='-fsanitize=undefined,address'
