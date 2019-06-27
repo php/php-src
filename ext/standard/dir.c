@@ -247,7 +247,7 @@ PHP_FUNCTION(opendir)
 }
 /* }}} */
 
-/* {{{ proto objectđalse dir(string directory[, resource context])
+/* {{{ proto object|false dir(string directory[, resource context])
    Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
