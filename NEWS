@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
+  . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
 
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
