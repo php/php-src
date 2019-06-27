@@ -50,22 +50,47 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 }
 /* }}} */
 
-static zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce) /* {{{ */
+static zend_function *zend_duplicate_internal_function(zend_function *func, zend_class_entry *ce) /* {{{ */
 {
 	zend_function *new_function;
 
+	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
+		new_function = pemalloc(sizeof(zend_internal_function), 1);
+		memcpy(new_function, func, sizeof(zend_internal_function));
+	} else {
+		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+		memcpy(new_function, func, sizeof(zend_internal_function));
+		new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
+	}
+	if (EXPECTED(new_function->common.function_name)) {
+		zend_string_addref(new_function->common.function_name);
+	}
+	return new_function;
+}
+/* }}} */
+
+static zend_function *zend_duplicate_user_function(zend_function *func) /* {{{ */
+{
+	zend_function *new_function;
+
+	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+	memcpy(new_function, func, sizeof(zend_op_array));
+	if (ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr)) {
+		/* See: Zend/tests/method_static_var.phpt */
+		new_function->op_array.static_variables = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+	}
+	if (!(GC_FLAGS(new_function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+		GC_ADDREF(new_function->op_array.static_variables);
+	}
+	ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
+	return new_function;
+}
+/* }}} */
+
+static zend_always_inline zend_function *zend_duplicate_function(zend_function *func, zend_class_entry *ce) /* {{{ */
+{
 	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
-		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-			new_function = pemalloc(sizeof(zend_internal_function), 1);
-			memcpy(new_function, func, sizeof(zend_internal_function));
-		} else {
-			new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-			memcpy(new_function, func, sizeof(zend_internal_function));
-			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
-		}
-		if (EXPECTED(new_function->common.function_name)) {
-			zend_string_addref(new_function->common.function_name);
-		}
+		return zend_duplicate_internal_function(func, ce);
 	} else {
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
@@ -75,18 +100,8 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			/* reuse the same op_array structure */
 			return func;
 		}
-		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-		memcpy(new_function, func, sizeof(zend_op_array));
-		if (ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr)) {
-			/* See: Zend/tests/method_static_var.phpt */
-			new_function->op_array.static_variables = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
-		}
-		if (!(GC_FLAGS(new_function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(new_function->op_array.static_variables);
-		}
-		ZEND_MAP_PTR_INIT(new_function->op_array.static_variables_ptr, &new_function->op_array.static_variables);
+		return zend_duplicate_user_function(func);
 	}
-	return new_function;
 }
 /* }}} */
 
