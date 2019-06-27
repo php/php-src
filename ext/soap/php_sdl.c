@@ -739,7 +739,9 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(this_ptr, struri,&ctx, 0);
+	load_wsdl_ex(this_ptr, struri, &ctx, 0);
+	zend_try {
+
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
@@ -1165,6 +1167,12 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	if (ctx.sdl->bindings == NULL || ctx.sdl->bindings->nNumOfElements == 0) {
 		soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 	}
+
+	} zend_catch {
+		/* Avoid persistent memory leak. */
+		zend_hash_destroy(&ctx.docs);
+		zend_bailout();
+	} zend_end_try();
 
 	zend_hash_destroy(&ctx.messages);
 	zend_hash_destroy(&ctx.bindings);

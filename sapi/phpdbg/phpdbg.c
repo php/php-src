@@ -218,18 +218,6 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 
 static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
-	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
-	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 	phpdbg_destroy_watchpoints();
 
@@ -249,19 +237,13 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	}
 
 	if (PHPDBG_G(exec)) {
-		efree(PHPDBG_G(exec));
+		free(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
 	}
 
 	if (PHPDBG_G(oplog)) {
 		fclose(PHPDBG_G(oplog));
 		PHPDBG_G(oplog) = NULL;
-	}
-
-	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops));
-		efree(PHPDBG_G(ops));
-		PHPDBG_G(ops) = NULL;
 	}
 
 	if (PHPDBG_G(oplog_list)) {
@@ -325,11 +307,11 @@ static PHP_FUNCTION(phpdbg_exec)
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
 					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
-					efree(PHPDBG_G(exec));
+					free(PHPDBG_G(exec));
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = estrndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec) = strndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
 				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {
@@ -902,6 +884,27 @@ static int php_sapi_phpdbg_activate(void) /* {{{ */
 
 static int php_sapi_phpdbg_deactivate(void) /* {{{ */
 {
+	/* Everything using ZMM should be freed here... */
+	zend_hash_destroy(&PHPDBG_G(file_sources));
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
+	zend_hash_destroy(&PHPDBG_G(seek));
+
+	if (PHPDBG_G(ops)) {
+		destroy_op_array(PHPDBG_G(ops));
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
+
 	return SUCCESS;
 }
 
@@ -2095,16 +2098,16 @@ phpdbg_out:
 			zend_objects_store_mark_destructed(&EG(objects_store));
 		}
 
-		zend_try {
-			php_request_shutdown(NULL);
-		} zend_end_try();
-
 		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
 			GC_MAKE_PERSISTENT_LOCAL(backup_phpdbg_compile);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
 		}
+
+		zend_try {
+			php_request_shutdown(NULL);
+		} zend_end_try();
 
 		/* backup globals when cleaning */
 		if ((cleaning > 0 || remote) && !quit_immediately) {
@@ -2157,8 +2160,6 @@ phpdbg_out:
 			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
 			Z_PTR_P(zv) = (void*)PHPDBG_G(orig_url_wrap_php);
 		}
-
-		zend_hash_destroy(&PHPDBG_G(file_sources));
 
 		php_module_shutdown();
 
