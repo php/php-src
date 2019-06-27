@@ -857,7 +857,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 	save_text($info_file, $php_info);
 	$info_params = array();
 	settings2array($ini_overwrites, $info_params);
-	settings2params($info_params);
+	$info_params = settings2params($info_params);
 	$php_info = `$php $pass_options $info_params $no_file_cache "$info_file"`;
 	define('TESTED_PHP_VERSION', `$php -n -r "echo PHP_VERSION;"`);
 
@@ -2091,7 +2091,7 @@ TEST $file
 	if (array_key_exists('EXTENSIONS', $section_text)) {
 		$ext_params = array();
 		settings2array($ini_overwrites, $ext_params);
-		settings2params($ext_params);
+		$ext_params = settings2params($ext_params);
 		$ext_dir = `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
 		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
 		$loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
@@ -2111,6 +2111,8 @@ TEST $file
 	//$ini_overwrites[] = 'setting=value';
 	settings2array($ini_overwrites, $ini_settings);
 
+	$orig_ini_settings = settings2params($ini_settings);
+
 	// Any special ini settings
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
@@ -2119,7 +2121,7 @@ TEST $file
 		settings2array(preg_split("/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 
-	settings2params($ini_settings);
+	$ini_settings = settings2params($ini_settings);
 
 	$env['TEST_PHP_EXTRA_ARGS'] = $pass_options . ' ' . $ini_settings;
 
@@ -2142,7 +2144,7 @@ TEST $file
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
+			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
 
@@ -2481,7 +2483,7 @@ COMMAND $cmd
 			if (!$no_clean) {
 				$clean_params = array();
 				settings2array($ini_overwrites, $clean_params);
-				settings2params($clean_params);
+				$clean_params = settings2params($clean_params);
 				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 				system_with_timeout("$extra $php $pass_options $extra_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
@@ -2939,7 +2941,7 @@ function settings2array($settings, &$ini_settings)
 	}
 }
 
-function settings2params(&$ini_settings)
+function settings2params($ini_settings)
 {
 	$settings = '';
 
@@ -2966,7 +2968,7 @@ function settings2params(&$ini_settings)
 		}
 	}
 
-	$ini_settings = $settings;
+	return $settings;
 }
 
 function compute_summary()
