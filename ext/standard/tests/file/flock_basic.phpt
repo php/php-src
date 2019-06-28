@@ -9,7 +9,6 @@ Description: PHP supports a portable way of locking complete files
 */
 
 echo "*** Testing flock() fun with file and dir ***\n";
-$file_path = __DIR__;
 
 $lock_file = preg_replace("~\.phpt?$~", null, __FILE__);
 
