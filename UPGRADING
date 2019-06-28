@@ -348,6 +348,13 @@ r SQLite3:
     in the documentation since PHP 7.1, but did not throw a deprecation notice
     for technical reasons.
 
+- Standard:
+  . Passing invalid characters to ''base_convert()'', ''bindec()'', ''octdec()''
+    and ''hexdec()'' will now generate a deprecation notice. The result will
+    still be computed as if the invalid characters did not exist. Leading and
+    trailing whitespace, as well as prefixes of type 0x (depending on base)
+    continue to be allowed.
+
 ========================================
 5. Changed Functions
 ========================================
