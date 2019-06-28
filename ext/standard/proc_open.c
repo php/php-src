@@ -34,6 +34,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "main/php_network.h"
+#include "zend_smart_string.h"
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -399,12 +400,87 @@ struct php_proc_open_descriptor_item {
 };
 /* }}} */
 
+static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
+	zend_string *str = zval_get_string(zv);
+	if (!str) {
+		return NULL;
+	}
+
+	if (strlen(ZSTR_VAL(str)) != ZSTR_LEN(str)) {
+		php_error_docref(NULL, E_WARNING,
+			"Command array element %d contains a null byte", elem_num);
+		zend_string_release(str);
+		return NULL;
+	}
+
+	return str;
+}
+
+#ifdef PHP_WIN32
+static void append_backslashes(smart_string *str, size_t num_bs) {
+	size_t i;
+	for (i = 0; i < num_bs; i++) {
+		smart_string_appendc(str, '\\');
+	}
+}
+
+/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments */
+static void append_win_escaped_arg(smart_string *str, char *arg) {
+	char c;
+	size_t num_bs = 0;
+	smart_string_appendc(str, '"');
+	while ((c = *arg)) {
+		if (c == '\\') {
+			num_bs++;
+		} else {
+			if (c == '"') {
+				/* Backslashes before " need to be doubled. */
+				num_bs = num_bs * 2 + 1;
+			}
+			append_backslashes(str, num_bs);
+			smart_string_appendc(str, c);
+			num_bs = 0;
+		}
+		arg++;
+	}
+	append_backslashes(str, num_bs * 2);
+	smart_string_appendc(str, '"');
+}
+
+static char *create_win_command_from_args(HashTable *args) {
+	smart_string str = {0};
+	zval *arg_zv;
+	zend_bool is_prog_name = 1;
+	int elem_num = 0;
+
+	ZEND_HASH_FOREACH_VAL(args, arg_zv) {
+		zend_string *arg_str = get_valid_arg_string(arg_zv, ++elem_num);
+		if (!arg_str) {
+			smart_string_free(&str);
+			return NULL;
+		}
+
+		if (!is_prog_name) {
+			smart_string_appendc(&str, ' ');
+		}
+
+		append_win_escaped_arg(&str, ZSTR_VAL(arg_str));
+
+		is_prog_name = 0;
+		zend_string_release(arg_str);
+	} ZEND_HASH_FOREACH_END();
+	smart_string_0(&str);
+	return str.c;
+}
+#endif
+
 /* {{{ proto resource|false proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
-	char *command, *cwd=NULL;
-	size_t command_len, cwd_len = 0;
+	zval *command_zv;
+	char *command = NULL, *cwd = NULL;
+	size_t cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;
@@ -428,23 +504,23 @@ PHP_FUNCTION(proc_open)
 	char cur_cwd[MAXPATHLEN];
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envpw = NULL;
 	size_t tmp_len;
-#endif
-	php_process_id_t child;
-	struct php_process_handle *proc;
-	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
-#ifdef PHP_WIN32
 	int suppress_errors = 0;
 	int bypass_shell = 0;
 	int blocking_pipes = 0;
 	int create_process_group = 0;
+#else
+	char **argv = NULL;
 #endif
+	php_process_id_t child;
+	struct php_process_handle *proc;
+	int is_persistent = 0; /* TODO: ensure that persistent procs will work */
 #if PHP_CAN_DO_PTS
 	php_file_descriptor_t dev_ptmx = -1;	/* master */
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(3, 6)
-		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_ZVAL(command_zv)
 		Z_PARAM_ARRAY(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
@@ -453,7 +529,48 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_ARRAY_EX(other_options, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	command = pestrdup(command, is_persistent);
+	memset(&env, 0, sizeof(env));
+
+	if (Z_TYPE_P(command_zv) == IS_ARRAY) {
+		zval *arg_zv;
+		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
+		if (num_elems == 0) {
+			php_error_docref(NULL, E_WARNING, "Command array must have at least one element");
+			RETURN_FALSE;
+		}
+
+#ifdef PHP_WIN32
+		bypass_shell = 1;
+		command = create_win_command_from_args(Z_ARRVAL_P(command_zv));
+		if (!command) {
+			RETURN_FALSE;
+		}
+#else
+		argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
+		i = 0;
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(command_zv), arg_zv) {
+			zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
+			if (!arg_str) {
+				argv[i] = NULL;
+				goto exit_fail;
+			}
+
+			if (i == 0) {
+				command = pestrdup(ZSTR_VAL(arg_str), is_persistent);
+			}
+
+			argv[i++] = estrdup(ZSTR_VAL(arg_str));
+			zend_string_release(arg_str);
+		} ZEND_HASH_FOREACH_END();
+		argv[i] = NULL;
+
+		/* As the array is non-empty, we should have found a command. */
+		ZEND_ASSERT(command);
+#endif
+	} else {
+		convert_to_string(command_zv);
+		command = pestrdup(Z_STRVAL_P(command_zv), is_persistent);
+	}
 
 #ifdef PHP_WIN32
 	if (other_options) {
@@ -464,6 +581,7 @@ PHP_FUNCTION(proc_open)
 			}
 		}
 
+		/* TODO Deprecate in favor of array command? */
 		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell") - 1);
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
@@ -487,12 +605,8 @@ PHP_FUNCTION(proc_open)
 	}
 #endif
 
-	command_len = strlen(command);
-
 	if (environment) {
 		env = _php_array_to_envp(environment, is_persistent);
-	} else {
-		memset(&env, 0, sizeof(env));
 	}
 
 	ndescriptors_array = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
@@ -744,7 +858,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	cmdw = php_win32_cp_conv_any_to_w(command, command_len, &tmp_len);
+	cmdw = php_win32_cp_conv_any_to_w(command, strlen(command), &tmp_len);
 	if (!cmdw) {
 		php_error_docref(NULL, E_WARNING, "Command conversion failed");
 		goto exit_fail;
@@ -852,10 +966,18 @@ PHP_FUNCTION(proc_open)
 			php_ignore_value(chdir(cwd));
 		}
 
-		if (env.envarray) {
-			execle("/bin/sh", "sh", "-c", command, NULL, env.envarray);
+		if (argv) {
+			/* execvpe() is non-portable, use environ instead. */
+			if (env.envarray) {
+				environ = env.envarray;
+			}
+			execvp(command, argv);
 		} else {
-			execl("/bin/sh", "sh", "-c", command, NULL);
+			if (env.envarray) {
+				execle("/bin/sh", "sh", "-c", command, NULL, env.envarray);
+			} else {
+				execl("/bin/sh", "sh", "-c", command, NULL);
+			}
 		}
 		_exit(127);
 
@@ -960,18 +1082,42 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+#ifndef PHP_WIN32
+	if (argv) {
+		char **arg = argv;
+		while (*arg != NULL) {
+			efree(*arg);
+			arg++;
+		}
+		efree(argv);
+	}
+#endif
+
 	efree(descriptors);
 	ZVAL_RES(return_value, zend_register_resource(proc, le_proc_open));
 	return;
 
 exit_fail:
-	efree(descriptors);
+	if (descriptors) {
+		efree(descriptors);
+	}
 	_php_free_envp(env, is_persistent);
-	pefree(command, is_persistent);
+	if (command) {
+		pefree(command, is_persistent);
+	}
 #ifdef PHP_WIN32
 	free(cwdw);
 	free(cmdw);
 	free(envpw);
+#else
+	if (argv) {
+		char **arg = argv;
+		while (*arg != NULL) {
+			efree(*arg);
+			arg++;
+		}
+		efree(argv);
+	}
 #endif
 #if PHP_CAN_DO_PTS
 	if (dev_ptmx >= 0) {
