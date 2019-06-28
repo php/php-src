@@ -180,3 +180,41 @@ index 69e8e90f..76f7e7da 100644
 -- 
 2.13.6
 
+From bb421c437d406760fb9f70f49e2eb5c504528450 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Mon, 5 Jun 2017 17:40:31 +0000
+Subject: [PATCH] use default to avoid dup printing (Stephan Kulow)
+
+---
+ magic/Magdir/images | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/magic/Magdir/images b/magic/Magdir/images
+index d14c1de19..7e6f74d5e 100644
+--- a/magic/Magdir/images
++++ b/magic/Magdir/images
+@@ -35,11 +35,6 @@
+ >>>16	ubyte			<33
+ # skip more by looking for pixel size 0Fh 10h 18h 20h
+ >>>>16	ubyte&0xC0		0x00
+-# skip 260-16.ico by looking for no color map
+->>>>>1	ubyte			0
+-# implies no first map entry
+->>>>>>3	uleshort		0
+->>>>>>>0	use		tga-image
+ # Color Map
+ >>>>>1	belong&0xfff7ffff	0x01010000
+ >>>>>>0		use		tga-image
+@@ -47,6 +42,12 @@
+ >>>>>>0		use		tga-image
+ >>>>>1	belong&0xfff7ffff	0x00030000
+ >>>>>>0		use		tga-image
++>>>>>1	default			x
++# skip 260-16.ico by looking for no color map
++>>>>>>1	ubyte			0
++# implies no first map entry
++>>>>>>>3	uleshort		0
++>>>>>>>>0	use		tga-image
+ #	display tga bitmap image information
+ 0	name				tga-image
+ >2	ubyte		<34		Targa image data
