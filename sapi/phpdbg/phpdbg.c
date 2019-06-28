@@ -449,14 +449,12 @@ static PHP_FUNCTION(phpdbg_start_oplog)
 
 	if (!prev) {
 		PHPDBG_G(oplog_arena) = zend_arena_create(64 * 1024);
-
-		PHPDBG_G(oplog_cur) = ((phpdbg_oplog_entry *) zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry))) + 1;
-		PHPDBG_G(oplog_cur)->next = NULL;
 	}
 
 	PHPDBG_G(oplog_list) = emalloc(sizeof(phpdbg_oplog_list));
 	PHPDBG_G(oplog_list)->prev = prev;
-	PHPDBG_G(oplog_list)->start = PHPDBG_G(oplog_cur);
+	PHPDBG_G(oplog_cur) = &PHPDBG_G(oplog_list)->start;
+	PHPDBG_G(oplog_cur)->next = NULL;
 }
 
 static zend_always_inline zend_bool phpdbg_is_ignored_opcode(zend_uchar opcode) {
@@ -633,7 +631,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 		return;
 	}
 
-	cur = PHPDBG_G(oplog_list)->start;
+	cur = PHPDBG_G(oplog_list)->start.next;
 	prev = PHPDBG_G(oplog_list)->prev;
 
 	efree(PHPDBG_G(oplog_list));
