@@ -657,7 +657,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		password.s = "";
 		password.l = 0;
 	}
-	if (!database.s) {
+	if (!database.s || !database.s[0]) {
 		DBG_INF_FMT("no db given, using empty string");
 		database.s = "";
 		database.l = 0;
