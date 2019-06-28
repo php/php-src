@@ -33,13 +33,13 @@ echo base_convert("0o7" , 9, 10) . "\n";
 7
 10
 =======================================
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in /tmp/test.php on line 18
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 15
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in /tmp/test.php on line 19
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 61695
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in /tmp/test.php on line 20
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 511
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in /tmp/test.php on line 21
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 0
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in /tmp/test.php on line 22
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 7
