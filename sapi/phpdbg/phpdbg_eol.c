@@ -36,11 +36,11 @@ struct phpdbg_eol_rep phpdbg_eol_list[EOL_LIST_LEN] = {
 int phpdbg_eol_global_update(char *name)
 {
 
-	if (0 == memcmp(name, "CRLF", 4) || 0 == memcmp(name, "crlf", 4) || 0 == memcmp(name, "DOS", 3) || 0 == memcmp(name, "dos", 3)) {
+	if (0 == strcmp(name, "CRLF") || 0 == strcmp(name, "crlf") || 0 == strcmp(name, "DOS") || 0 == strcmp(name, "dos")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_CRLF;
-	} else if (0 == memcmp(name, "LF", 2) || 0 == memcmp(name, "lf", 2) || 0 == memcmp(name, "UNIX", 4) || 0 == memcmp(name, "unix", 4)) {
+	} else if (0 == strcmp(name, "LF") || 0 == strcmp(name, "lf") || 0 == strcmp(name, "UNIX") || 0 == strcmp(name, "unix")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_LF;
-	} else if (0 == memcmp(name, "CR", 2) || 0 == memcmp(name, "cr", 2) || 0 == memcmp(name, "MAC", 3) || 0 == memcmp(name, "mac", 3)) {
+	} else if (0 == strcmp(name, "CR") || 0 == strcmp(name, "cr") || 0 == strcmp(name, "MAC") || 0 == strcmp(name, "mac")) {
 		PHPDBG_G(eol) = PHPDBG_EOL_CR;
 	} else {
 		return FAILURE;

@@ -524,6 +524,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 
 /* Intrinsics macros start. */
 
+/* Memory sanitizer is incompatible with ifunc resolvers. Even if the resolver
+ * is marked as no_sanitize("memory") it will still be instrumented and crash. */
+#if defined(__has_feature)
+# if __has_feature(memory_sanitizer)
+#  undef HAVE_FUNC_ATTRIBUTE_IFUNC
+# endif
+#endif
+
 #if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif

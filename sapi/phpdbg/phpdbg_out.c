@@ -863,17 +863,6 @@ PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool es
 }
 /* copy end */
 
-PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, zend_bool escape_xml, ...) {
-	int ret;
-	va_list va;
-
-	va_start(va, escape_xml);
-	ret = phpdbg_xml_vasprintf(buf, format, escape_xml, va);
-	va_end(va);
-
-	return ret;
-}
-
 PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...) {
 	int ret;
 	va_list va;
