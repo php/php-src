@@ -3881,6 +3881,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resol
 PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
 ZEND_NO_SANITIZE_ADDRESS
+ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static void *resolve_addslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_addslashes_sse42;
@@ -3889,6 +3890,7 @@ static void *resolve_addslashes() {
 }
 
 ZEND_NO_SANITIZE_ADDRESS
+ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static void *resolve_stripslashes() {
 	if (zend_cpu_supports_sse42()) {
 		return php_stripslashes_sse42;
