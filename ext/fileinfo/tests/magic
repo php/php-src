@@ -1682,7 +1682,7 @@
 # http://home.earthlink.net/~hughhood/appleiiworksenvoy/
 # ('p' + 1-byte ProDOS File Type + 2-byte ProDOS Aux Type')
 # $70 $1A $F8 $FF is this the apple type ?
-#:apple pdospøÿ
+#:apple pdospï¿½ï¿½
 !:ext awp
 # minimum version needed to read this files. SFMinVers (0 , 30~3.0 )
 >>>183	ubyte		30	3.0
@@ -7299,9 +7299,9 @@
 #>>52	ulelong		3		\b, CleanShutdown
 >>52	ulelong		4		\b, BeingConverted
 >>52	ulelong		5		\b, ForceDetach
-# Windows NT major version when the databases indexes were updated.
+# Windowsï¿½NT major version when the databases indexes were updated.
 >>216	ulelong		x		\b, Windows version %d
-# Windows NT minor version
+# Windowsï¿½NT minor version
 >>220	ulelong		x		\b.%d
 
 # From: Joerg Jenderek
@@ -13280,11 +13280,6 @@
 >>>16	ubyte			<33
 # skip more by looking for pixel size 0Fh 10h 18h 20h
 >>>>16	ubyte&0xC0		0x00
-# skip 260-16.ico by looking for no color map
->>>>>1	ubyte			0
-# implies no first map entry
->>>>>>3	uleshort		0
->>>>>>>0	use		tga-image
 # Color Map
 >>>>>1	belong&0xfff7ffff	0x01010000
 >>>>>>0		use		tga-image
@@ -13292,6 +13287,12 @@
 >>>>>>0		use		tga-image
 >>>>>1	belong&0xfff7ffff	0x00030000
 >>>>>>0		use		tga-image
+>>>>>1	default			x
+# skip 260-16.ico by looking for no color map
+>>>>>>1	ubyte			0
+# implies no first map entry
+>>>>>>>3	uleshort		0
+>>>>>>>>0	use		tga-image
 #	display tga bitmap image information
 0	name				tga-image
 >2	ubyte		<34		Targa image data
