@@ -7032,7 +7032,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *value_ast = elem_ast->child[0];
-		zend_ast *key_ast = elem_ast->child[1];
+		zend_ast *key_ast;
 
 		zval *value = zend_ast_get_zval(value_ast);
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
@@ -7060,6 +7060,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		
 		Z_TRY_ADDREF_P(value);
 
+		key_ast = elem_ast->child[1];
 		if (key_ast) {
 			zval *key = zend_ast_get_zval(key_ast);
 			switch (Z_TYPE_P(key)) {
@@ -7823,8 +7824,6 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		}
 
 		value_ast = elem_ast->child[0];
-		key_ast = elem_ast->child[1];
-		by_ref = elem_ast->attr;
 
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
 			zend_compile_expr(&value_node, value_ast);
@@ -7835,6 +7834,9 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 			SET_NODE(opline->result, result);
 			continue;
 		}
+
+		key_ast = elem_ast->child[1];
+		by_ref = elem_ast->attr;
 
 		if (key_ast) {
 			zend_compile_expr(&key_node, key_ast);
