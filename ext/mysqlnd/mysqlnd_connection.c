@@ -829,7 +829,8 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_client_name", "mysqlnd");
-		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_server_host", "hostname");
+        if(hostname.l>0)
+            mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_server_host", hostname.s);
 		ret = conn->m->connect(conn, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
 
 		conn->m->local_tx_end(conn, this_func, FAIL);
