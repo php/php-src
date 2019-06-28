@@ -102,6 +102,26 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	zend_function_dtor(&tmp);
 }
 
+void zend_free_internal_arg_info(zend_internal_function *function) {
+	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
+		!function->scope && function->arg_info) {
+
+		uint32_t i;
+		uint32_t num_args = function->num_args + 1;
+		zend_internal_arg_info *arg_info = function->arg_info - 1;
+
+		if (function->fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		for (i = 0 ; i < num_args; i++) {
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
+			}
+		}
+		free(arg_info);
+	}
+}
+
 ZEND_API void zend_function_dtor(zval *zv)
 {
 	zend_function *function = Z_PTR_P(zv);
@@ -115,23 +135,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release_ex(function->common.function_name, 1);
 
-		if ((function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		    !function->common.scope && function->common.arg_info) {
-
-			uint32_t i;
-			uint32_t num_args = function->common.num_args + 1;
-			zend_arg_info *arg_info = function->common.arg_info - 1;
-
-			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
-			for (i = 0 ; i < num_args; i++) {
-				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
-				}
-			}
-			free(arg_info);
-		}
+		zend_free_internal_arg_info(&function->internal_function);
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
