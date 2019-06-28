@@ -6,8 +6,6 @@ dnl
 AC_DEFUN([TSRM_BASIC_CHECKS],[
 AC_REQUIRE([AC_PROG_CC])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
-
-AC_CHECK_FUNCS(sigprocmask)
 ])
 
 dnl
