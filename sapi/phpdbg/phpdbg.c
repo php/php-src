@@ -311,7 +311,7 @@ static PHP_FUNCTION(phpdbg_exec)
 					result = 0;
 				}
 
-				PHPDBG_G(exec) = strndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
+				PHPDBG_G(exec) = zend_strndup(ZSTR_VAL(exec), ZSTR_LEN(exec));
 				PHPDBG_G(exec_len) = ZSTR_LEN(exec);
 
 				if (result) {
