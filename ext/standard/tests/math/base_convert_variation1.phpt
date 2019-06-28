@@ -90,24 +90,36 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(2) "14"
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(3) "151"
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(3) "151"
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(7) "4553207"
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(7) "4553207"
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "5"
 
 -- Iteration 11 --
@@ -137,15 +149,23 @@ string(1) "0"
 -- Iteration 19 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 20 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
 
 -- Iteration 23 --
@@ -155,5 +175,7 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 25 --
-string(%d) "%d"
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+string(1) "5"
 ===Done===

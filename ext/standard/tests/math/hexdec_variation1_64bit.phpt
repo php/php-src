@@ -96,6 +96,8 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(9029)
 
 -- Iteration 5 --
@@ -105,18 +107,26 @@ int(285960729237)
 int(285960729238)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 9 --
 int(20015998341120)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1250999896553)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
@@ -146,15 +156,23 @@ int(0)
 -- Iteration 20 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(170)
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 23 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 24 --
@@ -164,5 +182,7 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-%s
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+int(970453)
 ===Done===

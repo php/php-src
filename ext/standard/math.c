@@ -855,6 +855,8 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	char c, *s;
 	zend_long cutoff;
 	int cutlim;
+	int lastchar = 0;
+	int invalidchars = 0;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
 		return FAILURE;
@@ -875,11 +877,39 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 			c -= 'A' - 10;
 		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
-		else
+		else if (isspace(c)) {
+			if (num == 0 && fnum == 0) {
+				continue;
+			}
+			lastchar = 1;
 			continue;
+		} else {
+			invalidchars++;
+			continue;
+		}
 
-		if (c >= base)
-			continue;
+		if (lastchar == 1 && c > 0 && c < base) {
+			invalidchars++;
+		}
+		lastchar = 0;
+
+
+		if (c >= base) {
+			if (*(s-2) == '0' && num == 0) {
+				if (base == 16 && c == 33) { /* allow the second char to be x */
+					continue;
+				}
+				if (base == 8 && c == 24) { /* allow the second char to be o */
+					continue;
+				}
+				if (base == 2 && c == 11) { /* allow the second char to be b */
+					continue;
+				}
+			}
+
+				invalidchars++;
+				continue;
+		}
 
 		switch (mode) {
 		case 0: /* Integer */
@@ -894,6 +924,10 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 		case 1: /* Float */
 			fnum = fnum * base + c;
 		}
+	}
+
+	if (invalidchars > 0) {
+		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
 	}
 
 	if (mode == 1) {
