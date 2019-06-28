@@ -1062,6 +1062,13 @@ static ZEND_COLD int zend_ast_valid_var_name(const char *s, size_t len)
 	return 1;
 }
 
+static ZEND_COLD int zend_ast_var_needs_braces(char ch)
+{
+	if (ch != '[' && !zend_ast_valid_var_char(ch))
+		return 0;
+	return 1;
+}
+
 static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
@@ -1109,7 +1116,7 @@ static ZEND_COLD void zend_ast_export_encaps_list(smart_str *str, char quote, ze
 		           ast->child[0]->kind == ZEND_AST_ZVAL &&
 		           (i + 1 == list->children ||
 		            list->child[i + 1]->kind != ZEND_AST_ZVAL ||
-		            !zend_ast_valid_var_char(
+		            !zend_ast_var_needs_braces(
 		                *Z_STRVAL_P(
 		                    zend_ast_get_zval(list->child[i + 1]))))) {
 			zend_ast_export_ex(str, ast, 0, indent);
