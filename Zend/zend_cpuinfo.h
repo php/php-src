@@ -111,11 +111,7 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
  * CPU support helpers from asan.
  * See also https://github.com/google/sanitizers/issues/342. */
 #if __has_attribute(no_sanitize_address)
-# if __has_feature(memory_sanitizer)
-#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address)) __attribute__((no_sanitize("memory")))
-# else
-#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
-# endif
+# define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
 #else
 # define ZEND_NO_SANITIZE_ADDRESS
 #endif
