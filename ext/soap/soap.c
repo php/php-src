@@ -2099,7 +2099,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 }
 /* }}} */
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) /* {{{ */
+static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) /* {{{ */
 {
 	zend_bool _old_in_compilation;
 	zend_execute_data *_old_current_execute_data;
@@ -2110,11 +2110,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_current_execute_data = EG(current_execute_data);
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
-
-	if (!PG(modules_activated) || !SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets) {
-		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
-		return;
-	}
 
 	if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
 	    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_class_entry)) {
@@ -2232,6 +2227,16 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			soap_server_fault_ex(NULL, &fault_obj, NULL);
 			zend_bailout();
 		}
+	}
+}
+/* }}} */
+
+static void soap_error_handler(int error_num, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) /* {{{ */
+{
+	if (EXPECTED(!SOAP_GLOBAL(use_soap_error_handler))) {
+		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
+	} else {
+		soap_real_error_handler(error_num, error_filename, error_lineno, format, args);
 	}
 }
 /* }}} */
