@@ -546,6 +546,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		}
 
 		if (packet->db_len > 0) {
+            /* CLIENT_CONNECT_WITH_DB should have been set if !is_change_user_packet*/
 			size_t real_db_len = MIN(MYSQLND_MAX_ALLOWED_DB_LEN, packet->db_len);
 			memcpy(p, packet->db, real_db_len);
 			p+= real_db_len;
