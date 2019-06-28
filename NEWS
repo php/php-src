@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
+- PDO_Sqlite:
+  . Fixed #78192 (SegFault when reuse statement after schema has changed).
+    (Vincent Quatrevieux)
+
 - Standard:
   . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
 
