@@ -1759,6 +1759,8 @@ simple_list:
 				zend_ast_export_ex(str, ast->child[1], 80, indent);
 				smart_str_appends(str, " => ");
 			}
+			if (ast->attr)
+				smart_str_appendc(str, '&');
 			zend_ast_export_ex(str, ast->child[0], 80, indent);
 			break;
 		case ZEND_AST_NEW:
