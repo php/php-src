@@ -11,7 +11,7 @@ jobs:
       configurationName: DEBUG_NTS
       configurationParameters: >-
           --enable-debug --disable-maintainer-zts
-          CFLAGS='-fsanitize=undefined,address'
+          CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
           LDFLAGS='-fsanitize=undefined,address'
       runTestsParameters: --asan
       timeoutInMinutes: 120
@@ -20,7 +20,7 @@ jobs:
       configurationName: DEBUG_ZTS
       configurationParameters: >-
           --enable-debug --enable-maintainer-zts
-          CFLAGS='-fsanitize=undefined,address'
+          CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
           LDFLAGS='-fsanitize=undefined,address'
       runTestsParameters: --asan
       timeoutInMinutes: 120
@@ -29,7 +29,7 @@ jobs:
       configurationName: RELEASE_NTS
       configurationParameters: >-
           --disable-debug --disable-maintainer-zts
-          CFLAGS='-fsanitize=undefined,address'
+          CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
           LDFLAGS='-fsanitize=undefined,address'
       runTestsParameters: --asan
       timeoutInMinutes: 120
@@ -38,7 +38,7 @@ jobs:
       configurationName: RELEASE_ZTS
       configurationParameters: >-
           --disable-debug --enable-maintainer-zts
-          CFLAGS='-fsanitize=undefined,address'
+          CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
           LDFLAGS='-fsanitize=undefined,address'
       runTestsParameters: --asan
       timeoutInMinutes: 120
