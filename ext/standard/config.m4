@@ -286,7 +286,7 @@ dnl Check for available functions
 dnl
 dnl log2 could be used to improve the log function, however it requires C99. The
 dnl check for log2 should be turned on, as soon as we support C99.
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
+AC_CHECK_FUNCS(asinh acosh atanh log1p hypot)
 AC_FUNC_FNMATCH
 
 dnl
@@ -376,7 +376,7 @@ dnl
 dnl Check for i18n capabilities
 dnl
 AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen mbrlen mbsinit])
+AC_CHECK_FUNCS([mblen])
 AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_WCHAR_H

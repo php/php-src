@@ -17,9 +17,7 @@ if test "$PHP_OPCACHE" != "no"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
 
-  AC_CHECK_FUNC(mprotect,[
-    AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
-  ])
+  AC_CHECK_FUNCS([mprotect])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
