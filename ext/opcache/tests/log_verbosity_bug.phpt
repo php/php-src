@@ -12,7 +12,10 @@ opcache.file_cache_fallback=0
 opcache.memory_consumption=999999999
 opcache.log_verbosity_level=-1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
+?>
 --FILE--
 <?php
 var_dump("Script should fail");

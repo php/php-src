@@ -25,6 +25,10 @@ if (empty($enough_free_ram)) {
 if (getenv('TRAVIS')) {
     die("skip Fails intermittently on travis");
 }
+
+if (getenv('SKIP_PERF_SENSITIVE')) {
+    die("skip Test may be very slow if PHP is instrumented");
+}
 ?>
 --FILE--
 <?php

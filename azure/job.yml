@@ -1,9 +1,12 @@
 parameters:
   configurationName: ''
   configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
 
 jobs:
   - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -80,13 +83,19 @@ jobs:
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
+        runTestsParameters: ${{ parameters.runTestsParameters }}
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so -d opcache.enable_cli=1
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'JIT'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.jit_buffer_size=16M
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so -d opcache.enable_cli=1
+          -d opcache.jit_buffer_size=16M

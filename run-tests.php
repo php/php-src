@@ -517,6 +517,18 @@ NO_PROC_OPEN_ERROR;
 					case '--shuffle':
 						$shuffle = true;
 						break;
+					case '--asan':
+						$environment['USE_ZEND_ALLOC'] = 0;
+						$environment['USE_TRACKED_ALLOC'] = 1;
+						$environment['SKIP_ASAN'] = 1;
+						$environment['SKIP_PERF_SENSITIVE'] = 1;
+
+						$lsanSuppressions = __DIR__ . '/azure/lsan-suppressions.txt';
+						if (file_exists($lsanSuppressions)) {
+							$environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
+								. ':print_suppressions=0';
+						}
+						break;
 					//case 'w'
 					case '-':
 						// repeat check with full switch
