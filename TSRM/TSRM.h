@@ -100,9 +100,6 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
 /* frees all resources allocated for the current thread */
 TSRM_API void ts_free_thread(void);
 
-/* frees all resources allocated for all threads except current */
-void ts_free_worker_threads(void);
-
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
 
@@ -137,6 +134,7 @@ TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
+TSRM_API uint8_t tsrm_is_shutdown(void);
 TSRM_API const char *tsrm_api_name(void);
 
 #ifdef TSRM_WIN32

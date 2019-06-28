@@ -2488,10 +2488,6 @@ void php_module_shutdown(void)
 
 	zend_interned_strings_switch_storage(0);
 
-#ifdef ZTS
-	ts_free_worker_threads();
-#endif
-
 #if ZEND_RC_DEBUG
 	zend_rc_debug = 0;
 #endif
