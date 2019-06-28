@@ -359,6 +359,7 @@ void shutdown_executor(void) /* {{{ */
 					if (ht) {
 						ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
 						zend_array_destroy(ht);
+						ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -390,6 +391,7 @@ void shutdown_executor(void) /* {{{ */
 								if (ht) {
 									ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
 									zend_array_destroy(ht);
+									ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 								}
 							}
 						}
