@@ -731,6 +731,11 @@ static int zend_ast_valid_var_name(const char *s, size_t len)
 	return 1;
 }
 
+static ZEND_COLD int zend_ast_var_needs_braces(char ch)
+{
+	return ch == '[' || zend_ast_valid_var_char(ch);
+}
+
 static void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
@@ -778,7 +783,7 @@ static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_lis
 		           ast->child[0]->kind == ZEND_AST_ZVAL &&
 		           (i + 1 == list->children ||
 		            list->child[i + 1]->kind != ZEND_AST_ZVAL ||
-		            !zend_ast_valid_var_char(
+		            !zend_ast_var_needs_braces(
 		                *Z_STRVAL_P(
 		                    zend_ast_get_zval(list->child[i + 1]))))) {
 			zend_ast_export_ex(str, ast, 0, indent);
@@ -1390,6 +1395,8 @@ simple_list:
 				zend_ast_export_ex(str, ast->child[1], 80, indent);
 				smart_str_appends(str, " => ");
 			}
+			if (ast->attr)
+				smart_str_appendc(str, '&');
 			zend_ast_export_ex(str, ast->child[0], 80, indent);
 			break;
 		case ZEND_AST_NEW:
