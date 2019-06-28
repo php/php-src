@@ -302,6 +302,13 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 
 	result->m.free_result_buffers(result);
 
+	if (result->conn) {
+		result->conn->m->free_reference(result->conn);
+		result->conn = NULL;
+	}
+
+	mysqlnd_mempool_destroy(result->memory_pool);
+
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -312,16 +319,9 @@ static
 void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 {
 	DBG_ENTER("mysqlnd_res::free_result_internal");
+
 	result->m.skip_result(result);
-
 	result->m.free_result_contents(result);
-
-	if (result->conn) {
-		result->conn->m->free_reference(result->conn);
-		result->conn = NULL;
-	}
-
-	mysqlnd_mempool_destroy(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -355,7 +355,8 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 
 	/* It's safe to reread without freeing */
 	if (FAIL == result->meta->m->read_metadata(result->meta, conn, result)) {
-		result->m.free_result_contents(result);
+		result->meta->m->free_metadata(result->meta);
+		result->meta = NULL;
 		DBG_RETURN(FAIL);
 	}
 	/* COM_FIELD_LIST is broken and has premature EOF, thus we need to hack here and in mysqlnd_res_meta.c */
@@ -517,7 +518,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 					DBG_ERR("Error occurred while reading the EOF packet");
 					result->m.free_result_contents(result);
-					mysqlnd_mempool_destroy(result->memory_pool);
 					if (!stmt) {
 						conn->current_result = NULL;
 					} else {

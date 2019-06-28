@@ -2203,11 +2203,17 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 			if (full) {
 				zend_hash_destroy(heap->tracked_allocs);
 				free(heap->tracked_allocs);
+				/* Make sure the heap free below does not use tracked_free(). */
+				heap->custom_heap.std._free = free;
 			}
 		}
 
 		if (full) {
-			free(heap);
+			if (ZEND_DEBUG && heap->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+				heap->custom_heap.debug._free(heap ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
+			} else {
+				heap->custom_heap.std._free(heap);
+			}
 		}
 		return;
 	}
