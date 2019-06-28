@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
+  . Fixed #78208 (password_needs_rehash() with an unknown algo should always
+    return true). (Sara)
 
 27 Jun 2019, PHP 7.4.0alpha2
 
