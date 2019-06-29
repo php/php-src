@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.21
 
+- Fileinfo:
+  . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
+    (Joshua Westerheide)
+
 - PDO_Sqlite:
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
