@@ -39,6 +39,8 @@ array(%d) {
   string(9) "image/png"
   ["%s/resources/test.ppt"]=>
   string(29) "application/vnd.ms-powerpoint"
+  ["%s/resources/test.tga"]=>
+  string(11) "image/x-tga"
   ["%s/resources/test.webm"]=>
   string(10) "video/webm"
 }
