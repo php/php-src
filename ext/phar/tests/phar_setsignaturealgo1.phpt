@@ -2,7 +2,6 @@
 Phar::setSignatureAlgorithm()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if ( extension_loaded("hash")) die("skip extension hash conflicts"); ?>
 <?php if (!defined("Phar::PGP")) die("skip PGP Signature algorithm not available"); ?>
 --INI--
 phar.require_hash=0
@@ -59,8 +58,18 @@ array(2) {
   ["hash_type"]=>
   string(5) "SHA-1"
 }
-string (82) "SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled"
-string (82) "SHA-256 and SHA-512 signatures are only supported if the hash extension is enabled"
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-256"
+}
+array(2) {
+  ["hash"]=>
+  string(%d) "%s"
+  ["hash_type"]=>
+  string(7) "SHA-512"
+}
 array(2) {
   ["hash"]=>
   string(%d) "%s"
