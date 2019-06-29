@@ -45,12 +45,10 @@ FILE_RCSID("@(#)$File: compress.c,v 1.121 2019/05/07 02:27:11 christos Exp $")
 #endif
 #include <string.h>
 #include <errno.h>
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-# ifndef HAVE_SIG_T
+#ifndef HAVE_SIG_T
 typedef void (*sig_t)(int);
-# endif /* HAVE_SIG_T */
-#endif
+#endif /* HAVE_SIG_T */
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -117,8 +115,8 @@ zlibcmp(const unsigned char *buf)
 #define gzip_flags "-cd"
 #define lrzip_flags "-do"
 #define lzip_flags gzip_flags
-
 #ifdef PHP_FILEINFO_UNCOMPRESS
+
 static const char *gzip_args[] = {
 	"gzip", gzip_flags, NULL
 };
@@ -174,7 +172,6 @@ private const struct {
 	{ RCAST(const void *, zlibcmp),	0, zlib_args, NULL },	/* zlib */
 #endif
 };
-
 
 #define OKDATA 	0
 #define NODATA	1
@@ -485,7 +482,6 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 	}
 	return fd;
 }
-
 #ifdef PHP_FILEINFO_UNCOMPRESS
 #ifdef BUILTIN_DECOMPRESS
 

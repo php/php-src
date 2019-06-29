@@ -231,7 +231,7 @@ der_data(char *buf, size_t blen, uint32_t tag, const void *q, uint32_t len)
 	default:
 		break;
 	}
-		
+
 	for (; i < len; i++) {
 		uint32_t z = i << 1;
 		if (z < blen - 2)
