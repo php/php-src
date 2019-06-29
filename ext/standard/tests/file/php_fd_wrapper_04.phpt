@@ -1,9 +1,7 @@
 --TEST--
 php://fd wrapper: invalid file descriptor
 --SKIPIF--
-<?php include('skipif.inc');
-if(substr(PHP_OS, 0, 3) == "WIN")
-	die("skip Not for Windows");
+<?php if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
 
 //we'd need a release and a test variation for windows, because in debug builds we get this message:
 //Warning: Invalid parameter detected in CRT function '_dup' (f:\dd\vctools\crt_bld\self_x86\crt\src\dup.c:52)
