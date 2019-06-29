@@ -101,6 +101,13 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
+#if HAVE_FORK
+# include <sys/wait.h>
+static pid_t     php_cli_server_master;
+static pid_t    *php_cli_server_workers;
+static zend_long php_cli_server_workers_max;
+#endif
+
 typedef struct php_cli_server_poller {
 	fd_set rfds, wfds;
 	struct {
@@ -483,9 +490,57 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
+    char *workers;
+
 	if (php_module_startup(sapi_module, &cli_server_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
+
+    if ((workers = getenv("PHP_CLI_SERVER_WORKERS"))) {
+#ifndef SO_REUSEPORT
+        fprintf(stderr, "platform does not support SO_REUSEPORT, cannot create workers\n");
+#elif HAVE_FORK
+        ZEND_ATOL(php_cli_server_workers_max, workers);
+
+        if (php_cli_server_workers_max > 1) {
+            zend_long php_cli_server_worker;
+            
+            php_cli_server_workers = calloc(
+                php_cli_server_workers_max, sizeof(pid_t));
+            if (!php_cli_server_workers) {
+                php_cli_server_workers_max = 1;
+
+                return SUCCESS;
+            }
+
+            php_cli_server_master = getpid();
+
+            for (php_cli_server_worker = 0;
+                 php_cli_server_worker < php_cli_server_workers_max;
+                 php_cli_server_worker++) {
+                pid_t pid = fork();
+
+                if (pid == FAILURE) {
+                    /* no more forks allowed, work with what we have ... */
+                    php_cli_server_workers_max = 
+                        php_cli_server_worker + 1;
+                    return SUCCESS;
+                } else if (pid == SUCCESS) {
+                    return SUCCESS;
+                } else {
+                    php_cli_server_workers[
+                        php_cli_server_worker
+                    ] = pid;
+                }
+            }
+        } else {
+            fprintf(stderr, "number of workers must be larger than 1\n");
+        }
+#else
+        fprintf(stderr, "forking is not supported on this platform\n");
+#endif
+    }
+
 	return SUCCESS;
 } /* }}} */
 
@@ -703,7 +758,15 @@ static void sapi_cli_server_log_message(char *msg, int syslog_type_int) /* {{{ *
 			memmove(buf, "unknown", sizeof("unknown"));
 		}
 	}
-	fprintf(stderr, "[%s] %s\n", buf, msg);
+#ifdef HAVE_FORK
+	if (php_cli_server_workers_max > 1) {
+		fprintf(stderr, "[%ld] [%s] %s\n", (long) getpid(), buf, msg);
+	} else {
+		fprintf(stderr, "[%s] %s\n", buf, msg);
+	}
+#else
+    fprintf(stderr, "[%s] %s\n", buf, msg);
+#endif
 } /* }}} */
 
 /* {{{ sapi_module_struct cli_server_sapi_module
@@ -1229,6 +1292,13 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 			int val = 1;
 			setsockopt(retval, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 		}
+#endif
+
+#if defined(HAVE_FORK) && defined(SO_REUSEPORT)
+        if (php_cli_server_workers_max > 1) {
+            int val = 1;
+			setsockopt(retval, SOL_SOCKET, SO_REUSEPORT, (char*)&val, sizeof(val));
+        }
 #endif
 
 		if (bind(retval, sa, *socklen) == SOCK_CONN_ERR) {
@@ -2219,6 +2289,32 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 	if (server->router) {
 		pefree(server->router, 1);
 	}
+#if HAVE_FORK
+    if (php_cli_server_workers_max > 1 &&
+        php_cli_server_workers &&
+        getpid() == php_cli_server_master) {
+        zend_long php_cli_server_worker;
+
+        for (php_cli_server_worker = 0;
+             php_cli_server_worker < php_cli_server_workers_max;
+             php_cli_server_worker++) {
+             int php_cli_server_worker_status;
+
+             do {
+                if (waitpid(php_cli_server_workers[php_cli_server_worker], 
+                           &php_cli_server_worker_status, 
+                           0) == FAILURE) {
+                    /* an extremely bad thing happened */
+                    break;
+                }
+
+             } while (!WIFEXITED(php_cli_server_worker_status) && 
+                      !WIFSIGNALED(php_cli_server_worker_status));
+        }
+
+        free(php_cli_server_workers);
+    }
+#endif
 } /* }}} */
 
 static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
@@ -2593,11 +2689,13 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 			memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
 		}
 
-		printf("PHP %s Development Server started at %s"
-				"Listening on http://%s\n"
-				"Document root is %s\n"
-				"Press Ctrl-C to quit.\n",
-				PHP_VERSION, buf, server_bind_address, document_root);
+#if HAVE_FORK
+        printf("[%ld] PHP %s Development Server (http://%s) started at %s",
+               (long) getpid(), PHP_VERSION, server_bind_address, buf);
+#else
+        printf("PHP %s Development Server (http://%s) started at %s",
+               PHP_VERSION, server_bind_address, buf); 
+#endif
 	}
 
 #if defined(SIGINT)
