@@ -68,10 +68,7 @@
 #endif
 
 #include <stdio.h>
-
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #define TIMELIB_SECOND   1
 #define TIMELIB_MINUTE   2
