@@ -1,5 +1,5 @@
 --TEST--
-FPM: Direct worker output plain log with limit 1000 and msg 2000
+FPM: Buffered worker output plain log with msg with flush split in buffer
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -10,8 +10,6 @@ require_once "tester.inc";
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
-log_limit = 1000
-log_buffering = no
 [unconfined]
 listen = {{ADDR}}
 pm = dynamic
@@ -25,7 +23,7 @@ EOT;
 
 $code = <<<EOT
 <?php
-file_put_contents('php://stderr', str_repeat('a', 2000) . "\n");
+file_put_contents('php://stderr', str_repeat('a', 1022) . "\0fscf\0");
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
@@ -33,15 +31,18 @@ $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 $tester->terminate();
-$tester->expectLogMessage('a', 1000, 2000, false);
+var_dump($tester->getLastLogLine() === str_repeat('a', 1022) . "\n");
 $tester->close();
 
 ?>
 Done
 --EXPECT--
+bool(true)
 Done
 --CLEAN--
 <?php
 require_once "tester.inc";
 FPM\Tester::clean();
 ?>
+--XFAIL--
+Split flush not implemented yet
