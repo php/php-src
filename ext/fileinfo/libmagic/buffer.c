@@ -83,6 +83,7 @@ buffer_fill(const struct buffer *bb)
 		FINFO_READ_FUNC(b->fd, b->ebuf, b->elen) != (ssize_t)b->elen)
 	{
 		efree(b->ebuf);
+		b->ebuf = NULL;
 		goto out;
 	}
 
