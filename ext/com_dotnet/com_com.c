@@ -273,7 +273,7 @@ PHP_FUNCTION(com_create_instance)
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
 				}
-
+				efree(typelib_name);
 			} else {
 				/* try it anyway */
 				php_com_import_typelib(TL, mode, obj->code_page);
