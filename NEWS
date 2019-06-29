@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha3
 
+- Fileinfo:
+  . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
+   (Anatol)
+
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
