@@ -420,7 +420,6 @@ AC_CHECK_HEADERS([ \
 inttypes.h \
 stdint.h \
 dirent.h \
-ApplicationServices/ApplicationServices.h \
 sys/param.h \
 sys/types.h \
 sys/time.h \
