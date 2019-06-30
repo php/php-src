@@ -30,6 +30,7 @@ PHP 7.4 UPGRADE NOTES
   . Passing the result of a (non-reference) list() assignment by reference is
     consistently disallowed now. Previously this worked if the right hand side
     was a simple (CV) variable and did not occur as part of the list().
+  . Added --ini-path and --ini-dir options to php-config.
 
 - BCMath:
   . BCMath functions will now warn if a non well-formed number is passed, such

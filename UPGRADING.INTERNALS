@@ -160,9 +160,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
      Linked classes have ZEND_ACC_LINKED flag set.
 
-  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED.
-     Special HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced
-     to hide implementation details.
+  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED. Special
+     HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced to hide
+     implementation details.
 
   m. The write_property() object handler now returns the assigned value (after
      possible type coercions) rather than void. For extensions, it should
@@ -170,9 +170,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   n. Assignments to references now need to ensure that they respect property
      types that affect the reference. This means that references should no
-     longer be directly assigned to, and instead a set of specialized macros
-     of the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed
-     porting instructions as well as a compatibility shim in the wiki:
+     longer be directly assigned to, and instead a set of specialized macros of
+     the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed porting
+     instructions as well as a compatibility shim in the wiki:
      https://wiki.php.net/rfc/typed_properties_v2#assignments_to_references
 
   o. ZEND_COMPILE_EXTENDED_INFO has been split into:
@@ -190,16 +190,16 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   r. TSRM adds tsrm_env_lock() and tsrm_env_unlock() for ZTS:
      code that may change environ and may run concurrently with user code in ZTS
-     is expected to use this exclusion API to maintain as much safety as reasonable.
-     This results in "thread safe" getenv/putenv in Windows and Unix, however
-     functions that may read the environment without exclusion still exist,
-     for example:
+     is expected to use this exclusion API to maintain as much safety as
+     reasonable. This results in "thread safe" getenv/putenv in Windows and
+     Unix, however functions that may read the environment without exclusion
+     still exist, for example:
        - setlocale
        - mktime
        - tzset
-     The above is not an exhaustive list of such functions, while getenv/putenv will
-     behave as if they are safe, care should still be taken in multi-threaded
-     environments.
+     The above is not an exhaustive list of such functions, while getenv/putenv
+     will behave as if they are safe, care should still be taken in
+     multi-threaded environments.
 
   s. Correct support for typed properties requires the use of new macros to
      assign values to references. For more information see
@@ -224,6 +224,19 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       builds.
     - Symbols HAVE_DATE, HAVE_REFLECTION, and HAVE_SPL have been removed. It
       should be considered to have these extensions always available.
+    - Removed unused build time symbols: PHP_ADA_INCLUDE, PHP_ADA_LFLAGS,
+      PHP_ADA_LIBS, PHP_APACHE_INCLUDE, PHP_APACHE_TARGET, PHP_FHTTPD_INCLUDE,
+      PHP_FHTTPD_LIB, PHP_FHTTPD_TARGET, PHP_CFLAGS, PHP_DBASE_LIB,
+      PHP_BUILD_DEBUG, PHP_GDBM_INCLUDE, PHP_IBASE_INCLUDE, PHP_IBASE_LFLAGS,
+      PHP_IBASE_LIBS, PHP_IFX_INCLUDE, PHP_IFX_LFLAGS, PHP_IFX_LIBS,
+      PHP_INSTALL_IT, PHP_IODBC_INCLUDE, PHP_IODBC_LFLAGS, PHP_IODBC_LIBS,
+      PHP_MSQL_LFLAGS, PHP_MSQL_INCLUDE, PHP_MSQL_LFLAGS, PHP_MSQL_LIBS,
+      PHP_MYSQL_INCLUDE, PHP_MYSQL_LIBS, PHP_MYSQL_TYPE, PHP_OCI8_SHARED_LIBADD,
+      PHP_ORACLE_SHARED_LIBADD, PHP_ORACLE_DIR, PHP_ORACLE_VERSION,
+      PHP_PGSQL_INCLUDE, PHP_PGSQL_LFLAGS, PHP_PGSQL_LIBS, PHP_SOLID_INCLUDE,
+      PHP_SOLID_LIBS, PHP_EMPRESS_INCLUDE, PHP_EMPRESS_LIBS, PHP_SYBASE_INCLUDE,
+      PHP_SYBASE_LFLAGS, PHP_SYBASE_LIBS, PHP_DBM_TYPE, PHP_DBM_LIB,
+      PHP_LDAP_LFLAGS, PHP_LDAP_INCLUDE, PHP_LDAP_LIBS.
 
   b. Unix build system changes
     - configure --help now also outputs --program-suffix and --program-prefix
@@ -234,8 +247,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - Local PHP m4 unused or obsolete macros have been removed:
       PHP_TARGET_RDYNAMIC, PHP_SOLARIS_PIC_WEIRDNESS, PHP_SYS_LFS,
       PHP_AC_BROKEN_SPRINTF, PHP_EXTENSION, PHP_DECLARED_TIMEZONE,
-      PHP_CHECK_TYPES, PHP_TM_GMTOFF, PHP_CHECK_64BIT, PHP_READDIR_R_TYPE,
+      PHP_CHECK_TYPES, PHP_CHECK_64BIT, PHP_READDIR_R_TYPE,
       PHP_SETUP_KERBEROS.
+    - Local PHP_TM_GMTOFF m4 macro replaced with Autoconf's AC_CHECK_MEMBERS.
+      The HAVE_TM_GMTOFF symbol is replaced with HAVE_STRUCT_TM_TM_GMTOFF and
+      HAVE_TM_ZONE symbol is replaced with HAVE_STRUCT_TM_TM_ZONE.
     - new --enable-rtld-now build option allow to switch dlopen behavior
       from RTLD_LAZY to RTLD_NOW
     - Minimum Bison version is 3.0+ for generating parser files.
@@ -253,7 +269,11 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       HAVE_PERROR, HAVE_STRFTIME, HAVE_TZNAME, HAVE_STDARG_H, HAVE_STRING_H,
       HAVE_STDLIB_H, HAVE_SYS_VARARGS_H, HAVE_ASSERT_H, HAVE_SYS_DIR_H,
       TM_IN_SYS_TIME, HAVE_STRTOD, HAVE_STRCOLL, HAVE_ERRNO_H, HAVE_MEMCPY,
-      HAVE_SNPRINTF, HAVE_STDIO_H, HAVE_STRPBRK, HAVE_TIME_H.
+      HAVE_SNPRINTF, HAVE_STDIO_H, HAVE_STRPBRK, HAVE_TIME_H, HAVE_LIMITS_H,
+      HAVE_STRTOUL, HAVE_SYS_NDIR_H, HAVE_SYS_TIMES_H, PHP_HAVE_STDINT_TYPES.
+    - Removed unused check for dev/arandom and the HAVE_DEV_ARANDOM symbol.
+    - Remove unused functions checks: HAVE_MBSINIT, HAVE_MEMPCPY, HAVE_SETPGID,
+      HAVE_STRPNCPY, HAVE_STRTOULL, and HAVE_VSNPRINTF.
 
   c. Windows build system changes
 
