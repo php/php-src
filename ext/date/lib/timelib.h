@@ -1,7 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
+ * Copyright (c) 2018 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -321,9 +322,9 @@ typedef struct _timelib_tzdb {
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201801
-#define TIMELIB_EXTENDED_VERSION 20180105
-#define TIMELIB_ASCII_VERSION "2018.01RC3"
+#define TIMELIB_VERSION 201802
+#define TIMELIB_EXTENDED_VERSION 20180201
+#define TIMELIB_ASCII_VERSION "2018.02"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -649,7 +650,7 @@ void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info
  * It fetches the right UTC offset that is currently stored in the time
  * stamp field in 't' ('sse'), and assigns that to the 'z' field and 'dst'
  * field (whether DST is in effect at the time). It also sets the current
- * abbrevation to the 'tz_addr' field, making sure that if a value was already
+ * abbreviation to the 'tz_addr' field, making sure that if a value was already
  * set it was freed.
  *
  * The time zone information in 'tz' is *not* duplicated into the 't' field so
