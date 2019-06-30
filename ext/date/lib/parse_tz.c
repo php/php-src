@@ -1,7 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
+ * Copyright (c) 2018 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -502,11 +503,6 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, i
 		tmp = timelib_tzinfo_ctor(timezone);
 
 		version = read_preamble(&tzf, tmp, &type);
-		if (version == -1) {
-			*error_code = TIMELIB_ERROR_UNSUPPORTED_VERSION;
-			timelib_tzinfo_dtor(tmp);
-			return NULL;
-		}
 		if (version < 2 || version > 3) {
 			*error_code = TIMELIB_ERROR_UNSUPPORTED_VERSION;
 			timelib_tzinfo_dtor(tmp);
@@ -521,6 +517,7 @@ timelib_tzinfo *timelib_parse_tzfile(char *timezone, const timelib_tzdb *tzdb, i
 		if (!skip_64bit_preamble(&tzf, tmp)) {
 			/* 64 bit preamble is not in place */
 			*error_code = TIMELIB_ERROR_CORRUPT_NO_64BIT_PREAMBLE;
+			timelib_tzinfo_dtor(tmp);
 			return NULL;
 		}
 		read_64bit_header(&tzf, tmp);
@@ -607,8 +604,8 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 	/* If there is no transition time, we pick the first one, if that doesn't
 	 * exist we return NULL */
 	if (!tz->bit64.timecnt || !tz->trans) {
-		*transition_time = 0;
 		if (tz->bit64.typecnt == 1) {
+			*transition_time = INT64_MIN;
 			return &(tz->type[0]);
 		}
 		return NULL;
@@ -619,6 +616,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 	 * one in case there are only DST entries. Not sure which smartass came up
 	 * with this idea in the first though :) */
 	if (ts < tz->trans[0]) {
+		*transition_time = INT64_MIN;
 		return &(tz->type[0]);
 	}
 
