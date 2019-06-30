@@ -58,7 +58,6 @@
 #define HAVE_LIBDL 1
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_PUTENV 1
-#define HAVE_LIMITS_H 1
 #define HAVE_TZSET 1
 #undef HAVE_FLOCK
 #define HAVE_ALLOCA 1
