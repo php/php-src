@@ -181,6 +181,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->stdin_file = NULL;
 
 	pg->cur_command = NULL;
+	pg->last_line = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
