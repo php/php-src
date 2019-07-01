@@ -506,6 +506,16 @@ static void* dasm_labels[zend_lb_MAX];
 |	mov dword [Ra(Z_REG(addr))+Z_OFFSET(addr)+4], val
 |.endmacro
 
+|.macro UNDEF_OPLINE_RESULT
+|	mov r0, EX->opline
+|.if X64
+	|	movsxd r0, dword OP:r0->result.var
+|.else
+	|	mov r0, OP:r0->result.var
+|.endif
+|	SET_Z_TYPE_INFO FP + r0, IS_UNDEF
+|.endmacro
+
 |.macro FPU_OP, fp_ins, addr
 ||	if (Z_MODE(addr) == IS_CONST_ZVAL) {
 |		MEM_OP1 fp_ins, qword, Z_ZV(addr), r0
@@ -2179,6 +2189,7 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
+	|	UNDEF_OPLINE_RESULT
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_arithmetic_error
@@ -2207,6 +2218,7 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
+	|	UNDEF_OPLINE_RESULT
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_division_by_zero_error
