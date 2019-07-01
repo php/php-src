@@ -7,7 +7,7 @@ opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --SKIPIF--
-<?php require_once('../skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function encodeDynamicInteger(int $int): string {
