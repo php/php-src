@@ -320,25 +320,21 @@ class Tester
     /**
      * Start PHP-FPM master process
      *
-     * @param string $extraArgs
+     * @param array $extraArgs
      * @return bool
      * @throws \Exception
      */
-    public function start(string $extraArgs = '')
+    public function start(array $extraArgs = [])
     {
         $configFile = $this->createConfig();
-        $desc = $this->outDesc ? [] : [1 => array('pipe', 'w')];
-        $asRoot = getenv('TEST_FPM_RUN_AS_ROOT') ? '--allow-to-run-as-root' : '';
-        $cmd = self::findExecutable() . " $asRoot -F -O -y $configFile $extraArgs";
-        /* Since it's not possible to spawn a process under linux without using a
-         * shell in php (why?!?) we need a little shell trickery, so that we can
-         * actually kill php-fpm */
-        $this->masterProcess = proc_open(
-            "killit () { kill \$child 2> /dev/null; }; " .
-                "trap killit TERM; $cmd 2>&1 & child=\$!; wait",
-            $desc,
-            $pipes
-        );
+        $desc = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
+        $cmd = [self::findExecutable(), '-F', '-O', '-y', $configFile];
+        if (getenv('TEST_FPM_RUN_AS_ROOT')) {
+            $cmd[] = '--allow-to-run-as-root';
+        }
+        $cmd = array_merge($cmd, $extraArgs);
+
+        $this->masterProcess = proc_open($cmd, $desc, $pipes);
         register_shutdown_function(
             function($masterProcess) use($configFile) {
                 @unlink($configFile);
