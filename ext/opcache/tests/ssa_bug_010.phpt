@@ -1,5 +1,7 @@
 --TEST--
 Wrong assertion
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function foo($parts, $a, $b) {

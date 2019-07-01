@@ -1,5 +1,7 @@
 --TEST--
 Incorrect constant propagation on BOOL in pass 1
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function test($foo) {
