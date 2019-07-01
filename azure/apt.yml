@@ -34,5 +34,6 @@ steps:
                        libargon2-0-dev \
                        postgresql \
                        postgresql-contrib \
+                       llvm \
                        ${{ parameters.packages }}
     displayName: 'APT'
