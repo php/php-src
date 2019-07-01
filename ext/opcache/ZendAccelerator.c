@@ -2749,9 +2749,9 @@ static void accel_move_code_to_huge_pages(void)
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_VMMAP, getpid()};
 	long unsigned int huge_page_size = 2 * 1024 * 1024;
 	if(sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
+		s = s * 4 / 3;
 		void *addr = mmap(NULL, s * sizeof (struct kinfo_vmentry), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
 		if (addr != MAP_FAILED) {
-			s = s * 4 / 3;
 			if (sysctl(mib, 4, addr, &s, NULL, 0) == 0) {
 				uintptr_t start = (uintptr_t)addr;
 				uintptr_t end = start + s;
