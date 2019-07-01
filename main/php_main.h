@@ -27,10 +27,8 @@
 BEGIN_EXTERN_C()
 PHPAPI int php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
-PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules);
 PHPAPI void php_module_shutdown(void);
-PHPAPI void php_module_shutdown_for_exec(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
 PHPAPI int php_register_extensions(zend_module_entry * const * ptr, int count);
