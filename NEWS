@@ -7,10 +7,15 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
+  . Updated timelib to 2018.02. (Derick)
 
 - OPcache:
   . Fixed #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
+
+- PCRE:
+  . Fixed bug #78197 (PCRE2 version check in configure fails for "##.##-xxx"
+    version strings). (pgnet, Peter Kokot)
 
 - PDO_Sqlite:
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
