@@ -64,3 +64,8 @@ jobs:
             LDFLAGS='-fsanitize=undefined,address'
         runTestsParameters: --asan
         timeoutInMinutes: 150
+    - template: azure/msan_job.yml
+      parameters:
+        configurationName: DEBUG_ZTS_MSAN
+        configurationParameters: '--enable-debug --enable-maintainer-zts'
+        runTestsParameters: --asan
