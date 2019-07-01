@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha3
 
+- Date:
+  . Updated timelib to 2018.02. (Derick)
+
 - Fileinfo:
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
    (Anatol)
