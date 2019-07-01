@@ -14,9 +14,16 @@ opcache.file_cache_only=1
 <?php
 $tmpdir = sys_get_temp_dir();
 $pattern = $tmpdir . '/*/*/' . str_replace(':', '', __DIR__) . '/bug78189.php.bin';
-foreach (glob($pattern) as $filename) {
-    var_dump(preg_match('~/[0-9a-f]{32}/~', substr($filename, strlen($tmpdir), 34)));
+$filenames = glob($pattern);
+if (count($filenames)) {
+    foreach ($filenames as $filename) {
+        $part = substr($filename, strlen($tmpdir), 34);
+        if (!preg_match('~/[0-9a-f]{32}/~', $part)) {
+            echo "invalid opcache folder: $part\n";
+        }
+    }
+} else {
+    echo "no opcache file found!\n";
 }
 ?>
 --EXPECT--
-int(1)
