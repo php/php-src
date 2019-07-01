@@ -3,6 +3,8 @@ Bug #77275: OPcache optimization problem for ArrayAccess->offsetGet(string)
 --INI--
 opcache.enable_cli=1
 opcache.optimization_level=-1
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 namespace Foo;
