@@ -2004,6 +2004,34 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 	zend_throw_error(NULL, "[] operator not supported for strings");
 }
 
+static zend_never_inline zend_uchar slow_index_convert(const zval *dim, zend_value *value)
+{
+	switch (Z_TYPE_P(dim)) {
+		case IS_UNDEF:
+			ZVAL_UNDEFINED_OP2();
+			/* break missing intentionally */
+		case IS_NULL:
+			value->str = ZSTR_EMPTY_ALLOC();
+			return IS_STRING;
+		case IS_DOUBLE:
+			value->lval = zend_dval_to_lval(Z_DVAL_P(dim));
+			return IS_LONG;
+		case IS_RESOURCE:
+			zend_use_resource_as_offset(dim);
+			value->lval = Z_RES_HANDLE_P(dim);
+			return IS_LONG;
+		case IS_FALSE:
+			value->lval = 0;
+			return IS_LONG;
+		case IS_TRUE:
+			value->lval = 1;
+			return IS_LONG;
+		default:
+			zend_illegal_offset();
+			return IS_NULL;
+	}
+}
+
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
 	zval *retval = NULL;
@@ -2082,33 +2110,21 @@ str_index:
 					break;
 			}
 		}
+	} else if (EXPECTED(Z_TYPE_P(dim) == IS_REFERENCE)) {
+		dim = Z_REFVAL_P(dim);
+		goto try_again;
 	} else {
-		switch (Z_TYPE_P(dim)) {
-			case IS_UNDEF:
-				ZVAL_UNDEFINED_OP2();
-				/* break missing intentionally */
-			case IS_NULL:
-				offset_key = ZSTR_EMPTY_ALLOC();
-				goto str_index;
-			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(dim));
-				goto num_index;
-			case IS_RESOURCE:
-				zend_use_resource_as_offset(dim);
-				hval = Z_RES_HANDLE_P(dim);
-				goto num_index;
-			case IS_FALSE:
-				hval = 0;
-				goto num_index;
-			case IS_TRUE:
-				hval = 1;
-				goto num_index;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_again;
-			default:
-				zend_illegal_offset();
-				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
+		zend_value val;
+		zend_uchar t = slow_index_convert(dim, &val);
+
+		if (t == IS_STRING) {
+			offset_key = val.str;
+			goto str_index;
+		} else if (t == IS_LONG) {
+			hval = val.lval;
+			goto num_index;
+		} else {
+			retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
 					NULL : &EG(uninitialized_zval);
 		}
 	}
