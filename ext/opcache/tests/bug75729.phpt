@@ -1,6 +1,7 @@
 --TEST--
 Bug #75729: opcache segfault when installing Bitrix
 --SKIPIF--
+<?php require_once('skipif.inc'); ?>
 <?php if (!extension_loaded('mbstring')) die('skip mbstring not loaded'); ?>
 --INI--
 opcache.enable_cli=1

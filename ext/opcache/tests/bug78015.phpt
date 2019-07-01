@@ -1,5 +1,7 @@
 --TEST--
 Bug #78015: Incorrect evaluation of expressions involving partials array in SCCP
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
