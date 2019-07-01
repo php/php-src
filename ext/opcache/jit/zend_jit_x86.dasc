@@ -9642,11 +9642,12 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	} else {
 		op1_info = OP1_INFO();
 		if (ssa->var_info && ssa->ops) {
-			zend_ssa_var_info *op1_ssa =
-				ssa->var_info + ssa->ops[opline - op_array->opcodes].op1_use;
-
-			if (op1_ssa->ce && !op1_ssa->is_instanceof && !op1_ssa->ce->create_object) {
-				ce = op1_ssa->ce;
+			zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+			if (ssa_op->op1_use >= 0) {
+				zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
+				if (op1_ssa->ce && !op1_ssa->is_instanceof && !op1_ssa->ce->create_object) {
+					ce = op1_ssa->ce;
+				}
 			}
 		}
 	}
