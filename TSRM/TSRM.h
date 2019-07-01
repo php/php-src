@@ -52,9 +52,6 @@ typedef uintptr_t tsrm_uintptr_t;
 # include <pthread.h>
 #elif defined(TSRM_ST)
 # include <st.h>
-#elif defined(BETHREADS)
-#include <kernel/OS.h>
-#include <TLS.h>
 #endif
 
 #if SIZEOF_SIZE_T == 4
