@@ -1,5 +1,7 @@
 --TEST--
 Bug #73789 (Strange behavior of class constants in switch/case block)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 class Lexer
