@@ -1214,8 +1214,7 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 		zend_error_noreturn(E_ERROR, "Could not queue new timer");
 		return;
 	}
-#else
-#	ifdef HAVE_SETITIMER
+#elif defined(HAVE_SETITIMER)
 	{
 		struct itimerval t_r;		/* timeout requested */
 		int signo;
@@ -1224,39 +1223,38 @@ static void zend_set_timeout_ex(zend_long seconds, int reset_signals) /* {{{ */
 			t_r.it_value.tv_sec = seconds;
 			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
-#	ifdef __CYGWIN__
+# ifdef __CYGWIN__
 			setitimer(ITIMER_REAL, &t_r, NULL);
 		}
 		signo = SIGALRM;
-#	else
+# else
 			setitimer(ITIMER_PROF, &t_r, NULL);
 		}
 		signo = SIGPROF;
-#	endif
+# endif
 
 		if (reset_signals) {
-#	ifdef ZEND_SIGNALS
+# ifdef ZEND_SIGNALS
 			zend_signal(signo, zend_timeout_handler);
-#	else
+# else
 			sigset_t sigset;
-#   ifdef HAVE_SIGACTION
+#  ifdef HAVE_SIGACTION
 			struct sigaction act;
 
 			act.sa_handler = zend_timeout_handler;
 			sigemptyset(&act.sa_mask);
 			act.sa_flags = SA_RESETHAND | SA_NODEFER;
 			sigaction(signo, &act, NULL);
-#   else
+#  else
 			signal(signo, zend_timeout_handler);
-#   endif /* HAVE_SIGACTION */
+#  endif /* HAVE_SIGACTION */
 			sigemptyset(&sigset);
 			sigaddset(&sigset, signo);
 			sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-#	endif /* ZEND_SIGNALS */
+# endif /* ZEND_SIGNALS */
 		}
 	}
-#	endif /* HAVE_SETITIMER */
-#endif
+#endif /* HAVE_SETITIMER */
 }
 /* }}} */
 
@@ -1281,23 +1279,20 @@ void zend_unset_timeout(void) /* {{{ */
 		}
 		tq_timer = NULL;
 	}
-	EG(timed_out) = 0;
-#else
-#	ifdef HAVE_SETITIMER
+#elif defined(HAVE_SETITIMER)
 	if (EG(timeout_seconds)) {
 		struct itimerval no_timeout;
 
 		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
 
-#ifdef __CYGWIN__
+# ifdef __CYGWIN__
 		setitimer(ITIMER_REAL, &no_timeout, NULL);
-#else
+# else
 		setitimer(ITIMER_PROF, &no_timeout, NULL);
-#endif
+# endif
 	}
-#	endif
-	EG(timed_out) = 0;
 #endif
+	EG(timed_out) = 0;
 }
 /* }}} */
 
