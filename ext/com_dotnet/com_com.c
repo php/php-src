@@ -267,7 +267,7 @@ PHP_FUNCTION(com_create_instance)
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
 				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page);
 
-				if (NULL != zend_ts_hash_str_add_ptr(&php_com_typelibraries, typelib_name, typelib_name_len, TL)) {
+				if (NULL != php_com_cache_typelib(TL, typelib_name, typelib_name_len)) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
