@@ -44,7 +44,9 @@
 #elif defined( __linux__ ) || defined( __GNUC__ ) || defined( __GNU_LIBRARY__ )
 #  if !defined( __MINGW32__ ) && !defined( _AIX )
 #    include <endian.h>
-#    include <byteswap.h>
+#    if !defined( __BEOS__ )
+#      include <byteswap.h>
+#    endif
 #  endif
 #endif
 #endif
