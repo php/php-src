@@ -1,5 +1,7 @@
 --TEST--
 Incorrect elision of return type checks
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

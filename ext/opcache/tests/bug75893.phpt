@@ -3,6 +3,8 @@ Bug #75893: file_get_contents $http_response_header variable bugged with opcache
 --INI--
 opcache.enable_cli=1
 track_errors=1
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
