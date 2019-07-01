@@ -86,6 +86,9 @@
 #ifndef __has_builtin
 # define __has_builtin(x) 0
 #endif
+#ifndef __has_feature
+# define __has_feature(x) 0
+#endif
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
@@ -123,10 +126,8 @@
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
-# if defined(__has_feature)
-#  if __has_feature(address_sanitizer)
-#   define __SANITIZE_ADDRESS__
-#  endif
+# if __has_feature(address_sanitizer)
+#  define __SANITIZE_ADDRESS__
 # endif
 
 # ifndef RTLD_LAZY
@@ -145,7 +146,7 @@
 
 # if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
-# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__)
+# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer)
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
 # else
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
@@ -526,10 +527,8 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 
 /* Memory sanitizer is incompatible with ifunc resolvers. Even if the resolver
  * is marked as no_sanitize("memory") it will still be instrumented and crash. */
-#if defined(__has_feature)
-# if __has_feature(memory_sanitizer)
-#  undef HAVE_FUNC_ATTRIBUTE_IFUNC
-# endif
+#if __has_feature(memory_sanitizer)
+# undef HAVE_FUNC_ATTRIBUTE_IFUNC
 #endif
 
 #if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
