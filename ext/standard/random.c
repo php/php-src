@@ -38,6 +38,10 @@
 # endif
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 #ifdef ZTS
 int random_globals_id;
 #else
@@ -133,6 +137,10 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 			}
 		}
 
+#if __has_feature(memory_sanitizer)
+		/* MSan does not instrument manual syscall invocations. */
+		__msan_unpoison(bytes + read_bytes, n);
+#endif
 		read_bytes += (size_t) n;
 	}
 #endif

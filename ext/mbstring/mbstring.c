@@ -425,6 +425,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_chr, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+#if HAVE_MBREGEX
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -508,6 +509,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_set_options, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
+#endif /* HAVE_MBREGEX */
 /* }}} */
 
 /* {{{ zend_function_entry mbstring_functions[] */

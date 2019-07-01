@@ -572,7 +572,9 @@ static void zend_accel_class_hash_copy_from_shm(HashTable *target, HashTable *so
 	return;
 }
 
-#if defined(__AVX__)
+#if __has_feature(memory_sanitizer)
+# define fast_memcpy memcpy
+#elif defined(__AVX__)
 # include <nmmintrin.h>
 # if defined(__GNUC__) && defined(__i386__)
 static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
