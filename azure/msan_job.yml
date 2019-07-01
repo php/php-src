@@ -14,7 +14,7 @@ jobs:
     - script: |
         export CC=clang
         export CXX=clang++
-        export CFLAGS="-fsanitize=memory -fsanitize-memory-track-origins=2 -DZEND_TRACK_ARENA_ALLOC"
+        export CFLAGS="-fsanitize=memory -DZEND_TRACK_ARENA_ALLOC"
         export LDFLAGS="-fsanitize=memory"
         ./buildconf --force
         # msan requires all used libraries to be instrumented,
