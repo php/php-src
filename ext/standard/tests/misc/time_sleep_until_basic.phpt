@@ -29,7 +29,8 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     $now = $tmp >= (int)$time ? $tmp : $tmp + .05;
 }
 
-if ($now >= $sleepUntil) {
+// Add some tolerance for early wake on macos. Reason unknown.
+if ($now + 0.001 >= $sleepUntil) {
     echo "Success\n";
 } else {
     echo "Sleep until (before truncation): ", $time, "\n";
