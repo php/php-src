@@ -589,7 +589,6 @@ alphasort \
 asctime_r \
 chroot \
 ctime_r \
-cuserid \
 crypt \
 explicit_memset \
 flock \
@@ -622,7 +621,6 @@ link \
 localtime_r \
 lockf \
 lchown \
-lrand48 \
 mbrlen \
 memmove \
 mkstemp \
@@ -633,7 +631,6 @@ poll \
 ptsname \
 putenv \
 realpath \
-random \
 rand_r \
 scandir \
 setitimer \
@@ -643,13 +640,10 @@ setvbuf \
 shutdown \
 sigprocmask \
 sin \
-srand48 \
-srandom \
 statfs \
 statvfs \
 std_syslog \
 strcasecmp \
-strdup \
 strerror \
 strfmon \
 strnlen \
