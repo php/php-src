@@ -102,13 +102,6 @@ dnl  -qthreaded        AIX cc V5
 dnl  -threads          gcc (HP-UX)
 dnl
 AC_DEFUN([PTHREADS_CHECK],[
-save_CFLAGS=$CFLAGS
-save_LIBS=$LIBS
-PTHREADS_ASSIGN_VARS
-PTHREADS_CHECK_COMPILE
-LIBS=$save_LIBS
-CFLAGS=$save_CFLAGS
-
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=
 if test "$pthreads_working" != "yes"; then
@@ -143,26 +136,5 @@ fi
 
 if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
   pthreads_working="yes"
-fi
-
-if test "$pthreads_working" = "yes"; then
-  threads_result="POSIX-Threads found"
-else
-  threads_result="POSIX-Threads not found"
-fi
-])
-
-dnl
-dnl PTHREADS_ASSIGN_VARS
-dnl
-dnl Adds pthreads linker and compiler flags.
-dnl
-AC_DEFUN([PTHREADS_ASSIGN_VARS],[
-if test -n "$ac_cv_pthreads_lib"; then
-  LIBS="$LIBS -l$ac_cv_pthreads_lib"
-fi
-
-if test -n "$ac_cv_pthreads_cflags"; then
-  CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
 fi
 ])

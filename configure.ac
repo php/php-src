@@ -10,6 +10,8 @@ m4_include([build/libtool.m4])
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
+m4_include([TSRM/threads.m4])
+m4_include([TSRM/tsrm.m4])
 
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
@@ -313,12 +315,10 @@ case $host_alias in
     ;;
 esac
 
-dnl Include Zend and TSRM configurations.
+dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
 
 sinclude(Zend/Zend.m4)
-sinclude(TSRM/threads.m4)
-sinclude(TSRM/tsrm.m4)
 
 dnl ----------------------------------------------------------------------------
 
@@ -359,7 +359,14 @@ fi
 
 dnl Force ZTS.
 if test "$enable_maintainer_zts" = "yes"; then
-  PTHREADS_ASSIGN_VARS
+  dnl Add pthreads linker and compiler flags.
+  if test -n "$ac_cv_pthreads_lib"; then
+    LIBS="$LIBS -l$ac_cv_pthreads_lib"
+  fi
+  if test -n "$ac_cv_pthreads_cflags"; then
+    CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
+  fi
+
   PTHREADS_FLAGS
 fi
 
