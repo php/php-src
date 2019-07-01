@@ -5,6 +5,8 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 disable_functions=strpos
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #75938: Modulus value not stored in variable
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function borken($columns) {

@@ -1,5 +1,7 @@
 --TEST--
 Literal compaction should take method calls on literals into account
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
