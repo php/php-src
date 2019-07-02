@@ -623,14 +623,24 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	struct pdo_data_src_parser vars[] = {
 		{ "dbname", NULL, 0 },
 		{ "charset",  NULL,	0 },
-		{ "role", NULL,	0 }
+		{ "role", NULL,	0 },
+		{ "user", NULL, 0 },
+		{ "password", NULL, 0 }
 	};
 	int i, ret = 0;
 	short buf_len = 256, dpb_len;
 
 	pdo_firebird_db_handle *H = dbh->driver_data = pecalloc(1,sizeof(*H),dbh->is_persistent);
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 3);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+
+	if (!dbh->username && vars[3].optval) {
+		dbh->username = vars[3].optval;
+	}
+
+	if (!dbh->password && vars[4].optval) {
+		dbh->password = vars[4].optval;
+	}
 
 	do {
 		static char const dpb_flags[] = {
