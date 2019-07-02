@@ -2209,61 +2209,6 @@ EOF
 ])
 
 dnl
-dnl PHP_CHECK_CONFIGURE_OPTIONS
-dnl
-AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
-  for arg in $ac_configure_args; do
-    case $arg in
-      --with-*[)]
-        arg_name="`echo [$]arg | $SED -e 's/--with-/with-/g' -e 's/=.*//g'`"
-        ;;
-      --without-*[)]
-        arg_name="`echo [$]arg | $SED -e 's/--without-/with-/g' -e 's/=.*//g'`"
-        ;;
-      --enable-*[)]
-        arg_name="`echo [$]arg | $SED -e 's/--enable-/enable-/g' -e 's/=.*//g'`"
-        ;;
-      --disable-*[)]
-        arg_name="`echo [$]arg | $SED -e 's/--disable-/enable-/g' -e 's/=.*//g'`"
-        ;;
-      *[)]
-        continue
-        ;;
-    esac
-    case $arg_name in
-      dnl Allow --disable-all / --enable-all
-      enable-all[)];;
-
-      dnl Allow certain libtool options
-      enable-libtool-lock | with-pic | with-tags | enable-shared | enable-static | enable-fast-install | with-gnu-ld[)];;
-
-      dnl Allow certain TSRM options
-      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads [)];;
-
-      dnl Allow certain Zend options
-      with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
-
-      dnl All the rest must be set using the PHP_ARG_* macros. PHP_ARG_* macros
-      dnl set php_enable_<arg_name> or php_with_<arg_name>.
-      *[)]
-        dnl Options that exist before PHP 6
-        if test "$PHP_MAJOR_VERSION" -lt "6"; then
-          case $arg_name in
-            enable-zend-multibyte[)] continue;;
-          esac
-        fi
-
-        is_arg_set=php_[]`echo [$]arg_name | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ-' 'abcdefghijklmnopqrstuvwxyz_'`
-        if eval test "x\$$is_arg_set" = "x"; then
-          PHP_UNKNOWN_CONFIGURE_OPTIONS="$PHP_UNKNOWN_CONFIGURE_OPTIONS
-[$]arg"
-        fi
-        ;;
-    esac
-  done
-])
-
-dnl
 dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
