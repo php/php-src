@@ -1983,7 +1983,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 	zend_throw_error(NULL, "[] operator not supported for strings");
 }
 
-static zend_never_inline zend_uchar slow_index_convert(const zval *dim, zend_value *value)
+static zend_never_inline zend_uchar slow_index_convert(const zval *dim, zend_value *value EXECUTE_DATA_DC)
 {
 	switch (Z_TYPE_P(dim)) {
 		case IS_UNDEF:
@@ -2094,7 +2094,7 @@ str_index:
 		goto try_again;
 	} else {
 		zend_value val;
-		zend_uchar t = slow_index_convert(dim, &val);
+		zend_uchar t = slow_index_convert(dim, &val EXECUTE_DATA_CC);
 
 		if (t == IS_STRING) {
 			offset_key = val.str;
