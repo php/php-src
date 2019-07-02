@@ -1586,9 +1586,6 @@ scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"
 
-dnl Check for unknown configure options.
-PHP_CHECK_CONFIGURE_OPTIONS
-
 dnl Generate build files.
 AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
 AC_CONFIG_COMMANDS([default],[],[
@@ -1689,15 +1686,6 @@ cat <<X
 Thank you for using PHP.
 
 X
-
-  dnl Output unknown configure options.
-  if test "$PHP_UNKNOWN_CONFIGURE_OPTIONS"; then
-    echo "Notice: Following unknown configure options were used:
-$PHP_UNKNOWN_CONFIGURE_OPTIONS
-
-Check '[$]0 --help' for available options
-"
-  fi
 
 fi
 ])
