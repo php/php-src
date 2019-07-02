@@ -2007,7 +2007,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 							ZEND_VM_C_GOTO(fetch_obj_r_copy);
 						} else {
 ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
@@ -2028,7 +2028,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 						          EXPECTED(p->key != NULL) &&
 						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								retval = &p->val;
-								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 									ZEND_VM_C_GOTO(fetch_obj_r_copy);
 								} else {
 									ZEND_VM_C_GOTO(fetch_obj_r_fast_copy);
@@ -2041,7 +2041,7 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 							ZEND_VM_C_GOTO(fetch_obj_r_copy);
 						} else {
 							ZEND_VM_C_GOTO(fetch_obj_r_fast_copy);
@@ -2163,7 +2163,7 @@ ZEND_VM_COLD_CONST_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|THIS|CV, C
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 							ZEND_VM_C_GOTO(fetch_obj_is_copy);
 						} else {
 ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
@@ -2184,7 +2184,7 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 						          EXPECTED(p->key != NULL) &&
 						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								retval = &p->val;
-								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+								if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 									ZEND_VM_C_GOTO(fetch_obj_is_copy);
 								} else {
 									ZEND_VM_C_GOTO(fetch_obj_is_fast_copy);
@@ -2197,7 +2197,7 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR))) {
+						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
 							ZEND_VM_C_GOTO(fetch_obj_is_copy);
 						} else {
 							ZEND_VM_C_GOTO(fetch_obj_is_fast_copy);
