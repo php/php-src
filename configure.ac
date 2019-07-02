@@ -283,10 +283,6 @@ case $host_alias in
     fi
     php_multiple_shlib_versions_ok=yes
     ;;
-  *beos*)
-    beos_threads=1
-    LIBS="$LIBS -lbe -lroot"
-    ;;
   *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV"
     ;;
