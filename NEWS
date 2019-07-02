@@ -1,17 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.20RC3
-
-- Opcache:
-  . Fixed bug #78185 (File cache no longer works). (Dmitry)
-
-20 Jun 2019, PHP 7.2.20RC2
-
-- Opcache:
-  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
-    (Nikita)
-
-13 Jun 2019, PHP 7.2.20RC1
+?? ??? ????, PHP 7.2.20
 
 - Core:
   . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
@@ -26,6 +15,11 @@ PHP                                                                        NEWS
     error message). (Sjon Hortensius)
   . Fixed bug #38546 (bindParam incorrect processing of bool types).
     (camporter)
+
+- Opcache:
+  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
+    (Nikita)
+  . Fixed bug #78185 (File cache no longer works). (Dmitry)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
