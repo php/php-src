@@ -568,6 +568,9 @@ r SQLite3:
 - CTRL+C and CTRL+BREAK on console can be caught by setting a handler function
   with sapi_windows_set_ctrl_handler().
 
+- configure now regards additional CFLAGS and LDFLAGS set as environment
+  variables.
+
 ========================================
 13. Migration to pkg-config
 ========================================

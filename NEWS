@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78239 (Deprecation notice during string conversion converted to
     exception hangs). (Nikita)
+  . Implemented FR #77230 (Support custom CFLAGS and LDFLAGS from environment).
+    (cmb)
 
 - Date:
   . Updated timelib to 2018.02. (Derick)
