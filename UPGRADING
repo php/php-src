@@ -265,6 +265,14 @@ PHP 7.4 UPGRADE NOTES
   . PDOStatement::getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT) allows to
     check whether this statement is read-only, i.e. whether it doesn't modify
     the database.
+  . PDO::setAttribute(PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES, true) enables the
+    use of SQLite3 extended result codes in errorInfo().
+
+r SQLite3:
+  . Added SQLite3::lastExtendedErrorCode() to fetch the last extended result
+    code.
+  . Added SQLite3::enableExtendedResultCodes($enable = true), which will make
+    SQLite3::lastErrorCode() return extended result codes.
 
 - Standard:
   . strip_tags() now also accepts an array of allowed tags: Instead of
