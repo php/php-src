@@ -20,6 +20,7 @@ jobs:
         # msan requires all used libraries to be instrumented,
         # so we should avoiding linking against anything but libc here
         ./configure ${{ parameters.configurationParameters }} \
+            --enable-option-checking=fatal \
             --prefix=/usr \
             --without-sqlite3 \
             --without-pdo-sqlite \
