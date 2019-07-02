@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
+- PDO:
+  . Implemented FR #78033 (PDO - support username & password specified in
+    DSN). (sjon)
+
 - PDO_Sqlite:
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
