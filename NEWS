@@ -1,13 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-20 Jun 2019, PHP 7.3.7RC3
-
-- Opcache:
-  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
-    (Nikita)
-  . Fixed bug #78185 (File cache no longer works). (Dmitry)
-
-13 Jun 2019, PHP 7.3.7RC1
+04 Jul 2019, PHP 7.3.7
 
 - Core:
   . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
@@ -30,6 +23,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78015 (Incorrect evaluation of expressions involving partials
     arrays in SCCP). (Nikita)
+  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
+    (Nikita)
 
 - OpenSSL:
   . Fixed bug #78079 (openssl_encrypt_ccm.phpt fails with OpenSSL 1.1.1c).
