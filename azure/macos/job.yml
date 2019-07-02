@@ -19,6 +19,7 @@ jobs:
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
         ./buildconf --force
         ./configure ${{ parameters.configurationParameters }} \
+            --enable-option-checking=fatal \
             --prefix=/usr/local \
             --disable-phpdbg \
             --enable-fpm \

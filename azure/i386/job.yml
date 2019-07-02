@@ -15,6 +15,7 @@ jobs:
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
+            --enable-option-checking=fatal \
             --prefix=/usr \
             --enable-phpdbg \
             --enable-fpm \

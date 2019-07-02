@@ -27,6 +27,7 @@ MAKE_JOBS=${MAKE_JOBS:-2}
 
 ./buildconf --force
 ./configure \
+--enable-option-checking=fatal \
 --prefix="$HOME"/php-install \
 $CONFIG_QUIET \
 $DEBUG \
