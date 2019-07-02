@@ -4,6 +4,12 @@ trigger:
     include:
       - PHP-7.4
       - master
+  paths:
+    exclude:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
 
 jobs:
   - template: azure/job.yml
