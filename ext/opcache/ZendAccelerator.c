@@ -2748,9 +2748,9 @@ static void accel_move_code_to_huge_pages(void)
 	size_t s = 0;
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_VMMAP, getpid()};
 	long unsigned int huge_page_size = 2 * 1024 * 1024;
-	if(sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
+	if (sysctl(mib, 4, NULL, &s, NULL, 0) == 0) {
 		s = s * 4 / 3;
-		void *addr = mmap(NULL, s * sizeof (struct kinfo_vmentry), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
+		void *addr = mmap(NULL, s, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
 		if (addr != MAP_FAILED) {
 			if (sysctl(mib, 4, addr, &s, NULL, 0) == 0) {
 				uintptr_t start = (uintptr_t)addr;
@@ -2769,11 +2769,14 @@ static void accel_move_code_to_huge_pages(void)
 						if (seg_end > seg_start) {
 							zend_accel_error(ACCEL_LOG_DEBUG, "remap to huge page %lx-%lx %s \n", seg_start, seg_end, entry->kve_path);
 							accel_remap_huge_pages((void*)seg_start, seg_end - seg_start, seg_end - seg_start, entry->kve_path, entry->kve_offset + seg_start - start);
+							// First relevant segment found is our binary
+							break;
 						}
 					}
 					start += sz;
 				}
 			}
+			munmap(addr, s);
 		}
 	}
 #endif
