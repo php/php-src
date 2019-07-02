@@ -1857,18 +1857,6 @@ int php_request_startup(void)
 }
 /* }}} */
 
-/* {{{ php_request_shutdown_for_exec
- */
-void php_request_shutdown_for_exec(void *dummy)
-{
-
-	/* used to close fd's in the 3..255 range here, but it's problematic
-	 */
-	zend_interned_strings_deactivate();
-	shutdown_memory_manager(1, 1);
-}
-/* }}} */
-
 /* {{{ php_request_shutdown
  */
 void php_request_shutdown(void *dummy)
@@ -2459,11 +2447,6 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	return retval;
 }
 /* }}} */
-
-void php_module_shutdown_for_exec(void)
-{
-	/* used to close fd's in the range 3.255 here, but it's problematic */
-}
 
 /* {{{ php_module_shutdown_wrapper
  */

@@ -474,7 +474,7 @@ static char *create_win_command_from_args(HashTable *args) {
 }
 #endif
 
-/* {{{ proto resource|false proc_open(string command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
+/* {{{ proto resource|false proc_open(string|array command, array descriptorspec, array &pipes [, string cwd [, array env [, array other_options]]])
    Run a process with more control over it's file descriptors */
 PHP_FUNCTION(proc_open)
 {
