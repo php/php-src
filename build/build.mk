@@ -21,7 +21,7 @@
 config_h_in = main/php_config.h.in
 PHP_AUTOCONF = autoconf
 PHP_AUTOHEADER = autoheader
-PHP_AUTOCONF_FLAGS = -f
+PHP_AUTOCONF_FLAGS =
 
 all: configure $(config_h_in)
 

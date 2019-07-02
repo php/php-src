@@ -82,6 +82,7 @@ if test "$force" = "1"; then
   echo "buildconf: Forcing buildconf"
   echo "buildconf: Removing configure caches and files"
   rm -rf autom4te.cache config.cache configure
+  autoconf_flags="-f"
 fi
 
 echo "buildconf: Checking installation"
@@ -124,9 +125,9 @@ fi
 echo "buildconf: Building configure files"
 
 if test "$debug" = "1"; then
-  autoconf_flags="-f -Wall"
+  autoconf_flags="${autoconf_flags} -Wall"
 else
-  autoconf_flags="-f"
+  autoconf_flags="${autoconf_flags}"
 fi
 
 $MAKE -s -f build/build.mk \
