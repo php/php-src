@@ -421,11 +421,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(uint32_t var EXECUTE_D
 static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
-		if (op_type == IS_TMP_VAR) {
-			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
-		} else {
-			ZEND_ASSERT(op_type == IS_VAR);
+		if (!ZEND_DEBUG || op_type == IS_VAR) {
 			return _get_zval_ptr_var(node.var, should_free EXECUTE_DATA_CC);
+		} else {
+			ZEND_ASSERT(op_type == IS_TMP_VAR);
+			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
 		}
 	} else {
 		*should_free = NULL;
@@ -442,11 +442,11 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_f
 static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op node, zend_free_op *should_free EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
-		if (op_type == IS_TMP_VAR) {
-			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
-		} else {
-			ZEND_ASSERT(op_type == IS_VAR);
+		if (!ZEND_DEBUG || op_type == IS_VAR) {
 			return _get_zval_ptr_var(node.var, should_free EXECUTE_DATA_CC);
+		} else {
+			ZEND_ASSERT(op_type == IS_TMP_VAR);
+			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
 		}
 	} else {
 		*should_free = NULL;
@@ -505,11 +505,11 @@ static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_dere
 static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
-		if (op_type == IS_TMP_VAR) {
-			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
-		} else {
-			ZEND_ASSERT(op_type == IS_VAR);
+		if (!ZEND_DEBUG || op_type == IS_VAR) {
 			return _get_zval_ptr_var(node.var, should_free EXECUTE_DATA_CC);
+		} else {
+			ZEND_ASSERT(op_type == IS_TMP_VAR);
+			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
 		}
 	} else {
 		*should_free = NULL;

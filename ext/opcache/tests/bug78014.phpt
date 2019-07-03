@@ -16,7 +16,7 @@ $c = new C;
 var_dump($c->foo());
 ?>
 --EXPECTF--
-Warning: Can't preload unlinked class C in %s on line %d
+Warning: Can't preload unlinked class C: Parent with unresolved initializers B in %s on line %d
 
 Warning: Can't preload class B with unresolved initializer for constant X in %s on line %d
 
