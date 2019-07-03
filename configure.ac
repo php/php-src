@@ -7,6 +7,10 @@ m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 m4_include([build/libtool.m4])
+m4_include([build/lt~obsolete.m4])
+m4_include([build/ltoptions.m4])
+m4_include([build/ltsugar.m4])
+m4_include([build/ltversion.m4])
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
@@ -1463,28 +1467,11 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
-dnl This hack works around it. Ugly.
-case $host_alias in
-*darwin9*|*darwin10*)
-  ac_cv_exeext=
-  ;;
-esac
-
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
 dnl See https://github.com/php/php-src/pull/3017
 AC_SUBST(AR_FLAGS, [cr])
 
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
-dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
-dnl compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
-AC_PROG_LIBTOOL
+LT_INIT
 
 PHP_SET_LIBTOOL_VARIABLE([--silent])
 
