@@ -934,7 +934,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 						/* special case for typed properties */
 						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
 					} else {
-						zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](zptr, zptr, value);
+						zend_binary_op(zptr, zptr, value OPLINE_CC);
 					}
 				} while (0);
 
@@ -990,7 +990,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_static_prop_helper, ANY, ANY)
 			/* special case for typed properties */
 			zend_binary_assign_op_typed_prop(prop_info, prop, value OPLINE_CC EXECUTE_DATA_CC);
 		} else {
-			zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](prop, prop, value);
+			zend_binary_op(prop, prop, value OPLINE_CC);
 		}
 	} while (0);
 
@@ -1046,7 +1046,7 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 					break;
 				}
 			}
-			zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](var_ptr, var_ptr, value);
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
 		} while (0);
 
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1128,7 +1128,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_simple_helper, VAR|CV, CONST|TMPVAR|CV)
 				}
 				var_ptr = Z_REFVAL_P(var_ptr);
 			}
-			zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](var_ptr, var_ptr, value);
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
 		} while (0);
 
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
