@@ -47,7 +47,7 @@ $TS \
 --with-freetype \
 --with-xpm \
 --enable-exif \
---enable-zip \
+--with-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
 --enable-soap \
