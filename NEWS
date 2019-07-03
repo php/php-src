@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
   . Fixed #78208 (password_needs_rehash() with an unknown algo should always
     return true). (Sara)
+  . Fixed #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
 
 27 Jun 2019, PHP 7.4.0alpha2
 
