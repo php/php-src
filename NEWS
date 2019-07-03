@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
+- Openssl:
+  . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
+    socket-to-stream). (Nikita)
+
 - OPcache:
   . Fixed #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
