@@ -1623,33 +1623,48 @@ static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *re
 	return NULL;
 }
 
-static ZEND_COLD void zend_throw_incdec_ref_error(zend_reference *ref, zend_bool inc)
+static ZEND_COLD zend_long zend_throw_incdec_ref_error(zend_reference *ref OPLINE_DC)
 {
 	zend_property_info *error_prop = zend_get_prop_not_accepting_double(ref);
 	/* Currently there should be no way for a typed reference to accept both int and double.
 	 * Generalize this and the related property code once this becomes possible. */
 	ZEND_ASSERT(error_prop);
-	zend_type_error(
-		"Cannot %s a reference held by property %s::$%s of type %sint past its %simal value",
-		inc ? "increment" : "decrement",
-		ZSTR_VAL(error_prop->ce->name),
-		zend_get_unmangled_property_name(error_prop->name),
-		ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "",
-		inc ? "max" : "min");
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
+		zend_type_error(
+			"Cannot increment a reference held by property %s::$%s of type %sint past its maximal value",
+			ZSTR_VAL(error_prop->ce->name),
+			zend_get_unmangled_property_name(error_prop->name),
+			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "");
+		return ZEND_LONG_MAX;
+	} else {
+		zend_type_error(
+			"Cannot decrement a reference held by property %s::$%s of type %sint past its minimal value",
+			ZSTR_VAL(error_prop->ce->name),
+			zend_get_unmangled_property_name(error_prop->name),
+			ZEND_TYPE_ALLOW_NULL(error_prop->type) ? "?" : "");
+		return ZEND_LONG_MIN;
+	}
 }
 
-static ZEND_COLD void zend_throw_incdec_prop_error(zend_property_info *prop, zend_bool inc) {
+static ZEND_COLD zend_long zend_throw_incdec_prop_error(zend_property_info *prop OPLINE_DC) {
 	const char *prop_type1, *prop_type2;
 	zend_format_type(prop->type, &prop_type1, &prop_type2);
-	zend_type_error("Cannot %s property %s::$%s of type %s%s past its %simal value",
-		inc ? "increment" : "decrement",
-		ZSTR_VAL(prop->ce->name),
-		zend_get_unmangled_property_name(prop->name),
-		prop_type1, prop_type2,
-		inc ? "max" : "min");
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
+		zend_type_error("Cannot increment property %s::$%s of type %s%s past its maximal value",
+			ZSTR_VAL(prop->ce->name),
+			zend_get_unmangled_property_name(prop->name),
+			prop_type1, prop_type2);
+		return ZEND_LONG_MAX;
+	} else {
+		zend_type_error("Cannot decrement property %s::$%s of type %s%s past its minimal value",
+			ZSTR_VAL(prop->ce->name),
+			zend_get_unmangled_property_name(prop->name),
+			prop_type1, prop_type2);
+		return ZEND_LONG_MIN;
+	}
 }
 
-static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECUTE_DATA_DC)
+static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval tmp;
 	zval *var_ptr = &ref->val;
@@ -1660,15 +1675,15 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECU
 
 	ZVAL_COPY(copy, var_ptr);
 
-	if (inc) {
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
 		increment_function(var_ptr);
 	} else {
 		decrement_function(var_ptr);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
-		zend_throw_incdec_ref_error(ref, inc);
-		ZVAL_COPY_VALUE(var_ptr, copy);
+		zend_long val = zend_throw_incdec_ref_error(ref OPLINE_CC);
+		ZVAL_LONG(var_ptr, val);
 	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, copy);
@@ -1678,7 +1693,7 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy, int inc EXECU
 	}
 }
 
-static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr, zval *copy, int inc EXECUTE_DATA_DC)
+static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr, zval *copy OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval tmp;
 
@@ -1688,15 +1703,15 @@ static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr,
 
 	ZVAL_COPY(copy, var_ptr);
 
-	if (inc) {
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
 		increment_function(var_ptr);
 	} else {
 		decrement_function(var_ptr);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
-		zend_throw_incdec_prop_error(prop_info, inc);
-		ZVAL_COPY_VALUE(var_ptr, copy);
+		zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
+		ZVAL_LONG(var_ptr, val);
 	} else if (UNEXPECTED(!zend_verify_property_type(prop_info, var_ptr, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, copy);
@@ -1706,36 +1721,32 @@ static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr,
 	}
 }
 
-static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
+static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
-		if (inc) {
+		if (ZEND_IS_INCREMENT(opline->opcode)) {
 			fast_long_increment_function(prop);
 		} else {
 			fast_long_decrement_function(prop);
 		}
 		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
-			zend_throw_incdec_prop_error(prop_info, inc);
-			if (inc) {
-				ZVAL_LONG(prop, ZEND_LONG_MAX);
-			} else {
-				ZVAL_LONG(prop, ZEND_LONG_MIN);
-			}
+			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
+			ZVAL_LONG(prop, val);
 		}
 	} else {
 		do {
 			if (Z_ISREF_P(prop)) {
 				zend_reference *ref = Z_REF_P(prop);
 				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-					zend_incdec_typed_ref(ref, NULL, inc EXECUTE_DATA_CC);
+					zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
 					break;
 				}
 				prop = Z_REFVAL_P(prop);
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				zend_incdec_typed_prop(prop_info, prop, NULL, inc EXECUTE_DATA_CC);
-			} else if (inc) {
+				zend_incdec_typed_prop(prop_info, prop, NULL OPLINE_CC EXECUTE_DATA_CC);
+			} else if (ZEND_IS_INCREMENT(opline->opcode)) {
 				increment_function(prop);
 			} else {
 				decrement_function(prop);
@@ -1747,38 +1758,34 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 	}
 }
 
-static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
+static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_info OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(prop));
-		if (inc) {
+		if (ZEND_IS_INCREMENT(opline->opcode)) {
 			fast_long_increment_function(prop);
 		} else {
 			fast_long_decrement_function(prop);
 		}
 		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
-			zend_throw_incdec_prop_error(prop_info, inc);
-			if (inc) {
-				ZVAL_LONG(prop, ZEND_LONG_MAX);
-			} else {
-				ZVAL_LONG(prop, ZEND_LONG_MIN);
-			}
+			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
+			ZVAL_LONG(prop, val);
 		}
 	} else {
 		if (Z_ISREF_P(prop)) {
 			zend_reference *ref = Z_REF_P(prop);
 			if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
-				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var), inc EXECUTE_DATA_CC);
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 				return;
 			}
 			prop = Z_REFVAL_P(prop);
 		}
 
 		if (UNEXPECTED(prop_info)) {
-			zend_incdec_typed_prop(prop_info, prop, EX_VAR(opline->result.var), inc EXECUTE_DATA_CC);
+			zend_incdec_typed_prop(prop_info, prop, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), prop);
-			if (inc) {
+			if (ZEND_IS_INCREMENT(opline->opcode)) {
 				increment_function(prop);
 			} else {
 				decrement_function(prop);
@@ -1787,7 +1794,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 	}
 }
 
-static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval rv, obj;
 	zval *z;
@@ -1813,7 +1820,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 
 	ZVAL_COPY_DEREF(&z_copy, z);
 	ZVAL_COPY(EX_VAR(opline->result.var), &z_copy);
-	if (inc) {
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
 		increment_function(&z_copy);
 	} else {
 		decrement_function(&z_copy);
@@ -1824,7 +1831,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 	zval_ptr_dtor(z);
 }
 
-static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval rv;
 	zval *z, obj;
@@ -1851,7 +1858,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		ZVAL_COPY_VALUE(z, value);
 	}
 	ZVAL_COPY_DEREF(&z_copy, z);
-	if (inc) {
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
 		increment_function(&z_copy);
 	} else {
 		decrement_function(&z_copy);
