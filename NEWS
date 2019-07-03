@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
+- Standard:
+  . Fixed #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
+
 27 Jun 2019, PHP 7.2.20
 
 - Core:
