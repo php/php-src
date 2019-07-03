@@ -30,10 +30,21 @@ if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
         echo "failed\n";
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-        dump_entries_name($zip);
+        if (!verify_entries($zip, [
+            "bar",
+            "foobar/",
+            "foobar/baz",
+            "entry1.txt",
+            "baz/foo.txt",
+            "baz/bar.txt"
+        ])) {
+            echo "failed\n";
+        } else {
+            echo "OK";
+        }
         $zip->close();
 } else {
-        echo "failed\n";
+        echo "failed3\n";
 }
 ?>
 --CLEAN--
@@ -45,9 +56,4 @@ unlink($dirname . 'bar.txt');
 rmdir($dirname);
 ?>
 --EXPECT--
-0 bar
-1 foobar/
-2 foobar/baz
-3 entry1.txt
-4 baz/bar.txt
-5 baz/foo.txt
+OK

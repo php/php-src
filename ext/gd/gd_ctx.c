@@ -139,8 +139,8 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
-				php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, filename must not contain null bytes");
-				RETURN_FALSE;
+				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
+				return;
 			}
 
 			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);

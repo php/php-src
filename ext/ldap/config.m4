@@ -41,59 +41,15 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
   fi
 ])
 
-AC_DEFUN([PHP_LDAP_SASL_CHECKS], [
-  if test "$1" = "yes"; then
-    SEARCH_DIRS="/usr/local /usr"
-  else
-    SEARCH_DIRS=$1
-  fi
-
-  for i in $SEARCH_DIRS; do
-    if test -f $i/include/sasl/sasl.h; then
-      LDAP_SASL_DIR=$i
-      AC_DEFINE(HAVE_LDAP_SASL_SASL_H,1,[ ])
-      break
-    elif test -f $i/include/sasl.h; then
-      LDAP_SASL_DIR=$i
-      AC_DEFINE(HAVE_LDAP_SASL_H,1,[ ])
-      break
-    fi
-  done
-
-  if test "$LDAP_SASL_DIR"; then
-    LDAP_SASL_INCDIR=$LDAP_SASL_DIR/include
-    LDAP_SASL_LIBDIR=$LDAP_SASL_DIR/$PHP_LIBDIR
-  else
-    AC_MSG_ERROR([sasl.h not found!])
-  fi
-
-  if test "$PHP_LDAP_SASL" = "yes"; then
-    SASL_LIB="-lsasl2"
-  else
-    SASL_LIB="-L$LDAP_SASL_LIBDIR -lsasl2"
-  fi
-
-  PHP_CHECK_LIBRARY(sasl2, sasl_version,
-  [
-    PHP_ADD_INCLUDE($LDAP_SASL_INCDIR)
-    PHP_ADD_LIBRARY_WITH_PATH(sasl2, $LDAP_SASL_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_LDAP_SASL, 1, [LDAP SASL support])
-  ], [
-    AC_MSG_ERROR([LDAP SASL check failed. Please check config.log for more information.])
-  ], [
-    $LDAP_SHARED_LIBADD $SASL_LIB
-  ])
-])
-
 PHP_ARG_WITH([ldap],
   [for LDAP support],
   [AS_HELP_STRING([[--with-ldap[=DIR]]],
     [Include LDAP support])])
 
 PHP_ARG_WITH([ldap-sasl],
-  [for LDAP Cyrus SASL support],
-  [AS_HELP_STRING([[--with-ldap-sasl[=DIR]]],
-    [LDAP: Include Cyrus SASL support])],
+  [whether to build with LDAP Cyrus SASL support],
+  [AS_HELP_STRING([--with-ldap-sasl],
+    [LDAP: Build with Cyrus SASL support])],
   [no],
   [no])
 
@@ -216,7 +172,12 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl SASL check
   if test "$PHP_LDAP_SASL" != "no"; then
-    PHP_LDAP_SASL_CHECKS([$PHP_LDAP_SASL])
+    PKG_CHECK_MODULES([SASL], [libsasl2])
+
+    PHP_EVAL_INCLINE($SASL_CFLAGS)
+    PHP_EVAL_LIBLINE($SASL_LIBS, LDAP_SHARED_LIBADD)
+
+    AC_DEFINE(HAVE_LDAP_SASL, 1, [LDAP SASL support])
   fi
 
   dnl Sanity check

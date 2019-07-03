@@ -47,4 +47,4 @@ error: 0, IntlCalendar::setTimeZone() expects exactly 1 parameter, 0 given
 
 error: 0, intlcal_set_time_zone() expects exactly 2 parameters, 3 given
 
-error: 0, Argument 1 passed to intlcal_set_time_zone() must be an instance of IntlCalendar, int given
+error: 0, intlcal_set_time_zone() expects parameter 1 to be IntlCalendar, int given

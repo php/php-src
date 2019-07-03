@@ -24,7 +24,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
 	$maxport = 31356;
 	$bound = false;
 	for($port = $minport; $port <= $maxport; ++$port) {
-        	if (socket_bind($server, $localhost, $port)) {
+		if (@socket_bind($server, $localhost, $port)) {
 			$bound = true;
 			break;
 		}

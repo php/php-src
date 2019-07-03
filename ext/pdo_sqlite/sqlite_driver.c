@@ -309,6 +309,11 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	return 0;
 }
 
+typedef struct {
+	zval val;
+	zend_long row;
+} aggregate_context;
+
 static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		int argc, sqlite3_value **argv, sqlite3_context *context,
 		int is_agg)
@@ -318,7 +323,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	int i;
 	int ret;
 	int fake_argc;
-	zend_reference *agg_context = NULL;
+	aggregate_context *agg_context = NULL;
 
 	if (is_agg) {
 		is_agg = 2;
@@ -339,18 +344,16 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	}
 
 	if (is_agg) {
-		agg_context = (zend_reference*)sqlite3_aggregate_context(context, sizeof(zend_reference));
+		agg_context = sqlite3_aggregate_context(context, sizeof(aggregate_context));
 		if (!agg_context) {
-			ZVAL_NULL(&zargs[0]);
-		} else {
-			if (Z_ISUNDEF(agg_context->val)) {
-				GC_SET_REFCOUNT(agg_context, 1);
-				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
-				ZVAL_NULL(&agg_context->val);
-			}
-			ZVAL_REF(&zargs[0], agg_context);
+			efree(zargs);
+			return FAILURE;
 		}
-		ZVAL_LONG(&zargs[1], sqlite3_aggregate_count(context));
+		if (Z_ISUNDEF(agg_context->val)) {
+			ZVAL_NEW_REF(&agg_context->val, &EG(uninitialized_zval));
+		}
+		ZVAL_COPY_VALUE(&zargs[0], &agg_context->val);
+		ZVAL_LONG(&zargs[1], ++agg_context->row);
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -411,7 +414,10 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 					break;
 
 				default:
-					convert_to_string_ex(&retval);
+					if (!try_convert_to_string(&retval)) {
+						ret = FAILURE;
+						break;
+					}
 					sqlite3_result_text(context, Z_STRVAL(retval), Z_STRLEN(retval), SQLITE_TRANSIENT);
 					break;
 			}
@@ -426,13 +432,13 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		/* we're stepping in an aggregate; the return value goes into
 		 * the context */
 		if (agg_context) {
-			zval_ptr_dtor(&agg_context->val);
-		}
-		if (!Z_ISUNDEF(retval)) {
-			ZVAL_COPY_VALUE(&agg_context->val, &retval);
+			if (Z_ISUNDEF(retval)) {
+				zval_ptr_dtor(&agg_context->val);
+				return FAILURE;
+			}
+			zval_ptr_dtor(Z_REFVAL(agg_context->val));
+			ZVAL_COPY_VALUE(Z_REFVAL(agg_context->val), &retval);
 			ZVAL_UNDEF(&retval);
-		} else {
-			ZVAL_UNDEF(&agg_context->val);
 		}
 	}
 

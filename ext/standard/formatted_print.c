@@ -400,7 +400,10 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 	int always_sign;
 	size_t format_len;
 
-	convert_to_string_ex(z_format);
+	if (!try_convert_to_string(z_format)) {
+		return NULL;
+	}
+
 	format = Z_STRVAL_P(z_format);
 	format_len = Z_STRLEN_P(z_format);
 	result = zend_string_alloc(size, 0);

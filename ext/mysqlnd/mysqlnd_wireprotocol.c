@@ -296,7 +296,6 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 	if (FAIL == mysqlnd_read_header(pfc, vio, packet_header, stats, error_info)) {
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-		php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone);
 		DBG_ERR_FMT("Can't read %s's header", packet_type_as_text);
 		DBG_RETURN(FAIL);
 	}
@@ -308,7 +307,6 @@ mysqlnd_read_packet_header_and_body(MYSQLND_PACKET_HEADER * packet_header,
 	if (FAIL == pfc->data->m.receive(pfc, vio, buf, packet_header->size, stats, error_info)) {
 		SET_CONNECTION_STATE(connection_state, CONN_QUIT_SENT);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-		php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone);
 		DBG_ERR_FMT("Empty '%s' packet body", packet_type_as_text);
 		DBG_RETURN(FAIL);
 	}
@@ -393,6 +391,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	packet->server_capabilities = uint2korr(p);
 	p+= 2;
 	BAIL_IF_NO_MORE_DATA;
+	DBG_INF_FMT("4.1 server_caps=%u\n", (uint32_t) packet->server_capabilities);
 
 	packet->charset_no = uint1korr(p);
 	p++;
@@ -422,7 +421,8 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		p--;
 
     	/* Additional 16 bits for server capabilities */
-		packet->server_capabilities |= uint2korr(pad_start) << 16;
+		DBG_INF_FMT("additional 5.5+ caps=%u\n", (uint32_t) uint2korr(pad_start));
+		packet->server_capabilities |= ((uint32_t) uint2korr(pad_start)) << 16;
 		/* And a length of the server scramble in one byte */
 		packet->authentication_plugin_data.l = uint1korr(pad_start + 2);
 		if (packet->authentication_plugin_data.l > SCRAMBLE_LENGTH) {
@@ -1663,7 +1663,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
 					/* we are using the text protocol, so convert to string */
 					char tmp[22];
-					const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, (uint64_t) Z_LVAL_P(current_field));
+					const size_t tmp_len = sprintf((char *)&tmp, ZEND_ULONG_FMT, Z_LVAL_P(current_field));
 					ZVAL_STRINGL(current_field, tmp, tmp_len);
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
 					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */
@@ -2532,7 +2532,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 	MYSQLND_INC_CONN_STATISTIC(stats, STAT_COM_QUIT + command - 1 /* because of COM_SLEEP */ );
 
 	if (! PACKET_WRITE(payload_decoder_factory->conn, &cmd_packet)) {
-		if (!silent) {
+		if (!silent && error_info->error_no != CR_SERVER_GONE_ERROR) {
 			DBG_ERR_FMT("Error while sending %s packet", mysqlnd_command_to_text[command]);
 			php_error(E_WARNING, "Error while sending %s packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 		}

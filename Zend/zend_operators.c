@@ -561,19 +561,23 @@ try_again:
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			zval_ptr_dtor(op);
-			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
+			ZVAL_INTERNED_STR(op, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 			break;
 		case IS_OBJECT: {
-			zval dst;
+			zval tmp;
 
-			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
-			zval_ptr_dtor(op);
-
-			if (Z_TYPE(dst) == IS_STRING) {
-				ZVAL_COPY_VALUE(op, &dst);
-			} else {
-				ZVAL_NEW_STR(op, zend_string_init("Object", sizeof("Object")-1, 0));
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &tmp, IS_STRING) == SUCCESS) {
+					zval_ptr_dtor(op);
+					ZVAL_COPY_VALUE(op, &tmp);
+					return;
+				}
 			}
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+			}
+			zval_ptr_dtor(op);
+			ZVAL_EMPTY_STRING(op);
 			break;
 		}
 		case IS_REFERENCE:
@@ -583,6 +587,20 @@ try_again:
 	}
 }
 /* }}} */
+
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op)
+{
+	zend_string *str;
+
+	ZEND_ASSERT(Z_TYPE_P(op) != IS_STRING);
+	str = zval_try_get_string_func(op);
+	if (UNEXPECTED(!str)) {
+		return 0;
+	}
+	zval_ptr_dtor(op);
+	ZVAL_STR(op, str);
+	return 1;
+}
 
 static void convert_scalar_to_array(zval *op) /* {{{ */
 {
@@ -831,7 +849,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op) /* {{{ */
+static zend_always_inline zend_string* __zval_get_string_func(zval *op, zend_bool try) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -852,7 +870,8 @@ try_again:
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			return zend_string_init("Array", sizeof("Array")-1, 0);
+			return (try && UNEXPECTED(EG(exception))) ?
+				NULL : ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object) {
@@ -860,8 +879,10 @@ try_again:
 					return Z_STR(tmp);
 				}
 			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
-			return ZSTR_EMPTY_ALLOC();
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+			}
+			return try ? NULL : ZSTR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
@@ -871,6 +892,18 @@ try_again:
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
+}
+/* }}} */
+
+ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op) /* {{{ */
+{
+	return __zval_get_string_func(op, 0);
+}
+/* }}} */
+
+ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
+{
+	return __zval_get_string_func(op, 1);
 }
 /* }}} */
 
@@ -1205,6 +1238,9 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 }
 /* }}} */
 
+#ifdef __clang__
+__attribute__((no_sanitize("float-divide-by-zero")))
+#endif
 ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy, op2_copy;
@@ -1699,7 +1735,8 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 		zval_ptr_dtor(result);
 	}
 
-	ZVAL_LONG(result, op1_lval << op2_lval);
+	/* Perform shift on unsigned numbers to get well-defined wrap behavior. */
+	ZVAL_LONG(result, (zend_long) ((zend_ulong) op1_lval << op2_lval));
 	return SUCCESS;
 }
 /* }}} */
@@ -2232,7 +2269,7 @@ static zend_bool ZEND_FASTCALL instanceof_interface_only(const zend_class_entry 
 	uint32_t i;
 
 	if (instance_ce->num_interfaces) {
-		ZEND_ASSERT(instance_ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS));
+		ZEND_ASSERT(instance_ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
 		for (i = 0; i < instance_ce->num_interfaces; i++) {
 			if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
 				return 1;
@@ -2260,7 +2297,7 @@ static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *inst
 	uint32_t i;
 
 	if (instance_ce->num_interfaces) {
-		ZEND_ASSERT(instance_ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_LINKING_IN_PROGRESS));
+		ZEND_ASSERT(instance_ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
 		for (i = 0; i < instance_ce->num_interfaces; i++) {
 			if (instanceof_interface(instance_ce->interfaces[i], ce)) {
 				return 1;
@@ -2933,7 +2970,7 @@ ZEND_API zend_uchar ZEND_FASTCALL _is_numeric_string_ex(const char *str, size_t 
 	int digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
 	zend_uchar type;
-	zend_long tmp_lval = 0;
+	zend_ulong tmp_lval = 0;
 	int neg = 0;
 
 	if (!length) {
@@ -3041,7 +3078,7 @@ process_double:
 			if (neg) {
 				tmp_lval = -tmp_lval;
 			}
-			*lval = tmp_lval;
+			*lval = (zend_long) tmp_lval;
 		}
 
 		return IS_LONG;

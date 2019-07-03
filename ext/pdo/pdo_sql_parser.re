@@ -269,7 +269,8 @@ safe:
 
 						default:
 							buf = zval_get_string(parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
+							if (EG(exception) ||
+								!stmt->dbh->methods->quoter(stmt->dbh, ZSTR_VAL(buf),
 									ZSTR_LEN(buf), &plc->quoted, &plc->qlen,
 									param_type)) {
 								/* bork */

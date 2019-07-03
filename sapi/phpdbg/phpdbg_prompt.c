@@ -1632,7 +1632,14 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 				sigio_watcher_start();
 			}
 #endif
-			switch (ret = phpdbg_stack_execute(&stack, allow_async_unsafe)) {
+			zend_try {
+				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
+			} zend_catch {
+				phpdbg_stack_free(&stack);
+				zend_bailout();
+			} zend_end_try();
+
+			switch (ret) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {

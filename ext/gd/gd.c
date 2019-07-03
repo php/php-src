@@ -355,6 +355,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrombmp, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_GD_TGA)
+ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromtga, 0)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagexbm, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
@@ -915,6 +921,9 @@ static const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_BMP
 	PHP_FE(imagecreatefrombmp,						arginfo_imagecreatefrombmp)
 #endif
+#ifdef HAVE_GD_TGA
+	PHP_FE(imagecreatefromtga,						arginfo_imagecreatefromtga)
+#endif
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								arginfo_imagepng)
 #endif
@@ -986,7 +995,7 @@ zend_module_entry gd_module_entry = {
 	"gd",
 	gd_functions,
 	PHP_MINIT(gd),
-	NULL,
+	PHP_MSHUTDOWN(gd),
 	NULL,
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 	PHP_RSHUTDOWN(gd),
@@ -1075,6 +1084,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_XPM", PHP_IMG_XPM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_WEBP", PHP_IMG_WEBP, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BMP", PHP_IMG_BMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_TGA", PHP_IMG_TGA, CONST_CS | CONST_PERSISTENT);
 
 	/* special colours for gd */
 	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
@@ -1194,6 +1204,17 @@ PHP_MINIT_FUNCTION(gd)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(gd)
+{
+#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+	gdFontCacheMutexShutdown();
+#endif
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
@@ -1280,6 +1301,12 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_WEBP
 	php_info_print_table_row(2, "WebP Support", "enabled");
 #endif
+#ifdef HAVE_GD_BMP
+	php_info_print_table_row(2, "BMP Support", "enabled");
+#endif
+#ifdef HAVE_GD_TGA
+	php_info_print_table_row(2, "TGA Read Support", "enabled");
+#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -1335,6 +1362,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "BMP Support", 1);
 #else
 	add_assoc_bool(return_value, "BMP Support", 0);
+#endif
+#ifdef HAVE_GD_TGA
+	add_assoc_bool(return_value, "TGA Read Support", 1);
+#else
+	add_assoc_bool(return_value, "TGA Read Support", 0);
 #endif
 #if defined(USE_GD_JISX0208)
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
@@ -1406,19 +1438,19 @@ PHP_FUNCTION(imageloadfont)
 	body_size_check = php_stream_tell(stream) - hdr_size;
 	php_stream_seek(stream, i, SEEK_SET);
 
+	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
+		efree(font);
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+
 	body_size = font->w * font->h * font->nchars;
 	if (body_size != body_size_check) {
 		font->w = FLIPWORD(font->w);
 		font->h = FLIPWORD(font->h);
 		font->nchars = FLIPWORD(font->nchars);
 		body_size = font->w * font->h * font->nchars;
-	}
-
-	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
-		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
-		efree(font);
-		php_stream_close(stream);
-		RETURN_FALSE;
 	}
 
 	if (body_size != body_size_check) {
@@ -1780,6 +1812,12 @@ PHP_FUNCTION(imagelayereffect)
 }
 /* }}} */
 
+#define CHECK_RGB_RANGE(component, name) \
+	if (component < 0 || component > 255) { \
+		php_error_docref(NULL, E_WARNING, #name " component is out of range"); \
+		RETURN_FALSE; \
+	}
+
 /* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
    Allocate a color with an alpha level.  Works for true color and palette based images */
 PHP_FUNCTION(imagecolorallocatealpha)
@@ -1796,6 +1834,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	CHECK_RGB_RANGE(red, Red);
+	CHECK_RGB_RANGE(green, Green);
+	CHECK_RGB_RANGE(blue, Blue);
 
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
@@ -2155,6 +2197,9 @@ PHP_FUNCTION(imagetypes)
 #endif
 #ifdef HAVE_GD_BMP
 	ret |= PHP_IMG_BMP;
+#endif
+#ifdef HAVE_GD_TGA
+	ret |= PHP_IMG_TGA;
 #endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2548,6 +2593,16 @@ PHP_FUNCTION(imagecreatefrombmp)
 /* }}} */
 #endif
 
+#if defined(HAVE_GD_TGA)
+/* {{{ proto resource imagecreatefromtga(string filename)
+   Create a new image from TGA file or URL */
+PHP_FUNCTION(imagecreatefromtga)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_TGA, "TGA", gdImageCreateFromTga, gdImageCreateFromTgaCtx);
+}
+/* }}} */
+#endif
+
 /* {{{ _php_image_output
  */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
@@ -2767,7 +2822,6 @@ PHP_FUNCTION(imagedestroy)
 }
 /* }}} */
 
-
 /* {{{ proto int imagecolorallocate(resource im, int red, int green, int blue)
    Allocate a color for an image */
 PHP_FUNCTION(imagecolorallocate)
@@ -2784,6 +2838,10 @@ PHP_FUNCTION(imagecolorallocate)
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
 		RETURN_FALSE;
 	}
+
+	CHECK_RGB_RANGE(red, Red);
+	CHECK_RGB_RANGE(green, Green);
+	CHECK_RGB_RANGE(blue, Blue);
 
 	ct = gdImageColorAllocate(im, red, green, blue);
 	if (ct < 0) {
@@ -4244,7 +4302,7 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 
 		efree(colors);
 	} else {
-		RETURN_BOOL(gdImageScatter(im, (int) scatter_sub, (int) scatter_plus))
+		RETURN_BOOL(gdImageScatter(im, (int) scatter_sub, (int) scatter_plus));
 	}
 }
 

@@ -672,6 +672,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		keylen += Z_STRLEN(args[i]);
 	}
 
+	/* Exception during string conversion */
+	if (EG(exception)) {
+		FREENOW;
+		return;
+	}
+
 	if (persistent) {
 		zend_resource *le;
 

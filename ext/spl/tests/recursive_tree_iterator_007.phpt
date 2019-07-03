@@ -22,12 +22,12 @@ try {
 	foreach(new RecursiveTreeIterator($it) as $k => $v) {
 		echo "[$k] => $v\n";
 	}
-} catch (UnexpectedValueException $e) {
-	echo "UnexpectedValueException thrown\n";
+} catch (Error $e) {
+	echo $e->getMessage(), "\n";
 }
 
 ?>
 ===DONE===
 --EXPECT--
-UnexpectedValueException thrown
+Object of class stdClass could not be converted to string
 ===DONE===

@@ -535,12 +535,16 @@ static inline zend_bool zend_abs_range(
 	return 1;
 }
 
+static inline zend_long safe_shift_left(zend_long n, zend_long s) {
+	return (zend_long) ((zend_ulong) n << (zend_ulong) s);
+}
+
 static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
 	/* This considers shifts that shift in the sign bit to be overflowing as well */
 	if (n >= 0) {
-		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) < n;
+		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;
 	} else {
-		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) > n;
+		return s >= SIZEOF_ZEND_LONG * 8 || safe_shift_left(n, s) > n;
 	}
 }
 
@@ -575,19 +579,21 @@ static int zend_inference_calc_binary_op_range(
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				tmp->min = op1_min + op2_min;
-				tmp->max = op1_max + op2_max;
 				if (OP1_RANGE_UNDERFLOW() ||
 					OP2_RANGE_UNDERFLOW() ||
-					(op1_min < 0 && op2_min < 0 && tmp->min >= 0)) {
+					zend_add_will_overflow(op1_min, op2_min)) {
 					tmp->underflow = 1;
 					tmp->min = ZEND_LONG_MIN;
+				} else {
+					tmp->min = op1_min + op2_min;
 				}
 				if (OP1_RANGE_OVERFLOW() ||
 					OP2_RANGE_OVERFLOW() ||
-					(op1_max > 0 && op2_max > 0 && tmp->max <= 0)) {
+					zend_add_will_overflow(op1_max, op2_max)) {
 					tmp->overflow = 1;
 					tmp->max = ZEND_LONG_MAX;
+				} else {
+					tmp->max = op1_max + op2_max;
 				}
 				return 1;
 			}
@@ -598,42 +604,47 @@ static int zend_inference_calc_binary_op_range(
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				tmp->min = op1_min - op2_max;
-				tmp->max = op1_max - op2_min;
 				if (OP1_RANGE_UNDERFLOW() ||
 					OP2_RANGE_OVERFLOW() ||
-					(op1_min < 0 && op2_max > 0 && tmp->min >= 0)) {
+					zend_sub_will_overflow(op1_min, op2_max)) {
 					tmp->underflow = 1;
 					tmp->min = ZEND_LONG_MIN;
+				} else {
+					tmp->min = op1_min - op2_max;
 				}
 				if (OP1_RANGE_OVERFLOW() ||
 					OP2_RANGE_UNDERFLOW() ||
-					(op1_max > 0 && op2_min < 0 && tmp->max <= 0)) {
+					zend_sub_will_overflow(op1_max, op2_min)) {
 					tmp->overflow = 1;
 					tmp->max = ZEND_LONG_MAX;
+				} else {
+					tmp->max = op1_max - op2_min;
 				}
 				return 1;
 			}
 			break;
 		case ZEND_MUL:
 			if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+				double dummy;
+				zend_long t1_overflow, t2_overflow, t3_overflow, t4_overflow;
 				op1_min = OP1_MIN_RANGE();
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				t1 = op1_min * op2_min;
-				t2 = op1_min * op2_max;
-				t3 = op1_max * op2_min;
-				t4 = op1_max * op2_max;
+				/* Suppress uninit variable warnings, these will only be used if the overflow
+				 * flags are all false. */
+				t1 = t2 = t3 = t4 = 0;
+				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_min, t1, dummy, t1_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_min, op2_max, t2, dummy, t2_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_max, op2_min, t3, dummy, t3_overflow);
+				ZEND_SIGNED_MULTIPLY_LONG(op1_max, op2_max, t4, dummy, t4_overflow);
+				(void) dummy;
+
 				// FIXME: more careful overflow checks?
-				if (OP1_RANGE_UNDERFLOW() ||
-					OP2_RANGE_UNDERFLOW() ||
-					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()  ||
-					(double)t1 != (double)op1_min * (double)op2_min ||
-					(double)t2 != (double)op1_min * (double)op2_max ||
-					(double)t3 != (double)op1_max * (double)op2_min ||
-					(double)t4 != (double)op1_max * (double)op2_max) {
+				if (OP1_RANGE_UNDERFLOW() || OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() || OP2_RANGE_OVERFLOW()  ||
+					t1_overflow || t2_overflow || t3_overflow || t4_overflow
+				) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
@@ -751,10 +762,10 @@ static int zend_inference_calc_binary_op_range(
 						tmp->min = ZEND_LONG_MIN;
 						tmp->max = ZEND_LONG_MAX;
 					} else {
-						t1 = op1_min << op2_min;
-						t2 = op1_min << op2_max;
-						t3 = op1_max << op2_min;
-						t4 = op1_max << op2_max;
+						t1 = safe_shift_left(op1_min, op2_min);
+						t2 = safe_shift_left(op1_min, op2_max);
+						t3 = safe_shift_left(op1_max, op2_min);
+						t4 = safe_shift_left(op1_max, op2_max);
 						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
 						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
 					}
@@ -3164,7 +3175,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			break;
 		}
 		case ZEND_DECLARE_ANON_CLASS:
-		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
 			if (script && (ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);

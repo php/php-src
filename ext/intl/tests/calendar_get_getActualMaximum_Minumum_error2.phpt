@@ -99,8 +99,8 @@ error: 0, intlcal_get_actual_maximum() expects parameter 2 to be int, string giv
 
 error: 0, intlcal_get_actual_minimum() expects parameter 2 to be int, string given
 
-error: 0, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get() expects exactly 2 parameters, 1 given
 
-error: 0, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
 
-error: 0, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given

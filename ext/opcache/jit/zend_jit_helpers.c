@@ -1489,25 +1489,6 @@ static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *
 	zend_vm_stack_free_args(call);
 }
 
-static int ZEND_FASTCALL zend_jit_verify_internal_arg_types_helper(zend_execute_data *call)
-{
-	zend_function *fbc = call->func;
-	uint32_t i;
-	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
-	zval *p = ZEND_CALL_ARG(call, 1);
-
-	for (i = 0; i < num_args; ++i) {
-		zend_check_internal_arg_type(fbc, i + 1, p);
-		if (UNEXPECTED(EG(exception))) {
-			EG(current_execute_data) = call->prev_execute_data;
-			zend_vm_stack_free_args(call);
-			return 0;
-		}
-		p++;
-	}
-	return 1;
-}
-
 static zend_always_inline void zend_jit_assign_to_typed_ref(zend_reference *ref, zval *value, zend_uchar value_type)
 {
 	zval variable;
@@ -1634,4 +1615,10 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zval *var_ptr, zend_refere
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, ret);
 	}
+}
+
+static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
+{
+	ZVAL_NEW_REF(arg, arg);
+	zend_error(E_NOTICE, "Only variables should be passed by reference");
 }

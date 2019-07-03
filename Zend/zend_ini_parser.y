@@ -289,7 +289,7 @@ static void zval_ini_dtor(zval *zv)
 %}
 
 %expect 0
-%pure-parser
+%define api.pure full
 
 %token TC_SECTION
 %token TC_RAW

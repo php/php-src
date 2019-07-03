@@ -62,22 +62,22 @@ try {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_offset_get() : error conditions ***
 
 -- Testing timezone_offset_get() function with an invalid values for $object argument --
-string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of stdClass given"
+string(74) "timezone_offset_get() expects parameter 1 to be DateTimeZone, object given"
 
-string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given"
+string(71) "timezone_offset_get() expects parameter 1 to be DateTimeZone, int given"
 
-string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given"
+string(72) "timezone_offset_get() expects parameter 1 to be DateTimeZone, null given"
 
 
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
-string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, instance of stdClass given"
+string(79) "timezone_offset_get() expects parameter 2 to be DateTimeInterface, object given"
 
-string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given"
+string(76) "timezone_offset_get() expects parameter 2 to be DateTimeInterface, int given"
 
-string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given"
+string(77) "timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given"
 
 ===DONE===

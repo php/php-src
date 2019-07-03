@@ -240,7 +240,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
+				return;
+			}
+
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release_ex(key, 0);
@@ -252,7 +256,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_BAIL:
 		oldint = ASSERTG(bail);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
+				return;
+			}
+
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release_ex(key, 0);
@@ -264,7 +272,11 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_WARNING:
 		oldint = ASSERTG(warning);
 		if (ac == 2) {
-			zend_string *value_str = zval_get_string(value);
+			zend_string *value_str = zval_try_get_string(value);
+			if (UNEXPECTED(!value_str)) {
+				return;
+			}
+
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release_ex(key, 0);
@@ -290,8 +302,12 @@ PHP_FUNCTION(assert_options)
 	case ASSERT_EXCEPTION:
 		oldint = ASSERTG(exception);
 		if (ac == 2) {
-			zend_string *key = zend_string_init("assert.exception", sizeof("assert.exception")-1, 0);
-			zend_string *val = zval_get_string(value);
+			zend_string *val = zval_try_get_string(value);
+			if (UNEXPECTED(!val)) {
+				return;
+			}
+
+			key = zend_string_init("assert.exception", sizeof("assert.exception")-1, 0);
 			zend_alter_ini_entry_ex(key, val, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release_ex(val, 0);
 			zend_string_release_ex(key, 0);

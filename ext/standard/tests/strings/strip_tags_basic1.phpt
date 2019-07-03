@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : basic functionality - with default arguments
---INI--
-short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])

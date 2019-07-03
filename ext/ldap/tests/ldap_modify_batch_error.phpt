@@ -20,14 +20,6 @@ $addGivenName = array(
 	)
 );
 
-// Too few parameters
-var_dump(ldap_modify_batch());
-var_dump(ldap_modify_batch($link));
-var_dump(ldap_modify_batch($link, "$base"));
-
-// Too many parameters
-var_dump(ldap_modify_batch($link, "$base", $addGivenName, [], "Invalid additional parameter"));
-
 // DN not found
 var_dump(ldap_modify_batch($link, "cn=not-found,$base", $addGivenName));
 
@@ -78,18 +70,6 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "dc=my-domain,$base");
 ?>
 --EXPECTF--
-Warning: ldap_modify_batch() expects at least 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ldap_modify_batch() expects at least 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ldap_modify_batch() expects at least 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: ldap_modify_batch() expects at most 4 parameters, 5 given in %s on line %d
-NULL
-
 Warning: ldap_modify_batch(): Batch Modify: No such object in %s on line %d
 bool(false)
 

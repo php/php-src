@@ -3,12 +3,6 @@ ZE2 __toString()
 --FILE--
 <?php
 
-function my_error_handler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
-}
-
-set_error_handler('my_error_handler');
-
 class test1
 {
 }
@@ -33,7 +27,11 @@ class test3
 echo "====test1====\n";
 $o = new test1;
 print_r($o);
-var_dump((string)$o);
+try {
+    var_dump((string)$o);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($o);
 
 echo "====test2====\n";
@@ -70,7 +68,11 @@ echo sprintf("%s", $o);
 echo "====test10====\n";
 $o = new test3;
 var_dump($o);
-echo $o;
+try {
+    echo $o;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ====DONE====
@@ -79,9 +81,8 @@ echo $o;
 test1 Object
 (
 )
-string(54) "Object of class test1 could not be converted to string"
-string(0) ""
-object(test1)#%d (0) {
+Object of class test1 could not be converted to string
+object(test1)#1 (0) {
 }
 ====test2====
 test2 Object
@@ -89,7 +90,7 @@ test2 Object
 )
 test2::__toString()
 Converted
-object(test2)#%d (0) {
+object(test2)#3 (0) {
 }
 ====test3====
 test2::__toString()
@@ -113,7 +114,8 @@ test2::__toString()
 Converted
 ====test7====
 test2::__toString()
-string(19) "Illegal offset type"
+
+Warning: Illegal offset type in %s on line %d
 ====test8====
 test2::__toString()
 string(9) "Converted"
@@ -123,8 +125,8 @@ string(9) "Converted"
 test2::__toString()
 Converted
 ====test10====
-object(test3)#%d (0) {
+object(test3)#1 (0) {
 }
 test3::__toString()
-string(53) "Method test3::__toString() must return a string value"
+Method test3::__toString() must return a string value
 ====DONE====

@@ -116,7 +116,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	int len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
-	memcpy(nscat, ns, ns_len);
+	if (ns) {
+		memcpy(nscat, ns, ns_len);
+	}
 	nscat[ns_len] = ':';
 	memcpy(nscat+ns_len+1, type, type_len);
 	nscat[len] = '\0';
@@ -1176,15 +1178,15 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 #define WSDL_CACHE_VERSION 0x10
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
-#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
+#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;
 #define WSDL_CACHE_GET_1(ret,type,buf) ret = (type)(**buf); (*buf)++;
 #define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
 #define WSDL_CACHE_SKIP(n,buf)         *buf += n;
 
-#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,val & 0xff); \
-                                       smart_str_appendc(buf,(val >> 8) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 16) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 24) & 0xff);
+#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,(char)(val & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 8) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 16) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 24) & 0xff));
 #define WSDL_CACHE_PUT_1(val,buf)      smart_str_appendc(buf,val);
 #define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,(char*)val,n);
 

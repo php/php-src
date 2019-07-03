@@ -244,6 +244,7 @@ static ZEND_INI_MH(OnEnable)
 			return FAILURE;
 		} else {
 			*p = 0;
+			ZCG(accelerator_enabled) = 0;
 			return SUCCESS;
 		}
 	}
@@ -463,7 +464,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
 #if HAVE_JIT
-	if (ZCG(accel_directives).jit) {
+	if (ZCG(jit_enabled)) {
 		php_info_print_table_row(2, "JIT", "Enabled");
 	} else {
 		php_info_print_table_row(2, "JIT", "Disabled");

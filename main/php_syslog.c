@@ -76,6 +76,13 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	smart_string_0(&fbuf);
 	va_end(args);
 
+	if (PG(syslog_filter) == PHP_SYSLOG_FILTER_RAW) {
+		/* Just send it directly to the syslog */
+		syslog(priority, "%.*s", (int)fbuf.len, fbuf.c);
+		smart_string_free(&fbuf);
+		return;
+	}
+
 	for (ptr = fbuf.c; ; ++ptr) {
 		c = *ptr;
 		if (c == '\0') {

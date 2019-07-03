@@ -13,10 +13,4 @@ try {
 
 ?>
 --EXPECTF--
-bool(false)
-bool(false)
-
-Fatal error: Uncaught Error: Class 'B' not found in %sbug75765.php:%d
-Stack trace:
-#0 {main}
-  thrown in %sbug75765.php on line %d
+Fatal error: Class 'B' not found in %s on line %d

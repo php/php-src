@@ -11,7 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 intltz_get_raw_offset(null);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_raw_offset() must be an instance of IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: intltz_get_raw_offset() expects parameter 1 to be IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_raw_offset(NULL)
 #1 {main}

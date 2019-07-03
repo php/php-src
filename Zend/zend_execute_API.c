@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_float.h"
 #include "zend_weakrefs.h"
+#include "zend_inheritance.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -131,8 +132,8 @@ void init_executor(void) /* {{{ */
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
 
-	EG(symtable_cache_ptr) = EG(symtable_cache) - 1;
-	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE - 1;
+	EG(symtable_cache_ptr) = EG(symtable_cache);
+	EG(symtable_cache_limit) = EG(symtable_cache) + SYMTABLE_CACHE_SIZE;
 	EG(no_extensions) = 0;
 
 	EG(function_table) = CG(function_table);
@@ -397,10 +398,10 @@ void shutdown_executor(void) /* {{{ */
 
 		zend_cleanup_internal_classes();
 
-		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
+		while (EG(symtable_cache_ptr) > EG(symtable_cache)) {
+			EG(symtable_cache_ptr)--;
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
-			EG(symtable_cache_ptr)--;
 		}
 
 		zend_hash_destroy(&EG(included_files));
@@ -862,7 +863,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			zend_string_release_ex(lc_name, 0);
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED)) &&
+				!(flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED)) {
 			return NULL;
 		}
 		return ce;
@@ -984,7 +986,7 @@ ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name) /* {{{ */
+ZEND_API int zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1048,13 +1050,13 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 }
 /* }}} */
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name) /* {{{ */
+ZEND_API int zend_eval_string(const char *str, zval *retval_ptr, const char *string_name) /* {{{ */
 {
 	return zend_eval_stringl(str, strlen(str), retval_ptr, string_name);
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions) /* {{{ */
+ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, int handle_exceptions) /* {{{ */
 {
 	int result;
 
@@ -1067,7 +1069,7 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 }
 /* }}} */
 
-ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions) /* {{{ */
+ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, int handle_exceptions) /* {{{ */
 {
 	return zend_eval_stringl_ex(str, strlen(str), retval_ptr, string_name, handle_exceptions);
 }
@@ -1414,9 +1416,8 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 	}
 
 	ZEND_ADD_CALL_FLAG(ex, ZEND_CALL_HAS_SYMBOL_TABLE);
-	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
-		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
-		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
+	if (EG(symtable_cache_ptr) > EG(symtable_cache)) {
+		symbol_table = ex->symbol_table = *(--EG(symtable_cache_ptr));
 		if (!ex->func->op_array.last_var) {
 			return symbol_table;
 		}

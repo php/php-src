@@ -16,7 +16,7 @@ IPv6 Loopback test
 	}
 	$bound = false;
 	for($port = 31337; $port < 31357; ++$port) {
-		if (socket_bind($server, '::1', $port)) {
+		if (@socket_bind($server, '::1', $port)) {
 			$bound = true;
 			break;
 		}

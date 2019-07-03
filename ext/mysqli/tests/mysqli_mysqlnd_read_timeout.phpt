@@ -28,9 +28,6 @@ mysqlnd.net_read_timeout=1
 
 	print "done!";
 ?>
---EXPECTF--
-Warning: mysqli_query(): MySQL server has gone away in %s on line %d
-
-Warning: mysqli_query(): Error reading result set's header in %s on line %d
-[002] [%d] %s
+--EXPECT--
+[002] [2006] MySQL server has gone away
 done!

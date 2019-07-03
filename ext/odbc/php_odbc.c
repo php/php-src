@@ -1343,9 +1343,7 @@ PHP_FUNCTION(odbc_execute)
 			}
 
 			otype = Z_TYPE_P(tmp);
-			convert_to_string_ex(tmp);
-			if (Z_TYPE_P(tmp) != IS_STRING) {
-				php_error_docref(NULL, E_WARNING,"Error converting parameter");
+			if (!try_convert_to_string(tmp)) {
 				SQLFreeStmt(result->stmt, SQL_RESET_PARAMS);
 				for (i = 0; i < result->numparams; i++) {
 					if (params[i].fp != -1) {
@@ -2880,7 +2878,7 @@ PHP_FUNCTION(odbc_field_type)
 	}
 
 	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
-	RETURN_STRING(tmp)
+	RETURN_STRING(tmp);
 }
 /* }}} */
 

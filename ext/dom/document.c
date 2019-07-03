@@ -337,7 +337,10 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -431,11 +434,14 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (docp->version != NULL) {
 		xmlFree((xmlChar *) docp->version );
 	}
-
-	str = zval_get_string(newval);
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
@@ -659,11 +665,14 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (docp->URL != NULL) {
 		xmlFree((xmlChar *) docp->URL);
 	}
-
-	str = zval_get_string(newval);
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 

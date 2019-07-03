@@ -92,8 +92,6 @@ object(mysqli)#%d (%d) {
   string(%d) "%s"
   ["server_version"]=>
   int(%d)
-  ["stat"]=>
-  string(%d) "Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d"
   ["sqlstate"]=>
   string(5) "00000"
   ["protocol_version"]=>
@@ -132,8 +130,6 @@ object(mysqli)#%d (%d) {
   bool(false)
   ["server_version"]=>
   bool(false)
-  ["stat"]=>
-  NULL
   ["sqlstate"]=>
   bool(false)
   ["protocol_version"]=>

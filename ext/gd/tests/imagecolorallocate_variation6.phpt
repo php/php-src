@@ -34,23 +34,75 @@ foreach($values as $key => $value) {
       //Need to be created every time to get expected return value
       $im_palette = imagecreate(200, 200);
       $im_true_color = imagecreatetruecolor(200, 200);
-      var_dump( imagecolorallocate($im_palette, $value, $value, $value) );
-      var_dump( imagecolorallocate($im_true_color, $value, $value, $value) );
+      var_dump( imagecolorallocate($im_palette, $value, 0, 0) );
+      var_dump( imagecolorallocate($im_true_color, $value, 0, 0) );
+      var_dump( imagecolorallocate($im_palette, 0, $value, 0) );
+      var_dump( imagecolorallocate($im_true_color, 0, $value, 0) );
+      var_dump( imagecolorallocate($im_palette, 0, 0, $value) );
+      var_dump( imagecolorallocate($im_true_color, 0, 0, $value) );
 };
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-int(0)
-int(16843008)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
 
 --Octal 0400--
-int(0)
-int(16843008)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
 
 --Hexa-decimal 0x100--
-int(0)
-int(16843008)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Red component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Green component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
+
+Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
+bool(false)
 ===DONE===

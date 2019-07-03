@@ -351,7 +351,7 @@ declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
 		")"
 		{nested = 1;}
 	)
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -366,7 +366,7 @@ abstract_declarator(zend_ffi_dcl *dcl):
 		")"
 		{nested = 1;}
 	)?
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -383,7 +383,7 @@ parameter_declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
 	|	ID(name, name_len)
 	|	/* empty */
 	)
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -394,7 +394,7 @@ pointer(zend_ffi_dcl *dcl):
 	)+
 ;
 
-array_or_function_declarators(zend_ffi_dcl *dcl):
+array_or_function_declarators(zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl):
 	{zend_ffi_dcl dummy = ZEND_FFI_ATTR_INIT;}
 	{zend_ffi_val len = {.kind = ZEND_FFI_VAL_EMPTY};}
 	{HashTable *args = NULL;}
@@ -419,7 +419,7 @@ array_or_function_declarators(zend_ffi_dcl *dcl):
 			)
 		)
 		"]"
-		array_or_function_declarators(dcl)?
+		array_or_function_declarators(dcl, nested_dcl)?
 		{dcl->attr |= attr;}
 		{zend_ffi_make_array_type(dcl, &len);}
 	|	"("
@@ -437,9 +437,9 @@ array_or_function_declarators(zend_ffi_dcl *dcl):
 			{attr |= ZEND_FFI_ATTR_VARIADIC;}
 		)?
 		")"
-		array_or_function_declarators(dcl)?
+		array_or_function_declarators(dcl, nested_dcl)?
 		{dcl->attr |= attr;}
-		{zend_ffi_make_func_type(dcl, args);}
+		{zend_ffi_make_func_type(dcl, args, nested_dcl);}
 //	|	"(" (ID ("," ID)*)? ")" // TODO: ANSI function not-implemented ???
 	)
 ;

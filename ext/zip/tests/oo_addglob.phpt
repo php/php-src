@@ -29,10 +29,21 @@ if (!$zip->addGlob($dirname . '*.{txt,baz}', GLOB_BRACE, $options)) {
         echo "failed1\n";
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-        dump_entries_name($zip);
+        if (!verify_entries($zip, [
+            "bar",
+            "foobar/",
+            "foobar/baz",
+            "entry1.txt",
+            "baz/foo.txt",
+            "baz/bar.baz"
+        ])) {
+            echo "failed\n";
+        } else {
+            echo "OK";
+        }
         $zip->close();
 } else {
-        echo "failed2\n";
+        echo "failed3\n";
 }
 ?>
 --CLEAN--
@@ -44,9 +55,4 @@ unlink($dirname . 'bar.baz');
 rmdir($dirname);
 ?>
 --EXPECT--
-0 bar
-1 foobar/
-2 foobar/baz
-3 entry1.txt
-4 baz/foo.txt
-5 baz/bar.baz
+OK

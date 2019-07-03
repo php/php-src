@@ -104,10 +104,10 @@ typedef uint32_t zend_regset;
 	(regset == ZEND_REGSET_EMPTY)
 
 #define ZEND_REGSET(reg) \
-	(1 << (reg))
+	(1u << (reg))
 
 #define ZEND_REGSET_INTERVAL(reg1, reg2) \
-	(((1 << ((reg2) - (reg1) + 1)) - 1) << (reg1))
+	(((1u << ((reg2) - (reg1) + 1)) - 1) << (reg1))
 
 #define ZEND_REGSET_IN(regset, reg) \
 	(((regset) & ZEND_REGSET(reg)) != 0)

@@ -1136,7 +1136,7 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 }
 /* }}} */
 
-ZEND_API char *get_zend_version(void) /* {{{ */
+ZEND_API const char *get_zend_version(void) /* {{{ */
 {
 	return zend_version_info;
 }

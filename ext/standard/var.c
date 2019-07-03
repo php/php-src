@@ -1222,6 +1222,13 @@ PHP_FUNCTION(unserialize)
 				zend_hash_add_empty_element(class_hash, lcname);
 		        zend_string_release_ex(lcname, 0);
 			} ZEND_HASH_FOREACH_END();
+
+			/* Exception during string conversion. */
+			if (EG(exception)) {
+				zend_hash_destroy(class_hash);
+				FREE_HASHTABLE(class_hash);
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			}
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}

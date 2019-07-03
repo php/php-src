@@ -1666,7 +1666,7 @@ PHP_FUNCTION(dirname)
 }
 /* }}} */
 
-/* {{{ proto array pathinfo(string path[, int options])
+/* {{{ proto array|string pathinfo(string path[, int options])
    Returns information about a certain string */
 PHP_FUNCTION(pathinfo)
 {
@@ -2057,7 +2057,7 @@ PHP_FUNCTION(strripos)
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + (size_t)offset;
+			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
 		}
 		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
 		lowered = tolower(*ZSTR_VAL(needle));
@@ -2416,6 +2416,10 @@ PHP_FUNCTION(substr_replace)
 	}
 	if (Z_TYPE_P(from) != IS_ARRAY) {
 		convert_to_long_ex(from);
+	}
+
+	if (EG(exception)) {
+		return;
 	}
 
 	if (argc > 3) {
@@ -3442,7 +3446,9 @@ PHP_FUNCTION(strtr)
 			php_strtr_array(return_value, str, pats);
 		}
 	} else {
-		convert_to_string_ex(from);
+		if (!try_convert_to_string(from)) {
+			return;
+		}
 
 		RETURN_STR(php_strtr_ex(str,
 				  Z_STRVAL_P(from),
@@ -4362,6 +4368,10 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		convert_to_string_ex(replace);
 	}
 
+	if (EG(exception)) {
+		return;
+	}
+
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
@@ -4763,7 +4773,10 @@ PHP_FUNCTION(setlocale)
 			plocale = &args[i];
 		}
 
-		loc = zval_get_string(plocale);
+		loc = zval_try_get_string(plocale);
+		if (UNEXPECTED(!loc)) {
+			return;
+		}
 
 		if (!strcmp("0", ZSTR_VAL(loc))) {
 			zend_string_release_ex(loc, 0);
@@ -4776,7 +4789,28 @@ PHP_FUNCTION(setlocale)
 			}
 		}
 
+# ifndef PHP_WIN32
 		retval = php_my_setlocale(cat, loc ? ZSTR_VAL(loc) : NULL);
+# else
+		if (loc) {
+			/* BC: don't try /^[a-z]{2}_[A-Z]{2}($|\..*)/ except for /^u[ks]_U[KS]$/ */
+			char *locp = ZSTR_VAL(loc);
+			if (ZSTR_LEN(loc) >= 5 && locp[2] == '_'
+				&& locp[0] >= 'a' && locp[0] <= 'z' && locp[1] >= 'a' && locp[1] <= 'z'
+				&& locp[3] >= 'A' && locp[3] <= 'Z' && locp[4] >= 'A' && locp[4] <= 'Z'
+				&& (locp[5] == '\0' || locp[5] == '.')
+				&& !(locp[0] == 'u' && (locp[1] == 'k' || locp[1] == 's')
+					&& locp[3] == 'U' && (locp[4] == 'K' || locp[4] == 'S')
+					&& locp[5] == '\0')
+			) {
+				retval = NULL;
+			} else {
+				retval = php_my_setlocale(cat, ZSTR_VAL(loc));
+			}
+		} else {
+			retval = php_my_setlocale(cat, NULL);
+		}
+# endif
 		zend_update_current_locale();
 		if (retval) {
 			if (loc) {

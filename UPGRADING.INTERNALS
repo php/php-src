@@ -6,6 +6,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   c. TSRM changes
   d. get() and set() object handlers
   e. zend_parse_parameters 'L' specifier
+  f. Arginfo argument types
 
 2. Build system changes
   a. Abstract
@@ -51,6 +52,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
      family of macros have been removed. Use 'l' and Z_PARAM_LONG() instead,
      which, despite the confusing name, actually have stricter input validation.
+
+  f. Arginfo argument types for internal functions are no longer checked.
+     Instead type checks should be performed using the zend_parse_parameters()
+     or ZEND_PARSE_PARAMETERS_*() APIs.
 
 ========================
 2. Build system changes

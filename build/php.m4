@@ -2064,6 +2064,20 @@ AC_DEFUN([PHP_SETUP_LIBXML], [
   $2
 ])
 
+dnl
+dnl PHP_SETUP_EXPAT([shared-add])
+dnl
+dnl Common setup macro for expat.
+dnl
+AC_DEFUN([PHP_SETUP_EXPAT], [
+  PKG_CHECK_MODULES([EXPAT], [expat])
+
+  PHP_EVAL_INCLINE($EXPAT_CFLAGS)
+  PHP_EVAL_LIBLINE($EXPAT_LIBS, $1)
+
+  AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------

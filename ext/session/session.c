@@ -1752,35 +1752,36 @@ static PHP_FUNCTION(session_set_cookie_params)
 		lifetime = zval_get_string(lifetime_or_options);
 	}
 
+	/* Exception during string conversion */
+	if (EG(exception)) {
+		goto cleanup;
+	}
+
 	if (lifetime) {
 		ini_name = zend_string_init("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
 		result = zend_alter_ini_entry(ini_name, lifetime, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		zend_string_release(lifetime);
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 	if (path) {
 		ini_name = zend_string_init("session.cookie_path", sizeof("session.cookie_path") - 1, 0);
 		result = zend_alter_ini_entry(ini_name, path, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		if (found > 0) {
-			zend_string_release(path);
-		}
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 	if (domain) {
 		ini_name = zend_string_init("session.cookie_domain", sizeof("session.cookie_domain") - 1, 0);
 		result = zend_alter_ini_entry(ini_name, domain, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		if (found > 0) {
-			zend_string_release(domain);
-		}
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 	if (!secure_null) {
@@ -1788,7 +1789,8 @@ static PHP_FUNCTION(session_set_cookie_params)
 		result = zend_alter_ini_entry_chars(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 	if (!httponly_null) {
@@ -1796,22 +1798,29 @@ static PHP_FUNCTION(session_set_cookie_params)
 		result = zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 	if (samesite) {
 		ini_name = zend_string_init("session.cookie_samesite", sizeof("session.cookie_samesite") - 1, 0);
 		result = zend_alter_ini_entry(ini_name, samesite, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		if (found > 0) {
-			zend_string_release(samesite);
-		}
 		zend_string_release_ex(ini_name, 0);
 		if (result == FAILURE) {
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 	}
 
-	RETURN_TRUE;
+	RETVAL_TRUE;
+
+cleanup:
+	if (lifetime) zend_string_release(lifetime);
+	if (found > 0) {
+		if (path) zend_string_release(path);
+		if (domain) zend_string_release(domain);
+		if (samesite) zend_string_release(samesite);
+	}
 }
 /* }}} */
 

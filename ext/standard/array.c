@@ -2015,6 +2015,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 					continue;
 				}
 			}
+prefix:
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
@@ -2044,8 +2045,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				zend_throw_error(NULL, "Cannot re-assign $this");
-				return -1;
+				goto prefix;
 			}
 			if (Z_ISREF_P(entry)) {
 				Z_ADDREF_P(entry);
@@ -2084,6 +2084,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 					continue;
 				}
 			}
+prefix:
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 			if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 				if (zend_string_equals_literal(Z_STR(final_name), "this")) {
@@ -2113,8 +2114,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 				continue;
 			}
 			if (zend_string_equals_literal(var_name, "this")) {
-				zend_throw_error(NULL, "Cannot re-assign $this");
-				return -1;
+				goto prefix;
 			}
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
@@ -2230,7 +2230,8 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(arr, num_key, var_name, entry) {
 		if (var_name) {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))
+			 || zend_string_equals_literal(var_name, "this")) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 					zval_ptr_dtor_str(&final_name);
@@ -2284,7 +2285,8 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(arr, num_key, var_name, entry) {
 		if (var_name) {
-			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
+			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))
+			 || zend_string_equals_literal(var_name, "this")) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 					zval_ptr_dtor_str(&final_name);
@@ -2343,8 +2345,7 @@ static zend_long php_extract_ref_skip(zend_array *arr, zend_array *symbol_table)
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			zend_throw_error(NULL, "Cannot re-assign $this");
-			return -1;
+			continue;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
@@ -2389,8 +2390,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 			continue;
 		}
 		if (zend_string_equals_literal(var_name, "this")) {
-			zend_throw_error(NULL, "Cannot re-assign $this");
-			return -1;
+			continue;
 		}
 		orig_var = zend_hash_find_ex(symbol_table, var_name, 1);
 		if (orig_var) {
@@ -2703,7 +2703,7 @@ PHP_FUNCTION(array_fill_keys)
 	} while (0)
 
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
-		zend_ulong __calc_size = (start - end) / lstep; \
+		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
 			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
 			RETURN_FALSE; \
@@ -2713,7 +2713,7 @@ PHP_FUNCTION(array_fill_keys)
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-/* {{{ proto array range(mixed low, mixed high[, int step])
+/* {{{ proto array|false range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -2860,7 +2860,7 @@ long_str:
 		}
 
 		if (low > high) { 		/* Negative steps */
-			if ((zend_ulong)(low - high) < lstep) {
+			if ((zend_ulong)low - high < lstep) {
 				err = 1;
 				goto err;
 			}
@@ -2874,7 +2874,7 @@ long_str:
 				}
 			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
-			if ((zend_ulong)(high - low) < lstep) {
+			if ((zend_ulong)high - low < lstep) {
 				err = 1;
 				goto err;
 			}
@@ -3136,7 +3136,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 }
 /* }}} */
 
-/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
+/* {{{ proto int|false array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
@@ -3434,6 +3434,9 @@ PHP_FUNCTION(array_splice)
 		/* Initialize return value */
 		array_init_size(return_value, size > 0 ? (uint32_t)size : 0);
 		rem_hash = Z_ARRVAL_P(return_value);
+	} else {
+		/* The return value will not be used, but make sure it still has the correct type. */
+		RETVAL_EMPTY_ARRAY();
 	}
 
 	/* Perform splice */
@@ -3915,7 +3918,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_ZVAL(input, 1, 0)
+		RETURN_ZVAL(input, 1, 0);
 	}
 
 	/* Initialize return array */
@@ -4108,7 +4111,9 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		case IS_OBJECT:
-			convert_to_string_ex(param);
+			if (!try_convert_to_string(param)) {
+				return 0;
+			}
 			/* fallthrough */
 		case IS_STRING:
 			return 1;
@@ -4308,7 +4313,7 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
-/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
+/* {{{ proto array|false array_pad(array input, int pad_size, mixed pad_value)
    Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
@@ -5897,7 +5902,7 @@ PHP_FUNCTION(array_rand)
 }
 /* }}} */
 
-/* {{{ proto mixed array_sum(array input)
+/* {{{ proto int|float array_sum(array input)
    Returns the sum of the array entries */
 PHP_FUNCTION(array_sum)
 {
@@ -5922,7 +5927,7 @@ PHP_FUNCTION(array_sum)
 }
 /* }}} */
 
-/* {{{ proto mixed array_product(array input)
+/* {{{ proto int|float array_product(array input)
    Returns the product of the array entries */
 PHP_FUNCTION(array_product)
 {

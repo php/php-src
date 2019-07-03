@@ -103,6 +103,12 @@
 #include "Zend/zend_cpuinfo.h"
 #include "jit/zend_jit_x86.h"
 
+/* The generated code may contain tautological comparisons, ignore them. */
+#if defined(__clang__)
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wtautological-compare"
+#endif
+
 const char* zend_reg_name[] = {
 #if defined(__x86_64__) || defined(_M_X64)
 	"rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
@@ -169,6 +175,14 @@ static void* dasm_labels[zend_lb_MAX];
 |		mov reg, aword [0x2c]
 |		mov reg, aword [reg + tsrm_tls_index]
 |		mov reg, aword [reg + tsrm_tls_offset]
+|	.elif X64APPLE
+|		gs
+||		if (tsrm_ls_cache_tcb_offset) {
+|			mov reg, aword [tsrm_ls_cache_tcb_offset]
+||		} else {
+|			mov reg, aword [tsrm_tls_index]
+|			mov reg, aword [reg + tsrm_tls_offset]
+||		}
 |	.elif X64
 |		fs
 ||		if (tsrm_ls_cache_tcb_offset) {
@@ -227,7 +241,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			mov IP, aword [IP + (struct.._offset + offsetof(zend_..struct, field))]
 ||		} else {
 |			LOAD_TSRM_CACHE RX
-|			mov RX, aword [RX + (struct.._offset + offsetof(zend_..struct, field))]
+|			lea RX, aword [RX + (struct.._offset + offsetof(zend_..struct, field))]
 |			mov aword EX->opline, RX
 ||		}
 |	.else
@@ -2557,6 +2571,16 @@ static int zend_jit_setup(void)
 			return FAILURE;
 		}
 	} while(0);
+# elif defined(__APPLE__) && defined(__x86_64__)
+	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		size_t *ti;
+		__asm__(
+			"leaq __tsrm_ls_cache(%%rip),%0"
+			: "=r" (ti));
+		tsrm_tls_offset = ti[2];
+		tsrm_tls_index = ti[1] * 8;
+	}
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
@@ -7156,7 +7180,6 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 				case ZEND_ASSERT_CHECK:
 				case ZEND_CATCH:
 				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 					return 1;
@@ -7675,26 +7698,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// EG(current_execute_data) = execute_data;
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, RX, r1
 
-		if (!func || (func->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-			if (!func) {
-				|	test dword [r0 + offsetof(zend_op_array, fn_flags)], ZEND_ACC_HAS_TYPE_HINTS
-				|	jnz >1
-				|.cold_code
-			}
-			|1:
-			|	mov FCARG1a, RX
-			|	EXT_CALL zend_jit_verify_internal_arg_types_helper, r0
-			|	test r0, r0
-			|	je >8
-			|	LOAD_ZVAL_ADDR FCARG2a, res_addr // reload
-			if (!func) {
-				|	mov r0, EX:RX->func // reload
-				|	jmp >1
-				|.code
-			}
-			|1:
-		}
-
 		zend_jit_reset_opline(Dst, NULL);
 
 		|	// fbc->internal_function.handler(call, ret);
@@ -8017,17 +8020,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 			|	jnz >7
 			|	SAVE_VALID_OPLINE opline
-			|.if X64
-				|	mov CARG1, E_NOTICE
-				|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
-				|	EXT_CALL zend_error, r0
-			|.else
-				|	sub r4, 8
-				|	push "Only variables should be passed by reference"
-				|	push E_NOTICE
-				|	EXT_CALL zend_error, r0
-				|	add r4, 16
-			|.endif
+			|	LOAD_ZVAL_ADDR FCARG1a, arg_addr
+			|	EXT_CALL zend_jit_only_vars_by_reference, r0
 			if (!zend_jit_check_exception(Dst)) {
 				return 0;
 			}
@@ -8064,17 +8058,8 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, zend_op_ar
 			|	je >7
 		}
 		|	SAVE_VALID_OPLINE opline
-		|.if X64
-			|	mov CARG1, E_NOTICE
-			|	LOAD_ADDR CARG2, "Only variables should be passed by reference"
-			|	EXT_CALL zend_error, r0
-		|.else
-			|	sub r4, 8
-			|	push "Only variables should be passed by reference"
-			|	push E_NOTICE
-			|	EXT_CALL zend_error, r0
-			|	add r4, 16
-		|.endif
+		|	LOAD_ZVAL_ADDR FCARG1a, arg_addr
+		|	EXT_CALL zend_jit_only_vars_by_reference, r0
 		if (!zend_jit_check_exception(Dst)) {
 			return 0;
 		}
@@ -10531,8 +10516,24 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			break;
 	}
 
+#if ZTS
+	/* %r0 is used to check EG(vm_interrupt) */
+	{
+		uint32_t b = ssa->cfg.map[line];
+
+		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
+		 && ssa->cfg.blocks[b].start == line) {
+			ZEND_REGSET_INCL(regset, ZREG_R0);
+		}
+	}
+#endif
+
 	return regset;
 }
+
+#if defined(__clang__)
+# pragma clang diagnostic pop
+#endif
 
 /*
  * Local variables:

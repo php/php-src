@@ -15,13 +15,7 @@ $link = ldap_connect($host, $port);
 $dn = "dc=not-found,$base";
 $filter = "(dc=*)";
 
-$result = ldap_search();
-var_dump($result);
-
 $result = ldap_search($link, $dn, $filter);
-var_dump($result);
-
-$result = ldap_search($link, $dn, $filter, NULL);
 var_dump($result);
 
 $result = ldap_search($link, $dn, $filter, array(1 => 'top'));
@@ -38,14 +32,8 @@ var_dump($result);
 ?>
 ===DONE===
 --EXPECTF--
-Warning: ldap_search() expects at least 3 parameters, 0 given in %s on line %d
-NULL
-
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
-
-Warning: ldap_search() expects parameter 4 to be array, null given in %s on line %d
-NULL
 
 Warning: ldap_search(): Array initialization wrong in %s on line %d
 bool(false)
