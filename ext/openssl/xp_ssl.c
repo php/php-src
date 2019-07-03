@@ -2383,7 +2383,8 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 
 	xparam->outputs.client = NULL;
 
-	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
+	if (PHP_STREAM_CONTEXT(stream) &&
+		(tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
 		zend_is_true(tmpzval)) {
 		nodelay = 1;
 	}

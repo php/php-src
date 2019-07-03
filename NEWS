@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
    (Anatol)
 
+- Openssl:
+  . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
+    socket-to-stream). (Nikita)
+
 - Opcache:
   . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
 
