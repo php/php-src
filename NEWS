@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
   . Updated timelib to 2018.02. (Derick)
 
+- Openssl:
+  . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
+    socket-to-stream). (Nikita)
+
 - Opcache:
   . Fixed bug #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed bug #78202 (Opcache stats for cache hits are capped at 32bit NUM).
