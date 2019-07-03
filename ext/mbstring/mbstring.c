@@ -260,25 +260,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_begins, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_starts_with, 0, 0, 2)
     ZEND_ARG_INFO(0, haystack)
     ZEND_ARG_INFO(0, needle)
     ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_ibegins, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_starts_with_ci, 0, 0, 2)
     ZEND_ARG_INFO(0, haystack)
     ZEND_ARG_INFO(0, needle)
     ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_ends, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_ends_with, 0, 0, 2)
     ZEND_ARG_INFO(0, haystack)
     ZEND_ARG_INFO(0, needle)
     ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_iends, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_str_ends_with_ci, 0, 0, 2)
     ZEND_ARG_INFO(0, haystack)
     ZEND_ARG_INFO(0, needle)
     ZEND_ARG_INFO(0, encoding)
@@ -554,10 +554,10 @@ static const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_strrpos,				arginfo_mb_strrpos)
 	PHP_FE(mb_stripos,				arginfo_mb_stripos)
 	PHP_FE(mb_strripos,				arginfo_mb_strripos)
-    PHP_FE(mb_str_begins,           arginfo_mb_str_begins)
-    PHP_FE(mb_str_ibegins,          arginfo_mb_str_ibegins)
-    PHP_FE(mb_str_ends,             arginfo_mb_str_ends)
-    PHP_FE(mb_str_iends,            arginfo_mb_str_iends)
+    PHP_FE(mb_str_starts_with,           arginfo_mb_str_starts_with)
+    PHP_FE(mb_str_starts_with_ci,          arginfo_mb_str_starts_with_ci)
+    PHP_FE(mb_str_ends_with,             arginfo_mb_str_ends_with)
+    PHP_FE(mb_str_ends_with_ci,            arginfo_mb_str_ends_with_ci)
 	PHP_FE(mb_strstr,				arginfo_mb_strstr)
 	PHP_FE(mb_strrchr,				arginfo_mb_strrchr)
 	PHP_FE(mb_stristr,				arginfo_mb_stristr)
@@ -2609,9 +2609,9 @@ PHP_FUNCTION(mb_strripos)
 }
 /* }}} */
 
-/* {{{ proto boolean mb_str_begins(string haystack, string needle [, string encoding])
-   Checks if haystack begins with needle */
-PHP_FUNCTION(mb_str_begins)
+/* {{{ proto boolean mb_str_starts_with(string haystack, string needle [, string encoding])
+   Checks if haystack starts with needle */
+PHP_FUNCTION(mb_str_starts_with)
 {
     mbfl_string haystack, needle;
     zend_string *enc_name = NULL;
@@ -2657,9 +2657,9 @@ PHP_FUNCTION(mb_str_begins)
 }
 /* }}} */
 
-/* {{{ proto boolean mb_str_ibegins(string haystack, string needle. [, string encoding])
-   Checks if haystack begins with needle, case insensitive */
-PHP_FUNCTION(mb_str_ibegins)
+/* {{{ proto boolean mb_str_starts_with_ci(string haystack, string needle. [, string encoding])
+   Checks if haystack starts with needle, case insensitive */
+PHP_FUNCTION(mb_str_starts_with_ci)
 {
     mbfl_string haystack, needle;
     zend_string *enc_name = NULL;
@@ -2692,9 +2692,9 @@ PHP_FUNCTION(mb_str_ibegins)
 }
 /* }}} */
 
-/* {{{ proto boolean mb_str_ends(string haystack, string needle [, string encoding])
+/* {{{ proto boolean mb_str_ends_with(string haystack, string needle [, string encoding])
    Checks if haystack ends with needle */
-PHP_FUNCTION(mb_str_ends)
+PHP_FUNCTION(mb_str_ends_with)
 {
     mbfl_string haystack, needle;
     zend_string *enc_name = NULL;
@@ -2752,9 +2752,9 @@ PHP_FUNCTION(mb_str_ends)
 }
 /* }}} */
 
-/* {{{ proto boolean mb_str_iends(string haystack, string needle. [, string encoding])
+/* {{{ proto boolean mb_str_ends_with_ci(string haystack, string needle. [, string encoding])
    Checks if haystack ends with needle, case insensitive */
-PHP_FUNCTION(mb_str_iends)
+PHP_FUNCTION(mb_str_ends_with_ci)
 {
     mbfl_string haystack, needle;
     zend_string *enc_name = NULL;
