@@ -3350,6 +3350,63 @@ static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, 
 	} ZEND_HASH_FOREACH_END();
 }
 
+static zend_bool preload_all_types_known(zend_class_entry *ce);
+static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
+	zend_class_entry *p;
+	*kind = "Unknown reason";
+	*name = "";
+
+	if (ce->parent_name) {
+		zend_string *key = zend_string_tolower(ce->parent_name);
+		p = zend_hash_find_ptr(EG(class_table), key);
+		zend_string_release(key);
+		if (!p) {
+			*kind = "Unknown parent ";
+			*name = ZSTR_VAL(ce->parent_name);
+			return;
+		}
+		if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+			*kind = "Parent with unresolved initializers ";
+			*name = ZSTR_VAL(ce->parent_name);
+			return;
+		}
+		if (!(p->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+			*kind = "Parent with unresolved property types ";
+			*name = ZSTR_VAL(ce->parent_name);
+			return;
+		}
+	}
+
+	if (ce->num_interfaces) {
+		uint32_t i;
+		for (i = 0; i < ce->num_interfaces; i++) {
+			p = zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
+			if (!p) {
+				*kind = "Unknown interface ";
+				*name = ZSTR_VAL(ce->interface_names[i].name);
+				return;
+			}
+		}
+	}
+
+	if (ce->num_traits) {
+		uint32_t i;
+		for (i = 0; i < ce->num_traits; i++) {
+			p = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
+			if (!p) {
+				*kind = "Unknown trait ";
+				*name = ZSTR_VAL(ce->trait_names[i].name);
+				return;
+			}
+		}
+	}
+
+	if (!preload_all_types_known(ce)) {
+		*kind = "Unknown type dependencies";
+		return;
+	}
+}
+
 static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
 {
 	zend_bool ok, changed;
@@ -3650,9 +3707,12 @@ static void preload_link(void)
 					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
 			} else {
+				const char *kind, *name;
+				get_unlinked_dependency(ce, &kind, &name);
 				zend_error_at(
 					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
-					"Can't preload unlinked class %s", ZSTR_VAL(ce->name));
+					"Can't preload unlinked class %s: %s%s",
+					ZSTR_VAL(ce->name), kind, name);
 			}
 			zend_string_release(key);
 		} else if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
