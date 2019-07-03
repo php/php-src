@@ -280,3 +280,9 @@ tmp-php.ini
 !/ext/fileinfo/magicdata.patch
 !/ext/pcre/pcre2lib/config.h
 !/win32/build/Makefile
+
+# ------------------------------------------------------------------------------
+# Installed during the libtoolize step
+# ------------------------------------------------------------------------------
+/build/aux/
+/build/m4/

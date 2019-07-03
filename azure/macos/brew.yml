@@ -9,6 +9,7 @@ steps:
       brew install pkg-config \
                    autoconf \
                    bison \
+                   libtool \
                    re2c
     displayName: 'Install Build Tools'
   - script: |

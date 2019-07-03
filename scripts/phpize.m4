@@ -4,7 +4,11 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 m4_include([build/ax_check_compile_flag.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
-m4_include([build/libtool.m4])
+m4_include([build/m4/libtool.m4])
+m4_include([build/m4/ltoptions.m4])
+m4_include([build/m4/ltsugar.m4])
+m4_include([build/m4/ltversion.m4])
+m4_include([build/m4/lt~obsolete.m4])
 m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
@@ -12,7 +16,8 @@ m4_include([build/pkg.m4])
 AC_PREREQ([2.68])
 AC_INIT
 AC_CONFIG_SRCDIR([config.m4])
-AC_CONFIG_AUX_DIR([build])
+AC_CONFIG_AUX_DIR([build/aux])
+AC_CONFIG_MACRO_DIR([build/m4])
 AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
@@ -162,7 +167,7 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
   undefine([AC_PROG_CXXCPP])
   AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
 ])
-AC_PROG_LIBTOOL
+LT_INIT
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"

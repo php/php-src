@@ -5,6 +5,7 @@
 MAKE=${MAKE:-make}
 PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
+PHP_LIBTOOLIZE=${PHP_LIBTOOLIZE:-libtoolize}
 force=0
 debug=0
 
@@ -121,6 +122,16 @@ if ! test -x "$(command -v $MAKE)"; then
   exit 1
 fi
 
+# Check if libtoolize exists.
+libtoolize_version=$($PHP_LIBTOOLIZE --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//')
+
+if test -z "$libtoolize_version"; then
+  echo "buildconf: libtoolize not found." >&2
+  echo "           You need libtoolize version 2.4.6 or newer installed" >&2
+  echo "           to build PHP from Git." >&2
+  exit 1
+fi
+
 echo "buildconf: Building configure files"
 
 if test "$debug" = "1"; then
@@ -133,4 +144,5 @@ $MAKE -s -f build/build.mk \
   PHP_AUTOCONF="$PHP_AUTOCONF" \
   PHP_AUTOHEADER="$PHP_AUTOHEADER" \
   PHP_AUTOCONF_FLAGS="$autoconf_flags" \
+  PHP_LIBTOOLIZE="$PHP_LIBTOOLIZE" \
   PHP_M4_FILES="$(echo TSRM/*.m4 Zend/Zend.m4 build/*.m4 ext/*/config*.m4 sapi/*/config*.m4)"

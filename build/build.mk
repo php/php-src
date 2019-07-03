@@ -22,6 +22,7 @@ config_h_in = main/php_config.h.in
 PHP_AUTOCONF = autoconf
 PHP_AUTOHEADER = autoheader
 PHP_AUTOCONF_FLAGS = -f
+PHP_LIBTOOLIZE = libtoolize
 
 all: configure $(config_h_in)
 
@@ -30,6 +31,7 @@ configure: configure.ac $(PHP_M4_FILES)
 # not used by the PHP build system since PHP 7.4.
 	@echo rebuilding $@
 	@rm -f $@ aclocal.m4
+	@$(PHP_LIBTOOLIZE) -i -c -f -Wall
 	@$(PHP_AUTOCONF) $(PHP_AUTOCONF_FLAGS)
 
 $(config_h_in): configure
