@@ -5,7 +5,7 @@ else
 	TS="";
 fi
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
-	DEBUG="--enable-debug --without-pcre-valgrind";
+	DEBUG="--enable-debug";
 else
 	DEBUG="";
 fi
