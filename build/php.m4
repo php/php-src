@@ -70,15 +70,6 @@ AC_DEFUN([PHP_EXPAND_PATH],[
 ])
 
 dnl
-dnl PHP_DEFINE(WHAT [, value[, directory]])
-dnl
-dnl Creates builddir/include/what.h and in there #define WHAT value.
-dnl
-AC_DEFUN([PHP_DEFINE],[
-  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > ]ifelse([$3],,[include],[$3])[/php_]translit($1,A-Z,a-z)[.h]
-])
-
-dnl
 dnl PHP_SUBST(varname)
 dnl
 dnl Adds variable with it's value into Makefile, e.g.:
@@ -135,12 +126,8 @@ dnl Creates build directories and Makefile placeholders.
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-test -d include || $php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
-dnl We need to play tricks here to avoid matching the grep line itself.
-pattern=define
-$EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl
@@ -1940,19 +1927,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
 
-  dnl Create the directories for a VPATH build.
-  $php_shtool mkdir -p ext/iconv
-
-  echo > ext/iconv/php_have_bsd_iconv.h
-  echo > ext/iconv/php_have_ibm_iconv.h
-  echo > ext/iconv/php_have_glibc_iconv.h
-  echo > ext/iconv/php_have_libiconv.h
-  echo > ext/iconv/php_have_iconv.h
-  echo > ext/iconv/php_php_iconv_impl.h
-  echo > ext/iconv/php_iconv_aliased_libiconv.h
-  echo > ext/iconv/php_php_iconv_h_path.h
-  echo > ext/iconv/php_iconv_supports_errno.h
-
   dnl Check libc first if no path is provided in --with-iconv.
   if test "$PHP_ICONV" = "yes"; then
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
@@ -1962,8 +1936,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       found_iconv=yes
     ],[
       AC_CHECK_FUNC(libiconv,[
-        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
-        AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+        AC_DEFINE(HAVE_LIBICONV, 1, [Define to 1 if you have the libiconv])
         found_iconv=yes
       ])
     ])
@@ -1996,9 +1969,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
-        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
         AC_DEFINE(HAVE_LIBICONV,1,[ ])
-        PHP_DEFINE([ICONV_ALIASED_LIBICONV],1,[ext/iconv])
         AC_DEFINE([ICONV_ALIASED_LIBICONV],1,[iconv() is aliased to libiconv() in -liconv])
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
@@ -2013,7 +1984,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   fi
 
   if test "$found_iconv" = "yes"; then
-    PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
     AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
       PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
@@ -2162,9 +2132,7 @@ dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    if test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$phpincludedir/ext

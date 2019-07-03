@@ -1501,7 +1501,7 @@ PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 PHP_SUBST(install_binary_targets)
 
-PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
+PHP_INSTALL_HEADERS([Zend/ TSRM/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 

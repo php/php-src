@@ -89,36 +89,24 @@ int main() {
       ])
     fi
 
-    echo > ext/iconv/php_have_bsd_iconv.h
-    echo > ext/iconv/php_have_glibc_iconv.h
-    echo > ext/iconv/php_have_libiconv.h
-    echo > ext/iconv/php_have_ibm_iconv.h
-
     case "$iconv_impl_name" in
       gnu_libiconv [)]
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
-        PHP_DEFINE([HAVE_LIBICONV],1,[ext/iconv])
+        AC_DEFINE(HAVE_LIBICONV, 1, [Define to 1 if you have the libiconv])
         PHP_ADD_LIBRARY_WITH_PATH(iconv, "$PHP_ICONV_PREFIX/$PHP_LIBDIR", ICONV_SHARED_LIBADD)
         ;;
 
       bsd [)]
-        PHP_DEFINE([HAVE_BSD_ICONV],1,[ext/iconv])
         AC_DEFINE([HAVE_BSD_ICONV],1,[Konstantin Chuguev's iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"BSD iconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["BSD iconv"],[Which iconv implementation to use])
         ;;
 
       glibc [)]
-        PHP_DEFINE([HAVE_GLIBC_ICONV],1,[ext/iconv])
         AC_DEFINE([HAVE_GLIBC_ICONV],1,[glibc's iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
         ;;
       ibm [)]
-        PHP_DEFINE([HAVE_IBM_ICONV],1,[ext/iconv])
         AC_DEFINE([HAVE_IBM_ICONV],1,[IBM iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"IBM iconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["IBM iconv"],[Which iconv implementation to use])
         ;;
     esac
@@ -143,15 +131,12 @@ int main() {
 }
     ]])],[
       AC_MSG_RESULT(yes)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
     ],[
       AC_MSG_RESULT(no)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
     ],[
       AC_MSG_RESULT(no, cross-compiling)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
     ])
 
@@ -174,15 +159,12 @@ int main() {
 }
    ]])],[
       AC_MSG_RESULT(yes)
-      PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
       AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
     ],[
       AC_MSG_RESULT(no)
-      PHP_DEFINE([ICONV_BROKEN_IGNORE],1,[ext/iconv])
       AC_DEFINE([ICONV_BROKEN_IGNORE],1,[Whether iconv supports IGNORE])
     ],[
       AC_MSG_RESULT(no, cross-compiling)
-      PHP_DEFINE([ICONV_BROKEN_IGNORE],0,[ext/iconv])
       AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
     ])
 
@@ -192,7 +174,6 @@ int main() {
 #include FOO
     ]], [])], [
       AC_MSG_RESULT([yes])
-      PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>],[ext/iconv])
       AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])
     ], [
       AC_MSG_RESULT([no])

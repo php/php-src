@@ -35,18 +35,6 @@
 #include "php_version.h"
 #define PHP_ICONV_VERSION PHP_VERSION
 
-#ifdef PHP_ATOM_INC
-#include "ext/iconv/php_have_iconv.h"
-#include "ext/iconv/php_have_libiconv.h"
-#include "ext/iconv/php_iconv_aliased_libiconv.h"
-#include "ext/iconv/php_have_glibc_iconv.h"
-#include "ext/iconv/php_have_bsd_iconv.h"
-#include "ext/iconv/php_have_ibm_iconv.h"
-#include "ext/iconv/php_iconv_supports_errno.h"
-#include "ext/iconv/php_php_iconv_impl.h"
-#include "ext/iconv/php_php_iconv_h_path.h"
-#endif
-
 #ifdef HAVE_ICONV
 extern zend_module_entry iconv_module_entry;
 #define iconv_module_ptr &iconv_module_entry
