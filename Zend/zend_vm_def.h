@@ -1233,7 +1233,7 @@ ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_helper, binary_op, pow_function);
 }
 
-ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
+ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1290,10 +1290,10 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 				} else {
 					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), zptr);
 				}
-				zend_pre_incdec_property_zval(zptr, prop_info, inc OPLINE_CC EXECUTE_DATA_CC);
+				zend_pre_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
-			zend_pre_incdec_overloaded_property(zobj, name, cache_slot, inc OPLINE_CC EXECUTE_DATA_CC);
+			zend_pre_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
 		}
 		if (OP2_TYPE != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -1307,15 +1307,15 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 
 ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper, inc, 1);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper);
 }
 
 ZEND_VM_HANDLER(133, ZEND_PRE_DEC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper, inc, 0);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_property_helper);
 }
 
-ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, int inc)
+ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1371,10 +1371,10 @@ ZEND_VM_C_LABEL(post_incdec_object):
 					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), zptr);
 				}
 
-				zend_post_incdec_property_zval(zptr, prop_info, inc OPLINE_CC EXECUTE_DATA_CC);
+				zend_post_incdec_property_zval(zptr, prop_info OPLINE_CC EXECUTE_DATA_CC);
 			}
 		} else {
-			zend_post_incdec_overloaded_property(zobj, name, cache_slot, inc OPLINE_CC EXECUTE_DATA_CC);
+			zend_post_incdec_overloaded_property(zobj, name, cache_slot OPLINE_CC EXECUTE_DATA_CC);
 		}
 		if (OP2_TYPE != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
@@ -1388,16 +1388,16 @@ ZEND_VM_C_LABEL(post_incdec_object):
 
 ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper, inc, 1);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper);
 }
 
 ZEND_VM_HANDLER(135, ZEND_POST_DEC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper, inc, 0);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_property_helper);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HELPER(zend_pre_incdec_static_property_helper, ANY, ANY, int inc)
+ZEND_VM_HELPER(zend_pre_incdec_static_property_helper, ANY, ANY)
 {
 	USE_OPLINE
 	zval *prop;
@@ -1410,25 +1410,25 @@ ZEND_VM_HELPER(zend_pre_incdec_static_property_helper, ANY, ANY, int inc)
 		HANDLE_EXCEPTION();
 	}
 
-	zend_pre_incdec_property_zval(prop, prop_info->type ? prop_info : NULL, inc OPLINE_CC EXECUTE_DATA_CC);
+	zend_pre_incdec_property_zval(prop, prop_info->type ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(203, ZEND_PRE_INC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
+ZEND_VM_HANDLER(200, ZEND_PRE_INC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_static_property_helper, inc, 1);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_static_property_helper);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(204, ZEND_PRE_DEC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
+ZEND_VM_HANDLER(201, ZEND_PRE_DEC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_static_property_helper, inc, 0);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_pre_incdec_static_property_helper);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HELPER(zend_post_incdec_static_property_helper, ANY, ANY, int inc)
+ZEND_VM_HELPER(zend_post_incdec_static_property_helper, ANY, ANY)
 {
 	USE_OPLINE
 	zval *prop;
@@ -1441,21 +1441,21 @@ ZEND_VM_HELPER(zend_post_incdec_static_property_helper, ANY, ANY, int inc)
 		HANDLE_EXCEPTION();
 	}
 
-	zend_post_incdec_property_zval(prop, prop_info->type ? prop_info : NULL, inc OPLINE_CC EXECUTE_DATA_CC);
+	zend_post_incdec_property_zval(prop, prop_info->type ? prop_info : NULL OPLINE_CC EXECUTE_DATA_CC);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(205, ZEND_POST_INC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
+ZEND_VM_HANDLER(202, ZEND_POST_INC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_static_property_helper, inc, 1);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_static_property_helper);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(206, ZEND_POST_DEC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
+ZEND_VM_HANDLER(203, ZEND_POST_DEC_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_static_property_helper, inc, 0);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_post_incdec_static_property_helper);
 }
 
 ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY, SPEC(RETVAL))
@@ -1492,7 +1492,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY, SPEC(RETVAL))
 			zend_reference *ref = Z_REF_P(var_ptr);
 			var_ptr = Z_REFVAL_P(var_ptr);
 			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_incdec_typed_ref(ref, NULL, 1 EXECUTE_DATA_CC);
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
 				break;
 			}
 		}
@@ -1542,7 +1542,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY, SPEC(RETVAL))
 			var_ptr = Z_REFVAL_P(var_ptr);
 
 			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_incdec_typed_ref(ref, NULL, 0 EXECUTE_DATA_CC);
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
 				break;
 			}
 		}
@@ -1588,7 +1588,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 			var_ptr = Z_REFVAL_P(var_ptr);
 
 			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var), 1 EXECUTE_DATA_CC);
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 				break;
 			}
 		}
@@ -1632,7 +1632,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 			var_ptr = Z_REFVAL_P(var_ptr);
 
 			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var), 0 EXECUTE_DATA_CC);
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 				break;
 			}
 		}
@@ -2516,7 +2516,7 @@ ZEND_VM_C_LABEL(exit_assign_obj):
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
+ZEND_VM_HANDLER(205, ZEND_ASSIGN_STATIC_PROP, ANY, ANY, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
 {
 	USE_OPLINE
 	zend_free_op free_op_data;
@@ -2733,7 +2733,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT|SRC, SPEC(OP_DATA=VAR|CV))
+ZEND_VM_HANDLER(204, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT|SRC, SPEC(OP_DATA=VAR|CV))
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
@@ -2776,7 +2776,7 @@ ZEND_VM_HANDLER(200, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
-ZEND_VM_HANDLER(202, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
+ZEND_VM_HANDLER(206, ZEND_ASSIGN_STATIC_PROP_REF, ANY, ANY, CACHE_SLOT|SRC)
 {
 	USE_OPLINE
 	zend_free_op free_op_data;
