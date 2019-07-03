@@ -2301,9 +2301,9 @@ truncate_len:
 }
 /* }}} */
 
-/* {{{ proto boolean str_begins_with(string haystack, string needle)
-   Checks if haystack begins with needle */
-PHP_FUNCTION(str_begins_with) {
+/* {{{ proto boolean str_starts_with(string haystack, string needle)
+   Checks if haystack strats with needle */
+PHP_FUNCTION(str_starts_with) {
     zend_string *haystack, *needle;
     int i;
 
@@ -2322,9 +2322,9 @@ PHP_FUNCTION(str_begins_with) {
     RETURN_BOOL(1);
 }
 
-/* {{{ proto boolean str_begins_with_ci(string haystack, string needle)
-   Performs case insensitive check to determine if haystack begins with needle */
-PHP_FUNCTION(str_begins_with_ci) {
+/* {{{ proto boolean str_starts_with_ci(string haystack, string needle)
+   Performs case insensitive check to determine if haystack starts with needle */
+PHP_FUNCTION(str_starts_with_ci) {
     zend_string *haystack, *needle;
     int i;
 
