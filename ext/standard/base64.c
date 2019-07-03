@@ -53,8 +53,85 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
+#ifdef __aarch64__
+#include <arm_neon.h>
+
+static zend_always_inline uint8x16_t encode_toascii(const uint8x16_t input, const uint8x16x2_t shift_LUT)
+{
+	/* reduce  0..51 -> 0
+	          52..61 -> 1 .. 10
+	              62 -> 11
+	              63 -> 12 */
+	uint8x16_t result = vqsubq_u8(input, vdupq_n_u8(51));
+	/* distinguish between ranges 0..25 and 26..51:
+	   0 .. 25 -> remains 0
+	   26 .. 51 -> becomes 13 */
+	const uint8x16_t less = vcgtq_u8(vdupq_n_u8(26), input);
+	result = vorrq_u8(result, vandq_u8(less, vdupq_n_u8(13)));
+	/* read shift */
+	result = vqtbl2q_u8(shift_LUT, result);
+	return vaddq_u8(result, input);
+}
+
+static zend_always_inline unsigned char *neon_base64_encode(const unsigned char *in, size_t inl, unsigned char *out, size_t *left)
+{
+	const uint8_t shift_LUT_[32] = {'a' - 26, '0' - 52, '0' - 52, '0' - 52,
+					'0' - 52, '0' - 52, '0' - 52, '0' - 52,
+					'0' - 52, '0' - 52, '0' - 52, '+' - 62,
+					'/' - 63, 'A',      0,        0,
+					'a' - 26, '0' - 52, '0' - 52, '0' - 52,
+					'0' - 52, '0' - 52, '0' - 52, '0' - 52,
+					'0' - 52, '0' - 52, '0' - 52, '+' - 62,
+					'/' - 63, 'A',      0,        0};
+	const uint8x16x2_t shift_LUT = *((const uint8x16x2_t *)shift_LUT_);
+	do {
+		/* [ccdddddd | bbbbcccc | aaaaaabb]
+		    x.val[2] | x.val[1] | x.val[0] */
+		const uint8x16x3_t x = vld3q_u8((const uint8_t *)(in));
+
+		/* [00aa_aaaa] */
+		const uint8x16_t field_a = vshrq_n_u8(x.val[0], 2);
+
+		const uint8x16_t field_b =             /* [00bb_bbbb] */
+		    vbslq_u8(vdupq_n_u8(0x30),         /* [0011_0000] */
+		             vshlq_n_u8(x.val[0], 4),  /* [aabb_0000] */
+		             vshrq_n_u8(x.val[1], 4)); /* [0000_bbbb] */
+
+		const uint8x16_t field_c =             /* [00cc_cccc] */
+		    vbslq_u8(vdupq_n_u8(0x3c),         /* [0011_1100] */
+		             vshlq_n_u8(x.val[1], 2),  /* [bbcc_cc00] */
+		             vshrq_n_u8(x.val[2], 6)); /* [0000_00cc] */
+
+		/* [00dd_dddd] */
+		const uint8x16_t field_d = vandq_u8(x.val[2], vdupq_n_u8(0x3f));
+
+		uint8x16x4_t result;
+		result.val[0] = encode_toascii(field_a, shift_LUT);
+		result.val[1] = encode_toascii(field_b, shift_LUT);
+		result.val[2] = encode_toascii(field_c, shift_LUT);
+		result.val[3] = encode_toascii(field_d, shift_LUT);
+
+		vst4q_u8((uint8_t *)out, result);
+		out += 64;
+		in += 16 * 3;
+		inl -= 16 * 3;
+	} while (inl >= 16 * 3);
+
+        *left = inl;
+	return out;
+}
+#endif /* __aarch64__ */
+
 static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out) /* {{{ */
 {
+#ifdef __aarch64__
+	if (inl >= 16 * 3) {
+		size_t left = 0;
+		out = neon_base64_encode(in, inl, out, &left);
+		in += inl - left;
+		inl = left;
+	}
+#endif
 
 	while (inl > 2) { /* keep going until we have less than 24 bits */
 		*out++ = base64_table[in[0] >> 2];
@@ -86,10 +163,102 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 }
 /* }}} */
 
+#ifdef __aarch64__
+static zend_always_inline uint8x16_t decode_fromascii(const uint8x16_t input, uint8x16_t *error, const uint8x16x2_t shiftLUT, const uint8x16x2_t maskLUT, const uint8x16x2_t bitposLUT) {
+	const uint8x16_t higher_nibble = vshrq_n_u8(input, 4);
+	const uint8x16_t lower_nibble = vandq_u8(input, vdupq_n_u8(0x0f));
+	const uint8x16_t sh = vqtbl2q_u8(shiftLUT, higher_nibble);
+	const uint8x16_t eq_2f = vceqq_u8(input, vdupq_n_u8(0x2f));
+	const uint8x16_t shift = vbslq_u8(eq_2f, vdupq_n_u8(16), sh);
+	const uint8x16_t M = vqtbl2q_u8(maskLUT, lower_nibble);
+	const uint8x16_t bit = vqtbl2q_u8(bitposLUT, higher_nibble);
+	*error = vceqq_u8(vandq_u8(M, bit), vdupq_n_u8(0));
+	return vaddq_u8(input, shift);
+}
+
+static zend_always_inline size_t neon_base64_decode(const unsigned char *in, size_t inl, unsigned char *out, size_t *left) {
+	unsigned char *out_orig = out;
+	const uint8_t shiftLUT_[32] = {
+		0,   0,  19,   4, (uint8_t)-65, (uint8_t)-65, (uint8_t)-71, (uint8_t)-71,
+		0,   0,   0,   0,   0,   0,   0,   0,
+		0,   0,  19,   4, (uint8_t)-65, (uint8_t)-65, (uint8_t)-71, (uint8_t)-71,
+		0,   0,   0,   0,   0,   0,   0,   0};
+	const uint8_t maskLUT_[32] = {
+		/* 0        : 0b1010_1000*/ 0xa8,
+		/* 1 .. 9   : 0b1111_1000*/ 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8,
+		/* 10       : 0b1111_0000*/ 0xf0,
+		/* 11       : 0b0101_0100*/ 0x54,
+		/* 12 .. 14 : 0b0101_0000*/ 0x50, 0x50, 0x50,
+		/* 15       : 0b0101_0100*/ 0x54,
+
+		/* 0        : 0b1010_1000*/ 0xa8,
+		/* 1 .. 9   : 0b1111_1000*/ 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8,
+		/* 10       : 0b1111_0000*/ 0xf0,
+		/* 11       : 0b0101_0100*/ 0x54,
+		/* 12 .. 14 : 0b0101_0000*/ 0x50, 0x50, 0x50,
+		/* 15       : 0b0101_0100*/ 0x54
+	};
+	const uint8_t bitposLUT_[32] = {
+		0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+	const uint8x16x2_t shiftLUT = *((const uint8x16x2_t *)shiftLUT_);
+	const uint8x16x2_t maskLUT = *((const uint8x16x2_t *)maskLUT_);
+	const uint8x16x2_t bitposLUT = *((const uint8x16x2_t *)bitposLUT_);;
+
+	do {
+		const uint8x16x4_t x = vld4q_u8((const unsigned char *)in);
+		uint8x16_t error_a;
+		uint8x16_t error_b;
+		uint8x16_t error_c;
+		uint8x16_t error_d;
+		uint8x16_t field_a = decode_fromascii(x.val[0], &error_a, shiftLUT, maskLUT, bitposLUT);
+		uint8x16_t field_b = decode_fromascii(x.val[1], &error_b, shiftLUT, maskLUT, bitposLUT);
+		uint8x16_t field_c = decode_fromascii(x.val[2], &error_c, shiftLUT, maskLUT, bitposLUT);
+		uint8x16_t field_d = decode_fromascii(x.val[3], &error_d, shiftLUT, maskLUT, bitposLUT);
+
+		const uint8x16_t err = vorrq_u8(vorrq_u8(error_a, error_b), vorrq_u8(error_c, error_d));
+		union {uint8_t mem[16]; uint64_t dw[2]; } error;
+		vst1q_u8(error.mem, err);
+
+		/* Check that the input only contains bytes belonging to the alphabet of
+		   Base64. If there are errors, decode the rest of the string with the
+		   scalar decoder. */
+		if (error.dw[0] | error.dw[1])
+			break;
+
+		uint8x16x3_t result;
+		result.val[0] = vorrq_u8(vshrq_n_u8(field_b, 4), vshlq_n_u8(field_a, 2));
+		result.val[1] = vorrq_u8(vshrq_n_u8(field_c, 2), vshlq_n_u8(field_b, 4));
+		result.val[2] = vorrq_u8(field_d, vshlq_n_u8(field_c, 6));
+
+		vst3q_u8((unsigned char *)out, result);
+		out += 16 * 3;
+		in += 16 * 4;
+		inl -= 16 * 4;
+	} while (inl >= 16 * 4);
+	*left = inl;
+	return out - out_orig;
+}
+#endif /* __aarch64__ */
+
 static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
+
+#ifdef __aarch64__
+	if (inl >= 16 * 4) {
+		size_t left = 0;
+		j += neon_base64_decode(in, inl, out, &left);
+                i = inl - left;
+		in += i;
+		inl = left;
+	}
+#endif
 
 	/* run through the whole string, converting as we go */
 	while (inl-- > 0) {
