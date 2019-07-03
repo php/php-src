@@ -141,6 +141,21 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	{NULL,NULL,NULL,NULL}   /* reserved          */
 };
 
+static const binary_op_type zend_binary_ops[] = {
+	add_function,
+	sub_function,
+	mul_function,
+	div_function,
+	mod_function,
+	shift_left_function,
+	shift_right_function,
+	concat_function,
+	bitwise_or_function,
+	bitwise_and_function,
+	bitwise_xor_function,
+	pow_function
+};
+
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv)
 
@@ -1301,7 +1316,7 @@ static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim,
 	}
 }
 
-static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, binary_op_type binary_op OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *z;
 	zval rv, res;
@@ -1317,7 +1332,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		if (binary_op(&res, z, value) == SUCCESS) {
+		if (zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](&res, z, value) == SUCCESS) {
 			Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
 		}
 		if (z == &rv) {
@@ -1335,11 +1350,11 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 	}
 }
 
-static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value, binary_op_type binary_op EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval z_copy;
 
-	binary_op(&z_copy, &ref->val, value);
+	zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](&z_copy, &ref->val, value);
 	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(&ref->val);
 		ZVAL_COPY_VALUE(&ref->val, &z_copy);
@@ -1348,11 +1363,11 @@ static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *re
 	}
 }
 
-static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_info *prop_info, zval *zptr, zval *value, binary_op_type binary_op EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_info *prop_info, zval *zptr, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval z_copy;
 
-	binary_op(&z_copy, zptr, value);
+	zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](&z_copy, zptr, value);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(zptr);
 		ZVAL_COPY_VALUE(zptr, &z_copy);
@@ -1872,7 +1887,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 	zval_ptr_dtor(z);
 }
 
-static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *z;
 	zval rv, obj, res;
@@ -1896,7 +1911,7 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		}
 		ZVAL_COPY_VALUE(z, value);
 	}
-	if (binary_op(&res, z, value) == SUCCESS) {
+	if (zend_binary_ops[opline->opcode - ZEND_ASSIGN_ADD](&res, z, value) == SUCCESS) {
 		Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
 	}
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
