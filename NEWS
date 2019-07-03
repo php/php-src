@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
+- mysqlnd:
+  . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
+
 - PDO:
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)
