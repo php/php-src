@@ -4657,13 +4657,13 @@ is_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -4735,13 +4735,13 @@ is_not_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -13221,13 +13221,13 @@ is_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -13299,13 +13299,13 @@ is_not_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -14863,13 +14863,13 @@ is_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -14941,13 +14941,13 @@ is_not_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -38390,13 +38390,13 @@ is_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -38468,13 +38468,13 @@ is_not_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -42102,13 +42102,13 @@ is_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -42180,13 +42180,13 @@ is_not_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -47391,13 +47391,13 @@ is_equal_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 is_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
@@ -47469,13 +47469,13 @@ is_not_equal_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	is_equal_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) != 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_FALSE) {
 is_not_equal_true:
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
