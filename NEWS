@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0alpha3
 
+- Core:
+  . Fixed bug #78239 (Deprecation notice during string conversion converted to
+    exception hangs). (Nikita)
+
 - Date:
   . Updated timelib to 2018.02. (Derick)
 
