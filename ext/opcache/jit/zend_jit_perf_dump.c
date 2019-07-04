@@ -28,6 +28,7 @@
 # include <pthread.h>
 #elif defined(__FreeBSD__)
 # include <sys/thr.h>
+# include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
 #endif
@@ -113,7 +114,21 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+#if defined(__linux__)
 	fd = open("/proc/self/exe", O_RDONLY);
+#elif defined(__NetBSD__)
+	int fd = open("/proc/curproc/exe", O_RDONLY);
+#elif defined(__FreeBSD__)
+	char path[PATH_MAX];
+	size_t pathlen = sizeof(path);
+	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
+             return;
+	}
+	fd = open(path, O_RDONLY);
+#else
+	fd = -1;
+#endif
 	if (fd < 0) {
 		return;
 	}
