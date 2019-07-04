@@ -725,12 +725,13 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 				zend_string_hash_val(key);
 			}
 		}
-	} else if ((flag & HASH_ADD_NEW) == 0) {
+	} else if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
 		p = zend_hash_find_bucket(ht, key, 0);
 
 		if (p) {
 			zval *data;
 
+			ZEND_ASSERT((flag & HASH_ADD_NEW) == 0);
 			if (flag & HASH_ADD) {
 				if (!(flag & HASH_UPDATE_INDIRECT)) {
 					return NULL;
@@ -1012,9 +1013,10 @@ convert_to_hash:
 		}
 		zend_hash_real_init_mixed(ht);
 	} else {
-		if ((flag & HASH_ADD_NEW) == 0) {
+		if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
 			p = zend_hash_index_find_bucket(ht, h);
 			if (p) {
+				ZEND_ASSERT((flag & HASH_ADD_NEW) == 0);
 				goto replace;
 			}
 		}
