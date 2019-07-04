@@ -138,12 +138,20 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 }
 /* }}} */
 
-static void php_free_pcre_cache(zval *data) /* {{{ */
+static void php_free_pcre_permanent_cache(zval *data) /* {{{ */
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
-	pefree(pce, !PCRE_G(per_request_cache));
+	pefree(pce, 1);
+}
+/* }}} */
+
+static void php_free_pcre_request_cache(zval *data) /* {{{ */
+{
+	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
+	if (!pce) return;
+	php_pcre_pce_decref(pce);
 }
 /* }}} */
 
@@ -252,12 +260,8 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
 	php_pcre_mutex_alloc();
 
-	/* If we're on the CLI SAPI, there will only be one request, so we don't need the
-	 * cache to survive after RSHUTDOWN. */
-	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0;
-	if (!pcre_globals->per_request_cache) {
-		zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
-	}
+	/* Persistent pcre cache */
+	zend_hash_init(&pcre_globals->pcre_permanent_cache, 0, NULL, php_free_pcre_permanent_cache, 1);
 
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
@@ -275,9 +279,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 
 static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
-	if (!pcre_globals->per_request_cache) {
-		zend_hash_destroy(&pcre_globals->pcre_cache);
-	}
+	zend_hash_destroy(&pcre_globals->pcre_permanent_cache);
 
 	php_pcre_shutdown_pcre2();
 	zend_hash_destroy(&char_tables);
@@ -458,9 +460,7 @@ static PHP_RINIT_FUNCTION(pcre)
 	mdata_used = 0;
 #endif
 
-	if (PCRE_G(per_request_cache)) {
-		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 0);
-	}
+	zend_hash_init(&PCRE_G(pcre_request_cache), 0, NULL, php_free_pcre_request_cache, 0);
 
 	return SUCCESS;
 }
@@ -468,9 +468,7 @@ static PHP_RINIT_FUNCTION(pcre)
 
 static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
-	if (PCRE_G(per_request_cache)) {
-		zend_hash_destroy(&PCRE_G(pcre_cache));
-	}
+	zend_hash_destroy(&PCRE_G(pcre_request_cache));
 
 	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
@@ -479,8 +477,23 @@ static PHP_RSHUTDOWN_FUNCTION(pcre)
 	return SUCCESS;
 }
 
-/* {{{ static pcre_clean_cache */
-static int pcre_clean_cache(zval *data, void *arg)
+/* {{{ static pcre_clean_request_cache */
+static int pcre_clean_request_cache(zval *data, void *arg)
+{
+	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
+	int *num_clean = (int *)arg;
+
+	if (*num_clean > 0 && pce->refcount <= 1) {
+		(*num_clean)--;
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+}
+/* }}} */
+
+/* {{{ static pcre_clean_permanent_cache */
+static int pcre_clean_permanent_cache(zval *data, void *arg)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	int *num_clean = (int *)arg;
@@ -587,14 +600,26 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		key = regex;
 	}
 
-	/* Try to lookup the cached regex entry, and if successful, just pass
-	   back the compiled pattern, otherwise go on and compile it. */
-	zv = zend_hash_find(&PCRE_G(pcre_cache), key);
-	if (zv) {
+	/* First try to look up the cached regex entry in the per-request cache,
+	 * and if successful just pass back the compiled pattern.
+	 */
+	ret = (pcre_cache_entry*) zend_hash_find_ptr(&PCRE_G(pcre_request_cache), key);
+	if (ret) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		return (pcre_cache_entry*)Z_PTR_P(zv);
+		return ret;
+	}
+
+	/* Now try to lookup the cached regex entry in the permanent cache. */
+	zv = zend_hash_find(&PCRE_G(pcre_permanent_cache), key);
+	if (zv) {
+		/* Copy this over to the per-request cache, but with our local
+		 * key string.  This ensures that string constants which didn't
+		 * manage to get interned into IS_PERMANENT still get to use
+		 * identity key comparisons. */
+		ret = (pcre_cache_entry*)Z_PTR_P(zv);
+		goto out;
 	}
 
 	p = ZSTR_VAL(regex);
@@ -805,9 +830,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * these are supposedly the oldest ones (but not necessarily the least used
 	 * ones).
 	 */
-	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
+	if (zend_hash_num_elements(&PCRE_G(pcre_request_cache)) >= PCRE_CACHE_SIZE) {
 		int num_clean = PCRE_CACHE_SIZE / 8;
-		zend_hash_apply_with_argument(&PCRE_G(pcre_cache), pcre_clean_cache, &num_clean);
+		zend_hash_apply_with_argument(&PCRE_G(pcre_request_cache), pcre_clean_request_cache, &num_clean);
+	}
+	if (zend_hash_num_elements(&PCRE_G(pcre_permanent_cache)) >= PCRE_CACHE_SIZE) {
+		int num_clean = PCRE_CACHE_SIZE / 8;
+		zend_hash_apply_with_argument(&PCRE_G(pcre_permanent_cache), pcre_clean_permanent_cache, &num_clean);
 	}
 
 	/* Store the compiled pattern and extra info in the cache. */
@@ -840,20 +869,28 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	/*
 	 * Interned strings are not duplicated when stored in HashTable,
 	 * but all the interned strings created during HTTP request are removed
-	 * at end of request. However PCRE_G(pcre_cache) must be consistent
-	 * on the next request as well. So we disable usage of interned strings
-	 * as hash keys especually for this table.
-	 * See bug #63180
+	 * at end of request. However PCRE_G(pcre_permanent_cache) must be
+	 * consistent on the next request as well. So we disable usage of interned
+	 * strings as hash keys for this table.
 	 */
-	if (!(GC_FLAGS(key) & IS_STR_PERMANENT) && !PCRE_G(per_request_cache)) {
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
 		GC_MAKE_PERSISTENT_LOCAL(str);
 
-		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), str, &new_entry, sizeof(pcre_cache_entry));
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_permanent_cache), str, &new_entry, sizeof(pcre_cache_entry));
 		zend_string_release(str);
 	} else {
-		ret = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
+		ret = zend_hash_add_new_mem(&PCRE_G(pcre_permanent_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
+
+ out:
+	/**
+	 * Store a local reference to this cache entry in our request cache,
+	 * keyed by the local string value (which could be a non-permanent interned
+	 * string).
+	 */
+	php_pcre_pce_incref(ret);
+	zend_hash_add_ptr(&PCRE_G(pcre_request_cache), key, ret);
 
 	if (key != regex) {
 		zend_string_release_ex(key, 0);
