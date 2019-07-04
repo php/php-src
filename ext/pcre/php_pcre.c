@@ -143,7 +143,16 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
-	pefree(pce, !PCRE_G(per_request_cache));
+	free(pce);
+}
+/* }}} */
+
+static void php_efree_pcre_cache(zval *data) /* {{{ */
+{
+	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
+	if (!pce) return;
+	pcre2_code_free(pce->re);
+	efree(pce);
 }
 /* }}} */
 
@@ -459,7 +468,7 @@ static PHP_RINIT_FUNCTION(pcre)
 #endif
 
 	if (PCRE_G(per_request_cache)) {
-		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 0);
+		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_efree_pcre_cache, 0);
 	}
 
 	return SUCCESS;
