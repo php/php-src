@@ -3414,6 +3414,7 @@ static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
 	zval *val;
 
 	EG(exception) = (void*)(uintptr_t)-1; /* prevent error reporting */
+	CG(in_compilation) = 1; /* prevent autoloading */
 	do {
 		ok = 1;
 		changed = 0;
@@ -3455,6 +3456,7 @@ static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
 		}
 	} while (changed && !ok);
 	EG(exception) = NULL;
+	CG(in_compilation) = 0;
 
 	return ok;
 }
