@@ -3404,7 +3404,7 @@ static void get_unresolved_initializer(zend_class_entry *ce, const char **kind, 
 	} ZEND_HASH_FOREACH_END();
 }
 
-static zend_bool preload_all_types_known(zend_class_entry *ce);
+static zend_bool preload_needed_types_known(zend_class_entry *ce);
 static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, const char **name) {
 	zend_class_entry *p;
 	*kind = "Unknown reason";
@@ -3455,7 +3455,7 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 		}
 	}
 
-	if (!preload_all_types_known(ce)) {
+	if (!preload_needed_types_known(ce)) {
 		*kind = "Unknown type dependencies";
 		return;
 	}
@@ -3583,17 +3583,58 @@ static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
 	return known;
 }
 
-static zend_bool preload_all_types_known(zend_class_entry *ce) {
+static zend_bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {
+	zend_class_entry *p;
+	if (ce->trait_aliases || ce->trait_precedences) {
+		return 1;
+	}
+
+	if (ce->parent_name) {
+		zend_string *key = zend_string_tolower(ce->parent_name);
+		p = zend_hash_find_ptr(EG(class_table), key);
+		zend_string_release(key);
+		if (zend_hash_exists(&p->function_table, lcname)) {
+			return 1;
+		}
+	}
+
+	if (ce->num_interfaces) {
+		uint32_t i;
+		for (i = 0; i < ce->num_interfaces; i++) {
+			zend_class_entry *p = zend_hash_find_ptr(EG(class_table), ce->interface_names[i].lc_name);
+			if (zend_hash_exists(&p->function_table, lcname)) {
+				return 1;
+			}
+		}
+	}
+
+	if (ce->num_traits) {
+		uint32_t i;
+		for (i = 0; i < ce->num_traits; i++) {
+			zend_class_entry *p = zend_hash_find_ptr(EG(class_table), ce->trait_names[i].lc_name);
+			if (zend_hash_exists(&p->function_table, lcname)) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static zend_bool preload_needed_types_known(zend_class_entry *ce) {
 	zend_function *fptr;
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, fptr) {
+	zend_string *lcname;
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
 		uint32_t i;
 		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			if (!preload_is_type_known(ce, fptr->common.arg_info[-1].type)) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[-1].type) &&
+				preload_is_method_maybe_override(ce, lcname)) {
 				return 0;
 			}
 		}
 		for (i = 0; i < fptr->common.num_args; i++) {
-			if (!preload_is_type_known(ce, fptr->common.arg_info[i].type)) {
+			if (!preload_is_type_known(ce, fptr->common.arg_info[i].type) &&
+				preload_is_method_maybe_override(ce, lcname)) {
 				return 0;
 			}
 		}
@@ -3699,7 +3740,7 @@ static void preload_link(void)
 				 * know the types for covariant checks, but don't need them if we can ensure
 				 * compatibility through a simple string comparison. We could improve this using
 				 * a more general version of zend_can_early_bind(). */
-				if (!preload_all_types_known(ce)) {
+				if (!preload_needed_types_known(ce)) {
 					continue;
 				}
 
@@ -3947,6 +3988,15 @@ static void preload_remove_empty_includes(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void preload_register_trait_methods(zend_class_entry *ce) {
+	zend_op_array *op_array;
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+		if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+			zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 static void preload_fix_trait_methods(zend_class_entry *ce)
 {
 	zend_op_array *op_array;
@@ -3972,18 +4022,21 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 static int preload_optimize(zend_persistent_script *script)
 {
 	zend_class_entry *ce;
-	zend_op_array *op_array;
 
 	zend_shared_alloc_init_xlat_table();
 
 	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
 		if (ce->ce_flags & ZEND_ACC_TRAIT) {
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-				if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
-					zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array);
-				}
-			} ZEND_HASH_FOREACH_END();
+			preload_register_trait_methods(ce);
 		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
+		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
+			if (ce->ce_flags & ZEND_ACC_TRAIT) {
+				preload_register_trait_methods(ce);
+			}
+		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
 	if (!zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
