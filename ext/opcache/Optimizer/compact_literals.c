@@ -431,16 +431,18 @@ literals_handle_static_prop:
 						j++;
 					}
 					break;
-				case IS_STRING:
+				case IS_STRING: {
 					if (LITERAL_NUM_RELATED(info[i].flags) == 1) {
 						key = zend_string_copy(Z_STR(op_array->literals[i]));
-					} else {
+					} else if ((info[i].flags & LITERAL_KIND_MASK) != LITERAL_VALUE) {
 						key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
 						ZSTR_H(key) = ZSTR_HASH(Z_STR(op_array->literals[i])) +
 							LITERAL_NUM_RELATED(info[i].flags) - 1;
+					} else {
+						/* Don't merge LITERAL_VALUE that has related literals */
+						key = NULL;
 					}
-					pos = zend_hash_find(&hash, key);
-					if (pos != NULL &&
+					if (key && (pos = zend_hash_find(&hash, key)) != NULL &&
 					    Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) == IS_STRING &&
 					    LITERAL_NUM_RELATED(info[i].flags) == LITERAL_NUM_RELATED(info[Z_LVAL_P(pos)].flags) &&
 					    (LITERAL_NUM_RELATED(info[i].flags) != 2 ||
@@ -458,8 +460,10 @@ literals_handle_static_prop:
 					} else {
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
-						zend_hash_add_new(&hash, key, &zv);
-						zend_string_release_ex(key, 0);
+						if (key) {
+							zend_hash_add_new(&hash, key, &zv);
+							zend_string_release_ex(key, 0);
+						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -474,6 +478,7 @@ literals_handle_static_prop:
 						}
 					}
 					break;
+				}
 				case IS_ARRAY:
 					if (zend_hash_num_elements(Z_ARRVAL(op_array->literals[i])) == 0) {
 						if (l_empty_arr < 0) {
