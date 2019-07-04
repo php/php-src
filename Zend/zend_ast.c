@@ -1713,18 +1713,18 @@ simple_list:
 		case ZEND_AST_ASSIGN_REF:        BINARY_OP(" =& ",  90, 91, 90);
 		case ZEND_AST_ASSIGN_OP:
 			switch (ast->attr) {
-				case ZEND_ASSIGN_ADD:    BINARY_OP(" += ",  90, 91, 90);
-				case ZEND_ASSIGN_SUB:    BINARY_OP(" -= ",  90, 91, 90);
-				case ZEND_ASSIGN_MUL:    BINARY_OP(" *= ",  90, 91, 90);
-				case ZEND_ASSIGN_DIV:    BINARY_OP(" /= ",  90, 91, 90);
-				case ZEND_ASSIGN_MOD:    BINARY_OP(" %= ",  90, 91, 90);
-				case ZEND_ASSIGN_SL:     BINARY_OP(" <<= ", 90, 91, 90);
-				case ZEND_ASSIGN_SR:     BINARY_OP(" >>= ", 90, 91, 90);
-				case ZEND_ASSIGN_CONCAT: BINARY_OP(" .= ",  90, 91, 90);
-				case ZEND_ASSIGN_BW_OR:  BINARY_OP(" |= ",  90, 91, 90);
-				case ZEND_ASSIGN_BW_AND: BINARY_OP(" &= ",  90, 91, 90);
-				case ZEND_ASSIGN_BW_XOR: BINARY_OP(" ^= ",  90, 91, 90);
-				case ZEND_ASSIGN_POW:    BINARY_OP(" **= ", 90, 91, 90);
+				case ZEND_ADD:    BINARY_OP(" += ",  90, 91, 90);
+				case ZEND_SUB:    BINARY_OP(" -= ",  90, 91, 90);
+				case ZEND_MUL:    BINARY_OP(" *= ",  90, 91, 90);
+				case ZEND_DIV:    BINARY_OP(" /= ",  90, 91, 90);
+				case ZEND_MOD:    BINARY_OP(" %= ",  90, 91, 90);
+				case ZEND_SL:     BINARY_OP(" <<= ", 90, 91, 90);
+				case ZEND_SR:     BINARY_OP(" >>= ", 90, 91, 90);
+				case ZEND_CONCAT: BINARY_OP(" .= ",  90, 91, 90);
+				case ZEND_BW_OR:  BINARY_OP(" |= ",  90, 91, 90);
+				case ZEND_BW_AND: BINARY_OP(" &= ",  90, 91, 90);
+				case ZEND_BW_XOR: BINARY_OP(" ^= ",  90, 91, 90);
+				case ZEND_POW:    BINARY_OP(" **= ", 90, 91, 90);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
