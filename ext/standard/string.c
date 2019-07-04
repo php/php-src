@@ -2313,13 +2313,13 @@ PHP_FUNCTION(str_starts_with) {
     ZEND_PARSE_PARAMETERS_END();
 
     if (needle->len > haystack->len) {
-        RETURN_BOOL(0);
+        RETURN_FALSE;
     }
 
     for (i = 0; i < needle->len; i++) 
         if (haystack->val[i] != needle->val[i]) 
-            RETURN_BOOL(0);
-    RETURN_BOOL(1);
+            RETURN_FALSE;
+    RETURN_TRUE;
 }
 
 /* {{{ proto boolean str_starts_with_ci(string haystack, string needle)
@@ -2334,13 +2334,13 @@ PHP_FUNCTION(str_starts_with_ci) {
     ZEND_PARSE_PARAMETERS_END();
 
     if (needle->len > haystack->len) {
-        RETURN_BOOL(0);
+        RETURN_FALSE;
     }
 
     for (i = 0; i < needle->len; i++) 
         if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
-            RETURN_BOOL(0); 
-    RETURN_BOOL(1);
+            RETURN_FALSE; 
+    RETURN_TRUE;
 }
 
 /* {{{ proto boolean str_ends_with(string haystack, string needle)
@@ -2355,13 +2355,13 @@ PHP_FUNCTION(str_ends_with) {
     ZEND_PARSE_PARAMETERS_END();
     
     if (needle->len > haystack->len) {
-        RETURN_BOOL(0);
+        RETURN_FALSE;
     }
 
     for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
         if (haystack->val[i] != needle->val[j]) 
-            RETURN_BOOL(0);
-    RETURN_BOOL(1);
+            RETURN_FALSE;
+    RETURN_TRUE;
 }
 
 /* {{{ proto boolean str_ends_with_ci(string haystack, string needle)
@@ -2376,13 +2376,13 @@ PHP_FUNCTION(str_ends_with_ci) {
     ZEND_PARSE_PARAMETERS_END();
 
     if (needle->len > haystack->len) {
-        RETURN_BOOL(0);
+        RETURN_FALSE;
     }
 
     for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
         if (tolower(haystack->val[i]) != tolower(needle->val[j])) 	
-            RETURN_BOOL(0);
-    RETURN_BOOL(1);
+            RETURN_FALSE;
+    RETURN_TRUE;
 }
 
 /* {{{ proto string|array|false substr_replace(mixed str, mixed repl, mixed start [, mixed length])
