@@ -19,6 +19,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#if defined(__FreeBSD__)
+#include <sys/sysctl.h>
+#endif
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -46,7 +49,17 @@ void zend_elf_load_symbols(void)
 	zend_elf_header hdr;
 	zend_elf_sectheader sect;
 	int i;
+#if defined(__linux__)
 	int fd = open("/proc/self/exe", O_RDONLY);
+#elif defined(__FreeBSD__)
+	char path[PATH_MAX];
+	size_t pathlen = sizeof(path);
+	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+	if (sysctl(mib, 4, path, &pathlen, NULL, 0) == -1) {
+             return;
+	}
+	int fd = open(path, O_RDONLY);
+#endif
 
 	if (fd >= 0) {
 		if (read(fd, &hdr, sizeof(hdr)) == sizeof(hdr)
