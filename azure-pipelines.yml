@@ -73,5 +73,5 @@ jobs:
     - template: azure/msan_job.yml
       parameters:
         configurationName: DEBUG_ZTS_MSAN
-        configurationParameters: '--enable-debug --enable-maintainer-zts'
+        configurationParameters: '--enable-debug --enable-zts'
         runTestsParameters: --asan
