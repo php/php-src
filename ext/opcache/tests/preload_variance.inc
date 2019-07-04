@@ -38,4 +38,6 @@ class H extends G {
 }
 
 // Early-binding preventer.
-class Z {}
+class Z {
+    public function method(X $a) {}
+}
