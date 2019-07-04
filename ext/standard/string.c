@@ -2322,6 +2322,7 @@ PHP_FUNCTION(str_starts_with) {
    Performs case insensitive check to determine if haystack starts with needle */
 PHP_FUNCTION(str_starts_with_ci) {
     zend_string *haystack, *needle;
+    int i;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
