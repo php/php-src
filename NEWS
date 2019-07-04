@@ -17,7 +17,6 @@ PHP                                                                        NEWS
   . Fixed bug #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed bug #78202 (Opcache stats for cache hits are capped at 32bit NUM).
     (cmb)
-  . Fixed bug #78230 (Incorrect type check optimization). (Nikita)
 
 - PCRE:
   . Fixed bug #78197 (PCRE2 version check in configure fails for "##.##-xxx"
