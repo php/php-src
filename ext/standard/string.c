@@ -2316,10 +2316,7 @@ PHP_FUNCTION(str_starts_with) {
         RETURN_FALSE;
     }
 
-    for (i = 0; i < needle->len; i++) 
-        if (haystack->val[i] != needle->val[i]) 
-            RETURN_FALSE;
-    RETURN_TRUE;
+    RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
 
 /* {{{ proto boolean str_starts_with_ci(string haystack, string needle)
@@ -2337,10 +2334,7 @@ PHP_FUNCTION(str_starts_with_ci) {
         RETURN_FALSE;
     }
 
-    for (i = 0; i < needle->len; i++) 
-        if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
-            RETURN_FALSE; 
-    RETURN_TRUE;
+    RETURN_BOOL(memcmp(tolower(ZSTR_VAL(haystack)), tolower(ZSTR_VAL(needle)), ZSTR_LEN(needle)) == 0);
 }
 
 /* {{{ proto boolean str_ends_with(string haystack, string needle)
