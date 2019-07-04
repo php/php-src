@@ -956,7 +956,11 @@ static void zend_resolve_property_types(void) /* {{{ */
 	zend_property_info *prop_info;
 
 	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
-		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
+		if (ce->type != ZEND_INTERNAL_CLASS) {
+			continue;
+		}
+
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
 					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
@@ -970,6 +974,7 @@ static void zend_resolve_property_types(void) /* {{{ */
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
+		ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -986,6 +991,8 @@ int zend_post_startup(void) /* {{{ */
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 #endif
 
+	zend_resolve_property_types();
+
 	if (zend_post_startup_cb) {
 		int (*cb)(void) = zend_post_startup_cb;
 
@@ -994,8 +1001,6 @@ int zend_post_startup(void) /* {{{ */
 			return FAILURE;
 		}
 	}
-
-	zend_resolve_property_types();
 
 #ifdef ZTS
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
