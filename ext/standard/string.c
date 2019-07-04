@@ -2332,7 +2332,10 @@ PHP_FUNCTION(str_starts_with_ci) {
         RETURN_FALSE;
     }
 
-    RETURN_BOOL(memcmp(tolower(ZSTR_VAL(haystack)), tolower(ZSTR_VAL(needle)), ZSTR_LEN(needle)) == 0);
+    for (i = 0; i < needle->len; i++) 
+        if (tolower(haystack->val[i]) != tolower(needle->val[i])) 
+            RETURN_FALSE; 
+    RETURN_TRUE;
 }
 
 /* {{{ proto boolean str_ends_with(string haystack, string needle)
