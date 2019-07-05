@@ -19,8 +19,8 @@ echo base_convert('fg', 16, 10);
 echo base_convert('f 0xff ', 16, 10);
 echo base_convert('1xff ', 16, 10);
 echo base_convert(chr(0), 16, 10);
-echo base_convert("0o7" , 9, 10) . "\n";
-
+echo base_convert("0o7" , 9, 10);
+echo base_convert("0 0" , 9, 10) . "\n";
 ?>
 --EXPECTF--
 255
@@ -43,3 +43,5 @@ Deprecated: Invalid characters passed for attempted conversion, these have been 
 0
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 7
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
+0

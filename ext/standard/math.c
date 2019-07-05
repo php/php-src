@@ -850,24 +850,33 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
-	zend_long i;
 	int mode = 0;
-	char c, *s;
+	char c, *s, *e;
 	zend_long cutoff;
 	int cutlim;
-	int lastchar = 0;
 	int invalidchars = 0;
 
-	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
+	if (Z_TYPE_P(arg) != IS_STRING || base < 1 || base > 36) {
 		return FAILURE;
 	}
-
 	s = Z_STRVAL_P(arg);
+	e = s + Z_STRLEN_P(arg);
+
+	/* Skip leading whitespace */
+	while (s < e && isspace(*s)) s++;
+	/* Skip trailing whitespace */
+	while (s < e && isspace(*(e-1))) e--;
+
+	if (e - s >= 2) {
+			if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
+			if (base == 8 && s[0] == '0' && (s[1] == 'o' || s[1] == 'O')) s += 2;
+			if (base == 2 && s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) s += 2;
+	}
 
 	cutoff = ZEND_LONG_MAX / base;
 	cutlim = ZEND_LONG_MAX % base;
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	while (s < e) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -877,38 +886,14 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 			c -= 'A' - 10;
 		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
-		else if (isspace(c)) {
-			if (num == 0 && fnum == 0) {
-				continue;
-			}
-			lastchar = 1;
-			continue;
-		} else {
+		else {
 			invalidchars++;
 			continue;
 		}
-
-		if (lastchar == 1 && c > 0 && c < base) {
-			invalidchars++;
-		}
-		lastchar = 0;
-
 
 		if (c >= base) {
-			if (*(s-2) == '0' && num == 0) {
-				if (base == 16 && c == 33) { /* allow the second char to be x */
-					continue;
-				}
-				if (base == 8 && c == 24) { /* allow the second char to be o */
-					continue;
-				}
-				if (base == 2 && c == 11) { /* allow the second char to be b */
-					continue;
-				}
-			}
-
-				invalidchars++;
-				continue;
+			invalidchars++;
+			continue;
 		}
 
 		switch (mode) {
