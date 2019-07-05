@@ -511,7 +511,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 #endif
 
     if (conn->options->connect_attr && zend_hash_num_elements(conn->options->connect_attr)) {
-		//mysql_flags |= CLIENT_CONNECT_ATTRS;
+		mysql_flags |= CLIENT_CONNECT_ATTRS;
 	}
 
 	DBG_RETURN(mysql_flags);
