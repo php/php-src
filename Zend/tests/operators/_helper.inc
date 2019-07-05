@@ -61,25 +61,46 @@ function err_out($err) {
     return $err !== null ? ' - ' . $errTypes[$err['type']] . ' ' . $err['message'] : '';
 }
 
+function one_operand($statement, $fn, $a, $var_out = 'var_out') {
+    error_clear_last();
+    echo strtr($statement, ['$a' => var_out($a)]);
+
+    try {
+        $res = @$fn($a);
+    } catch (ErrorException $e) {
+        echo err_out(['type' => $e->getSeverity(), 'message' => $e->getMessage()]), "\n";
+    } catch (Throwable $e) {
+        echo ' - ', get_class($e), ' ', $e->getMessage(), "\n";
+        return;
+    }
+
+    $err = error_get_last();
+    echo ' = ', $var_out($res), err_out($err), "\n";
+}
+
 function test_one_operand($statement, $fn, $var_out = 'var_out') {
     $values = get_test_values();
 
     foreach ($values as $a) {
-        error_clear_last();
-        echo strtr($statement, ['$a' => var_out($a)]);
-
-        try {
-            $res = @$fn($a);
-        } catch (ErrorException $e) {
-            echo err_out(['type' => $e->getSeverity(), 'message' => $e->getMessage()]), "\n";
-        } catch (Throwable $e) {
-            echo ' - ', get_class($e), ' ', $e->getMessage(), "\n";
-            continue;
-        }
-
-        $err = error_get_last();
-        echo ' = ', $var_out($res), err_out($err), "\n";
+        one_operand($statement, $fn, $a, $var_out);
     }
+}
+
+function two_operands($statement, $fn, $a, $b, $var_out = 'var_out') {
+    error_clear_last();
+    echo strtr($statement, ['$a' => var_out($a), '$b' => var_out($b)]);
+
+    try {
+        $res = @$fn($a, $b);
+    } catch (ErrorException $e) {
+        echo err_out(['type' => $e->getSeverity(), 'message' => $e->getMessage()]), "\n";
+    } catch (Throwable $e) {
+        echo ' - ', get_class($e), ' ', $e->getMessage(), "\n";
+        return;
+    }
+
+    $err = error_get_last();
+    echo ' = ', $var_out($res), err_out($err), "\n";
 }
 
 function test_two_operands($statement, $fn, $var_out = 'var_out') {
@@ -87,20 +108,7 @@ function test_two_operands($statement, $fn, $var_out = 'var_out') {
 
     foreach ($values as $a) {
         foreach ($values as $b) {
-            error_clear_last();
-            echo strtr($statement, ['$a' => var_out($a), '$b' => var_out($b)]);
-
-            try {
-                $res = @$fn($a, $b);
-            } catch (ErrorException $e) {
-                echo err_out(['type' => $e->getSeverity(), 'message' => $e->getMessage()]), "\n";
-            } catch (Throwable $e) {
-                echo ' - ', get_class($e), ' ', $e->getMessage(), "\n";
-                continue;
-            }
-
-            $err = error_get_last();
-            echo ' = ', $var_out($res), err_out($err), "\n";
+            two_operands($statement, $fn, $a, $b, $var_out);
         }
     }
 }
