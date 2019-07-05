@@ -53,16 +53,6 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 						}
 					}
 				}
-				/* break missing *intentionally* - the assign_op's may only optimize op2 */
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-			case ZEND_ASSIGN_DIV:
-			case ZEND_ASSIGN_POW:
-				if (opline->extended_value != 0) {
-					/* object tristate op - don't attempt to optimize it! */
-					break;
-				}
 				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 						/* don't optimise if it should produce a runtime numeric string error */
@@ -85,14 +75,6 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 						}
 					}
 				}
-				/* break missing *intentionally - the assign_op's may only optimize op2 */
-			case ZEND_ASSIGN_MOD:
-			case ZEND_ASSIGN_SL:
-			case ZEND_ASSIGN_SR:
-				if (opline->extended_value != 0) {
-					/* object tristate op - don't attempt to optimize it! */
-					break;
-				}
 				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
 						/* don't optimise if it should produce a runtime numeric string error */
@@ -111,15 +93,40 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 						convert_to_string(&ZEND_OP1_LITERAL(opline));
 					}
 				}
-				/* break missing *intentionally - the assign_op's may only optimize op2 */
-			case ZEND_ASSIGN_CONCAT:
-				if (opline->extended_value != 0) {
-					/* object tristate op - don't attempt to optimize it! */
-					break;
-				}
 				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 						convert_to_string(&ZEND_OP2_LITERAL(opline));
+					}
+				}
+				break;
+
+			case ZEND_ASSIGN_OP:
+				if (opline->op2_type == IS_CONST) {
+					if (opline->extended_value == ZEND_ADD
+					 || opline->extended_value == ZEND_SUB
+					 || opline->extended_value == ZEND_MUL
+					 || opline->extended_value == ZEND_DIV
+					 || opline->extended_value == ZEND_POW) {
+						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
+							/* don't optimise if it should produce a runtime numeric string error */
+							if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
+								convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
+							}
+						}
+					} else if (opline->extended_value == ZEND_MOD
+					 || opline->extended_value == ZEND_SL
+					 || opline->extended_value == ZEND_SR) {
+						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
+							/* don't optimise if it should produce a runtime numeric string error */
+							if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
+								&& !is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0))) {
+								convert_to_long(&ZEND_OP2_LITERAL(opline));
+							}
+						}
+					} else if (opline->extended_value == ZEND_CONCAT) {
+						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
+							convert_to_string(&ZEND_OP2_LITERAL(opline));
+						}
 					}
 				}
 				break;

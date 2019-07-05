@@ -1180,8 +1180,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					}
 				}
 
-			} else if (opline->opcode == ZEND_ASSIGN_ADD
-			 && opline->extended_value == 0
+			} else if (opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value == ZEND_ADD
 			 && ssa->ops[op_1].op1_def == v
 			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
@@ -1192,10 +1192,11 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: ASSIGN_ADD #?.CV [undef,null,int,foat] ->#v.CV, int(1) => PRE_INC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_INC;
+				opline->extended_value = 0;
 				SET_UNUSED(opline->op2);
 
-			} else if (opline->opcode == ZEND_ASSIGN_SUB
-			 && opline->extended_value == 0
+			} else if (opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value == ZEND_SUB
 			 && ssa->ops[op_1].op1_def == v
 			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
@@ -1206,6 +1207,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_1: ASSIGN_SUB #?.CV [undef,null,int,foat] -> #v.CV, int(1) => PRE_DEC #?.CV ->#v.CV
 
 				opline->opcode = ZEND_PRE_DEC;
+				opline->extended_value = 0;
 				SET_UNUSED(opline->op2);
 
 			} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
@@ -1240,26 +1242,18 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && !RETURN_VALUE_USED(opline)
 			 && ssa->ops[op_1].op1_use >= 0
 			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
-			 && (opline->opcode == ZEND_ASSIGN_ADD
-			  || opline->opcode == ZEND_ASSIGN_SUB
-			  || opline->opcode == ZEND_ASSIGN_MUL
-			  || opline->opcode == ZEND_ASSIGN_DIV
-			  || opline->opcode == ZEND_ASSIGN_MOD
-			  || opline->opcode == ZEND_ASSIGN_SL
-			  || opline->opcode == ZEND_ASSIGN_SR
-			  || opline->opcode == ZEND_ASSIGN_BW_OR
-			  || opline->opcode == ZEND_ASSIGN_BW_AND
-			  || opline->opcode == ZEND_ASSIGN_BW_XOR)
-			 && opline->extended_value == 0) {
+			 && opline->opcode == ZEND_ASSIGN_OP
+			 && opline->extended_value != ZEND_CONCAT) {
 
-// op_1: ASSIGN_ADD #orig_var.CV [undef,null,bool,int,double] -> #v.CV, ? => #v.CV = ADD #orig_var.CV, ?
+// op_1: ASSIGN_OP #orig_var.CV [undef,null,bool,int,double] -> #v.CV, ? => #v.CV = ADD #orig_var.CV, ?
 
 				/* Reconstruct SSA */
 				ssa->ops[op_1].result_def = ssa->ops[op_1].op1_def;
 				ssa->ops[op_1].op1_def = -1;
 
 				/* Update opcode */
-				opline->opcode -= (ZEND_ASSIGN_ADD - ZEND_ADD);
+				opline->opcode = opline->extended_value;
+				opline->extended_value = 0;
 				opline->result_type = opline->op1_type;
 				opline->result.var = opline->op1.var;
 

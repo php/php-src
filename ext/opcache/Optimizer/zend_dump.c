@@ -443,14 +443,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
 		fprintf(stderr, " %u", opline->extended_value);
-	} else if (ZEND_VM_EXT_DIM_OBJ == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			fprintf(stderr, " (dim)");
-		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-			fprintf(stderr, " (obj)");
-		} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
-			fprintf(stderr, " (static prop)");
-		}
+	} else if (ZEND_VM_EXT_OP == (flags & ZEND_VM_EXT_MASK)) {
+		fprintf(stderr, " (%s)", zend_get_opcode_name(opline->extended_value) + 5);
 	} else if (ZEND_VM_EXT_TYPE == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case IS_NULL:

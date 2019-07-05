@@ -82,7 +82,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
 	"ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
 	"ZEND_VM_EXT_JMP_ADDR"    => 0x03000000,
-	"ZEND_VM_EXT_DIM_OBJ"     => 0x04000000,
+	"ZEND_VM_EXT_OP"          => 0x04000000,
     // unused 0x5000000
     // unused 0x6000000
 	"ZEND_VM_EXT_TYPE"        => 0x07000000,
@@ -123,7 +123,7 @@ $vm_ext_decode = array(
 	"NUM"                  => ZEND_VM_EXT_NUM,
 	"LAST_CATCH"           => ZEND_VM_EXT_LAST_CATCH,
 	"JMP_ADDR"             => ZEND_VM_EXT_JMP_ADDR,
-	"DIM_OBJ"              => ZEND_VM_EXT_DIM_OBJ,
+	"OP"                   => ZEND_VM_EXT_OP,
 	"VAR_FETCH"            => ZEND_VM_EXT_VAR_FETCH,
 	"ARRAY_INIT"           => ZEND_VM_EXT_ARRAY_INIT,
 	"TYPE"                 => ZEND_VM_EXT_TYPE,
@@ -839,44 +839,12 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				:	($extra_spec['SMART_BRANCH'] == 2 ?
 						"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : ""))
 			:	"ZEND_VM_SMART_BRANCH(\\1, \\2)",
-		"/opline->extended_value\s*==\s*0/" => isset($extra_spec['DIM_OBJ']) ?
-			($extra_spec['DIM_OBJ'] == 0 ? "1" : "0")
-			: "\\0",
-		"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/" => isset($extra_spec['DIM_OBJ']) ?
-			($extra_spec['DIM_OBJ'] == 1 ? "1" : "0")
-			: "\\0",
-		"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/" => isset($extra_spec['DIM_OBJ']) ?
-			($extra_spec['DIM_OBJ'] == 2 ? "1" : "0")
-			: "\\0",
-		"/opline->extended_value\s*==\s*ZEND_ASSIGN_STATIC_PROP/" => isset($extra_spec['DIM_OBJ']) ?
-			($extra_spec['DIM_OBJ'] == 3 ? "1" : "0")
-			: "\\0",
 		"/opline->extended_value\s*&\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
 			($extra_spec['ISSET'] == 0 ? "0" : "1")
 			: "\\0",
 		"/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
 			($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
 			: "\\0",
-		"/zend_binary_assign_op_helper/" =>
-			isset($extra_spec['DIM_OBJ']) ?
-				(
-					$extra_spec['DIM_OBJ'] < 2 ?
-					(
-						$extra_spec['DIM_OBJ'] == 0 ?
-						"zend_binary_assign_op_simple_helper"
-						:
-						"zend_binary_assign_op_dim_helper"
-					)
-					:
-					(
-						$extra_spec['DIM_OBJ'] == 2 ?
-						"zend_binary_assign_op_obj_helper"
-						:
-						"zend_binary_assign_op_static_prop_helper"
-					)
-				)
-				:
-				"zend_binary_assign_op_helper",
 	);
 	$code = preg_replace(array_keys($specialized_replacements), array_values($specialized_replacements), $code);
 
@@ -1056,15 +1024,6 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 		return true;
 	}
 
-	if (isset($extra_spec["DIM_OBJ"]) &&
-	    ((($op1 == "CONST" || $op1 == "TMP") && $extra_spec["DIM_OBJ"] != 3) ||
-	     ($op2 == "UNUSED" && $extra_spec["DIM_OBJ"] != 1 && $extra_spec["DIM_OBJ"] != 3) ||
-	     ($op2 == "CV" && $extra_spec["DIM_OBJ"] == 3) ||
-	     ($op1 == "UNUSED" && $extra_spec["DIM_OBJ"] != 2))) {
-	    // Skip useless handlers
-		return true;
-	}
-
 	return false;
 }
 
@@ -1108,18 +1067,6 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 
 	if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
 		return;
-	}
-
-	// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
-	// handlers, that call unspecialized helper, anyway.
-	if ($spec &&
-	    isset($extra_spec["DIM_OBJ"]) &&
-	    $extra_spec["DIM_OBJ"] == 3) {
-		if ($op1 == 'CONST' && $op2 == 'CONST') {
-			$op1 = $op2 = 'ANY';
-		} else {
-			return;
-		}
 	}
 
 	if (ZEND_VM_LINES) {
@@ -1201,18 +1148,6 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 		return;
 	}
 
-	// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
-	// handlers, that call unspecialized helper, anyway.
-	if ($spec &&
-	    isset($extra_spec["DIM_OBJ"]) &&
-	    $extra_spec["DIM_OBJ"] == 3) {
-		if ($op1 == 'CONST' && $op2 == 'CONST') {
-			$op1 = $op2 = 'ANY';
-		} else {
-			return;
-		}
-	}
-	
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1426,13 +1361,6 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						return;
 					}
 
-					// Prevent generation of specialized ZEND_ASSIGN_OP_..._STATIC_PROP
-					// handlers, that call unspecialized helper, anyway.
-					if (isset($extra_spec["DIM_OBJ"]) &&
-					    $extra_spec["DIM_OBJ"] == 3) {
-						$op1 = $op2 = 'ANY';
-					}
-
 					// Emit pointer to specialized handler
 					$spec_name = $dsc["op"]."_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec);
 					switch ($kind) {
@@ -1612,15 +1540,6 @@ function extra_spec_name($extra_spec) {
 			$s .= "_JMPNZ";
 		}
 	}
-	if (isset($extra_spec["DIM_OBJ"])) {
-		if ($extra_spec["DIM_OBJ"] == 1) {
-			$s .= "_DIM";
-		} else if ($extra_spec["DIM_OBJ"] == 2) {
-			$s .= "_OBJ";
-		} else if ($extra_spec["DIM_OBJ"] == 3) {
-			$s .= "_STATIC_PROP";
-		}
-	}
 	if (isset($extra_spec["ISSET"])) {
 		if ($extra_spec["ISSET"] == 0) {
 			$s .= "_SET";
@@ -1644,9 +1563,6 @@ function extra_spec_flags($extra_spec) {
 	}
 	if (isset($extra_spec["SMART_BRANCH"])) {
 		$s[] = "SPEC_RULE_SMART_BRANCH";
-	}
-	if (isset($extra_spec["DIM_OBJ"])) {
-		$s[] = "SPEC_RULE_DIM_OBJ";
 	}
 	if (isset($extra_spec["COMMUTATIVE"])) {
 		$s[] = "SPEC_RULE_COMMUTATIVE";
@@ -1850,7 +1766,6 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_RETVAL       0x00080000\n");
 					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
 					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
-					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
 					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
 					out($f,"#define SPEC_RULE_ISSET        0x01000000\n");
 					out($f,"\n");
@@ -2337,9 +2252,6 @@ function parse_spec_rules($def, $lineno, $str) {
 				case "SMART_BRANCH":
 					$ret["SMART_BRANCH"] = array(0, 1, 2);
 					break;
-				case "DIM_OBJ":
-					$ret["DIM_OBJ"] = array(0, 1, 2, 3);
-					break;
 				case "NO_CONST_CONST":
 					$ret["NO_CONST_CONST"] = array(1);
 					break;
@@ -2760,7 +2672,6 @@ function gen_vm($def, $skel) {
 		    isset($used_extra_spec["RETVAL"]) ||
 		    isset($used_extra_spec["QUICK_ARG"]) ||
 		    isset($used_extra_spec["SMART_BRANCH"]) ||
-		    isset($used_extra_spec["DIM_OBJ"]) ||
 		    isset($used_extra_spec["ISSET"])) {
 
 			$else = "";
@@ -2779,18 +2690,6 @@ function gen_vm($def, $skel) {
 			if (isset($used_extra_spec["OP_DATA"])) {
 				out($f, "\t\t{$else}if (spec & SPEC_RULE_OP_DATA) {\n");
 				out($f, "\t\t\toffset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
-				$else = "} else ";
-			}
-			if (isset($used_extra_spec["DIM_OBJ"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
-				out($f,	"\t\t\toffset = offset * 4;\n");
-				out($f, "\t\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
-				out($f,	"\t\t\t\toffset += 1;\n");
-				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
-				out($f,	"\t\t\t\toffset += 2;\n");
-				out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
-				out($f,	"\t\t\t\toffset += 3;\n");
-				out($f, "\t\t\t}\n");
 				$else = "} else ";
 			}
 			if (isset($used_extra_spec["ISSET"])) {
@@ -2855,7 +2754,6 @@ function gen_vm($def, $skel) {
 			    isset($used_extra_spec["RETVAL"]) ||
 			    isset($used_extra_spec["QUICK_ARG"]) ||
 			    isset($used_extra_spec["SMART_BRANCH"]) ||
-			    isset($used_extra_spec["DIM_OBJ"]) ||
 			    isset($used_extra_spec["ISSET"])) {
 
 				$else = "";
@@ -2880,19 +2778,6 @@ function gen_vm($def, $skel) {
 					out($f,	"\t\t\t\toffset += 1;\n");
 					out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
 					out($f,	"\t\t\t\toffset += 2;\n");
-					out($f, "\t\t\t}\n");
-					out($f, "\t\t}\n");
-					$else = "else ";
-				}
-				if (isset($used_extra_spec["DIM_OBJ"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_DIM_OBJ) {\n");
-					out($f,	"\t\t\toffset = offset * 4;\n");
-					out($f, "\t\t\tif (op->extended_value == ZEND_ASSIGN_DIM) {\n");
-					out($f,	"\t\t\t\toffset += 1;\n");
-					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_OBJ) {\n");
-					out($f,	"\t\t\t\toffset += 2;\n");
-					out($f, "\t\t\t} else if (op->extended_value == ZEND_ASSIGN_STATIC_PROP) {\n");
-					out($f,	"\t\t\t\toffset += 3;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");
 					$else = "else ";

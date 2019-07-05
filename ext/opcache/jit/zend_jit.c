@@ -123,12 +123,7 @@ static zend_bool zend_is_commutative(zend_uchar opcode)
 		opcode == ZEND_MUL ||
 		opcode == ZEND_BW_OR ||
 		opcode == ZEND_BW_AND ||
-		opcode == ZEND_BW_XOR ||
-		opcode == ZEND_ASSIGN_ADD ||
-		opcode == ZEND_ASSIGN_MUL||
-		opcode == ZEND_ASSIGN_BW_OR ||
-		opcode == ZEND_ASSIGN_BW_AND ||
-		opcode == ZEND_ASSIGN_BW_XOR;
+		opcode == ZEND_BW_XOR;
 }
 
 static zend_bool zend_long_is_power_of_two(zend_long x)
@@ -496,86 +491,79 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 				!ssa->var_info[res].has_range ||
 				ssa->var_info[res].range.underflow ||
 				ssa->var_info[res].range.overflow);
-		case ZEND_ASSIGN_ADD:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].op1_def;
-			if (res < 0 ||
-			    !ssa->var_info[res].has_range) {
-				return 1;
-			}
-			if (ssa->var_info[res].range.underflow) {
-				zend_long op1_min, op2_min;
+		case ZEND_ASSIGN_OP:
+			if (opline->extended_value == ZEND_ADD) {
+				num = opline - op_array->opcodes;
+				res = ssa->ops[num].op1_def;
+				if (res < 0 ||
+				    !ssa->var_info[res].has_range) {
+					return 1;
+				}
+				if (ssa->var_info[res].range.underflow) {
+					zend_long op1_min, op2_min;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
-					return 1;
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+						return 1;
+					}
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					if (zend_add_will_overflow(op1_min, op2_min)) {
+						return 1;
+					}
 				}
-				op1_min = OP1_MIN_RANGE();
-				op2_min = OP2_MIN_RANGE();
-				if (zend_add_will_overflow(op1_min, op2_min)) {
-					return 1;
-				}
-			}
-			if (ssa->var_info[res].range.overflow) {
-				zend_long op1_max, op2_max;
+				if (ssa->var_info[res].range.overflow) {
+					zend_long op1_max, op2_max;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+						return 1;
+					}
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					if (zend_add_will_overflow(op1_max, op2_max)) {
+						return 1;
+					}
+				}
+				return 0;
+			} else if (opline->extended_value == ZEND_SUB) {
+				num = opline - op_array->opcodes;
+				res = ssa->ops[num].op1_def;
+				if (res < 0 ||
+				    !ssa->var_info[res].has_range) {
 					return 1;
 				}
-				op1_max = OP1_MAX_RANGE();
-				op2_max = OP2_MAX_RANGE();
-				if (zend_add_will_overflow(op1_max, op2_max)) {
-					return 1;
-				}
-			}
-			return 0;
-		case ZEND_ASSIGN_SUB:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].op1_def;
-			if (res < 0 ||
-			    !ssa->var_info[res].has_range) {
-				return 1;
-			}
-			if (ssa->var_info[res].range.underflow) {
-				zend_long op1_min, op2_max;
+				if (ssa->var_info[res].range.underflow) {
+					zend_long op1_min, op2_max;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
-					return 1;
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+						return 1;
+					}
+					op1_min = OP1_MIN_RANGE();
+					op2_max = OP2_MAX_RANGE();
+					if (zend_sub_will_overflow(op1_min, op2_max)) {
+						return 1;
+					}
 				}
-				op1_min = OP1_MIN_RANGE();
-				op2_max = OP2_MAX_RANGE();
-				if (zend_sub_will_overflow(op1_min, op2_max)) {
-					return 1;
-				}
-			}
-			if (ssa->var_info[res].range.overflow) {
-				zend_long op1_max, op2_min;
+				if (ssa->var_info[res].range.overflow) {
+					zend_long op1_max, op2_min;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
-					return 1;
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+						return 1;
+					}
+					op1_max = OP1_MAX_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					if (zend_sub_will_overflow(op1_max, op2_min)) {
+						return 1;
+					}
 				}
-				op1_max = OP1_MAX_RANGE();
-				op2_min = OP2_MIN_RANGE();
-				if (zend_sub_will_overflow(op1_max, op2_min)) {
-					return 1;
-				}
+				return 0;
+			} else if (opline->extended_value == ZEND_MUL) {
+				num = opline - op_array->opcodes;
+				res = ssa->ops[num].op1_def;
+				return (res < 0 ||
+					!ssa->var_info[res].has_range ||
+					ssa->var_info[res].range.underflow ||
+					ssa->var_info[res].range.overflow);
 			}
-			return 0;
-		case ZEND_ASSIGN_MUL:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].op1_def;
-			return (res < 0 ||
-				!ssa->var_info[res].has_range ||
-				ssa->var_info[res].range.underflow ||
-				ssa->var_info[res].range.overflow);
 		default:
 			return 1;
 	}
@@ -1471,10 +1459,10 @@ static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_MUL:
 				hint = ssa->ops[current->start].op1_use;
 				break;
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-				if (opline->extended_value) {
+			case ZEND_ASSIGN_OP:
+				if (opline->extended_value == ZEND_ADD
+				 || opline->extended_value == ZEND_SUB
+				 || opline->extended_value == ZEND_MUL) {
 					hint = ssa->ops[current->start].op1_use;
 				}
 				break;
@@ -1920,21 +1908,7 @@ static void zend_calc_checked_this_r(zend_bitset checked_this, zend_op_array *op
 
 	for (; opline < end; opline++) {
 		switch (opline->opcode) {
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-			case ZEND_ASSIGN_DIV:
-			case ZEND_ASSIGN_MOD:
-			case ZEND_ASSIGN_SL:
-			case ZEND_ASSIGN_SR:
-			case ZEND_ASSIGN_CONCAT:
-			case ZEND_ASSIGN_BW_OR:
-			case ZEND_ASSIGN_BW_AND:
-			case ZEND_ASSIGN_BW_XOR:
-			case ZEND_ASSIGN_POW:
-				if (opline->extended_value != ZEND_ASSIGN_OBJ) {
-					break;
-				}
+			case ZEND_ASSIGN_OBJ_OP:
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
@@ -2232,21 +2206,17 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 							goto jit_failure;
 						}
 						goto done;
-					case ZEND_ASSIGN_ADD:
-					case ZEND_ASSIGN_SUB:
-					case ZEND_ASSIGN_MUL:
-//					case ZEND_ASSIGN_DIV: // TODO: check for division by zero ???
-					case ZEND_ASSIGN_CONCAT:
-					case ZEND_ASSIGN_BW_OR:
-					case ZEND_ASSIGN_BW_AND:
-					case ZEND_ASSIGN_BW_XOR:
-					case ZEND_ASSIGN_SL:
-					case ZEND_ASSIGN_SR:
-					case ZEND_ASSIGN_MOD:
-						if (!zend_jit_assign_op(&dasm_state, opline, op_array, ssa)) {
-							goto jit_failure;
+					case ZEND_ASSIGN_OP:
+					case ZEND_ASSIGN_DIM_OP:
+						if (opline->extended_value != ZEND_POW
+						 && opline->extended_value != ZEND_DIV) {
+							// TODO: check for division by zero ???
+							if (!zend_jit_assign_op(&dasm_state, opline, op_array, ssa)) {
+								goto jit_failure;
+							}
+							goto done;
 						}
-						goto done;
+						break;
 					case ZEND_ASSIGN_DIM:
 						if (!zend_jit_assign_dim(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;

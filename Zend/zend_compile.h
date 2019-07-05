@@ -995,6 +995,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 /* All increment opcodes are even (decrement are odd) */
 #define ZEND_IS_INCREMENT(opcode) (((opcode) & 1) == 0)
 
+#define ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opcode) \
+	(((opcode) >= ZEND_ADD) && ((opcode) <= ZEND_POW))
+
 /* Pseudo-opcodes that are used only temporarily during compilation */
 #define ZEND_GOTO  253
 #define ZEND_BRK   254
