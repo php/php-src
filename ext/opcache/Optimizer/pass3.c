@@ -113,8 +113,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 					}
 
-					if (opline->opcode >= ZEND_ADD
-					    && opline->opcode <= ZEND_POW
+					if (ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opline->opcode)
 					    && (opline->op1_type & (IS_VAR | IS_CV))
 						&& opline->op1.var == next_opline->op1.var
 						&& opline->op1_type == next_opline->op1_type) {
