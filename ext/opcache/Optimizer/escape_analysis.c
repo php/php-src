@@ -257,24 +257,11 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 	} else if (op->op1_def == var) {
 		switch (opline->opcode) {
 			case ZEND_ASSIGN:
-				return 1;
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_ASSIGN_OBJ_REF:
-				return 1;
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-			case ZEND_ASSIGN_DIV:
-			case ZEND_ASSIGN_MOD:
-			case ZEND_ASSIGN_SL:
-			case ZEND_ASSIGN_SR:
-			case ZEND_ASSIGN_CONCAT:
-			case ZEND_ASSIGN_BW_OR:
-			case ZEND_ASSIGN_BW_AND:
-			case ZEND_ASSIGN_BW_XOR:
-			case ZEND_ASSIGN_POW:
-				return (opline->extended_value != 0);
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_ASSIGN_OBJ_OP:
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
@@ -312,22 +299,11 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 			case ZEND_FETCH_DIM_IS:
 			case ZEND_FETCH_OBJ_IS:
 				break;
-			case ZEND_ASSIGN_ADD:
-			case ZEND_ASSIGN_SUB:
-			case ZEND_ASSIGN_MUL:
-			case ZEND_ASSIGN_DIV:
-			case ZEND_ASSIGN_MOD:
-			case ZEND_ASSIGN_SL:
-			case ZEND_ASSIGN_SR:
-			case ZEND_ASSIGN_CONCAT:
-			case ZEND_ASSIGN_BW_OR:
-			case ZEND_ASSIGN_BW_AND:
-			case ZEND_ASSIGN_BW_XOR:
-			case ZEND_ASSIGN_POW:
-				if (!opline->extended_value) {
-					return 1;
-				}
-				/* break missing intentionally */
+			case ZEND_ASSIGN_OP:
+				return 1;
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_ASSIGN_OBJ_OP:
+			case ZEND_ASSIGN_STATIC_PROP_OP:
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_ASSIGN_OBJ_REF:

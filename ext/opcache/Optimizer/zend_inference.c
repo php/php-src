@@ -548,25 +548,6 @@ static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
 	}
 }
 
-/* Get the normal op corresponding to a compound assignment op */
-static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
-	switch (opcode) {
-		case ZEND_ASSIGN_ADD: return ZEND_ADD;
-		case ZEND_ASSIGN_SUB: return ZEND_SUB;
-		case ZEND_ASSIGN_MUL: return ZEND_MUL;
-		case ZEND_ASSIGN_DIV: return ZEND_DIV;
-		case ZEND_ASSIGN_MOD: return ZEND_MOD;
-		case ZEND_ASSIGN_SL: return ZEND_SL;
-		case ZEND_ASSIGN_SR: return ZEND_SR;
-		case ZEND_ASSIGN_CONCAT: return ZEND_CONCAT;
-		case ZEND_ASSIGN_BW_OR: return ZEND_BW_OR;
-		case ZEND_ASSIGN_BW_AND: return ZEND_BW_AND;
-		case ZEND_ASSIGN_BW_XOR: return ZEND_BW_XOR;
-		case ZEND_ASSIGN_POW: return ZEND_POW;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-}
-
 static int zend_inference_calc_binary_op_range(
 		const zend_op_array *op_array, zend_ssa *ssa,
 		zend_op *opline, zend_ssa_op *ssa_op, zend_uchar opcode, zend_ssa_range *tmp) {
@@ -1381,23 +1362,20 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
-		case ZEND_ASSIGN_ADD:
-		case ZEND_ASSIGN_SUB:
-		case ZEND_ASSIGN_MUL:
-		case ZEND_ASSIGN_DIV:
-		case ZEND_ASSIGN_MOD:
-		case ZEND_ASSIGN_SL:
-		case ZEND_ASSIGN_SR:
-		case ZEND_ASSIGN_BW_OR:
-		case ZEND_ASSIGN_BW_AND:
-		case ZEND_ASSIGN_BW_XOR:
-			if (opline->extended_value == 0) {
+		case ZEND_ASSIGN_OP:
+			if (opline->extended_value != ZEND_CONCAT
+			 && opline->extended_value != ZEND_POW) {
 				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
 					return zend_inference_calc_binary_op_range(
 						op_array, ssa, opline, &ssa->ops[line],
-						get_compound_assign_op(opline->opcode), tmp);
+						opline->extended_value, tmp);
 				}
-			} else if ((opline+1)->opcode == ZEND_OP_DATA) {
+			}
+			break;
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+			if ((opline+1)->opcode == ZEND_OP_DATA) {
 				if (ssa->ops[line+1].op1_def == var) {
 					opline++;
 					if (OP1_HAS_RANGE()) {
@@ -1410,13 +1388,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				}
 			}
 			break;
-//		case ZEND_ASSIGN_CONCAT:
 		case ZEND_OP_DATA:
 			if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
 			    (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
-			    (opline-1)->opcode == ZEND_ASSIGN_ADD ||
-			    (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-			    (opline-1)->opcode == ZEND_ASSIGN_MUL) {
+			    ((opline-1)->opcode == ZEND_ASSIGN_OP &&
+			     ((opline-1)->extended_value == ZEND_ADD ||
+			      (opline-1)->extended_value == ZEND_SUB ||
+			      (opline-1)->extended_value == ZEND_MUL))) {
 				if (ssa->ops[line].op1_def == var) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
@@ -2601,34 +2579,27 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].result_def);
 			break;
-		case ZEND_ASSIGN_ADD:
-		case ZEND_ASSIGN_SUB:
-		case ZEND_ASSIGN_MUL:
-		case ZEND_ASSIGN_DIV:
-		case ZEND_ASSIGN_POW:
-		case ZEND_ASSIGN_MOD:
-		case ZEND_ASSIGN_SL:
-		case ZEND_ASSIGN_SR:
-		case ZEND_ASSIGN_BW_OR:
-		case ZEND_ASSIGN_BW_AND:
-		case ZEND_ASSIGN_BW_XOR:
-		case ZEND_ASSIGN_CONCAT: {
+		case ZEND_ASSIGN_OP:
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+		{
 			zend_property_info *prop_info = NULL;
 			orig = 0;
 			tmp = 0;
-			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+			if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 				prop_info = zend_fetch_prop_info(op_array, ssa, opline, i);
 				orig = t1;
 				t1 = zend_fetch_prop_type(script, prop_info, &ce);
 				t2 = OP1_DATA_INFO();
-			} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+			} else if (opline->opcode == ZEND_ASSIGN_DIM_OP) {
 				if (t1 & MAY_BE_ARRAY_OF_REF) {
 			        tmp |= MAY_BE_REF;
 				}
 				orig = t1;
 				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
-			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 				prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
 				t1 = zend_fetch_prop_type(script, prop_info, &ce);
 				t2 = OP1_DATA_INFO();
@@ -2639,7 +2610,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 
 			tmp |= binary_op_result_type(
-				ssa, get_compound_assign_op(opline->opcode), t1, t2, ssa_ops[i].op1_def, optimization_level);
+				ssa, opline->extended_value, t1, t2, ssa_ops[i].op1_def, optimization_level);
 			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY)) {
 				tmp |= MAY_BE_RC1;
 			}
@@ -2647,13 +2618,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
 
-			if (opline->extended_value == ZEND_ASSIGN_DIM) {
+			if (opline->opcode == ZEND_ASSIGN_DIM_OP) {
 				if (opline->op1_type == IS_CV) {
 					orig = assign_dim_result_type(orig, OP2_INFO(), tmp, opline->op2_type);
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
-			} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+			} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 				if (opline->op1_type == IS_CV) {
 					if (!(orig & MAY_BE_REF)) {
 						if (orig & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
@@ -2667,14 +2638,14 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					UPDATE_SSA_TYPE(orig, ssa_ops[i].op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 				}
-			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP) {
 				/* Nothing to do */
 			} else {
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			if (ssa_ops[i].result_def >= 0) {
 				ce = NULL;
-				if (opline->extended_value == ZEND_ASSIGN_DIM) {
+				if (opline->opcode == ZEND_ASSIGN_DIM_OP) {
 					if (opline->op2_type == IS_UNUSED) {
 						/* When appending to an array and the LONG_MAX key is already used
 						 * null will be returned. */
@@ -2689,7 +2660,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						 * results in a null return value. */
 						tmp |= MAY_BE_NULL;
 					}
-				} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 					if (orig & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT))) {
 						/* null and false (and empty string) are implicitly converted to object,
 						 * anything else results in a null return value. */
@@ -2700,7 +2671,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					if (prop_info) {
 						tmp &= zend_fetch_prop_type(script, prop_info, NULL);
 					}
-				} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
 						tmp &= zend_fetch_prop_type(script, prop_info, NULL);
@@ -3443,18 +3414,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_DIM_RW:
 						case ZEND_FETCH_DIM_FUNC_ARG:
 						case ZEND_FETCH_LIST_W:
-						case ZEND_ASSIGN_ADD:
-						case ZEND_ASSIGN_SUB:
-						case ZEND_ASSIGN_MUL:
-						case ZEND_ASSIGN_DIV:
-						case ZEND_ASSIGN_MOD:
-						case ZEND_ASSIGN_SL:
-						case ZEND_ASSIGN_SR:
-						case ZEND_ASSIGN_CONCAT:
-						case ZEND_ASSIGN_BW_OR:
-						case ZEND_ASSIGN_BW_AND:
-						case ZEND_ASSIGN_BW_XOR:
-						case ZEND_ASSIGN_POW:
+						case ZEND_ASSIGN_OP:
+						case ZEND_ASSIGN_DIM_OP:
+						case ZEND_ASSIGN_OBJ_OP:
+						case ZEND_ASSIGN_STATIC_PROP_OP:
 						case ZEND_ASSIGN_DIM:
 							tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
 							break;
@@ -3959,13 +3922,19 @@ static zend_bool can_convert_to_double(
 					return 0;
 				}
 			} else {
+				zend_uchar opcode = opline->opcode;
+
+				if (opcode == ZEND_ASSIGN_OP) {
+					opcode = opline->extended_value;
+				}
+
 				/* Avoid division by zero */
-				if (opline->opcode == ZEND_DIV && zval_get_double(&orig_op2) == 0.0) {
+				if (opcode == ZEND_DIV && zval_get_double(&orig_op2) == 0.0) {
 					return 0;
 				}
 
-				get_binary_op(opline->opcode)(&orig_result, &orig_op1, &orig_op2);
-				get_binary_op(opline->opcode)(&dval_result, &dval_op1, &dval_op2);
+				get_binary_op(opcode)(&orig_result, &orig_op1, &orig_op2);
+				get_binary_op(opcode)(&dval_result, &dval_op1, &dval_op2);
 				ZEND_ASSERT(Z_TYPE(dval_result) == IS_DOUBLE);
 				if (zval_get_double(&orig_result) != Z_DVAL(dval_result)) {
 					return 0;
@@ -4573,62 +4542,48 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				return 0;
 			}
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT)) || (t2 & (MAY_BE_OBJECT|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT));
-		case ZEND_ASSIGN_ADD:
-			if (opline->extended_value != 0) {
-				return 1;
+		case ZEND_ASSIGN_OP:
+			if (opline->extended_value == ZEND_ADD) {
+				if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY
+				 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
+					return 0;
+				}
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			} else if (opline->extended_value == ZEND_DIV ||
+				opline->extended_value == ZEND_MOD) {
+				if (!OP2_HAS_RANGE() ||
+					(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
+					/* Division by zero */
+					return 1;
+				}
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			} else if (opline->extended_value == ZEND_SUB ||
+				opline->extended_value == ZEND_MUL ||
+				opline->extended_value == ZEND_POW) {
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			} else if (opline->extended_value == ZEND_SL ||
+				opline->extended_value == ZEND_SR) {
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					!OP2_HAS_RANGE() ||
+					OP2_MIN_RANGE() < 0;
+			} else if (opline->extended_value == ZEND_CONCAT) {
+				return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+			} else if (opline->extended_value == ZEND_BW_OR ||
+				opline->extended_value == ZEND_BW_AND ||
+				opline->extended_value == ZEND_BW_XOR) {
+				if ((t1 & MAY_BE_ANY) == MAY_BE_STRING
+				 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
+					return 0;
+				}
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_ARRAY
-			 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
-				return 0;
-			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
-		case ZEND_ASSIGN_DIV:
-		case ZEND_ASSIGN_MOD:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			if (!OP2_HAS_RANGE() ||
-				(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
-				/* Division by zero */
-				return 1;
-			}
-			/* break missing intentionally */
-		case ZEND_ASSIGN_SUB:
-		case ZEND_ASSIGN_MUL:
-		case ZEND_ASSIGN_POW:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
-		case ZEND_ASSIGN_SL:
-		case ZEND_ASSIGN_SR:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				!OP2_HAS_RANGE() ||
-				OP2_MIN_RANGE() < 0;
-		case ZEND_ASSIGN_CONCAT:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
-		case ZEND_ASSIGN_BW_OR:
-		case ZEND_ASSIGN_BW_AND:
-		case ZEND_ASSIGN_BW_XOR:
-			if (opline->extended_value != 0) {
-				return 1;
-			}
-			if ((t1 & MAY_BE_ANY) == MAY_BE_STRING
-			 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
-				return 0;
-			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return 1;
 		case ZEND_ASSIGN:
 			if (t1 & MAY_BE_REF) {
 				return 1;

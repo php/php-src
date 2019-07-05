@@ -107,18 +107,10 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
-					case ZEND_ASSIGN_ADD:
-					case ZEND_ASSIGN_SUB:
-					case ZEND_ASSIGN_MUL:
-					case ZEND_ASSIGN_DIV:
-					case ZEND_ASSIGN_MOD:
-					case ZEND_ASSIGN_SL:
-					case ZEND_ASSIGN_SR:
-					case ZEND_ASSIGN_CONCAT:
-					case ZEND_ASSIGN_BW_OR:
-					case ZEND_ASSIGN_BW_AND:
-					case ZEND_ASSIGN_BW_XOR:
-					case ZEND_ASSIGN_POW:
+					case ZEND_ASSIGN_OP:
+					case ZEND_ASSIGN_DIM_OP:
+					case ZEND_ASSIGN_OBJ_OP:
+					case ZEND_ASSIGN_STATIC_PROP_OP:
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
 					case ZEND_POST_INC:

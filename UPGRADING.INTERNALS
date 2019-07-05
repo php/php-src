@@ -22,6 +22,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   s. Typed references support
   t. Exceptions thrown by string conversions.
   u. Removed uint and ulong typedefs
+  v. Compound assignment opcodes
 
 2. Build system changes
   a. Abstract
@@ -211,6 +212,13 @@ PHP 7.4 INTERNALS UPGRADE NOTES
 
   u. The Windows typedefs uint and ulong are no longer available, and have to be
      replaced with standard types.
+
+  v. Compound assignment opcodes were changed. Instead of ZEND_ASSIGN_ADD (and
+     others) with 0, ZEND_ASSIGN_DIM, ZEND_ASSIGN_OBJ or
+     ZEND_ASSIGN_STATIC_PROP in extended value, now we use ZEND_ASSIGN_OP,
+     ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP and ZEND_ASSIGN_STATIC_PROP_OP with
+     ZEND_ADD (or other) in extended_value.
+
 
 ========================
 2. Build system changes
