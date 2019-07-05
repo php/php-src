@@ -2733,7 +2733,38 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
+static zend_always_inline int increment_object(zval *op1) /* {{{ */
+{
+	if (Z_OBJ_HANDLER_P(op1, get)
+		&& Z_OBJ_HANDLER_P(op1, set)) {
+		/* proxy object */
+		zval rv;
+		zval *val;
+
+		val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
+		Z_TRY_ADDREF_P(val);
+		increment_function(val);
+		Z_OBJ_HANDLER_P(op1, set)(op1, val);
+		zval_ptr_dtor(val);
+
+		return SUCCESS;
+	}
+
+	if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+		zval op2;
+		int res;
+
+		ZVAL_LONG(&op2, 1);
+		res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
+
+		return res;
+	}
+
+	return FAILURE;
+}
+/* }}} */
+
+static zend_always_inline int standard_increment_function(zval *op1) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op1)) {
@@ -2773,27 +2804,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_TRY_ADDREF_P(val);
-				increment_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(op1, val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval op2;
-				int res;
-
-				ZVAL_LONG(&op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
-
-				return res;
-			}
-			return FAILURE;
+			return increment_object(op1);
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
@@ -2804,7 +2815,77 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
+static zend_always_inline int strict_increment_function(zval *op1) /* {{{ */
+{
+try_again:
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+			fast_long_increment_function(op1);
+			break;
+		case IS_DOUBLE:
+			Z_DVAL_P(op1) = Z_DVAL_P(op1) + 1;
+			break;
+		case IS_STRING:
+			/* Perl style string increment */
+			increment_string(op1);
+			break;
+		case IS_OBJECT:
+			return increment_object(op1);
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			goto try_again;
+		default:
+			return FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
+{
+	if (ZEND_USES_STRICT_OPERATORS()) {
+		if (UNEXPECTED(strict_increment_function(op1) == FAILURE)) {
+			zend_throw_error(zend_ce_type_error, "Unsupported operand");
+			return FAILURE;
+		}
+		return SUCCESS;
+	} else {
+		return standard_increment_function(op1);
+	}
+}
+/* }}} */
+
+static zend_always_inline int decrement_object(zval *op1) /* {{{ */
+{
+	if (Z_OBJ_HANDLER_P(op1, get)
+		&& Z_OBJ_HANDLER_P(op1, set)) {
+		/* proxy object */
+		zval rv;
+		zval *val;
+
+		val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
+		Z_TRY_ADDREF_P(val);
+		decrement_function(val);
+		Z_OBJ_HANDLER_P(op1, set)(op1, val);
+		zval_ptr_dtor(val);
+		return SUCCESS;
+	}
+
+	if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+		zval op2;
+		int res;
+
+		ZVAL_LONG(&op2, 1);
+		res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
+
+		return res;
+	}
+
+	return FAILURE;
+}
+/* }}} */
+
+static zend_always_inline int standard_decrement_function(zval *op1) /* {{{ */
 {
 	zend_long lval;
 	double dval;
@@ -2840,27 +2921,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_TRY_ADDREF_P(val);
-				decrement_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(op1, val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval op2;
-				int res;
-
-				ZVAL_LONG(&op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
-
-				return res;
-			}
-			return FAILURE;
+			return decrement_object(op1);
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
@@ -2869,6 +2930,43 @@ try_again:
 	}
 
 	return SUCCESS;
+}
+/* }}} */
+
+static zend_always_inline int strict_decrement_function(zval *op1) /* {{{ */
+{
+try_again:
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+			fast_long_decrement_function(op1);
+			break;
+		case IS_DOUBLE:
+			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
+			break;
+		case IS_OBJECT:
+			return decrement_object(op1);
+		case IS_REFERENCE:
+			op1 = Z_REFVAL_P(op1);
+			goto try_again;
+		default:
+			return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
+{
+	if (ZEND_USES_STRICT_OPERATORS()) {
+		if (UNEXPECTED(strict_decrement_function(op1) == FAILURE)) {
+			zend_throw_error(zend_ce_type_error, "Unsupported operand");
+			return FAILURE;
+		}
+		return SUCCESS;
+	} else {
+		return standard_decrement_function(op1);
+	}
 }
 /* }}} */
 
