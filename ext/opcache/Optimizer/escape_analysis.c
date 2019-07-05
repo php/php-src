@@ -262,7 +262,6 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 			case ZEND_ASSIGN_OBJ_REF:
 			case ZEND_ASSIGN_DIM_OP:
 			case ZEND_ASSIGN_OBJ_OP:
-			case ZEND_ASSIGN_STATIC_PROP_OP:
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
