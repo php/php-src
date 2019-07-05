@@ -856,7 +856,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	int cutlim;
 	int invalidchars = 0;
 
-	if (Z_TYPE_P(arg) != IS_STRING || base < 1 || base > 36) {
+	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
 		return FAILURE;
 	}
 	s = Z_STRVAL_P(arg);
