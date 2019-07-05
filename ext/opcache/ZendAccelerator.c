@@ -3596,7 +3596,6 @@ static void preload_link(void)
 	zend_string *key;
 	zend_bool found, changed;
 	uint32_t i;
-	zend_op_array *op_array;
 	dtor_func_t orig_dtor;
 	zend_function *function;
 
@@ -3789,28 +3788,6 @@ static void preload_link(void)
 	} ZEND_HASH_FOREACH_END();
 	EG(class_table)->pDestructor = orig_dtor;
 	zend_hash_rehash(EG(class_table));
-
-	/* Move run-time declared functions back to scripts */
-	orig_dtor = EG(function_table)->pDestructor;
-	EG(function_table)->pDestructor = NULL;
-	ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(function_table), key, zv) {
-		op_array = Z_PTR_P(zv);
-		if (op_array->type == ZEND_INTERNAL_FUNCTION) {
-			break;
-		}
-		if (op_array->fn_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_CLOSURE)) {
-			continue;
-		}
-		script = zend_hash_find_ptr(preload_scripts, op_array->filename);
-		ZEND_ASSERT(script);
-		zend_hash_add(&script->script.function_table, key, zv);
-		ZVAL_UNDEF(zv);
-		zend_string_release(key);
-		EG(function_table)->nNumOfElements--;
-	} ZEND_HASH_FOREACH_END();
-	EG(function_table)->pDestructor = orig_dtor;
-	zend_hash_rehash(EG(function_table));
-
 
 	/* Remove DECLARE opcodes */
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
