@@ -3407,63 +3407,67 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 				}
-				j = ssa_vars[ssa_ops[i].result_def].use_chain;
-				while (j >= 0) {
-					switch (op_array->opcodes[j].opcode) {
-						case ZEND_FETCH_DIM_W:
-						case ZEND_FETCH_DIM_RW:
-						case ZEND_FETCH_DIM_FUNC_ARG:
-						case ZEND_FETCH_LIST_W:
-						case ZEND_ASSIGN_DIM:
-						case ZEND_ASSIGN_DIM_OP:
-							tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
-							break;
-						case ZEND_FETCH_OBJ_W:
-						case ZEND_FETCH_OBJ_RW:
-						case ZEND_FETCH_OBJ_FUNC_ARG:
-						case ZEND_ASSIGN_OBJ:
-						case ZEND_ASSIGN_OBJ_OP:
-						case ZEND_ASSIGN_OBJ_REF:
-						case ZEND_PRE_INC_OBJ:
-						case ZEND_PRE_DEC_OBJ:
-						case ZEND_POST_INC_OBJ:
-						case ZEND_POST_DEC_OBJ:
-							tmp |= MAY_BE_ARRAY_OF_OBJECT;
-							break;
-						case ZEND_SEND_VAR_EX:
-						case ZEND_SEND_FUNC_ARG:
-						case ZEND_SEND_VAR_NO_REF:
-						case ZEND_SEND_VAR_NO_REF_EX:
-						case ZEND_SEND_REF:
-						case ZEND_ASSIGN_REF:
-						case ZEND_YIELD:
-						case ZEND_INIT_ARRAY:
-						case ZEND_ADD_ARRAY_ELEMENT:
-						case ZEND_RETURN_BY_REF:
-						case ZEND_VERIFY_RETURN_TYPE:
-						case ZEND_MAKE_REF:
-							tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-							break;
-						case ZEND_PRE_INC:
-						case ZEND_PRE_DEC:
-						case ZEND_POST_INC:
-						case ZEND_POST_DEC:
-							if (tmp & MAY_BE_ARRAY_OF_LONG) {
-								/* may overflow */
-								tmp |= MAY_BE_ARRAY_OF_DOUBLE;
-							} else if (!(tmp & (MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE))) {
-								tmp |= MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE;
-							}
-							break;
-						case ZEND_UNSET_DIM:
-						case ZEND_UNSET_OBJ:
-						case ZEND_FETCH_DIM_UNSET:
-						case ZEND_FETCH_OBJ_UNSET:
-							break;
-						default	:
-							break;
+				if (opline->opcode == ZEND_FETCH_DIM_RW
+						|| opline->opcode == ZEND_FETCH_DIM_W
+						|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+						|| opline->opcode == ZEND_FETCH_LIST_W) {
+					j = ssa_vars[ssa_ops[i].result_def].use_chain;
+					while (j >= 0) {
+						switch (op_array->opcodes[j].opcode) {
+							case ZEND_FETCH_DIM_W:
+							case ZEND_FETCH_DIM_RW:
+							case ZEND_FETCH_DIM_FUNC_ARG:
+							case ZEND_FETCH_LIST_W:
+							case ZEND_ASSIGN_DIM:
+							case ZEND_ASSIGN_DIM_OP:
+								tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
+								break;
+							case ZEND_FETCH_OBJ_W:
+							case ZEND_FETCH_OBJ_RW:
+							case ZEND_FETCH_OBJ_FUNC_ARG:
+							case ZEND_ASSIGN_OBJ:
+							case ZEND_ASSIGN_OBJ_OP:
+							case ZEND_ASSIGN_OBJ_REF:
+							case ZEND_PRE_INC_OBJ:
+							case ZEND_PRE_DEC_OBJ:
+							case ZEND_POST_INC_OBJ:
+							case ZEND_POST_DEC_OBJ:
+								tmp |= MAY_BE_ARRAY_OF_OBJECT;
+								break;
+							case ZEND_SEND_VAR_EX:
+							case ZEND_SEND_FUNC_ARG:
+							case ZEND_SEND_VAR_NO_REF:
+							case ZEND_SEND_VAR_NO_REF_EX:
+							case ZEND_SEND_REF:
+							case ZEND_ASSIGN_REF:
+							case ZEND_YIELD:
+							case ZEND_INIT_ARRAY:
+							case ZEND_ADD_ARRAY_ELEMENT:
+							case ZEND_RETURN_BY_REF:
+							case ZEND_VERIFY_RETURN_TYPE:
+							case ZEND_MAKE_REF:
+							case ZEND_FE_RESET_RW:
+								tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+								break;
+							case ZEND_PRE_INC:
+							case ZEND_PRE_DEC:
+							case ZEND_POST_INC:
+							case ZEND_POST_DEC:
+								if (tmp & MAY_BE_ARRAY_OF_LONG) {
+									/* may overflow */
+									tmp |= MAY_BE_ARRAY_OF_DOUBLE;
+								} else if (!(tmp & (MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE))) {
+									tmp |= MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE;
+								}
+								break;
+							case ZEND_SEND_VAR:
+								/* This can occur if a DIM_FETCH_FUNC_ARG with UNUSED op2 is left
+								 * behind, because it can't be converted to DIM_FETCH_R. */
+								break;
+							EMPTY_SWITCH_DEFAULT_CASE()
+						}
+						j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
 					}
-					j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
 				}
 				if ((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) {
 					UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
