@@ -304,6 +304,13 @@ PHP 7.4 UPGRADE NOTES
 
         proc_open(['php', '-r', 'echo "Hello World\n";'], $descriptors, $pipes);
 
+  . proc_open() now supports "redirect" and "null" descriptors. For example:
+
+        // Like 2>&1 on the shell
+        proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
+        // Like 2>/dev/null or 2>nul on the shell
+        proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['null']], $pipes);
+
   . password_hash() has argon2i(d) implementations from ext/sodium when PHP is
     built without libargon.
 
