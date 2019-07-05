@@ -390,6 +390,7 @@ static inline HANDLE dup_fd_as_handle(int fd)
 
 #define DESC_PIPE		1
 #define DESC_FILE		2
+#define DESC_REDIRECT	3
 #define DESC_PARENT_MODE_WRITE	8
 
 struct php_proc_open_descriptor_item {
@@ -760,6 +761,47 @@ PHP_FUNCTION(proc_open)
 #else
 				descriptors[ndesc].childend = fd;
 #endif
+			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
+				struct php_proc_open_descriptor_item *target = NULL;
+				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
+				if (!ztarget) {
+					php_error_docref(NULL, E_WARNING, "Missing redirection target");
+					goto exit_fail;
+				}
+				if (Z_TYPE_P(ztarget) != IS_LONG) {
+					php_error_docref(NULL, E_WARNING, "Redirection target must be an integer");
+					goto exit_fail;
+				}
+
+				for (i = 0; i < ndesc; i++) {
+					if (descriptors[i].index == Z_LVAL_P(ztarget)) {
+						target = &descriptors[i];
+						break;
+					}
+				}
+				if (!target) {
+					php_error_docref(NULL, E_WARNING,
+						"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
+					goto exit_fail;
+				}
+
+#ifdef PHP_WIN32
+				descriptors[ndesc].childend = dup_handle(target->childend, TRUE, FALSE);
+				if (descriptors[ndesc].childend == NULL) {
+					php_error_docref(NULL, E_WARNING,
+						"Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+					goto exit_fail;
+				}
+#else
+				descriptors[ndesc].childend = dup(target->childend);
+				if (descriptors[ndesc].childend < 0) {
+					php_error_docref(NULL, E_WARNING,
+						"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s",
+						nindex, strerror(errno));
+					goto exit_fail;
+				}
+#endif
+				descriptors[ndesc].mode = DESC_REDIRECT;
 			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
 #if PHP_CAN_DO_PTS
 				if (dev_ptmx == -1) {
