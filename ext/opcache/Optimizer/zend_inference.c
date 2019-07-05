@@ -3414,17 +3414,15 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_DIM_RW:
 						case ZEND_FETCH_DIM_FUNC_ARG:
 						case ZEND_FETCH_LIST_W:
-						case ZEND_ASSIGN_OP:
-						case ZEND_ASSIGN_DIM_OP:
-						case ZEND_ASSIGN_OBJ_OP:
-						case ZEND_ASSIGN_STATIC_PROP_OP:
 						case ZEND_ASSIGN_DIM:
+						case ZEND_ASSIGN_DIM_OP:
 							tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
 							break;
 						case ZEND_FETCH_OBJ_W:
 						case ZEND_FETCH_OBJ_RW:
 						case ZEND_FETCH_OBJ_FUNC_ARG:
 						case ZEND_ASSIGN_OBJ:
+						case ZEND_ASSIGN_OBJ_OP:
 						case ZEND_ASSIGN_OBJ_REF:
 						case ZEND_PRE_INC_OBJ:
 						case ZEND_PRE_DEC_OBJ:
