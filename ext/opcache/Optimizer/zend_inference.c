@@ -3227,6 +3227,9 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_DIM_RW:
 						case ZEND_FETCH_DIM_FUNC_ARG:
 						case ZEND_FETCH_LIST_W:
+						case ZEND_ASSIGN_DIM:
+							tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
+							break;
 						case ZEND_ASSIGN_ADD:
 						case ZEND_ASSIGN_SUB:
 						case ZEND_ASSIGN_MUL:
@@ -3239,8 +3242,11 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_ASSIGN_BW_AND:
 						case ZEND_ASSIGN_BW_XOR:
 						case ZEND_ASSIGN_POW:
-						case ZEND_ASSIGN_DIM:
-							tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
+							if (op_array->opcodes[j].extended_value == ZEND_ASSIGN_DIM) {
+								tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
+							} else if (op_array->opcodes[j].extended_value == ZEND_ASSIGN_OBJ) {
+								tmp |= MAY_BE_ARRAY_OF_OBJECT;
+							}
 							break;
 						case ZEND_FETCH_OBJ_W:
 						case ZEND_FETCH_OBJ_RW:
