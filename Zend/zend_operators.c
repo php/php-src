@@ -866,7 +866,7 @@ try_again:
 }
 /* }}} */
 
-static zend_always_inline zend_string* __zval_get_string_func(zval *op, zend_bool try) /* {{{ */
+static zend_always_inline zend_string* __zval_get_string_func(zval *op, zend_bool try, zend_class_entry *object_exception_ce) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
@@ -905,7 +905,7 @@ try_again:
 				zval_ptr_dtor(z);
 			}
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
+				zend_throw_error(object_exception_ce, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
 			}
 			return try ? NULL : ZSTR_EMPTY_ALLOC();
 		}
@@ -922,13 +922,13 @@ try_again:
 
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op) /* {{{ */
 {
-	return __zval_get_string_func(op, 0);
+	return __zval_get_string_func(op, 0, NULL);
 }
 /* }}} */
 
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
 {
-	return __zval_get_string_func(op, 1);
+	return __zval_get_string_func(op, 1, NULL);
 }
 /* }}} */
 
@@ -1889,8 +1889,21 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
     zval *orig_op1 = op1;
 	zval op1_copy, op2_copy;
 
+	zend_class_entry *object_exception_ce = NULL;
+
 	ZVAL_UNDEF(&op1_copy);
 	ZVAL_UNDEF(&op2_copy);
+
+	if (ZEND_USES_STRICT_OPERATORS()) {
+		if (UNEXPECTED(Z_TYPE_P(op1) == IS_FALSE || Z_TYPE_P(op1) == IS_TRUE || Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op1) == IS_RESOURCE
+				|| Z_TYPE_P(op2) == IS_FALSE || Z_TYPE_P(op2) == IS_TRUE || Z_TYPE_P(op2) == IS_ARRAY || Z_TYPE_P(op2) == IS_RESOURCE
+    	)) {
+			zend_throw_error(zend_ce_type_error, "Unsupported operands");
+			return FAILURE;
+		}
+
+		object_exception_ce = zend_ce_type_error;
+	}
 
 	do {
 	 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_STRING)) {
@@ -1899,7 +1912,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 	 			if (Z_TYPE_P(op1) == IS_STRING) break;
 	 		}
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT, concat_function);
-			ZVAL_STR(&op1_copy, zval_get_string_func(op1));
+			ZVAL_STR(&op1_copy, __zval_get_string_func(op1, 0, object_exception_ce));
 			if (UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_str(&op1_copy);
 				if (orig_op1 != result) {
@@ -1922,7 +1935,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 	 			if (Z_TYPE_P(op2) == IS_STRING) break;
 	 		}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_CONCAT);
-			ZVAL_STR(&op2_copy, zval_get_string_func(op2));
+			ZVAL_STR(&op2_copy, __zval_get_string_func(op2, 0, object_exception_ce));
 			if (UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_str(&op1_copy);
 				zval_ptr_dtor_str(&op2_copy);
