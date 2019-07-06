@@ -59,6 +59,9 @@ void zend_elf_load_symbols(void)
              return;
 	}
 	int fd = open(path, O_RDONLY);
+#elif defined(__APPLE__)
+	// APPLE is Mach-O
+	int fd = -1;
 #endif
 
 	if (fd >= 0) {
