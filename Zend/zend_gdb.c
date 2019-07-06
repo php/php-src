@@ -171,8 +171,10 @@ ZEND_API int zend_gdb_present(void)
 #else
 			// Does not seem there is a way to get a full path
 			// but only from the current process ...
+			// unless there is "off the book" technique to get it ;
 			// here considered "gdb-ish"
 			// open to debate if we throw away the mac support altogether...
+			(void)ppid;
 			ret = 1;
 #endif
 		}
