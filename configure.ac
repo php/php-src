@@ -1595,7 +1595,22 @@ $PHP_OUTPUT_FILES"
 
 dnl Generate build files.
 AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
-AC_CONFIG_COMMANDS([default],[],[
+AC_CONFIG_COMMANDS([default],[
+cat <<X
+
++--------------------------------------------------------------------+
+| License:                                                           |
+| This software is subject to the PHP License, available in this     |
+| distribution in the file LICENSE. By continuing this installation  |
+| process, you are bound by the terms of this license agreement.     |
+| If you do not agree with the terms of this license, you must abort |
+| the installation process at this point.                            |
++--------------------------------------------------------------------+
+
+Thank you for using PHP.
+
+X
+],[
 
 if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
   REDO_ALL=yes
@@ -1679,20 +1694,6 @@ X
       fi
     fi
   fi
-
-cat <<X
-+--------------------------------------------------------------------+
-| License:                                                           |
-| This software is subject to the PHP License, available in this     |
-| distribution in the file LICENSE.  By continuing this installation |
-| process, you are bound by the terms of this license agreement.     |
-| If you do not agree with the terms of this license, you must abort |
-| the installation process at this point.                            |
-+--------------------------------------------------------------------+
-
-Thank you for using PHP.
-
-X
 
 fi
 ])
