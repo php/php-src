@@ -389,6 +389,7 @@ again:
 }
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);
+ZEND_API int ZEND_FASTCALL operator_compare_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive);
@@ -415,6 +416,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp(const char *s1, size_t len1, 
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
+ZEND_API int ZEND_FASTCALL zend_equal_string(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
@@ -830,7 +832,7 @@ static zend_always_inline int zend_fast_equal_strings(zend_string *s1, zend_stri
 	} else if (ZSTR_VAL(s1)[0] > '9' || ZSTR_VAL(s2)[0] > '9') {
 		return zend_string_equal_content(s1, s2);
 	} else {
-		return zendi_smart_streq(s1, s2);
+		return zend_equal_string(s1, s2);
 	}
 }
 

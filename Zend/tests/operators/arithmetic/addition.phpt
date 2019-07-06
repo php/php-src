@@ -1,5 +1,7 @@
 --TEST--
 addition '+' operator
+--INI--
+precision=14
 --FILE--
 <?php
 require_once __DIR__ . '/../_helper.inc';

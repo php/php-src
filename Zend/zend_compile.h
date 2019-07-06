@@ -587,7 +587,8 @@ struct _zend_execute_data {
 	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
 
 #define ZEND_USES_STRICT_OPERATORS() \
-	(((EG(current_execute_data) ? EG(current_execute_data)->func->common.fn_flags : CG(active_op_array)->fn_flags) & ZEND_ACC_STRICT_OPERATORS) != 0)
+	((EG(current_execute_data) && (EG(current_execute_data)->func->common.fn_flags & ZEND_ACC_STRICT_OPERATORS) != 0) || \
+	 (!EG(current_execute_data) && CG(active_op_array) && (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_OPERATORS) != 0))
 
 #define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)

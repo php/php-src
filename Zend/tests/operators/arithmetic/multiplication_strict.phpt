@@ -1,5 +1,7 @@
 --TEST--
 multiplication '*' operator with strict_operators
+--INI--
+precision=14
 --FILE--
 <?php
 declare(strict_operators=1);

@@ -4798,7 +4798,7 @@ is_smaller_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -4861,7 +4861,7 @@ is_smaller_or_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -4889,7 +4889,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CO
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
 	op2 = RT_CONSTANT(opline, opline->op2);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -7001,7 +7001,7 @@ is_smaller_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -7064,7 +7064,7 @@ is_smaller_or_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -7092,7 +7092,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CONST_TMPVAR_HA
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
 	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -9701,7 +9701,7 @@ is_smaller_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -9764,7 +9764,7 @@ is_smaller_or_equal_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -9792,7 +9792,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CONST_CV_HANDLE
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
 	op2 = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -13362,7 +13362,7 @@ is_smaller_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
@@ -13425,7 +13425,7 @@ is_smaller_or_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
@@ -13453,7 +13453,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_TMPVAR_CONST_HA
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	op2 = RT_CONSTANT(opline, opline->op2);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -15004,7 +15004,7 @@ is_smaller_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -15067,7 +15067,7 @@ is_smaller_or_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -15095,7 +15095,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_TMPVAR_TMPVAR_H
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -16610,7 +16610,7 @@ is_smaller_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
@@ -16673,7 +16673,7 @@ is_smaller_or_equal_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	if (UNEXPECTED(EG(exception))) {
@@ -16701,7 +16701,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_TMPVAR_CV_HANDL
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -38531,7 +38531,7 @@ is_smaller_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -38594,7 +38594,7 @@ is_smaller_or_equal_double:
 	if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -38622,7 +38622,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CV_CONST_HANDLE
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = RT_CONSTANT(opline, opline->op2);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -42243,7 +42243,7 @@ is_smaller_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -42306,7 +42306,7 @@ is_smaller_or_equal_double:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(EG(exception))) {
@@ -42334,7 +42334,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CV_TMPVAR_HANDL
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -47532,7 +47532,7 @@ is_smaller_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -47595,7 +47595,7 @@ is_smaller_or_equal_double:
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	if (UNEXPECTED(EG(exception))) {
@@ -47623,7 +47623,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SPACESHIP_SPEC_CV_CV_HANDLER(Z
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

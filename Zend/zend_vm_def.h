@@ -597,7 +597,7 @@ ZEND_VM_C_LABEL(is_smaller_double):
 	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	if (UNEXPECTED(EG(exception))) {
@@ -660,7 +660,7 @@ ZEND_VM_C_LABEL(is_smaller_or_equal_double):
 	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	if (UNEXPECTED(EG(exception))) {
@@ -688,7 +688,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(170, ZEND_SPACESHIP, CONST|TMPVAR|CV, CONST|TMPV
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	operator_compare_function(EX_VAR(opline->result.var), op1, op2);
 	FREE_OP1();
 	FREE_OP2();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
