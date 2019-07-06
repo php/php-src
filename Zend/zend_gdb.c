@@ -145,9 +145,11 @@ ZEND_API int zend_gdb_present(void)
 #if defined(__APPLE__)
 #define KINFO_PROC_FLAG (cproc->kp_proc.p_flag)
 #define KINFO_PROC_PPID (cproc->kp_proc.p_oppid)
+#define KINFO_PROC_COMM (pcproc->kp_proc.p_comm)
 #else
 #define KINFO_PROC_FLAG (cproc->ki_flag)
 #define KINFO_PROC_PPID (cproc->ki_ppid)
+#define KINFO_PROC_COMM (pcproc->ki_comm)
 #endif
 	struct kinfo_proc *cproc;
 	size_t cproclen = 0;
@@ -159,24 +161,15 @@ ZEND_API int zend_gdb_present(void)
 	if (sysctl(mib, 4, cproc, &cproclen, NULL, 0) == 0) {
 		if ((KINFO_PROC_FLAG & P_TRACED) != 0) {
 			pid_t ppid = KINFO_PROC_PPID;
-#if defined(__FreeBSD__)
-			char path[PATH_MAX];
-			size_t pathlen = sizeof(path);
-			int smib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, ppid};
-			if (sysctl(smib, 4, path, &pathlen, NULL, 0) == 0) {
-				if (strstr(path, "gdb")) {
+			mib[3] = ppid;
+			struct kinfo_proc *pcproc = (struct kinfo_proc *)malloc(cproclen);
+			if (sysctl(mib, 4, pcproc, &cproclen, NULL, 0) == 0) {
+				// Could be prefixed with package systems e.g. egdb
+				if (strstr(KINFO_PROC_COMM, "gdb")) {
 					ret = 1;
 				}
 			}
-#else
-			// Does not seem there is a way to get a full path
-			// but only from the current process ...
-			// unless there is "off the book" technique to get it ;
-			// here considered "gdb-ish"
-			// open to debate if we throw away the mac support altogether...
-			(void)ppid;
-			ret = 1;
-#endif
+			free(pcproc);
 		}
 	}
 	free(cproc);
