@@ -51,6 +51,8 @@ void zend_elf_load_symbols(void)
 	int i;
 #if defined(__linux__)
 	int fd = open("/proc/self/exe", O_RDONLY);
+#elif defined(__NetBSD__)
+	int fd = open("/proc/curproc/exe", O_RDONLY);
 #elif defined(__FreeBSD__)
 	char path[PATH_MAX];
 	size_t pathlen = sizeof(path);
@@ -59,8 +61,9 @@ void zend_elf_load_symbols(void)
              return;
 	}
 	int fd = open(path, O_RDONLY);
-#elif defined(__APPLE__)
-	// APPLE is Mach-O
+#else
+	// To complete eventually for other ELF platforms.
+	// Otherwise APPLE is Mach-O
 	int fd = -1;
 #endif
 
