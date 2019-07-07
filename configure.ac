@@ -26,7 +26,12 @@ PHP_CONFIG_NICE(config.nice)
 
 PHP_CANONICAL_HOST_TARGET
 
-AC_CONFIG_HEADERS([main/php_config.h])
+AC_CONFIG_HEADERS(
+  [main/php_config.h],
+  [],
+  [PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])]
+)
+
 AH_TOP([
 #ifndef PHP_CONFIG_H
 #define PHP_CONFIG_H

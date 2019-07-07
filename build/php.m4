@@ -2716,3 +2716,19 @@ int main() {
   AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
    [$have_ext_instructions], [Whether the compiler supports $1 instructions])
 ])
+
+dnl
+dnl PHP_PATCH_CONFIG_HEADERS([FILE])
+dnl
+dnl PACKAGE_* symbols are automatically defined by Autoconf. When including
+dnl php_config.h header in PHP extensions or headers from other libraries
+dnl warnings about redefined symbols are emitted for such symbols. This disables
+dnl all PACKAGE_* symbols in the generated configuration header template FILE.
+dnl For example, php_config.h.in or config.h.in.
+dnl
+AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
+  echo "patching $1"
+
+  $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
+    > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
+])

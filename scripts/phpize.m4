@@ -212,6 +212,6 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || $php_shtool mkdir modules
 
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([config.h], [], [PHP_PATCH_CONFIG_HEADERS([config.h.in])])
 
 AC_OUTPUT
