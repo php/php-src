@@ -62,6 +62,9 @@ static const unsigned char tolower_map[256] = {
 
 #define zend_tolower_ascii(c) (tolower_map[(unsigned char)(c)])
 
+/* Declare here as strict_equals_function calls hash_zval_strict_equals_function and visa versa */
+static int hash_zval_strict_equals_function(zval *z1, zval *z2);
+
 /**
  * Functions using locale lowercase:
  	 	zend_binary_strncasecmp_l
@@ -2329,19 +2332,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 }
 /* }}} */
 
-static int hash_zval_strict_equal_function(zval *z1, zval *z2) /* {{{ */
-{
-	/* is_identical_function() returns 1 in case of identity and 0 in case
-	 * of a difference;
-	 * whereas this comparison function is expected to return 0 on identity,
-	 * and non zero otherwise.
-	 */
-	ZVAL_DEREF(z1);
-	ZVAL_DEREF(z2);
-	return fast_is_not_identical_function(z1, z2); // TODO
-}
-/* }}} */
-
 static zend_always_inline int strict_scalar_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
@@ -2419,7 +2409,7 @@ try_again:
 				ZVAL_LONG(result, 0);
 				return SUCCESS;
 			}
-			ZVAL_LONG(result, zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_strict_equal_function, 0));
+			ZVAL_LONG(result, zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_strict_equals_function, 0));
 			return SUCCESS;
 
 		case TYPE_PAIR(IS_OBJECT, IS_OBJECT):
@@ -2462,6 +2452,22 @@ try_again:
 	}
 }
 /* }}} */
+
+static int hash_zval_strict_equals_function(zval *z1, zval *z2) /* {{{ */
+{
+	zval result;
+
+	ZVAL_DEREF(z1);
+	ZVAL_DEREF(z2);
+
+	if (strict_equals_function(&result, z1, z2) == FAILURE) {
+		return 1;
+	}
+
+	return Z_LVAL(result);
+}
+/* }}} */
+
 
 ZEND_API int ZEND_FASTCALL operator_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
@@ -2544,19 +2550,17 @@ ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2)
 		if (UNEXPECTED(compare_function(result, op1, op2) == FAILURE)) {
 			return FAILURE;
 		}
-
-		ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
-		return SUCCESS;
-	}
-
-	if (UNEXPECTED(strict_equals_function(result, op1, op2) == FAILURE)) {
-		zend_throw_error(zend_ce_type_error, "Type mismatch");
-		if (result != op1) {
-			ZVAL_UNDEF(result);
+	} else {
+		if (UNEXPECTED(strict_equals_function(result, op1, op2) == FAILURE)) {
+			zend_throw_error(zend_ce_type_error, "Type mismatch");
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
 		}
-		return FAILURE;
 	}
 
+	ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
 	return SUCCESS;
 }
 /* }}} */

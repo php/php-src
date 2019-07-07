@@ -14,7 +14,14 @@ two_operands('$a == $b', $fn, ['foo' => 0, 'bar' => 2], ['bar' => 2, 'foo' => 0]
 two_operands('$a == $b', $fn, ['foo' => 0, 'bar' => 2], ['bar' => 2, 'foo' => null]);
 two_operands('$a == $b', $fn, ['foo' => 0, 'bar' => 2], ['bar' => '2', 'foo' => 0]);
 
+two_operands('$a == $b', $fn, ['a' => ['foo' => 0, 'bar' => 2]], ['a' => ['bar' => 2, 'foo' => 0]]);
+two_operands('$a == $b', $fn, ['a' => ['foo' => 0, 'bar' => 2]], ['a' => ['bar' => 2, 'foo' => null]]);
+two_operands('$a == $b', $fn, ['a' => ['foo' => 0, 'bar' => 2]], ['a' => ['bar' => '2', 'foo' => 0]]);
+
 --EXPECT--
-array ( 'foo' => 0, 'bar' => 2 ) == array ( 'bar' => 2, 'foo' => 0 ) = false
+array ( 'foo' => 0, 'bar' => 2 ) == array ( 'bar' => 2, 'foo' => 0 ) = true
 array ( 'foo' => 0, 'bar' => 2 ) == array ( 'bar' => 2, 'foo' => NULL ) = false
 array ( 'foo' => 0, 'bar' => 2 ) == array ( 'bar' => '2', 'foo' => 0 ) = false
+array ( 'a' =>  array ( 'foo' => 0, 'bar' => 2 ) ) == array ( 'a' =>  array ( 'bar' => 2, 'foo' => 0 ) ) = true
+array ( 'a' =>  array ( 'foo' => 0, 'bar' => 2 ) ) == array ( 'a' =>  array ( 'bar' => 2, 'foo' => NULL ) ) = false
+array ( 'a' =>  array ( 'foo' => 0, 'bar' => 2 ) ) == array ( 'a' =>  array ( 'bar' => '2', 'foo' => 0 ) ) = false

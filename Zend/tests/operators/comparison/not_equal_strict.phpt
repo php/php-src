@@ -12,7 +12,7 @@ test_two_operands('$a != $b', function($a, $b) { return $a != $b; });
 
 --EXPECT--
 false != false = false
-false != true = false
+false != true = true
 false != 0 - TypeError Type mismatch
 false != 10 - TypeError Type mismatch
 false != 0.0 - TypeError Type mismatch
@@ -34,7 +34,7 @@ false != (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 false != DateTime - TypeError Type mismatch
 false != resource - TypeError Type mismatch
 false != NULL - TypeError Type mismatch
-true != false = false
+true != false = true
 true != true = false
 true != 0 - TypeError Type mismatch
 true != 10 - TypeError Type mismatch
@@ -300,10 +300,10 @@ array ( ) != '010' - TypeError Type mismatch
 array ( ) != '10 elephants' - TypeError Type mismatch
 array ( ) != 'foo' - TypeError Type mismatch
 array ( ) != array ( ) = false
-array ( ) != array ( 0 => 1 ) = false
-array ( ) != array ( 0 => 1, 1 => 100 ) = false
-array ( ) != array ( 'foo' => 1, 'bar' => 2 ) = false
-array ( ) != array ( 'bar' => 1, 'foo' => 2 ) = false
+array ( ) != array ( 0 => 1 ) = true
+array ( ) != array ( 0 => 1, 1 => 100 ) = true
+array ( ) != array ( 'foo' => 1, 'bar' => 2 ) = true
+array ( ) != array ( 'bar' => 1, 'foo' => 2 ) = true
 array ( ) != (object) array ( ) - TypeError Type mismatch
 array ( ) != (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 array ( ) != (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
@@ -322,11 +322,11 @@ array ( 0 => 1 ) != '10' - TypeError Type mismatch
 array ( 0 => 1 ) != '010' - TypeError Type mismatch
 array ( 0 => 1 ) != '10 elephants' - TypeError Type mismatch
 array ( 0 => 1 ) != 'foo' - TypeError Type mismatch
-array ( 0 => 1 ) != array ( ) = false
+array ( 0 => 1 ) != array ( ) = true
 array ( 0 => 1 ) != array ( 0 => 1 ) = false
-array ( 0 => 1 ) != array ( 0 => 1, 1 => 100 ) = false
-array ( 0 => 1 ) != array ( 'foo' => 1, 'bar' => 2 ) = false
-array ( 0 => 1 ) != array ( 'bar' => 1, 'foo' => 2 ) = false
+array ( 0 => 1 ) != array ( 0 => 1, 1 => 100 ) = true
+array ( 0 => 1 ) != array ( 'foo' => 1, 'bar' => 2 ) = true
+array ( 0 => 1 ) != array ( 'bar' => 1, 'foo' => 2 ) = true
 array ( 0 => 1 ) != (object) array ( ) - TypeError Type mismatch
 array ( 0 => 1 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 array ( 0 => 1 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
@@ -345,11 +345,11 @@ array ( 0 => 1, 1 => 100 ) != '10' - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) != '010' - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) != '10 elephants' - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) != 'foo' - TypeError Type mismatch
-array ( 0 => 1, 1 => 100 ) != array ( ) = false
-array ( 0 => 1, 1 => 100 ) != array ( 0 => 1 ) = false
+array ( 0 => 1, 1 => 100 ) != array ( ) = true
+array ( 0 => 1, 1 => 100 ) != array ( 0 => 1 ) = true
 array ( 0 => 1, 1 => 100 ) != array ( 0 => 1, 1 => 100 ) = false
-array ( 0 => 1, 1 => 100 ) != array ( 'foo' => 1, 'bar' => 2 ) = false
-array ( 0 => 1, 1 => 100 ) != array ( 'bar' => 1, 'foo' => 2 ) = false
+array ( 0 => 1, 1 => 100 ) != array ( 'foo' => 1, 'bar' => 2 ) = true
+array ( 0 => 1, 1 => 100 ) != array ( 'bar' => 1, 'foo' => 2 ) = true
 array ( 0 => 1, 1 => 100 ) != (object) array ( ) - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
@@ -368,11 +368,11 @@ array ( 'foo' => 1, 'bar' => 2 ) != '10' - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) != '010' - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) != '10 elephants' - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) != 'foo' - TypeError Type mismatch
-array ( 'foo' => 1, 'bar' => 2 ) != array ( ) = false
-array ( 'foo' => 1, 'bar' => 2 ) != array ( 0 => 1 ) = false
-array ( 'foo' => 1, 'bar' => 2 ) != array ( 0 => 1, 1 => 100 ) = false
+array ( 'foo' => 1, 'bar' => 2 ) != array ( ) = true
+array ( 'foo' => 1, 'bar' => 2 ) != array ( 0 => 1 ) = true
+array ( 'foo' => 1, 'bar' => 2 ) != array ( 0 => 1, 1 => 100 ) = true
 array ( 'foo' => 1, 'bar' => 2 ) != array ( 'foo' => 1, 'bar' => 2 ) = false
-array ( 'foo' => 1, 'bar' => 2 ) != array ( 'bar' => 1, 'foo' => 2 ) = false
+array ( 'foo' => 1, 'bar' => 2 ) != array ( 'bar' => 1, 'foo' => 2 ) = true
 array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( ) - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
@@ -391,10 +391,10 @@ array ( 'bar' => 1, 'foo' => 2 ) != '10' - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) != '010' - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) != '10 elephants' - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) != 'foo' - TypeError Type mismatch
-array ( 'bar' => 1, 'foo' => 2 ) != array ( ) = false
-array ( 'bar' => 1, 'foo' => 2 ) != array ( 0 => 1 ) = false
-array ( 'bar' => 1, 'foo' => 2 ) != array ( 0 => 1, 1 => 100 ) = false
-array ( 'bar' => 1, 'foo' => 2 ) != array ( 'foo' => 1, 'bar' => 2 ) = false
+array ( 'bar' => 1, 'foo' => 2 ) != array ( ) = true
+array ( 'bar' => 1, 'foo' => 2 ) != array ( 0 => 1 ) = true
+array ( 'bar' => 1, 'foo' => 2 ) != array ( 0 => 1, 1 => 100 ) = true
+array ( 'bar' => 1, 'foo' => 2 ) != array ( 'foo' => 1, 'bar' => 2 ) = true
 array ( 'bar' => 1, 'foo' => 2 ) != array ( 'bar' => 1, 'foo' => 2 ) = false
 array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( ) - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
@@ -420,8 +420,8 @@ array ( 'bar' => 1, 'foo' => 2 ) != NULL - TypeError Type mismatch
 (object) array ( ) != array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 (object) array ( ) != array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 (object) array ( ) != (object) array ( ) = false
-(object) array ( ) != (object) array ( 'foo' => 1, 'bar' => 2 ) = false
-(object) array ( ) != (object) array ( 'bar' => 1, 'foo' => 2 ) = false
+(object) array ( ) != (object) array ( 'foo' => 1, 'bar' => 2 ) = true
+(object) array ( ) != (object) array ( 'bar' => 1, 'foo' => 2 ) = true
 (object) array ( ) != DateTime - TypeError Type mismatch
 (object) array ( ) != resource - TypeError Type mismatch
 (object) array ( ) != NULL - TypeError Type mismatch
@@ -442,9 +442,9 @@ array ( 'bar' => 1, 'foo' => 2 ) != NULL - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) != array ( 0 => 1, 1 => 100 ) - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) != array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) != array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
-(object) array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( ) = false
+(object) array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( ) = true
 (object) array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) = false
-(object) array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) = false
+(object) array ( 'foo' => 1, 'bar' => 2 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) = true
 (object) array ( 'foo' => 1, 'bar' => 2 ) != DateTime - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) != resource - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) != NULL - TypeError Type mismatch
@@ -465,8 +465,8 @@ array ( 'bar' => 1, 'foo' => 2 ) != NULL - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) != array ( 0 => 1, 1 => 100 ) - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) != array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) != array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
-(object) array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( ) = false
-(object) array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) = false
+(object) array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( ) = true
+(object) array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( 'foo' => 1, 'bar' => 2 ) = true
 (object) array ( 'bar' => 1, 'foo' => 2 ) != (object) array ( 'bar' => 1, 'foo' => 2 ) = false
 (object) array ( 'bar' => 1, 'foo' => 2 ) != DateTime - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) != resource - TypeError Type mismatch

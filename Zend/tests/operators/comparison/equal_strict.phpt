@@ -13,7 +13,7 @@ $fn = function($a, $b) { return $a == $b; };
 test_two_operands('$a == $b', $fn);
 
 --EXPECT--
-false == false = false
+false == false = true
 false == true = false
 false == 0 - TypeError Type mismatch
 false == 10 - TypeError Type mismatch
@@ -37,7 +37,7 @@ false == DateTime - TypeError Type mismatch
 false == resource - TypeError Type mismatch
 false == NULL - TypeError Type mismatch
 true == false = false
-true == true = false
+true == true = true
 true == 0 - TypeError Type mismatch
 true == 10 - TypeError Type mismatch
 true == 0.0 - TypeError Type mismatch
@@ -301,7 +301,7 @@ array ( ) == '10' - TypeError Type mismatch
 array ( ) == '010' - TypeError Type mismatch
 array ( ) == '10 elephants' - TypeError Type mismatch
 array ( ) == 'foo' - TypeError Type mismatch
-array ( ) == array ( ) = false
+array ( ) == array ( ) = true
 array ( ) == array ( 0 => 1 ) = false
 array ( ) == array ( 0 => 1, 1 => 100 ) = false
 array ( ) == array ( 'foo' => 1, 'bar' => 2 ) = false
@@ -325,7 +325,7 @@ array ( 0 => 1 ) == '010' - TypeError Type mismatch
 array ( 0 => 1 ) == '10 elephants' - TypeError Type mismatch
 array ( 0 => 1 ) == 'foo' - TypeError Type mismatch
 array ( 0 => 1 ) == array ( ) = false
-array ( 0 => 1 ) == array ( 0 => 1 ) = false
+array ( 0 => 1 ) == array ( 0 => 1 ) = true
 array ( 0 => 1 ) == array ( 0 => 1, 1 => 100 ) = false
 array ( 0 => 1 ) == array ( 'foo' => 1, 'bar' => 2 ) = false
 array ( 0 => 1 ) == array ( 'bar' => 1, 'foo' => 2 ) = false
@@ -349,7 +349,7 @@ array ( 0 => 1, 1 => 100 ) == '10 elephants' - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) == 'foo' - TypeError Type mismatch
 array ( 0 => 1, 1 => 100 ) == array ( ) = false
 array ( 0 => 1, 1 => 100 ) == array ( 0 => 1 ) = false
-array ( 0 => 1, 1 => 100 ) == array ( 0 => 1, 1 => 100 ) = false
+array ( 0 => 1, 1 => 100 ) == array ( 0 => 1, 1 => 100 ) = true
 array ( 0 => 1, 1 => 100 ) == array ( 'foo' => 1, 'bar' => 2 ) = false
 array ( 0 => 1, 1 => 100 ) == array ( 'bar' => 1, 'foo' => 2 ) = false
 array ( 0 => 1, 1 => 100 ) == (object) array ( ) - TypeError Type mismatch
@@ -373,7 +373,7 @@ array ( 'foo' => 1, 'bar' => 2 ) == 'foo' - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) == array ( ) = false
 array ( 'foo' => 1, 'bar' => 2 ) == array ( 0 => 1 ) = false
 array ( 'foo' => 1, 'bar' => 2 ) == array ( 0 => 1, 1 => 100 ) = false
-array ( 'foo' => 1, 'bar' => 2 ) == array ( 'foo' => 1, 'bar' => 2 ) = false
+array ( 'foo' => 1, 'bar' => 2 ) == array ( 'foo' => 1, 'bar' => 2 ) = true
 array ( 'foo' => 1, 'bar' => 2 ) == array ( 'bar' => 1, 'foo' => 2 ) = false
 array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( ) - TypeError Type mismatch
 array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
@@ -397,7 +397,7 @@ array ( 'bar' => 1, 'foo' => 2 ) == array ( ) = false
 array ( 'bar' => 1, 'foo' => 2 ) == array ( 0 => 1 ) = false
 array ( 'bar' => 1, 'foo' => 2 ) == array ( 0 => 1, 1 => 100 ) = false
 array ( 'bar' => 1, 'foo' => 2 ) == array ( 'foo' => 1, 'bar' => 2 ) = false
-array ( 'bar' => 1, 'foo' => 2 ) == array ( 'bar' => 1, 'foo' => 2 ) = false
+array ( 'bar' => 1, 'foo' => 2 ) == array ( 'bar' => 1, 'foo' => 2 ) = true
 array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( ) - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
@@ -421,7 +421,7 @@ array ( 'bar' => 1, 'foo' => 2 ) == NULL - TypeError Type mismatch
 (object) array ( ) == array ( 0 => 1, 1 => 100 ) - TypeError Type mismatch
 (object) array ( ) == array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 (object) array ( ) == array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
-(object) array ( ) == (object) array ( ) = false
+(object) array ( ) == (object) array ( ) = true
 (object) array ( ) == (object) array ( 'foo' => 1, 'bar' => 2 ) = false
 (object) array ( ) == (object) array ( 'bar' => 1, 'foo' => 2 ) = false
 (object) array ( ) == DateTime - TypeError Type mismatch
@@ -445,7 +445,7 @@ array ( 'bar' => 1, 'foo' => 2 ) == NULL - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) == array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) == array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( ) = false
-(object) array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( 'foo' => 1, 'bar' => 2 ) = false
+(object) array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( 'foo' => 1, 'bar' => 2 ) = true
 (object) array ( 'foo' => 1, 'bar' => 2 ) == (object) array ( 'bar' => 1, 'foo' => 2 ) = false
 (object) array ( 'foo' => 1, 'bar' => 2 ) == DateTime - TypeError Type mismatch
 (object) array ( 'foo' => 1, 'bar' => 2 ) == resource - TypeError Type mismatch
@@ -469,7 +469,7 @@ array ( 'bar' => 1, 'foo' => 2 ) == NULL - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) == array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( ) = false
 (object) array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( 'foo' => 1, 'bar' => 2 ) = false
-(object) array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( 'bar' => 1, 'foo' => 2 ) = false
+(object) array ( 'bar' => 1, 'foo' => 2 ) == (object) array ( 'bar' => 1, 'foo' => 2 ) = true
 (object) array ( 'bar' => 1, 'foo' => 2 ) == DateTime - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) == resource - TypeError Type mismatch
 (object) array ( 'bar' => 1, 'foo' => 2 ) == NULL - TypeError Type mismatch
@@ -493,7 +493,7 @@ DateTime == array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 DateTime == (object) array ( ) - TypeError Type mismatch
 DateTime == (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 DateTime == (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
-DateTime == DateTime = false
+DateTime == DateTime = true
 DateTime == resource - TypeError Type mismatch
 DateTime == NULL - TypeError Type mismatch
 resource == false - TypeError Type mismatch
@@ -517,7 +517,7 @@ resource == (object) array ( ) - TypeError Type mismatch
 resource == (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 resource == (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 resource == DateTime - TypeError Type mismatch
-resource == resource = false
+resource == resource = true
 resource == NULL - TypeError Type mismatch
 NULL == false - TypeError Type mismatch
 NULL == true - TypeError Type mismatch
@@ -541,4 +541,4 @@ NULL == (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Type mismatch
 NULL == (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Type mismatch
 NULL == DateTime - TypeError Type mismatch
 NULL == resource - TypeError Type mismatch
-NULL == NULL = false
+NULL == NULL = true
