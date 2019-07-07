@@ -94,6 +94,14 @@ Submitting test scripts helps us to understand what functionality has changed.
 It is important for the stability and maintainability of PHP that tests are
 comprehensive.
 
+Failure conditions of `zend_parse_parameters`, `ZEND_PARSE_PARAMETERS()` and
+similar functions should not be tested. These parameter parsing APIs are already
+extensively tested, and additional tests only complicate future modifications.
+
+For newly created tests, a `--CREDITS--` section should no longer be included,
+as test authorship is already accurately tracked by Git. If multiple authors
+should be credited, the `Co-authored-by` tag in the commit message may be used.
+
 ## Writing documentation
 
 There are two ways to contribute to the PHP manual. You can edit the manual and
