@@ -1563,19 +1563,66 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
-ALL_OUTPUT_FILES="main/build-defs.h \
-scripts/phpize scripts/man1/phpize.1 \
-scripts/php-config scripts/man1/php-config.1 \
-$PHP_OUTPUT_FILES"
-
 dnl Generate build files.
-AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
+AC_CONFIG_FILES([
+  main/build-defs.h
+  scripts/man1/phpize.1
+  scripts/man1/php-config.1
+  scripts/phpize
+  scripts/php-config
+])
+
+AC_CONFIG_FILES([
+  main/internal_functions.c
+],[
+  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
+],[
+  EXT_STATIC="$EXT_STATIC"
+  AWK="$AWK"
+])
+
+AC_CONFIG_FILES([
+  main/internal_functions_cli.c:main/internal_functions.c.in
+],[
+  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
+],[
+  EXT_CLI_STATIC="$EXT_CLI_STATIC"
+  AWK="$AWK"
+])
 
 AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])])
 
 AC_CONFIG_COMMANDS([default],[
-cat <<X
+  test -d Zend || $php_shtool mkdir Zend
+  cat >Zend/zend_config.h <<FEO
+#include <../main/php_config.h>
+FEO
 
+  if test "x$php_warning_apache" != "x"; then
+    cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| You have built PHP for Apache's current non-threaded MPM.          |
+| If you change Apache to use a threaded MPM you must reconfigure    |
+| PHP with --enable-maintainer-zts                                   |
+X
+  fi
+
+  if test "x$php_warning_oci8" != "x"; then
+    cat <<X
++--------------------------------------------------------------------+
+| Notice:                                                            |
+| If you encounter <defunc> processes when using a local Oracle      |
+| database, set the value BEQUEATH_DETACH=YES in Oracle Net's        |
+| sqlnet.ora file on the PHP host, or set the environment variable   |
+| BEQUEATH_DETACH to YES before starting Apache. If the problem      |
+| still occurs, then recompile PHP and specify --enable-sigchild     |
+| when configuring.                                                  |
+X
+  fi
+
+  cat <<X
 +--------------------------------------------------------------------+
 | License:                                                           |
 | This software is subject to the PHP License, available in this     |
@@ -1589,60 +1636,20 @@ Thank you for using PHP.
 
 X
 ],[
-
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
-  REDO_ALL=yes
-fi
-
-dnl Create configuration headers.
-dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
-
-cat >Zend/zend_config.h <<FEO
-#include <../main/php_config.h>
-FEO
-
-dnl Run this only when generating all the files.
-if test -n "\$REDO_ALL"; then
-  echo "creating main/internal_functions.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
-
-  echo "creating main/internal_functions_cli.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
-
-    if test "$PHP_SAPI" = "apache2handler"; then
-      if test "$APACHE_VERSION" -ge 2004001; then
-        if test -z "$APACHE_THREADED_MPM"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| You have built PHP for Apache's current non-threaded MPM.          |
-| If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-maintainer-zts                                   |
-X
-        fi
-      fi
-    fi
-
-  dnl Warn about Apache if oci8 extension is enabled on Linux.
-  if test "$PHP_OCI8" != "no"; then
-    if test "$PHP_SIGCHILD" != "yes"; then
-      if test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
-cat <<X
-+--------------------------------------------------------------------+
-| Notice:                                                            |
-| If you encounter <defunc> processes when using a local Oracle      |
-| database, set the value BEQUEATH_DETACH=YES in Oracle Net's        |
-| sqlnet.ora file on the PHP host, or set the environment variable   |
-| BEQUEATH_DETACH to YES before starting Apache.  If the problem     |
-| still occurs, then recompile PHP and specify --enable-sigchild     |
-| when configuring.                                                  |
-X
+  if test "$PHP_SAPI" = "apache2handler"; then
+    if test "$APACHE_VERSION" -ge 2004001; then
+      if test -z "$APACHE_THREADED_MPM"; then
+        php_warning_apache=1
       fi
     fi
   fi
 
-fi
+  if test "$PHP_OCI8" != "no"; then
+    if test "$PHP_SIGCHILD" != "yes"; then
+      if test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
+        php_warning_oci8=1
+      fi
+    fi
+  fi
 ])
 AC_OUTPUT

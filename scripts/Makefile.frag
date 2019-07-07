@@ -47,7 +47,7 @@ install-programs: $(builddir)/phpize $(builddir)/php-config
 	done
 
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status
-	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
+	$(top_builddir)/config.status $@
 
 $(builddir)/php-config: $(srcdir)/php-config.in $(top_builddir)/config.status
-	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
+	$(top_builddir)/config.status $@
