@@ -1636,14 +1636,6 @@ if test -n "\$REDO_ALL"; then
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test -n "$PHP_APXS_BROKEN"; then
-    echo "+--------------------------------------------------------------------+"
-    echo "| WARNING: Your $APXS script is most likely broken."
-    echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/faq.build#faq.build.apxs         |"
-    echo "| and make the changes described there and try again.                |"
-  fi
-
   if test -n "$DEBUG_LOG"; then
     rm -f config.cache
 cat <<X
