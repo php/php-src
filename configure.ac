@@ -12,6 +12,7 @@ m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 m4_include([TSRM/threads.m4])
 m4_include([TSRM/tsrm.m4])
+m4_include([Zend/Zend.m4])
 
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
@@ -311,12 +312,13 @@ case $host_alias in
     ;;
 esac
 
-dnl Include Zend configurations.
-dnl ----------------------------------------------------------------------------
-
-sinclude(Zend/Zend.m4)
-
-dnl ----------------------------------------------------------------------------
+AC_MSG_CHECKING([whether /dev/urandom exists])
+if test -r "/dev/urandom" && test -c "/dev/urandom"; then
+  AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
@@ -1200,9 +1202,7 @@ dnl ----------------------------------------------------------------------------
 PHP_HELP_SEPARATOR([Zend:])
 PHP_CONFIGURE_PART(Configuring Zend)
 
-LIBZEND_BASIC_CHECKS
-LIBZEND_DLSYM_CHECK
-LIBZEND_OTHER_CHECKS
+ZEND_INIT
 
 if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
