@@ -2118,37 +2118,6 @@ IFS="- /.
 ])
 
 dnl
-dnl PHP_DEBUG_MACRO(filename)
-dnl
-AC_DEFUN([PHP_DEBUG_MACRO],[
-  DEBUG_LOG=$1
-  cat >$1 <<X
-CONFIGURE:  $CONFIGURE_COMMAND
-CC:         $CC
-CFLAGS:     $CFLAGS
-CPPFLAGS:   $CPPFLAGS
-CXX:        $CXX
-CXXFLAGS:   $CXXFLAGS
-INCLUDES:   $INCLUDES
-LDFLAGS:    $LDFLAGS
-LIBS:       $LIBS
-DLIBS:      $DLIBS
-SAPI:       $PHP_SAPI
-PHP_RPATHS: $PHP_RPATHS
-uname -a:   `uname -a`
-
-X
-    cat >conftest.$ac_ext <<X
-main()
-{
-  exit(0);
-}
-X
-    (eval echo \"$ac_link\"; eval $ac_link && ./conftest) >>$1 2>&1
-    rm -fr conftest*
-])
-
-dnl
 dnl PHP_CONFIG_NICE(filename)
 dnl
 dnl This macro creates script file with given filename which includes the last
