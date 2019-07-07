@@ -1637,23 +1637,6 @@ if test -n "\$REDO_ALL"; then
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test -n "$DEBUG_LOG"; then
-    rm -f config.cache
-cat <<X
-+--------------------------------------------------------------------+
-|                       *** ATTENTION ***                            |
-|                                                                    |
-| Something is likely to be messed up here, because the configure    |
-| script was not able to detect a simple feature on your platform.   |
-| This is often caused by incorrect configuration parameters. Please |
-| see the file debug.log for error messages.                         |
-|                                                                    |
-| If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropriate     |
-| information about your setup.                                      |
-X
-  fi
-
     if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then
         if test -z "$APACHE_THREADED_MPM"; then
