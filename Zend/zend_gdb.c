@@ -22,9 +22,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
 #include <sys/user.h>
+#include <sys/proc.h>
 #endif
 #include <fcntl.h>
 #include <unistd.h>
@@ -141,20 +142,29 @@ ZEND_API int zend_gdb_present(void)
 
 		close(fd);
 	}
-#elif defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #if defined(__APPLE__)
+#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid());
 #define KINFO_PROC_FLAG (cproc->kp_proc.p_flag)
 #define KINFO_PROC_PPID (cproc->kp_proc.p_oppid)
 #define KINFO_PROC_COMM (pcproc->kp_proc.p_comm)
-#else
+#elif defined(__FreeBSD__)
+#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid());
 #define KINFO_PROC_FLAG (cproc->ki_flag)
 #define KINFO_PROC_PPID (cproc->ki_ppid)
 #define KINFO_PROC_COMM (pcproc->ki_comm)
+#elif defined(__OpenBSD__)
+#define P_TRACED PS_TRACED
+#define KINFO_MIB int mib[6] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc), 1};
+#define KINFO_PROC_FLAG (cproc->p_psflags)
+#define KINFO_PROC_PPID (cproc->p_ppid)
+#define KINFO_PROC_COMM (pcproc->p_comm)
 #endif
 	struct kinfo_proc *cproc;
 	size_t cproclen = 0;
-	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
-	if (sysctl(mib, 4, NULL, &cproclen, NULL, 0) != 0) {
+	KINFO_MIB
+	const size_t miblen = sizeof(mib)/sizeof(mib[0]);
+	if (sysctl(mib, miblen, NULL, &cproclen, NULL, 0) != 0) {
 		return 0;
 	}
 	cproc = (struct kinfo_proc *)malloc(cproclen);
@@ -163,7 +173,7 @@ ZEND_API int zend_gdb_present(void)
 			pid_t ppid = KINFO_PROC_PPID;
 			mib[3] = ppid;
 			struct kinfo_proc *pcproc = (struct kinfo_proc *)malloc(cproclen);
-			if (sysctl(mib, 4, pcproc, &cproclen, NULL, 0) == 0) {
+			if (sysctl(mib, miblen, pcproc, &cproclen, NULL, 0) == 0) {
 				// Could be prefixed with package systems e.g. egdb
 				if (strstr(KINFO_PROC_COMM, "gdb")) {
 					ret = 1;
