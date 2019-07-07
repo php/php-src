@@ -80,7 +80,7 @@ PHP_TEST_SHARED_EXTENSIONS =  ` \
 	fi; \
 	if test "x$(PHP_ZEND_EX)" != "x"; then \
 		for i in $(PHP_ZEND_EX)""; do \
-			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d $(ZEND_EXT_TYPE)=$(top_builddir)/modules/$$dlname"; \
+			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d zend_extension=$(top_builddir)/modules/$$dlname"; \
 		done; \
 	fi`
 PHP_DEPRECATED_DIRECTIVES_REGEX = '^(magic_quotes_(gpc|runtime|sybase)?|(zend_)?extension(_debug)?(_ts)?)[\t\ ]*='
