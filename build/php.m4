@@ -2104,7 +2104,7 @@ AC_DEFUN([PHP_INSTALL_HEADERS],[
 dnl
 dnl PHP_AP_EXTRACT_VERSION(/path/httpd)
 dnl
-dnl This macro is used to get a comparable version for apache1/2.
+dnl This macro is used to get a comparable version for Apache.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
   ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
