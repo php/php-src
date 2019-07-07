@@ -1606,14 +1606,6 @@ if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL
   REDO_ALL=yes
 fi
 
-dnl Create configuration headers.
-dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
-
-cat >Zend/zend_config.h <<FEO
-#include <../main/php_config.h>
-FEO
-
 dnl Run this only when generating all the files.
 if test -n "\$REDO_ALL"; then
   echo "creating main/internal_functions.c"

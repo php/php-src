@@ -39,7 +39,7 @@
 #if ZEND_WIN32
 # include "zend_config.w32.h"
 #else
-#include "zend_config.h"
+# include "php_config.h"
 # include <sys/time.h>
 # include <sys/resource.h>
 #endif

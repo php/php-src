@@ -37,10 +37,8 @@
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
 #elif defined(__riscos__)
-# include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		';'
 #else
-# include <zend_config.h>
 # define ZEND_PATHS_SEPARATOR		':'
 #endif
 
@@ -121,8 +119,6 @@
 #endif
 
 #define zend_quiet_write(...) ZEND_IGNORE_VALUE(write(__VA_ARGS__))
-
-/* all HAVE_XXX test have to be after the include of zend_config above */
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 

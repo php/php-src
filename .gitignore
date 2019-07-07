@@ -99,7 +99,6 @@ config.h.in
 /main/build-defs.h
 /main/php_config.h.in
 /main/php_config.h
-/Zend/zend_config.h
 
 # ------------------------------------------------------------------------------
 # Manual (man 1 and 8) pages generated from templates for *nix alike systems
