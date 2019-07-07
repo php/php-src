@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/sysctl.h>
 #include <sys/user.h>
 #include <sys/proc.h>
@@ -142,14 +142,14 @@ ZEND_API int zend_gdb_present(void)
 
 		close(fd);
 	}
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #if defined(__APPLE__)
-#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid());
+#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
 #define KINFO_PROC_FLAG (cproc->kp_proc.p_flag)
 #define KINFO_PROC_PPID (cproc->kp_proc.p_oppid)
 #define KINFO_PROC_COMM (pcproc->kp_proc.p_comm)
 #elif defined(__FreeBSD__)
-#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid());
+#define KINFO_MIB int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
 #define KINFO_PROC_FLAG (cproc->ki_flag)
 #define KINFO_PROC_PPID (cproc->ki_ppid)
 #define KINFO_PROC_COMM (pcproc->ki_comm)
@@ -157,6 +157,12 @@ ZEND_API int zend_gdb_present(void)
 #define P_TRACED PS_TRACED
 #define KINFO_MIB int mib[6] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc), 1};
 #define KINFO_PROC_FLAG (cproc->p_psflags)
+#define KINFO_PROC_PPID (cproc->p_ppid)
+#define KINFO_PROC_COMM (pcproc->p_comm)
+#elif defined(__NetBSD__)
+#define kinfo_proc kinfo_proc2
+#define KINFO_MIB int mib[6] = {CTL_KERN, KERN_PROC2, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc2), 1};
+#define KINFO_PROC_FLAG (cproc->p_flag)
 #define KINFO_PROC_PPID (cproc->p_ppid)
 #define KINFO_PROC_COMM (pcproc->p_comm)
 #endif
