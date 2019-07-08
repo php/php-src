@@ -165,9 +165,6 @@ test -z "$CFLAGS" && auto_cflags=1
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
 
-php_abs_top_srcdir=$abs_srcdir
-php_abs_top_builddir=$abs_builddir
-
 dnl Because `make install` is often performed by the superuser, we create the
 dnl libs subdirectory as the user who configures PHP. Otherwise, the current
 dnl user will not be able to delete libs or the contents of libs.
@@ -1382,8 +1379,6 @@ PHP_SUBST(EXT_LIBS)
 
 PHP_SUBST_OLD(abs_builddir)
 PHP_SUBST_OLD(abs_srcdir)
-PHP_SUBST_OLD(php_abs_top_builddir)
-PHP_SUBST_OLD(php_abs_top_srcdir)
 
 PHP_SUBST(bindir)
 PHP_SUBST(sbindir)
@@ -1458,9 +1453,6 @@ if test "$PHP_WERROR" = "yes"; then
   CFLAGS="$CFLAGS -Werror"
   CPPFLAGS="$CPPFLAGS -Werror"
 fi
-
-ZEND_EXT_TYPE="zend_extension"
-PHP_SUBST(ZEND_EXT_TYPE)
 
 dnl
 dnl Libtool creation.
