@@ -26,14 +26,10 @@
 #include "url.h"
 #include "file.h"
 #ifdef _OSD_POSIX
-#ifndef APACHE
-#error On this EBCDIC platform, PHP is only supported as an Apache module.
-#else /*APACHE*/
-#ifndef CHARSET_EBCDIC
-#define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
-#endif
-#include "ebcdic.h"
-#endif /*APACHE*/
+# ifndef CHARSET_EBCDIC
+#  define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
+# endif
+# include "ebcdic.h"
 #endif /*_OSD_POSIX*/
 
 /* {{{ free_url

@@ -128,8 +128,6 @@ typedef int pid_t;
 #endif
 #include <assert.h>
 
-#define APACHE 0
-
 #if HAVE_UNIX_H
 #include <unix.h>
 #endif
