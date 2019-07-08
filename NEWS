@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
 
+- Reflection:
+  . Fixed bug #78263 (\ReflectionReference::fromArrayElement() returns null
+    while item is a reference). (Nikita)
+
 - Standard:
   . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
   . Fixed #78208 (password_needs_rehash() with an unknown algo should always
