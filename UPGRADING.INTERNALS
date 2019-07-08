@@ -23,6 +23,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   t. Exceptions thrown by string conversions.
   u. Removed uint and ulong typedefs
   v. Compound assignment opcodes
+  z. APACHE symbol removed
 
 2. Build system changes
   a. Abstract
@@ -219,6 +220,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP and ZEND_ASSIGN_STATIC_PROP_OP with
      ZEND_ADD (or other) in extended_value.
 
+  z. APACHE symbol has been removed and is no longer defined.
 
 ========================
 2. Build system changes
@@ -278,10 +280,19 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       HAVE_STDLIB_H, HAVE_SYS_VARARGS_H, HAVE_ASSERT_H, HAVE_SYS_DIR_H,
       TM_IN_SYS_TIME, HAVE_STRTOD, HAVE_STRCOLL, HAVE_ERRNO_H, HAVE_MEMCPY,
       HAVE_SNPRINTF, HAVE_STDIO_H, HAVE_STRPBRK, HAVE_TIME_H, HAVE_LIMITS_H,
-      HAVE_STRTOUL, HAVE_SYS_NDIR_H, HAVE_SYS_TIMES_H, PHP_HAVE_STDINT_TYPES.
+      HAVE_STRTOUL, HAVE_SYS_NDIR_H, HAVE_SYS_TIMES_H, PHP_HAVE_STDINT_TYPES,
+      HAVE_SIGNAL_H, HAVE_STRERROR.
     - Removed unused check for dev/arandom and the HAVE_DEV_ARANDOM symbol.
     - Remove unused functions checks: HAVE_MBSINIT, HAVE_MEMPCPY, HAVE_SETPGID,
-      HAVE_STRPNCPY, HAVE_STRTOULL, and HAVE_VSNPRINTF.
+      HAVE_STRPNCPY, HAVE_STRTOULL, HAVE_VSNPRINTF, HAVE_CUSERID, HAVE_LRAND48,
+      HAVE_RANDOM, HAVE_SRAND48, HAVE_SRANDOM, HAVE_STRDUP.
+    - Unused check for struct cmsghdr and symbol HAVE_CMSGHDR have been removed.
+    - Unused ApplicationServices/ApplicationServices.h headers check and
+      HAVE_APPLICATIONSERVICES_APPLICATIONSERVICES_H symbol have been removed.
+    - PHP_DEBUG_MACRO macro has been removed.
+    - PHP_CHECK_CONFIGURE_OPTIONS macro has been removed. Default Autoconf's
+      --enable-option-checking=fatal option can be used in the configure step
+      to enable error when invalid options are used.
 
   c. Windows build system changes
 

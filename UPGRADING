@@ -268,7 +268,7 @@ PHP 7.4 UPGRADE NOTES
   . PDO::setAttribute(PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES, true) enables the
     use of SQLite3 extended result codes in errorInfo().
 
-r SQLite3:
+- SQLite3:
   . Added SQLite3::lastExtendedErrorCode() to fetch the last extended result
     code.
   . Added SQLite3::enableExtendedResultCodes($enable = true), which will make
@@ -301,6 +301,11 @@ r SQLite3:
     shell) and PHP will take care of any necessary argument escaping.
 
         proc_open(['php', '-r', 'echo "Hello World\n";'], $descriptors, $pipes);
+
+  . password_hash() has argon2i(d) implementations from ext/sodium when PHP is
+    built without libargon.
+
+    RFC: https://wiki.php.net/rfc/sodium.argon.hash
 
 ========================================
 3. Changes in SAPI modules
