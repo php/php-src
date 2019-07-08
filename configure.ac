@@ -416,6 +416,7 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
+dnl locale.h is checked for supporting old code in extensions such as imagick.
 AC_CHECK_HEADERS([ \
 inttypes.h \
 stdint.h \
@@ -440,7 +441,6 @@ netdb.h \
 poll.h \
 pwd.h \
 resolv.h \
-signal.h \
 strings.h \
 syslog.h \
 sysexits.h \
@@ -642,7 +642,6 @@ statfs \
 statvfs \
 std_syslog \
 strcasecmp \
-strerror \
 strfmon \
 strnlen \
 strptime \
