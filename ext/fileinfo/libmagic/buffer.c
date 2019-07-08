@@ -59,7 +59,7 @@ buffer_init(struct buffer *b, int fd, const zend_stat_t *st, const void *data,
 void
 buffer_fini(struct buffer *b)
 {
-		efree(b->ebuf);
+	efree(b->ebuf);
 }
 
 int

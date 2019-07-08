@@ -1,7 +1,7 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/apprentice.c	2019-06-29 13:59:33.250393384 +0200
-@@ -29,27 +29,42 @@
++++ libmagic/apprentice.c	2019-06-29 22:00:36.200336685 +0200
+@@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
  
@@ -10,8 +10,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  #include "file.h"
  
  #ifndef	lint
--FILE_RCSID("@(#)$File: apprentice.c,v 1.283 2019/02/20 02:35:27 christos Exp $")
-+FILE_RCSID("@(#)$File: apprentice.c,v 1.270 2018/02/21 21:26:48 christos Exp $")
+@@ -36,20 +38,33 @@
  #endif	/* lint */
  
  #include "magic.h"
@@ -425,7 +424,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		(void)addentry(ms, &me, mset);
 -	free(line);
 -	(void)fclose(f);
-+    efree(line);
++	efree(line);
 +	php_stream_close(stream);
  }
  
@@ -975,7 +974,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
 --- libmagic.orig/ascmagic.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/ascmagic.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/ascmagic.c	2019-06-29 20:07:54.070996657 +0200
 @@ -96,7 +96,7 @@
  		rv = file_ascmagic_with_encoding(ms, &bb,
  		    ubuf, ulen, code, type, text);
@@ -1006,7 +1005,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
 --- libmagic.orig/buffer.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/buffer.c	2019-06-29 17:22:25.723071581 +0200
++++ libmagic/buffer.c	2019-06-29 22:07:44.306641133 +0200
 @@ -31,19 +31,23 @@
  #endif	/* lint */
  
@@ -1038,7 +1037,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  buffer_fini(struct buffer *b)
  {
 -	free(b->ebuf);
-+		efree(b->ebuf);
++	efree(b->ebuf);
  }
  
  int
@@ -1063,7 +1062,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/cdf.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/cdf.c	2019-06-29 20:07:54.074996599 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1321,7 +1320,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2019-02-20 02:24:19.000000000 +0100
-+++ libmagic/cdf.h	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/cdf.h	2019-06-29 20:07:54.074996599 +0200
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1338,7 +1337,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  #define timespec timeval
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/cdf_time.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/cdf_time.c	2019-06-29 20:07:54.074996599 +0200
 @@ -23,6 +23,7 @@
   * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   * POSSIBILITY OF SUCH DAMAGE.
@@ -1367,27 +1366,23 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/compress.c	2019-06-29 13:59:33.250393384 +0200
-@@ -45,13 +45,13 @@
++++ libmagic/compress.c	2019-06-29 20:07:54.078996542 +0200
+@@ -45,13 +45,11 @@
  #endif
  #include <string.h>
  #include <errno.h>
 -#include <ctype.h>
 -#include <stdarg.h>
-+#ifdef HAVE_SIGNAL_H
  #include <signal.h>
--#ifndef HAVE_SIG_T
-+# ifndef HAVE_SIG_T
+ #ifndef HAVE_SIG_T
  typedef void (*sig_t)(int);
--#endif /* HAVE_SIG_T */
+ #endif /* HAVE_SIG_T */
 -#if !defined(__MINGW32__) && !defined(WIN32)
-+# endif /* HAVE_SIG_T */
-+#endif
 +#ifndef PHP_WIN32
  #include <sys/ioctl.h>
  #endif
  #ifdef HAVE_SYS_WAIT_H
-@@ -60,13 +60,14 @@
+@@ -60,13 +58,14 @@
  #if defined(HAVE_SYS_TIME_H)
  #include <sys/time.h>
  #endif
@@ -1405,23 +1400,15 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  #define BUILTIN_BZLIB
  #include <bzlib.h>
  #endif
-@@ -117,6 +118,7 @@
+@@ -116,6 +115,7 @@
+ #define gzip_flags "-cd"
  #define lrzip_flags "-do"
  #define lzip_flags gzip_flags
- 
 +#ifdef PHP_FILEINFO_UNCOMPRESS
+ 
  static const char *gzip_args[] = {
  	"gzip", gzip_flags, NULL
- };
-@@ -173,6 +175,7 @@
- #endif
- };
- 
-+
- #define OKDATA 	0
- #define NODATA	1
- #define ERRDATA	2
-@@ -193,8 +196,7 @@
+@@ -193,8 +193,7 @@
      size_t *, int);
  #endif
  
@@ -1431,7 +1418,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  private const char *methodname(size_t);
  
  private int
-@@ -267,7 +269,7 @@
+@@ -267,7 +266,7 @@
  			if (urv == ERRDATA)
  				prv = format_decompression_error(ms, i, newbuf);
  			else
@@ -1440,7 +1427,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  			if (prv == -1)
  				goto error;
  			rv = 1;
-@@ -284,17 +286,17 @@
+@@ -284,17 +283,17 @@
  			 * XXX: If file_buffer fails here, we overwrite
  			 * the compressed text. FIXME.
  			 */
@@ -1461,7 +1448,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  			}
  			if (!mime && file_printf(ms, ")") == -1)
  				goto error;
-@@ -315,7 +317,8 @@
+@@ -315,7 +314,8 @@
  	if (sa_saved && sig_act.sa_handler != SIG_IGN)
  		(void)sigaction(SIGPIPE, &sig_act, NULL);
  
@@ -1471,7 +1458,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  	ms->flags |= MAGIC_COMPRESS;
  	DPRINTF("Zmagic returns %d\n", rv);
  	return rv;
-@@ -350,7 +353,7 @@
+@@ -350,7 +350,7 @@
   * `safe' read for sockets and pipes.
   */
  protected ssize_t
@@ -1480,7 +1467,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  {
  	ssize_t rv;
  #ifdef FIONREAD
-@@ -398,7 +401,7 @@
+@@ -398,7 +398,7 @@
  
  nocheck:
  	do
@@ -1489,7 +1476,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  		case -1:
  			if (errno == EINTR)
  				continue;
-@@ -434,7 +437,6 @@
+@@ -434,7 +434,6 @@
  #else
  	{
  		int te;
@@ -1497,7 +1484,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  		tfd = mkstemp(buf);
  		(void)umask(ou);
  		te = errno;
-@@ -477,13 +479,14 @@
+@@ -477,13 +476,13 @@
  		return -1;
  	}
  	(void)close(tfd);
@@ -1509,12 +1496,11 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  	return fd;
  }
 -#if HAVE_FORK
-+
 +#ifdef PHP_FILEINFO_UNCOMPRESS
  #ifdef BUILTIN_DECOMPRESS
  
  #define FHCRC		(1 << 1)
-@@ -534,7 +537,7 @@
+@@ -534,7 +533,7 @@
  	int rc;
  	z_stream z;
  
@@ -1523,14 +1509,14 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  		return makeerror(newch, n, "No buffer, %s", strerror(errno));
  
  	z.next_in = CCAST(Bytef *, old);
-@@ -831,3 +834,4 @@
+@@ -831,3 +830,4 @@
  	return rv;
  }
  #endif
 +#endif
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2019-02-20 03:35:27.000000000 +0100
-+++ libmagic/der.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/der.c	2019-06-29 20:07:54.078996542 +0200
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1549,20 +1535,18 @@ diff -u libmagic.orig/der.c libmagic/der.c
  	const uint8_t *d = CAST(const uint8_t *, q);
  	switch (tag) {
  	case DER_TAG_PRINTABLE_STRING:
-@@ -228,8 +231,8 @@
- 	default:
+@@ -229,7 +232,7 @@
  		break;
  	}
--
+ 
 -	for (uint32_t i = 0; i < len; i++) {
-+		
 +	for (; i < len; i++) {
  		uint32_t z = i << 1;
  		if (z < blen - 2)
  			snprintf(buf + z, blen - z, "%.2x", d[i]);
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2019-02-20 02:30:19.000000000 +0100
-+++ libmagic/elfclass.h	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/elfclass.h	2019-06-29 20:07:54.078996542 +0200
 @@ -41,7 +41,7 @@
  			return toomany(ms, "program headers", phnum);
  		flags |= FLAGS_IS_CORE;
@@ -1592,7 +1576,7 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
 --- libmagic.orig/encoding.c	2019-04-15 18:48:41.000000000 +0200
-+++ libmagic/encoding.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/encoding.c	2019-06-29 20:07:54.078996542 +0200
 @@ -89,13 +89,13 @@
  	*code_mime = "binary";
  
@@ -1623,7 +1607,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  }
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/file.h	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/file.h	2019-06-29 20:32:19.553528888 +0200
 @@ -33,18 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1818,7 +1802,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  
  typedef struct {
  	char *buf;
-@@ -550,28 +520,20 @@
+@@ -550,28 +520,13 @@
  protected file_pushbuf_t *file_push_buffer(struct magic_set *);
  protected char  *file_pop_buffer(struct magic_set *, file_pushbuf_t *);
  
@@ -1838,13 +1822,8 @@ diff -u libmagic.orig/file.h libmagic/file.h
 -#endif
 -#ifndef HAVE_DPRINTF
 -int dprintf(int, const char *, ...);
-+#ifndef HAVE_STRERROR
-+extern int sys_nerr;
-+extern char *sys_errlist[];
-+#define strerror(e) \
-+	(((e) >= 0 && (e) < sys_nerr) ? sys_errlist[(e)] : "Unknown error")
- #endif
- 
+-#endif
+-
 -#ifndef HAVE_STRLCPY
 +#ifndef strlcpy
  size_t strlcpy(char *, const char *, size_t);
@@ -1854,7 +1833,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  size_t strlcat(char *, const char *, size_t);
  #endif
  #ifndef HAVE_STRCASESTR
-@@ -587,39 +549,6 @@
+@@ -587,39 +542,6 @@
  #ifndef HAVE_ASCTIME_R
  char   *asctime_r(const struct tm *, char *);
  #endif
@@ -1894,7 +1873,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  
  #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)
  #define QUICK
-@@ -645,6 +574,18 @@
+@@ -645,6 +567,18 @@
  #else
  #define FILE_RCSID(id)
  #endif
@@ -1915,7 +1894,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #endif
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2019-05-07 04:26:48.000000000 +0200
-+++ libmagic/fsmagic.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/fsmagic.c	2019-06-29 20:07:54.082996485 +0200
 @@ -66,26 +66,10 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -2208,7 +2187,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/funcs.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/funcs.c	2019-06-29 20:07:54.082996485 +0200
 @@ -31,7 +31,6 @@
  #endif	/* lint */
  
@@ -2351,7 +2330,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	struct buffer b;
 +	int fd = -1;
 +
-+	if (stream) {		
++	if (stream) {
 +#ifdef _WIN64
 +		php_socket_t _fd = fd;
 +#else
@@ -2567,7 +2546,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2019-05-07 04:27:11.000000000 +0200
-+++ libmagic/magic.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/magic.c	2019-06-29 20:07:54.082996485 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -3031,8 +3010,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  public const char *
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2019-05-19 14:56:46.641201688 +0200
-+++ libmagic/magic.h	2019-06-29 13:59:33.250393384 +0200
+--- libmagic.orig/magic.h	2019-06-29 20:13:10.290924369 +0200
++++ libmagic/magic.h	2019-06-29 20:11:37.732033650 +0200
 @@ -124,6 +124,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -3043,7 +3022,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/print.c	2019-06-29 13:59:33.250393384 +0200
++++ libmagic/print.c	2019-06-29 20:07:54.082996485 +0200
 @@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
@@ -3117,7 +3096,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/readcdf.c	2019-06-29 13:59:33.254060103 +0200
++++ libmagic/readcdf.c	2019-06-29 22:10:43.100179773 +0200
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3212,19 +3191,19 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	cdf_zero_stream(&sst);
  out3:
 -	free(dir.dir_tab);
-+        efree(dir.dir_tab);
++	efree(dir.dir_tab);
  out2:
 -	free(ssat.sat_tab);
-+        efree(ssat.sat_tab);
++	efree(ssat.sat_tab);
  out1:
 -	free(sat.sat_tab);
-+        efree(sat.sat_tab);
++	efree(sat.sat_tab);
  out0:
  	/* If we handled it already, return */
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2019-05-17 04:24:59.000000000 +0200
-+++ libmagic/softmagic.c	2019-06-29 13:59:33.254060103 +0200
++++ libmagic/softmagic.c	2019-06-29 20:07:54.086996427 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3579,7 +3558,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
 --- libmagic.orig/strcasestr.c	2014-09-11 17:05:33.000000000 +0200
-+++ libmagic/strcasestr.c	2019-05-19 16:20:55.737239597 +0200
++++ libmagic/strcasestr.c	2019-06-29 20:07:54.086996427 +0200
 @@ -39,6 +39,8 @@
  
  #include "file.h"
