@@ -15,6 +15,13 @@ PHP                                                                        NEWS
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
    (Anatol)
 
+- LiteSpeed:
+  . Updated to LiteSpeed SAPI V7.4.3 (increased response header count limit from
+    100 to 1000, added crash handler to cleanly shutdown PHP request, added
+    CloudLinux mod_lsapi mode). (George Wang)
+  . Fixed bug #76058 (After "POST data can't be buffered", using php://input
+    makes huge tmp files). (George Wang)
+
 - Openssl:
   . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
     socket-to-stream). (Nikita)
