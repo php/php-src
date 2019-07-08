@@ -117,7 +117,7 @@ static void zend_jit_perf_jitdump_open(void)
 #if defined(__linux__)
 	fd = open("/proc/self/exe", O_RDONLY);
 #elif defined(__NetBSD__)
-	int fd = open("/proc/curproc/exe", O_RDONLY);
+	fd = open("/proc/curproc/exe", O_RDONLY);
 #elif defined(__FreeBSD__)
 	char path[PATH_MAX];
 	size_t pathlen = sizeof(path);
