@@ -17,6 +17,13 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
+- LiteSpeed:
+  . Updated to LiteSpeed SAPI V7.4.3 (increased response header count limit from
+    100 to 1000, added crash handler to cleanly shutdown PHP request, added
+    CloudLinux mod_lsapi mode). (George Wang)
+  . Fixed bug #76058 (After "POST data can't be buffered", using php://input
+    makes huge tmp files). (George Wang)
+
 - Openssl:
   . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
     socket-to-stream). (Nikita)
@@ -118,7 +125,7 @@ PHP                                                                        NEWS
     value). (Ignace Nyamagana Butera)
 
 - EXIF
-  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG). 
+  . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG).
     (CVE-2019-11036) (Stas)
 
 - Interbase:
@@ -149,7 +156,7 @@ PHP                                                                        NEWS
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
-    
+
 - Reflection:
   . Fixed bug #77772 (ReflectionClass::getMethods(null) doesn't work). (Nikita)
   . Fixed bug #77882 (Different behavior: always calls destructor). (Nikita)
@@ -192,7 +199,7 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #77753 (Heap-buffer-overflow in php_ifd_get32s). (CVE-2019-11034)
     (Stas)
-  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value). 
+  . Fixed bug #77831 (Heap-buffer-overflow in exif_iif_add_value).
     (CVE-2019-11035) (Stas)
 
 - FPM:
