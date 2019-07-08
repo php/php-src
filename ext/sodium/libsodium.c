@@ -358,8 +358,18 @@ static const zend_function_entry sodium_functions[] = {
 	PHP_FE_END
 };
 
+/* Load after the "standard" module in order to give it
+ * priority in registering argon2i/argon2id password hashers.
+ */
+static const zend_module_dep sodium_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+
 zend_module_entry sodium_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	sodium_deps,
 	"sodium",
 	sodium_functions,
 	PHP_MINIT(sodium),
@@ -632,6 +642,13 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING",
 						   sodium_base64_VARIANT_URLSAFE_NO_PADDING, CONST_CS | CONST_PERSISTENT);
 #endif
+
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+	if (FAILURE == PHP_MINIT(sodium_password_hash)(INIT_FUNC_ARGS_PASSTHRU)) {
+		return FAILURE;
+	}
+#endif
+
 	return SUCCESS;
 }
 

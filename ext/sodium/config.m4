@@ -11,6 +11,6 @@ if test "$PHP_SODIUM" != "no"; then
 
   AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
 
-  PHP_NEW_EXTENSION(sodium, libsodium.c, $ext_shared)
+  PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared)
   PHP_SUBST(SODIUM_SHARED_LIBADD)
 fi
