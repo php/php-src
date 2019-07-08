@@ -222,8 +222,6 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INPUT_REQUEST", PARSE_REQUEST, 	CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
 
@@ -549,13 +547,8 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			}
 			array_ptr = !Z_ISUNDEF(IF_G(env_array)) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
-		case PARSE_SESSION:
-			/* FIXME: Implement session source */
-			php_error_docref(NULL, E_WARNING, "INPUT_SESSION is not yet implemented");
-			break;
-		case PARSE_REQUEST:
-			/* FIXME: Implement request source */
-			php_error_docref(NULL, E_WARNING, "INPUT_REQUEST is not yet implemented");
+		default:
+			php_error_docref(NULL, E_WARNING, "Unknown source");
 			break;
 	}
 

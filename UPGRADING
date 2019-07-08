@@ -91,6 +91,9 @@ PHP 8.0 UPGRADE NOTES
   . The FILTER_FLAG_SCHEME_REQUIRED and FILTER_FLAG_HOST_REQUIRED flags for the
     FILTER_VALIDATE_URL filter have been removed. The scheme and host are (and
     have been) always required.
+  . The INPUT_REQUEST and INPUT_SESSION source for filter_input() etc have been
+    removed. These were never implemented and their use always generated a
+    warning.
 
 - GD:
   . The deprecated function image2wbmp() has been removed.
