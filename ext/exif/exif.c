@@ -2619,7 +2619,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 {
 	int   a;
 	char  *decode;
-	size_t len;;
+	size_t len;
 
 	*pszEncoding = NULL;
 	/* Copy the comment */
@@ -2632,11 +2632,11 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			/* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16)
 			 * since we have no encoding support for the BOM yet we skip that.
 			 */
-			if (!memcmp(szValuePtr, "\xFE\xFF", 2)) {
+			if (ByteCount >=2 && !memcmp(szValuePtr, "\xFE\xFF", 2)) {
 				decode = "UCS-2BE";
 				szValuePtr = szValuePtr+2;
 				ByteCount -= 2;
-			} else if (!memcmp(szValuePtr, "\xFF\xFE", 2)) {
+			} else if (ByteCount >=2 && !memcmp(szValuePtr, "\xFF\xFE", 2)) {
 				decode = "UCS-2LE";
 				szValuePtr = szValuePtr+2;
 				ByteCount -= 2;
