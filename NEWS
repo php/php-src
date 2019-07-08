@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.8
 
 - EXIF:
+  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
+    (CVE-2019-11042) (Stas)
   . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
     (CVE-2019-11041) (Stas)
 
