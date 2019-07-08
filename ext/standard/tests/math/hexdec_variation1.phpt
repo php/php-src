@@ -100,6 +100,8 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(9029)
 
 -- Iteration 5 --
@@ -109,18 +111,26 @@ float(285960729237)
 float(285960729238)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(261)
 
 -- Iteration 9 --
 float(20015998341120)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 float(1250999896553)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
@@ -151,12 +161,18 @@ int(0)
 hexdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 23 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2748)
 
 -- Iteration 24 --

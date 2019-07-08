@@ -14,11 +14,17 @@ var_dump((float)hexdec("1234500001"));
 var_dump((float)hexdec("17fffffff"));
 
 ?>
---EXPECT--
+--EXPECTF--
 int(74565)
 int(74565)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(74565)
 float(78187069441)
 float(6442450943)

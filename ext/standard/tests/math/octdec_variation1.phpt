@@ -83,7 +83,7 @@ foreach($inputs as $input) {
 fclose($fp);
 ?>
 ---Done---
---EXPECT--
+--EXPECTF--
 *** Testing octdec() : usage variations ***
 
 -- Iteration 1 --
@@ -96,27 +96,43 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1253)
 
 -- Iteration 5 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134037)
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134038)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(175304192)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(342391)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
@@ -147,12 +163,18 @@ int(0)
 octdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 23 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 24 --

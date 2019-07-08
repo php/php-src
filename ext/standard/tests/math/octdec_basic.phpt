@@ -29,19 +29,30 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(14489)
 int(253)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(36947879)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(4618484)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(4104)
 int(5349)
 int(342391)
 int(375)
 int(2147483647)
 float(2147483648)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(668)
 int(5349)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(102923)
 int(823384)
 int(1)

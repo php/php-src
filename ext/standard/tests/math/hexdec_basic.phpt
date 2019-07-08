@@ -29,7 +29,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECT--
+--EXPECTF--
 int(18433668)
 int(126895953)
 float(142929835591)
@@ -38,9 +38,13 @@ int(1194684)
 int(7904751)
 int(2147483647)
 float(2147483648)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1194684)
 int(3215381)
 int(3215381)
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(3215379)
 int(51446064)
 int(18279)

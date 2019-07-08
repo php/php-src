@@ -847,18 +847,30 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
-	zend_long i;
 	int mode = 0;
-	char c, *s;
+	char c, *s, *e;
 	zend_long cutoff;
 	int cutlim;
+	int invalidchars = 0;
 
 	s = ZSTR_VAL(str);
+	e = s + ZSTR_LEN(str);
+
+	/* Skip leading whitespace */
+	while (s < e && isspace(*s)) s++;
+	/* Skip trailing whitespace */
+	while (s < e && isspace(*(e-1))) e--;
+
+	if (e - s >= 2) {
+		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
+		if (base == 8 && s[0] == '0' && (s[1] == 'o' || s[1] == 'O')) s += 2;
+		if (base == 2 && s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) s += 2;
+	}
 
 	cutoff = ZEND_LONG_MAX / base;
 	cutlim = ZEND_LONG_MAX % base;
 
-	for (i = ZSTR_LEN(str); i > 0; i--) {
+	while (s < e) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -868,11 +880,15 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 			c -= 'A' - 10;
 		else if (c >= 'a' && c <= 'z')
 			c -= 'a' - 10;
-		else
+		else {
+			invalidchars++;
 			continue;
+		}
 
-		if (c >= base)
+		if (c >= base) {
+			invalidchars++;
 			continue;
+		}
 
 		switch (mode) {
 		case 0: /* Integer */
@@ -887,6 +903,10 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 		case 1: /* Float */
 			fnum = fnum * base + c;
 		}
+	}
+
+	if (invalidchars > 0) {
+		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
 	}
 
 	if (mode == 1) {
