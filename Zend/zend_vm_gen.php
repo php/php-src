@@ -868,11 +868,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 
 						$name = $matches[1];
 						$opcode = $opcodes[$opnames[$name]];
-						if (is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
-							return "goto " . opcode_name($name, $spec, $op1, $op2) . "_LABEL";
-						} else {
-							return "ZEND_VM_TAIL_CALL(" . opcode_name($name, $spec, $op1, $op2) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
-						}
+						return "goto " . opcode_name($name, $spec, $op1, $op2, $extra_spec) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
