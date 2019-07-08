@@ -1928,8 +1928,8 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 	ZVAL_UNDEF(&op2_copy);
 
 	if (ZEND_USES_STRICT_OPERATORS()) {
-		if (UNEXPECTED(Z_TYPE_P(op1) == IS_FALSE || Z_TYPE_P(op1) == IS_TRUE || Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op1) == IS_RESOURCE
-				|| Z_TYPE_P(op2) == IS_FALSE || Z_TYPE_P(op2) == IS_TRUE || Z_TYPE_P(op2) == IS_ARRAY || Z_TYPE_P(op2) == IS_RESOURCE
+		if (UNEXPECTED(Z_TYPE_P(op1) <= IS_TRUE || Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op1) == IS_RESOURCE
+				|| Z_TYPE_P(op2) <= IS_TRUE || Z_TYPE_P(op2) == IS_ARRAY || Z_TYPE_P(op2) == IS_RESOURCE
     	)) {
 			zend_throw_error(zend_ce_type_error, "Unsupported operands");
 			return FAILURE;

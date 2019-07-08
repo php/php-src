@@ -79,7 +79,7 @@ true . NULL - TypeError Unsupported operands
 0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 0 . DateTime - TypeError Object of class DateTime could not be converted to string
 0 . resource - TypeError Unsupported operands
-0 . NULL = '0'
+0 . NULL - TypeError Unsupported operands
 10 . false - TypeError Unsupported operands
 10 . true - TypeError Unsupported operands
 10 . 0 = '100'
@@ -102,7 +102,7 @@ true . NULL - TypeError Unsupported operands
 10 . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 10 . DateTime - TypeError Object of class DateTime could not be converted to string
 10 . resource - TypeError Unsupported operands
-10 . NULL = '10'
+10 . NULL - TypeError Unsupported operands
 0.0 . false - TypeError Unsupported operands
 0.0 . true - TypeError Unsupported operands
 0.0 . 0 = '00'
@@ -125,7 +125,7 @@ true . NULL - TypeError Unsupported operands
 0.0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 0.0 . DateTime - TypeError Object of class DateTime could not be converted to string
 0.0 . resource - TypeError Unsupported operands
-0.0 . NULL = '0'
+0.0 . NULL - TypeError Unsupported operands
 10.0 . false - TypeError Unsupported operands
 10.0 . true - TypeError Unsupported operands
 10.0 . 0 = '100'
@@ -148,7 +148,7 @@ true . NULL - TypeError Unsupported operands
 10.0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 10.0 . DateTime - TypeError Object of class DateTime could not be converted to string
 10.0 . resource - TypeError Unsupported operands
-10.0 . NULL = '10'
+10.0 . NULL - TypeError Unsupported operands
 3.14 . false - TypeError Unsupported operands
 3.14 . true - TypeError Unsupported operands
 3.14 . 0 = '3.140'
@@ -171,7 +171,7 @@ true . NULL - TypeError Unsupported operands
 3.14 . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 3.14 . DateTime - TypeError Object of class DateTime could not be converted to string
 3.14 . resource - TypeError Unsupported operands
-3.14 . NULL = '3.14'
+3.14 . NULL - TypeError Unsupported operands
 '0' . false - TypeError Unsupported operands
 '0' . true - TypeError Unsupported operands
 '0' . 0 = '00'
@@ -194,7 +194,7 @@ true . NULL - TypeError Unsupported operands
 '0' . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 '0' . DateTime - TypeError Object of class DateTime could not be converted to string
 '0' . resource - TypeError Unsupported operands
-'0' . NULL = '0'
+'0' . NULL - TypeError Unsupported operands
 '10' . false - TypeError Unsupported operands
 '10' . true - TypeError Unsupported operands
 '10' . 0 = '100'
@@ -217,7 +217,7 @@ true . NULL - TypeError Unsupported operands
 '10' . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 '10' . DateTime - TypeError Object of class DateTime could not be converted to string
 '10' . resource - TypeError Unsupported operands
-'10' . NULL = '10'
+'10' . NULL - TypeError Unsupported operands
 '010' . false - TypeError Unsupported operands
 '010' . true - TypeError Unsupported operands
 '010' . 0 = '0100'
@@ -240,7 +240,7 @@ true . NULL - TypeError Unsupported operands
 '010' . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 '010' . DateTime - TypeError Object of class DateTime could not be converted to string
 '010' . resource - TypeError Unsupported operands
-'010' . NULL = '010'
+'010' . NULL - TypeError Unsupported operands
 '10 elephants' . false - TypeError Unsupported operands
 '10 elephants' . true - TypeError Unsupported operands
 '10 elephants' . 0 = '10 elephants0'
@@ -263,7 +263,7 @@ true . NULL - TypeError Unsupported operands
 '10 elephants' . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 '10 elephants' . DateTime - TypeError Object of class DateTime could not be converted to string
 '10 elephants' . resource - TypeError Unsupported operands
-'10 elephants' . NULL = '10 elephants'
+'10 elephants' . NULL - TypeError Unsupported operands
 'foo' . false - TypeError Unsupported operands
 'foo' . true - TypeError Unsupported operands
 'foo' . 0 = 'foo0'
@@ -286,7 +286,7 @@ true . NULL - TypeError Unsupported operands
 'foo' . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 'foo' . DateTime - TypeError Object of class DateTime could not be converted to string
 'foo' . resource - TypeError Unsupported operands
-'foo' . NULL = 'foo'
+'foo' . NULL - TypeError Unsupported operands
 array ( ) . false - TypeError Unsupported operands
 array ( ) . true - TypeError Unsupported operands
 array ( ) . 0 - TypeError Unsupported operands
@@ -424,7 +424,7 @@ array ( 'bar' => 1, 'foo' => 2 ) . NULL - TypeError Unsupported operands
 (object) array ( ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 (object) array ( ) . DateTime - TypeError Object of class stdClass could not be converted to string
 (object) array ( ) . resource - TypeError Unsupported operands
-(object) array ( ) . NULL - TypeError Object of class stdClass could not be converted to string
+(object) array ( ) . NULL - TypeError Unsupported operands
 (object) array ( 'foo' => 1, 'bar' => 2 ) . false - TypeError Unsupported operands
 (object) array ( 'foo' => 1, 'bar' => 2 ) . true - TypeError Unsupported operands
 (object) array ( 'foo' => 1, 'bar' => 2 ) . 0 - TypeError Object of class stdClass could not be converted to string
@@ -447,7 +447,7 @@ array ( 'bar' => 1, 'foo' => 2 ) . NULL - TypeError Unsupported operands
 (object) array ( 'foo' => 1, 'bar' => 2 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 (object) array ( 'foo' => 1, 'bar' => 2 ) . DateTime - TypeError Object of class stdClass could not be converted to string
 (object) array ( 'foo' => 1, 'bar' => 2 ) . resource - TypeError Unsupported operands
-(object) array ( 'foo' => 1, 'bar' => 2 ) . NULL - TypeError Object of class stdClass could not be converted to string
+(object) array ( 'foo' => 1, 'bar' => 2 ) . NULL - TypeError Unsupported operands
 (object) array ( 'bar' => 1, 'foo' => 2 ) . false - TypeError Unsupported operands
 (object) array ( 'bar' => 1, 'foo' => 2 ) . true - TypeError Unsupported operands
 (object) array ( 'bar' => 1, 'foo' => 2 ) . 0 - TypeError Object of class stdClass could not be converted to string
@@ -470,7 +470,7 @@ array ( 'bar' => 1, 'foo' => 2 ) . NULL - TypeError Unsupported operands
 (object) array ( 'bar' => 1, 'foo' => 2 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
 (object) array ( 'bar' => 1, 'foo' => 2 ) . DateTime - TypeError Object of class stdClass could not be converted to string
 (object) array ( 'bar' => 1, 'foo' => 2 ) . resource - TypeError Unsupported operands
-(object) array ( 'bar' => 1, 'foo' => 2 ) . NULL - TypeError Object of class stdClass could not be converted to string
+(object) array ( 'bar' => 1, 'foo' => 2 ) . NULL - TypeError Unsupported operands
 DateTime . false - TypeError Unsupported operands
 DateTime . true - TypeError Unsupported operands
 DateTime . 0 - TypeError Object of class DateTime could not be converted to string
@@ -493,7 +493,7 @@ DateTime . (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Object of class
 DateTime . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class DateTime could not be converted to string
 DateTime . DateTime - TypeError Object of class DateTime could not be converted to string
 DateTime . resource - TypeError Unsupported operands
-DateTime . NULL - TypeError Object of class DateTime could not be converted to string
+DateTime . NULL - TypeError Unsupported operands
 resource . false - TypeError Unsupported operands
 resource . true - TypeError Unsupported operands
 resource . 0 - TypeError Unsupported operands
@@ -519,24 +519,24 @@ resource . resource - TypeError Unsupported operands
 resource . NULL - TypeError Unsupported operands
 NULL . false - TypeError Unsupported operands
 NULL . true - TypeError Unsupported operands
-NULL . 0 = '0'
-NULL . 10 = '10'
-NULL . 0.0 = '0'
-NULL . 10.0 = '10'
-NULL . 3.14 = '3.14'
-NULL . '0' = '0'
-NULL . '10' = '10'
-NULL . '010' = '010'
-NULL . '10 elephants' = '10 elephants'
-NULL . 'foo' = 'foo'
+NULL . 0 - TypeError Unsupported operands
+NULL . 10 - TypeError Unsupported operands
+NULL . 0.0 - TypeError Unsupported operands
+NULL . 10.0 - TypeError Unsupported operands
+NULL . 3.14 - TypeError Unsupported operands
+NULL . '0' - TypeError Unsupported operands
+NULL . '10' - TypeError Unsupported operands
+NULL . '010' - TypeError Unsupported operands
+NULL . '10 elephants' - TypeError Unsupported operands
+NULL . 'foo' - TypeError Unsupported operands
 NULL . array ( ) - TypeError Unsupported operands
 NULL . array ( 0 => 1 ) - TypeError Unsupported operands
 NULL . array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operands
 NULL . array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operands
 NULL . array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operands
-NULL . (object) array ( ) - TypeError Object of class stdClass could not be converted to string
-NULL . (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Object of class stdClass could not be converted to string
-NULL . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Object of class stdClass could not be converted to string
-NULL . DateTime - TypeError Object of class DateTime could not be converted to string
+NULL . (object) array ( ) - TypeError Unsupported operands
+NULL . (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operands
+NULL . (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operands
+NULL . DateTime - TypeError Unsupported operands
 NULL . resource - TypeError Unsupported operands
-NULL . NULL = ''
+NULL . NULL - TypeError Unsupported operands
