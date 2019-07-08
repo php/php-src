@@ -6182,7 +6182,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 	}
 
 	/* Treat singleton reference as non-reference. */
-	if (Z_TYPE_P(item) != IS_REFERENCE || Z_REFCOUNT_P(item) == 1) {
+	if (Z_TYPE_P(item) != IS_REFERENCE) {
 		RETURN_NULL();
 	}
 
@@ -6227,6 +6227,30 @@ ZEND_METHOD(reflection_reference, getId)
 	PHP_SHA1Final(digest, &context);
 
 	RETURN_STRINGL((char *) digest, sizeof(digest));
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionReference::getRefcount()
+ *     Returns reference count of the held reference.
+ *     ReflectionReference itself increases the refcount, as such:
+ *      * Refcount 1 indicates that the reference is only held by this ReflectionReference.
+ *      * Refcount 2 indicates that it is a singleton reference (often not treated as a reference).
+ *      * Refcount 3 or higher is an ordinary shared reference. */
+ZEND_METHOD(reflection_reference, getRefcount)
+{
+	reflection_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = Z_REFLECTION_P(getThis());
+	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
+		_DO_THROW("Corrupted ReflectionReference object");
+		return;
+	}
+
+	RETURN_LONG(Z_REFCOUNT(intern->obj));
 }
 /* }}} */
 
@@ -6719,6 +6743,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_reference_functions[] = {
 	ZEND_ME(reflection_reference, fromArrayElement, arginfo_reflection_reference_fromArrayElement, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(reflection_reference, getId, arginfo_reflection__void, ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_reference, getRefcount, arginfo_reflection__void, ZEND_ACC_PUBLIC)
 
 	/* Always throwing dummy methods */
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE)
