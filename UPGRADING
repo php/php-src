@@ -564,6 +564,10 @@ PHP 7.4 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- zend.exception_ignore_args
+  . New INI directive which displays or hides arguments from the stack traces
+    generated for exceptions.
+
 ========================================
 12. Windows Support
 ========================================
