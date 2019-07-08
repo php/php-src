@@ -1917,6 +1917,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
+		free(bindpath);
 		return FAILURE;
 	}
 
@@ -2339,6 +2340,7 @@ parent_loop_end:
 							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
 								php_module_shutdown();
+								free(bindpath);
 								return FAILURE;
 							}
 							if (no_headers) {
@@ -2383,6 +2385,7 @@ parent_loop_end:
 							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
 								php_module_shutdown();
+								free(bindpath);
 								return FAILURE;
 							}
 							SG(headers_sent) = 1;
@@ -2541,6 +2544,7 @@ parent_loop_end:
 #ifdef ZTS
 					tsrm_shutdown();
 #endif
+					free(bindpath);
 					return FAILURE;
 				}
 			}
@@ -2710,9 +2714,7 @@ fastcgi_request_done:
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(request, 1);
-				if (bindpath) {
-					free(bindpath);
-				}
+				free(bindpath);
 				if (max_requests != 1) {
 					/* no need to return exit_status of the last request */
 					exit_status = 0;
