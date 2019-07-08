@@ -1613,9 +1613,6 @@ test -d Zend || $php_shtool mkdir Zend
 
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
-#if defined(APACHE) && defined(PHP_API_VERSION)
-#undef HAVE_DLFCN_H
-#endif
 FEO
 
 dnl Run this only when generating all the files.
