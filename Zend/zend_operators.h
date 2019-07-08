@@ -63,6 +63,8 @@ ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *
 ZEND_API int ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 
+ZEND_API int ZEND_FASTCALL case_equal_function(zval *result, zval *op1, zval *op2);
+
 ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only);
 ZEND_API zend_bool ZEND_FASTCALL instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce);
 

@@ -66,7 +66,7 @@ static const unsigned char tolower_map[256] = {
 static int hash_zval_strict_equals_function(zval *z1, zval *z2);
 
 /**
- * Functions using locale lowercase:
+ * Functions using locale loweris_smaller_or_equal_functioncase:
  	 	zend_binary_strncasecmp_l
  	 	zend_binary_strcasecmp_l
 		zend_binary_zval_strcasecmp
@@ -2605,6 +2605,26 @@ ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1,
 		return FAILURE;
 	}
 	ZVAL_BOOL(result, (Z_LVAL_P(result) <= 0));
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL case_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (!ZEND_USES_STRICT_OPERATORS()) {
+		if (UNEXPECTED(compare_function(result, op1, op2) == FAILURE)) {
+			return FAILURE;
+		}
+	} else {
+		if (UNEXPECTED(strict_equals_function(result, op1, op2) == FAILURE)) {
+			if (result != op1) {
+				ZVAL_UNDEF(result);
+			}
+			return FAILURE;
+		}
+	}
+
+	ZVAL_BOOL(result, (Z_LVAL_P(result) == 0));
 	return SUCCESS;
 }
 /* }}} */

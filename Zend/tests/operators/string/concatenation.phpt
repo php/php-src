@@ -6,7 +6,21 @@ require_once __DIR__ . '/../_helper.inc';
 
 set_error_handler('error_to_exception');
 
-test_two_operands('$a . $b', function($a, $b) { return $a . $b; });
+// Can't use EXPECTF because output is too large
+$var_out_str = function($value, $a = null, $b = null) {
+    $out = var_out($value);
+
+    if (is_resource($a)) {
+        $out = str_replace((string)$a, 'Resource id #%d', $out);
+    }
+    if (is_resource($b)) {
+        $out = str_replace((string)$b, 'Resource id #%d', $out);
+    }
+
+    return $out;
+};
+
+test_two_operands('$a . $b', function($a, $b) { return $a . $b; }, $var_out_str);
 
 --EXPECT--
 false . false = ''
@@ -30,7 +44,7 @@ false . (object) array ( ) - Error Object of class stdClass could not be convert
 false . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 false . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 false . DateTime - Error Object of class DateTime could not be converted to string
-false . resource = 'Resource id #6'
+false . resource = 'Resource id #%d'
 false . NULL = ''
 true . false = '1'
 true . true = '11'
@@ -53,7 +67,7 @@ true . (object) array ( ) - Error Object of class stdClass could not be converte
 true . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 true . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 true . DateTime - Error Object of class DateTime could not be converted to string
-true . resource = '1Resource id #6'
+true . resource = '1Resource id #%d'
 true . NULL = '1'
 0 . false = '0'
 0 . true = '01'
@@ -76,7 +90,7 @@ true . NULL = '1'
 0 . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 0 . DateTime - Error Object of class DateTime could not be converted to string
-0 . resource = '0Resource id #6'
+0 . resource = '0Resource id #%d'
 0 . NULL = '0'
 10 . false = '10'
 10 . true = '101'
@@ -99,7 +113,7 @@ true . NULL = '1'
 10 . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 10 . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 10 . DateTime - Error Object of class DateTime could not be converted to string
-10 . resource = '10Resource id #6'
+10 . resource = '10Resource id #%d'
 10 . NULL = '10'
 0.0 . false = '0'
 0.0 . true = '01'
@@ -122,7 +136,7 @@ true . NULL = '1'
 0.0 . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 0.0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 0.0 . DateTime - Error Object of class DateTime could not be converted to string
-0.0 . resource = '0Resource id #6'
+0.0 . resource = '0Resource id #%d'
 0.0 . NULL = '0'
 10.0 . false = '10'
 10.0 . true = '101'
@@ -145,7 +159,7 @@ true . NULL = '1'
 10.0 . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 10.0 . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 10.0 . DateTime - Error Object of class DateTime could not be converted to string
-10.0 . resource = '10Resource id #6'
+10.0 . resource = '10Resource id #%d'
 10.0 . NULL = '10'
 3.14 . false = '3.14'
 3.14 . true = '3.141'
@@ -168,7 +182,7 @@ true . NULL = '1'
 3.14 . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 3.14 . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 3.14 . DateTime - Error Object of class DateTime could not be converted to string
-3.14 . resource = '3.14Resource id #6'
+3.14 . resource = '3.14Resource id #%d'
 3.14 . NULL = '3.14'
 '0' . false = '0'
 '0' . true = '01'
@@ -191,7 +205,7 @@ true . NULL = '1'
 '0' . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 '0' . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 '0' . DateTime - Error Object of class DateTime could not be converted to string
-'0' . resource = '0Resource id #6'
+'0' . resource = '0Resource id #%d'
 '0' . NULL = '0'
 '10' . false = '10'
 '10' . true = '101'
@@ -214,7 +228,7 @@ true . NULL = '1'
 '10' . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 '10' . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 '10' . DateTime - Error Object of class DateTime could not be converted to string
-'10' . resource = '10Resource id #6'
+'10' . resource = '10Resource id #%d'
 '10' . NULL = '10'
 '010' . false = '010'
 '010' . true = '0101'
@@ -237,7 +251,7 @@ true . NULL = '1'
 '010' . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 '010' . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 '010' . DateTime - Error Object of class DateTime could not be converted to string
-'010' . resource = '010Resource id #6'
+'010' . resource = '010Resource id #%d'
 '010' . NULL = '010'
 '10 elephants' . false = '10 elephants'
 '10 elephants' . true = '10 elephants1'
@@ -260,7 +274,7 @@ true . NULL = '1'
 '10 elephants' . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 '10 elephants' . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 '10 elephants' . DateTime - Error Object of class DateTime could not be converted to string
-'10 elephants' . resource = '10 elephantsResource id #6'
+'10 elephants' . resource = '10 elephantsResource id #%d'
 '10 elephants' . NULL = '10 elephants'
 'foo' . false = 'foo'
 'foo' . true = 'foo1'
@@ -283,7 +297,7 @@ true . NULL = '1'
 'foo' . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 'foo' . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 'foo' . DateTime - Error Object of class DateTime could not be converted to string
-'foo' . resource = 'fooResource id #6'
+'foo' . resource = 'fooResource id #%d'
 'foo' . NULL = 'foo'
 array ( ) . false = 'Array' - Notice Array to string conversion
 array ( ) . true = 'Array1' - Notice Array to string conversion
@@ -306,7 +320,7 @@ array ( ) . (object) array ( ) - Error Object of class stdClass could not be con
 array ( ) . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( ) . DateTime - Error Object of class DateTime could not be converted to string
-array ( ) . resource = 'ArrayResource id #6' - Notice Array to string conversion
+array ( ) . resource = 'ArrayResource id #%d' - Notice Array to string conversion
 array ( ) . NULL = 'Array' - Notice Array to string conversion
 array ( 0 => 1 ) . false = 'Array' - Notice Array to string conversion
 array ( 0 => 1 ) . true = 'Array1' - Notice Array to string conversion
@@ -329,7 +343,7 @@ array ( 0 => 1 ) . (object) array ( ) - Error Object of class stdClass could not
 array ( 0 => 1 ) . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 0 => 1 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 0 => 1 ) . DateTime - Error Object of class DateTime could not be converted to string
-array ( 0 => 1 ) . resource = 'ArrayResource id #6' - Notice Array to string conversion
+array ( 0 => 1 ) . resource = 'ArrayResource id #%d' - Notice Array to string conversion
 array ( 0 => 1 ) . NULL = 'Array' - Notice Array to string conversion
 array ( 0 => 1, 1 => 100 ) . false = 'Array' - Notice Array to string conversion
 array ( 0 => 1, 1 => 100 ) . true = 'Array1' - Notice Array to string conversion
@@ -352,7 +366,7 @@ array ( 0 => 1, 1 => 100 ) . (object) array ( ) - Error Object of class stdClass
 array ( 0 => 1, 1 => 100 ) . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 0 => 1, 1 => 100 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 0 => 1, 1 => 100 ) . DateTime - Error Object of class DateTime could not be converted to string
-array ( 0 => 1, 1 => 100 ) . resource = 'ArrayResource id #6' - Notice Array to string conversion
+array ( 0 => 1, 1 => 100 ) . resource = 'ArrayResource id #%d' - Notice Array to string conversion
 array ( 0 => 1, 1 => 100 ) . NULL = 'Array' - Notice Array to string conversion
 array ( 'foo' => 1, 'bar' => 2 ) . false = 'Array' - Notice Array to string conversion
 array ( 'foo' => 1, 'bar' => 2 ) . true = 'Array1' - Notice Array to string conversion
@@ -375,7 +389,7 @@ array ( 'foo' => 1, 'bar' => 2 ) . (object) array ( ) - Error Object of class st
 array ( 'foo' => 1, 'bar' => 2 ) . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 'foo' => 1, 'bar' => 2 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 'foo' => 1, 'bar' => 2 ) . DateTime - Error Object of class DateTime could not be converted to string
-array ( 'foo' => 1, 'bar' => 2 ) . resource = 'ArrayResource id #6' - Notice Array to string conversion
+array ( 'foo' => 1, 'bar' => 2 ) . resource = 'ArrayResource id #%d' - Notice Array to string conversion
 array ( 'foo' => 1, 'bar' => 2 ) . NULL = 'Array' - Notice Array to string conversion
 array ( 'bar' => 1, 'foo' => 2 ) . false = 'Array' - Notice Array to string conversion
 array ( 'bar' => 1, 'foo' => 2 ) . true = 'Array1' - Notice Array to string conversion
@@ -398,7 +412,7 @@ array ( 'bar' => 1, 'foo' => 2 ) . (object) array ( ) - Error Object of class st
 array ( 'bar' => 1, 'foo' => 2 ) . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 'bar' => 1, 'foo' => 2 ) . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 array ( 'bar' => 1, 'foo' => 2 ) . DateTime - Error Object of class DateTime could not be converted to string
-array ( 'bar' => 1, 'foo' => 2 ) . resource = 'ArrayResource id #6' - Notice Array to string conversion
+array ( 'bar' => 1, 'foo' => 2 ) . resource = 'ArrayResource id #%d' - Notice Array to string conversion
 array ( 'bar' => 1, 'foo' => 2 ) . NULL = 'Array' - Notice Array to string conversion
 (object) array ( ) . false - Error Object of class stdClass could not be converted to string
 (object) array ( ) . true - Error Object of class stdClass could not be converted to string
@@ -492,29 +506,29 @@ DateTime . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class Dat
 DateTime . DateTime - Error Object of class DateTime could not be converted to string
 DateTime . resource - Error Object of class DateTime could not be converted to string
 DateTime . NULL - Error Object of class DateTime could not be converted to string
-resource . false = 'Resource id #6'
-resource . true = 'Resource id #61'
-resource . 0 = 'Resource id #60'
-resource . 10 = 'Resource id #610'
-resource . 0.0 = 'Resource id #60'
-resource . 10.0 = 'Resource id #610'
-resource . 3.14 = 'Resource id #63.14'
-resource . '0' = 'Resource id #60'
-resource . '10' = 'Resource id #610'
-resource . '010' = 'Resource id #6010'
-resource . '10 elephants' = 'Resource id #610 elephants'
-resource . 'foo' = 'Resource id #6foo'
-resource . array ( ) = 'Resource id #6Array' - Notice Array to string conversion
-resource . array ( 0 => 1 ) = 'Resource id #6Array' - Notice Array to string conversion
-resource . array ( 0 => 1, 1 => 100 ) = 'Resource id #6Array' - Notice Array to string conversion
-resource . array ( 'foo' => 1, 'bar' => 2 ) = 'Resource id #6Array' - Notice Array to string conversion
-resource . array ( 'bar' => 1, 'foo' => 2 ) = 'Resource id #6Array' - Notice Array to string conversion
+resource . false = 'Resource id #%d'
+resource . true = 'Resource id #%d1'
+resource . 0 = 'Resource id #%d0'
+resource . 10 = 'Resource id #%d10'
+resource . 0.0 = 'Resource id #%d0'
+resource . 10.0 = 'Resource id #%d10'
+resource . 3.14 = 'Resource id #%d3.14'
+resource . '0' = 'Resource id #%d0'
+resource . '10' = 'Resource id #%d10'
+resource . '010' = 'Resource id #%d010'
+resource . '10 elephants' = 'Resource id #%d10 elephants'
+resource . 'foo' = 'Resource id #%dfoo'
+resource . array ( ) = 'Resource id #%dArray' - Notice Array to string conversion
+resource . array ( 0 => 1 ) = 'Resource id #%dArray' - Notice Array to string conversion
+resource . array ( 0 => 1, 1 => 100 ) = 'Resource id #%dArray' - Notice Array to string conversion
+resource . array ( 'foo' => 1, 'bar' => 2 ) = 'Resource id #%dArray' - Notice Array to string conversion
+resource . array ( 'bar' => 1, 'foo' => 2 ) = 'Resource id #%dArray' - Notice Array to string conversion
 resource . (object) array ( ) - Error Object of class stdClass could not be converted to string
 resource . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 resource . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 resource . DateTime - Error Object of class DateTime could not be converted to string
-resource . resource = 'Resource id #6Resource id #6'
-resource . NULL = 'Resource id #6'
+resource . resource = 'Resource id #%dResource id #%d'
+resource . NULL = 'Resource id #%d'
 NULL . false = ''
 NULL . true = '1'
 NULL . 0 = '0'
@@ -536,5 +550,5 @@ NULL . (object) array ( ) - Error Object of class stdClass could not be converte
 NULL . (object) array ( 'foo' => 1, 'bar' => 2 ) - Error Object of class stdClass could not be converted to string
 NULL . (object) array ( 'bar' => 1, 'foo' => 2 ) - Error Object of class stdClass could not be converted to string
 NULL . DateTime - Error Object of class DateTime could not be converted to string
-NULL . resource = 'Resource id #6'
+NULL . resource = 'Resource id #%d'
 NULL . NULL = ''

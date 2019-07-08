@@ -75,7 +75,7 @@ function one_operand($statement, $fn, $a, $var_out = 'var_out') {
     }
 
     $err = error_get_last();
-    echo ' = ', $var_out($res), err_out($err), "\n";
+    echo ' = ', $var_out($res, $a), err_out($err), "\n";
 }
 
 function test_one_operand($statement, $fn, $var_out = 'var_out') {
@@ -100,7 +100,7 @@ function two_operands($statement, $fn, $a, $b, $var_out = 'var_out') {
     }
 
     $err = error_get_last();
-    echo ' = ', $var_out($res), err_out($err), "\n";
+    echo ' = ', $var_out($res, $a, $b), err_out($err), "\n";
 }
 
 function test_two_operands($statement, $fn, $var_out = 'var_out') {

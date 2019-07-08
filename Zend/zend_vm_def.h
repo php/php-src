@@ -5106,7 +5106,7 @@ ZEND_VM_COLD_CONST_HANDLER(52, ZEND_BOOL, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(48, ZEND_CASE, TMPVAR, CONST|TMPVAR|CV)
+ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -5145,6 +5145,9 @@ ZEND_VM_C_LABEL(case_double):
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
 			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (OP1_TYPE == IS_CV || OP1_TYPE == IS_CONST) {
+				FREE_OP1();
+			}
 			FREE_OP2();
 			if (result) {
 				ZEND_VM_C_GOTO(case_true);
@@ -5160,12 +5163,15 @@ ZEND_VM_C_LABEL(case_double):
 	if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
 		op2 = ZVAL_UNDEFINED_OP2();
 	}
-	compare_function(EX_VAR(opline->result.var), op1, op2);
+	case_equal_function(EX_VAR(opline->result.var), op1, op2);
+	if (OP1_TYPE == IS_CV || OP1_TYPE == IS_CONST) {
+		FREE_OP1();
+	}
 	FREE_OP2();
 	if (UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
 	}
-	if (Z_LVAL_P(EX_VAR(opline->result.var)) == 0) {
+	if (Z_TYPE_P(EX_VAR(opline->result.var)) == IS_TRUE) {
 ZEND_VM_C_LABEL(case_true):
 		ZEND_VM_SMART_BRANCH_TRUE();
 		ZVAL_TRUE(EX_VAR(opline->result.var));

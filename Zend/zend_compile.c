@@ -4793,9 +4793,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
 		} else {
-			opline = zend_emit_op(NULL,
-				(expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE : ZEND_IS_EQUAL,
-				&expr_node, &cond_node);
+			opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
 			SET_NODE(opline->result, &case_node);
 			if (opline->op1_type == IS_CONST) {
 				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
