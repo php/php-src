@@ -3892,7 +3892,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo)
 	size_t          length=2, pos=0;
 	jpeg_sof_info   sof_info;
 
-	if (!data) {
+	if (!data || ImageInfo->Thumbnail.size < 4) {
 		return FALSE; /* nothing to do here */
 	}
 	if (memcmp(data, "\xFF\xD8\xFF", 3)) {
