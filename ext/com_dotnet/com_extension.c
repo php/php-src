@@ -33,8 +33,6 @@
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
 static PHP_GINIT_FUNCTION(com_dotnet);
 
-TsHashTable php_com_typelibraries;
-
 zend_class_entry
 	*php_com_variant_class_entry,
    	*php_com_exception_class_entry,
@@ -330,8 +328,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	tmp->serialize = zend_class_serialize_deny;
 	tmp->unserialize = zend_class_unserialize_deny;
 
-	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
-
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
@@ -418,6 +414,9 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	COM_CONST(VT_UI8);
 	COM_CONST(VT_I8);
 #endif
+
+	PHP_MINIT(com_typeinfo)(INIT_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -433,7 +432,8 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 	}
 #endif
 
-	zend_ts_hash_destroy(&php_com_typelibraries);
+	PHP_MSHUTDOWN(com_typeinfo)(INIT_FUNC_ARGS_PASSTHRU);
+
 	return SUCCESS;
 }
 /* }}} */
