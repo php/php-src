@@ -207,12 +207,16 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
 	const char *space;
-	const char *class_name = get_active_class_name(&space);
+	const char *class_name;
 	static const char * const expected_error[] = {
 		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
 		NULL
 	};
 
+	if (EG(exception)) {
+		return;
+	}
+	class_name = get_active_class_name(&space);
 	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
 }
@@ -221,8 +225,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg) /* {{{ */
 {
 	const char *space;
-	const char *class_name = get_active_class_name(&space);
+	const char *class_name;
 
+	if (EG(exception)) {
+		return;
+	}
+	class_name = get_active_class_name(&space);
 	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
 		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
 }
@@ -231,8 +239,12 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error) /* {{{ */
 {
 	const char *space;
-	const char *class_name = get_active_class_name(&space);
+	const char *class_name;
 
+	if (EG(exception)) {
+		return;
+	}
+	class_name = get_active_class_name(&space);
 	zend_type_error("%s%s%s() expects parameter %d to be a valid callback, %s",
 		class_name, space, get_active_function_name(), num, error);
 	efree(error);
