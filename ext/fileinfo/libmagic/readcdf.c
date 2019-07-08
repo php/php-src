@@ -637,11 +637,11 @@ out5:
 	cdf_zero_stream(&scn);
 	cdf_zero_stream(&sst);
 out3:
-        efree(dir.dir_tab);
+	efree(dir.dir_tab);
 out2:
-        efree(ssat.sat_tab);
+	efree(ssat.sat_tab);
 out1:
-        efree(sat.sat_tab);
+	efree(sat.sat_tab);
 out0:
 	/* If we handled it already, return */
 	if (i != -1)

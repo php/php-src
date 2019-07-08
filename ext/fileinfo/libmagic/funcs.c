@@ -215,7 +215,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 	struct buffer b;
 	int fd = -1;
 
-	if (stream) {		
+	if (stream) {
 #ifdef _WIN64
 		php_socket_t _fd = fd;
 #else

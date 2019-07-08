@@ -34,7 +34,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: apprentice.c,v 1.270 2018/02/21 21:26:48 christos Exp $")
+FILE_RCSID("@(#)$File: apprentice.c,v 1.283 2019/02/20 02:35:27 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -1171,7 +1171,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 	}
 	if (me.mp)
 		(void)addentry(ms, &me, mset);
-    efree(line);
+	efree(line);
 	php_stream_close(stream);
 }
 
