@@ -1608,7 +1608,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
 
-					if (compare_function(&result, p1, p2)==FAILURE) {
+					if (operator_compare_function(&result, p1, p2)==FAILURE) {
 						Z_UNPROTECT_RECURSION_P(o1);
 						return 1;
 					}
