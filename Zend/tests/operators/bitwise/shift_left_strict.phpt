@@ -11,532 +11,532 @@ set_error_handler('error_to_exception');
 test_two_operands('$a << $b', function($a, $b) { return $a << $b; }, 'var_out_base64');
 
 --EXPECT--
-false << false = 0
-false << true = 0
-false << 0 = 0
-false << 10 = 0
-false << 0.0 = 0
-false << 10.0 = 0
-false << 3.14 = 0
-false << '0' = 0
-false << '10' = 0
-false << '010' = 0
-false << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-false << 'foo' = 0 - Warning A non-numeric value encountered
-false << array ( ) = 0
-false << array ( 0 => 1 ) = 0
-false << array ( 0 => 1, 1 => 100 ) = 0
-false << array ( 'foo' => 1, 'bar' => 2 ) = 0
-false << array ( 'bar' => 1, 'foo' => 2 ) = 0
-false << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-false << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-false << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-false << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-false << resource = 0
-false << NULL = 0
-true << false = 1
-true << true = 2
-true << 0 = 1
-true << 10 = 1024
-true << 0.0 = 1
-true << 10.0 = 1024
-true << 3.14 = 8
-true << '0' = 1
-true << '10' = 1024
-true << '010' = 1024
-true << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-true << 'foo' = 1 - Warning A non-numeric value encountered
-true << array ( ) = 1
-true << array ( 0 => 1 ) = 2
-true << array ( 0 => 1, 1 => 100 ) = 2
-true << array ( 'foo' => 1, 'bar' => 2 ) = 2
-true << array ( 'bar' => 1, 'foo' => 2 ) = 2
-true << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-true << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-true << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-true << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-true << resource = 64
-true << NULL = 1
-0 << false = 0
-0 << true = 0
+false << false - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << true - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 10 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 0.0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 10.0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 3.14 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << '0' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << '10' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << '010' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << '10 elephants' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << 'foo' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << array ( ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << array ( 0 => 1 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << (object) array ( ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << DateTime - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << resource - TypeError Unsupported operand type bool for '<<' (shift left) operator
+false << NULL - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << false - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << true - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 10 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 0.0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 10.0 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 3.14 - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << '0' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << '10' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << '010' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << '10 elephants' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << 'foo' - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << array ( ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << array ( 0 => 1 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << (object) array ( ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << DateTime - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << resource - TypeError Unsupported operand type bool for '<<' (shift left) operator
+true << NULL - TypeError Unsupported operand type bool for '<<' (shift left) operator
+0 << false - TypeError Unsupported operand type bool for '<<' (shift left) operator
+0 << true - TypeError Unsupported operand type bool for '<<' (shift left) operator
 0 << 0 = 0
 0 << 10 = 0
-0 << 0.0 = 0
-0 << 10.0 = 0
-0 << 3.14 = 0
-0 << '0' = 0
-0 << '10' = 0
-0 << '010' = 0
-0 << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-0 << 'foo' = 0 - Warning A non-numeric value encountered
-0 << array ( ) = 0
-0 << array ( 0 => 1 ) = 0
-0 << array ( 0 => 1, 1 => 100 ) = 0
-0 << array ( 'foo' => 1, 'bar' => 2 ) = 0
-0 << array ( 'bar' => 1, 'foo' => 2 ) = 0
-0 << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-0 << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-0 << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-0 << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-0 << resource = 0
-0 << NULL = 0
-10 << false = 10
-10 << true = 20
+0 << 0.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0 << 10.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0 << 3.14 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0 << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+0 << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+0 << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+0 << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+0 << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+0 << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+0 << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+0 << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+0 << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+0 << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+0 << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+0 << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+0 << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+0 << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+0 << resource - TypeError Unsupported operand type resource for '<<' (shift left) operator
+0 << NULL - TypeError Unsupported operand type null for '<<' (shift left) operator
+10 << false - TypeError Unsupported operand type bool for '<<' (shift left) operator
+10 << true - TypeError Unsupported operand type bool for '<<' (shift left) operator
 10 << 0 = 10
 10 << 10 = 10240
-10 << 0.0 = 10
-10 << 10.0 = 10240
-10 << 3.14 = 80
-10 << '0' = 10
-10 << '10' = 10240
-10 << '010' = 10240
-10 << '10 elephants' = 10240 - Notice A non well formed numeric value encountered
-10 << 'foo' = 10 - Warning A non-numeric value encountered
-10 << array ( ) = 10
-10 << array ( 0 => 1 ) = 20
-10 << array ( 0 => 1, 1 => 100 ) = 20
-10 << array ( 'foo' => 1, 'bar' => 2 ) = 20
-10 << array ( 'bar' => 1, 'foo' => 2 ) = 20
-10 << (object) array ( ) = 20 - Notice Object of class stdClass could not be converted to int
-10 << (object) array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-10 << (object) array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-10 << DateTime = 20 - Notice Object of class DateTime could not be converted to int
-10 << resource = 640
-10 << NULL = 10
-0.0 << false = 0
-0.0 << true = 0
-0.0 << 0 = 0
-0.0 << 10 = 0
-0.0 << 0.0 = 0
-0.0 << 10.0 = 0
-0.0 << 3.14 = 0
-0.0 << '0' = 0
-0.0 << '10' = 0
-0.0 << '010' = 0
-0.0 << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-0.0 << 'foo' = 0 - Warning A non-numeric value encountered
-0.0 << array ( ) = 0
-0.0 << array ( 0 => 1 ) = 0
-0.0 << array ( 0 => 1, 1 => 100 ) = 0
-0.0 << array ( 'foo' => 1, 'bar' => 2 ) = 0
-0.0 << array ( 'bar' => 1, 'foo' => 2 ) = 0
-0.0 << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-0.0 << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-0.0 << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-0.0 << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-0.0 << resource = 0
-0.0 << NULL = 0
-10.0 << false = 10
-10.0 << true = 20
-10.0 << 0 = 10
-10.0 << 10 = 10240
-10.0 << 0.0 = 10
-10.0 << 10.0 = 10240
-10.0 << 3.14 = 80
-10.0 << '0' = 10
-10.0 << '10' = 10240
-10.0 << '010' = 10240
-10.0 << '10 elephants' = 10240 - Notice A non well formed numeric value encountered
-10.0 << 'foo' = 10 - Warning A non-numeric value encountered
-10.0 << array ( ) = 10
-10.0 << array ( 0 => 1 ) = 20
-10.0 << array ( 0 => 1, 1 => 100 ) = 20
-10.0 << array ( 'foo' => 1, 'bar' => 2 ) = 20
-10.0 << array ( 'bar' => 1, 'foo' => 2 ) = 20
-10.0 << (object) array ( ) = 20 - Notice Object of class stdClass could not be converted to int
-10.0 << (object) array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-10.0 << (object) array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-10.0 << DateTime = 20 - Notice Object of class DateTime could not be converted to int
-10.0 << resource = 640
-10.0 << NULL = 10
-3.14 << false = 3
-3.14 << true = 6
-3.14 << 0 = 3
-3.14 << 10 = 3072
-3.14 << 0.0 = 3
-3.14 << 10.0 = 3072
-3.14 << 3.14 = 24
-3.14 << '0' = 3
-3.14 << '10' = 3072
-3.14 << '010' = 3072
-3.14 << '10 elephants' = 3072 - Notice A non well formed numeric value encountered
-3.14 << 'foo' = 3 - Warning A non-numeric value encountered
-3.14 << array ( ) = 3
-3.14 << array ( 0 => 1 ) = 6
-3.14 << array ( 0 => 1, 1 => 100 ) = 6
-3.14 << array ( 'foo' => 1, 'bar' => 2 ) = 6
-3.14 << array ( 'bar' => 1, 'foo' => 2 ) = 6
-3.14 << (object) array ( ) = 6 - Notice Object of class stdClass could not be converted to int
-3.14 << (object) array ( 'foo' => 1, 'bar' => 2 ) = 6 - Notice Object of class stdClass could not be converted to int
-3.14 << (object) array ( 'bar' => 1, 'foo' => 2 ) = 6 - Notice Object of class stdClass could not be converted to int
-3.14 << DateTime = 6 - Notice Object of class DateTime could not be converted to int
-3.14 << resource = 192
-3.14 << NULL = 3
-'0' << false = 0
-'0' << true = 0
-'0' << 0 = 0
-'0' << 10 = 0
-'0' << 0.0 = 0
-'0' << 10.0 = 0
-'0' << 3.14 = 0
-'0' << '0' = 0
-'0' << '10' = 0
-'0' << '010' = 0
-'0' << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-'0' << 'foo' = 0 - Warning A non-numeric value encountered
-'0' << array ( ) = 0
-'0' << array ( 0 => 1 ) = 0
-'0' << array ( 0 => 1, 1 => 100 ) = 0
-'0' << array ( 'foo' => 1, 'bar' => 2 ) = 0
-'0' << array ( 'bar' => 1, 'foo' => 2 ) = 0
-'0' << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-'0' << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-'0' << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-'0' << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-'0' << resource = 0
-'0' << NULL = 0
-'10' << false = 10
-'10' << true = 20
-'10' << 0 = 10
-'10' << 10 = 10240
-'10' << 0.0 = 10
-'10' << 10.0 = 10240
-'10' << 3.14 = 80
-'10' << '0' = 10
-'10' << '10' = 10240
-'10' << '010' = 10240
-'10' << '10 elephants' = 10240 - Notice A non well formed numeric value encountered
-'10' << 'foo' = 10 - Warning A non-numeric value encountered
-'10' << array ( ) = 10
-'10' << array ( 0 => 1 ) = 20
-'10' << array ( 0 => 1, 1 => 100 ) = 20
-'10' << array ( 'foo' => 1, 'bar' => 2 ) = 20
-'10' << array ( 'bar' => 1, 'foo' => 2 ) = 20
-'10' << (object) array ( ) = 20 - Notice Object of class stdClass could not be converted to int
-'10' << (object) array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'10' << (object) array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'10' << DateTime = 20 - Notice Object of class DateTime could not be converted to int
-'10' << resource = 640
-'10' << NULL = 10
-'010' << false = 10
-'010' << true = 20
-'010' << 0 = 10
-'010' << 10 = 10240
-'010' << 0.0 = 10
-'010' << 10.0 = 10240
-'010' << 3.14 = 80
-'010' << '0' = 10
-'010' << '10' = 10240
-'010' << '010' = 10240
-'010' << '10 elephants' = 10240 - Notice A non well formed numeric value encountered
-'010' << 'foo' = 10 - Warning A non-numeric value encountered
-'010' << array ( ) = 10
-'010' << array ( 0 => 1 ) = 20
-'010' << array ( 0 => 1, 1 => 100 ) = 20
-'010' << array ( 'foo' => 1, 'bar' => 2 ) = 20
-'010' << array ( 'bar' => 1, 'foo' => 2 ) = 20
-'010' << (object) array ( ) = 20 - Notice Object of class stdClass could not be converted to int
-'010' << (object) array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'010' << (object) array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'010' << DateTime = 20 - Notice Object of class DateTime could not be converted to int
-'010' << resource = 640
-'010' << NULL = 10
-'10 elephants' << false = 10 - Notice A non well formed numeric value encountered
-'10 elephants' << true = 20 - Notice A non well formed numeric value encountered
-'10 elephants' << 0 = 10 - Notice A non well formed numeric value encountered
-'10 elephants' << 10 = 10240 - Notice A non well formed numeric value encountered
-'10 elephants' << 0.0 = 10 - Notice A non well formed numeric value encountered
-'10 elephants' << 10.0 = 10240 - Notice A non well formed numeric value encountered
-'10 elephants' << 3.14 = 80 - Notice A non well formed numeric value encountered
-'10 elephants' << '0' = 10 - Notice A non well formed numeric value encountered
-'10 elephants' << '10' = 10240 - Notice A non well formed numeric value encountered
-'10 elephants' << '010' = 10240 - Notice A non well formed numeric value encountered
-'10 elephants' << '10 elephants' = 10240 - Notice A non well formed numeric value encountered
-'10 elephants' << 'foo' = 10 - Warning A non-numeric value encountered
-'10 elephants' << array ( ) = 10 - Notice A non well formed numeric value encountered
-'10 elephants' << array ( 0 => 1 ) = 20 - Notice A non well formed numeric value encountered
-'10 elephants' << array ( 0 => 1, 1 => 100 ) = 20 - Notice A non well formed numeric value encountered
-'10 elephants' << array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice A non well formed numeric value encountered
-'10 elephants' << array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice A non well formed numeric value encountered
-'10 elephants' << (object) array ( ) = 20 - Notice Object of class stdClass could not be converted to int
-'10 elephants' << (object) array ( 'foo' => 1, 'bar' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'10 elephants' << (object) array ( 'bar' => 1, 'foo' => 2 ) = 20 - Notice Object of class stdClass could not be converted to int
-'10 elephants' << DateTime = 20 - Notice Object of class DateTime could not be converted to int
-'10 elephants' << resource = 640 - Notice A non well formed numeric value encountered
-'10 elephants' << NULL = 10 - Notice A non well formed numeric value encountered
-'foo' << false = 0 - Warning A non-numeric value encountered
-'foo' << true = 0 - Warning A non-numeric value encountered
-'foo' << 0 = 0 - Warning A non-numeric value encountered
-'foo' << 10 = 0 - Warning A non-numeric value encountered
-'foo' << 0.0 = 0 - Warning A non-numeric value encountered
-'foo' << 10.0 = 0 - Warning A non-numeric value encountered
-'foo' << 3.14 = 0 - Warning A non-numeric value encountered
-'foo' << '0' = 0 - Warning A non-numeric value encountered
-'foo' << '10' = 0 - Warning A non-numeric value encountered
-'foo' << '010' = 0 - Warning A non-numeric value encountered
-'foo' << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-'foo' << 'foo' = 0 - Warning A non-numeric value encountered
-'foo' << array ( ) = 0 - Warning A non-numeric value encountered
-'foo' << array ( 0 => 1 ) = 0 - Warning A non-numeric value encountered
-'foo' << array ( 0 => 1, 1 => 100 ) = 0 - Warning A non-numeric value encountered
-'foo' << array ( 'foo' => 1, 'bar' => 2 ) = 0 - Warning A non-numeric value encountered
-'foo' << array ( 'bar' => 1, 'foo' => 2 ) = 0 - Warning A non-numeric value encountered
-'foo' << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-'foo' << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-'foo' << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-'foo' << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-'foo' << resource = 0 - Warning A non-numeric value encountered
-'foo' << NULL = 0 - Warning A non-numeric value encountered
-array ( ) << false = 0
-array ( ) << true = 0
-array ( ) << 0 = 0
-array ( ) << 10 = 0
-array ( ) << 0.0 = 0
-array ( ) << 10.0 = 0
-array ( ) << 3.14 = 0
-array ( ) << '0' = 0
-array ( ) << '10' = 0
-array ( ) << '010' = 0
-array ( ) << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-array ( ) << 'foo' = 0 - Warning A non-numeric value encountered
-array ( ) << array ( ) = 0
-array ( ) << array ( 0 => 1 ) = 0
-array ( ) << array ( 0 => 1, 1 => 100 ) = 0
-array ( ) << array ( 'foo' => 1, 'bar' => 2 ) = 0
-array ( ) << array ( 'bar' => 1, 'foo' => 2 ) = 0
-array ( ) << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-array ( ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-array ( ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-array ( ) << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-array ( ) << resource = 0
-array ( ) << NULL = 0
-array ( 0 => 1 ) << false = 1
-array ( 0 => 1 ) << true = 2
-array ( 0 => 1 ) << 0 = 1
-array ( 0 => 1 ) << 10 = 1024
-array ( 0 => 1 ) << 0.0 = 1
-array ( 0 => 1 ) << 10.0 = 1024
-array ( 0 => 1 ) << 3.14 = 8
-array ( 0 => 1 ) << '0' = 1
-array ( 0 => 1 ) << '10' = 1024
-array ( 0 => 1 ) << '010' = 1024
-array ( 0 => 1 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-array ( 0 => 1 ) << 'foo' = 1 - Warning A non-numeric value encountered
-array ( 0 => 1 ) << array ( ) = 1
-array ( 0 => 1 ) << array ( 0 => 1 ) = 2
-array ( 0 => 1 ) << array ( 0 => 1, 1 => 100 ) = 2
-array ( 0 => 1 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2
-array ( 0 => 1 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2
-array ( 0 => 1 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-array ( 0 => 1 ) << resource = 64
-array ( 0 => 1 ) << NULL = 1
-array ( 0 => 1, 1 => 100 ) << false = 1
-array ( 0 => 1, 1 => 100 ) << true = 2
-array ( 0 => 1, 1 => 100 ) << 0 = 1
-array ( 0 => 1, 1 => 100 ) << 10 = 1024
-array ( 0 => 1, 1 => 100 ) << 0.0 = 1
-array ( 0 => 1, 1 => 100 ) << 10.0 = 1024
-array ( 0 => 1, 1 => 100 ) << 3.14 = 8
-array ( 0 => 1, 1 => 100 ) << '0' = 1
-array ( 0 => 1, 1 => 100 ) << '10' = 1024
-array ( 0 => 1, 1 => 100 ) << '010' = 1024
-array ( 0 => 1, 1 => 100 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-array ( 0 => 1, 1 => 100 ) << 'foo' = 1 - Warning A non-numeric value encountered
-array ( 0 => 1, 1 => 100 ) << array ( ) = 1
-array ( 0 => 1, 1 => 100 ) << array ( 0 => 1 ) = 2
-array ( 0 => 1, 1 => 100 ) << array ( 0 => 1, 1 => 100 ) = 2
-array ( 0 => 1, 1 => 100 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2
-array ( 0 => 1, 1 => 100 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2
-array ( 0 => 1, 1 => 100 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1, 1 => 100 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1, 1 => 100 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 0 => 1, 1 => 100 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-array ( 0 => 1, 1 => 100 ) << resource = 64
-array ( 0 => 1, 1 => 100 ) << NULL = 1
-array ( 'foo' => 1, 'bar' => 2 ) << false = 1
-array ( 'foo' => 1, 'bar' => 2 ) << true = 2
-array ( 'foo' => 1, 'bar' => 2 ) << 0 = 1
-array ( 'foo' => 1, 'bar' => 2 ) << 10 = 1024
-array ( 'foo' => 1, 'bar' => 2 ) << 0.0 = 1
-array ( 'foo' => 1, 'bar' => 2 ) << 10.0 = 1024
-array ( 'foo' => 1, 'bar' => 2 ) << 3.14 = 8
-array ( 'foo' => 1, 'bar' => 2 ) << '0' = 1
-array ( 'foo' => 1, 'bar' => 2 ) << '10' = 1024
-array ( 'foo' => 1, 'bar' => 2 ) << '010' = 1024
-array ( 'foo' => 1, 'bar' => 2 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-array ( 'foo' => 1, 'bar' => 2 ) << 'foo' = 1 - Warning A non-numeric value encountered
-array ( 'foo' => 1, 'bar' => 2 ) << array ( ) = 1
-array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1 ) = 2
-array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1, 1 => 100 ) = 2
-array ( 'foo' => 1, 'bar' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2
-array ( 'foo' => 1, 'bar' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2
-array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'foo' => 1, 'bar' => 2 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-array ( 'foo' => 1, 'bar' => 2 ) << resource = 64
-array ( 'foo' => 1, 'bar' => 2 ) << NULL = 1
-array ( 'bar' => 1, 'foo' => 2 ) << false = 1
-array ( 'bar' => 1, 'foo' => 2 ) << true = 2
-array ( 'bar' => 1, 'foo' => 2 ) << 0 = 1
-array ( 'bar' => 1, 'foo' => 2 ) << 10 = 1024
-array ( 'bar' => 1, 'foo' => 2 ) << 0.0 = 1
-array ( 'bar' => 1, 'foo' => 2 ) << 10.0 = 1024
-array ( 'bar' => 1, 'foo' => 2 ) << 3.14 = 8
-array ( 'bar' => 1, 'foo' => 2 ) << '0' = 1
-array ( 'bar' => 1, 'foo' => 2 ) << '10' = 1024
-array ( 'bar' => 1, 'foo' => 2 ) << '010' = 1024
-array ( 'bar' => 1, 'foo' => 2 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-array ( 'bar' => 1, 'foo' => 2 ) << 'foo' = 1 - Warning A non-numeric value encountered
-array ( 'bar' => 1, 'foo' => 2 ) << array ( ) = 1
-array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1 ) = 2
-array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1, 1 => 100 ) = 2
-array ( 'bar' => 1, 'foo' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2
-array ( 'bar' => 1, 'foo' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2
-array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-array ( 'bar' => 1, 'foo' => 2 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-array ( 'bar' => 1, 'foo' => 2 ) << resource = 64
-array ( 'bar' => 1, 'foo' => 2 ) << NULL = 1
-(object) array ( ) << false = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << true = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << 0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << 10 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << 0.0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << 10.0 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << 3.14 = 8 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << '0' = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << '10' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << '010' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-(object) array ( ) << 'foo' = 1 - Warning A non-numeric value encountered
-(object) array ( ) << array ( ) = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << array ( 0 => 1 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << array ( 0 => 1, 1 => 100 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-(object) array ( ) << resource = 64 - Notice Object of class stdClass could not be converted to int
-(object) array ( ) << NULL = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << false = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << true = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 10 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 0.0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 10.0 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 3.14 = 8 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << '0' = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << '10' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << '010' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-(object) array ( 'foo' => 1, 'bar' => 2 ) << 'foo' = 1 - Warning A non-numeric value encountered
-(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( ) = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1, 1 => 100 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << resource = 64 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'foo' => 1, 'bar' => 2 ) << NULL = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << false = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << true = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 10 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 0.0 = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 10.0 = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 3.14 = 8 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << '0' = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << '10' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << '010' = 1024 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-(object) array ( 'bar' => 1, 'foo' => 2 ) << 'foo' = 1 - Warning A non-numeric value encountered
-(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( ) = 1 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1, 1 => 100 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << resource = 64 - Notice Object of class stdClass could not be converted to int
-(object) array ( 'bar' => 1, 'foo' => 2 ) << NULL = 1 - Notice Object of class stdClass could not be converted to int
-DateTime << false = 1 - Notice Object of class DateTime could not be converted to int
-DateTime << true = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << 0 = 1 - Notice Object of class DateTime could not be converted to int
-DateTime << 10 = 1024 - Notice Object of class DateTime could not be converted to int
-DateTime << 0.0 = 1 - Notice Object of class DateTime could not be converted to int
-DateTime << 10.0 = 1024 - Notice Object of class DateTime could not be converted to int
-DateTime << 3.14 = 8 - Notice Object of class DateTime could not be converted to int
-DateTime << '0' = 1 - Notice Object of class DateTime could not be converted to int
-DateTime << '10' = 1024 - Notice Object of class DateTime could not be converted to int
-DateTime << '010' = 1024 - Notice Object of class DateTime could not be converted to int
-DateTime << '10 elephants' = 1024 - Notice A non well formed numeric value encountered
-DateTime << 'foo' = 1 - Warning A non-numeric value encountered
-DateTime << array ( ) = 1 - Notice Object of class DateTime could not be converted to int
-DateTime << array ( 0 => 1 ) = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << array ( 0 => 1, 1 => 100 ) = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << (object) array ( ) = 2 - Notice Object of class stdClass could not be converted to int
-DateTime << (object) array ( 'foo' => 1, 'bar' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-DateTime << (object) array ( 'bar' => 1, 'foo' => 2 ) = 2 - Notice Object of class stdClass could not be converted to int
-DateTime << DateTime = 2 - Notice Object of class DateTime could not be converted to int
-DateTime << resource = 64 - Notice Object of class DateTime could not be converted to int
-DateTime << NULL = 1 - Notice Object of class DateTime could not be converted to int
-resource << false = 6
-resource << true = 12
-resource << 0 = 6
-resource << 10 = 6144
-resource << 0.0 = 6
-resource << 10.0 = 6144
-resource << 3.14 = 48
-resource << '0' = 6
-resource << '10' = 6144
-resource << '010' = 6144
-resource << '10 elephants' = 6144 - Notice A non well formed numeric value encountered
-resource << 'foo' = 6 - Warning A non-numeric value encountered
-resource << array ( ) = 6
-resource << array ( 0 => 1 ) = 12
-resource << array ( 0 => 1, 1 => 100 ) = 12
-resource << array ( 'foo' => 1, 'bar' => 2 ) = 12
-resource << array ( 'bar' => 1, 'foo' => 2 ) = 12
-resource << (object) array ( ) = 12 - Notice Object of class stdClass could not be converted to int
-resource << (object) array ( 'foo' => 1, 'bar' => 2 ) = 12 - Notice Object of class stdClass could not be converted to int
-resource << (object) array ( 'bar' => 1, 'foo' => 2 ) = 12 - Notice Object of class stdClass could not be converted to int
-resource << DateTime = 12 - Notice Object of class DateTime could not be converted to int
-resource << resource = 384
-resource << NULL = 6
-NULL << false = 0
-NULL << true = 0
-NULL << 0 = 0
-NULL << 10 = 0
-NULL << 0.0 = 0
-NULL << 10.0 = 0
-NULL << 3.14 = 0
-NULL << '0' = 0
-NULL << '10' = 0
-NULL << '010' = 0
-NULL << '10 elephants' = 0 - Notice A non well formed numeric value encountered
-NULL << 'foo' = 0 - Warning A non-numeric value encountered
-NULL << array ( ) = 0
-NULL << array ( 0 => 1 ) = 0
-NULL << array ( 0 => 1, 1 => 100 ) = 0
-NULL << array ( 'foo' => 1, 'bar' => 2 ) = 0
-NULL << array ( 'bar' => 1, 'foo' => 2 ) = 0
-NULL << (object) array ( ) = 0 - Notice Object of class stdClass could not be converted to int
-NULL << (object) array ( 'foo' => 1, 'bar' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-NULL << (object) array ( 'bar' => 1, 'foo' => 2 ) = 0 - Notice Object of class stdClass could not be converted to int
-NULL << DateTime = 0 - Notice Object of class DateTime could not be converted to int
-NULL << resource = 0
-NULL << NULL = 0
+10 << 0.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10 << 10.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10 << 3.14 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10 << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+10 << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+10 << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+10 << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+10 << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+10 << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+10 << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+10 << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+10 << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+10 << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+10 << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+10 << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+10 << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+10 << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+10 << resource - TypeError Unsupported operand type resource for '<<' (shift left) operator
+10 << NULL - TypeError Unsupported operand type null for '<<' (shift left) operator
+0.0 << false - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << true - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 10 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 0.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 10.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 3.14 - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << '0' - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << '10' - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << '010' - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << '10 elephants' - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << 'foo' - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << array ( 0 => 1 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << (object) array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << DateTime - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << resource - TypeError Unsupported operand type float for '<<' (shift left) operator
+0.0 << NULL - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << false - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << true - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 10 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 0.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 10.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 3.14 - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << '0' - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << '10' - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << '010' - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << '10 elephants' - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << 'foo' - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << array ( 0 => 1 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << (object) array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << DateTime - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << resource - TypeError Unsupported operand type float for '<<' (shift left) operator
+10.0 << NULL - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << false - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << true - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 10 - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 0.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 10.0 - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 3.14 - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << '0' - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << '10' - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << '010' - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << '10 elephants' - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << 'foo' - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << array ( 0 => 1 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << (object) array ( ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << DateTime - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << resource - TypeError Unsupported operand type float for '<<' (shift left) operator
+3.14 << NULL - TypeError Unsupported operand type float for '<<' (shift left) operator
+'0' << false - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << true - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 10 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 0.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 10.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 3.14 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << array ( 0 => 1 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << (object) array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << DateTime - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << resource - TypeError Unsupported operand type string for '<<' (shift left) operator
+'0' << NULL - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << false - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << true - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 10 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 0.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 10.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 3.14 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << array ( 0 => 1 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << (object) array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << DateTime - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << resource - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10' << NULL - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << false - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << true - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 10 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 0.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 10.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 3.14 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << array ( 0 => 1 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << (object) array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << DateTime - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << resource - TypeError Unsupported operand type string for '<<' (shift left) operator
+'010' << NULL - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << false - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << true - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 10 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 0.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 10.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 3.14 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << array ( 0 => 1 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << (object) array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << DateTime - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << resource - TypeError Unsupported operand type string for '<<' (shift left) operator
+'10 elephants' << NULL - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << false - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << true - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 10 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 0.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 10.0 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 3.14 - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << '0' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << '10' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << '010' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << '10 elephants' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << 'foo' - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << array ( 0 => 1 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << (object) array ( ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << DateTime - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << resource - TypeError Unsupported operand type string for '<<' (shift left) operator
+'foo' << NULL - TypeError Unsupported operand type string for '<<' (shift left) operator
+array ( ) << false - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << true - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 10 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 0.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 10.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 3.14 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << '0' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << '10' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << '010' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << '10 elephants' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << 'foo' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << (object) array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << DateTime - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << resource - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( ) << NULL - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << false - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << true - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 10 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 0.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 10.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 3.14 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << '0' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << '10' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << '010' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << '10 elephants' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << 'foo' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << (object) array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << DateTime - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << resource - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1 ) << NULL - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << false - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << true - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 10 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 0.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 10.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 3.14 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << '0' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << '10' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << '010' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << '10 elephants' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << 'foo' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << (object) array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << DateTime - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << resource - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 0 => 1, 1 => 100 ) << NULL - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << false - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << true - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 10 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 0.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 10.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 3.14 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << '0' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << '10' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << '010' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << '10 elephants' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << 'foo' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << DateTime - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << resource - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'foo' => 1, 'bar' => 2 ) << NULL - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << false - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << true - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 10 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 0.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 10.0 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 3.14 - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << '0' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << '10' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << '010' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << '10 elephants' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << 'foo' - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << DateTime - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << resource - TypeError Unsupported operand type array for '<<' (shift left) operator
+array ( 'bar' => 1, 'foo' => 2 ) << NULL - TypeError Unsupported operand type array for '<<' (shift left) operator
+(object) array ( ) << false - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << true - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 10 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 0.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 10.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 3.14 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << '0' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << '10' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << '010' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << '10 elephants' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << 'foo' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << array ( 0 => 1 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << resource - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( ) << NULL - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << false - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << true - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 10 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 0.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 10.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 3.14 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << '0' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << '10' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << '010' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << '10 elephants' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << 'foo' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << resource - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'foo' => 1, 'bar' => 2 ) << NULL - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << false - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << true - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 10 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 0.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 10.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 3.14 - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << '0' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << '10' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << '010' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << '10 elephants' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << 'foo' - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << resource - TypeError Unsupported operand type object for '<<' (shift left) operator
+(object) array ( 'bar' => 1, 'foo' => 2 ) << NULL - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << false - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << true - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 10 - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 0.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 10.0 - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 3.14 - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << '0' - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << '10' - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << '010' - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << '10 elephants' - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << 'foo' - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << array ( 0 => 1 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << (object) array ( ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << DateTime - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << resource - TypeError Unsupported operand type object for '<<' (shift left) operator
+DateTime << NULL - TypeError Unsupported operand type object for '<<' (shift left) operator
+resource << false - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << true - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 0 - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 10 - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 0.0 - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 10.0 - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 3.14 - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << '0' - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << '10' - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << '010' - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << '10 elephants' - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << 'foo' - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << array ( ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << array ( 0 => 1 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << (object) array ( ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << DateTime - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << resource - TypeError Unsupported operand type resource for '<<' (shift left) operator
+resource << NULL - TypeError Unsupported operand type resource for '<<' (shift left) operator
+NULL << false - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << true - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 0 - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 10 - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 0.0 - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 10.0 - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 3.14 - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << '0' - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << '10' - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << '010' - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << '10 elephants' - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << 'foo' - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << array ( ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << array ( 0 => 1 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << (object) array ( ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << (object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << (object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << DateTime - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << resource - TypeError Unsupported operand type null for '<<' (shift left) operator
+NULL << NULL - TypeError Unsupported operand type null for '<<' (shift left) operator

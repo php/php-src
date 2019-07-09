@@ -11,8 +11,8 @@ set_error_handler('error_to_exception');
 test_one_operand('++$a', function($a) { return ++$a; });
 
 --EXPECT--
-++false - TypeError Unsupported operand
-++true - TypeError Unsupported operand
+++false - TypeError Unsupported operand type bool for '++' (increment) operator
+++true - TypeError Unsupported operand type bool for '++' (increment) operator
 ++0 = 1
 ++10 = 11
 ++0.0 = 1.0
@@ -23,14 +23,14 @@ test_one_operand('++$a', function($a) { return ++$a; });
 ++'010' = '011'
 ++'10 elephants' = '10 elephantt'
 ++'foo' = 'fop'
-++array ( ) - TypeError Unsupported operand
-++array ( 0 => 1 ) - TypeError Unsupported operand
-++array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand
-++array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand
-++array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand
-++(object) array ( ) - TypeError Unsupported operand
-++(object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand
-++(object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand
-++DateTime - TypeError Unsupported operand
-++resource - TypeError Unsupported operand
-++NULL - TypeError Unsupported operand
+++array ( ) - TypeError Unsupported operand type array for '++' (increment) operator
+++array ( 0 => 1 ) - TypeError Unsupported operand type array for '++' (increment) operator
+++array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for '++' (increment) operator
+++array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type array for '++' (increment) operator
+++array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type array for '++' (increment) operator
+++(object) array ( ) - TypeError Unsupported operand type object for '++' (increment) operator
+++(object) array ( 'foo' => 1, 'bar' => 2 ) - TypeError Unsupported operand type object for '++' (increment) operator
+++(object) array ( 'bar' => 1, 'foo' => 2 ) - TypeError Unsupported operand type object for '++' (increment) operator
+++DateTime - TypeError Unsupported operand type object for '++' (increment) operator
+++resource - TypeError Unsupported operand type resource for '++' (increment) operator
+++NULL - TypeError Unsupported operand type null for '++' (increment) operator

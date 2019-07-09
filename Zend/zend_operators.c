@@ -935,6 +935,18 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
 }
 /* }}} */
 
+static zend_always_inline void zend_throw_error_unsupported_operand(const char* format, zval *operand) /* {{{ */
+{
+	zend_throw_error(zend_ce_type_error, format, zend_zval_type_name(operand));
+}
+/* }}} */
+
+static zend_always_inline void zend_throw_error_type_mismatch(const char* format, zval *op1, zval *op2) /* {{{ */
+{
+	zend_throw_error(zend_ce_type_error, format, zend_zval_type_name(op1), zend_zval_type_name(op2));
+}
+/* }}} */
+
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if ((result == op1) && (result == op2)) {
@@ -1021,7 +1033,8 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return add_function_slow(result, op1, op2);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '+' (addition) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
 		return FAILURE;
 	}
 }
@@ -1097,7 +1110,8 @@ ZEND_API int ZEND_FASTCALL sub_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return sub_function_slow(result, op1, op2);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '-' (subtraction) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
 		return FAILURE;
 	}
 }
@@ -1177,7 +1191,31 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return mul_function_slow(result, op1, op2);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '*' (multiplication) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
+		return FAILURE;
+	}
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL unary_plusminus_function(zval *result, zval *op1, int mul) /* {{{ */
+{
+	if (Z_TYPE_P(op1) == IS_LONG) {
+		ZVAL_LONG(result, Z_LVAL_P(op1) * mul);
+		return SUCCESS;
+	} else if (Z_TYPE_P(op1) == IS_DOUBLE) {
+		ZVAL_DOUBLE(result, Z_DVAL_P(op1) * mul);
+		return SUCCESS;
+	} else if (!ZEND_USES_STRICT_OPERATORS()) {
+		zval left;
+		ZVAL_LONG(&left, mul);
+		return mul_function_slow(result, &left, op1);
+	} else {
+		if (mul > 0) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '%s' '+' (unary plus) operator", op1);
+		} else {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '%s' '-' (unary minus) operator", op1);
+		}
 		return FAILURE;
 	}
 }
@@ -1305,7 +1343,8 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return pow_function_slow(result, op1, op2);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '**' (exponentiation) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
 		return FAILURE;
 	}
 }
@@ -1411,7 +1450,8 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		return div_function_slow(result, op1, op2);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '/' (division) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
 		return FAILURE;
 	}
 }
@@ -1457,7 +1497,8 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 	} else if (!ZEND_USES_STRICT_OPERATORS()) {
 		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, mod_function);
 	} else {
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		zend_throw_error_unsupported_operand("Unsupported operand type %s for '%%' (modulo) operator",
+				Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE ? op1 : op2);
 		return FAILURE;
 	}
 
@@ -1576,7 +1617,7 @@ try_again:
 			}
 
 			if (ZEND_USES_STRICT_OPERATORS()) {
-				zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+				zend_throw_error_unsupported_operand("Unsupported operand type %s for '~' (bitwise not) operator", op1);
 			} else {
 				zend_throw_error(NULL, "Unsupported operand types");
 			}
@@ -1635,7 +1676,14 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR, bitwise_or_function);
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
 
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		if (Z_TYPE_P(op1) != IS_STRING && Z_TYPE_P(op1) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '|' (bitwise or) operator", op1);
+		} else if (Z_TYPE_P(op2) != IS_STRING && Z_TYPE_P(op2) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '|' (bitwise or) operator", op2);
+		} else {
+			zend_throw_error_type_mismatch("Operand type mismatch %s and %s for '|' (bitwise or) operator", op1, op2);
+		}
+
 		return FAILURE;
 	}
 
@@ -1721,7 +1769,14 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR, bitwise_and_function);
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
 
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		if (Z_TYPE_P(op1) != IS_STRING && Z_TYPE_P(op1) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '&' (bitwise and) operator", op1);
+		} else if (Z_TYPE_P(op2) != IS_STRING && Z_TYPE_P(op2) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '&' (bitwise and) operator", op2);
+		} else {
+			zend_throw_error_type_mismatch("Operand type mismatch %s and %s for '&' (bitwise and) operator", op1, op2);
+		}
+
 		return FAILURE;
 	}
 
@@ -1807,7 +1862,14 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR, bitwise_xor_function);
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
 
-		zend_throw_error(zend_ce_type_error, "Unsupported operand types");
+		if (Z_TYPE_P(op1) != IS_STRING && Z_TYPE_P(op1) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '^' (bitwise xor) operator", op1);
+		} else if (Z_TYPE_P(op2) != IS_STRING && Z_TYPE_P(op2) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '^' (bitwise xor) operator", op2);
+		} else {
+			zend_throw_error_type_mismatch("Operand type mismatch %s and %s for '^' (bitwise xor) operator", op1, op2);
+		}
+
 		return FAILURE;
 	}
 
@@ -1848,7 +1910,21 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, shift_left_function);
+	if (ZEND_USES_STRICT_OPERATORS()) {
+		if (Z_TYPE_P(op1) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '<<' (shift left) operator", op1);
+			return FAILURE;
+		}
+		if (Z_TYPE_P(op2) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '<<' (shift left) operator", op2);
+			return FAILURE;
+		}
+
+		op1_lval = Z_LVAL_P(op1);
+		op2_lval = Z_LVAL_P(op2);
+	} else {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, shift_left_function);
+	}
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -1885,7 +1961,21 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, shift_right_function);
+	if (ZEND_USES_STRICT_OPERATORS()) {
+		if (Z_TYPE_P(op1) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '>>' (shift right) operator", op1);
+			return FAILURE;
+		}
+		if (Z_TYPE_P(op2) != IS_LONG) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '>>' (shift right) operator", op2);
+			return FAILURE;
+		}
+
+		op1_lval = Z_LVAL_P(op1);
+		op2_lval = Z_LVAL_P(op2);
+	} else {
+		convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, shift_right_function);
+	}
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -1928,10 +2018,12 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 	ZVAL_UNDEF(&op2_copy);
 
 	if (ZEND_USES_STRICT_OPERATORS()) {
-		if (UNEXPECTED(Z_TYPE_P(op1) <= IS_TRUE || Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op1) == IS_RESOURCE
-				|| Z_TYPE_P(op2) <= IS_TRUE || Z_TYPE_P(op2) == IS_ARRAY || Z_TYPE_P(op2) == IS_RESOURCE
-    	)) {
-			zend_throw_error(zend_ce_type_error, "Unsupported operands");
+		if (UNEXPECTED(Z_TYPE_P(op1) <= IS_TRUE || Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op1) == IS_RESOURCE)) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '.' (concatenation) operator", op1);
+			return FAILURE;
+		}
+		if (UNEXPECTED(Z_TYPE_P(op2) <= IS_TRUE || Z_TYPE_P(op2) == IS_ARRAY || Z_TYPE_P(op2) == IS_RESOURCE)) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '.' (concatenation) operator", op2);
 			return FAILURE;
 		}
 
@@ -2476,7 +2568,14 @@ ZEND_API int ZEND_FASTCALL operator_compare_function(zval *result, zval *op1, zv
 	}
 
 	if (UNEXPECTED(strict_scalar_compare_function(result, op1, op2) == FAILURE)) {
-		zend_throw_error(zend_ce_type_error, "Type mismatch");
+		if (Z_TYPE_P(op1) <= IS_NULL || Z_TYPE_P(op1) >= IS_ARRAY) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for comparison operator", op1);
+		} else if (Z_TYPE_P(op2) <= IS_NULL || Z_TYPE_P(op2) >= IS_ARRAY) {
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for comparison operator", op2);
+		} else {
+			zend_throw_error_type_mismatch("Operand type mismatch %s and %s for comparison operator", op1, op2);
+		}
+
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -2552,7 +2651,7 @@ ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2)
 		}
 	} else {
 		if (UNEXPECTED(strict_equals_function(result, op1, op2) == FAILURE)) {
-			zend_throw_error(zend_ce_type_error, "Type mismatch");
+			zend_throw_error_type_mismatch("Operand type mismatch %s and %s for comparison operator", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -2577,7 +2676,7 @@ ZEND_API int ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1, zval *
 	}
 
 	if (UNEXPECTED(strict_equals_function(result, op1, op2) == FAILURE)) {
-		zend_throw_error(zend_ce_type_error, "Type mismatch");
+		zend_throw_error_type_mismatch("Operand type mismatch %s and %s for comparison operator", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -2902,7 +3001,7 @@ ZEND_API int ZEND_FASTCALL increment_function(zval *op1) /* {{{ */
 {
 	if (ZEND_USES_STRICT_OPERATORS()) {
 		if (UNEXPECTED(strict_increment_function(op1) == FAILURE)) {
-			zend_throw_error(zend_ce_type_error, "Unsupported operand");
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '++' (increment) operator", op1);
 			return FAILURE;
 		}
 		return SUCCESS;
@@ -3017,7 +3116,7 @@ ZEND_API int ZEND_FASTCALL decrement_function(zval *op1) /* {{{ */
 {
 	if (ZEND_USES_STRICT_OPERATORS()) {
 		if (UNEXPECTED(strict_decrement_function(op1) == FAILURE)) {
-			zend_throw_error(zend_ce_type_error, "Unsupported operand");
+			zend_throw_error_unsupported_operand("Unsupported operand type %s for '--' (decrement) operator", op1);
 			return FAILURE;
 		}
 		return SUCCESS;
