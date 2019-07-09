@@ -36,38 +36,38 @@ foreach([1, 2, 4] as $mem) {
 --EXPECTF--
 Argon2 provider: string(%d) "%s"
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=262144,t=3,p=1$%s$%s"
+Hash: string(96) "$argon2i$v=19$m=65536,t=4,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=262144,t=6,p=1$%s$%s"
+Hash: string(96) "$argon2i$v=19$m=65536,t=8,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2i$v=19$m=262144,t=12,p=1$%s$%s"
+Hash: string(97) "$argon2i$v=19$m=65536,t=16,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=524288,t=3,p=1$%s$%s"
+Hash: string(97) "$argon2i$v=19$m=131072,t=4,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(97) "$argon2i$v=19$m=524288,t=6,p=1$%s$%s"
+Hash: string(97) "$argon2i$v=19$m=131072,t=8,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2i$v=19$m=524288,t=12,p=1$%s$%s"
+Hash: string(98) "$argon2i$v=19$m=131072,t=16,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2i$v=19$m=1048576,t=3,p=1$%s$%s"
+Hash: string(97) "$argon2i$v=19$m=262144,t=4,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(98) "$argon2i$v=19$m=1048576,t=6,p=1$%s$%s"
+Hash: string(97) "$argon2i$v=19$m=262144,t=8,p=1$%s$%s"
 bool(true)
 bool(false)
 Using password: string(44) "%s"
-Hash: string(99) "$argon2i$v=19$m=1048576,t=12,p=1$%s$%s"
+Hash: string(98) "$argon2i$v=19$m=262144,t=16,p=1$%s$%s"
 bool(true)
 bool(false)
