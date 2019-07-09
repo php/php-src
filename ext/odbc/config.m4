@@ -291,8 +291,8 @@ PHP_ARG_WITH([custom-odbc],,
   [AS_HELP_STRING([[--with-custom-odbc[=DIR]]],
     [Include user defined ODBC support. DIR is ODBC install base directory
     [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and have some odbc.h in
-    your include dirs. f.e. you should define following for Sybase SQL Anywhere
-    5.5.00 on QNX, prior to running this configure script:
+    your include dirs. For example, you should define following for Sybase SQL
+    Anywhere 5.5.00 on QNX, prior to running this configure script:
     CPPFLAGS="-DODBC_QNX -DSQLANY_BUG" LDFLAGS=-lunix
     CUSTOM_ODBC_LIBS="-ldblib -lodbc"])])
 

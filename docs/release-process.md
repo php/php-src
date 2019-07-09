@@ -112,10 +112,10 @@
 
 10. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
     `configure.ac` and `NEWS` in the *main* branch (PHP-7.4 for example) to
-    prepare for the **next** version. F.e. if the RC is "7.4.1RC1" then the new
-    one should be `7.4.2-dev` - regardless if we get a new RC or not. This is to
-    make sure `version_compare()` can correctly work. Commit the changes to the
-    main branch.
+    prepare for the **next** version. For example, if the RC is "7.4.1RC1" then
+    the new one should be `7.4.2-dev` - regardless if we get a new RC or not.
+    This is to make sure `version_compare()` can correctly work. Commit the
+    changes to the main branch.
 
 11. Push the changes to the main repo, the tag, the main branch and the release
     branch. Release branches for alpha/beta/.0RCx releases before to GA release
@@ -139,7 +139,7 @@
     have this directory, create it.
 
 15. Now the RC can be found on https://downloads.php.net/~yourname,
-    f.e. https://downloads.php.net/~derick/.
+    e.g. https://downloads.php.net/~derick/.
 
 16. Once the release has been tagged, contact the release-managers@ distribution
     list so that Windows binaries can be created. Once those are made, they can
@@ -204,7 +204,7 @@
     `Zend/zend.h`, `configure.ac` and possibly `NEWS`.
 
  2. If a CVE commit needs to be merged to the release, then have it committed to
-    the base branches and merged upwards as usual (f.e commit the CVE fix to
+    the base branches and merged upwards as usual (e.g. commit the CVE fix to
     7.2, merge to 7.3, 7.4 etc...). Then you can cherry-pick it in your release
     branch. Don't forget to update `NEWS` manually in an extra commit then.
 
@@ -219,9 +219,9 @@
 
  6. Check `./sapi/cli/php -v` output for version matching.
 
- 7. Tag the repository with the version f.e. `git tag -u YOURKEYID php-7.4.1`
+ 7. Tag the repository with the version e.g. `git tag -u YOURKEYID php-7.4.1`
 
- 8. Push the tag f.e. `git push origin php-7.4.1`.
+ 8. Push the tag e.g. `git push origin php-7.4.1`.
 
  9. Run: `./scripts/dev/makedist php-7.4.1`, this will export the tag,
     create configure and build three tarballs (gz, bz2 and xz). Check if the
@@ -289,7 +289,7 @@
 
  5. Update the ChangeLog file for the given major version
 
-    f.e. `ChangeLog-7.php` from the `NEWS` file
+    e.g. `ChangeLog-7.php` from the `NEWS` file
 
     * Go over the list and put every element on one line.
     * Check for `&`, `<` and `>` and escape them if necessary.
@@ -319,7 +319,7 @@
 
  8. **Check website has been synced before announcing or pushing news**
 
-    Try, f.e. https://www.php.net/distributions/php-7.4.0.tar.xz
+    Try, e.g. https://www.php.net/distributions/php-7.4.0.tar.xz
 
     Website may update slowly (may take an hour).
 
