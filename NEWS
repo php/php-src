@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0alpha3
+11 Jul 2019, PHP 7.4.0alpha3
 
 - Core:
   . Fixed bug #78239 (Deprecation notice during string conversion converted to
