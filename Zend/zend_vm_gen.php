@@ -1061,6 +1061,10 @@ function is_inline_hybrid_handler($name, $hot, $op1, $op2, $extra_spec) {
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
 	global $definition_file, $prefix, $opnames, $gen_order;
 
+	if (isset($opcode['alias']) && ($spec || $kind != ZEND_VM_KIND_SWITCH)) {
+		return;
+	}
+
 	if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
 		return;
 	}
@@ -1204,7 +1208,7 @@ function gen_null_label($f, $kind, $prolog) {
 
 // Generates array of opcode handlers (specialized or unspecialized)
 function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()) {
-	global $opcodes, $op_types, $prefix, $op_types_ex;
+	global $opcodes, $opnames, $op_types, $prefix, $op_types_ex;
 
 	$list = [];
 	$next = 0;
@@ -1214,6 +1218,10 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 
 	  // For each opcode in opcode number order
 		foreach($opcodes as $num => $dsc) {
+			if (isset($dsc['alias'])) {
+				$specs[$num] = $specs[$opnames[$dsc['alias']]];
+				continue;
+			}
 			$specs[$num] = "$label";
 			$spec_op1 = $spec_op2 = $spec_extra = false;
 			$def_op1_type = $def_op2_type = "ANY";
@@ -1425,8 +1433,18 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			}
 			$next = $num+1;
 
-			//ugly trick for ZEND_VM_DEFINE_OP
-			if ($dsc["code"]) {
+			if (isset($dsc['alias']) && $kind != ZEND_VM_KIND_SWITCH) {
+				// Emit pointer to unspecialized handler
+				switch ($kind) {
+				case ZEND_VM_KIND_CALL:
+					out($f,$prolog.$dsc['alias']."_HANDLER,\n");
+					break;
+				case ZEND_VM_KIND_GOTO:
+					out($f,$prolog."(void*)&&".$dsc['alias']."_LABEL,\n");
+					break;
+				}
+				$list[] = $dsc["op"];
+			} else if ($dsc["code"]) { //ugly trick for ZEND_VM_DEFINE_OP
 				// Emit pointer to unspecialized handler
 				switch ($kind) {
 				case ZEND_VM_KIND_CALL:
@@ -2496,7 +2514,17 @@ function gen_vm($def, $skel) {
 
 	// Search for opcode handlers those are used by other opcode handlers
 	foreach ($opcodes as $dsc) {
-		if (preg_match_all("/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $mm, PREG_SET_ORDER)) {
+		if (preg_match("/^\s*{\s*ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)\s*;\s*}\s*/", $dsc["code"], $m)) {
+			$op = $m[1];
+			if (!isset($opnames[$op])) {
+				die("ERROR ($def:$lineno): Opcode with name '$op' is not defined.\n");
+			}
+			$opcodes[$opnames[$dsc['op']]]['alias'] = $op;
+			if (!ZEND_VM_SPEC && ZEND_VM_KIND == ZEND_VM_KIND_SWITCH) {
+				$code = $opnames[$op];
+				$opcodes[$code]['use'] = 1;
+			}
+		} else if (preg_match_all("/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m", $dsc["code"], $mm, PREG_SET_ORDER)) {
 			foreach ($mm as $m) {
 				$op = $m[1];
 				if (!isset($opnames[$op])) {
