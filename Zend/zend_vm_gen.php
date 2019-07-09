@@ -891,11 +891,21 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
 					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*(,[^)]*)?\)/m",
 				),
-				function($matches) use ($spec, $prefix, $op1, $op2, $extra_spec) {
+				function($matches) use ($spec, $prefix, $op1, $op2, $extra_spec, $name) {
 					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
 						return "execute_data";
 					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
-						return "ZEND_VM_TAIL_CALL(" . opcode_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
+						global $opcodes, $opnames;
+
+						$handler = $matches[1];
+						$opcode = $opcodes[$opnames[$handler]];
+						$inline =
+							ZEND_VM_KIND == ZEND_VM_KIND_HYBRID &&
+						    isset($opcode["use"]) &&
+							is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec) &&
+							is_hot_handler($opcodes[$opnames[$name]]["hot"], $op1, $op2, $extra_spec) ?
+							"_INLINE" : "";
+						return "ZEND_VM_TAIL_CALL(" . opcode_name($handler, $spec, $op1, $op2, $extra_spec) . $inline . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
@@ -1074,6 +1084,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 	}
 
 	// Generate opcode handler's entry point according to selected threading model
+	$additional_func = false;
 	$spec_name = $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].($spec?extra_spec_name($extra_spec):"");
 	switch($kind) {
 		case ZEND_VM_KIND_HYBRID:
@@ -1087,10 +1098,14 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 					. stream_get_contents($out);
 				fclose($out);
 			} else {
+				$inline =
+				    isset($opcode["use"]) &&
+					is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec) ?
+					"_INLINE" : "";
 				$code =
 					  "\t\t\tHYBRID_CASE({$spec_name}):\n"
 					. "\t\t\t\tVM_TRACE($spec_name)\n"
-					. "\t\t\t\t{$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
+					. "\t\t\t\t{$spec_name}{$inline}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
 					. "\t\t\t\tHYBRID_BREAK();\n";
 			}
 			if (is_array($gen_order)) {
@@ -1101,7 +1116,12 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 			return;
 		case ZEND_VM_KIND_CALL:
 			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
-				out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+				if (isset($opcode["use"])) {
+					out($f,"static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+					$additional_func = true;
+				} else {
+					out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+				}
 			} else if ($opcode["hot"] && is_cold_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
 				out($f,"static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 			} else {
@@ -1130,6 +1150,14 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 
 	// Generate opcode handler's code
 	gen_code($f, $spec, $kind, 0, $code, $op1, $op2, $name, $extra_spec);
+
+	if ($additional_func) {
+		out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+		out($f,"{\n");
+		out($f,"\tZEND_VM_TAIL_CALL({$spec_name}_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
+		out($f,"}\n");
+		out($f,"\n");
+	}
 }
 
 // Generates helper
