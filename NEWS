@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
 
+- SQLite:
+  . Upgraded to SQLite 3.28.0. (cmb)
+
 - Standard:
   . Fixed #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
 
