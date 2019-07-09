@@ -34,14 +34,11 @@ PHP_MSHUTDOWN_FUNCTION(password);
 
 #if HAVE_ARGON2LIB
 /**
- * OPSLIMIT and MEMLIMIT are taken from libsodium's MODERATE values.
- * Threads are fixed at 1 by libsodium.
- *
  * When updating these values, synchronize ext/sodium/sodium_pwhash.c values.
  * Note that libargon expresses memlimit in KB, while libsoidum uses bytes.
  */
-#define PHP_PASSWORD_ARGON2_MEMORY_COST (256 << 10)
-#define PHP_PASSWORD_ARGON2_TIME_COST 3
+#define PHP_PASSWORD_ARGON2_MEMORY_COST (64 << 10)
+#define PHP_PASSWORD_ARGON2_TIME_COST 4
 #define PHP_PASSWORD_ARGON2_THREADS 1
 #endif
 

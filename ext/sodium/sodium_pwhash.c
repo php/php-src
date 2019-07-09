@@ -29,7 +29,6 @@
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 
 /**
- * OPSLIMIT and MEMLIMIT are taken from libsodium's MODERATE values.
  * MEMLIMIT is normalized to KB even though sodium uses Bytes in order to
  * present a consistent user-facing API.
  *
@@ -37,8 +36,8 @@
  *
  * When updating these values, synchronize ext/standard/php_password.h values.
  */
-#define PHP_SODIUM_PWHASH_MEMLIMIT (256 << 10)
-#define PHP_SODIUM_PWHASH_OPSLIMIT 3
+#define PHP_SODIUM_PWHASH_MEMLIMIT (64 << 10)
+#define PHP_SODIUM_PWHASH_OPSLIMIT 4
 #define PHP_SODIUM_PWHASH_THREADS 1
 
 static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_array *options, int alg) {
