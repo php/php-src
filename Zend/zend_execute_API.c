@@ -1424,28 +1424,14 @@ zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *
 	if (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) {
 		return zend_lookup_class_ex(class_name, key, 0);
 	} else if ((ce = zend_lookup_class_ex(class_name, key, 1)) == NULL) {
-		if (fetch_type & ZEND_FETCH_CLASS_SILENT) {
-			return NULL;
-		}
-		if (EG(exception)) {
-			if (!(fetch_type & ZEND_FETCH_CLASS_EXCEPTION)) {
-				zend_string *exception_str;
-				zval exception_zv;
-				ZVAL_OBJ(&exception_zv, EG(exception));
-				Z_ADDREF(exception_zv);
-				zend_clear_exception();
-				exception_str = zval_get_string(&exception_zv);
-				zend_error_noreturn(E_ERROR,
-					"During class fetch: Uncaught %s", ZSTR_VAL(exception_str));
+		if ((fetch_type & ZEND_FETCH_CLASS_SILENT) == 0 && !EG(exception)) {
+			if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
+				zend_throw_or_error(fetch_type, NULL, "Interface '%s' not found", ZSTR_VAL(class_name));
+			} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
+				zend_throw_or_error(fetch_type, NULL, "Trait '%s' not found", ZSTR_VAL(class_name));
+			} else {
+				zend_throw_or_error(fetch_type, NULL, "Class '%s' not found", ZSTR_VAL(class_name));
 			}
-			return NULL;
-		}
-		if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_INTERFACE) {
-			zend_throw_or_error(fetch_type, NULL, "Interface '%s' not found", ZSTR_VAL(class_name));
-		} else if ((fetch_type & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_TRAIT) {
-			zend_throw_or_error(fetch_type, NULL, "Trait '%s' not found", ZSTR_VAL(class_name));
-		} else {
-			zend_throw_or_error(fetch_type, NULL, "Class '%s' not found", ZSTR_VAL(class_name));
 		}
 		return NULL;
 	}
