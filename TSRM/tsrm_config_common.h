@@ -8,7 +8,7 @@
 #endif
 
 #ifdef TSRM_WIN32
-# include "tsrm_config.w32.h"
+# include "Zend/zend_config.w32.h"
 #else
 # include "main/php_config.h"
 # include <sys/param.h>
