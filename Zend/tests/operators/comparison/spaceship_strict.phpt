@@ -181,9 +181,9 @@ true <=> NULL - TypeError Unsupported operand type null for comparison
 '0' <=> 3.14 - TypeError Operand type mismatch string and float for comparison
 '0' <=> '0' = 0
 '0' <=> '10' = -1
-'0' <=> '010' = -2
+'0' <=> '010' = -1
 '0' <=> '10 elephants' = -1
-'0' <=> 'foo' = -54
+'0' <=> 'foo' = -1
 '0' <=> array ( ) - TypeError Unsupported operand type array for comparison
 '0' <=> array ( 0 => 1 ) - TypeError Unsupported operand type array for comparison
 '0' <=> array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for comparison
@@ -204,9 +204,9 @@ true <=> NULL - TypeError Unsupported operand type null for comparison
 '10' <=> 3.14 - TypeError Operand type mismatch string and float for comparison
 '10' <=> '0' = 1
 '10' <=> '10' = 0
-'10' <=> '010' = 65279
-'10' <=> '10 elephants' = -10
-'10' <=> 'foo' = -3489599
+'10' <=> '010' = 1
+'10' <=> '10 elephants' = -1
+'10' <=> 'foo' = -1
 '10' <=> array ( ) - TypeError Unsupported operand type array for comparison
 '10' <=> array ( 0 => 1 ) - TypeError Unsupported operand type array for comparison
 '10' <=> array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for comparison
@@ -225,11 +225,11 @@ true <=> NULL - TypeError Unsupported operand type null for comparison
 '010' <=> 0.0 - TypeError Operand type mismatch string and float for comparison
 '010' <=> 10.0 - TypeError Operand type mismatch string and float for comparison
 '010' <=> 3.14 - TypeError Operand type mismatch string and float for comparison
-'010' <=> '0' = 2
-'010' <=> '10' = -65279
+'010' <=> '0' = 1
+'010' <=> '10' = -1
 '010' <=> '010' = 0
-'010' <=> '10 elephants' = -65264
-'010' <=> 'foo' = -3554879
+'010' <=> '10 elephants' = -1
+'010' <=> 'foo' = -1
 '010' <=> array ( ) - TypeError Unsupported operand type array for comparison
 '010' <=> array ( 0 => 1 ) - TypeError Unsupported operand type array for comparison
 '010' <=> array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for comparison
@@ -249,10 +249,10 @@ true <=> NULL - TypeError Unsupported operand type null for comparison
 '10 elephants' <=> 10.0 - TypeError Operand type mismatch string and float for comparison
 '10 elephants' <=> 3.14 - TypeError Operand type mismatch string and float for comparison
 '10 elephants' <=> '0' = 1
-'10 elephants' <=> '10' = 10
-'10 elephants' <=> '010' = 65264
+'10 elephants' <=> '10' = 1
+'10 elephants' <=> '010' = 1
 '10 elephants' <=> '10 elephants' = 0
-'10 elephants' <=> 'foo' = -3489615
+'10 elephants' <=> 'foo' = -1
 '10 elephants' <=> array ( ) - TypeError Unsupported operand type array for comparison
 '10 elephants' <=> array ( 0 => 1 ) - TypeError Unsupported operand type array for comparison
 '10 elephants' <=> array ( 0 => 1, 1 => 100 ) - TypeError Unsupported operand type array for comparison
@@ -271,10 +271,10 @@ true <=> NULL - TypeError Unsupported operand type null for comparison
 'foo' <=> 0.0 - TypeError Operand type mismatch string and float for comparison
 'foo' <=> 10.0 - TypeError Operand type mismatch string and float for comparison
 'foo' <=> 3.14 - TypeError Operand type mismatch string and float for comparison
-'foo' <=> '0' = 54
-'foo' <=> '10' = 3489599
-'foo' <=> '010' = 3554879
-'foo' <=> '10 elephants' = 3489615
+'foo' <=> '0' = 1
+'foo' <=> '10' = 1
+'foo' <=> '010' = 1
+'foo' <=> '10 elephants' = 1
 'foo' <=> 'foo' = 0
 'foo' <=> array ( ) - TypeError Unsupported operand type array for comparison
 'foo' <=> array ( 0 => 1 ) - TypeError Unsupported operand type array for comparison

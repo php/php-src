@@ -2445,7 +2445,7 @@ static zend_always_inline int strict_scalar_compare_function(zval *result, zval 
 				ZVAL_LONG(result, 0);
 				return SUCCESS;
 			}
-			ZVAL_LONG(result, zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2)));
+			ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2))));
 			return SUCCESS;
 
 		default:
