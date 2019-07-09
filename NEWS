@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
 
+- SQLite:
+  . Upgraded to SQLite 3.28.0. (cmb)
+
 - XMLRPC:
   . Fixed #78173 (XML-RPC mutates immutable objects during encoding). (Asher
     Baker)
