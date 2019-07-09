@@ -119,21 +119,11 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
 ])
 
 dnl
-dnl LIBZEND_BASIC_CHECKS
-dnl
-dnl Basic checks specific for the Zend engine library.
-dnl
-AC_DEFUN([LIBZEND_BASIC_CHECKS],[
-AC_REQUIRE([AC_PROG_CC])
-
-AC_CHECK_HEADERS([cpuid.h])
-
-dnl
-dnl LIBZEND_DLSYM_CHECK
+dnl ZEND_DLSYM_CHECK
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
-AC_DEFUN([LIBZEND_DLSYM_CHECK],[
+AC_DEFUN([ZEND_DLSYM_CHECK],[
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
 _LT_AC_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
@@ -144,6 +134,16 @@ _LT_AC_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
 ], [])
 ])
+
+dnl
+dnl LIBZEND_BASIC_CHECKS
+dnl
+dnl Basic checks specific for the Zend engine library.
+dnl
+AC_DEFUN([LIBZEND_BASIC_CHECKS],[
+AC_REQUIRE([AC_PROG_CC])
+
+AC_CHECK_HEADERS([cpuid.h])
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(getpid kill finite sigsetjmp)
@@ -321,14 +321,12 @@ AC_MSG_RESULT($ZEND_SIGNALS)
 
 ])
 
-AC_MSG_CHECKING(whether /dev/urandom exists)
-if test -r "/dev/urandom" && test -c "/dev/urandom"; then
-  AC_DEFINE([HAVE_DEV_URANDOM], 1, [Define if the target system has /dev/urandom device])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-
+dnl
+dnl ZEND_INIT
+dnl
+dnl Checks for the Zend engine to use the characteristics of the host system.
+dnl
+AC_DEFUN([ZEND_INIT],[
 AC_ARG_ENABLE([gcc-global-regs],
   [AS_HELP_STRING([--disable-gcc-global-regs],
     [whether to enable GCC global register variables])],
@@ -388,7 +386,7 @@ fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
 
 dnl Check if atof() accepts NAN.
-AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
+AC_CACHE_CHECK([whether atof() accepts NAN], ac_cv_atof_accept_nan,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
@@ -417,7 +415,7 @@ if test "$ac_cv_atof_accept_nan" = "yes"; then
 fi
 
 dnl Check if atof() accepts INF.
-AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
+AC_CACHE_CHECK([whether atof() accepts INF], ac_cv_atof_accept_inf,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
@@ -449,7 +447,7 @@ if test "$ac_cv_atof_accept_inf" = "yes"; then
 fi
 
 dnl Check if HUGE_VAL == INF.
-AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
+AC_CACHE_CHECK([whether HUGE_VAL == INF], ac_cv_huge_val_inf,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
@@ -482,7 +480,7 @@ if test "$ac_cv_huge_val_inf" = "yes"; then
 fi
 
 dnl Check if HUGE_VAL + -HUGEVAL == NAN.
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
+AC_CACHE_CHECK([whether HUGE_VAL + -HUGEVAL == NAN], ac_cv_huge_val_nan,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <math.h>
 #include <stdlib.h>
@@ -517,7 +515,7 @@ if test "$ac_cv_huge_val_nan" = "yes"; then
 fi
 
 dnl Check whether __cpuid_count is available.
-AC_CACHE_CHECK(whether __cpuid_count is available, ac_cv_cpuid_count_available, [
+AC_CACHE_CHECK([whether __cpuid_count is available], ac_cv_cpuid_count_available, [
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
   #include <cpuid.h>
 ]], [[
@@ -531,3 +529,4 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 if test "$ac_cv_cpuid_count_available" = "yes"; then
   AC_DEFINE([HAVE_CPUID_COUNT], 1, [whether __cpuid_count is available])
 fi
+])
