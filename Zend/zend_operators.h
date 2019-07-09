@@ -44,7 +44,6 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2);
-ZEND_API int ZEND_FASTCALL unary_plusminus_function(zval *result, zval *op1, int mul);
 ZEND_API int ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL boolean_not_function(zval *result, zval *op1);
 ZEND_API int ZEND_FASTCALL bitwise_not_function(zval *result, zval *op1);
