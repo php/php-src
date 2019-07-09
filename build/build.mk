@@ -21,7 +21,8 @@
 config_h_in = main/php_config.h.in
 PHP_AUTOCONF = autoconf
 PHP_AUTOHEADER = autoheader
-PHP_AUTOCONF_FLAGS =
+PHP_AUTOCONF_FLAGS = -f
+PHP_AUTOHEADER_FLAGS =
 
 all: configure $(config_h_in)
 
@@ -38,5 +39,5 @@ $(config_h_in): configure
 # generated php_config.h.in template.
 	@echo rebuilding $@
 	@rm -f $@
-	@$(PHP_AUTOHEADER) $(PHP_AUTOCONF_FLAGS)
+	@$(PHP_AUTOHEADER) $(PHP_AUTOHEADER_FLAGS)
 	@sed -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $@ > $@.tmp && mv $@.tmp $@
