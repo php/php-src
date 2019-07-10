@@ -1227,7 +1227,7 @@ fi
 
 dnl Align segments on huge page boundary
 case $host_alias in
-  *linux*)
+  i[[3456]]86-*-linux-* | x86_64-*-linux-*)
     EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
     ;;
 esac
