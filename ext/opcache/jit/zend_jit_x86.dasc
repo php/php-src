@@ -8760,7 +8760,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info, op2_info, res_info;
-	zend_jit_addr op1_addr, op2_addr, res_addr;
+	zend_jit_addr op1_addr, orig_op1_addr, op2_addr, res_addr;
 
 	if (!ssa->ops || !ssa->var_info) {
 		goto fallback;
@@ -8770,7 +8770,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 	op2_info = OP2_INFO();
 	res_info = RES_INFO();
 
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
+	op1_addr = orig_op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, NULL, -1);
 	res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
@@ -8886,7 +8886,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_OBJECT))) {
 			if (opline->opcode != ZEND_FETCH_DIM_IS) {
 				|	SAVE_VALID_OPLINE opline
-				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+				|	LOAD_ZVAL_ADDR FCARG1a, orig_op1_addr
 				|	EXT_CALL zend_jit_invalid_array_access, r0
 			}
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_NULL
