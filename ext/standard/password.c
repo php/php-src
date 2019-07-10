@@ -501,6 +501,21 @@ static const php_password_algo* php_password_algo_find_zval_ex(zval *arg, const 
 #if HAVE_ARGON2LIB
 			case 2: return &php_password_algo_argon2i;
 			case 3: return &php_password_algo_argon2id;
+#else
+			case 2:
+				{
+				zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+				const php_password_algo* ret = php_password_algo_find(n);
+				zend_string_release(n);
+				return ret;
+				}
+			case 3:
+				{
+				zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+				const php_password_algo* ret = php_password_algo_find(n);
+				zend_string_release(n);
+				return ret;
+				}
 #endif
 		}
 		return NULL;
