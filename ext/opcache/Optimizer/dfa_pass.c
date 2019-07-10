@@ -125,10 +125,37 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	return SUCCESS;
 }
 
+static zend_bool is_smart_branch_inhibiting_nop(
+		zend_op_array *op_array, uint32_t target, uint32_t current,
+		zend_basic_block *b, zend_basic_block *blocks_end)
+{
+	uint32_t next;
+	/* Target points one past the last non-nop instruction. Make sure there is one. */
+	if (target == 0) {
+		return 0;
+	}
+
+	/* Find the next instruction, skipping unreachable or empty blocks. */
+	next = current + 1;
+	if (next >= b->start + b->len) {
+		do {
+			b++;
+			if (b == blocks_end) {
+				return 0;
+			}
+		} while (!(b->flags & ZEND_BB_REACHABLE) || b->len == 0);
+		next = b->start;
+	}
+
+	return (op_array->opcodes[next].opcode == ZEND_JMPZ ||
+		 op_array->opcodes[next].opcode == ZEND_JMPNZ) &&
+		zend_is_smart_branch(op_array->opcodes + target - 1);
+}
+
 static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
-	zend_basic_block *end = blocks + ssa->cfg.blocks_count;
+	zend_basic_block *blocks_end = blocks + ssa->cfg.blocks_count;
 	zend_basic_block *b;
 	zend_func_info *func_info;
 	int j;
@@ -152,7 +179,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 		}
 	}
 
-	for (b = blocks; b < end; b++) {
+	for (b = blocks; b < blocks_end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			uint32_t end;
 
@@ -174,13 +201,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 				while (i < end) {
 					shiftlist[i] = i - target;
 					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-					   /* Keep NOP to support ZEND_VM_SMART_BRANCH. Using "target-1" instead of
-					    * "i-1" here to check the last non-NOP instruction. */
-					   (target > 0 &&
-					    i + 1 < op_array->last &&
-					    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
-					     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-					    zend_is_smart_branch(op_array->opcodes + target - 1))) {
+						is_smart_branch_inhibiting_nop(op_array, target, i, b, blocks_end)) {
 						if (i != target) {
 							op_array->opcodes[target] = op_array->opcodes[i];
 							ssa->ops[target] = ssa->ops[i];
@@ -240,7 +261,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 		}
 
 		/* update branch targets */
-		for (b = blocks; b < end; b++) {
+		for (b = blocks; b < blocks_end; b++) {
 			if ((b->flags & ZEND_BB_REACHABLE) && b->len != 0) {
 				zend_op *opline = op_array->opcodes + b->start + b->len - 1;
 				zend_optimizer_shift_jump(op_array, opline, shiftlist);
