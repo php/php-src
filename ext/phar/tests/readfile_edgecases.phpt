@@ -13,16 +13,16 @@ $pname = 'phar://' . $fname;
 readfile(array());
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
-file_put_contents("foob", "test\n");
+file_put_contents("readfile_edgecases.txt", "test\n");
 readfile($fname);
 unlink($fname);
 mkdir($pname . '/oops');
 file_put_contents($pname . '/foo/hi', '<?php
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
-readfile("foob");
+readfile("readfile_edgecases.txt");
 set_include_path("' . addslashes(__DIR__) . '");
-readfile("foob", true);
+readfile("readfile_edgecases.txt", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
@@ -33,16 +33,16 @@ include $pname . '/foo/hi';
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo'); ?>
-<?php unlink(__DIR__ . '/foob'); ?>
+<?php unlink(__DIR__ . '/readfile_edgecases.txt'); ?>
 --EXPECTF--
 Warning: readfile() expects parameter 1 to be a valid path, array given in %sreadfile_edgecases.php on line %d
 blah
 <?php
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
-readfile("foob");
+readfile("readfile_edgecases.txt");
 set_include_path("%stests");
-readfile("foob", true);
+readfile("readfile_edgecases.txt", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
@@ -51,9 +51,9 @@ test
 <?php
 readfile("foo/" . basename(__FILE__));
 $context = stream_context_create();
-readfile("foob");
+readfile("readfile_edgecases.txt");
 set_include_path("%stests");
-readfile("foob", true);
+readfile("readfile_edgecases.txt", true);
 readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
