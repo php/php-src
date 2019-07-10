@@ -1604,3 +1604,9 @@ static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 	ZVAL_NEW_REF(arg, arg);
 	zend_error(E_NOTICE, "Only variables should be passed by reference");
 }
+
+static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
+{
+	const char *type = Z_ISUNDEF_P(container) ? "null" : zend_zval_type_name(container);
+	zend_error(E_NOTICE, "Trying to access array offset on value of type %s", type);
+}
