@@ -1324,7 +1324,7 @@ TEST $file
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',
 				'SKIPIF', 'XFAIL', 'CLEAN',
-				'CREDITS', 'DESCRIPTION',
+				'CREDITS', 'DESCRIPTION', 'CONFLICTS',
 			))) {
 				$bork_info = 'Unknown section "' . $section . '"';
 			}
