@@ -1296,6 +1296,10 @@ static void* dasm_labels[zend_lb_MAX];
 |	IF_NOT_ZVAL_FLAGS addr, IS_TYPE_REFCOUNTED, label
 |.endmacro
 
+|.macro IF_NOT_ZVAL_COLLECTABLE, addr, label
+|	IF_NOT_ZVAL_FLAGS addr, IS_TYPE_COLLECTABLE, label
+|.endmacro
+
 |.macro GC_ADDREF, zv
 |	add	dword [zv], 1
 |.endmacro
@@ -1441,7 +1445,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||			if ((op_info) & MAY_BE_REF) {
 ||				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
 |				IF_NOT_ZVAL_TYPE addr, IS_REFERENCE, >1
-|				IF_NOT_ZVAL_REFCOUNTED ref_addr, >4
+|				IF_NOT_ZVAL_COLLECTABLE ref_addr, >4
 |				GET_ZVAL_PTR FCARG1a, ref_addr
 |1:
 ||			}
