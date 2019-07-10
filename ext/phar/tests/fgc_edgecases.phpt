@@ -21,7 +21,7 @@ try {
 }
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
-file_put_contents("foob", "test\n");
+file_put_contents("fgc_edgecases.txt", "test\n");
 echo file_get_contents($fname);
 unlink($fname);
 mkdir($pname . '/oops');
@@ -30,9 +30,9 @@ file_put_contents($pname . '/foo/hi', '<?php
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 file_get_contents("./hi", 0, $context, 0, -1);
-echo file_get_contents("foob");
+echo file_get_contents("fgc_edgecases.txt");
 set_include_path("' . addslashes(__DIR__) . '");
-echo file_get_contents("foob", true);
+echo file_get_contents("fgc_edgecases.txt", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
@@ -48,7 +48,7 @@ include $pname . '/foo/hi';
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo'); ?>
-<?php unlink(__DIR__ . '/foob'); ?>
+<?php unlink(__DIR__ . '/fgc_edgecases.txt'); ?>
 --EXPECTF--
 file_get_contents() expects parameter 1 to be a valid path, array given
 blah
@@ -56,9 +56,9 @@ blah
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 file_get_contents("./hi", 0, $context, 0, -1);
-echo file_get_contents("foob");
+echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
-echo file_get_contents("foob", true);
+echo file_get_contents("fgc_edgecases.txt", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
@@ -73,9 +73,9 @@ test
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 file_get_contents("./hi", 0, $context, 0, -1);
-echo file_get_contents("foob");
+echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
-echo file_get_contents("foob", true);
+echo file_get_contents("fgc_edgecases.txt", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);
@@ -90,9 +90,9 @@ Warning: file_get_contents(): Failed to seek to position 50000 in the stream in 
 echo file_get_contents("foo/" . basename(__FILE__));
 $context = stream_context_create();
 file_get_contents("./hi", 0, $context, 0, -1);
-echo file_get_contents("foob");
+echo file_get_contents("fgc_edgecases.txt");
 set_include_path("%stests");
-echo file_get_contents("foob", true);
+echo file_get_contents("fgc_edgecases.txt", true);
 echo file_get_contents("./hi", 0, $context);
 echo file_get_contents("../oops");
 echo file_get_contents("./hi", 0, $context, 50000);

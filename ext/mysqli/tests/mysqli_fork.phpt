@@ -111,7 +111,7 @@ if (!have_innodb($link))
 						continue;
 					$tmp = mysqli_fetch_assoc($pres);
 					mysqli_free_result($pres);
-					if ($tmp['msg_id'] == $msg_id)
+					if (!$tmp || $tmp['msg_id'] == $msg_id)
 						/* no new message */
 						continue;
 					if ($tmp['msg'] == 'stop')
