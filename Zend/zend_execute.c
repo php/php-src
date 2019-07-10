@@ -2295,7 +2295,7 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int support_strings, int slow EXECUTE_DATA_DC)
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, int is_list, int slow EXECUTE_DATA_DC)
 {
 	zval *retval;
 
@@ -2312,7 +2312,7 @@ try_array:
 			}
 		}
 	}
-	if (support_strings && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+	if (!is_list && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
 
 try_string_offset:
@@ -2402,30 +2402,30 @@ try_string_offset:
 static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_R(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0 EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
 }
 
 static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1 EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 0, 1 EXECUTE_DATA_CC);
 }
 
 static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_IS(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 0, 0 EXECUTE_DATA_CC);
 }
 
 static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
-	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0 EXECUTE_DATA_CC);
 }
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type)
 {
-	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, type, 1, 0 NO_EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, type, 0, 0 NO_EXECUTE_DATA_CC);
 }
 
 static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable *ht, zval *offset EXECUTE_DATA_DC)
