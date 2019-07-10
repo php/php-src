@@ -249,6 +249,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       PHP_LDAP_LFLAGS, PHP_LDAP_INCLUDE, PHP_LDAP_LIBS.
 
   b. Unix build system changes
+    - Added --ini-path and --ini-dir options to php-config.
     - configure --help now also outputs --program-suffix and --program-prefix
       information by using the Autoconf AC_ARG_PROGRAM macro.
     - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been

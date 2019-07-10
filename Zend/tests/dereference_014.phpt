@@ -27,8 +27,12 @@ var_dump($h);
 
 ?>
 --EXPECTF--
+Notice: Trying to access array offset on value of type null in %s on line %d
+
 Notice: Trying to get property 'a' of non-object in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 
 Notice: Trying to get property 'b' of non-object in %s on line %d
 NULL

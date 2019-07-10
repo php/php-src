@@ -24,14 +24,31 @@ var_dump($null[$arr]);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 NULL
 Done
