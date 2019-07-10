@@ -143,7 +143,7 @@ if (!have_innodb($link))
 				$wait_id = pcntl_waitpid($pid, $status, WNOHANG);
 				if ($pres = mysqli_query($plink, $sql)) {
 					$row = mysqli_fetch_assoc($pres);
-					if ($row['msg_id'] != $last_msg_id) {
+					if ($row && $row['msg_id'] != $last_msg_id) {
 						$last_msg_id = $row['msg_id'];
 						switch ($row['msg']) {
 							case 'start':

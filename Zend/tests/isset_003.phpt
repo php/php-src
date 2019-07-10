@@ -33,6 +33,8 @@ Notice: Undefined variable: c in %s on line %d
 
 Notice: Undefined variable: d in %s on line %d
 
+Notice: Trying to access array offset on value of type null in %s on line %d
+
 Notice: Trying to get property '' of non-object in %s on line %d
 bool(false)
 bool(true)

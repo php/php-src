@@ -2369,10 +2369,14 @@ try_string_offset:
 		}
 	} else {
 		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
+			container = ZVAL_UNDEFINED_OP1();
 		}
 		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP2();
+		}
+		if (!is_list && type != BP_VAR_IS) {
+			zend_error(E_NOTICE, "Trying to access array offset on value of type %s",
+				zend_zval_type_name(container));
 		}
 		ZVAL_NULL(result);
 	}
