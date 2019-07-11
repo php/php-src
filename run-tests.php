@@ -3444,8 +3444,8 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	}, $escaped_details);
 	$escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
-	$escaped_test_name = htmlspecialchars($test_name, ENT_QUOTES);
-	$JUNIT['files'][$file_name]['xml'] = "<testcase classname='$file_name' name='$escaped_test_name' time='$time'>\n";
+	$escaped_test_name = htmlspecialchars($file_name . ' (' . $test_name . ')', ENT_QUOTES);
+	$JUNIT['files'][$file_name]['xml'] = "<testcase name='$escaped_test_name' time='$time'>\n";
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
