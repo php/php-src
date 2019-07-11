@@ -3011,8 +3011,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
-	PHP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
+	PHP_DEP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
+	PHP_DEP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
