@@ -27,6 +27,7 @@ PHP_CONFIG_NICE(config.nice)
 PHP_CANONICAL_HOST_TARGET
 
 AC_CONFIG_HEADERS([main/php_config.h])
+
 AH_TOP([
 #ifndef PHP_CONFIG_H
 #define PHP_CONFIG_H
@@ -1585,6 +1586,9 @@ $PHP_OUTPUT_FILES"
 
 dnl Generate build files.
 AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
+
+AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])])
+
 AC_CONFIG_COMMANDS([default],[
 cat <<X
 

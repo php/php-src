@@ -34,9 +34,7 @@ configure: configure.ac $(PHP_M4_FILES)
 
 $(config_h_in): configure
 # Explicitly remove target since autoheader does not seem to work correctly
-# otherwise (timestamps are not updated). Also disable PACKAGE_* symbols in the
-# generated php_config.h.in template.
+# otherwise (timestamps are not updated).
 	@echo rebuilding $@
 	@rm -f $@
 	@$(PHP_AUTOHEADER) $(PHP_AUTOCONF_FLAGS)
-	@sed -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $@ > $@.tmp && mv $@.tmp $@

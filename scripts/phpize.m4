@@ -210,4 +210,6 @@ test -d modules || $php_shtool mkdir modules
 
 AC_CONFIG_HEADERS([config.h])
 
+AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([config.h.in])])
+
 AC_OUTPUT
