@@ -32,6 +32,10 @@ fclose($file);
 var_dump(file_get_contents($fileName));
 unlink($fileName);
 
+echo "\nWith inherited stdout:\n";
+$proc = proc_open($cmd, [2 => ['redirect', 1]], $pipes);
+proc_close($proc);
+
 ?>
 --EXPECTF--
 Warning: proc_open(): Missing redirection target in %s on line %d
@@ -62,3 +66,7 @@ array(0) {
 }
 string(10) "Test
 Error"
+
+With inherited stdout:
+Test
+Error

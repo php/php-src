@@ -762,8 +762,10 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].childend = fd;
 #endif
 			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
-				struct php_proc_open_descriptor_item *target = NULL;
 				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
+				struct php_proc_open_descriptor_item *target = NULL;
+				php_file_descriptor_t childend;
+
 				if (!ztarget) {
 					php_error_docref(NULL, E_WARNING, "Missing redirection target");
 					goto exit_fail;
@@ -779,21 +781,38 @@ PHP_FUNCTION(proc_open)
 						break;
 					}
 				}
-				if (!target) {
-					php_error_docref(NULL, E_WARNING,
-						"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
-					goto exit_fail;
+				if (target) {
+					childend = target->childend;
+				} else {
+					if (Z_LVAL_P(ztarget) < 0 || Z_LVAL_P(ztarget) > 2) {
+						php_error_docref(NULL, E_WARNING,
+							"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
+						goto exit_fail;
+					}
+
+					/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
+					 * which happens whenever an explicit override is not provided. */
+#ifndef PHP_WIN32
+					childend = Z_LVAL_P(ztarget);
+#else
+					switch (Z_LVAL_P(ztarget)) {
+						case 0: childend = GetStdHandle(STD_INPUT_HANDLE); break;
+						case 1: childend = GetStdHandle(STD_OUTPUT_HANDLE); break;
+						case 2: childend = GetStdHandle(STD_ERROR_HANDLE); break;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+#endif
 				}
 
 #ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_handle(target->childend, TRUE, FALSE);
+				descriptors[ndesc].childend = dup_handle(childend, TRUE, FALSE);
 				if (descriptors[ndesc].childend == NULL) {
 					php_error_docref(NULL, E_WARNING,
 						"Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
 					goto exit_fail;
 				}
 #else
-				descriptors[ndesc].childend = dup(target->childend);
+				descriptors[ndesc].childend = dup(childend);
 				if (descriptors[ndesc].childend < 0) {
 					php_error_docref(NULL, E_WARNING,
 						"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s",
