@@ -24,8 +24,9 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 
-#if defined(__darwin__)
+#if defined(__APPLE__)
 # include <pthread.h>
+# include <mach-o/dyld.h>
 #elif defined(__FreeBSD__)
 # include <sys/thr.h>
 # include <sys/sysctl.h>
@@ -34,6 +35,7 @@
 #endif
 
 #include "zend_elf.h"
+#include "zend_mach.h"
 
 /*
  * 1) Profile using perf-<pid>.map
@@ -106,6 +108,7 @@ static void zend_jit_perf_jitdump_open(void)
 {
 	char filename[64];
 	int fd, ret;
+	uint32_t machine;
 	zend_elf_header elf_hdr;
 	zend_perf_jitdump_header jit_hdr;
 
@@ -114,6 +117,7 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+#if !defined(__APPLE__)
 #if defined(__linux__)
 	fd = open("/proc/self/exe", O_RDONLY);
 #elif defined(__NetBSD__)
@@ -144,6 +148,34 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+	machine = elf_hdr.machine;
+#else
+	zend_mach_header mach_hdr;
+	char path[PATH_MAX];
+	uint32_t pathlen = sizeof(path);
+
+	if (_NSGetExecutablePath(path, &pathlen) != 0) {
+             return;
+	}
+	fd = open(path, O_RDONLY);
+	
+	if (fd < 0) {
+		return;
+	}
+
+	ret = read(fd, &mach_hdr, sizeof(mach_hdr));
+	close(fd);
+
+	if (ret != sizeof(mach_hdr) ||
+	    (mach_hdr.magic != MACHO_MAGIC &&
+	     mach_hdr.magic != MACHO_MAGIC64)) {
+		close(fd);
+		return;
+	}
+
+	machine = (uint32_t)mach_hdr.cpu_type;
+#endif
+
 	jitdump_fd = open(filename, O_CREAT | O_TRUNC | O_RDWR, 0666);
 	if (jitdump_fd < 0) {
 		return;
@@ -164,7 +196,7 @@ static void zend_jit_perf_jitdump_open(void)
 	jit_hdr.magic           = ZEND_PERF_JITDUMP_HEADER_MAGIC;
 	jit_hdr.version         = ZEND_PERF_JITDUMP_HEADER_VERSION;
 	jit_hdr.size            = sizeof(jit_hdr);
-	jit_hdr.elf_mach_target = elf_hdr.machine;
+	jit_hdr.elf_mach_target = machine;
 	jit_hdr.process_id      = getpid();
 	jit_hdr.time_stamp      = zend_perf_timestamp();
 	jit_hdr.flags           = 0;
