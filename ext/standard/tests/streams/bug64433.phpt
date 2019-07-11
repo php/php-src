@@ -2,7 +2,6 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') die("skip test hangs on Windows as of commit 30019f4");
 if(!file_exists(__DIR__."/../../../../sapi/cli/tests/php_cli_server.inc"))
 	die("skip could not found cli server script");
 $res = @include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
