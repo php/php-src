@@ -2574,6 +2574,10 @@ num_key:
 static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_slow(zval *subject, zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (EXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
+		zend_error(E_DEPRECATED, "array_key_exists(): "
+			"Using array_key_exists() on objects is deprecated. "
+			"Use isset() or property_exists() instead");
+
 		HashTable *ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
 		uint32_t result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
 		zend_release_properties(ht);
