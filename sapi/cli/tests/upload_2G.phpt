@@ -37,8 +37,8 @@ echo "Test\n";
 
 include "php_cli_server.inc";
 
-php_cli_server_start("var_dump(\$_FILES);", false,
-	"-d post_max_size=3G -d upload_max_filesize=3G");
+php_cli_server_start("var_dump(\$_FILES);", null,
+	["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
