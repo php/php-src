@@ -2804,7 +2804,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strcoll,															arginfo_strcoll)
 
 #ifdef HAVE_STRFMON
-	PHP_FE(money_format,													arginfo_money_format)
+	PHP_DEP_FE(money_format,												arginfo_money_format)
 #endif
 
 	PHP_FE(substr,															arginfo_substr)
