@@ -9,5 +9,8 @@ get_magic_quotes_runtime();
 echo 'done';
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function get_magic_quotes_gpc() is deprecated in %s on line %d
+
+Deprecated: Function get_magic_quotes_runtime() is deprecated in %s on line %d
 done
