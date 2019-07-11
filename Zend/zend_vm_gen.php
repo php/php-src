@@ -873,7 +873,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
 							// extra args
-							$args = substr(preg_replace("/,\s*[A-Za-z_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
+							$args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
 							return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(" . $args. " ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC))";
 						}
 						if (is_hot_helper($matches[1])) {
@@ -910,7 +910,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
 							// extra args
-							$args = substr(preg_replace("/,\s*[A-Za-z_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
+							$args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
 							return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(" . $args. " ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC))";
 						}
 						return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
@@ -934,7 +934,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
 							// extra args
-							$args = preg_replace("/,\s*([A-Za-z_]*)\s*,\s*([^,)\s]*)\s*/", "$1 = $2; ", $matches[2]);
+							$args = preg_replace("/,\s*([A-Za-z0-9_]*)\s*,\s*([^,)\s]*)\s*/", "$1 = $2; ", $matches[2]);
 							return $args .  "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec);
 						}
 						return "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec);
@@ -958,7 +958,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 						// ZEND_VM_DISPATCH_TO_HELPER
 						if (isset($matches[2])) {
 							// extra args
-							$args = preg_replace("/,\s*([A-Za-z_]*)\s*,\s*([^,)\s]*)\s*/", "$1 = $2; ", $matches[2]);
+							$args = preg_replace("/,\s*([A-Za-z0-9_]*)\s*,\s*([^,)\s]*)\s*/", "$1 = $2; ", $matches[2]);
 							return $args .  "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec);
 						}
 						return "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec);
@@ -1038,6 +1038,8 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
 		return true;
 	} else if ($hot === 'HOT_NOCONST_') {
 		return ($op1 !== 'CONST');
+	} else if ($hot === 'HOT_NOCONSTCONST_') {
+		return (($op1 !== 'CONST') || ($op2 !== 'CONST')) ;
 	} else if ($hot === 'HOT_OBJ_') {
 		return (($op1 === 'UNUSED') || ($op1 === 'CV')) && ($op2 === 'CONST');
 	} else if ($hot === 'HOT_SEND_') {
@@ -1058,6 +1060,8 @@ function is_cold_handler($hot, $op1, $op2, $extra_spec) {
 		return ($op1 === 'CONST');
 	} else if ($hot === 'HOT_NOCONST_') {
 		return ($op1 === 'CONST');
+	} else if ($hot === 'HOT_NOCONSTCONST_') {
+		return ($op1 === 'CONST' && $op2 === 'CONST');
 	} else {
 		return false;
 	}
@@ -2347,6 +2351,7 @@ function gen_vm($def, $skel) {
 		    strpos($line,"ZEND_VM_INLINE_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_NOCONST_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_HOT_NOCONSTCONST_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_SEND_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_OBJ_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_COLD_HANDLER(") === 0 ||
@@ -2354,7 +2359,7 @@ function gen_vm($def, $skel) {
 		    strpos($line,"ZEND_VM_COLD_CONSTCONST_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
@@ -2400,11 +2405,12 @@ function gen_vm($def, $skel) {
 		           strpos($line,"ZEND_VM_INLINE_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_NOCONST_TYPE_SPEC_HANDLER(") === 0 ||
+		           strpos($line,"ZEND_VM_HOT_NOCONSTCONST_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_SEND_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_OBJ_TYPE_SPEC_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_TYPE_HANDLER_HANDLER definition.\n");
