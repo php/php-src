@@ -883,13 +883,18 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 						return "goto " . opcode_name($name, $spec, $op1, $op2, $extra_spec) . "_LABEL";
 					} else {
 						// ZEND_VM_DISPATCH_TO_HELPER
+						if (is_hot_helper($matches[1])) {
+							if (isset($matches[2])) {
+								// extra args
+								$args = preg_replace("/,\s*([A-Za-z0-9_]*)\s*,\s*([^,)\s]*)\s*/", "$1 = $2; ", $matches[2]);
+								return $args . "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
+							}
+							return "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
+						}
 						if (isset($matches[2])) {
 							// extra args
 							$args = substr(preg_replace("/,\s*[A-Za-z0-9_]*\s*,\s*([^,)\s]*)\s*/", ", $1", $matches[2]), 2);
 							return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(" . $args. " ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC))";
-						}
-						if (is_hot_helper($matches[1])) {
-							return "goto " . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "_LABEL";
 						}
 						return "ZEND_VM_TAIL_CALL(" . helper_name($matches[1], $spec, $op1, $op2, $extra_spec) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU))";
 					}
@@ -2065,14 +2070,22 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f, $m[1].$executor_name.$m[3]."\n");
 					break;
 				case "HELPER_VARS":
-					if ($kind != ZEND_VM_KIND_CALL && $kind != ZEND_VM_KIND_HYBRID) {
-						if ($kind == ZEND_VM_KIND_SWITCH) {
-							out($f,$m[1]."const void *dispatch_handler;\n");
+					if ($kind == ZEND_VM_KIND_SWITCH) {
+						out($f,$m[1]."const void *dispatch_handler;\n");
+					}
+					if ($kind != ZEND_VM_KIND_CALL && count($params)) {
+						if ($kind == ZEND_VM_KIND_HYBRID) {
+							out($f, "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
 						}
 						// Emit local variables those are used for helpers' parameters
 						foreach ($params as $param => $x) {
 							out($f,$m[1].$param.";\n");
 						}
+						if ($kind == ZEND_VM_KIND_HYBRID) {
+							out($f, "#endif\n");
+						}
+					}
+					if ($kind != ZEND_VM_KIND_CALL && $kind != ZEND_VM_KIND_HYBRID) {
 						out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
 						out($f,$m[1]."register zend_execute_data *execute_data __asm__(ZEND_VM_FP_GLOBAL_REG) = ex;\n");
 						out($f,"#else\n");
@@ -2485,10 +2498,14 @@ function gen_vm($def, $skel) {
 			}
 
 			// Store parameters
-			foreach (explode(",", $param) as $p) {
-				$p = trim($p);
-				if ($p !== "") {
-					$params[$p] = 1;
+			if (ZEND_VM_KIND == ZEND_VM_KIND_GOTO
+			 || ZEND_VM_KIND == ZEND_VM_KIND_SWITCH
+			 || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && $hot)) {
+				foreach (explode(",", $param) as $p) {
+					$p = trim($p);
+					if ($p !== "") {
+						$params[$p] = 1;
+					}
 				}
 			}
 
