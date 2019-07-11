@@ -1256,6 +1256,35 @@ static void reflection_class_constant_factory(zend_class_entry *ce, zend_string 
 }
 /* }}} */
 
+static void reflection_export_impl(zval *return_value, zval *object, zend_bool return_output) {
+	zval fname, retval;
+	int result;
+
+	/* Invoke the __toString() method */
+	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
+	result = call_user_function(NULL, object, &fname, &retval, 0, NULL);
+	zval_ptr_dtor_str(&fname);
+
+	if (result == FAILURE) {
+		_DO_THROW("Invocation of method __toString() failed");
+		return;
+	}
+
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		php_error_docref(NULL, E_WARNING, "%s::__toString() did not return anything", ZSTR_VAL(Z_OBJCE_P(object)->name));
+		RETURN_FALSE;
+	}
+
+	if (return_output) {
+		ZVAL_COPY_VALUE(return_value, &retval);
+	} else {
+		/* No need for _r variant, return of __toString should always be a string */
+		zend_print_zval(&retval, 0);
+		zend_printf("\n");
+		zval_ptr_dtor(&retval);
+	}
+}
+
 /* {{{ _reflection_export */
 static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
@@ -1315,33 +1344,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 		return;
 	}
 
-	/* Call static reflection::export */
-	ZVAL_COPY_VALUE(&params[0], &reflector);
-	ZVAL_BOOL(&params[1], return_output);
-
-	ZVAL_STRINGL(&fci.function_name, "reflection::export", sizeof("reflection::export") - 1);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 2;
-	fci.params = params;
-	fci.no_separation = 1;
-
-	result = zend_call_function(&fci, NULL);
-
-	zval_ptr_dtor(&fci.function_name);
-
-	if (result == FAILURE && EG(exception) == NULL) {
-		zval_ptr_dtor(&reflector);
-		zval_ptr_dtor(&retval);
-		_DO_THROW("Could not execute reflection::export()");
-		return;
-	}
-
-	if (return_output) {
-		ZVAL_COPY_VALUE(return_value, &retval);
-	} else {
-		zval_ptr_dtor(&retval);
-	}
+	reflection_export_impl(return_value, &reflector, return_output);
 
 	/* Destruct reflector which is no longer needed */
 	zval_ptr_dtor(&reflector);
@@ -1404,8 +1407,7 @@ ZEND_METHOD(reflection, __clone)
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection, export)
 {
-	zval *object, fname, retval;
-	int result;
+	zval *object;
 	zend_bool return_output = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -1414,29 +1416,7 @@ ZEND_METHOD(reflection, export)
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Invoke the __toString() method */
-	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
-	result= call_user_function(NULL, object, &fname, &retval, 0, NULL);
-	zval_ptr_dtor_str(&fname);
-
-	if (result == FAILURE) {
-		_DO_THROW("Invocation of method __toString() failed");
-		return;
-	}
-
-	if (Z_TYPE(retval) == IS_UNDEF) {
-		php_error_docref(NULL, E_WARNING, "%s::__toString() did not return anything", ZSTR_VAL(Z_OBJCE_P(object)->name));
-		RETURN_FALSE;
-	}
-
-	if (return_output) {
-		ZVAL_COPY_VALUE(return_value, &retval);
-	} else {
-		/* No need for _r variant, return of __toString should always be a string */
-		zend_print_zval(&retval, 0);
-		zend_printf("\n");
-		zval_ptr_dtor(&retval);
-	}
+	reflection_export_impl(return_value, object, return_output);
 }
 /* }}} */
 
