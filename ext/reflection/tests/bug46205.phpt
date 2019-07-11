@@ -10,5 +10,6 @@ try {
 } catch (Exception $e) { }
 ?>
 ok
---EXPECT--
+--EXPECTF--
+Deprecated: Function ReflectionParameter::export() is deprecated in %s on line %d
 ok

@@ -60,6 +60,8 @@ string(%d) "Method [ <user, inherits TestClass> public method foo ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user, inherits TestClass> public method foo ] {
   @@ %s 16 - 18
 }
@@ -76,6 +78,8 @@ string(%d) "Method [ <user> static public method stat ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user> static public method stat ] {
   @@ %s 20 - 22
 }
@@ -92,6 +96,8 @@ string(%d) "Method [ <user> private method priv ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user> private method priv ] {
   @@ %s 24 - 26
 }
@@ -108,6 +114,8 @@ string(%d) "Method [ <user> protected method prot ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user> protected method prot ] {
   @@ %s 28 - 28
 }
@@ -124,6 +132,8 @@ string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user, inherits TestClass> protected method prot ] {
   @@ %s 28 - 28
 }
@@ -140,6 +150,8 @@ string(%d) "Method [ <user> abstract public method int ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user> abstract public method int ] {
   @@ %s 36 - 36
 }
@@ -160,6 +172,8 @@ string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
@@ -180,6 +194,8 @@ string(%d) "Method [ <user, dtor> public method __destruct ] {
 "
 
 export():
+
+Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <user, dtor> public method __destruct ] {
   @@ %s 30 - 30
 }

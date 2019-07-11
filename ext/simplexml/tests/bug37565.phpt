@@ -31,7 +31,9 @@ try {
 ===DONE===
 --EXPECT--
 Error: simplexml_load_string() expects parameter 2 to be a class name derived from SimpleXMLElement, 'Setting' given
+Error: Function Reflection::export() is deprecated
 Error: Argument 1 passed to Reflection::export() must implement interface Reflector, null given
 Error: simplexml_load_file() expects parameter 2 to be a class name derived from SimpleXMLElement, 'Setting' given
+Error: Function Reflection::export() is deprecated
 Error: Argument 1 passed to Reflection::export() must implement interface Reflector, null given
 ===DONE===

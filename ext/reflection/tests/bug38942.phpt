@@ -8,7 +8,7 @@ class foo {
 
 class bar extends foo {
 }
-ReflectionClass::export("bar");
+echo new ReflectionClass("bar");
 ?>
 --EXPECTF--
 Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; foo has a deprecated constructor in %s on line %d

@@ -23,7 +23,7 @@ class foo extends foo2 {
 	}
 }
 
-ReflectionObject::export(new foo);
+echo new ReflectionObject(new foo);
 
 ?>
 --EXPECTF--

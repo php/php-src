@@ -21,7 +21,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
   }
 
   - Static methods [1] {
-    Method [ <internal:Reflection, prototype Reflector> static public method export ] {
+    Method [ <internal, deprecated:Reflection> static public method export ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $argument ]

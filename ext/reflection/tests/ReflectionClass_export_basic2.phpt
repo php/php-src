@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::export() - ensure inherited private props are hidden.
+ReflectionClass::__toString() - ensure inherited private props are hidden.
 --FILE--
 <?php
 Class c {
@@ -9,8 +9,8 @@ Class c {
 
 class d extends c {}
 
-ReflectionClass::export("c");
-ReflectionClass::export("d");
+echo new ReflectionClass("c"), "\n";
+echo new ReflectionClass("d"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class c ] {

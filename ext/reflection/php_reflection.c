@@ -6262,12 +6262,11 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_functions[] = {
 	ZEND_ME(reflection, getModifierNames, arginfo_reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(reflection, export, arginfo_reflection_export, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_DEP_ME(reflection, export, arginfo_reflection_export, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 
 static const zend_function_entry reflector_functions[] = {
-	ZEND_FENTRY(export, NULL, NULL, ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT|ZEND_ACC_PUBLIC)
 	ZEND_ABSTRACT_ME(reflector, __toString, arginfo_reflection__void)
 	PHP_FE_END
 };
@@ -6322,7 +6321,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 static const zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, __construct, arginfo_reflection_function___construct, 0)
 	ZEND_ME(reflection_function, __toString, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_function, export, arginfo_reflection_function_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_function, isDisabled, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, invoke, arginfo_reflection_function_invoke, 0)
 	ZEND_ME(reflection_function, invokeArgs, arginfo_reflection_function_invokeArgs, 0)
@@ -6379,7 +6378,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_getClosure, 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_method_functions[] = {
-	ZEND_ME(reflection_method, export, arginfo_reflection_method_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_method, export, arginfo_reflection_method_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_method, __construct, arginfo_reflection_method___construct, 0)
 	ZEND_ME(reflection_method, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_method, isPublic, arginfo_reflection__void, 0)
@@ -6477,7 +6476,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_class, export, arginfo_reflection_class_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_class, export, arginfo_reflection_class_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_class, __construct, arginfo_reflection_class___construct, 0)
 	ZEND_ME(reflection_class, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getName, arginfo_reflection__void, 0)
@@ -6544,7 +6543,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_object___construct, 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_object_functions[] = {
-	ZEND_ME(reflection_object, export, arginfo_reflection_object_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_object, export, arginfo_reflection_object_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_object, __construct, arginfo_reflection_object___construct, 0)
 	PHP_FE_END
 };
@@ -6580,7 +6579,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_property, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_property, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_property, __construct, arginfo_reflection_property___construct, 0)
 	ZEND_ME(reflection_property, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getName, arginfo_reflection__void, 0)
@@ -6614,7 +6613,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_class_constant_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_class_constant, export, arginfo_reflection_class_constant_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_class_constant, export, arginfo_reflection_class_constant_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_class_constant, __construct, arginfo_reflection_class_constant___construct, 0)
 	ZEND_ME(reflection_class_constant, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class_constant, getName, arginfo_reflection__void, 0)
@@ -6641,7 +6640,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_parameter, export, arginfo_reflection_parameter_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_parameter, export, arginfo_reflection_parameter_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_parameter, __construct, arginfo_reflection_parameter___construct, 0)
 	ZEND_ME(reflection_parameter, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getName, arginfo_reflection__void, 0)
@@ -6689,7 +6688,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_extension, __construct, arginfo_reflection_extension___construct, 0)
 	ZEND_ME(reflection_extension, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_extension, getName, arginfo_reflection__void, 0)
@@ -6712,7 +6711,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_DEP_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_zend_extension___construct, 0)
 	ZEND_ME(reflection_zend_extension, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getName, arginfo_reflection__void, 0)
