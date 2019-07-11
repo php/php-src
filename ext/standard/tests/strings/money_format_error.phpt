@@ -41,20 +41,28 @@ var_dump( money_format($string . $string, $value) );
 
 -- Testing money_format() function with no arguments --
 
+Deprecated: Function money_format() is deprecated in %s on line %d
+
 Warning: money_format() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
 -- Testing money_format() function with insufficient arguments --
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 
 Warning: money_format() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing money_format() function with more than expected no. of arguments --
 
+Deprecated: Function money_format() is deprecated in %s on line %d
+
 Warning: money_format() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
 -- Testing money_format() function with more than one token --
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 
 Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
 bool(false)

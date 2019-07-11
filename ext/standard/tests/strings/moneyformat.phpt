@@ -15,5 +15,6 @@ if (setlocale(LC_MONETARY, 'en_US') === false) {
 setlocale(LC_MONETARY, 'en_US');
 var_dump( money_format("X%nY", 3.1415));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function money_format() is deprecated in %s on line %d
 string(7) "X$3.14Y"
