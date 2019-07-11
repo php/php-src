@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0beta1
 
+- Core:
+  . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
 
 11 Jul 2019, PHP 7.4.0alpha3
 
