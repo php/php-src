@@ -3109,7 +3109,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(is_integer,			is_int,									arginfo_is_int)
 	PHP_FALIAS(is_long,				is_int,									arginfo_is_int)
 	PHP_FALIAS(is_double,			is_float,								arginfo_is_float)
-	PHP_FALIAS(is_real,				is_float,								arginfo_is_float)
+	PHP_DEP_FALIAS(is_real,			is_float,								arginfo_is_float)
 	PHP_FE(is_numeric,														arginfo_is_numeric)
 	PHP_FE(is_string,														arginfo_is_string)
 	PHP_FE(is_array,														arginfo_is_array)
