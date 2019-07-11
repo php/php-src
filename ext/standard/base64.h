@@ -21,6 +21,11 @@
 #define BASE64_H
 
 /*
+ * NEON implementation is based on https://github.com/WojciechMula/base64simd
+ * which is copyrighted to:
+ * Copyright (c) 2015-2018, Wojciech Mula
+ * All rights reserved.
+ *
  * SSSE3 and AVX2 implementation are based on https://github.com/aklomp/base64
  * which is copyrighted to:
  *
