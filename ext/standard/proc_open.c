@@ -390,6 +390,7 @@ static inline HANDLE dup_fd_as_handle(int fd)
 
 #define DESC_PIPE		1
 #define DESC_FILE		2
+#define DESC_REDIRECT	3
 #define DESC_PARENT_MODE_WRITE	8
 
 struct php_proc_open_descriptor_item {
@@ -760,6 +761,85 @@ PHP_FUNCTION(proc_open)
 #else
 				descriptors[ndesc].childend = fd;
 #endif
+			} else if (strcmp(Z_STRVAL_P(ztype), "redirect") == 0) {
+				zval *ztarget = zend_hash_index_find_deref(Z_ARRVAL_P(descitem), 1);
+				struct php_proc_open_descriptor_item *target = NULL;
+				php_file_descriptor_t childend;
+
+				if (!ztarget) {
+					php_error_docref(NULL, E_WARNING, "Missing redirection target");
+					goto exit_fail;
+				}
+				if (Z_TYPE_P(ztarget) != IS_LONG) {
+					php_error_docref(NULL, E_WARNING, "Redirection target must be an integer");
+					goto exit_fail;
+				}
+
+				for (i = 0; i < ndesc; i++) {
+					if (descriptors[i].index == Z_LVAL_P(ztarget)) {
+						target = &descriptors[i];
+						break;
+					}
+				}
+				if (target) {
+					childend = target->childend;
+				} else {
+					if (Z_LVAL_P(ztarget) < 0 || Z_LVAL_P(ztarget) > 2) {
+						php_error_docref(NULL, E_WARNING,
+							"Redirection target " ZEND_LONG_FMT " not found", Z_LVAL_P(ztarget));
+						goto exit_fail;
+					}
+
+					/* Support referring to a stdin/stdout/stderr pipe adopted from the parent,
+					 * which happens whenever an explicit override is not provided. */
+#ifndef PHP_WIN32
+					childend = Z_LVAL_P(ztarget);
+#else
+					switch (Z_LVAL_P(ztarget)) {
+						case 0: childend = GetStdHandle(STD_INPUT_HANDLE); break;
+						case 1: childend = GetStdHandle(STD_OUTPUT_HANDLE); break;
+						case 2: childend = GetStdHandle(STD_ERROR_HANDLE); break;
+						EMPTY_SWITCH_DEFAULT_CASE()
+					}
+#endif
+				}
+
+#ifdef PHP_WIN32
+				descriptors[ndesc].childend = dup_handle(childend, TRUE, FALSE);
+				if (descriptors[ndesc].childend == NULL) {
+					php_error_docref(NULL, E_WARNING,
+						"Failed to dup() for descriptor " ZEND_LONG_FMT, nindex);
+					goto exit_fail;
+				}
+#else
+				descriptors[ndesc].childend = dup(childend);
+				if (descriptors[ndesc].childend < 0) {
+					php_error_docref(NULL, E_WARNING,
+						"Failed to dup() for descriptor " ZEND_LONG_FMT " - %s",
+						nindex, strerror(errno));
+					goto exit_fail;
+				}
+#endif
+				descriptors[ndesc].mode = DESC_REDIRECT;
+			} else if (strcmp(Z_STRVAL_P(ztype), "null") == 0) {
+#ifndef PHP_WIN32
+				descriptors[ndesc].childend = open("/dev/null", O_RDWR);
+				if (descriptors[ndesc].childend < 0) {
+					php_error_docref(NULL, E_WARNING,
+						"Failed to open /dev/null - %s", strerror(errno));
+					goto exit_fail;
+				}
+#else
+				descriptors[ndesc].childend = CreateFileA(
+					"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+					NULL, OPEN_EXISTING, 0, NULL);
+				descriptors[ndesc].childend = VCWD_OPEN("nul", O_RDWR);
+				if (descriptors[ndesc].childend == NULL) {
+					php_error_docref(NULL, E_WARNING, "Failed to open nul");
+					goto exit_fail;
+				}
+#endif
+				descriptors[ndesc].mode = DESC_FILE;
 			} else if (strcmp(Z_STRVAL_P(ztype), "pty") == 0) {
 #if PHP_CAN_DO_PTS
 				if (dev_ptmx == -1) {

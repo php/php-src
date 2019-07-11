@@ -15,13 +15,14 @@ server
 
 include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
 
-$args = substr(PHP_OS, 0, 3) == 'WIN' ? "-d extension_dir=" . ini_get("extension_dir") . " -d extension=php_soap.dll" : "";
+$args = substr(PHP_OS, 0, 3) == 'WIN'
+    ? ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=php_soap.dll"] : [];
 $code = <<<'PHP'
 /* Receive */
 $content = trim(file_get_contents("php://input")) . PHP_EOL;
 PHP;
 
-php_cli_server_start($code, false, $args);
+php_cli_server_start($code, null, $args);
 
 $client = new soapclient(NULL, [
   'location' => 'http://' . PHP_CLI_SERVER_ADDRESS,
