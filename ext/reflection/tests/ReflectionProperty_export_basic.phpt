@@ -1,5 +1,5 @@
 --TEST--
-Test ReflectionProperty::export() usage.
+Test ReflectionProperty::__toString() usage.
 --FILE--
 <?php
 
@@ -7,10 +7,8 @@ class TestClass {
     public $proper = 5;
 }
 
-var_dump(ReflectionProperty::export('TestClass', 'proper'));
+echo new ReflectionProperty('TestClass', 'proper');
 
 ?>
 --EXPECT--
 Property [ <default> public $proper ]
-
-NULL

@@ -1,5 +1,5 @@
 --TEST--
-ReflectionClass::export() - various parameters
+ReflectionClass::__toString() - various parameters
 --FILE--
 <?php
 Class A {
@@ -17,7 +17,7 @@ Class A {
 Class C extends A { }
 
 define('K', "16 chars long --");
-ReflectionClass::export("C");
+echo new ReflectionClass("C"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class C extends A ] {
