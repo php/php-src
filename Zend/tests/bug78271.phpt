@@ -1,7 +1,7 @@
 --TEST--
 Bug #78271: Invalid result of if-else
 --FILE--
-<?
+<?php
 function test($a, $b){
     if ($a==10) {
         $w="x";
