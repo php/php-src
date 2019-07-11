@@ -4400,6 +4400,14 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 			ZEND_VM_CONTINUE(); \
 		} \
 	} while (0)
+#define ZEND_VM_SMART_BRANCH_TRUE_JMPZ() do { \
+		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+#define ZEND_VM_SMART_BRANCH_TRUE_JMPNZ() do { \
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
 #define ZEND_VM_SMART_BRANCH_FALSE() do { \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4408,6 +4416,14 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 			ZEND_VM_CONTINUE(); \
 		} \
+	} while (0)
+#define ZEND_VM_SMART_BRANCH_FALSE_JMPZ() do { \
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+#define ZEND_VM_SMART_BRANCH_FALSE_JMPNZ() do { \
+		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
+		ZEND_VM_CONTINUE(); \
 	} while (0)
 #else
 # define ZEND_VM_REPEATABLE_OPCODE
