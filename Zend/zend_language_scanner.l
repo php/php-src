@@ -1497,7 +1497,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_INT_CAST);
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("double"|"float"){TABS_AND_SPACES}")" {
+	RETURN_TOKEN(T_DOUBLE_CAST);
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"real"{TABS_AND_SPACES}")" {
+	if (PARSER_MODE()) {
+		zend_error(E_DEPRECATED, "The (real) cast is deprecated, use (float) instead");
+	}
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
 
