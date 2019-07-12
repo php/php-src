@@ -18,7 +18,7 @@ class B {
 }
 
 $f = (new A)->f();
-var_dump($f->bindTo(null, 'B')());
+var_dump($f->bindTo(new B, 'B')());
 
 ?>
 --EXPECT--

@@ -38,7 +38,7 @@ $d = $nonstaticUnscoped->bindTo(new A, 'A'); $d(); echo "\n";
 $d = $nonstaticScoped->bindTo(new A, 'A'); $d(); echo "\n";
 
 echo "Done.\n";
---EXPECT--
+--EXPECTF--
 Before binding
 bool(false)
 bool(false)
@@ -50,6 +50,8 @@ After binding, null scope, no instance
 bool(false)
 bool(false)
 
+
+Deprecated: Unbinding $this of closure is deprecated in %s on line %d
 bool(false)
 bool(false)
 
@@ -64,6 +66,8 @@ After binding, with scope, no instance
 bool(true)
 bool(false)
 
+
+Deprecated: Unbinding $this of closure is deprecated in %s on line %d
 bool(true)
 bool(false)
 
