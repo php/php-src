@@ -58,7 +58,7 @@ static const filter_list_entry filter_list[] = {
 	{ "url",             FILTER_SANITIZE_URL,           php_filter_url             },
 	{ "number_int",      FILTER_SANITIZE_NUMBER_INT,    php_filter_number_int      },
 	{ "number_float",    FILTER_SANITIZE_NUMBER_FLOAT,  php_filter_number_float    },
-	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_add_slashes     },
+	{ "magic_quotes",    FILTER_SANITIZE_MAGIC_QUOTES,  php_filter_magic_quotes    },
 	{ "add_slashes",     FILTER_SANITIZE_ADD_SLASHES,   php_filter_add_slashes     },
 
 	{ "callback",        FILTER_CALLBACK,               php_filter_callback        },
