@@ -22,7 +22,7 @@
 #define VIRTUAL_CWD_H
 
 #include "TSRM.h"
-#include "tsrm_config_common.h"
+#include "zend_portability.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
