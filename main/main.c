@@ -2359,6 +2359,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				"Directive '%s' is deprecated",
 				{
 					"track_errors",
+					"allow_url_include",
 					NULL
 				}
 			},

@@ -37,6 +37,8 @@ var_dump(highlight_file($filename));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
+
 Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 
