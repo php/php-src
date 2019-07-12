@@ -30,6 +30,9 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#endif
 
 /*
  * This define is here because some versions of libintl redefine setlocale
@@ -1403,6 +1406,99 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 }
 /* }}} */
 
+#if !defined(ZTS) && defined(__aarch64__)
+static zend_always_inline void memcpy_15(uint8_t *out, uint8_t *in, uint8_t len) {
+	uint8_t k = 0;
+	if (len >= 8) {
+		memcpy(out, in, 8);
+		len -= 8;
+		k += 8;
+	}
+	if (len >= 4) {
+		memcpy(out + k, in + k, 4);
+		len -= 4;
+		k += 4;
+	}
+	if (len >= 2) {
+		memcpy(out + k, in + k, 2);
+		len -= 2;
+		k += 2;
+	}
+	if (len == 1) {
+		memcpy(out + k, in + k, 1);
+	}
+}
+
+static zend_always_inline uint8x16_t neon_to_lu(uint8x16_t x,
+						uint8_t shift_LUT[4][64],
+						uint8_t has_shift[4],
+						uint8x16_t *transformed) {
+	uint8x16_t shifts = {0};
+
+	/* There are no lower/upper case chars in the first table: [0, 63]. */
+	int i = 1;
+	for (; i < 4; i++) {
+		if (!has_shift[i])
+			continue;
+
+		/* Mask out the higher bits that are used to index in the
+		   shift_LUT[i]: a vector table lookup that accesses in the
+		   range [0..63] will return the value recorded in the LUT,
+		   otherwise the returned value is 0. The value in the LUT is
+		   the shift amount to convert low->up or up->low case. */
+		uint8x16_t idx = veorq_u8(x, vdupq_n_u8(i << 6));
+		uint8x16_t s = vqtbl4q_u8(*((uint8x16x4_t *)shift_LUT[i]), idx);
+		shifts = vaddq_u8(shifts, s);
+	}
+
+	/* The output is transformed if any char is shifted. */
+	*transformed = vorrq_u8(*transformed, shifts);
+	return vaddq_u8(x, shifts);
+}
+
+static zend_always_inline
+zend_string *neon_string_to_lu(zend_string *s,
+			       uint8_t shift_LUT[4][64],
+			       uint8_t has_shift[4])
+{
+	size_t len = ZSTR_LEN(s);
+	zend_string *res = zend_string_alloc(len, 0);
+	uint8_t *in = (uint8_t *) ZSTR_VAL(s);
+	uint8_t *out = (uint8_t *) ZSTR_VAL(res);
+	uint8x16_t transformed = {0};
+	int j = 0;
+
+	for (; len - j > 15; j += 16) {
+		uint8x16_t a = *((uint8x16_t *)(in + j));
+		uint8x16_t b = neon_to_lu(a, shift_LUT, has_shift, &transformed);
+		vst1q_u8((uint8_t *)(out + j), b);
+	}
+
+	/* Process 15 or fewer bytes. */
+	if (j < len) {
+		uint8_t left_bytes = len - j;
+		uint8x16_t a = {0}, b;
+
+		ZEND_ASSERT(left_bytes < 16);
+		memcpy_15((uint8_t *)&a, in + j, left_bytes);
+		b = neon_to_lu(a, shift_LUT, has_shift, &transformed);
+		memcpy_15(out + j, (uint8_t *)&b, left_bytes);
+	}
+
+	/* Check whether one of the chars has been transformed. */
+	union {uint8_t mem[16]; uint64_t dw[2]; } qw;
+	vst1q_u8(qw.mem, transformed);
+	if (qw.dw[0] != 0 || qw.dw[1] != 0) {
+		*(out + len) = '\0';
+		return res;
+	}
+
+	/* There was no transform. */
+	zend_string_efree(res);
+	return zend_string_copy(s);
+}
+#endif /* !ZTS && __aarch64__ */
+
 /* {{{ php_string_toupper
  */
 PHPAPI zend_string *php_string_toupper(zend_string *s)
@@ -1410,6 +1506,33 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	unsigned char *c;
 	const unsigned char *e;
 
+#if !defined(ZTS) && defined(__aarch64__)
+	if (ZSTR_LEN(s) >= 32) {
+		static uint8_t toupper_shift_LUT[4][64] = {0};
+		static uint8_t toupper_has_shift[4] = {0};
+		static char *saved_locale = NULL;
+		char *locale = setlocale(LC_ALL, NULL);
+
+		/* Check that the locale has not changed from last time we cached it. */
+		if (saved_locale != locale) {
+			/* There are no lower/upper case chars in the first table: [0, 63]. */
+			int i = 0, j = 1;
+			for (; j < 4; j++) {
+				for (i = 0; i < 64; i++) {
+					int y, x = i + 64*j;
+					if (!islower((unsigned char)x))
+						continue;
+					y = toupper((unsigned char)x);
+					toupper_has_shift[j] = 1;
+					toupper_shift_LUT[j][i] = y - x;
+				}
+			}
+			saved_locale = locale;
+		}
+
+		return neon_string_to_lu(s, toupper_shift_LUT, toupper_has_shift);
+	}
+#endif
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
 
@@ -1474,6 +1597,34 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 {
 	unsigned char *c;
 	const unsigned char *e;
+
+#if !defined(ZTS) && defined(__aarch64__)
+	if (ZSTR_LEN(s) >= 32) {
+		static uint8_t tolower_shift_LUT[4][64] = {0};
+		static uint8_t tolower_has_shift[4] = {0};
+		static char *saved_locale = NULL;
+		char *locale = setlocale(LC_ALL, NULL);
+
+		/* Check that the locale has not changed from last time we cached it. */
+		if (saved_locale != locale) {
+			/* There are no lower/upper case chars in the first table: [0, 63]. */
+			int i = 0, j = 1;
+			for (; j < 4; j++) {
+				for (i = 0; i < 64; i++) {
+					int y, x = i + 64*j;
+					if (!isupper((unsigned char)x))
+						continue;
+					y = tolower((unsigned char)x);
+					tolower_has_shift[j] = 1;
+					tolower_shift_LUT[j][i] = y - x;
+				}
+			}
+			saved_locale = locale;
+		}
+
+		return neon_string_to_lu(s, tolower_shift_LUT, tolower_has_shift);
+	}
+#endif
 
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
@@ -3376,8 +3527,6 @@ PHP_FUNCTION(strtr)
    Reverse a string */
 #if ZEND_INTRIN_SSSE3_NATIVE
 #include <tmmintrin.h>
-#elif defined(__aarch64__)
-#include <arm_neon.h>
 #endif
 PHP_FUNCTION(strrev)
 {
