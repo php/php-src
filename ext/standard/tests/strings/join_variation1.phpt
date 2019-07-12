@@ -123,22 +123,32 @@ string(19) "element10.5element2"
 -- Iteration 10 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(0) ""
 -- Iteration 11 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(1) "0"
 -- Iteration 12 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(1) "1"
 -- Iteration 13 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(7) "1Array2"
 -- Iteration 14 --
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(11) "redArraypen"
 -- Iteration 15 --
 string(17) "element11element2"

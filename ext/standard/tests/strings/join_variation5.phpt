@@ -39,6 +39,8 @@ Notice: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
 
 Notice: Array to string conversion in %s on line %d
+
+Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(19) "1Array2Array3Array4"
 
 Notice: Array to string conversion in %s on line %d

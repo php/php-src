@@ -1292,6 +1292,8 @@ PHP_FUNCTION(implode)
 		if (Z_TYPE_P(arg1) == IS_ARRAY) {
 			glue = zval_get_tmp_string(arg2, &tmp_glue);
 			pieces = arg1;
+			php_error_docref(NULL, E_DEPRECATED,
+				"Passing glue string after array is deprecated. Swap the parameters");
 		} else if (Z_TYPE_P(arg2) == IS_ARRAY) {
 			glue = zval_get_tmp_string(arg1, &tmp_glue);
 			pieces = arg2;
