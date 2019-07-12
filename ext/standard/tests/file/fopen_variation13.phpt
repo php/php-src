@@ -21,7 +21,6 @@ set_include_path($newpath);
 runtest();
 
 teardown_include_path();
-restore_include_path();
 
 
 function runtest() {

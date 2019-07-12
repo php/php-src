@@ -14,7 +14,6 @@ require_once('reading_include_path.inc');
 //define the files to go into these directories, create one in dir2
 set_include_path($newIncludePath);
 test_gzfile();
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);

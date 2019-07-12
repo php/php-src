@@ -54,6 +54,7 @@ function normalizeOutput(string $out): string {
     $out = preg_replace('/^#(\d+) \/.+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
+    $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
     return $out;
 }
 
