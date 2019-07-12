@@ -2269,7 +2269,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 			} else {
 				add_next_index_zval(&array_copy, val);
 			}
-			Z_ADDREF_P(val);
+			Z_TRY_ADDREF_P(val);
 
 			iter->funcs->move_forward(iter);
 			if (EG(exception)) {
@@ -2850,7 +2850,7 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 
 		object_init_ex(&soapvar, soap_var_class_entry);
 		add_property_long(&soapvar, "enc_type", enc->details.type);
-		Z_DELREF_P(ret);
+		Z_TRY_DELREF_P(ret);
 		add_property_zval(&soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));
