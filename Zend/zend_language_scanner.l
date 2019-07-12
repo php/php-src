@@ -2059,8 +2059,12 @@ inline_char_handler:
 		}
 
 		if (*YYCURSOR == '?') {
-			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
-
+			if (CG(short_tags) /* <? */
+				|| (*(YYCURSOR + 1) == '=') /* <?= */
+				|| (!strncasecmp((char*)YYCURSOR + 1, "php", 3) && /* <?php[ \t\r\n] */
+					(YYCURSOR[4] == ' ' || YYCURSOR[4] == '\t' ||
+					YYCURSOR[4] == '\n' || YYCURSOR[4] == '\r'))
+			) {
 				YYCURSOR--;
 				break;
 			}
