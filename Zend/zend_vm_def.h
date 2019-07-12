@@ -49,6 +49,7 @@ ZEND_VM_HOT_NOCONSTCONST_HANDLER(1, ZEND_ADD, CONST|TMPVARCV, CONST|TMPVARCV)
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2, *result;
+	double d1, d2;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -60,19 +61,22 @@ ZEND_VM_HOT_NOCONSTCONST_HANDLER(1, ZEND_ADD, CONST|TMPVARCV, CONST|TMPVARCV)
 			fast_long_add_function(result, op1, op2);
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_GOTO(add_double);
 		}
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+ZEND_VM_C_LABEL(add_double):
 			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
+			ZVAL_DOUBLE(result, d1 + d2);
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2)));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			ZEND_VM_C_GOTO(add_double);
 		}
 	}
 
@@ -105,6 +109,7 @@ ZEND_VM_HOT_NOCONSTCONST_HANDLER(2, ZEND_SUB, CONST|TMPVARCV, CONST|TMPVARCV)
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2, *result;
+	double d1, d2;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -116,19 +121,22 @@ ZEND_VM_HOT_NOCONSTCONST_HANDLER(2, ZEND_SUB, CONST|TMPVARCV, CONST|TMPVARCV)
 			fast_long_sub_function(result, op1, op2);
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_GOTO(sub_double);
 		}
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+ZEND_VM_C_LABEL(sub_double):
 			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - Z_DVAL_P(op2));
+			ZVAL_DOUBLE(result, d1 - d2);
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2)));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			ZEND_VM_C_GOTO(sub_double);
 		}
 	}
 
@@ -161,6 +169,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(3, ZEND_MUL, CONST|TMPVARCV, CONST|TMPVARCV, SPE
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *op1, *op2, *result;
+	double d1, d2;
 
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -175,19 +184,22 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(3, ZEND_MUL, CONST|TMPVARCV, CONST|TMPVARCV, SPE
 			Z_TYPE_INFO_P(result) = overflow ? IS_DOUBLE : IS_LONG;
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_GOTO(mul_double);
 		}
 	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+ZEND_VM_C_LABEL(mul_double):
 			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * Z_DVAL_P(op2));
+			ZVAL_DOUBLE(result, d1 * d2);
 			ZEND_VM_NEXT_OPCODE();
 		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
-			result = EX_VAR(opline->result.var);
-			ZVAL_DOUBLE(result, Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2)));
-			ZEND_VM_NEXT_OPCODE();
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			ZEND_VM_C_GOTO(mul_double);
 		}
 	}
 
