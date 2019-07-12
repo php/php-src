@@ -4,7 +4,6 @@ $http_reponse_header (whitespace-only "header")
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:22350'); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';
