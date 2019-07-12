@@ -505,7 +505,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_ce_ptr = zend_register_internal_class(&ce);
 	if (!TimeZone_ce_ptr) {
 		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
+		php_error_docref(NULL, E_ERROR,
 			"IntlTimeZone: class registration has failed.");
 		return;
 	}

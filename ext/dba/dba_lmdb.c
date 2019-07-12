@@ -251,14 +251,14 @@ DBA_FIRSTKEY_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
 	rc = mdb_cursor_open(LMDB_IT(txn), LMDB_IT(dbi), &LMDB_IT(cur));
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
@@ -268,7 +268,7 @@ DBA_FIRSTKEY_FUNC(lmdb)
 		mdb_cursor_close(LMDB_IT(cur));
 		LMDB_IT(cur) = NULL;
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		return NULL;
 	}
@@ -291,7 +291,7 @@ DBA_NEXTKEY_FUNC(lmdb)
 
 	rc = mdb_txn_renew(LMDB_IT(txn));
 	if (rc) {
-		php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
@@ -301,7 +301,7 @@ DBA_NEXTKEY_FUNC(lmdb)
 		mdb_cursor_close(LMDB_IT(cur));
 		LMDB_IT(cur) = NULL;
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		return NULL;
 	}
@@ -327,7 +327,7 @@ DBA_SYNC_FUNC(lmdb)
 
 	rc = mdb_env_sync(LMDB_IT(env), 1);
 	if (rc) {
-			php_error_docref0(NULL, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 			return FAILURE;
 	}
 
