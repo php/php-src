@@ -3047,7 +3047,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(ini_restore,														arginfo_ini_restore)
 	PHP_FE(get_include_path,												arginfo_get_include_path)
 	PHP_FE(set_include_path,												arginfo_set_include_path)
-	PHP_FE(restore_include_path,											arginfo_restore_include_path)
+	PHP_DEP_FE(restore_include_path,											arginfo_restore_include_path)
 
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
