@@ -22,7 +22,6 @@
 #define VIRTUAL_CWD_H
 
 #include "TSRM.h"
-#include "tsrm_config_common.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,6 +32,24 @@
 #endif
 
 #include <stdarg.h>
+#include <limits.h>
+
+#if HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif
+
+#ifndef MAXPATHLEN
+# if _WIN32
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
+# elif PATH_MAX
+#  define MAXPATHLEN PATH_MAX
+# elif defined(MAX_PATH)
+#  define MAXPATHLEN MAX_PATH
+# else
+#  define MAXPATHLEN 256
+# endif
+#endif
 
 #ifdef ZTS
 #define VIRTUAL_DIR
