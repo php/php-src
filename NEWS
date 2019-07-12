@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed #69044 (discrepency between time and microtime). (krakjoe)
 
+- Libxml:
+  . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
+    requests (cgi-fcgi)). (Nikita)
+
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.4.3 (increased response header count limit from
     100 to 1000, added crash handler to cleanly shutdown PHP request, added
