@@ -62,23 +62,6 @@
 
 #include <limits.h>
 
-#if HAVE_SYS_PARAM_H
-# include <sys/param.h>
-#endif
-
-#ifndef MAXPATHLEN
-# if _WIN32
-#  include "win32/ioutil.h"
-#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
-# elif PATH_MAX
-#  define MAXPATHLEN PATH_MAX
-# elif defined(MAX_PATH)
-#  define MAXPATHLEN MAX_PATH
-# else
-#  define MAXPATHLEN 256
-# endif
-#endif
-
 #if HAVE_ALLOCA_H && !defined(_ALLOCA_H)
 # include <alloca.h>
 #endif
