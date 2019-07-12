@@ -258,6 +258,7 @@ NO_PROC_OPEN_ERROR;
 		'log_errors_max_len=0',
 		'opcache.fast_shutdown=0',
 		'opcache.file_update_protection=0',
+		'opcache.revalidate_freq=0',
 		'zend.assertions=1',
 	);
 
