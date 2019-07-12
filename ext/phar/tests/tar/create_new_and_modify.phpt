@@ -14,6 +14,13 @@ $pname = 'phar://' . $fname;
 
 file_put_contents($pname . '/a.php', "brand new!\n");
 
+if (function_exists("opcache_get_status")) {
+    $status = opcache_get_status();
+    if (is_array($status) && ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"]))) {
+        sleep(2);
+    }
+}
+
 $phar = new Phar($fname);
 var_dump($phar->isFileFormat(Phar::TAR));
 $sig1 = md5_file($fname);
