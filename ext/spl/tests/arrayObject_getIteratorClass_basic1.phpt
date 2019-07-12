@@ -6,36 +6,36 @@ class MyIterator extends ArrayIterator {
 
 	function __construct() {
 	 	$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 	}
 
 	function rewind() {
 		$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 		return parent::rewind();
 	}
 
 	function valid() {
 		$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 		return parent::valid();
 	}
 
 	function current() {
 		$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 		return parent::current();
 	}
 
 	function next() {
 		$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 		return parent::next();
 	}
 
 	function key() {
 		$args = func_get_args();
-		echo "   In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+		echo "   In " . __METHOD__ . "(" . implode(',', $args) . ")\n";
 		return parent::key();
 	}
 }
