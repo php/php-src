@@ -1522,7 +1522,7 @@ PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
-PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
