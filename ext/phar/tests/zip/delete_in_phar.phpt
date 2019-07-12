@@ -19,11 +19,11 @@ $phar->setStub('<?php __HALT_COMPILER(); ?>');
 $phar->stopBuffering();
 
 if (function_exists("opcache_get_status")) {
-	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
-		ini_set("opcache.revalidate_freq", "0");
-		sleep(2);
-	}
+    $status = opcache_get_status();
+    if (is_array($status) && $status["opcache_enabled"]) {
+        ini_set("opcache.revalidate_freq", "0");
+        sleep(2);
+    }
 }
 
 include $alias . '/a.php';
@@ -54,4 +54,3 @@ Warning: include(%sdelete_in_phar.phar.zip/b/c.php): failed to open stream: phar
 Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.zip/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar.php on line %d
 
 ===DONE===
-		
