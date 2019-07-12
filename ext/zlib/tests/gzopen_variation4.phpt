@@ -26,7 +26,6 @@ $modes = array("r", "r+", "rt");
 foreach($modes as $mode) {
     test_gzopen($mode);
 }
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);

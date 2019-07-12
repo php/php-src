@@ -45,7 +45,6 @@ $modes = array("r", "r+", "rt");
 foreach($modes as $mode) {
     test_fopen($mode);
 }
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);

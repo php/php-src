@@ -12,7 +12,6 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 set_include_path("rubbish");
 testme();
-restore_include_path();
 
 
 function testme() {
