@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Recode:
   . Unbundled the recode extension. (cmb)
 
+- Standard:
+  . Fixed bug #78282 (atime and mtime mismatch). (cmb)
+
 11 Jul 2019, PHP 7.4.0alpha3
 
 - Core:
