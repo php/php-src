@@ -104,6 +104,6 @@ bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(): Is a directory (%s/unlink_error) in %s on line %d
+Warning: unlink(): (%s/unlink_error) Is a directory in %s on line %d
 bool(false)
 Done

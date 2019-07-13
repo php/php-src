@@ -1148,7 +1148,12 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, 
 	ret = VCWD_UNLINK(url);
 	if (ret == -1) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url);
+			/* If error is "Is directory" show url after error message */
+			if (errno == EISDIR) {
+				php_error_docref(NULL, E_WARNING, "(%s) %s", url, strerror(errno));
+			} else {
+				php_error_docref(NULL, E_WARNING, "%s (%s)", strerror(errno), url);
+			}
 		}
 		return 0;
 	}

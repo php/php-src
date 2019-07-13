@@ -102,5 +102,5 @@ directory unlinked
 
 --- try to unlink a directory ---
 
-Warning: unlink(): %r(Is a directory|Operation not permitted)%r (unlinkVar10.tmp/linkme.tmp) in %s on line %d
+Warning: unlink(): %r(|Operation not permitted )%r(unlinkVar10.tmp/linkme.tmp)%r( Is a directory|)%r in %s on line %d
 ===DONE===

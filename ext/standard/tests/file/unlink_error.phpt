@@ -101,6 +101,6 @@ bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(): %r(Is a directory|Operation not permitted)%r (%s/unlink_error) in %s on line %d
+Warning: unlink(): %r(|Operation not permitted )%r(%s/unlink_error)%r( Is a directory|)%r in %s on line %d
 bool(false)
 Done
