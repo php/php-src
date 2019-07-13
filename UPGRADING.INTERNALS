@@ -23,7 +23,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   t. Exceptions thrown by string conversions.
   u. Removed uint and ulong typedefs
   v. Compound assignment opcodes
-  z. APACHE symbol removed
+  w. APACHE symbol removed
+  x. php_error_docref0() renamed to php_error_docref()
 
 2. Build system changes
   a. Abstract
@@ -220,7 +221,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP and ZEND_ASSIGN_STATIC_PROP_OP with
      ZEND_ADD (or other) in extended_value.
 
-  z. APACHE symbol has been removed and is no longer defined.
+  w. APACHE symbol has been removed and is no longer defined.
+
+  x. php_error_docref0() has been removed and renamed to php_error_docref().
 
 ========================
 2. Build system changes

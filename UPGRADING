@@ -25,6 +25,7 @@ PHP 7.4 UPGRADE NOTES
   . Trying to use values of type null, bool, int, float or resource as an
     array (such as $null["key"]) will now generate a notice. This does not
     affect array accesses performed by list().
+    RFC: https://wiki.php.net/rfc/notice-for-non-valid-array-container
   . get_declared_classes() no longer returns anonymous classes that haven't
     been instantiated yet.
   . "fn" is now a reserved keyword. In particular it can no longer be used as a
@@ -457,6 +458,7 @@ PHP 7.4 UPGRADE NOTES
 - Recode:
   . The recode extension has been moved to PECL. For character set/encoding
     conversion the iconv or mbstring extensions could be used instead.
+    RFC: https://wiki.php.net/rfc/unbundle_recode
 
 - WDDX:
   . The WDDX extension has been deprecated and moved to PECL.
