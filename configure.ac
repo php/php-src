@@ -547,13 +547,9 @@ PHP_CHECK_CPU_SUPPORTS([avx2])
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist. The
-dnl WARNING_LEVEL required because cc in QNX hates -w option without an argument
+dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
 if test "`uname -s 2>/dev/null`" != "QNX"; then
   AC_STRUCT_ST_BLOCKS
-else
-  AC_MSG_WARN([warnings level for cc set to 0])
-  WARNING_LEVEL=0
 fi
 
 dnl Checks for types.
@@ -1429,7 +1425,6 @@ PHP_SUBST_OLD(PHP_VERSION)
 PHP_SUBST_OLD(PHP_VERSION_ID)
 PHP_SUBST(SHELL)
 PHP_SUBST(SHARED_LIBTOOL)
-PHP_SUBST(WARNING_LEVEL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
 PHP_SUBST(INSTALL_HEADERS)
