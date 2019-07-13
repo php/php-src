@@ -74,27 +74,6 @@ function main()
 	}
 	define('TEST_PHP_SRCDIR', getcwd());
 
-
-	/* Sanity check to ensure that pcre extension needed by this script is available.
-	 * In the event it is not, print a nice error message indicating that this script will
-	 * not run without it.
-	 */
-
-	if (!extension_loaded('pcre')) {
-		echo <<<NO_PCRE_ERROR
-
-+-----------------------------------------------------------+
-|                       ! ERROR !                           |
-| The test-suite requires that you have pcre extension      |
-| enabled. To enable this extension either compile your PHP |
-| with --with-pcre-regex or if you've compiled pcre as a    |
-| shared module load it via php.ini.                        |
-+-----------------------------------------------------------+
-
-NO_PCRE_ERROR;
-		exit(1);
-	}
-
 	if (!function_exists('proc_open')) {
 		echo <<<NO_PROC_OPEN_ERROR
 
@@ -2680,7 +2659,7 @@ COMMAND $cmd
 					$info = " (warn: XFAIL section but test passes)";
 				} if (isset($section_text['XLEAK'])) {
 					$warn = true;
-					$info = " (warn: XLEAK section but test passes)";      
+					$info = " (warn: XLEAK section but test passes)";
                 } else {
 					show_result("PASS", $tested, $tested_file, '', $temp_filenames);
 					junit_mark_test_as('PASS', $shortname, $tested);
@@ -2704,7 +2683,7 @@ COMMAND $cmd
 	}
 
 	if ($leaked) {
-        $restype[] = isset($section_text['XLEAK']) ? 
+        $restype[] = isset($section_text['XLEAK']) ?
                         'XLEAK' : 'LEAK';
 	}
 
