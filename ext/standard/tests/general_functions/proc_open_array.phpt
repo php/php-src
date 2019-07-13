@@ -26,7 +26,7 @@ proc_close($proc);
 
 putenv('ENV_1=ENV_1');
 $env = ['ENV_2' => 'ENV_2'];
-$cmd = [$php, '-r', 'var_dump(getenv("ENV_1"), getenv("ENV_2"));'];
+$cmd = [$php, '-n', '-r', 'var_dump(getenv("ENV_1"), getenv("ENV_2"));'];
 
 echo "\nEnvironment inheritance:\n";
 $proc = proc_open($cmd, $ds, $pipes);
