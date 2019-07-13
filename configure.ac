@@ -280,7 +280,6 @@ case $host_alias in
         CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
       fi
     fi
-    php_multiple_shlib_versions_ok=yes
     ;;
   *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV"
