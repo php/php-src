@@ -287,7 +287,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (idna_info != NULL) {
 		if (variant == INTL_IDN_VARIANT_2003) {
-			php_error_docref0(NULL, E_NOTICE,
+			php_error_docref(NULL, E_NOTICE,
 				"4 arguments were provided, but INTL_IDNA_VARIANT_2003 only "
 				"takes 3 - extra argument ignored");
 		} else {

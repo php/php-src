@@ -241,7 +241,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
-		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
+		php_error_docref(NULL, E_WARNING, "The property \"id\" is read-only" );
 		retval = &EG( uninitialized_zval );
 	}
 	else
@@ -271,7 +271,7 @@ static zval *Transliterator_write_property( zval *object, zval *member, zval *va
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
-		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
+		php_error_docref(NULL, E_WARNING, "The property \"id\" is read-only" );
 	}
 	else
 	{

@@ -339,7 +339,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
@@ -349,8 +349,6 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()
-
-#define php_error_docref php_error_docref0
 
 #define zenderror phperror
 #define zendlex phplex

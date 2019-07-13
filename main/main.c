@@ -1163,9 +1163,9 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 }
 /* }}} */
 
-/* {{{ php_error_docref0 */
-/* See: CODING_STANDARDS.md for details. */
-PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
+/* {{{ php_error_docref */
+/* Generate an error which links to docref or the php.net documentation if docref is NULL */
+PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 {
 	va_list args;
 
