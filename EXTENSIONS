@@ -431,11 +431,6 @@ PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
-EXTENSION:           recode
-PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de> (2000 - 2000)
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           reflection
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2003 - 2009)
                      Johannes Schlüter <johannes@php.net> (2006 - 2014)
