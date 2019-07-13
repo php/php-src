@@ -15,7 +15,6 @@ steps:
                        libenchant-dev \
                        libaspell-dev \
                        libpspell-dev \
-                       librecode-dev \
                        libsasl2-dev \
                        libxpm-dev \
                        libzip-dev \
