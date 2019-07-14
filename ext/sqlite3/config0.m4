@@ -5,17 +5,6 @@ PHP_ARG_WITH([sqlite3],
   [yes])
 
 if test $PHP_SQLITE3 != "no"; then
-
-  dnl when running phpize enable_zts is not available
-  if test -z "$enable_zts"; then
-    if test -f "$phpincludedir/main/php_config.h"; then
-      ZTS=`grep '#define ZTS' $phpincludedir/main/php_config.h|$SED 's/#define ZTS//'`
-      if test "$ZTS" -eq "1"; then
-        enable_zts="yes"
-      fi
-    fi
-  fi
-
   PKG_CHECK_MODULES([SQLITE], [sqlite3 > 3.7.4])
 
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_stmt_readonly,
