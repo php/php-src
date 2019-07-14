@@ -105,8 +105,6 @@ extern "C++" {
 #endif
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
-#undef PTHREADS
-
 #endif /* PHP_CONFIG_H */
 ])
 
