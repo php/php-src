@@ -86,8 +86,5 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_cv_inc_path)
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo)
-  ])
+  PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo)
 fi
