@@ -42,8 +42,5 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   dnl Solaris fix
   PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
 
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
-  ])
+  PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
 fi
