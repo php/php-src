@@ -261,6 +261,3 @@ really-install:
 	@type nul > $(BUILD_DIR)\extension_dlls.txt
 	@if exist $(BUILD_DIR)\php_*.dll copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul & dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
 	@xcopy $(BUILD_DIR)\*.dll /exclude:$(BUILD_DIR)\extension_dlls.txt $(PHP_PREFIX) /y >nul
-	@echo Registering event source with syslog (requires admin rights)
-	@echo It's okay for this step to fail:
-	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
