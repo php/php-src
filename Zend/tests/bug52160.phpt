@@ -1,5 +1,5 @@
 --TEST--
-Bug #52160 (Invalid E_STRICT redefined constructor error)
+Bug #52160 (Invalid E_DEPRECATED redefined constructor error)
 --FILE--
 <?php
 

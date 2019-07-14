@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL|E_STRICT);
 
 copy('test_with_comment.zip', 't.zip');
 $z = new ZipArchive;

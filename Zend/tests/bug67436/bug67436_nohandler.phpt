@@ -1,5 +1,5 @@
 --TEST--
-bug67436: E_STRICT instead of custom error handler
+bug67436: E_WARNING instead of custom error handler
 --FILE--
 <?php
 

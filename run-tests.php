@@ -238,7 +238,7 @@ NO_PROC_OPEN_ERROR;
 		'open_basedir=',
 		'disable_functions=',
 		'output_buffering=Off',
-		'error_reporting=' . (E_ALL | E_STRICT),
+		'error_reporting=' . E_ALL,
 		'display_errors=1',
 		'display_startup_errors=1',
 		'log_errors=0',
@@ -1624,7 +1624,7 @@ escape:
 								'E_USER_ERROR',
 								'E_USER_WARNING',
 								'E_USER_NOTICE',
-								'E_STRICT',
+								'E_STRICT', // TODO Cleanup when removed from Zend Engine.
 								'E_RECOVERABLE_ERROR',
 								'E_USER_DEPRECATED'
 							];

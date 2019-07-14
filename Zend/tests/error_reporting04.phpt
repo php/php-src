@@ -3,11 +3,11 @@ testing @ and error_reporting - 4
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 function foo() {
 	echo $undef;
-	error_reporting(E_ALL|E_STRICT);
+	error_reporting(E_ALL);
 }
 
 
