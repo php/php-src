@@ -64,6 +64,8 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   a. Abstract
     - Symbol HAVE_HASH_EXT is removed and is no longer defined. It should be
       considered to have hash extension always available since PHP 7.4.
+    - Symbol HAVE_PCRE is removed and is no longer defined. It should be
+      considered to have pcre extension always available since PHP 7.4.
 
   b. Unix build system changes
 
