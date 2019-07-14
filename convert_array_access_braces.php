@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ALL);
 $opts = getopt('f:d:rb:', ['ext:', 'php:', 'diff::']);
 
@@ -97,11 +98,10 @@ class Converter
         $actualTokens = $this->actualTokens($tokens);
 
         while ($braces = $this->findPair($actualTokens)) {
-            if ($braces[2] !== 0) {                           // Semicolon inside. So function.
-                unset($actualTokens[ $braces[2] ]);
-            } else if ($actualTokens[ $braces[0] ] !== '${'   // Complex string.
-                       && $this->validPrevious($tokens, $braces[0])
-                       && $this->validNext($tokens, $braces[0])) {
+            if (
+                $actualTokens[ $braces[0] ] !== '${'   // Complex string.
+                && $this->validNext($tokens, $braces[0], $braces[1])
+            ) {
                 $tokens[ $braces[0] ] = '[';
                 $tokens[ $braces[1] ] = ']';
             }
@@ -186,17 +186,41 @@ class Converter
 
     private function actualTokens($tokens) {
         $result = [];
+        $inString = false;
+        $depth = 0;
+
         foreach ($tokens as $key => $token) {
-            if ($token === '{' || $token === '}') {
-                $result[ $key ] = $token;
-            } else if (is_array($token) && $token[1] === '${') {
-                $result[ $key ] = $token[1];
-            } else if (!empty($result) && $token === ';' && end($result) !== ';') {
-                $result[ $key ] = ';';
+            if ($token === '"') {
+                $inString = !$inString;
             }
-        }
-        while (end($result) === ';') {
-            array_pop($result);
+
+            $tokenStr = null;
+
+            if ($token === '{' || $token === '}') {
+                $tokenStr = $token;
+            } else if (is_array($token) && ($token[1] === '${' || $token[1] === '{')) {
+                $tokenStr = $token[1];
+            }
+
+            if ($tokenStr !== null) {
+                if ($inString) {
+                    if ($tokenStr === '}') {
+                        $depth--;
+
+                        if ($depth === 0) {
+                            continue; // ignore outer closing brace
+                        }
+                    } else {
+                        $depth++;
+
+                        if ($depth === 1) {
+                            continue; // ignore outer opening brace
+                        }
+                    }
+                }
+
+                $result[ $key ] = $tokenStr;
+            }
         }
 
         return $result;
@@ -208,70 +232,35 @@ class Converter
         }
         $last      = '';
         $lastKey   = 0;
-        $semicolon = 0;
         foreach ($tokens as $key => $token) {
             if (($last === '{' || $last === '${') && $token === '}') {
-                return [$lastKey, $key, $semicolon];
+                return [$lastKey, $key];
             } else if ($token === ';') {
-                $semicolon = $key;
             } else {
                 $last      = $token;
                 $lastKey   = $key;
-                $semicolon = 0;
             }
         }
 
         return false;
     }
 
-    private function validPrevious($tokens, $index) {
-        do {
-            $index--;
-            if (!isset($tokens[ $index ])) {
-                return false;
-            } else if (is_array($tokens[ $index ]) && $tokens[ $index ][0] === T_WHITESPACE) {
-                continue;
-            } else if ($tokens[ $index ] === ']') {   // In-place array.
-                return true;
-            } else if ($tokens[ $index ] === ')') {   // Expression/function returning array/string, function declaration or array(...).
-                return $this->isNotFunction($tokens, $index);
-            } else if (is_array($tokens[ $index ])) { // All others possible variants here.
-                return true;
-            } else {                                  // Nor string, nor variable, nor constant.
-                return false;
-            }
-        } while (true);
-    }
+    private function validNext($tokens, $index, $endIndex) {
+        if ($tokens[$index + 1] === '}') {
+            // Empty block. Other blocks have a semicolon inside.
+            return false;
+        }
 
-    private function validNext($tokens, $index) {
         do {
             $index++;
             if (!isset($tokens[ $index ])) {
                 return false;
-            } else if (is_array($tokens[ $index ]) && $tokens[ $index ][0] === T_WHITESPACE) {
-                continue;
-            } else if ($tokens[ $index ] === '}') {  // Function with empty body. Other functions has semicolons inside.
-                return false;
-            } else {
-                return true;
+            } else if ($tokens[ $index ] === ';') {
+                return false; // array/string offset accesses can't contain semicolon
             }
-        } while (true);
-    }
+        } while ($index < $endIndex);
 
-    private function isNotFunction($tokens, $index) {
-        do {
-            $index--;
-            if (!isset($tokens[ $index ])) {
-                return false;
-            } else if (is_array($tokens[ $index ])) {
-                if ($tokens[ $index ][0] === T_FUNCTION) {
-                    return false;
-                }
-                continue;
-            } else if (!in_array($tokens[ $index ], ['(', ')', '[', ']', '=', '&'])) {
-                return true;
-            }
-        } while (true);
+        return true;
     }
 
     private function fatalError($text, $file = false) {
