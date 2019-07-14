@@ -1436,12 +1436,6 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
-dnl This will go away, if we have a facility to run per-extension code after the
-dnl thread_safety decision was done.
-if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
-  CPPFLAGS="$CPPFLAGS -DTHREAD=1"
-fi
-
 if test "$PHP_WERROR" = "yes"; then
   CFLAGS="$CFLAGS -Werror"
   CPPFLAGS="$CPPFLAGS -Werror"
