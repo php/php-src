@@ -934,7 +934,7 @@ int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {
 		return FAILURE;
 	}
 
-	/* this archive has no open references, so emit an E_STRICT and remove it */
+	/* this archive has no open references, so emit a notice and remove it */
 	if (zend_hash_str_del(&(PHAR_G(phar_fname_map)), phar->fname, phar->fname_len) != SUCCESS) {
 		return FAILURE;
 	}

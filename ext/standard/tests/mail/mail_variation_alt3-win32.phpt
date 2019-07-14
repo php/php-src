@@ -18,7 +18,6 @@ max_execution_time = 120
  * Alias to functions:
  */
 
-error_reporting(E_ALL & ~E_STRICT);
 ini_set("SMTP", "localhost");
 ini_set("smtp_port", 25);
 
