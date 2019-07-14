@@ -131,15 +131,14 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
   fi
 
-  dnl fix after renaming to pdo_mysql
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
-    if test "$PHP_MYSQL" = "mysqlnd"; then
-      PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
-    fi
-  ])
+
+  PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+
+  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
+    PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
+  fi
+
   PDO_MYSQL_MODULE_TYPE=external
 
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
