@@ -1447,8 +1447,6 @@ dnl
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART(Configuring libtool)
 
-LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
-
 dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
 dnl This hack works around it. Ugly.
 case $host_alias in
