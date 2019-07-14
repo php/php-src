@@ -135,6 +135,10 @@ PHP 7.4 UPGRADE NOTES
     Applications correctly using the constants PASSWORD_DEFAULT,
     PASSWORD_BCRYPT, PASSWORD_ARGON2I, and PASSWORD_ARGON2ID will continue to
     function correctly.
+  . htmlentities() will now throw a notice (instead of a strict standards
+    warning) if it is used with an encoding for which only basic entity
+    substitution is supported, in which case it is equivalent to
+    htmlspecialchars().
 
 - Tokenizer:
   . token_get_all() will now emit a T_BAD_CHARACTER token for unexpected
