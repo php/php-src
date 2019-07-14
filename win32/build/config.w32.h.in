@@ -69,7 +69,6 @@
 #define HSREGEX 1
 #define HAVE_GCVT 1
 #define HAVE_GETLOGIN 1
-#define HAVE_GETTIMEOFDAY 1
 #define HAVE_MEMMOVE 1
 #define HAVE_PUTENV 1
 #define HAVE_REGCOMP 1
