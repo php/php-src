@@ -5,8 +5,6 @@ Bug #31668 (multi_query works exactly every other time (multi_query was global, 
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 	require_once("connect.inc");
@@ -47,6 +45,8 @@ array(1) {
   [2]=>
   %s(1) "2"
 }
+
+Notice: mysqli::next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %sbug31668.php on line %d
 %s(0) ""
 int(%d)
 array(1) {
@@ -57,5 +57,7 @@ array(1) {
   [2]=>
   %s(1) "2"
 }
+
+Notice: mysqli::next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %sbug31668.php on line %d
 %s(0) ""
 int(%d)

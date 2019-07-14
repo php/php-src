@@ -1606,7 +1606,7 @@ PHP_FUNCTION(mysqli_next_result) {
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	if (!mysql_more_results(mysql->mysql)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
+		php_error_docref(NULL, E_NOTICE, "There is no next result set. "
 						"Please, call mysqli_more_results()/mysqli::more_results() to check "
 						"whether to call this function/method");
 	}
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	if (!mysqlnd_stmt_more_results(stmt->stmt)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
+		php_error_docref(NULL, E_NOTICE, "There is no next result set. "
 						"Please, call mysqli_stmt_more_results()/mysqli_stmt::more_results() to check "
 						"whether to call this function/method");
 	}
