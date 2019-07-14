@@ -1351,9 +1351,17 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	$workerProcs = [];
 	$workerSocks = [];
 
-	echo "====⚡️===========================================================⚡️====\n";
-	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
-	echo "====⚡️===========================================================⚡️====\n";
+	$c = "⚡️";
+	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+		if (!function_exists('sapi_windows_cp_is_utf8') || !sapi_windows_cp_is_utf8()) {
+			// This is Windows, and the terminal (probably) doesn't support UTF-8. Use a different character instead.
+			$c = "x";
+		}
+	}
+
+	echo "====$c===========================================================$c====\n";
+	echo "====$c==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====$c====\n";
+	echo "====$c===========================================================$c====\n";
 
 	// Each test may specify a list of conflict keys. While a test that conflicts with
 	// key K is running, no other test that conflicts with K may run. Conflict keys are
