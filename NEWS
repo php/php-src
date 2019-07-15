@@ -7,7 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
 
 - Date:
-  . Fixed #69044 (discrepency between time and microtime). (krakjoe)
+  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
   . Updated timelib to 2018.02. (Derick)
 
 - Libxml:
@@ -30,13 +30,15 @@ PHP                                                                        NEWS
   . Fixed bug #78202 (Opcache stats for cache hits are capped at 32bit NUM).
     (cmb)
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
+  . Fixed bug #78291 (opcache_get_configuration doesn't list all directives).
+    (Andrew Collington)
 
 - PCRE:
   . Fixed bug #78197 (PCRE2 version check in configure fails for "##.##-xxx"
     version strings). (pgnet, Peter Kokot)
 
 - PDO_Sqlite:
-  . Fixed #78192 (SegFault when reuse statement after schema has changed).
+  . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
 
 - SQLite:
