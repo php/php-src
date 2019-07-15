@@ -513,15 +513,8 @@ ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding)
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 {
 	char *buf;
-	size_t size, offset = 0;
+	size_t size;
 	zend_string *compiled_filename;
-
-	/* The shebang line was read, get the current position to obtain the buffer start */
-	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
-		if ((offset = ftell(file_handle->handle.fp)) == (size_t)-1) {
-			offset = 0;
-		}
-	}
 
 	if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
 		return FAILURE;
@@ -556,13 +549,18 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 				size = SCNG(script_filtered_size);
 			}
 		}
-		SCNG(yy_start) = (unsigned char *)buf - offset;
+		SCNG(yy_start) = (unsigned char *)buf;
 		yy_scan_buffer(buf, (unsigned int)size);
 	} else {
 		zend_error_noreturn(E_COMPILE_ERROR, "zend_stream_mmap() failed");
 	}
 
-	BEGIN(INITIAL);
+	if (CG(skip_shebang)) {
+		CG(skip_shebang) = 0;
+		BEGIN(SHEBANG);
+	} else {
+		BEGIN(INITIAL);
+	}
 
 	if (file_handle->opened_path) {
 		compiled_filename = zend_string_copy(file_handle->opened_path);
@@ -573,14 +571,8 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	zend_set_compiled_filename(compiled_filename);
 	zend_string_release_ex(compiled_filename, 0);
 
-	if (CG(start_lineno)) {
-		CG(zend_lineno) = CG(start_lineno);
-		CG(start_lineno) = 0;
-	} else {
-		CG(zend_lineno) = 1;
-	}
-
 	RESET_DOC_COMMENT();
+	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
@@ -2009,6 +2001,17 @@ string:
 	RETURN_TOKEN(T_NS_C);
 }
 
+<SHEBANG>"#!" .* {NEWLINE} {
+	CG(zend_lineno)++;
+	BEGIN(INITIAL);
+	goto restart;
+}
+
+<SHEBANG>{ANY_CHAR} {
+	yyless(0);
+	BEGIN(INITIAL);
+	goto restart;
+}
 
 <INITIAL>"<?=" {
 	BEGIN(ST_IN_SCRIPTING);
