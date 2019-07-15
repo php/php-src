@@ -963,7 +963,7 @@ PHPAPI size_t php_printf(const char *format, ...)
 /* {{{ php_verror */
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
- * html error messages if correcponding ini setting (html_errors) is activated.
+ * html error messages if corresponding ini setting (html_errors) is activated.
  * See: CODING_STANDARDS.md for details.
  */
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
