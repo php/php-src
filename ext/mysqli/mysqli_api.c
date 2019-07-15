@@ -1616,7 +1616,7 @@ PHP_FUNCTION(mysqli_next_result) {
 /* }}} */
 
 #if defined(HAVE_STMT_NEXT_RESULT) && defined(MYSQLI_USE_MYSQLND)
-/* {{{ proto bool mysqli_stmt_next_result(object link)
+/* {{{ proto bool mysqli_stmt_more_results(object link)
    check if there any more query results from a multi query */
 PHP_FUNCTION(mysqli_stmt_more_results)
 {
