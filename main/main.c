@@ -2644,15 +2644,13 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 
 		/*
 		   If cli primary file has shabang line and there is a prepend file,
-		   the `start_lineno` will be used by prepend file but not primary file,
+		   the `skip_shebang` will be used by prepend file but not primary file,
 		   save it and restore after prepend file been executed.
 		 */
-		if (CG(start_lineno) && prepend_file_p) {
-			int orig_start_lineno = CG(start_lineno);
-
-			CG(start_lineno) = 0;
+		if (CG(skip_shebang) && prepend_file_p) {
+			CG(skip_shebang) = 0;
 			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {
-				CG(start_lineno) = orig_start_lineno;
+				CG(skip_shebang) = 1;
 				retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 2, primary_file, append_file_p) == SUCCESS);
 			}
 		} else {

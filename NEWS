@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
+  . Fixed bug #60677 (CGI doesn't properly validate shebang line contains #!).
+    (Nikita)
+  . Fixed bug #78066 (PHP eats the first byte of a program that comes from
+    process substitution). (Nikita)
 
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between

@@ -329,7 +329,7 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	zend_stack_init(&CG(delayed_oplines_stack), sizeof(zend_op));
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
-	CG(start_lineno) = 0;
+	CG(skip_shebang) = 0;
 
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
