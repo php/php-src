@@ -1,5 +1,0 @@
-REGEDIT4
-
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\PHP-7.3.0-dev]
-"TypesSupported"=dword:00000007
-"EventMessageFile"="g:\\test\\srctrunkinstall\\php7ts.dll"
