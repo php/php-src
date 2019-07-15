@@ -150,7 +150,7 @@
 #define GC_DEFAULT_BUF_SIZE  (16 * 1024)
 #define GC_BUF_GROW_STEP     (128 * 1024)
 
-#define GC_MAX_UNCOMPRESSED  (1024 * 1024)
+#define GC_MAX_UNCOMPRESSED  (512 * 1024)
 #define GC_MAX_BUF_SIZE      0x40000000
 
 #define GC_THRESHOLD_DEFAULT 10000
@@ -316,7 +316,10 @@ static void gc_stack_free(gc_stack *stack)
 
 static zend_always_inline uint32_t gc_compress(uint32_t idx)
 {
-	return idx % GC_MAX_UNCOMPRESSED;
+	if (EXPECTED(idx < GC_MAX_UNCOMPRESSED)) {
+		return idx;
+	}
+	return (idx % GC_MAX_UNCOMPRESSED) | GC_MAX_UNCOMPRESSED;
 }
 
 static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t idx)
