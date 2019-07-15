@@ -120,12 +120,9 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Notice: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 [006] 3
 [008] 0
 [009] [2014] Commands out of sync; you can't run this command now
-
-Notice: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 [010] 7
 
 Warning: mysqli_multi_query(): Couldn't fetch mysqli in %s on line %d
