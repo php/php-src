@@ -1234,9 +1234,12 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto emit_token_with_str; \
 	} while (0)
 
-#define SKIP_TOKEN(_token) do { \
+#define RETURN_OR_SKIP_TOKEN(_token) do { \
 		token = _token; \
-		goto skip_token; \
+		if (PARSER_MODE()) { \
+			goto skip_token; \
+		} \
+		goto emit_token; \
 	} while (0)
 
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
@@ -2025,20 +2028,14 @@ string:
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
-	if (PARSER_MODE()) {
-		SKIP_TOKEN(T_OPEN_TAG);
-	}
-	RETURN_TOKEN(T_OPEN_TAG);
+	RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 }
 
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
-		if (PARSER_MODE()) {
-			SKIP_TOKEN(T_OPEN_TAG);
-		}
-		RETURN_TOKEN(T_OPEN_TAG);
+		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 	} else {
 		goto inline_char_handler;
 	}
@@ -2165,11 +2162,7 @@ inline_char_handler:
 	}
 
 	yyleng = YYCURSOR - SCNG(yy_text);
-
-	if (PARSER_MODE()) {
-		SKIP_TOKEN(T_COMMENT);
-	}
-	RETURN_TOKEN(T_COMMENT);
+	RETURN_OR_SKIP_TOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
@@ -2199,16 +2192,10 @@ inline_char_handler:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		if (PARSER_MODE()) {
-			SKIP_TOKEN(T_DOC_COMMENT);
-		}
-		RETURN_TOKEN(T_DOC_COMMENT);
+		RETURN_OR_SKIP_TOKEN(T_DOC_COMMENT);
 	}
 
-	if (PARSER_MODE()) {
-		SKIP_TOKEN(T_COMMENT);
-	}
-	RETURN_TOKEN(T_COMMENT);
+	RETURN_OR_SKIP_TOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
