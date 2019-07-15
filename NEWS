@@ -45,7 +45,7 @@ PHP                                                                        NEWS
   . Upgraded to SQLite 3.28.0. (cmb)
 
 - Standard:
-  . Fixed #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
+  . Fixed bug #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
   . Fixed bug #78269 (password_hash uses weak options for argon2). (Remi)
 
 04 Jul 2019, PHP 7.3.7
