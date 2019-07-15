@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
   . Updated timelib to 2018.02. (Derick)
 
+- FTP:
+  . Fixed bug #78039 (FTP with SSL memory leak). (Nikita)
+
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
     requests (cgi-fcgi)). (Nikita)
