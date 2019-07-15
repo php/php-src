@@ -331,7 +331,7 @@ $op1_get_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "NULL",
 	"CV"       => "_get_zval_ptr_cv_undef_\\1(opline->op1.var EXECUTE_DATA_CC)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op1.var)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_zval_ptr_ptr_undef = array(
@@ -342,7 +342,7 @@ $op2_get_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "NULL",
 	"CV"       => "_get_zval_ptr_cv_undef_\\1(opline->op2.var EXECUTE_DATA_CC)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op2.var)",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_obj_zval_ptr = array(
@@ -441,7 +441,7 @@ $op1_get_obj_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "_get_obj_zval_ptr_unused(EXECUTE_DATA_C)",
 	"CV"       => "_get_zval_ptr_cv_undef_\\1(opline->op1.var EXECUTE_DATA_CC)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op1.var)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_obj_zval_ptr_ptr_undef = array(
@@ -452,7 +452,7 @@ $op2_get_obj_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "_get_obj_zval_ptr_unused(EXECUTE_DATA_C)",
 	"CV"       => "_get_zval_ptr_cv_undef_\\1(opline->op2.var EXECUTE_DATA_CC)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op2.var)",
+	"TMPVARCV" => "???",
 );
 
 $op1_free_op = array(
