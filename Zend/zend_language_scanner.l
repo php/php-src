@@ -2031,6 +2031,20 @@ string:
 	RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 }
 
+<INITIAL>"<?php" {
+	/* Allow <?php followed by end of file. */
+	if (YYCURSOR == YYLIMIT) {
+		BEGIN(ST_IN_SCRIPTING);
+		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
+	}
+	/* Degenerate case: <?phpX is interpreted as <? phpX with short tags. */
+	if (CG(short_tags)) {
+		yyless(2);
+		BEGIN(ST_IN_SCRIPTING);
+		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
+	}
+	goto inline_char_handler;
+}
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
