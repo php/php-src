@@ -132,6 +132,10 @@ PHP 7.4 UPGRADE NOTES
     PASSWORD_BCRYPT, PASSWORD_ARGON2I, and PASSWORD_ARGON2ID will continue to
     function correctly.
 
+- Tokenizer:
+  . token_get_all() will now emit a T_BAD_CHARACTER token for unexpected
+    characters instead of leaving behind holes in the token stream.
+
 ========================================
 2. New Features
 ========================================
