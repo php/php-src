@@ -947,10 +947,10 @@ cli_server.color = On
 ;date.default_longitude = 35.2333
 
 ; http://php.net/date.sunrise-zenith
-;date.sunrise_zenith = 90.583333
+;date.sunrise_zenith = 90.833333
 
 ; http://php.net/date.sunset-zenith
-;date.sunset_zenith = 90.583333
+;date.sunset_zenith = 90.833333
 
 [filter]
 ; http://php.net/filter.default
