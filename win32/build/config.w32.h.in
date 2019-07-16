@@ -39,7 +39,6 @@
 #define HAVE_ERRMSG_H 0
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
-#undef HAVE_LINK
 #undef HAVE_SYMLINK
 
 /* its in win32/time.c */

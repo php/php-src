@@ -605,7 +605,6 @@ grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
-link \
 localtime_r \
 lchown \
 mbrlen \
