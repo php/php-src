@@ -2186,6 +2186,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	return zend_accel_load_script(persistent_script, from_shared_memory);
 }
 
+#ifdef ZEND_WIN32
 static int accel_gen_uname_id(void)
 {
 	PHP_MD5_CTX ctx;
@@ -2203,6 +2204,7 @@ static int accel_gen_uname_id(void)
 	php_hash_bin2hex(accel_uname_id, digest, sizeof digest);
 	return SUCCESS;
 }
+#endif
 
 /* zend_stream_open_function() replacement for PHP 5.3 and above */
 static int persistent_stream_open_function(const char *filename, zend_file_handle *handle)
