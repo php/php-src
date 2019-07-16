@@ -792,9 +792,11 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.huge_code_pages",         ZCG(accel_directives).huge_code_pages);
 #endif
 	add_assoc_string(&directives, "opcache.preload", STRING_NOT_NULL(ZCG(accel_directives).preload));
+#ifdef HAVE_JIT
 	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
 	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
 	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
+#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 
