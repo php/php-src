@@ -1,10 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 7.3.9
 
-- Phpdbg:
-  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
-
-?? ??? ????, PHP 7.3.8
+01 Aug 2019, PHP 7.3.8
 
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
@@ -47,6 +45,9 @@ PHP                                                                        NEWS
 - PDO_Sqlite:
   . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
+
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
 - SQLite:
   . Upgraded to SQLite 3.28.0. (cmb)
