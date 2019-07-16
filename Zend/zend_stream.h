@@ -44,8 +44,6 @@ typedef enum {
 
 typedef struct _zend_mmap {
 	size_t      len;
-	size_t      pos;
-	void        *map;
 	char        *buf;
 	void                  *old_handle;
 	zend_stream_closer_t   old_closer;
