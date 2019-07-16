@@ -3556,8 +3556,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 		retval_ptr = NULL;
 
 		if (IS_CONST == IS_VAR) {
-			if (retval_ptr == &EG(uninitialized_zval) ||
-			    (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr))) {
+			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr)) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 					ZVAL_NEW_REF(EX(return_value), retval_ptr);
@@ -6439,20 +6439,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CONST == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CONST == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -8384,20 +8387,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CONST == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CONST == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -8521,20 +8527,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_VAR_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CONST == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CONST == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -9283,20 +9292,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CONST == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CONST == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -10795,20 +10807,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CONST == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CONST == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -16746,8 +16761,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER
 		retval_ptr = NULL;
 
 		if (IS_TMP_VAR == IS_VAR) {
-			if (retval_ptr == &EG(uninitialized_zval) ||
-			    (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr))) {
+			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr)) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 					ZVAL_NEW_REF(EX(return_value), retval_ptr);
@@ -17696,20 +17711,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_TMP_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -18145,20 +18163,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEN
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_TMP_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -18282,20 +18303,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEN
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_TMP_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -18599,20 +18623,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_TMP_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -19070,20 +19097,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_TMP_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -19588,8 +19618,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER
 		retval_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
 		if (IS_VAR == IS_VAR) {
-			if (retval_ptr == &EG(uninitialized_zval) ||
-			    (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr))) {
+			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr)) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 					ZVAL_NEW_REF(EX(return_value), retval_ptr);
@@ -23155,20 +23185,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			}
@@ -25543,20 +25576,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			}
@@ -25813,20 +25849,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEN
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			}
@@ -26951,20 +26990,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			}
@@ -29426,20 +29468,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_VAR == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			}
@@ -31670,20 +31715,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_UNUSED == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_UNUSED == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -33570,20 +33618,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_UNUSED == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_UNUSED == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -33707,20 +33758,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_UNUSED == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_UNUSED == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -34164,20 +34218,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_UNUSED == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_UNUSED == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -36218,20 +36275,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_UNUSED == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_UNUSED == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -36937,8 +36997,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(
 		retval_ptr = _get_zval_ptr_cv_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 		if (IS_CV == IS_VAR) {
-			if (retval_ptr == &EG(uninitialized_zval) ||
-			    (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr))) {
+			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION && !Z_ISREF_P(retval_ptr)) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 					ZVAL_NEW_REF(EX(return_value), retval_ptr);
@@ -41379,20 +41439,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CV == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CV == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -44785,20 +44848,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CV == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CV == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -45103,20 +45169,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CV == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CV == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -46365,20 +46434,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CV == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CV == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
@@ -49772,20 +49844,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
-				if (IS_CV == IS_VAR &&
-				    (value_ptr == &EG(uninitialized_zval) ||
-				     (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-				      !Z_ISREF_P(value_ptr)))) {
-					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-					ZVAL_COPY(&generator->value, value_ptr);
-				} else {
+				do {
+					if (IS_CV == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
 					if (Z_ISREF_P(value_ptr)) {
 						Z_ADDREF_P(value_ptr);
 					} else {
 						ZVAL_MAKE_REF_EX(value_ptr, 2);
 					}
 					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				}
+				} while (0);
 
 			}
 		} else {
