@@ -942,12 +942,6 @@ cli_server.color = On
 ; http://php.net/date.timezone
 ;date.timezone =
 
-; http://php.net/date.default-latitude
-;date.default_latitude = 31.7667
-
-; http://php.net/date.default-longitude
-;date.default_longitude = 35.2333
-
 ; http://php.net/date.sunrise-zenith
 ;date.sunrise_zenith = 90.833333
 

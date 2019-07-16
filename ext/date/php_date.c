@@ -578,8 +578,8 @@ static PHP_GINIT_FUNCTION(date);
 timelib_tzdb *php_date_global_timezone_db;
 int php_date_global_timezone_db_enabled;
 
-#define DATE_DEFAULT_LATITUDE "31.7667"
-#define DATE_DEFAULT_LONGITUDE "35.2333"
+#define DATE_DEFAULT_LATITUDE 31.7667
+#define DATE_DEFAULT_LONGITUDE 35.2333
 
 /* on 90'50; common sunset declaration (start of sun body appear) */
 #define DATE_SUNSET_ZENITH "90.833333"
@@ -592,8 +592,6 @@ static PHP_INI_MH(OnUpdate_date_timezone);
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdate_date_timezone, default_timezone, zend_date_globals, date_globals)
-	PHP_INI_ENTRY("date.default_latitude",           DATE_DEFAULT_LATITUDE,        PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("date.default_longitude",          DATE_DEFAULT_LONGITUDE,       PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.sunset_zenith",              DATE_SUNSET_ZENITH,           PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.sunrise_zenith",             DATE_SUNRISE_ZENITH,          PHP_INI_ALL, NULL)
 PHP_INI_END()
@@ -4901,9 +4899,9 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		case 1:
 			retformat = SUNFUNCS_RET_STRING;
 		case 2:
-			latitude = INI_FLT("date.default_latitude");
+			latitude = DATE_DEFAULT_LATITUDE;
 		case 3:
-			longitude = INI_FLT("date.default_longitude");
+			longitude = DATE_DEFAULT_LONGITUDE;
 		case 4:
 			if (calc_sunset) {
 				zenith = INI_FLT("date.sunset_zenith");

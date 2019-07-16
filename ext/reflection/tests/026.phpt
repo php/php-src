@@ -26,8 +26,6 @@ Default timezone => %s
 
 Directive => %s => %s
 date.timezone => %s => %s
-date.default_latitude => %s => %s
-date.default_longitude => %s => %s
 date.sunset_zenith => %s => %s
 date.sunrise_zenith => %s => %s
 
