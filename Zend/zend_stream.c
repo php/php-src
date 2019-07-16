@@ -215,29 +215,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	file_handle->type = ZEND_HANDLE_STREAM;  /* we might still be _FP but we need fsize() work */
 
 	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
-#if HAVE_MMAP
-		size_t page_size = REAL_PAGE_SIZE;
-
-		if (file_handle->handle.fp &&
-		    size != 0 &&
-		    ((size - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD) {
-			/*  *buf[size] is zeroed automatically by the kernel */
-			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
-			if (*buf != MAP_FAILED) {
-				zend_long offset = ftell(file_handle->handle.fp);
-				file_handle->handle.stream.mmap.map = *buf;
-
-				if (offset != -1) {
-					*buf += offset;
-					size -= offset;
-				}
-				file_handle->handle.stream.mmap.buf = *buf;
-				file_handle->handle.stream.mmap.len = size;
-
-				goto return_mapped;
-			}
-		}
-#endif
 		file_handle->handle.stream.mmap.map = 0;
 		file_handle->handle.stream.mmap.buf = *buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
 		file_handle->handle.stream.mmap.len = zend_stream_read(file_handle, *buf, size);
@@ -271,9 +248,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	if (ZEND_MMAP_AHEAD) {
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
-#if HAVE_MMAP
-return_mapped:
-#endif
 	file_handle->type = ZEND_HANDLE_MAPPED;
 	file_handle->handle.stream.mmap.pos        = 0;
 	file_handle->handle.stream.mmap.old_handle = file_handle->handle.stream.handle;
