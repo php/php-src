@@ -833,20 +833,13 @@ try_again:
 		    Z_TYPE_P(cookies) == IS_ARRAY) {
 			zval *data;
 			zend_string *key;
-			int i, n;
-
+			uint32_t n = zend_hash_num_elements(Z_ARRVAL_P(cookies));
 			has_cookies = 1;
-			n = zend_hash_num_elements(Z_ARRVAL_P(cookies));
 			if (n > 0) {
-				zend_hash_internal_pointer_reset(Z_ARRVAL_P(cookies));
 				smart_str_append_const(&soap_headers, "Cookie: ");
-				for (i = 0; i < n; i++) {
-					zend_ulong numindx;
-					int res = zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, &numindx);
-					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-
-					if (res == HASH_KEY_IS_STRING && Z_TYPE_P(data) == IS_ARRAY) {
-					  zval *value;
+				ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
+					if (key && Z_TYPE_P(data) == IS_ARRAY) {
+						zval *value;
 
 						if ((value = zend_hash_index_find(Z_ARRVAL_P(data), 0)) != NULL &&
 						    Z_TYPE_P(value) == IS_STRING) {
@@ -865,8 +858,7 @@ try_again:
 							}
 						}
 					}
-					zend_hash_move_forward(Z_ARRVAL_P(cookies));
-				}
+				} ZEND_HASH_FOREACH_END();
 				smart_str_append_const(&soap_headers, "\r\n");
 			}
 		}
