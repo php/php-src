@@ -587,19 +587,17 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
 	}
 	ret_len = wcslen(canonicalw);
-	if (ret_len != len) {
-		if (ret_len > len) {
-			wchar_t *tmp = realloc(*buf, (ret_len + 1) * sizeof(wchar_t));
-			if (!tmp) {
-				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
-				/* Length unchanged. */
-				*new_len = len;
-				return PHP_WIN32_IOUTIL_NORM_PARTIAL;
-			}
-			*buf = tmp;
+	if (ret_len > len) {
+		wchar_t *tmp = realloc(*buf, (ret_len + 1) * sizeof(wchar_t));
+		if (!tmp) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			/* Length unchanged. */
+			*new_len = len;
+			return PHP_WIN32_IOUTIL_NORM_PARTIAL;
 		}
-		memmove(*buf, canonicalw, (ret_len + 1) * sizeof(wchar_t));
+		*buf = tmp;
 	}
+	memmove(*buf, canonicalw, (ret_len + 1) * sizeof(wchar_t));
 	*new_len = ret_len;
 
 	return PHP_WIN32_IOUTIL_NORM_OK;
