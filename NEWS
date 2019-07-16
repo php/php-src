@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.8
+18 Jul 2019, PHP 7.3.8RC1
 
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
