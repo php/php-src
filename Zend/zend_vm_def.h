@@ -1078,7 +1078,7 @@ ZEND_VM_HANDLER(28, ZEND_ASSIGN_OBJ_OP, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, OP)
 	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -1093,6 +1093,10 @@ ZEND_VM_HANDLER(28, ZEND_ASSIGN_OBJ_OP, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, OP)
 			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(assign_op_object);
+			}
+			if (OP1_TYPE == IS_CV
+			 && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
+				object = ZVAL_UNDEFINED_OP1();
 			}
 			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 			if (UNEXPECTED(!object)) {
@@ -1349,7 +1353,7 @@ ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -1362,6 +1366,10 @@ ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(pre_incdec_object);
+			}
+			if (OP1_TYPE == IS_CV
+			 && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
+				object = ZVAL_UNDEFINED_OP1();
 			}
 			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 			if (UNEXPECTED(!object)) {
@@ -1411,7 +1419,7 @@ ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CAC
 	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
-	object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -1424,6 +1432,10 @@ ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CAC
 			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
 				object = Z_REFVAL_P(object);
 				ZEND_VM_C_GOTO(post_incdec_object);
+			}
+			if (OP1_TYPE == IS_CV
+			 && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
+				object = ZVAL_UNDEFINED_OP1();
 			}
 			object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 			if (UNEXPECTED(!object)) {
@@ -2200,7 +2212,7 @@ ZEND_VM_HANDLER(88, ZEND_FETCH_OBJ_RW, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 	zval *property, *container, *result;
 
 	SAVE_OPLINE();
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
+	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -2339,7 +2351,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 	zval *container, *property, *result;
 
 	SAVE_OPLINE();
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
+	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_UNSET);
 
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
@@ -6185,7 +6197,7 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_S
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
+	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_UNSET);
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
 	}
@@ -6196,6 +6208,10 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_S
 			if (Z_ISREF_P(container)) {
 				container = Z_REFVAL_P(container);
 				if (Z_TYPE_P(container) != IS_OBJECT) {
+					if (OP1_TYPE == IS_CV
+					 && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+						container = ZVAL_UNDEFINED_OP1();
+					}
 					break;
 				}
 			} else {
