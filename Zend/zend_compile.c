@@ -8802,6 +8802,10 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 			}
 
+			if (ast->attr == ZEND_ALTERNATIVE_ARRAY_SYNTAX) {
+				zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
+			}
+
 			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
 			if (ast->attr == ZEND_DIM_IS && ast->child[0]->kind == ZEND_AST_DIM) {
 				ast->child[0]->attr = ZEND_DIM_IS;
