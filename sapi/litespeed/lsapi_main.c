@@ -657,11 +657,7 @@ static int lsapi_execute_script( zend_file_handle * file_handle)
 {
     char *p;
     int len;
-    file_handle->type = ZEND_HANDLE_FILENAME;
-    file_handle->handle.fd = 0;
-    file_handle->filename = SG(request_info).path_translated;
-    file_handle->free_filename = 0;
-    file_handle->opened_path = NULL;
+	zend_stream_init_filename(file_handle, SG(request_info).path_translated);
 
     p = argv0;
     *p++ = ':';

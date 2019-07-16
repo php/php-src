@@ -1071,8 +1071,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 		file_handle->opened_path = NULL;
 	}
 
-	ps_handle.type = ZEND_HANDLE_FILENAME;
-	ps_handle.filename = ZSTR_VAL(persistent_script->script.filename);
+	zend_stream_init_filename(&ps_handle, ZSTR_VAL(persistent_script->script.filename));
 	ps_handle.opened_path = persistent_script->script.filename;
 
 	if (zend_get_file_handle_timestamp(&ps_handle, NULL) == persistent_script->timestamp) {
@@ -1297,9 +1296,7 @@ int zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool f
 	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath);
 	if (persistent_script && !persistent_script->corrupted) {
 		zend_file_handle file_handle;
-
-		file_handle.type = ZEND_HANDLE_FILENAME;
-		file_handle.filename = ZSTR_VAL(realpath);
+		zend_stream_init_filename(&file_handle, ZSTR_VAL(realpath));
 		file_handle.opened_path = realpath;
 
 		if (force ||
@@ -2198,10 +2195,8 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 		     ZCG(cache_opline) == EG(current_execute_data)->opline)) {
 
 			/* we are in include_once or FastCGI request */
-			handle->filename = (char*)filename;
-			handle->free_filename = 0;
+			zend_stream_init_filename(handle, (char*) filename);
 			handle->opened_path = zend_string_copy(ZCG(cache_persistent_script)->script.filename);
-			handle->type = ZEND_HANDLE_FILENAME;
 			return SUCCESS;
 		}
 		ZCG(cache_opline) = NULL;
@@ -4139,12 +4134,7 @@ static int accel_preload(const char *config)
 	orig_map_ptr_last = CG(map_ptr_last);
 
 	/* Compile and execute proloading script */
-	memset(&file_handle, 0, sizeof(file_handle));
-	file_handle.filename = (char*)config;
-	file_handle.free_filename = 0;
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.opened_path = NULL;
-	file_handle.handle.fp = NULL;
+	zend_stream_init_filename(&file_handle, (char *) config);
 
 	preload_scripts = emalloc(sizeof(HashTable));
 	zend_hash_init(preload_scripts, 0, NULL, NULL, 0);

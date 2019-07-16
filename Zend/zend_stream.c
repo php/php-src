@@ -101,6 +101,12 @@ ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char
 	handle->filename = filename;
 }
 
+ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *filename) {
+	memset(handle, 0, sizeof(zend_file_handle));
+	handle->type = ZEND_HANDLE_FILENAME;
+	handle->filename = filename;
+}
+
 ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	if (zend_stream_open_function) {

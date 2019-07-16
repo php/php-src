@@ -2072,11 +2072,7 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	}
 	{
 		zend_file_handle zfd;
-		zfd.type = ZEND_HANDLE_FILENAME;
-		zfd.filename = SG(request_info).path_translated;
-		zfd.handle.fp = NULL;
-		zfd.free_filename = 0;
-		zfd.opened_path = NULL;
+		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
 		zend_try {
 			php_execute_script(&zfd);
 		} zend_end_try();
@@ -2197,11 +2193,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	old_cwd[0] = '\0';
 	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
-	zfd.type = ZEND_HANDLE_FILENAME;
-	zfd.filename = server->router;
-	zfd.handle.fp = NULL;
-	zfd.free_filename = 0;
-	zfd.opened_path = NULL;
+	zend_stream_init_filename(&zfd, server->router);
 
 	zend_try {
 		zval retval;
