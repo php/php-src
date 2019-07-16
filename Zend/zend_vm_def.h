@@ -1268,6 +1268,7 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 		}
+		FREE_OP(free_op_data1);
 	} else {
 		if (EXPECTED(Z_ISREF_P(container))) {
 			container = Z_REFVAL_P(container);
@@ -1279,42 +1280,27 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 		dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-			value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
 			if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim, value OPLINE_CC EXECUTE_DATA_CC);
-		} else {
-			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
-				if (OP2_TYPE == IS_UNUSED) {
-					zend_use_new_element_for_string();
-				} else {
-					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
-					zend_wrong_string_offset(EXECUTE_DATA_C);
-				}
-				UNDEF_RESULT();
-			} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
-				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
-					ZVAL_NULL(container);
-					ZVAL_UNDEFINED_OP1();
-				}
-				ZVAL_ARR(container, zend_new_array(8));
-				ZEND_VM_C_GOTO(assign_dim_op_new_array);
-			} else {
-				if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_use_scalar_as_array();
-				}
-ZEND_VM_C_LABEL(assign_dim_op_ret_null):
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_NULL(EX_VAR(opline->result.var));
-				}
+			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+				ZVAL_NULL(container);
+				ZVAL_UNDEFINED_OP1();
 			}
-			value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
+			ZVAL_ARR(container, zend_new_array(8));
+			ZEND_VM_C_GOTO(assign_dim_op_new_array);
+		} else {
+			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
+ZEND_VM_C_LABEL(assign_dim_op_ret_null):
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 		}
 	}
 
 	FREE_OP2();
-	FREE_OP(free_op_data1);
 	FREE_OP1_VAR_PTR();
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }

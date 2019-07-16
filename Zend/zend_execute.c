@@ -1337,11 +1337,14 @@ static zend_always_inline int zend_binary_op(zval *ret, zval *op1, zval *op2 OPL
 	return zend_binary_ops[opcode - ZEND_ADD](ret, op1, op2);
 }
 
-static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
+	zend_free_op free_op_data1;
+	zval *value;
 	zval *z;
 	zval rv, res;
 
+	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
 	if ((z = Z_OBJ_HT_P(object)->read_dimension(Z_OBJ_P(object), property, BP_VAR_R, &rv)) != NULL) {
 
 		if (zend_binary_op(&res, z, value OPLINE_CC) == SUCCESS) {
@@ -1360,6 +1363,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	}
+	FREE_OP(free_op_data1);
 }
 
 static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value OPLINE_DC EXECUTE_DATA_DC)
@@ -1982,6 +1986,24 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offse
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_string(void)
 {
 	zend_throw_error(NULL, "[] operator not supported for strings");
+}
+
+static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
+{
+	zend_free_op free_op_data1;
+
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		if (opline->op2_type == IS_UNUSED) {
+			zend_use_new_element_for_string();
+		} else {
+			zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
+			zend_wrong_string_offset(EXECUTE_DATA_C);
+		}
+	} else if (EXPECTED(!Z_ISERROR_P(container))) {
+		zend_use_scalar_as_array();
+	}
+	get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
+	FREE_OP(free_op_data1);
 }
 
 static zend_never_inline zend_uchar slow_index_convert(const zval *dim, zend_value *value EXECUTE_DATA_DC)
