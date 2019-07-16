@@ -149,10 +149,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	}
 
 	switch (file_handle->type) {
-		case ZEND_HANDLE_FD:
-			file_handle->type = ZEND_HANDLE_FP;
-			file_handle->handle.fp = fdopen(file_handle->handle.fd, "rb");
-			/* no break; */
 		case ZEND_HANDLE_FP:
 			if (!file_handle->handle.fp) {
 				return FAILURE;
@@ -232,9 +228,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
-		case ZEND_HANDLE_FD:
-			/* nothing to do */
-			break;
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
@@ -268,8 +261,6 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 		return 0;
 	}
 	switch (fh1->type) {
-		case ZEND_HANDLE_FD:
-			return fh1->handle.fd == fh2->handle.fd;
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp == fh2->handle.fp;
 		case ZEND_HANDLE_STREAM:

@@ -220,7 +220,6 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			}
 
 			file_handle.type = ZEND_HANDLE_FILENAME;
-			file_handle.handle.fd = 0;
 			file_handle.filename = name;
 			file_handle.opened_path = NULL;
 			file_handle.free_filename = 0;

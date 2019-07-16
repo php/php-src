@@ -36,7 +36,6 @@ typedef void   (*zend_stream_closer_t)(void* handle);
 
 typedef enum {
 	ZEND_HANDLE_FILENAME,
-	ZEND_HANDLE_FD,
 	ZEND_HANDLE_FP,
 	ZEND_HANDLE_STREAM,
 	ZEND_HANDLE_MAPPED
@@ -60,7 +59,6 @@ typedef struct _zend_stream {
 
 typedef struct _zend_file_handle {
 	union {
-		int           fd;
 		FILE          *fp;
 		zend_stream   stream;
 	} handle;
