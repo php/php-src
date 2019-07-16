@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.22
 
-- Phpdbg:
-  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
-
 01 Aug 2019, PHP 7.2.21
 
 - Fileinfo:
@@ -49,6 +46,9 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #78291 (opcache_get_configuration doesn't list all directives).
     (Andrew Collington)
+
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
 - Standard:
   . Fixed bug #78241 (touch() does not handle dates after 2038 in PHP 64-bit).
