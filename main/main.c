@@ -1585,7 +1585,6 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 	if (stream) {
 		handle->type = ZEND_HANDLE_STREAM;
 		handle->filename = (char*)filename;
-		handle->free_filename = 0;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
 		handle->handle.stream.fsizer  = php_zend_stream_fsizer;

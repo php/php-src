@@ -3261,7 +3261,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 						efree(f.opened_path);
 					}
 					f.opened_path = file_handle->opened_path;
-					f.free_filename = file_handle->free_filename;
 
 					switch (file_handle->type) {
 						case ZEND_HANDLE_STREAM:

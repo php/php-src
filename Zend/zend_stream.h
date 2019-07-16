@@ -65,7 +65,6 @@ typedef struct _zend_file_handle {
 	const char        *filename;
 	zend_string       *opened_path;
 	zend_stream_type  type;
-	zend_bool free_filename;
 } zend_file_handle;
 
 BEGIN_EXTERN_C()

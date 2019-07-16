@@ -116,7 +116,6 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle) /*
 	handle->opened_path = NULL;
 	handle->handle.fp = zend_fopen(filename, &handle->opened_path);
 	handle->filename = filename;
-	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
 
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
@@ -260,10 +259,6 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 	if (fh->opened_path) {
 		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
-	}
-	if (fh->free_filename && fh->filename) {
-		efree((char*)fh->filename);
-		fh->filename = NULL;
 	}
 }
 /* }}} */
