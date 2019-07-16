@@ -1554,17 +1554,17 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 
 PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
-	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &handle->opened_path);
-
+	zend_string *opened_path;
+	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &opened_path);
 	if (stream) {
+		memset(handle, 0, sizeof(zend_file_handle));
 		handle->type = ZEND_HANDLE_STREAM;
 		handle->filename = (char*)filename;
-		handle->free_filename = 0;
+		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
 		handle->handle.stream.fsizer  = php_zend_stream_fsizer;
 		handle->handle.stream.isatty  = 0;
-		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
 		handle->handle.stream.closer = php_zend_stream_closer;
 		/* suppress warning if this stream is not explicitly closed */
 		php_stream_auto_cleanup(stream);

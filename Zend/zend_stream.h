@@ -37,21 +37,12 @@ typedef void   (*zend_stream_closer_t)(void* handle);
 typedef enum {
 	ZEND_HANDLE_FILENAME,
 	ZEND_HANDLE_FP,
-	ZEND_HANDLE_STREAM,
-	ZEND_HANDLE_MAPPED
+	ZEND_HANDLE_STREAM
 } zend_stream_type;
-
-typedef struct _zend_mmap {
-	size_t      len;
-	char        *buf;
-	void                  *old_handle;
-	zend_stream_closer_t   old_closer;
-} zend_mmap;
 
 typedef struct _zend_stream {
 	void        *handle;
 	int         isatty;
-	zend_mmap   mmap;
 	zend_stream_reader_t   reader;
 	zend_stream_fsizer_t   fsizer;
 	zend_stream_closer_t   closer;
@@ -65,7 +56,8 @@ typedef struct _zend_file_handle {
 	const char        *filename;
 	zend_string       *opened_path;
 	zend_stream_type  type;
-	zend_bool free_filename;
+	char              *buf;
+	size_t            len;
 } zend_file_handle;
 
 BEGIN_EXTERN_C()
