@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.21
+18 Jul 2019, PHP 7.2.21RC1
 
 - Fileinfo:
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
