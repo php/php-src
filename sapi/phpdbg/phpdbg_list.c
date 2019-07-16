@@ -248,6 +248,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 		} else {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
 		}
+		return NULL;
 	}
 
 	data.buf = estrndup(bufptr, len);

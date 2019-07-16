@@ -1,5 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
+
 ?? ??? ????, PHP 7.3.8
 
 - Core:
