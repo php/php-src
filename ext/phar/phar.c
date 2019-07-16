@@ -3264,7 +3264,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 
 					switch (file_handle->type) {
 						case ZEND_HANDLE_STREAM:
-						case ZEND_HANDLE_MAPPED:
 							if (file_handle->handle.stream.closer && file_handle->handle.stream.handle) {
 								file_handle->handle.stream.closer(file_handle->handle.stream.handle);
 							}
@@ -3288,7 +3287,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 				phar->is_persistent ?
 					php_stream_rewind(PHAR_G(cached_fp)[phar->phar_pos].fp) :
 					php_stream_rewind(phar->fp);
-				memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
 			}
 		}
 	}

@@ -970,7 +970,6 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 			}
 			break;
 		case ZEND_HANDLE_FILENAME:
-		case ZEND_HANDLE_MAPPED:
 			if (file_handle->opened_path) {
 				char *file_path = ZSTR_VAL(file_handle->opened_path);
 
