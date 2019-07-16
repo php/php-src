@@ -771,6 +771,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.huge_code_pages",         ZCG(accel_directives).huge_code_pages);
 #endif
 	add_assoc_string(&directives, "opcache.preload", STRING_NOT_NULL(ZCG(accel_directives).preload));
+#if ZEND_WIN32
+	add_assoc_string(&directives, "opcache.cache_id", STRING_NOT_NULL(ZCG(accel_directives).cache_id));
+#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 
