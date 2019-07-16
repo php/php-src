@@ -953,11 +953,6 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 #endif
 
 	switch (file_handle->type) {
-		case ZEND_HANDLE_FD:
-			if (zend_fstat(file_handle->handle.fd, &statbuf) == -1) {
-				return 0;
-			}
-			break;
 		case ZEND_HANDLE_FP:
 			if (zend_fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
 				if (zend_get_stream_timestamp(file_handle->filename, &statbuf) != SUCCESS) {

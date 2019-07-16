@@ -84,27 +84,6 @@
 #include "rfc1867.h"
 
 #include "ext/standard/html_tables.h"
-
-#if HAVE_MMAP || defined(PHP_WIN32)
-# if HAVE_UNISTD_H
-#  include <unistd.h>
-#  if defined(_SC_PAGESIZE)
-#    define REAL_PAGE_SIZE sysconf(_SC_PAGESIZE);
-#  elif defined(_SC_PAGE_SIZE)
-#    define REAL_PAGE_SIZE sysconf(_SC_PAGE_SIZE);
-#  endif
-# endif
-# if HAVE_SYS_MMAN_H
-#  include <sys/mman.h>
-# endif
-# ifndef REAL_PAGE_SIZE
-#  ifdef PAGE_SIZE
-#   define REAL_PAGE_SIZE PAGE_SIZE
-#  else
-#   define REAL_PAGE_SIZE 4096
-#  endif
-# endif
-#endif
 /* }}} */
 
 PHPAPI int (*php_register_internal_extensions_func)(void) = php_register_internal_extensions;
@@ -1557,13 +1536,6 @@ static void php_zend_stream_closer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static void php_zend_stream_mmap_closer(void *handle) /* {{{ */
-{
-	php_stream_mmap_unmap((php_stream*)handle);
-	php_zend_stream_closer(handle);
-}
-/* }}} */
-
 static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 {
 	php_stream_statbuf  ssb;
@@ -1582,38 +1554,18 @@ static int php_stream_open_for_zend(const char *filename, zend_file_handle *hand
 
 PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *handle, int mode) /* {{{ */
 {
-	char *p;
-	size_t len, mapped_len;
 	php_stream *stream = php_stream_open_wrapper((char *)filename, "rb", mode, &handle->opened_path);
 
 	if (stream) {
-#if HAVE_MMAP || defined(PHP_WIN32)
-		size_t page_size = REAL_PAGE_SIZE;
-#endif
-
+		handle->type = ZEND_HANDLE_STREAM;
 		handle->filename = (char*)filename;
 		handle->free_filename = 0;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
 		handle->handle.stream.fsizer  = php_zend_stream_fsizer;
 		handle->handle.stream.isatty  = 0;
-		/* can we mmap immediately? */
 		memset(&handle->handle.stream.mmap, 0, sizeof(handle->handle.stream.mmap));
-		len = php_zend_stream_fsizer(stream);
-		if (len != 0
-#if HAVE_MMAP || defined(PHP_WIN32)
-		&& ((len - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD
-#endif
-		&& php_stream_mmap_possible(stream)
-		&& (p = php_stream_mmap_range(stream, 0, len, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped_len)) != NULL) {
-			handle->handle.stream.closer   = php_zend_stream_mmap_closer;
-			handle->handle.stream.mmap.buf = p;
-			handle->handle.stream.mmap.len = mapped_len;
-			handle->type = ZEND_HANDLE_MAPPED;
-		} else {
-			handle->handle.stream.closer = php_zend_stream_closer;
-			handle->type = ZEND_HANDLE_STREAM;
-		}
+		handle->handle.stream.closer = php_zend_stream_closer;
 		/* suppress warning if this stream is not explicitly closed */
 		php_stream_auto_cleanup(stream);
 

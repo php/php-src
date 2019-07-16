@@ -23,27 +23,6 @@
 #include "zend_compile.h"
 #include "zend_stream.h"
 
-#if HAVE_MMAP
-# if HAVE_UNISTD_H
-#  include <unistd.h>
-#  if defined(_SC_PAGESIZE)
-#    define REAL_PAGE_SIZE sysconf(_SC_PAGESIZE);
-#  elif defined(_SC_PAGE_SIZE)
-#    define REAL_PAGE_SIZE sysconf(_SC_PAGE_SIZE);
-#  endif
-# endif
-# if HAVE_SYS_MMAN_H
-#  include <sys/mman.h>
-# endif
-# ifndef REAL_PAGE_SIZE
-#  ifdef PAGE_SIZE
-#   define REAL_PAGE_SIZE PAGE_SIZE
-#  else
-#   define REAL_PAGE_SIZE 4096
-#  endif
-# endif
-#endif
-
 ZEND_DLIMPORT int isatty(int fd);
 
 static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len) /* {{{ */
@@ -73,17 +52,10 @@ static size_t zend_stream_stdio_fsizer(void *handle) /* {{{ */
 } /* }}} */
 
 static void zend_stream_unmap(zend_stream *stream) { /* {{{ */
-#if HAVE_MMAP
-	if (stream->mmap.map) {
-		munmap(stream->mmap.map, stream->mmap.len + ZEND_MMAP_AHEAD);
-	} else
-#endif
 	if (stream->mmap.buf) {
 		efree(stream->mmap.buf);
 	}
 	stream->mmap.len = 0;
-	stream->mmap.pos = 0;
-	stream->mmap.map = 0;
 	stream->mmap.buf = 0;
 	stream->handle   = stream->mmap.old_handle;
 } /* }}} */
@@ -177,10 +149,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	}
 
 	switch (file_handle->type) {
-		case ZEND_HANDLE_FD:
-			file_handle->type = ZEND_HANDLE_FP;
-			file_handle->handle.fp = fdopen(file_handle->handle.fd, "rb");
-			/* no break; */
 		case ZEND_HANDLE_FP:
 			if (!file_handle->handle.fp) {
 				return FAILURE;
@@ -197,7 +165,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			break;
 
 		case ZEND_HANDLE_MAPPED:
-			file_handle->handle.stream.mmap.pos = 0;
 			*buf = file_handle->handle.stream.mmap.buf;
 			*len = file_handle->handle.stream.mmap.len;
 			return SUCCESS;
@@ -215,30 +182,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	file_handle->type = ZEND_HANDLE_STREAM;  /* we might still be _FP but we need fsize() work */
 
 	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
-#if HAVE_MMAP
-		size_t page_size = REAL_PAGE_SIZE;
-
-		if (file_handle->handle.fp &&
-		    size != 0 &&
-		    ((size - 1) % page_size) <= page_size - ZEND_MMAP_AHEAD) {
-			/*  *buf[size] is zeroed automatically by the kernel */
-			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
-			if (*buf != MAP_FAILED) {
-				zend_long offset = ftell(file_handle->handle.fp);
-				file_handle->handle.stream.mmap.map = *buf;
-
-				if (offset != -1) {
-					*buf += offset;
-					size -= offset;
-				}
-				file_handle->handle.stream.mmap.buf = *buf;
-				file_handle->handle.stream.mmap.len = size;
-
-				goto return_mapped;
-			}
-		}
-#endif
-		file_handle->handle.stream.mmap.map = 0;
 		file_handle->handle.stream.mmap.buf = *buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
 		file_handle->handle.stream.mmap.len = zend_stream_read(file_handle, *buf, size);
 	} else {
@@ -255,7 +198,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 				remain = size;
 			}
 		}
-		file_handle->handle.stream.mmap.map = 0;
 		file_handle->handle.stream.mmap.len = size;
 		if (size && remain < ZEND_MMAP_AHEAD) {
 			*buf = safe_erealloc(*buf, size, 1, ZEND_MMAP_AHEAD);
@@ -271,11 +213,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	if (ZEND_MMAP_AHEAD) {
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
-#if HAVE_MMAP
-return_mapped:
-#endif
 	file_handle->type = ZEND_HANDLE_MAPPED;
-	file_handle->handle.stream.mmap.pos        = 0;
 	file_handle->handle.stream.mmap.old_handle = file_handle->handle.stream.handle;
 	file_handle->handle.stream.mmap.old_closer = file_handle->handle.stream.closer;
 	file_handle->handle.stream.handle          = &file_handle->handle.stream;
@@ -290,9 +228,6 @@ return_mapped:
 ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
-		case ZEND_HANDLE_FD:
-			/* nothing to do */
-			break;
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
@@ -326,8 +261,6 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 		return 0;
 	}
 	switch (fh1->type) {
-		case ZEND_HANDLE_FD:
-			return fh1->handle.fd == fh2->handle.fd;
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp == fh2->handle.fp;
 		case ZEND_HANDLE_STREAM:
