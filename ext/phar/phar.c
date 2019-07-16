@@ -1971,44 +1971,31 @@ woohoo:
 			}
 		} else {
 			zend_string *str_key;
-			zend_ulong unused;
 
-			for (zend_hash_internal_pointer_reset(&(PHAR_G(phar_fname_map)));
-				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
-				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
-			) {
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&PHAR_G(phar_fname_map), str_key, pphar) {
 				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 					continue;
 				}
 
 				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
-					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
-						break;
-					}
 					*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 					goto woohoo;
 				}
-			}
+			} ZEND_HASH_FOREACH_END();
 
 			if (PHAR_G(manifest_cached)) {
-				for (zend_hash_internal_pointer_reset(&cached_phars);
-					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
-					zend_hash_move_forward(&cached_phars)
-				) {
+				ZEND_HASH_FOREACH_STR_KEY_PTR(&cached_phars, str_key, pphar) {
 					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 						continue;
 					}
 
 					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
-						if (NULL == (pphar = zend_hash_get_current_data_ptr(&cached_phars))) {
-							break;
-						}
 						*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 						goto woohoo;
 					}
-				}
+				} ZEND_HASH_FOREACH_END();
 			}
 		}
 	}
@@ -2692,12 +2679,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	}
 	new_manifest_count = 0;
 	offset = 0;
-	for (zend_hash_internal_pointer_reset(&phar->manifest);
-		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
-		zend_hash_move_forward(&phar->manifest)) {
-		if ((entry = zend_hash_get_current_data_ptr(&phar->manifest)) == NULL) {
-			continue;
-		}
+	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->cfp) {
 			/* did we forget to get rid of cfp last time? */
 			php_stream_close(entry->cfp);
@@ -2851,7 +2833,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		global_flags |= (entry->flags & PHAR_ENT_COMPRESSION_MASK);
-	}
+	} ZEND_HASH_FOREACH_END();
 	global_flags |= PHAR_HDR_SIGNATURE;
 
 	/* write out manifest pre-header */
@@ -2932,14 +2914,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	manifest_ftell = php_stream_tell(newfile);
 
 	/* now write the manifest */
-	for (zend_hash_internal_pointer_reset(&phar->manifest);
-		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
-		zend_hash_move_forward(&phar->manifest)) {
-
-		if ((entry = zend_hash_get_current_data_ptr(&phar->manifest)) == NULL) {
-			continue;
-		}
-
+	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->is_deleted || entry->is_mounted) {
 			/* remove this from the new phar if deleted, ignore if mounted */
 			continue;
@@ -3001,7 +2976,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 			return EOF;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 	/* Hack - see bug #65028, add padding byte to the end of the manifest */
 	if(manifest_hack) {
 		if(1 != php_stream_write(newfile, manifest, 1)) {
@@ -3021,14 +2996,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	/* now copy the actual file data to the new phar */
 	offset = php_stream_tell(newfile);
-	for (zend_hash_internal_pointer_reset(&phar->manifest);
-		zend_hash_has_more_elements(&phar->manifest) == SUCCESS;
-		zend_hash_move_forward(&phar->manifest)) {
-
-		if ((entry = zend_hash_get_current_data_ptr(&phar->manifest)) == NULL) {
-			continue;
-		}
-
+	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->is_deleted || entry->is_dir || entry->is_mounted) {
 			continue;
 		}
@@ -3096,7 +3064,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		} else if (entry->fp_type == PHAR_UFP) {
 			entry->fp_type = PHAR_FP;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* append signature */
 	if (global_flags & PHAR_HDR_SIGNATURE) {
@@ -3484,11 +3452,9 @@ void phar_request_initialize(void) /* {{{ */
 			phar_archive_data *pphar;
 			phar_entry_fp *stuff = (phar_entry_fp *) ecalloc(zend_hash_num_elements(&cached_phars), sizeof(phar_entry_fp));
 
-			for (zend_hash_internal_pointer_reset(&cached_phars);
-			(pphar = zend_hash_get_current_data_ptr(&cached_phars)) != NULL;
-			zend_hash_move_forward(&cached_phars)) {
+			ZEND_HASH_FOREACH_PTR(&cached_phars, pphar) {
 				stuff[pphar->phar_pos].manifest = (phar_entry_fp_info *) ecalloc( zend_hash_num_elements(&(pphar->manifest)), sizeof(phar_entry_fp_info));
-			}
+			} ZEND_HASH_FOREACH_END();
 
 			PHAR_G(cached_fp) = stuff;
 		}

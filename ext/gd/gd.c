@@ -4290,13 +4290,9 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 
 		colors = emalloc(num_colors * sizeof(int));
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(hash_colors));
-
-		while ((color = zend_hash_get_current_data(Z_ARRVAL_P(hash_colors))) != NULL) {
-			zend_hash_move_forward(Z_ARRVAL_P(hash_colors));
-
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
 			*(colors + i++) = (int) zval_get_long(color);
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		RETVAL_BOOL(gdImageScatterColor(im, (int)scatter_sub, (int)scatter_plus, colors, num_colors));
 
