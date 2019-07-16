@@ -50,7 +50,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #78269 (password_hash uses weak options for argon2). (Remi)
 
-27 Jun 2019, PHP 7.2.20
+04 Jul 2019, PHP 7.2.20
 
 - Core:
   . Fixed bug #76980 (Interface gets skipped if autoloader throws an exception).
