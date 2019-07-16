@@ -2720,6 +2720,12 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				break;
 			}
 
+			if (container_op_type == IS_CV
+			 && type != BP_VAR_W
+			 && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+				container = ZVAL_UNDEFINED_OP1();
+			}
+
 			/* this should modify object only if it's empty */
 			if (type == BP_VAR_UNSET) {
 				return;
