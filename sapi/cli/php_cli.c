@@ -589,18 +589,13 @@ static const char *param_mode_conflict = "Either execute direct code, process st
  */
 static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
-	// TODO: Is this still needed?
-	file_handle->type = ZEND_HANDLE_FP;
-	file_handle->opened_path = NULL;
-	file_handle->free_filename = 0;
-	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
+	FILE *fp = VCWD_FOPEN(script_file, "rb");
+	if (!fp) {
 		php_printf("Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
-	file_handle->filename = script_file;
 
-	rewind(file_handle->handle.fp);
-
+	zend_stream_init_fp(file_handle, fp, script_file);
 	return SUCCESS;
 }
 /* }}} */
@@ -916,12 +911,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			/* here but this would make things only more complicated. And it */
 			/* is consitent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
-			file_handle.filename = "Standard input code";
-			file_handle.handle.fp = stdin;
+			zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 		}
-		file_handle.type = ZEND_HANDLE_FP;
-		file_handle.opened_path = NULL;
-		file_handle.free_filename = 0;
 		php_self = (char*)file_handle.filename;
 
 		/* before registering argv to module exchange the *new* argv[0] */

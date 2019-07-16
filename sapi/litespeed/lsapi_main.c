@@ -1296,9 +1296,7 @@ static int cli_main( int argc, char * argv[] )
         if ( ret == -1 ) {
             if ( *p ) {
                 zend_file_handle file_handle;
-                memset(&file_handle, 0, sizeof(file_handle));
-                file_handle.type = ZEND_HANDLE_FP;
-                file_handle.handle.fp = VCWD_FOPEN(*p, "rb");
+				zend_stream_init_fp(&file_handle, VCWD_FOPEN(*p, "rb"), NULL);
 
                 if ( file_handle.handle.fp ) {
                     script_filename = *p;

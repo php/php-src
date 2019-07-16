@@ -94,6 +94,13 @@ static size_t zend_stream_fsize(zend_file_handle *file_handle) /* {{{ */
 	return -1;
 } /* }}} */
 
+ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char *filename) {
+	memset(handle, 0, sizeof(zend_file_handle));
+	handle->type = ZEND_HANDLE_FP;
+	handle->handle.fp = fp;
+	handle->filename = filename;
+}
+
 ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	if (zend_stream_open_function) {
