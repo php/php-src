@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.22
 
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
 01 Aug 2019, PHP 7.2.21
 
