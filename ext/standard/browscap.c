@@ -413,16 +413,11 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		return FAILURE;
 	}
 
-	fh.handle.fp = VCWD_FOPEN(filename, "r");
-	fh.opened_path = NULL;
-	fh.free_filename = 0;
+	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
 	if (!fh.handle.fp) {
 		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
 		return FAILURE;
 	}
-
-	fh.filename = filename;
-	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
 	zend_hash_init_ex(browdata->htab, 0, NULL,

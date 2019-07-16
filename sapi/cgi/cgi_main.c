@@ -2476,17 +2476,10 @@ parent_loop_end:
 				we need in the environment.
 			*/
 			if (SG(request_info).path_translated || cgi || fastcgi) {
-				file_handle.type = ZEND_HANDLE_FILENAME;
-				file_handle.filename = SG(request_info).path_translated;
-				file_handle.handle.fp = NULL;
+				zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
 			} else {
-				file_handle.filename = "Standard input code";
-				file_handle.type = ZEND_HANDLE_FP;
-				file_handle.handle.fp = stdin;
+				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 			}
-
-			file_handle.opened_path = NULL;
-			file_handle.free_filename = 0;
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */

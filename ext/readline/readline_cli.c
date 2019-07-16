@@ -592,17 +592,9 @@ static int readline_shell_run(void) /* {{{ */
 	int history_lines_to_write = 0;
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
-		zend_file_handle *prepend_file_p;
 		zend_file_handle prepend_file;
-
-		memset(&prepend_file, 0, sizeof(prepend_file));
-		prepend_file.filename = PG(auto_prepend_file);
-		prepend_file.opened_path = NULL;
-		prepend_file.free_filename = 0;
-		prepend_file.type = ZEND_HANDLE_FILENAME;
-		prepend_file_p = &prepend_file;
-
-		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p);
+		zend_stream_init_filename(&prepend_file, PG(auto_prepend_file));
+		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, &prepend_file);
 	}
 
 #ifndef PHP_WIN32

@@ -341,12 +341,9 @@ static int filename_is_in_cache(zend_string *filename)
 	if (key != NULL) {
 		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		if (persistent_script && !persistent_script->corrupted) {
-			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
-
-			handle.filename = ZSTR_VAL(filename);
-			handle.type = ZEND_HANDLE_FILENAME;
-
 			if (ZCG(accel_directives).validate_timestamps) {
+				zend_file_handle handle;
+				zend_stream_init_filename(&handle, ZSTR_VAL(filename));
 				return validate_timestamp_and_record_ex(persistent_script, &handle) == SUCCESS;
 			}
 
@@ -875,10 +872,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 		return;
 	}
 
-	handle.filename = script_name;
-	handle.free_filename = 0;
-	handle.opened_path = NULL;
-	handle.type = ZEND_HANDLE_FILENAME;
+	zend_stream_init_filename(&handle, script_name);
 
 	orig_execute_data = EG(current_execute_data);
 	orig_compiler_options = CG(compiler_options);
