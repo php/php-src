@@ -1216,7 +1216,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 				if ($cold) {
 					$zend_attributes = " zend_never_inline ZEND_COLD";
 				} else {
-					$zend_attributes = "";
+					$zend_attributes = " zend_never_inline";
 				}
 				$zend_fastcall = " ZEND_FASTCALL";
 			}
