@@ -145,6 +145,11 @@ PHP 8.0 UPGRADE NOTES
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
 
+- PCRE:
+  . When passing invalid escape sequences they are no longer intepreted as
+    literals. This behaviour previously required the X modifier - which is
+    now ignored.
+
 - PDO:
   . The method PDOStatement::setFetchMode() now accepts the following signature:
 
