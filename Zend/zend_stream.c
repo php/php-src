@@ -126,7 +126,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len) /* {{{ */
 {
 	size_t size;
-	zend_stream_type old_type;
+	zend_bool is_fp = 0;
 
 	if (file_handle->buf) {
 		*buf = file_handle->buf;
@@ -145,6 +145,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			return FAILURE;
 		}
 
+		is_fp = 1;
 		file_handle->type = ZEND_HANDLE_STREAM;
 		file_handle->handle.stream.handle = file_handle->handle.fp;
 		file_handle->handle.stream.isatty = isatty(fileno((FILE *)file_handle->handle.stream.handle));
@@ -158,10 +159,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		return FAILURE;
 	}
 
-	old_type = file_handle->type;
-	file_handle->type = ZEND_HANDLE_STREAM;  /* we might still be _FP but we need fsize() work */
-
-	if (old_type == ZEND_HANDLE_FP && !file_handle->handle.stream.isatty && size) {
+	if (is_fp && !file_handle->handle.stream.isatty && size) {
 		file_handle->buf = *buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
 		file_handle->len = zend_stream_read(file_handle, *buf, size);
 	} else {

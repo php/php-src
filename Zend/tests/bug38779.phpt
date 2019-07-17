@@ -22,6 +22,9 @@ class Loader {
 	function stream_stat() {
 		return array('size' => strlen($this->data));
 	}
+	function stream_set_option($option, $arg1, $arg2) {
+		return false;
+	}
 }
 stream_wrapper_register('Loader', 'Loader');
 require 'Loader://qqq.php';
