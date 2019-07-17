@@ -991,6 +991,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)
 #define ZEND_ARRAY_SIZE_SHIFT		2
 
+/* Array/string access syntax with curly braces is used */
+#define ZEND_ALTERNATIVE_ARRAY_SYNTAX			2
+
 /* Attribute for ternary inside parentheses */
 #define ZEND_PARENTHESIZED_CONDITIONAL 1
 
