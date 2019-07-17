@@ -1193,10 +1193,6 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 		return;
 	}
 
-	if ($spec && $name === "zend_binary_assign_op_helper") {
-		return;
-	}
-
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
