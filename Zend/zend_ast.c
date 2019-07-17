@@ -714,7 +714,7 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 				zval_ptr_dtor_nogc(&op1);
 				ret = FAILURE;
 			} else {
-				zend_fetch_dimension_const(result, &op1, &op2, (ast->attr & ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
+				zend_fetch_dimension_const(result, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
 
 				zval_ptr_dtor_nogc(&op1);
 				zval_ptr_dtor_nogc(&op2);
