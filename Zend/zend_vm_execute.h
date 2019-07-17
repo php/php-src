@@ -4579,6 +4579,17 @@ defined_false:
 	}
 }
 
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_LONG_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *value;
+
+	value = RT_CONSTANT(opline, opline->op1);
+	ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(value));
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4900,12 +4911,138 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CON
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -4963,12 +5100,138 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -5026,12 +5289,108 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_C
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
 is_smaller_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -5074,12 +5433,108 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQU
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
 is_smaller_or_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_or_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -6772,7 +7227,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SR_SPEC_CONST_TMPVARCV_HANDLER
 	ZEND_VM_TAIL_CALL(zend_shift_right_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -6787,12 +7242,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
 is_smaller_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -6820,7 +7275,103 @@ is_smaller_double:
 	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -6835,12 +7386,108 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
 is_smaller_or_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_or_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = RT_CONSTANT(opline, opline->op1);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CONST == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -10848,6 +11495,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 	ZEND_VM_RETURN();
 }
 
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *value;
+
+	value = EX_VAR(opline->op1.var);
+	ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(value));
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -11060,7 +11718,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SR_SPEC_TMPVARCV_CONST_HANDLER
 	ZEND_VM_TAIL_CALL(zend_shift_right_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -11075,12 +11733,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
 is_smaller_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -11108,7 +11766,103 @@ is_smaller_double:
 	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -11123,12 +11877,108 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVA
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
 is_smaller_or_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_or_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -11925,7 +12775,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SR_SPEC_TMPVARCV_TMPVARCV_HAND
 	ZEND_VM_TAIL_CALL(zend_shift_right_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -11940,12 +12790,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVA
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
 is_smaller_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -11973,7 +12823,103 @@ is_smaller_double:
 	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) < Z_LVAL_P(op2))) {
+is_smaller_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_double:
+			if (d1 < d2) {
+				goto is_smaller_true;
+			} else {
+				goto is_smaller_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -11988,12 +12934,108 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVA
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
 is_smaller_or_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_smaller_or_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_smaller_or_equal_double:
+			if (d1 <= d2) {
+				goto is_smaller_or_equal_true;
+			} else {
+				goto is_smaller_or_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_smaller_or_equal_double;
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_smaller_or_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST && (IS_TMP_VAR|IS_VAR|IS_CV) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) <= Z_LVAL_P(op2))) {
+is_smaller_or_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_smaller_or_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -13239,12 +14281,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HAN
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -13302,12 +14470,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -14402,12 +15696,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HA
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -14465,12 +15885,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVA
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && (IS_TMP_VAR|IS_VAR) == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -37218,12 +38764,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -37281,12 +38953,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HAN
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CONST & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = RT_CONSTANT(opline, opline->op2);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CONST == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -40456,12 +42254,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLE
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -40519,12 +42443,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HA
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && (IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -45258,12 +47308,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZE
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
 is_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CV == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_equal_double:
+			if (d1 == d2) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (result) {
+				goto is_equal_true;
+			} else {
+				goto is_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CV == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) == Z_LVAL_P(op2))) {
+is_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -45321,12 +47497,138 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLE
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
 is_not_equal_true:
-				ZEND_VM_SMART_BRANCH_TRUE();
+
 				ZVAL_TRUE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			} else {
 is_not_equal_false:
-				ZEND_VM_SMART_BRANCH_FALSE();
+
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CV == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPZ();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+is_not_equal_double:
+			if (d1 != d2) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			goto is_not_equal_double;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+			int result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op1);
+			}
+			if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_str(op2);
+			}
+			if (!result) {
+				goto is_not_equal_true;
+			} else {
+				goto is_not_equal_false;
+			}
+		}
+	}
+	ZEND_VM_TAIL_CALL(zend_is_not_equal_helper_SPEC(op1, op2 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = EX_VAR(opline->op1.var);
+	op2 = EX_VAR(opline->op2.var);
+	if (ZEND_VM_SPEC && IS_CV == IS_CONST && IS_CV == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) != Z_LVAL_P(op2))) {
+is_not_equal_true:
+				ZEND_VM_SMART_BRANCH_TRUE_JMPNZ();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+is_not_equal_false:
+				ZEND_VM_SMART_BRANCH_FALSE_JMPNZ();
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -48564,18 +50866,58 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -48584,23 +50926,73 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -48609,60 +51001,170 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_LABEL,
+			(void*)&&ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -51126,6 +53628,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_POST_INC_LONG_SPEC_CV_LABEL,
 			(void*)&&ZEND_POST_DEC_LONG_NO_OVERFLOW_SPEC_CV_LABEL,
 			(void*)&&ZEND_POST_DEC_LONG_SPEC_CV_LABEL,
+			(void*)&&ZEND_QM_ASSIGN_LONG_SPEC_CONST_LABEL,
+			(void*)&&ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_LABEL,
+			(void*)&&ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_LABEL,
@@ -51728,6 +54235,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_DEFINED_SPEC_CONST)
 				ZEND_DEFINED_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_QM_ASSIGN_LONG_SPEC_CONST):
+				VM_TRACE(ZEND_QM_ASSIGN_LONG_SPEC_CONST)
+				ZEND_QM_ASSIGN_LONG_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST):
 				VM_TRACE(ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST)
 				ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -51788,17 +54299,49 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_CONST_CONST)
 				ZEND_IS_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ)
+				ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST)
 				ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_CONST)
 				ZEND_IS_SMALLER_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ)
+				ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ)
+				ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST)
 				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_CONST_CONST)
@@ -51936,9 +54479,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV)
 				ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ)
+				ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ)
+				ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV):
 				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV)
 				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SUB_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV):
 				VM_TRACE(ZEND_SUB_LONG_NO_OVERFLOW_SPEC_CONST_TMPVARCV)
@@ -52256,6 +54815,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_YIELD_SPEC_CONST_CV)
 				ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV):
+				VM_TRACE(ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV)
+				ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV):
 				VM_TRACE(ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV)
 				ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -52292,9 +54855,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST)
 				ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ)
+				ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ)
+				ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST):
 				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST)
 				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_BW_OR_SPEC_TMPVARCV_CONST):
 				VM_TRACE(ZEND_BW_OR_SPEC_TMPVARCV_CONST)
@@ -52480,9 +55059,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV)
 				ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ)
+				ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ)
+				ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV):
 				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV)
 				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ):
+				VM_TRACE(ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ)
+				ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_BW_OR_SPEC_TMPVARCV_TMPVARCV):
 				VM_TRACE(ZEND_BW_OR_SPEC_TMPVARCV_TMPVARCV)
@@ -52720,9 +55315,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_CONST)
 				ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ)
+				ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST)
 				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_TMPVAR_CONST):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_TMPVAR_CONST)
@@ -52800,9 +55411,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR)
 				ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ)
+				ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR)
 				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_TMPVAR_TMPVAR):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_TMPVAR_TMPVAR)
@@ -54558,9 +57185,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CONST)
 				ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ)
+				ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST)
 				ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_CV_CONST):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_CV_CONST)
@@ -54762,9 +57405,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_TMPVAR)
 				ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ)
+				ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR)
 				ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_CV_TMPVAR):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_CV_TMPVAR)
@@ -55110,9 +57769,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CV)
 				ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ)
+				ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ):
+				VM_TRACE(ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ)
+				ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV):
 				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV)
 				ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ):
+				VM_TRACE(ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ)
+				ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SPACESHIP_SPEC_CV_CV):
 				VM_TRACE(ZEND_SPACESHIP_SPEC_CV_CV)
@@ -55743,18 +58418,58 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HANDLER,
 		ZEND_IS_EQUAL_SPEC_CONST_CONST_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -55763,23 +58478,73 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_CV_JMPZ_HANDLER,
+		ZEND_IS_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -55788,60 +58553,170 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPZ_HANDLER,
+		ZEND_IS_NOT_EQUAL_SPEC_CV_CV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_CONST_CONST_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_CONST_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPZ_HANDLER,
+		ZEND_IS_SMALLER_OR_EQUAL_SPEC_TMPVARCV_TMPVARCV_JMPNZ_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -58305,6 +61180,11 @@ void zend_vm_init(void)
 		ZEND_POST_INC_LONG_SPEC_CV_HANDLER,
 		ZEND_POST_DEC_LONG_NO_OVERFLOW_SPEC_CV_HANDLER,
 		ZEND_POST_DEC_LONG_SPEC_CV_HANDLER,
+		ZEND_QM_ASSIGN_LONG_SPEC_CONST_HANDLER,
+		ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_HANDLER,
+		ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_QM_ASSIGN_LONG_SPEC_TMPVARCV_HANDLER,
 		ZEND_QM_ASSIGN_DOUBLE_SPEC_CONST_HANDLER,
 		ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_HANDLER,
 		ZEND_QM_ASSIGN_DOUBLE_SPEC_TMPVARCV_HANDLER,
@@ -58375,184 +61255,184 @@ void zend_vm_init(void)
 		311 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE,
 		336 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE,
 		361 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE,
-		386 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE,
-		411 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE,
-		436 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		461 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		486 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
-		536 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		661 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		786 | SPEC_RULE_OP_DATA,
-		791 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		816 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		841 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		866,
-		867 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		892 | SPEC_RULE_OP1,
-		897 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		1022,
-		1023 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
-		1033 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
-		1043 | SPEC_RULE_OP1,
-		1048 | SPEC_RULE_OP1,
-		1053,
-		1053,
-		1054,
-		1054,
-		1055,
-		1056 | SPEC_RULE_OP1,
-		1061 | SPEC_RULE_OP1,
-		1066 | SPEC_RULE_OP1,
-		1071 | SPEC_RULE_OP1,
-		1076 | SPEC_RULE_OP1,
-		1081 | SPEC_RULE_OP2,
-		1086,
-		1087 | SPEC_RULE_QUICK_ARG,
-		1089 | SPEC_RULE_OP1,
-		1094 | SPEC_RULE_OP1,
-		1099 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1124 | SPEC_RULE_OP2,
-		1129 | SPEC_RULE_OP2,
-		1134 | SPEC_RULE_OP2,
-		1139,
-		1140,
-		1141,
-		1142 | SPEC_RULE_RETVAL,
-		1144,
-		1145 | SPEC_RULE_OP1,
-		1150,
-		1151,
-		1152 | SPEC_RULE_OP1,
-		1157 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
-		1167 | SPEC_RULE_OP1,
-		1172 | SPEC_RULE_OP1,
-		1177,
-		1178,
-		1179 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1204 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1229 | SPEC_RULE_OP1,
-		1234 | SPEC_RULE_OP1,
-		1239 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1264 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		386 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE,
+		461 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE,
+		536 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH,
+		611 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH,
+		686 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
+		736 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		861 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		986 | SPEC_RULE_OP_DATA,
+		991 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1016 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1041 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1066,
+		1067 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1092 | SPEC_RULE_OP1,
+		1097 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
+		1222,
+		1223 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
+		1233 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
+		1243 | SPEC_RULE_OP1,
+		1248 | SPEC_RULE_OP1,
+		1253,
+		1253,
+		1254,
+		1254,
+		1255,
+		1256 | SPEC_RULE_OP1,
+		1261 | SPEC_RULE_OP1,
+		1266 | SPEC_RULE_OP1,
+		1271 | SPEC_RULE_OP1,
+		1276 | SPEC_RULE_OP1,
+		1281 | SPEC_RULE_OP2,
+		1286,
+		1287 | SPEC_RULE_QUICK_ARG,
 		1289 | SPEC_RULE_OP1,
-		1294,
-		1295,
-		1296 | SPEC_RULE_OP1,
-		1301 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1326 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1351 | SPEC_RULE_OP1,
-		1356 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1381 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1406 | SPEC_RULE_OP1,
-		1411 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1436 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1461 | SPEC_RULE_OP1,
-		1466 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1491 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1516 | SPEC_RULE_OP1,
-		1521 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1546 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1571 | SPEC_RULE_OP1,
-		1576 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1601 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1626 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1651,
-		1652 | SPEC_RULE_QUICK_ARG,
-		1654,
-		1655,
-		1656,
-		1657,
-		1658,
-		1659,
-		1660,
+		1294 | SPEC_RULE_OP1,
+		1299 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1324 | SPEC_RULE_OP2,
+		1329 | SPEC_RULE_OP2,
+		1334 | SPEC_RULE_OP2,
+		1339,
+		1340,
+		1341,
+		1342 | SPEC_RULE_RETVAL,
+		1344,
+		1345 | SPEC_RULE_OP1,
+		1350,
+		1351,
+		1352 | SPEC_RULE_OP1,
+		1357 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1367 | SPEC_RULE_OP1,
+		1372 | SPEC_RULE_OP1,
+		1377,
+		1378,
+		1379 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1404 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1429 | SPEC_RULE_OP1,
+		1434 | SPEC_RULE_OP1,
+		1439 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1464 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1489 | SPEC_RULE_OP1,
+		1494,
+		1495,
+		1496 | SPEC_RULE_OP1,
+		1501 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1526 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1551 | SPEC_RULE_OP1,
+		1556 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1581 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1606 | SPEC_RULE_OP1,
+		1611 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1636 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1661 | SPEC_RULE_OP1,
-		1666 | SPEC_RULE_OP2,
-		1671 | SPEC_RULE_OP1,
-		1676 | SPEC_RULE_OP1,
-		1681 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1706 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1731 | SPEC_RULE_OP1,
-		1736 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1761 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1666 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1691 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1716 | SPEC_RULE_OP1,
+		1721 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1746 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1771 | SPEC_RULE_OP1,
-		1776 | SPEC_RULE_OP2,
-		1781,
-		1782 | SPEC_RULE_OP1,
-		1787 | SPEC_RULE_OP1,
-		1792,
-		1793 | SPEC_RULE_OP1,
-		1798 | SPEC_RULE_OP1,
-		1803 | SPEC_RULE_OP1,
-		1808,
-		1809,
-		1810 | SPEC_RULE_OP2,
-		1815 | SPEC_RULE_RETVAL,
-		1817 | SPEC_RULE_RETVAL,
-		1819 | SPEC_RULE_RETVAL,
-		1821 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1821 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1846 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1846 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1776 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1801 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1826 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1851,
+		1852 | SPEC_RULE_QUICK_ARG,
+		1854,
+		1855,
+		1856,
+		1857,
+		1858,
+		1859,
+		1860,
+		1861 | SPEC_RULE_OP1,
+		1866 | SPEC_RULE_OP2,
 		1871 | SPEC_RULE_OP1,
-		1876,
-		1877 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1902,
-		1903 | SPEC_RULE_OP1,
-		1908,
-		1909,
-		1910,
-		1911,
-		1912,
-		1913,
-		1914,
-		1915 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1940,
-		1941,
-		1942,
-		1943 | SPEC_RULE_OP1,
-		1948,
-		1949 | SPEC_RULE_ISSET,
-		1951 | SPEC_RULE_OP2,
-		1956,
-		1957,
-		1958,
-		1959,
-		1960 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1985 | SPEC_RULE_OP1,
-		1990,
-		1991,
+		1876 | SPEC_RULE_OP1,
+		1881 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1906 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1931 | SPEC_RULE_OP1,
+		1936 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1961 | SPEC_RULE_OP1 | SPEC_RULE_QUICK_ARG,
+		1971 | SPEC_RULE_OP1,
+		1976 | SPEC_RULE_OP2,
+		1981,
+		1982 | SPEC_RULE_OP1,
+		1987 | SPEC_RULE_OP1,
 		1992,
-		1993,
-		1994 | SPEC_RULE_OP1,
-		1999,
-		2000,
-		2001 | SPEC_RULE_OP1,
-		2006 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2031,
-		2032 | SPEC_RULE_OP1,
-		2037,
-		2038,
-		2039,
-		2040,
-		2041,
-		2042,
-		2043,
-		2044,
-		2045 | SPEC_RULE_OP1,
-		2050,
-		2051,
-		2052,
-		2053,
-		2054,
-		2055 | SPEC_RULE_OP1,
-		2060 | SPEC_RULE_OP1,
-		2065 | SPEC_RULE_OP1,
-		2070 | SPEC_RULE_OP1,
-		2075 | SPEC_RULE_OP1,
-		2080,
-		2081 | SPEC_RULE_OP1,
-		2086 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2998
+		1993 | SPEC_RULE_OP1,
+		1998 | SPEC_RULE_OP1,
+		2003 | SPEC_RULE_OP1,
+		2008,
+		2009,
+		2010 | SPEC_RULE_OP2,
+		2015 | SPEC_RULE_RETVAL,
+		2017 | SPEC_RULE_RETVAL,
+		2019 | SPEC_RULE_RETVAL,
+		2021 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2021 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2046 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2046 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2071 | SPEC_RULE_OP1,
+		2076,
+		2077 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2102,
+		2103 | SPEC_RULE_OP1,
+		2108,
+		2109,
+		2110,
+		2111,
+		2112,
+		2113,
+		2114,
+		2115 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2140,
+		2141,
+		2142,
+		2143 | SPEC_RULE_OP1,
+		2148,
+		2149 | SPEC_RULE_ISSET,
+		2151 | SPEC_RULE_OP2,
+		2156,
+		2157,
+		2158,
+		2159,
+		2160 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2185 | SPEC_RULE_OP1,
+		2190,
+		2191,
+		2192,
+		2193,
+		2194 | SPEC_RULE_OP1,
+		2199,
+		2200,
+		2201 | SPEC_RULE_OP1,
+		2206 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2231,
+		2232 | SPEC_RULE_OP1,
+		2237,
+		2238,
+		2239,
+		2240,
+		2241,
+		2242,
+		2243,
+		2244,
+		2245 | SPEC_RULE_OP1,
+		2250,
+		2251,
+		2252,
+		2253,
+		2254,
+		2255 | SPEC_RULE_OP1,
+		2260 | SPEC_RULE_OP1,
+		2265 | SPEC_RULE_OP1,
+		2270 | SPEC_RULE_OP1,
+		2275 | SPEC_RULE_OP1,
+		2280,
+		2281 | SPEC_RULE_OP1,
+		2286 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3203
 	};
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	zend_opcode_handler_funcs = labels;
@@ -58740,7 +61620,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2112 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2312 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -58748,7 +61628,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2137 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2337 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -58756,7 +61636,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2162 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2362 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -58767,17 +61647,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2187 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2387 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2212 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2412 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2237 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2437 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -58788,17 +61668,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2262 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2462 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2287 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2487 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2312 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2512 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -58809,12 +61689,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2337 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2537 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2412 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2612 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -58825,12 +61705,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2487 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2687 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2562 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2762 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -58838,12 +61718,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2637 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 2837 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2712 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 2912 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -58851,67 +61731,69 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2787 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 2987 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2862 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3062 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
-			if (op1_info == MAY_BE_DOUBLE) {
-				spec = 2949 | SPEC_RULE_OP1;
+			if (op1_info == MAY_BE_LONG) {
+				spec = 3149 | SPEC_RULE_OP1;
+			} else if (op1_info == MAY_BE_DOUBLE) {
+				spec = 3154 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 2954 | SPEC_RULE_OP1;
+				spec = 3159 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 2937 | SPEC_RULE_RETVAL;
+				spec = 3137 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 2939 | SPEC_RULE_RETVAL;
+				spec = 3139 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 2941 | SPEC_RULE_RETVAL;
+				spec = 3141 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 2943 | SPEC_RULE_RETVAL;
+				spec = 3143 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 2945;
+				spec = 3145;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 2946;
+				spec = 3146;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 2947;
+				spec = 3147;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 2948;
+				spec = 3148;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2111;
+				spec = 2311;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 2994;
+				spec = 3199;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 2989 | SPEC_RULE_OP1;
+				spec = 3194 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2996 | SPEC_RULE_RETVAL;
+				spec = 3201 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -58919,17 +61801,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2959 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3164 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 2995;
+				spec = 3200;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if ((op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 2984 | SPEC_RULE_OP1;
+				spec = 3189 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:
