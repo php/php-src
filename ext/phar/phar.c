@@ -3221,11 +3221,6 @@ static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len) /* {{
 }
 /* }}} */
 
-static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
-{
-	return ((phar_archive_data*)handle)->halt_offset + 32;
-} /* }}} */
-
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 #define phar_orig_zend_open zend_stream_open_function
 
@@ -3282,7 +3277,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 				file_handle->handle.stream.handle  = phar;
 				file_handle->handle.stream.reader  = phar_zend_stream_reader;
 				file_handle->handle.stream.closer  = NULL;
-				file_handle->handle.stream.fsizer  = phar_zend_stream_fsizer;
 				file_handle->handle.stream.isatty  = 0;
 				phar->is_persistent ?
 					php_stream_rewind(PHAR_G(cached_fp)[phar->phar_pos].fp) :
