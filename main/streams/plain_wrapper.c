@@ -128,6 +128,7 @@ typedef struct {
 	unsigned is_pipe:1;			/* don't try and seek */
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
+	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
 	unsigned _reserved:28;
 
 	int lock_flag;			/* stores the lock state */
@@ -152,7 +153,7 @@ typedef struct {
 
 static int do_fstat(php_stdio_stream_data *d, int force)
 {
-	if (!d->cached_fstat || force) {
+	if (!d->cached_fstat || (force && !d->no_forced_fstat)) {
 		int fd;
 		int r;
 
@@ -1079,6 +1080,10 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 					php_stream_close(ret);
 					return NULL;
 				}
+
+				/* Make sure the fstat result is reused when we later try to get the
+				 * file size. */
+				self->no_forced_fstat = 1;
 			}
 
 			if (options & STREAM_USE_BLOCKING_PIPE) {
