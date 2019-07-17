@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
+- PCRE:
+  . Remove X modifier and enable it by default. (sjon)
+
 - PDO:
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)

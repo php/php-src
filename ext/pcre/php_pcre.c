@@ -50,7 +50,6 @@ struct _pcre_cache_entry {
 	uint32_t capture_count;
 	uint32_t name_count;
 	uint32_t compile_options;
-	uint32_t extra_compile_options;
 	uint32_t refcount;
 };
 
@@ -167,7 +166,6 @@ static void php_pcre_free(void *block, void *data)
 	pefree(block, 1);
 }/*}}}*/
 
-#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
@@ -187,12 +185,6 @@ static void php_pcre_init_pcre2(uint8_t jit)
 			return;
 		}
 	}
-
-	/* XXX The 'X' modifier is the default behavior in PCRE2. This option is
-		called dangerous in the manual, as typos in patterns can cause
-		unexpected results. We might want to to switch to the default PCRE2
-		behavior, too, thus causing a certain BC break. */
-	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
 
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
@@ -569,7 +561,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
-	uint32_t			 extra_coptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -704,7 +695,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
 			case 'S':	/* Pass. */					break;
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
-			case 'X':	extra_coptions &= ~PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL;			break;
 			case 'u':	coptions |= PCRE2_UTF;
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
        characters, even in UTF-8 mode. However, this can be changed by setting
@@ -767,18 +757,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		pcre2_set_character_tables(cctx, tables);
 	}
 
-	/* Set extra options for the compile context. */
-	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
-		pcre2_set_compile_extra_options(cctx, extra_coptions);
-	}
-
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
-
-	/* Reset the compile context extra options to default. */
-	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
-		pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
-	}
 
 	if (re == NULL) {
 		if (key != regex) {
@@ -823,7 +803,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.re = re;
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
-	new_entry.extra_compile_options = extra_coptions;
 	new_entry.refcount = 0;
 
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
