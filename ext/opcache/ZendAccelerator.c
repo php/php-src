@@ -45,6 +45,7 @@
 #include "zend_file_cache.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/md5.h"
+#include "ext/hash/php_hash.h"
 
 #ifdef HAVE_JIT
 # include "jit/zend_jit.h"
@@ -58,6 +59,7 @@
 typedef int uid_t;
 typedef int gid_t;
 #include <io.h>
+#include <lmcons.h>
 #endif
 
 #ifndef ZEND_WIN32
@@ -101,6 +103,9 @@ zend_accel_shared_globals *accel_shared_globals = NULL;
 
 /* true globals, no need for thread safety */
 char accel_system_id[32];
+#ifdef ZEND_WIN32
+char accel_uname_id[32];
+#endif
 zend_bool accel_startup_ok = 0;
 static char *zps_failure_reason = NULL;
 char *zps_api_failure_reason = NULL;
@@ -2171,6 +2176,26 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	return zend_accel_load_script(persistent_script, from_shared_memory);
 }
 
+#ifdef ZEND_WIN32
+static int accel_gen_uname_id(void)
+{
+	PHP_MD5_CTX ctx;
+	unsigned char digest[16];
+	wchar_t uname[UNLEN + 1];
+	DWORD unsize = UNLEN;
+
+	if (!GetUserNameW(uname, &unsize)) {
+		return FAILURE;
+	}
+	PHP_MD5Init(&ctx);
+	PHP_MD5Update(&ctx, (void *) uname, (unsize - 1) * sizeof(wchar_t));
+	PHP_MD5Update(&ctx, ZCG(accel_directives).cache_id, strlen(ZCG(accel_directives).cache_id));
+	PHP_MD5Final(digest, &ctx);
+	php_hash_bin2hex(accel_uname_id, digest, sizeof digest);
+	return SUCCESS;
+}
+#endif
+
 /* zend_stream_open_function() replacement for PHP 5.3 and above */
 static int persistent_stream_open_function(const char *filename, zend_file_handle *handle)
 {
@@ -2612,9 +2637,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 static void accel_gen_system_id(void)
 {
 	PHP_MD5_CTX context;
-	unsigned char digest[16], c;
-	char *md5str = accel_system_id;
-	int i;
+	unsigned char digest[16];
 
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, PHP_VERSION, sizeof(PHP_VERSION)-1);
@@ -2626,14 +2649,7 @@ static void accel_gen_system_id(void)
 		PHP_MD5Update(&context, __TIME__, sizeof(__TIME__)-1);
 	}
 	PHP_MD5Final(digest, &context);
-	for (i = 0; i < 16; i++) {
-		c = digest[i] >> 4;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5str[i * 2] = c;
-		c = digest[i] &  0x0f;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5str[(i * 2) + 1] = c;
-	}
+	php_hash_bin2hex(accel_system_id, digest, sizeof digest);
 }
 
 #ifdef HAVE_HUGE_CODE_PAGES
@@ -2823,6 +2839,13 @@ static int accel_startup(zend_extension *extension)
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
 		return FAILURE;
 	}
+
+#ifdef ZEND_WIN32
+	if (UNEXPECTED(accel_gen_uname_id() == FAILURE)) {
+		zps_startup_failure("Unable to get user name", NULL, accelerator_remove_cb);
+		return SUCCESS;
+	}
+#endif
 
 #ifdef HAVE_HUGE_CODE_PAGES
 	if (ZCG(accel_directives).huge_code_pages &&

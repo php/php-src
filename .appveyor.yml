@@ -33,7 +33,7 @@ environment:
                   PARALLEL: -j2
                 - THREAD_SAFE: 1
                   OPCACHE: 1
-                  PARALLEL:
+                  PARALLEL: -j2
                   INTRINSICS: AVX
 
 services:

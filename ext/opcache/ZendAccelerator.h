@@ -185,6 +185,9 @@ typedef struct _zend_accel_directives {
 	zend_bool      huge_code_pages;
 #endif
 	char *preload;
+#ifdef ZEND_WIN32
+	char *cache_id;
+#endif
 #ifdef HAVE_JIT
 	zend_long      jit;
 	zend_long      jit_buffer_size;
@@ -278,6 +281,9 @@ typedef struct _zend_accel_shared_globals {
 } zend_accel_shared_globals;
 
 extern char accel_system_id[32];
+#ifdef ZEND_WIN32
+extern char accel_uname_id[32];
+#endif
 extern zend_bool accel_startup_ok;
 extern zend_bool file_cache_only;
 #if ENABLE_FILE_CACHE_FALLBACK

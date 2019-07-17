@@ -2076,7 +2076,7 @@ TEST $file
 	}
 
 	// Default ini settings
-	$ini_settings = array();
+	$ini_settings = $workerID ? array('opcache.cache_id' => "worker$workerID") : array();
 
 	// Additional required extensions
 	if (array_key_exists('EXTENSIONS', $section_text)) {
