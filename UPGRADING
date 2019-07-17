@@ -82,6 +82,9 @@ PHP 7.4 UPGRADE NOTES
   . When PREG_UNMATCHED_AS_NULL mode is used, trailing unmatched capturing
     groups will now also be set to null (or [null, -1] if offset capture is
     enabled). This means that the size of the $matches will always be the same.
+  . When passing invalid escape sequences they are no longer intepreted as
+    literals. This behaviour previously required the X modifier - which has
+    been removed as well.
 
 - PEAR:
   . Installation of PEAR (including PECL) is no longer enabled by default. It

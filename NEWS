@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
 
+- PCRE:
+  . Remove X modifier and enable it by default. (sjon)
+
 - Recode:
   . Unbundled the recode extension. (cmb)
 
