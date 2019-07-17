@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.9
 
+- Standard:
+  . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
+    with invalid length). (Nikita)
+
 01 Aug 2019, PHP 7.3.8
 
 - Core:
