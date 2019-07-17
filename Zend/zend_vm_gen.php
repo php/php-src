@@ -1100,6 +1100,20 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 		return;
 	}
 
+	/* Skip SMART_BRANCH specialization for "cold" CONST_CONST instructions */
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		if ($opcode["hot"] === 'HOT_NOCONSTCONST_'
+		 || $opcode["hot"] === 'COLD_CONSTCONST_') {
+			if (($op1 === 'CONST') && ($op2 === 'CONST')) {
+				if ($extra_spec["SMART_BRANCH"] == 0) {
+					unset($extra_spec["SMART_BRANCH"]);
+				} else {
+					return;
+				}
+			}
+		}
+	}
+
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1408,6 +1422,16 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						$list[$label] = null;
 						$label++;
 						return;
+					}
+
+					/* Skip SMART_BRANCH specialization for "cold" CONST_CONST instructions */
+					if (isset($extra_spec["SMART_BRANCH"])) {
+						if ($dsc["hot"] === 'HOT_NOCONSTCONST_'
+						 || $dsc["hot"] === 'COLD_CONSTCONST_') {
+							if (($op1 === 'CONST') && ($op2 === 'CONST')) {
+								unset($extra_spec["SMART_BRANCH"]);
+							}
+						}
 					}
 
 					// Emit pointer to specialized handler
