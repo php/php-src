@@ -1,5 +1,5 @@
 --TEST--
-X (PCRE_EXTRA) modififier is no longer functional
+X (PCRE_EXTRA) modififier is ignored (no error, no change)
 --FILE--
 <?php
 
@@ -11,5 +11,5 @@ var_dump(preg_match('/\y/X', '\y'));
 Warning: preg_match(): Compilation failed: unrecognized character follows \ at offset 1 in %spcre_extra.php on line 3
 bool(false)
 
-Warning: preg_match(): Unknown modifier 'X' in %spcre_extra.php on line 4
+Warning: preg_match(): Compilation failed: unrecognized character follows \ at offset 1 in %spcre_extra.php on line 4
 bool(false)

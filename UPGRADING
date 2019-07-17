@@ -147,8 +147,8 @@ PHP 8.0 UPGRADE NOTES
 
 - PCRE:
   . When passing invalid escape sequences they are no longer intepreted as
-    literals. This behaviour previously required the X modifier - which has
-    been removed as well.
+    literals. This behaviour previously required the X modifier - which is
+    now ignored.
 
 - PDO:
   . The method PDOStatement::setFetchMode() now accepts the following signature:
