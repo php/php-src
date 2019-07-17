@@ -1984,9 +1984,11 @@ static void core_globals_dtor(php_core_globals *core_globals)
 {
 	if (core_globals->last_error_message) {
 		free(core_globals->last_error_message);
+		core_globals->last_error_message = NULL;
 	}
 	if (core_globals->last_error_file) {
 		free(core_globals->last_error_file);
+		core_globals->last_error_file = NULL;
 	}
 	if (core_globals->disable_functions) {
 		free(core_globals->disable_functions);
