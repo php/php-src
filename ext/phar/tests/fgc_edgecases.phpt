@@ -14,7 +14,11 @@ Phar::interceptFileFuncs();
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
-file_get_contents(array());
+try {
+    file_get_contents(array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 chdir(__DIR__);
 file_put_contents($fname, "blah\n");
 file_put_contents("fgc_edgecases.txt", "test\n");
@@ -46,7 +50,7 @@ include $pname . '/foo/hi';
 <?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/fgc_edgecases.txt'); ?>
 --EXPECTF--
-Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %sfgc_edgecases.php on line %d
+file_get_contents() expects parameter 1 to be a valid path, array given
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));

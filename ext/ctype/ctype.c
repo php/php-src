@@ -45,47 +45,47 @@ static PHP_FUNCTION(ctype_upper);
 static PHP_FUNCTION(ctype_xdigit);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_alnum, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_alnum, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_alpha, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_alpha, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_cntrl, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_cntrl, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_digit, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_digit, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_lower, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_lower, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_graph, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_graph, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_print, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_print, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_punct, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_punct, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_space, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_space, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_upper, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_upper, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_xdigit, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_xdigit, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 

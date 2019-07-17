@@ -1434,7 +1434,7 @@ PHP_FUNCTION(ob_get_clean)
 }
 /* }}} */
 
-/* {{{ proto string ob_get_contents(void)
+/* {{{ proto string|false ob_get_contents(void)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
@@ -1460,7 +1460,7 @@ PHP_FUNCTION(ob_get_level)
 }
 /* }}} */
 
-/* {{{ proto int ob_get_length(void)
+/* {{{ proto int|false ob_get_length(void)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
@@ -1474,7 +1474,7 @@ PHP_FUNCTION(ob_get_length)
 }
 /* }}} */
 
-/* {{{ proto false|array ob_list_handlers()
+/* {{{ proto null|array ob_list_handlers()
    List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {

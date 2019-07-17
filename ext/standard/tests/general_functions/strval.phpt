@@ -141,13 +141,6 @@ foreach ($not_scalars as $value ) {
    var_dump( strval($value) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( strval() );
-
-//arguments more than expected
-var_dump( strval( $scalars[0], $scalars[1]) );
-
 echo "Done\n";
 
 // close the resources used
@@ -306,12 +299,4 @@ string(0) ""
 string(0) ""
 -- Iteration 11 --
 string(0) ""
-
-*** Testing error conditions ***
-
-Warning: strval() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: strval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

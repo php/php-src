@@ -81,32 +81,26 @@ try {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
-error: 2, intlcal_get() expects exactly 2 parameters, 1 given
-error: 2, intlcal_get(): intlcal_get: bad arguments
-bool(false)
-error: 2, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
-error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: bad arguments
-bool(false)
-error: 2, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given
-error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
-bool(false)
+error: 0, intlcal_get() expects exactly 2 parameters, 1 given
+
+error: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
+
+error: 0, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given
+
 error: 2, intlcal_get(): intlcal_get: invalid field
 bool(false)
 error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: invalid field
 bool(false)
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: invalid field
 bool(false)
-error: 2, intlcal_get() expects parameter 2 to be int, string given
-error: 2, intlcal_get(): intlcal_get: bad arguments
-bool(false)
-error: 2, intlcal_get_actual_maximum() expects parameter 2 to be int, string given
-error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: bad arguments
-bool(false)
-error: 2, intlcal_get_actual_minimum() expects parameter 2 to be int, string given
-error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
-bool(false)
-error: 0, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get() expects parameter 2 to be int, string given
 
-error: 0, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get_actual_maximum() expects parameter 2 to be int, string given
 
-error: 0, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, int given
+error: 0, intlcal_get_actual_minimum() expects parameter 2 to be int, string given
+
+error: 0, intlcal_get() expects exactly 2 parameters, 1 given
+
+error: 0, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
+
+error: 0, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given

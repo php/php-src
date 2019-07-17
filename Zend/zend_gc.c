@@ -692,10 +692,8 @@ tail_call:
 		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			int n;
 			zval *zv, *end;
-			zval tmp;
 
-			ZVAL_OBJ(&tmp, obj);
-			ht = obj->handlers->get_gc(&tmp, &zv, &n);
+			ht = obj->handlers->get_gc(obj, &zv, &n);
 			end = zv + n;
 			if (EXPECTED(!ht)) {
 				if (!n) goto next;
@@ -809,10 +807,8 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) goto next;
@@ -992,10 +988,8 @@ tail_call:
 				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 					int n;
 					zval *zv, *end;
-					zval tmp;
 
-					ZVAL_OBJ(&tmp, obj);
-					ht = obj->handlers->get_gc(&tmp, &zv, &n);
+					ht = obj->handlers->get_gc(obj, &zv, &n);
 					end = zv + n;
 					if (EXPECTED(!ht)) {
 						if (!n) goto next;
@@ -1152,7 +1146,6 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
 				/* optimization: color is GC_BLACK (0) */
 				if (!GC_INFO(ref)) {
@@ -1162,8 +1155,7 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 						obj->ce->destructor != NULL) {
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) goto next;
@@ -1340,10 +1332,8 @@ tail_call:
 			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 				int n;
 				zval *zv, *end;
-				zval tmp;
 
-				ZVAL_OBJ(&tmp, obj);
-				ht = obj->handlers->get_gc(&tmp, &zv, &n);
+				ht = obj->handlers->get_gc(obj, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
 					if (!n) return;

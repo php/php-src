@@ -23,7 +23,7 @@ try
 {
 	$phar->setFileClass('SplFileInfo');
 }
-catch (UnexpectedValueException $e)
+catch (TypeError $e)
 {
 	echo $e->getMessage() . "\n";
 }

@@ -21,7 +21,6 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",
 		"1000",
 		"1000ABC",
 		null,
@@ -44,9 +43,6 @@ float(4872401723)
 float(4872401723)
 float(7641446995)
 float(7641446995)
-
-Warning: sinh() expects parameter 1 to be float, string given in %s on line %d
-NULL
 float(INF)
 
 Notice: A non well formed numeric value encountered in %s on line %d

@@ -769,7 +769,6 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
-		php_error_docref(NULL, E_WARNING, "expects argument 1 to be a valid stream resource");
 		return 0;
 	}
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {

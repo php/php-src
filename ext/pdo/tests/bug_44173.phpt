@@ -18,11 +18,6 @@ $db->exec("CREATE TABLE test (x int)");
 $db->exec("INSERT INTO test VALUES (1)");
 
 
-// Bug entry [1]
-$stmt = $db->query();
-var_dump($stmt);
-
-
 // Bug entry [2] -- 1 is PDO::FETCH_LAZY
 $stmt = $db->query("SELECT * FROM test", PDO::FETCH_LAZY, 0, 0);
 var_dump($stmt);
@@ -55,9 +50,6 @@ var_dump($stmt);
 
 ?>
 --EXPECTF--
-Warning: PDO::query() expects at least 1 parameter, 0 given in %s
-bool(false)
-
 Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode doesn't allow any extra arguments in %s
 bool(false)
 

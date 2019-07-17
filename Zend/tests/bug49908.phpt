@@ -1,5 +1,5 @@
 --TEST--
-Bug #49908 (throwing exception in __autoload crashes when interface is not defined)
+Bug #49908 (throwing exception in autoloader crashes when interface is not defined)
 --FILE--
 <?php
 

@@ -30,11 +30,6 @@ fclose($fp);
 $linkname = __DIR__."/symlink_link_linkinfo_is_link_link_error2.tmp";
 
 echo "*** Testing link() for error conditions ***\n";
-//zero arguments
-var_dump( link() );
-
-//more than expected
-var_dump( link($filename, $linkname, false) );
 
 //invalid arguments
 var_dump( link(NULL, $linkname) );  // NULL as filename
@@ -46,11 +41,6 @@ var_dump( link($filename, '') );  // '' as linkname
 var_dump( link($filename, false) );  // false as linkname
 
 echo "\n*** Testing is_link() for error conditions ***\n";
-//zero arguments
-var_dump( is_link() );
-
-//more than expected
-var_dump( is_link($linkname, "/") );
 
 //invalid arguments
 var_dump( is_link(NULL) );  // NULL as linkname
@@ -67,12 +57,6 @@ unlink(__DIR__."/symlink_link_linkinfo_is_link_error2.tmp");
 ?>
 --EXPECTF--
 *** Testing link() for error conditions ***
-
-Warning: link() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: link() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
 
 Warning: link(): No such file or directory in %s on line %d
 bool(false)
@@ -96,12 +80,6 @@ Warning: link(): No such file or directory in %s on line %d
 bool(false)
 
 *** Testing is_link() for error conditions ***
-
-Warning: is_link() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_link() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 bool(false)
 bool(false)
 bool(false)

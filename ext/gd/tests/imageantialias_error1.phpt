@@ -11,8 +11,11 @@ if (!extension_loaded("gd")) die("skip GD not present");
 <?php
 $image = tmpfile();
 
-var_dump(imageantialias($image, true));
+try {
+    var_dump(imageantialias($image, true));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imageantialias(): supplied resource is not a valid Image resource in %s on line %d
-bool(false)
+--EXPECT--
+imageantialias(): supplied resource is not a valid Image resource

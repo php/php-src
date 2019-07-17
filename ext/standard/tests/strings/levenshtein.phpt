@@ -63,10 +63,8 @@ $n += test_me("gt maxlength2", -1, "A",  "AbcdefghijklmnopqrstuvwxyzAbcdefghijkl
 
 echo ($n==0)?"all passed\n":"$n failed\n";
 
-var_dump(levenshtein(array(), array()));
 var_dump(levenshtein("", "", -1, -1, -1));
 var_dump(levenshtein("", "", 10, 10, 10));
-var_dump(levenshtein(""));
 
 ?>
 --EXPECTF--
@@ -76,11 +74,5 @@ Warning: levenshtein(): Argument string(s) too long in %s on line %d
 
 Warning: levenshtein(): Argument string(s) too long in %s on line %d
 all passed
-
-Warning: levenshtein() expects parameter 1 to be string, array given in %s on line %d
-NULL
 int(0)
 int(0)
-
-Warning: Wrong parameter count for levenshtein() in %s on line %d
-NULL

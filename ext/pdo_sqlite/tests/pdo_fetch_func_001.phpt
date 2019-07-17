@@ -117,14 +117,11 @@ array(2) {
   string(4) "2---"
 }
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: cannot access private method bar::test2() in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test2() cannot be called statically in %s on line %d
 bool(false)
-array(2) {
-  [0]=>
-  string(7) "1===php"
-  [1]=>
-  string(4) "2==="
-}
+
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: non-static method bar::test3() cannot be called statically in %s on line %d
+bool(false)
 
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: class 'bar' does not have a method 'inexistent' in %s on line %d
 bool(false)

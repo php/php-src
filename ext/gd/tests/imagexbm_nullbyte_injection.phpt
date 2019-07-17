@@ -7,10 +7,11 @@ if(!extension_loaded('gd')) die('skip gd extension not available');
 --FILE--
 <?php
 $image = imagecreate(1,1);// 1px image
-var_dump(imagexbm($image, "./foo\0bar"));
+try {
+    imagexbm($image, "./foo\0bar");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
-===DONE===
 --EXPECTF--
-Warning: imagexbm() expects parameter 2 to be a valid path, string given in %s on line %d
-NULL
-===DONE===
+imagexbm() expects parameter 2 to be a valid path, string given

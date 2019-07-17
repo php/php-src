@@ -61,7 +61,5 @@ Exception: Too few arguments to function callback2(), 3 passed and exactly 4 exp
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 -- Testing array_walk_recursive() function with too many callback parameters --
-
-Warning: array_walk_recursive() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+Exception: array_walk_recursive() expects at most 3 parameters, 4 given
 Done

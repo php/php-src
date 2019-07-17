@@ -1,30 +1,12 @@
-PHP 7.4 INTERNALS UPGRADE NOTES
+PHP 8.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. php_sys_symlink() and php_sys_link()
-  b. zend_lookup_class_ex() and zend_fetch_class_by_name()
-  c. Function/property/class flags
-  d. Removed zend_check_private()
-  e. php_win32_error_to_msg() memory management
-  f. get_properties_for() handler / Z_OBJDEBUG_P
-  g. Required object handlers
-  h. Immutable classes and op_arrays
-  i. php_fgetcsv() and php_fputcsv()
-  j. Removed add_get_assoc_*() and add_get_index_*()
-  k. Class declaration opcodes
-  l. HASH_FLAG_INITIALIZED
-  m. write_property return value
-  n. Assignments to references
-  o. ZEND_COMPILE_EXTENDED_INFO split
-  p. ZEND_EXT_FCALL_BEGIN can access arguments
-  q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
-  r. TSRM environment locking
-  s. Typed references support
-  t. Exceptions thrown by string conversions.
-  u. Removed uint and ulong typedefs
-  v. Compound assignment opcodes
-  w. APACHE symbol removed
-  x. php_error_docref0() renamed to php_error_docref()
+  a. Object Handlers API
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+  c. TSRM changes
+  d. get() and set() object handlers
+  e. zend_parse_parameters 'L' specifier
+  f. Arginfo argument types
 
 2. Build system changes
   a. Abstract
@@ -32,287 +14,67 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   c. Windows build system changes
 
 3. Module changes
-  a. ext/xml
-  b. ext/hash
 
 ========================
 1. Internal API changes
 ========================
 
- a. php_sys_symlink() and php_sys_link() portability macros have been
-    added, which behave like POSIX's symlink() and link(), respectively, on
-    POSIX compliant systems and on Windows.
+  a. Object Handlers API and some related functions, e.g. zend_call_method() and
+     zend_objects_clone_obj() were changed to receive zend_object* instead of
+     zval* and zend_string* instead of zval* for property names.
 
- b. zend_lookup_class_ex() and zend_fetch_class_by_name() prototypes were
-    changed to accept optional lower-case class name as zend_string*,
-    instead of zval*.
+  b. ZEND_OVERLOADED_FUNCTION and corresponding call_method() object handler
+     were removed. ZEND_INTERNAL_FUNCTION with ZEND_ACC_CALL_VIA_HANDLER and
+     defined "handler" callback should be used instead. This "handler" callback
+     should also take care about function cleanup. See ext/zend_test/test.c
+     for example.
 
- c. Function/property/class flags changes
-    - ZEND_ACC_IMPLEMENTED_ABSTRACT is removed (it was used only internally
-      during inheritance).
-    - ZEND_ACC_IMPLICIT_PUBLIC is removed (it was used only for reflection)
-    - ZEND_ACC_SHADOW property flag is removed. Instead of creating shadow
-      clone, now we use the same private property_info, and should also
-      check property_info->ce (in the same way as with methods).
-    - ZEND_ACC_ANON_BOUND is replaced with ZEND_ACC_LINKED. This flag is set
-      not only during anonymous classes declaration, but also during any
-      run-time or compile-time class declaration.
-    - ZEND_ACC_NO_RT_ARENA renamed into ZEND_ACC_HEAP_RT_CACHE. Now it's used
-      not only for closures, but also for pseudo-main op_arrays.
-    - ZEND_ACC_... flags are re-numbered.
+  c. The following things have been removed from TSRM:
+      - TSRMLS_DC
+      - TSRMLS_D
+      - TSRMLS_CC
+      - TSRMLS_C
+      - TSRMLS_FETCH
+      - TSRMLS_FETCH_FROM_CTX
+      - TSRMLS_SET_CTX
+      - tsrm_new_interpreter_context
+      - tsrm_set_interpreter_context
+      - tsrm_free_interpreter_context
+      - support for GNUPTH, SGI ST, and BETHREADS
 
-  d. zend_check_private() is removed. Use (func->common.scope == scope) instead.
+  d. The get() and set() object handlers have been removed. The get() handler
+     can generally be replaced with cast_object(). Some uses of set() may be
+     replaced by do_operation(). If set() was used to overload direct
+     assignments using "=", then this is no longer supported and the
+     functionality should be provided in some other way (for example, as
+     modification of an object property).
 
-  e. Pointers returned by php_win32_error_to_msg() have to be freed using
-     php_win32_error_msg_free(). Same regarding php_win_err() vs.
-     php_win_err_free().
+  e. The zend_parse_parameters 'L' specifier and the Z_PARAM_STRICT_LONG()
+     family of macros have been removed. Use 'l' and Z_PARAM_LONG() instead,
+     which, despite the confusing name, actually have stricter input validation.
 
-  f. A new, optional object handler with the signature
-
-         HashTable *get_properties_for(zval *obj, zend_prop_purpose purpose)
-
-     has been introduced, where zend_prop_purpose (currently) takes one of:
-
-         ZEND_PROP_PURPOSE_DEBUG       // var_dump etc.
-         ZEND_PROP_PURPOSE_ARRAY_CAST  // (array) $obj
-         ZEND_PROP_PURPOSE_SERIALIZE   // "O"-format serialization (__wakeup)
-         ZEND_PROP_PURPOSE_VAR_EXPORT  // var_export (__set_state)
-         ZEND_PROP_PURPOSE_JSON        // json_encode
-
-     The handler returns a non-null HashTable with increased refcounted, and
-     the return value must be released using zend_release_properties().
-
-     This handler serves the same general function as get_properties(), but
-     provides more control over different property uses, while also making
-     it possible to return a temporary property table.
-
-     get_properties() is still used in cases where none of the above purposes
-     apply, but overloading get_properties() is generally discouraged. If you
-     want to provide purposes for general usage rather than just debugging or
-     serialization, please prefer using properly declared properties.
-
-     get_debug_info() is superseded by get_properties_for() with the
-     ZEND_PROP_PURPOSE_DEBUG purpose, but remains available for backwards-
-     compatibility reasons. However, while it is fine to define this handler,
-     it should never be directly called by consuming code.
-
-     The Z_OBJDEBUG_P macro has been removed. It should be replaced by calls to
-     zend_get_properties_for() with the ZEND_PROP_PURPOSE_DEBUG purpose:
-
-         // OLD
-         int is_temp;
-         HashTable *ht = Z_OBJDEBUG_P(obj, is_temp);
-         // ...
-         if (is_temp) {
-            zend_hash_destroy(ht);
-            FREE_HASHTABLE(ht);
-         }
-
-         // NEW
-         HashTable *ht = zend_get_properties_for(obj, ZEND_PROP_PURPOSE_DEBUG);
-         // ...
-         zend_release_properties(ht);
-
-  g. The following object handlers are now required (must be non-NULL):
-
-       * free_obj
-       * dtor_obj
-       * read_property
-       * write_property
-       * read_dimension
-       * write_dimension
-       * get_property_ptr_ptr
-       * has_property
-       * unset_property
-       * has_dimension
-       * unset_dimension
-       * get_properties
-       * get_method
-       * get_constructor
-       * get_class_name
-       * get_gc
-
-     It is recommended to initialize object handler structures by copying the
-     std object handlers and only overwriting those you want to change.
-
-  h. Opcache may make classes and op_arrays immutable. Such classes are marked
-     by ZEND_ACC_IMMUTABLE flag, they are not going to be copied from opcache
-     shared memory to process memory and must not be modified at all.
-     Few related data structures were changed to allow addressing mutable data
-     structures from immutable ones. This access is implemented through
-     ZEND_MAP_PTR... abstraction macros and, basically, uses additional level of
-     indirection. op_array->run_time_cache, op_array->static_variables_ptr and
-     class_entry->static_members_table now have to be accessed through
-     ZEND_MAP_PTR... macros.
-     It's also not allowed to change op_array->reserved[] handles of immutable
-     op_arrays. Instead, now you have to reserve op_array handle using
-     zend_get_op_array_extension_handle() during MINIT and access its value
-     using ZEND_OP_ARRAY_EXTENSION(op_array, handle).
-
-  i. The type of the escape parameter of php_fgetcsv() and php_fputcsv() has
-     been changed from char to int. This allows to pass the new constant macro
-     PHP_CSV_NO_ESCAPE to this parameter, to disable PHP's proprietary escape
-     mechanism.
-
-  j. add_get_assoc_*() and add_get_index_*() are removed. Use add_assoc*(),
-     add_index*() or zend_hash_*() API functions instead.
-
-  k. Complex class declaration opcodes ZEND_ADD_INTERFACE, ZEND_ADD_TRAIT,
-     ZEND_BIND_TRAITS and ZEND_VERIFY_ABSTRACT_CLASS were removed. Information
-     about interfaces and traits is kept in zend_class_entry structure and
-     actual linked performed by ZEND_DECLARE_...CLASS... opcode(s).
-     Linked classes have ZEND_ACC_LINKED flag set.
-
-  l. HASH_FLAG_INITIALIZED was reverted into HASH_FLAG_UNINITIALIZED. Special
-     HT_IS_INITIALIZED() and HT_INVALIDATE() macro were introduced to hide
-     implementation details.
-
-  m. The write_property() object handler now returns the assigned value (after
-     possible type coercions) rather than void. For extensions, it should
-     usually be sufficient to return whatever was passed as the argument.
-
-  n. Assignments to references now need to ensure that they respect property
-     types that affect the reference. This means that references should no
-     longer be directly assigned to, and instead a set of specialized macros of
-     the form ZEND_TRY_ASSIGN* needs to be used. You can find detailed porting
-     instructions as well as a compatibility shim in the wiki:
-     https://wiki.php.net/rfc/typed_properties_v2#assignments_to_references
-
-  o. ZEND_COMPILE_EXTENDED_INFO has been split into:
-       ZEND_COMPILE_EXTENDED_FCALL and ZEND_COMPILE_EXTENDED_STMT
-     This allows tooling to choose between profiling and debugging behaviour
-     ZEND_COMPILE_EXTENDED_INFO remains and preserves behaviour.
-
-  p. ZEND_EXT_BEGIN_FCALL is emitted after arguments are sent, this means
-     that handlers may access arguments.
-
-  q. ZEND_COMPILE_IGNORE_USER_FUNCTIONS and ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS
-     are respected by zend_get_call_op such that when set, the only possible
-     call opcodes are ZEND_DO_FCALL and ZEND_DO_FCALL_BY_NAME, previously they
-     were ignored by zend_get_call_op.
-
-  r. TSRM adds tsrm_env_lock() and tsrm_env_unlock() for ZTS:
-     code that may change environ and may run concurrently with user code in ZTS
-     is expected to use this exclusion API to maintain as much safety as
-     reasonable. This results in "thread safe" getenv/putenv in Windows and
-     Unix, however functions that may read the environment without exclusion
-     still exist, for example:
-       - setlocale
-       - mktime
-       - tzset
-     The above is not an exhaustive list of such functions, while getenv/putenv
-     will behave as if they are safe, care should still be taken in
-     multi-threaded environments.
-
-  s. Correct support for typed properties requires the use of new macros to
-     assign values to references. For more information see
-     https://wiki.php.net/rfc/typed_properties_v2#impact_on_extensions.
-
-  t. convert_to_string() and zval_get_string() are now more likely to result in
-     an exception. For instructions on how to gracefully handle this see
-     https://wiki.php.net/rfc/tostring_exceptions#extension_guidelines.
-
-  u. The Windows typedefs uint and ulong are no longer available, and have to be
-     replaced with standard types.
-
-  v. Compound assignment opcodes were changed. Instead of ZEND_ASSIGN_ADD (and
-     others) with 0, ZEND_ASSIGN_DIM, ZEND_ASSIGN_OBJ or
-     ZEND_ASSIGN_STATIC_PROP in extended value, now we use ZEND_ASSIGN_OP,
-     ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP and ZEND_ASSIGN_STATIC_PROP_OP with
-     ZEND_ADD (or other) in extended_value.
-
-  w. APACHE symbol has been removed and is no longer defined.
-
-  x. php_error_docref0() has been removed and renamed to php_error_docref().
+  f. Arginfo argument types for internal functions are no longer checked.
+     Instead type checks should be performed using the zend_parse_parameters()
+     or ZEND_PARSE_PARAMETERS_*() APIs.
 
 ========================
 2. Build system changes
 ========================
 
   a. Abstract
-    - The hash extension is now always available, meaning the --enable-hash
-        configure argument has been removed.
-    - The filter extension no longer exposes the --with-pcre-dir configure
-      argument and therefore allows shared builds with ./configure for Unix
-      builds.
-    - Symbols HAVE_DATE, HAVE_REFLECTION, and HAVE_SPL have been removed. It
-      should be considered to have these extensions always available.
-    - Removed unused build time symbols: PHP_ADA_INCLUDE, PHP_ADA_LFLAGS,
-      PHP_ADA_LIBS, PHP_APACHE_INCLUDE, PHP_APACHE_TARGET, PHP_FHTTPD_INCLUDE,
-      PHP_FHTTPD_LIB, PHP_FHTTPD_TARGET, PHP_CFLAGS, PHP_DBASE_LIB,
-      PHP_BUILD_DEBUG, PHP_GDBM_INCLUDE, PHP_IBASE_INCLUDE, PHP_IBASE_LFLAGS,
-      PHP_IBASE_LIBS, PHP_IFX_INCLUDE, PHP_IFX_LFLAGS, PHP_IFX_LIBS,
-      PHP_INSTALL_IT, PHP_IODBC_INCLUDE, PHP_IODBC_LFLAGS, PHP_IODBC_LIBS,
-      PHP_MSQL_LFLAGS, PHP_MSQL_INCLUDE, PHP_MSQL_LFLAGS, PHP_MSQL_LIBS,
-      PHP_MYSQL_INCLUDE, PHP_MYSQL_LIBS, PHP_MYSQL_TYPE, PHP_OCI8_SHARED_LIBADD,
-      PHP_ORACLE_SHARED_LIBADD, PHP_ORACLE_DIR, PHP_ORACLE_VERSION,
-      PHP_PGSQL_INCLUDE, PHP_PGSQL_LFLAGS, PHP_PGSQL_LIBS, PHP_SOLID_INCLUDE,
-      PHP_SOLID_LIBS, PHP_EMPRESS_INCLUDE, PHP_EMPRESS_LIBS, PHP_SYBASE_INCLUDE,
-      PHP_SYBASE_LFLAGS, PHP_SYBASE_LIBS, PHP_DBM_TYPE, PHP_DBM_LIB,
-      PHP_LDAP_LFLAGS, PHP_LDAP_INCLUDE, PHP_LDAP_LIBS.
+    - Symbol HAVE_HASH_EXT is removed and is no longer defined. It should be
+      considered to have hash extension always available since PHP 7.4.
+    - Symbol HAVE_PCRE is removed and is no longer defined. It should be
+      considered to have pcre extension always available since PHP 7.4.
 
   b. Unix build system changes
-    - Added --ini-path and --ini-dir options to php-config.
-    - configure --help now also outputs --program-suffix and --program-prefix
-      information by using the Autoconf AC_ARG_PROGRAM macro.
-    - Obsolescent macros AC_FUNC_VPRINTF and AC_FUNC_UTIME_NULL have been
-      removed. Symbols HAVE_VPRINTF and HAVE_UTIME_NULL are no longer defined
-      since they are not needed on the current systems.
-    - Local PHP m4 unused or obsolete macros have been removed:
-      PHP_TARGET_RDYNAMIC, PHP_SOLARIS_PIC_WEIRDNESS, PHP_SYS_LFS,
-      PHP_AC_BROKEN_SPRINTF, PHP_EXTENSION, PHP_DECLARED_TIMEZONE,
-      PHP_CHECK_TYPES, PHP_CHECK_64BIT, PHP_READDIR_R_TYPE,
-      PHP_SETUP_KERBEROS.
-    - Local PHP_TM_GMTOFF m4 macro replaced with Autoconf's AC_CHECK_MEMBERS.
-      The HAVE_TM_GMTOFF symbol is replaced with HAVE_STRUCT_TM_TM_GMTOFF and
-      HAVE_TM_ZONE symbol is replaced with HAVE_STRUCT_TM_TM_ZONE.
-    - new --enable-rtld-now build option allow to switch dlopen behavior
-      from RTLD_LAZY to RTLD_NOW
-    - Minimum Bison version is 3.0+ for generating parser files.
-    - PHP_PROG_BISON macro now takes two optional arguments - minimum required
-      version and excluded versions that aren't supported.
-    - PHP_PROG_RE2C is not called in the generated configure.ac for extensions
-      anymore and now takes one optional argument - minimum required version.
-    - with-pcre-valgrind and with-valgrind are merged, and valgrind detected by
-      pkgconfig
-    - Removed unused AC_PROG_CC_C_O check and the NO_MINUS_C_MINUS_O symbol.
-    - Obsolescant checks for headers and functions that are part of C89 have
-      been removed. The following symbols are therefore no longer defined by the
-      PHP build system at the configure step and shouldn't be used anymore:
-      HAVE_SETLOCALE, HAVE_LOCALECONV, HAVE_STRSTR, HAVE_STRTOL, HAVE_STRBRK,
-      HAVE_PERROR, HAVE_STRFTIME, HAVE_TZNAME, HAVE_STDARG_H, HAVE_STRING_H,
-      HAVE_STDLIB_H, HAVE_SYS_VARARGS_H, HAVE_ASSERT_H, HAVE_SYS_DIR_H,
-      TM_IN_SYS_TIME, HAVE_STRTOD, HAVE_STRCOLL, HAVE_ERRNO_H, HAVE_MEMCPY,
-      HAVE_SNPRINTF, HAVE_STDIO_H, HAVE_STRPBRK, HAVE_TIME_H, HAVE_LIMITS_H,
-      HAVE_STRTOUL, HAVE_SYS_NDIR_H, HAVE_SYS_TIMES_H, PHP_HAVE_STDINT_TYPES,
-      HAVE_SIGNAL_H, HAVE_STRERROR.
-    - Removed unused check for dev/arandom and the HAVE_DEV_ARANDOM symbol.
-    - Remove unused functions checks: HAVE_MBSINIT, HAVE_MEMPCPY, HAVE_SETPGID,
-      HAVE_STRPNCPY, HAVE_STRTOULL, HAVE_VSNPRINTF, HAVE_CUSERID, HAVE_LRAND48,
-      HAVE_RANDOM, HAVE_SRAND48, HAVE_SRANDOM, HAVE_STRDUP, HAVE_GCVT,
-      HAVE_ISASCII, HAVE_LINK, HAVE_LOCKF, HAVE_SOCKOPT, HAVE_SETVBUF, HAVE_SIN,
-      HAVE_TEMPNAM.
-    - Unused check for struct cmsghdr and symbol HAVE_CMSGHDR have been removed.
-    - Unused ApplicationServices/ApplicationServices.h headers check and
-      HAVE_APPLICATIONSERVICES_APPLICATIONSERVICES_H symbol have been removed.
-    - PHP_DEBUG_MACRO macro has been removed.
-    - PHP_CHECK_CONFIGURE_OPTIONS macro has been removed. Default Autoconf's
-      --enable-option-checking=fatal option can be used in the configure step
-      to enable error when invalid options are used.
+
+    1.  --enable-maintainer-zts is renamed --enable-zts for parity with Windows
+        and as recognition that ZTS is not a "maintainer" or experimental feature.
 
   c. Windows build system changes
-
-    . Visual Studio 2019 is utilized for the Windows builds
-    . Removed unused defined symbol HAVE_LIBBIND.
 
 ========================
 3. Module changes
 ========================
 
-  a. ext/xml
-    - The public (internal) API of the ext/xml extension has been removed. All
-      functions and structures are private to the extension now.
-
-  b. ext/hash
-    - The hash extension is now always available, allowing extensions to rely
-      on its functionality to be available without compile time checks.

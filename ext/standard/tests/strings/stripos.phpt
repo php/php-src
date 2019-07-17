@@ -28,7 +28,7 @@ stripos() function test
 
 	echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(5)
 int(5)
@@ -45,23 +45,11 @@ int(0)
 bool(false)
 bool(false)
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+int(0)
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
 int(1)
 Done

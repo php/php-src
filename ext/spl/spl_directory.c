@@ -345,15 +345,13 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
    Open the directory
    Clone other members (properties)
  */
-static zend_object *spl_filesystem_object_clone(zval *zobject)
+static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 {
-	zend_object *old_object;
 	zend_object *new_object;
 	spl_filesystem_object *intern;
 	spl_filesystem_object *source;
 	int index, skip_dots;
 
-	old_object = Z_OBJ_P(zobject);
 	source = spl_filesystem_from_obj(old_object);
 	new_object = spl_filesystem_object_new_ex(old_object->ce);
 	intern = spl_filesystem_from_obj(new_object);
@@ -465,7 +463,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STRINGL(&arg1, file_path, file_path_len);
-		zend_call_method_with_1_params(return_value, ce, &ce->constructor, "__construct", NULL, &arg1);
+		zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
 		zval_ptr_dtor(&arg1);
 	} else {
 		spl_filesystem_info_set_filename(intern, file_path, file_path_len, use_copy);
@@ -510,7 +508,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			spl_filesystem_object_get_file_name(source);
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 				ZVAL_STRINGL(&arg1, source->file_name, source->file_name_len);
-				zend_call_method_with_1_params(return_value, ce, &ce->constructor, "__construct", NULL, &arg1);
+				zend_call_method_with_1_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1);
 				zval_ptr_dtor(&arg1);
 			} else {
 				intern->file_name = estrndup(source->file_name, source->file_name_len);
@@ -535,7 +533,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			if (ce->constructor->common.scope != spl_ce_SplFileObject) {
 				ZVAL_STRINGL(&arg1, source->file_name, source->file_name_len);
 				ZVAL_STRINGL(&arg2, "r", 1);
-				zend_call_method_with_2_params(return_value, ce, &ce->constructor, "__construct", NULL, &arg1, &arg2);
+				zend_call_method_with_2_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1, &arg2);
 				zval_ptr_dtor(&arg1);
 				zval_ptr_dtor(&arg2);
 			} else {
@@ -599,9 +597,9 @@ static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, s
 }
 /* }}} */
 
-static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable *spl_filesystem_object_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
-	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(object);
+	spl_filesystem_object *intern = spl_filesystem_from_obj(object);
 	zval tmp;
 	HashTable *rv;
 	zend_string *pnstr;
@@ -848,19 +846,19 @@ SPL_METHOD(DirectoryIterator, seek)
 
 	if (intern->u.dir.index > pos) {
 		/* we first rewind */
-		zend_call_method_with_0_params(ZEND_THIS, Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_rewind, "rewind", NULL);
+		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_rewind, "rewind", NULL);
 	}
 
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
-		zend_call_method_with_0_params(ZEND_THIS, Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_valid, "valid", &retval);
+		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_valid, "valid", &retval);
 		valid = zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
 		if (!valid) {
 			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
 			return;
 		}
-		zend_call_method_with_0_params(ZEND_THIS, Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_next, "next", NULL);
+		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_next, "next", NULL);
 	}
 } /* }}} */
 
@@ -1349,15 +1347,12 @@ SPL_METHOD(SplFileInfo, setFileClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = spl_ce_SplFileObject;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		intern->file_class = ce;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	intern->file_class = ce;
 }
 /* }}} */
 
@@ -1367,15 +1362,12 @@ SPL_METHOD(SplFileInfo, setInfoClass)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = spl_ce_SplFileInfo;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling );
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		intern->info_class = ce;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	intern->info_class = ce;
 }
 /* }}} */
 
@@ -1385,15 +1377,12 @@ SPL_METHOD(SplFileInfo, getFileInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = intern->info_class;
-	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_INFO, ce, return_value);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_INFO, ce, return_value);
 }
 /* }}} */
 
@@ -1403,22 +1392,20 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_class_entry *ce = intern->info_class;
-	zend_error_handling error_handling;
+	size_t path_len;
+	char *path;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == SUCCESS) {
-		size_t path_len;
-		char *path = spl_filesystem_object_get_pathname(intern, &path_len);
-		if (path) {
-			char *dpath = estrndup(path, path_len);
-			path_len = php_dirname(dpath, path_len);
-			spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value);
-			efree(dpath);
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C", &ce) == FAILURE) {
+		return;
 	}
 
-	zend_restore_error_handling(&error_handling);
+	path = spl_filesystem_object_get_pathname(intern, &path_len);
+	if (path) {
+		char *dpath = estrndup(path, path_len);
+		path_len = php_dirname(dpath, path_len);
+		spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value);
+		efree(dpath);
+	}
 }
 /* }}} */
 
@@ -1865,12 +1852,12 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 /* }}} */
 
 /* {{{ spl_filesystem_object_cast */
-static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
+static int spl_filesystem_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
-	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(readobj);
+	spl_filesystem_object *intern = spl_filesystem_from_obj(readobj);
 
 	if (type == IS_STRING) {
-		if (Z_OBJCE_P(readobj)->__tostring) {
+		if (readobj->ce->__tostring) {
 			return zend_std_cast_object_tostring(readobj, writeobj, type);
 		}
 
@@ -2167,7 +2154,7 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
 		} else {
 			zend_execute_data *execute_data = EG(current_execute_data);
-			zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
+			zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
 		if (!Z_ISUNDEF(retval)) {
 			if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
@@ -2840,30 +2827,6 @@ SPL_METHOD(SplFileObject, fgetc)
 	}
 } /* }}} */
 
-/* {{{ proto string SplFileObject::fgetss([string allowable_tags])
-   Get a line from file pointer and strip HTML tags */
-SPL_METHOD(SplFileObject, fgetss)
-{
-	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
-	zval arg2;
-
-	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
-	}
-
-	if (intern->u.file.max_line_len > 0) {
-		ZVAL_LONG(&arg2, intern->u.file.max_line_len);
-	} else {
-		ZVAL_LONG(&arg2, 1024);
-	}
-
-	spl_filesystem_file_free_line(intern);
-	intern->u.file.current_line_num++;
-
-	FileFunctionCall(fgetss, ZEND_NUM_ARGS(), &arg2);
-} /* }}} */
-
 /* {{{ proto int SplFileObject::fpassthru()
    Output all remaining data from a file pointer */
 SPL_METHOD(SplFileObject, fpassthru)
@@ -3052,10 +3015,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fseek, 0, 0, 1)
 	ZEND_ARG_INFO(0, whence)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0)
-	ZEND_ARG_INFO(0, allowable_tags)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_VARIADIC_INFO(1, vars)
@@ -3094,7 +3053,6 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, fseek,          arginfo_file_object_fseek,         ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fgetc,          arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fpassthru,      arginfo_splfileinfo_void,          ZEND_ACC_PUBLIC)
-	SPL_ME(SplFileObject, fgetss,         arginfo_file_object_fgetss,        ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fscanf,         arginfo_file_object_fscanf,        ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fwrite,         arginfo_file_object_fwrite,        ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileObject, fread,          arginfo_file_object_fread,         ZEND_ACC_PUBLIC)

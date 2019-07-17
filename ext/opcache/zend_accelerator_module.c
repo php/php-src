@@ -32,6 +32,10 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 
+#if HAVE_JIT
+#include "jit/zend_jit.h"
+#endif
+
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
 #define MAX_ACCEL_FILES 1000000
@@ -321,6 +325,11 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
 	STD_PHP_INI_ENTRY("opcache.preload"                       , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,    accel_directives.preload,                zend_accel_globals, accel_globals)
+#ifdef HAVE_JIT
+	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.jit,                      zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_buffer_size,               zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_debug,                     zend_accel_globals, accel_globals)
+#endif
 ZEND_INI_END()
 
 static int filename_is_in_cache(zend_string *filename)
@@ -451,6 +460,15 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
+#if HAVE_JIT
+	if (ZCG(jit_enabled)) {
+		php_info_print_table_row(2, "JIT", "Enabled");
+	} else {
+		php_info_print_table_row(2, "JIT", "Disabled");
+	}
+#else
+	php_info_print_table_row(2, "JIT", "Not Available");
+#endif
 	if (file_cache_only) {
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
@@ -693,6 +711,9 @@ static ZEND_FUNCTION(opcache_get_status)
 			add_assoc_zval(return_value, "scripts", &scripts);
 		}
 	}
+#if HAVE_JIT
+	zend_jit_status(return_value);
+#endif
 }
 
 static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
@@ -768,6 +789,11 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.huge_code_pages",         ZCG(accel_directives).huge_code_pages);
 #endif
 	add_assoc_string(&directives, "opcache.preload", STRING_NOT_NULL(ZCG(accel_directives).preload));
+#ifdef HAVE_JIT
+	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
+	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
+	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
+#endif
 
 	add_assoc_zval(return_value, "directives", &directives);
 

@@ -2,7 +2,6 @@
 Bug #40236 (php -a function allocation eats memory)
 --SKIPIF--
 <?php
-if (php_sapi_name() != "cli") die("skip CLI only");
 if (extension_loaded("readline")) die("skip Test doesn't support readline");
 ?>
 --FILE--

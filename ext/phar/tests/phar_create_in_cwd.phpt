@@ -13,10 +13,9 @@ try {
 	$p['file1.txt'] = 'hi';
 	var_dump(strlen($p->getStub()));
 	$p->setStub("<?php
-function __autoload(\$class)
-{
+spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
-}
+});
 Phar::mapPhar('phar_create_in_cwd.phar');
 include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER();
@@ -34,10 +33,9 @@ unlink(__DIR__ . '/phar_create_in_cwd.phar');
 --EXPECTF--
 int(6641)
 string(%d) "<?php
-function __autoload($class)
-{
+spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);
-}
+});
 Phar::mapPhar('phar_create_in_cwd.phar');
 include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER(); ?>

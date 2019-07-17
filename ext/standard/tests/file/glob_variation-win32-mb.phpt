@@ -46,12 +46,16 @@ $counter = 1;
    using glob() */
 foreach($patterns as $pattern) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( glob($pattern) );  // default arguments
-  var_dump( glob($pattern, GLOB_MARK) );
-  var_dump( glob($pattern, GLOB_NOSORT) );
-  var_dump( glob($pattern, GLOB_NOCHECK) );
-  var_dump( glob($pattern, GLOB_NOESCAPE) );
-  var_dump( glob($pattern, GLOB_ERR) );
+  try {
+    var_dump( glob($pattern) );  // default arguments
+    var_dump( glob($pattern, GLOB_MARK) );
+    var_dump( glob($pattern, GLOB_NOSORT) );
+    var_dump( glob($pattern, GLOB_NOCHECK) );
+    var_dump( glob($pattern, GLOB_NOESCAPE) );
+    var_dump( glob($pattern, GLOB_ERR) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 }
 
@@ -73,7 +77,11 @@ $counter = 1;
    using glob() */
 foreach($patterns as $pattern) {
   echo "-- Iteration $counter --\n";
-  var_dump( glob($pattern, GLOB_ONLYDIR) );
+  try {
+    var_dump( glob($pattern, GLOB_ONLYDIR) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 }
 
@@ -326,24 +334,7 @@ array(0) {
 }
 
 -- Iteration 8 --
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
-
-Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32-mb.php on line %d
-NULL
+glob() expects parameter 1 to be a valid path, string given
 
 -- Iteration 9 --
 array(0) {
@@ -446,9 +437,7 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-
-Warning: glob() expects parameter 1 to be a valid path, string given in %sglob_variation-win32-mb.php on line %d
-NULL
+glob() expects parameter 1 to be a valid path, string given
 -- Iteration 9 --
 array(0) {
 }

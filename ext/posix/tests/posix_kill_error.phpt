@@ -16,16 +16,6 @@ Test posix_kill() function : error conditions
 echo "*** Testing posix_kill() : error conditions ***\n";
 
 
-echo "\n-- Testing posix_kill() function with more than expected no. of arguments --\n";
-$pid = posix_getpid();
-$sig = 9;
-$extra_arg = 10;
-var_dump( posix_kill($pid, $sig, $extra_arg) );
-
-echo "\n-- Testing posix_kill() function with less than expected no. of arguments --\n";
-$pid = posix_getpid();
-var_dump( posix_kill($pid) );
-
 echo "\n-- Testing posix_kill() function with invalid signal --\n";
 $pid = posix_getpid();
 $sig = 999;
@@ -40,16 +30,6 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing posix_kill() : error conditions ***
-
--- Testing posix_kill() function with more than expected no. of arguments --
-
-Warning: posix_kill() expects exactly 2 parameters, 3 given in %s on line %d
-bool(false)
-
--- Testing posix_kill() function with less than expected no. of arguments --
-
-Warning: posix_kill() expects exactly 2 parameters, 1 given in %s on line %d
-bool(false)
 
 -- Testing posix_kill() function with invalid signal --
 bool(false)

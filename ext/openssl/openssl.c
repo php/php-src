@@ -1856,7 +1856,9 @@ PHP_FUNCTION(openssl_spki_new)
 	pkey = php_openssl_evp_from_zval(zpkey, 0, challenge, challenge_len, 1, &keyresource);
 
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to use supplied private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Unable to use supplied private key");
+		}
 		goto cleanup;
 	}
 
@@ -2864,7 +2866,9 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	}
 	priv_key = php_openssl_evp_from_zval(zpkey, 0, "", 0, 1, &keyresource);
 	if (priv_key == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		}
 		goto cleanup;
 	}
 	if (!X509_check_private_key(cert, priv_key)) {
@@ -2957,7 +2961,9 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	}
 	priv_key = php_openssl_evp_from_zval(zpkey, 0, "", 0, 1, &keyresource);
 	if (priv_key == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		}
 		goto cleanup;
 	}
 	if (!X509_check_private_key(cert, priv_key)) {
@@ -3367,7 +3373,9 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 
 	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource);
 	if (csr == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		}
 		return;
 	}
 
@@ -3416,7 +3424,9 @@ PHP_FUNCTION(openssl_csr_export)
 
 	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource);
 	if (csr == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		}
 		return;
 	}
 
@@ -3467,7 +3477,9 @@ PHP_FUNCTION(openssl_csr_sign)
 
 	csr = php_openssl_csr_from_zval(zcsr, 0, &csr_resource);
 	if (csr == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get CSR from parameter 1");
+		}
 		return;
 	}
 	if (zcert) {
@@ -3479,7 +3491,9 @@ PHP_FUNCTION(openssl_csr_sign)
 	}
 	priv_key = php_openssl_evp_from_zval(zpkey, 0, "", 0, 1, &keyresource);
 	if (priv_key == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
+		}
 		goto cleanup;
 	}
 	if (cert && !X509_check_private_key(cert, priv_key)) {
@@ -4607,7 +4621,9 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, passphrase_len, 0, &key_resource);
 
 	if (key == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get key from parameter 1");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get key from parameter 1");
+		}
 		RETURN_FALSE;
 	}
 
@@ -4692,7 +4708,9 @@ PHP_FUNCTION(openssl_pkey_export)
 	key = php_openssl_evp_from_zval(zpkey, 0, passphrase, passphrase_len, 0, &key_resource);
 
 	if (key == NULL) {
-		php_error_docref(NULL, E_WARNING, "cannot get key from parameter 1");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "cannot get key from parameter 1");
+		}
 		RETURN_FALSE;
 	}
 
@@ -5571,7 +5589,9 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 	privkey = php_openssl_evp_from_zval(zprivkey, 0, "", 0, 0, &keyresource);
 	if (privkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "error getting private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "error getting private key");
+		}
 		goto clean_exit;
 	}
 
@@ -5683,7 +5703,9 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 
 	key = php_openssl_evp_from_zval(recipkey ? recipkey : recipcert, 0, "", 0, 0, &keyresval);
 	if (key == NULL) {
-		php_error_docref(NULL, E_WARNING, "unable to get private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "unable to get private key");
+		}
 		goto clean_exit;
 	}
 
@@ -5751,7 +5773,9 @@ PHP_FUNCTION(openssl_private_encrypt)
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, 0, &keyresource);
 
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "key param is not a valid private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "key param is not a valid private key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -5812,7 +5836,9 @@ PHP_FUNCTION(openssl_private_decrypt)
 
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "key parameter is not a valid private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "key parameter is not a valid private key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -5879,7 +5905,9 @@ PHP_FUNCTION(openssl_public_encrypt)
 
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -5941,7 +5969,9 @@ PHP_FUNCTION(openssl_public_decrypt)
 
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -6040,7 +6070,9 @@ PHP_FUNCTION(openssl_sign)
 	}
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "supplied key param cannot be coerced into a private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "supplied key param cannot be coerced into a private key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -6125,7 +6157,9 @@ PHP_FUNCTION(openssl_verify)
 
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "supplied key param cannot be coerced into a public key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "supplied key param cannot be coerced into a public key");
+		}
 		RETURN_FALSE;
 	}
 
@@ -6205,7 +6239,9 @@ PHP_FUNCTION(openssl_seal)
 	ZEND_HASH_FOREACH_VAL(pubkeysht, pubkey) {
 		pkeys[i] = php_openssl_evp_from_zval(pubkey, 1, NULL, 0, 0, &key_resources[i]);
 		if (pkeys[i] == NULL) {
-			php_error_docref(NULL, E_WARNING, "not a public key (%dth member of pubkeys)", i+1);
+			if (!EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "not a public key (%dth member of pubkeys)", i+1);
+			}
 			RETVAL_FALSE;
 			goto clean_exit;
 		}
@@ -6303,7 +6339,9 @@ PHP_FUNCTION(openssl_open)
 
 	pkey = php_openssl_evp_from_zval(privkey, 0, "", 0, 0, &keyresource);
 	if (pkey == NULL) {
-		php_error_docref(NULL, E_WARNING, "unable to coerce parameter 4 into a private key");
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "unable to coerce parameter 4 into a private key");
+		}
 		RETURN_FALSE;
 	}
 

@@ -14,27 +14,23 @@ $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
 $array2 = array("a" => "green", "yellow", "red");
 
 //function name within double quotes
-var_dump( array_diff_ukey($array1, $array1, "unknown_function") );
+try {
+    var_dump( array_diff_ukey($array1, $array1, "unknown_function") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 //function name within single quotes
-var_dump( array_diff_ukey($array1, $array1, 'unknown_function') );
-
-//function name without quotes
-var_dump( array_diff_ukey($array1, $array1, unknown_function) );
+try {
+    var_dump( array_diff_ukey($array1, $array1, 'unknown_function') );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
-
-Warning: array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
-NULL
-
-Warning: array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
-NULL
-
-Warning: Use of undefined constant unknown_function - assumed 'unknown_function' (this will throw an Error in a future version of PHP) in %s on line %d
-
-Warning: array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
-NULL
+array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
+array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
 ===DONE===

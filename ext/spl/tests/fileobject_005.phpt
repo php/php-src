@@ -16,13 +16,10 @@ $fo->fwrite("blahlubba");
 var_dump($fo->ftruncate(4));
 
 $fo->rewind();
-var_dump($fo->fgets(8));
+var_dump($fo->fgets());
 
 $fo->rewind();
 $fo->fwrite("blahlubba");
-
-// This should throw a warning and return NULL since an argument is missing
-var_dump($fo->ftruncate());
 
 ?>
 ==DONE==
@@ -33,10 +30,5 @@ unlink($path);
 ?>
 --EXPECTF--
 bool(true)
-
-Warning: SplFileObject::fgets() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
-
-Warning: SplFileObject::ftruncate() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
+string(4) "blah"
 ==DONE==

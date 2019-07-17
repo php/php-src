@@ -262,8 +262,8 @@ included.
 - Run `make test` to check your change doesn't break other features.
 - Rebuild PHP with `--enable-debug` which will show some kinds of memory errors
   and check the PHP and web server error logs after running your PHP tests.
-- Rebuild PHP with `--enable-maintainer-zts` to check your change compiles on
-  multi-threaded web servers.
+- Rebuild PHP with `--enable-zts` to check your change compiles and operates
+  correctly in a thread safe PHP.
 - Review the change once more just before submitting it.
 
 ## What happens after submitting contribution?
@@ -323,8 +323,8 @@ Having said that, here are the organizational rules:
    `make test`.
 
 7. For development use the `--enable-debug` switch to avoid memory leaks and the
-   `--enable-maintainer-zts` switch to ensure your code handles TSRM correctly
-   and doesn't break for those who need that.
+   `--enable-zts` switch to ensure your code handles TSRM correctly and doesn't
+   break for those who need that.
 
 Currently we have the following branches in use:
 

@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[7.4.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_INIT([PHP],[8.0.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -178,6 +178,7 @@ PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
+AC_PROG_CC_C99
 AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
@@ -349,7 +350,7 @@ if test -z "$PHP_INSTALLED_SAPIS"; then
 fi
 
 dnl Force ZTS.
-if test "$enable_maintainer_zts" = "yes"; then
+if test "$enable_zts" = "yes"; then
   dnl Add pthreads linker and compiler flags.
   if test -n "$ac_cv_pthreads_lib"; then
     LIBS="$LIBS -l$ac_cv_pthreads_lib"
@@ -1184,7 +1185,7 @@ LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
 
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
+if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   PHP_THREAD_SAFETY=yes
 else
@@ -1205,7 +1206,7 @@ unset LIBS LDFLAGS
 PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_THREADS_CHECKS
+  TSRM_CHECK_PTHREADS
 fi
 
 dnl Align segments on huge page boundary
@@ -1260,7 +1261,7 @@ if test -z "$EXTENSION_DIR"; then
     else
       part1=no-debug
     fi
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       part2=zts
     else
       part2=non-zts
@@ -1268,7 +1269,7 @@ if test -z "$EXTENSION_DIR"; then
     extbasedir=$part1-$part2-$extbasedir
     EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
-    if test "$enable_maintainer_zts" = "yes"; then
+    if test "$enable_zts" = "yes"; then
       extbasedir=$extbasedir-zts
     fi
 
@@ -1525,7 +1526,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 dnl Selectively disable optimization due to high RAM usage during compiling the
@@ -1609,7 +1610,7 @@ cat <<X
 |                                                                    |
 | You have built PHP for Apache's current non-threaded MPM.          |
 | If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-maintainer-zts                                   |
+| PHP with --enable-zts                                              |
 X
         fi
       fi

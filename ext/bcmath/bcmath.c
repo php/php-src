@@ -34,31 +34,31 @@ static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsub, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcsub, 0, 2, IS_STRING, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmul, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcmul, 0, 2, IS_STRING, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcdiv, 0, 2, IS_STRING, 1)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmod, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcmod, 0, 2, IS_STRING, 1)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
@@ -71,24 +71,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpow, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpow, 0, 2, IS_STRING, 0)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcsqrt, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcsqrt, 0, 1, IS_STRING, 1)
 	ZEND_ARG_INFO(0, operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bccomp, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bccomp, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcscale, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcscale, 0, 0, IS_LONG, 0)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 

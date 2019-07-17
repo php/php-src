@@ -15,7 +15,7 @@
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
    |          Dmitry Stogov <dmitry@php.net>                              |
-   |          Xinchen Hui <xinchen.h@zend.com>                            |
+   |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -714,7 +714,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
-#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval))
+#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(Z_OBJ(zval))
 #define Z_OBJPROP_P(zval_p)			Z_OBJPROP(*(zval_p))
 
 #define Z_RES(zval)					(zval).value.res
@@ -776,17 +776,17 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 			(b) ? IS_TRUE : IS_FALSE;	\
 	} while (0)
 
-#define ZVAL_LONG(z, l) {				\
+#define ZVAL_LONG(z, l) do {			\
 		zval *__z = (z);				\
 		Z_LVAL_P(__z) = l;				\
 		Z_TYPE_INFO_P(__z) = IS_LONG;	\
-	}
+	} while (0)
 
-#define ZVAL_DOUBLE(z, d) {				\
+#define ZVAL_DOUBLE(z, d) do {			\
 		zval *__z = (z);				\
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
-	}
+	} while (0)
 
 #define ZVAL_STR(z, s) do {						\
 		zval *__z = (z);						\

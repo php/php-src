@@ -54,9 +54,6 @@ PHP_FUNCTION( numfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -139,9 +136,6 @@ PHP_FUNCTION( numfmt_parse_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse_currency: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

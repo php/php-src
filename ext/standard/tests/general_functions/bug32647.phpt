@@ -46,13 +46,8 @@ Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed 
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'bar' passed in %s on line %d
 
-Deprecated: Non-static method bar::barfoo() should not be called statically in %sbug32647.php on line %d
+Warning: register_shutdown_function(): Invalid shutdown callback 'bar::barfoo' passed in %sbug32647.php on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'bar::foobar' passed in %sbug32647.php on line %d
 foo!
-
-Deprecated: Non-static method bar::barfoo() should not be called statically in Unknown on line 0
-
-Deprecated: Non-static method bar::barfoo() should not be called statically in Unknown on line 0
-bar!
 bar!

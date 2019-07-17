@@ -1,5 +1,5 @@
 --TEST--
-catch shouldn't call __autoload
+catch shouldn't call autoloader
 --FILE--
 <?php
 

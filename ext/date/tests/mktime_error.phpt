@@ -14,7 +14,11 @@ date_default_timezone_set("Europe/London");
 echo "*** Testing mktime() : error conditions ***\n";
 
 echo "\n-- Testing mktime() function with Zero arguments --\n";
-var_dump( mktime() );
+try {
+    var_dump( mktime() );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n-- Testing mktime() function with more than expected no. of arguments --\n";
 $hour = 10;
@@ -24,7 +28,11 @@ $month = 7;
 $day = 2;
 $year = 1963;
 $extra_arg = 10;
-var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
+try {
+    var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -32,12 +40,8 @@ var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
 *** Testing mktime() : error conditions ***
 
 -- Testing mktime() function with Zero arguments --
-
-Deprecated: mktime(): You should be using the time() function instead in %s on line %d
-int(%d)
+mktime() expects at least 1 parameter, 0 given
 
 -- Testing mktime() function with more than expected no. of arguments --
-
-Warning: mktime() expects at most 6 parameters, 7 given in %s on line %d
-bool(false)
+mktime() expects at most 6 parameters, 7 given
 ===DONE===

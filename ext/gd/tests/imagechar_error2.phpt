@@ -10,8 +10,12 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 
-$result = imagechar(tmpfile(), 1, 5, 5, 'C', 1);
+try {
+    $result = imagechar(tmpfile(), 1, 5, 5, 'C', 1);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: imagechar(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagechar(): supplied resource is not a valid Image resource

@@ -15,8 +15,12 @@ $white = imagecolorallocate($image, 255, 255, 255);
 
 $resource = tmpfile();
 
-$result = imagecolordeallocate($resource, $white);
+try {
+    $result = imagecolordeallocate($resource, $white);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: imagecolordeallocate(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagecolordeallocate(): supplied resource is not a valid Image resource

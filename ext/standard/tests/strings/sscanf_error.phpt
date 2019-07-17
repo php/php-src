@@ -12,12 +12,6 @@ echo "*** Testing sscanf() : error conditions ***\n";
 $str = "Hello World";
 $format = "%s %s";
 
-echo "\n-- Testing sscanf() function with no arguments --\n";
-var_dump( sscanf() );
-
-echo "\n-- Testing sscanf() function with one argument --\n";
-var_dump( sscanf($str) );
-
 echo "\n-- Testing sscanf() function with more than expected no. of arguments --\n";
 
 var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
@@ -26,16 +20,6 @@ var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
 ===DONE===
 --EXPECTF--
 *** Testing sscanf() : error conditions ***
-
--- Testing sscanf() function with no arguments --
-
-Warning: sscanf() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing sscanf() function with one argument --
-
-Warning: sscanf() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 
 -- Testing sscanf() function with more than expected no. of arguments --
 

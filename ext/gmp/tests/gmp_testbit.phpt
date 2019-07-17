@@ -5,8 +5,6 @@ gmp_testbit() basic tests
 --FILE--
 <?php
 
-var_dump(gmp_testbit());
-
 $n = gmp_init(0);
 var_dump(gmp_testbit($n, -10));
 var_dump(gmp_testbit($n, 0));
@@ -40,9 +38,6 @@ var_dump(gmp_strval($n));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: gmp_testbit() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
 Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d
 bool(false)
 bool(false)

@@ -74,7 +74,7 @@ foreach ($needles as $needle) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)
@@ -132,57 +132,25 @@ int(8)
 bool(false)
 int(8)
 -- Iteration 12 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 13 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 14 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 15 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(8)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 16 --
 bool(false)
 bool(false)

@@ -111,16 +111,6 @@ for( $i =0; $i < count( $mode_arr ); $i++) {
   var_dump(count($arr, $mode_arr[$i]));
 }
 
-
-echo "\n-- Testing error conditions --";
-var_dump( count() );  // No. of args = 0
-var_dump( count(array(), COUNT_NORMAL, 100) );  // No. of args > expected
-
-/* Testing Invalid type arguments */
-var_dump( count("string", ABCD) );
-var_dump( count(100, "string") );
-var_dump( count(array(), "") );
-
 echo "\nDone";
 
 /* closing the resource handles */
@@ -229,23 +219,5 @@ For mode '2' count is => int(3)
 For mode '1' count is => int(9)
 For mode '' count is => int(3)
 For mode '' count is => int(3)
-
--- Testing error conditions --
-Warning: count() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: count() expects at most 2 parameters, 3 given in %s on line %d
-NULL
-
-Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
-
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
-NULL
-
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
-NULL
-
-Warning: count() expects parameter 2 to be int, %s given in %s on line %d
-NULL
 
 Done

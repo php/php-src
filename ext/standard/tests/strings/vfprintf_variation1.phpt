@@ -48,8 +48,6 @@ writeAndDump( $fp, "%s %s %s", array( 'bar', 'bar', 'bar' ) );
 writeAndDump( $fp, "%02d", array( 50 ) );
 writeAndDump( $fp, "", array() );
 writeAndDump( $fp, "Testing %b %d %f %o %s %x %X", array( 9, 6, 2.5502, 24, "foobar", 15, 65 ) );
-@writeAndDump( $funset, "Foo with %s", array( 'string' ) );
-@writeAndDump( new FooClass(), "Foo with %s", array( 'string' ) );
 
 // Close handle
 fclose( $fp );
@@ -79,8 +77,4 @@ string(0) ""
 int(0)
 string(38) "Testing 1001 6 2.550200 30 foobar f 41"
 int(38)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
 ===DONE===

@@ -1142,7 +1142,7 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 }
 /* }}} */
 
-ZEND_API char *get_zend_version(void) /* {{{ */
+ZEND_API const char *get_zend_version(void) /* {{{ */
 {
 	return zend_version_info;
 }
@@ -1250,14 +1250,13 @@ static ZEND_COLD void zend_error_va_list(
 		const char *format, va_list args)
 {
 	va_list usr_copy;
-	zval params[5];
+	zval params[4];
 	zval retval;
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
-	zend_array *symbol_table;
 	zend_class_entry *orig_fake_scope;
 
 	/* Report about uncaught exception in case of fatal errors */
@@ -1332,15 +1331,6 @@ static ZEND_COLD void zend_error_va_list(
 
 			ZVAL_LONG(&params[3], error_lineno);
 
-			symbol_table = zend_rebuild_symbol_table();
-
-			/* during shutdown the symbol table table can be still null */
-			if (!symbol_table) {
-				ZVAL_NULL(&params[4]);
-			} else {
-				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
-			}
-
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
 			ZVAL_UNDEF(&EG(user_error_handler));
 
@@ -1361,7 +1351,7 @@ static ZEND_COLD void zend_error_va_list(
 			orig_fake_scope = EG(fake_scope);
 			EG(fake_scope) = NULL;
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -1382,7 +1372,6 @@ static ZEND_COLD void zend_error_va_list(
 				CG(in_compilation) = 1;
 			}
 
-			zval_ptr_dtor(&params[4]);
 			zval_ptr_dtor(&params[2]);
 			zval_ptr_dtor(&params[1]);
 
@@ -1558,35 +1547,14 @@ ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 	va_end(va);
 } /* }}} */
 
-ZEND_API ZEND_COLD void zend_internal_type_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
 	char *message = NULL;
 
 	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	if (throw_exception) {
-		zend_throw_exception(zend_ce_type_error, message, 0);
-	} else {
-		zend_error(E_WARNING, "%s", message);
-	}
-	efree(message);
-
-	va_end(va);
-} /* }}} */
-
-ZEND_API ZEND_COLD void zend_internal_argument_count_error(zend_bool throw_exception, const char *format, ...) /* {{{ */
-{
-	va_list va;
-	char *message = NULL;
-
-	va_start(va, format);
-	zend_vspprintf(&message, 0, format, va);
-	if (throw_exception) {
-		zend_throw_exception(zend_ce_argument_count_error, message, 0);
-	} else {
-		zend_error(E_WARNING, "%s", message);
-	}
+	zend_throw_exception(zend_ce_argument_count_error, message, 0);
 	efree(message);
 
 	va_end(va);

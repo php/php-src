@@ -196,7 +196,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string convert_uuencode(string data)
+/* {{{ proto string|false convert_uuencode(string data)
    uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {
@@ -204,14 +204,14 @@ PHP_FUNCTION(convert_uuencode)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(src)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
 /* }}} */
 
-/* {{{ proto string convert_uudecode(string data)
+/* {{{ proto string|false convert_uudecode(string data)
    decode a uuencoded string */
 PHP_FUNCTION(convert_uudecode)
 {
@@ -220,7 +220,7 @@ PHP_FUNCTION(convert_uudecode)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(src)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {

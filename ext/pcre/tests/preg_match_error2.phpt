@@ -15,10 +15,18 @@ $regex = '/[a-zA-Z]/';
 $input = array('this is a string', array('this is', 'a subarray'),);
 foreach($input as $value) {
     print "\nArg value is: $value\n";
-    var_dump(preg_match($regex, $value));
+    try {
+        var_dump(preg_match($regex, $value));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $value = new stdclass(); //Object
-var_dump(preg_match($regex, $value));
+try {
+    var_dump(preg_match($regex, $value));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "Done";
 ?>
 --EXPECTF--
@@ -28,10 +36,6 @@ Arg value is: this is a string
 int(1)
 
 Arg value is: Array
-
-Warning: preg_match() expects parameter 2 to be string, array given in %spreg_match_error2.php on line %d
-bool(false)
-
-Warning: preg_match() expects parameter 2 to be string, object given in %spreg_match_error2.php on line %d
-bool(false)
+preg_match() expects parameter 2 to be string, array given
+preg_match() expects parameter 2 to be string, object given
 Done

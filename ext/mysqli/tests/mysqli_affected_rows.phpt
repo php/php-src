@@ -10,18 +10,6 @@ mysqli_affected_rows()
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_affected_rows()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_affected_rows($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_affected_rows($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);

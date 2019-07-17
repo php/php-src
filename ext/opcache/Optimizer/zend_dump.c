@@ -127,11 +127,8 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " CONSTRUCTOR");
 	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_OP_MASK)) {
-		if (op.num & IS_CONSTANT_UNQUALIFIED) {
-			fprintf(stderr, " (unqualified)");
-		}
-		if (op.num & IS_CONSTANT_IN_NAMESPACE) {
-			fprintf(stderr, " (in-namespace)");
+		if (op.num & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+			fprintf(stderr, " (unqualified-in-namespace)");
 		}
 	}
 }
@@ -728,6 +725,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	fprintf(stderr, "BB%d:", n);
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
+	}
+	if (b->flags & ZEND_BB_RECV_ENTRY) {
+		fprintf(stderr, " recv");
 	}
 	if (b->flags & ZEND_BB_FOLLOW) {
 		fprintf(stderr, " follow");

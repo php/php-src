@@ -36,10 +36,18 @@ echo "-- with undefined variable --\n";
 var_dump( array_map(@$undefined_var, $arr1) );
 
 echo "-- with empty string --\n";
-var_dump( array_map("", $arr1, $arr2) );
+try {
+    var_dump( array_map("", $arr1, $arr2) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "-- with empty array --\n";
-var_dump( array_map(array(), $arr1, $arr2) );
+try {
+    var_dump( array_map(array(), $arr1, $arr2) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
@@ -115,11 +123,7 @@ array(2) {
   int(2)
 }
 -- with empty string --
-
-Warning: array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, function '' not found or invalid function name
 -- with empty array --
-
-Warning: array_map() expects parameter 1 to be a valid callback, array must have exactly two members in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, array must have exactly two members
 Done

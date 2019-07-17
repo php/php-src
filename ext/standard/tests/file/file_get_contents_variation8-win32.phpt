@@ -38,7 +38,11 @@ $names_arr = array(
 
 foreach($names_arr as $key =>$value) {
   echo "\n-- Filename: $key --\n";
-  var_dump(file_get_contents($value));
+  try {
+    var_dump(file_get_contents($value));
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
 
 ?>
@@ -77,14 +81,10 @@ Warning: file_get_contents( ): failed to open stream: Permission denied in %s on
 bool(false)
 
 -- Filename: \0 --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+file_get_contents() expects parameter 1 to be a valid path, string given
 
 -- Filename: array() --
-
-Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %s on line %d
-NULL
+file_get_contents() expects parameter 1 to be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

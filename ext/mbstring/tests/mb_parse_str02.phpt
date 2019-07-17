@@ -20,10 +20,6 @@ function test($query) {
 	var_dump($foo);
 	var_dump($bar);
 	var_dump($fubar);
-	mb_parse_str($query);
-	var_dump($foo);
-	var_dump($bar);
-	var_dump($fubar);
 }
 foreach ($queries as $query) {
 	test($query);
@@ -41,11 +37,6 @@ array(3) {
 string(0) ""
 string(0) ""
 string(0) ""
-
-Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
-string(3) "abc"
-string(3) "def"
-string(3) "ghi"
 array(3) {
   ["+foo"]=>
   string(3) "def"
@@ -54,11 +45,6 @@ array(3) {
   ["fubar"]=>
   string(0) ""
 }
-string(0) ""
-string(0) ""
-string(0) ""
-
-Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
 string(0) ""
 string(0) ""
 string(0) ""
@@ -88,23 +74,3 @@ array(3) {
 string(0) ""
 string(0) ""
 string(0) ""
-
-Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
-array(4) {
-  [0]=>
-  string(3) "abc"
-  [1]=>
-  string(3) "def"
-  [2]=>
-  string(3) "ghi"
-  [3]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
-  string(0) ""
-}
-array(1) {
-  [0]=>
-  string(1) "="
-}

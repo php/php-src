@@ -226,33 +226,11 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->get )
-	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
-
-		switch( Z_TYPE_P( zstr ) )
-		{
-			case IS_OBJECT:
-				{
-					/* Bail out. */
-					zval_ptr_dtor( zstr );
-					COLLATOR_CONVERT_RETURN_FAILED( obj );
-				} break;
-
-			case IS_STRING:
-				break;
-
-			default:
-				{
-					convert_to_string( zstr );
-				} break;
-		}
-	}
-	else if( Z_OBJ_HT_P(obj)->cast_object )
+	if( Z_OBJ_HT_P(obj)->cast_object )
 	{
 		zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
+		if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
 		{
 			/* cast_object failed => bail out. */
 			zval_ptr_dtor( zstr );

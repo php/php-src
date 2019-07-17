@@ -20,10 +20,18 @@ $regex_array = array('abcdef', //Regex without delimiter
 $subject = 'this is a test';
 foreach($regex_array as $regex_value) {
     print "\nArg value is $regex_value\n";
-    var_dump(preg_match($regex_value, $subject));
+    try {
+        var_dump(preg_match($regex_value, $subject));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 $regex_value = new stdclass(); //Object
-var_dump(preg_match($regex_value, $subject));
+try {
+    var_dump(preg_match($regex_value, $subject));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 *** Testing preg_match() : error conditions ***
@@ -49,12 +57,8 @@ Warning: preg_match(): Unknown modifier 'F' in %spreg_match_error1.php on line %
 bool(false)
 
 Arg value is Array
-
-Warning: preg_match() expects parameter 1 to be string, array given in %spreg_match_error1.php on line %d
-bool(false)
+preg_match() expects parameter 1 to be string, array given
 
 Arg value is /[a-zA-Z]/
 int(1)
-
-Warning: preg_match() expects parameter 1 to be string, object given in %spreg_match_error1.php on line %d
-bool(false)
+preg_match() expects parameter 1 to be string, object given

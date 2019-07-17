@@ -274,7 +274,6 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	if (Z_TYPE_P(object) == IS_ARRAY) {
 		zend_symtable_update(Z_ARRVAL_P(object), key, zvalue);
 	} else {
-		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
 			zend_string_release_ex(key, 0);
@@ -282,8 +281,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 		}
-		ZVAL_NEW_STR(&zkey, key);
-		zend_std_write_property(object, &zkey, zvalue, NULL);
+		zend_std_write_property(Z_OBJ_P(object), key, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
 	}
 	zend_string_release_ex(key, 0);

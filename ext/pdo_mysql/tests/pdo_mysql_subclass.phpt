@@ -10,10 +10,6 @@ MySQLPDOTest::skip();
 <?php
 	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
-	// No silly strict mode warnings, please!
-	error_reporting(E_ALL^E_STRICT);
-	ini_set('display_errors', false);
-
 	try {
 
 		class MyPDO extends PDO {
@@ -23,7 +19,7 @@ MySQLPDOTest::skip();
 				return call_user_func_array(array($this, 'parent::__construct'), func_get_args());
 			}
 
-			public function exec() {
+			public function exec($query) {
 				$this->protocol();
 				return call_user_func_array(array($this, 'parent::exec'), func_get_args());
 			}

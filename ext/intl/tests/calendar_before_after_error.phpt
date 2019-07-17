@@ -61,25 +61,18 @@ try {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
-error: 2, IntlCalendar::after() expects exactly 1 parameter, 0 given
-error: 2, IntlCalendar::after(): intlcal_before/after: bad arguments
-bool(false)
-error: 2, IntlCalendar::before() expects exactly 1 parameter, 0 given
-error: 2, IntlCalendar::before(): intlcal_before/after: bad arguments
-bool(false)
-error: 0, Argument 1 passed to IntlCalendar::after() must be an instance of IntlCalendar, int given
+error: 0, IntlCalendar::after() expects exactly 1 parameter, 0 given
 
-error: 0, Argument 1 passed to IntlCalendar::before() must be an instance of IntlCalendar, int given
+error: 0, IntlCalendar::before() expects exactly 1 parameter, 0 given
 
-error: 2, IntlCalendar::after() expects exactly 1 parameter, 2 given
-error: 2, IntlCalendar::after(): intlcal_before/after: bad arguments
-bool(false)
-error: 2, IntlCalendar::before() expects exactly 1 parameter, 2 given
-error: 2, IntlCalendar::before(): intlcal_before/after: bad arguments
-bool(false)
-error: 2, intlcal_after() expects exactly 2 parameters, 1 given
-error: 2, intlcal_after(): intlcal_before/after: bad arguments
-bool(false)
-error: 2, intlcal_before() expects exactly 2 parameters, 1 given
-error: 2, intlcal_before(): intlcal_before/after: bad arguments
-bool(false)
+error: 0, IntlCalendar::after() expects parameter 1 to be IntlCalendar, int given
+
+error: 0, IntlCalendar::before() expects parameter 1 to be IntlCalendar, int given
+
+error: 0, IntlCalendar::after() expects exactly 1 parameter, 2 given
+
+error: 0, IntlCalendar::before() expects exactly 1 parameter, 2 given
+
+error: 0, intlcal_after() expects exactly 2 parameters, 1 given
+
+error: 0, intlcal_before() expects exactly 2 parameters, 1 given

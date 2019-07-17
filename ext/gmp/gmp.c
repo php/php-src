@@ -99,10 +99,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_prob_prime, 0, 0, 1)
 	ZEND_ARG_INFO(0, reps)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
-	ZEND_ARG_INFO(0, limiter)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_seed, 0, 0, 1)
 	ZEND_ARG_INFO(0, seed)
 ZEND_END_ARG_INFO()
@@ -175,7 +171,6 @@ static const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_kronecker,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
-	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
 	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
@@ -408,24 +403,24 @@ static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target) /* {{{ */
 }
 /* }}} */
 
-static int gmp_cast_object(zval *readobj, zval *writeobj, int type) /* {{{ */
+static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	mpz_ptr gmpnum;
 	switch (type) {
 	case IS_STRING:
-		gmpnum = GET_GMP_FROM_ZVAL(readobj);
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		gmp_strval(writeobj, gmpnum, 10);
 		return SUCCESS;
 	case IS_LONG:
-		gmpnum = GET_GMP_FROM_ZVAL(readobj);
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
 		return SUCCESS;
 	case IS_DOUBLE:
-		gmpnum = GET_GMP_FROM_ZVAL(readobj);
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		return SUCCESS;
 	case _IS_NUMBER:
-		gmpnum = GET_GMP_FROM_ZVAL(readobj);
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
 		if (mpz_fits_slong_p(gmpnum)) {
 			ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
 		} else {
@@ -438,10 +433,10 @@ static int gmp_cast_object(zval *readobj, zval *writeobj, int type) /* {{{ */
 }
 /* }}} */
 
-static HashTable *gmp_get_debug_info(zval *obj, int *is_temp) /* {{{ */
+static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
 	HashTable *ht, *props = zend_std_get_properties(obj);
-	mpz_ptr gmpnum = GET_GMP_FROM_ZVAL(obj);
+	mpz_ptr gmpnum = GET_GMP_OBJECT_FROM_OBJ(obj)->num;
 	zval zv;
 
 	*is_temp = 1;
@@ -454,10 +449,10 @@ static HashTable *gmp_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 }
 /* }}} */
 
-static zend_object *gmp_clone_obj(zval *obj) /* {{{ */
+static zend_object *gmp_clone_obj(zend_object *obj) /* {{{ */
 {
-	gmp_object *old_object = GET_GMP_OBJECT_FROM_ZVAL(obj);
-	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(Z_OBJCE_P(obj)));
+	gmp_object *old_object = GET_GMP_OBJECT_FROM_OBJ(obj);
+	gmp_object *new_object = GET_GMP_OBJECT_FROM_OBJ(gmp_create_object(obj->ce));
 
 	zend_objects_clone_members( &new_object->std, &old_object->std);
 
@@ -578,7 +573,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	php_var_serialize(&buf, &zv, &serialize_data);
 	zval_ptr_dtor_str(&zv);
 
-	ZVAL_ARR(&zv, zend_std_get_properties(object));
+	ZVAL_ARR(&zv, zend_std_get_properties(Z_OBJ_P(object)));
 	php_var_serialize(&buf, &zv, &serialize_data);
 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
@@ -597,14 +592,12 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	zval *zv;
 	int retval = FAILURE;
 	php_unserialize_data_t unserialize_data;
-	zval object_copy;
+	zend_object *zobj;
 
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
 	gmp_create(object, &gmpnum);
 
-	/* The "object" variable may be modified during the execution of this unserialize handler
-	 * (it may turn into a reference). Keep the original object around for further operations. */
-	ZVAL_OBJ(&object_copy, Z_OBJ_P(object));
+	zobj = Z_OBJ_P(object);
 
 	p = buf;
 	max = buf + buf_len;
@@ -628,7 +621,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(zv)) != 0) {
 		zend_hash_copy(
-			zend_std_get_properties(&object_copy), Z_ARRVAL_P(zv),
+			zend_std_get_properties(zobj), Z_ARRVAL_P(zv),
 			(copy_ctor_func_t) zval_add_ref
 		);
 	}
@@ -1862,28 +1855,6 @@ static void gmp_init_random(void)
 		GMPG(rand_initialized) = 1;
 	}
 }
-
-/* {{{ proto GMP gmp_random([int limiter])
-   Gets random number */
-ZEND_FUNCTION(gmp_random)
-{
-	zend_long limiter = 20;
-	mpz_ptr gmpnum_result;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &limiter) == FAILURE) {
-		return;
-	}
-
-	INIT_GMP_RETVAL(gmpnum_result);
-	gmp_init_random();
-
-#ifdef GMP_LIMB_BITS
-	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
-#else
-	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
-#endif
-}
-/* }}} */
 
 /* {{{ proto GMP gmp_random_seed(mixed seed)
    Seed the RNG */

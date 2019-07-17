@@ -12,14 +12,6 @@ date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_parse() : error conditions ***\n";
 
-echo "\n-- Testing date_parse() function with zero arguments --\n";
-var_dump( date_parse() );
-
-echo "\n-- Testing date_parse() function with more than expected no. of arguments --\n";
-$date = "2009-02-27 10:00:00.5";
-$extra_arg = 10;
-var_dump( date_parse($date, $extra_arg) );
-
 echo "\n-- Testing date_parse() function with unexpected characters in \$date argument --\n";
 $invalid_date = "2OO9-02--27 10:00?00.5";
 var_dump( date_parse($invalid_date) );
@@ -28,16 +20,6 @@ var_dump( date_parse($invalid_date) );
 ===DONE===
 --EXPECTF--
 *** Testing date_parse() : error conditions ***
-
--- Testing date_parse() function with zero arguments --
-
-Warning: date_parse() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
--- Testing date_parse() function with more than expected no. of arguments --
-
-Warning: date_parse() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
 
 -- Testing date_parse() function with unexpected characters in $date argument --
 array(13) {

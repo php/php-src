@@ -3,9 +3,6 @@ str_ireplace() tests
 --FILE--
 <?php
 
-var_dump(str_ireplace());
-var_dump(str_ireplace(""));
-var_dump(str_ireplace("", ""));
 var_dump(str_ireplace("", "", ""));
 
 var_dump(str_ireplace("tt", "a", "ttttTttttttttTT"));
@@ -48,14 +45,6 @@ var_dump($Data = str_ireplace("\n", "<br>", $Data));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: str_ireplace() expects at least 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: str_ireplace() expects at least 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: str_ireplace() expects at least 3 parameters, 2 given in %s on line %d
-NULL
 string(0) ""
 string(8) "aaaaaaaT"
 string(8) "aaaaaaaT"

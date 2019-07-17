@@ -264,15 +264,11 @@ ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, co
 	end_read(source);
 }
 
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
 {
-	int retval;
-
 	begin_write(ht);
-	retval = zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
+	zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
-
-	return retval;
 }
 
 ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
@@ -310,15 +306,11 @@ ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_rehash(TsHashTable *ht)
+ZEND_API void zend_ts_hash_rehash(TsHashTable *ht)
 {
-	int retval;
-
 	begin_write(ht);
-	retval = zend_hash_rehash(TS_HASH(ht));
+	zend_hash_rehash(TS_HASH(ht));
 	end_write(ht);
-
-	return retval;
 }
 
 ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len)

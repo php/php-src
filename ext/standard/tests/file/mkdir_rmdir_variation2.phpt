@@ -35,8 +35,16 @@ var_dump( mkdir("$file_path/mkdir_variation2/test/", 0777, true) );
 var_dump( rmdir("$file_path/mkdir_variation2/") );
 
 echo "\n*** Testing mkdir() and rmdir() for binary safe functionality ***\n";
-var_dump( mkdir("$file_path/temp".chr(0)."/") );
-var_dump( rmdir("$file_path/temp".chr(0)."/") );
+try {
+    var_dump( mkdir("$file_path/temp".chr(0)."/") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( rmdir("$file_path/temp".chr(0)."/") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n*** Testing mkdir() with miscelleneous input ***\n";
 /* changing mode of mkdir to prevent creating sub-directory under it */
@@ -64,12 +72,8 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-
-Warning: mkdir() expects parameter 1 to be a valid path, string given in %s on line %d
-bool(false)
-
-Warning: rmdir() expects parameter 1 to be a valid path, string given in %s on line %d
-bool(false)
+mkdir() expects parameter 1 to be a valid path, string given
+rmdir() expects parameter 1 to be a valid path, string given
 
 *** Testing mkdir() with miscelleneous input ***
 bool(true)

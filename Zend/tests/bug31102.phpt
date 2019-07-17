@@ -1,5 +1,5 @@
 --TEST--
-Bug #31102 (Exception not handled when thrown inside __autoload())
+Bug #31102 (Exception not handled when thrown inside autoloader)
 --FILE--
 <?php
 

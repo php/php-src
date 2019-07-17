@@ -12,18 +12,17 @@ try
     $options = NULL;
     $sClient = new SoapClient("test.wsdl", $options);
 } 
-catch(SoapFault $e)
+catch(TypeError $e)
 {
     var_dump($e);
 }
 
 ?>
 --EXPECTF--
-Warning: SoapClient::SoapClient() expects parameter 2 to be array, null given in %sbug77088.php on line %d
-object(SoapFault)#%d (%d) {
+object(TypeError)#%d (%d) {
   ["message":protected]=>
-  string(44) "SoapClient::SoapClient(): Invalid parameters"
-  ["string":"Exception":private]=>
+  string(%d) "SoapClient::__construct() expects parameter 2 to be array, null given"
+  ["string":"Error":private]=>
   string(0) ""
   ["code":protected]=>
   int(0)
@@ -31,7 +30,7 @@ object(SoapFault)#%d (%d) {
   string(%d) "%sbug77088.php"
   ["line":protected]=>
   int(6)
-  ["trace":"Exception":private]=>
+  ["trace":"Error":private]=>
   array(1) {
     [0]=>
     array(6) {
@@ -40,7 +39,7 @@ object(SoapFault)#%d (%d) {
       ["line"]=>
       int(6)
       ["function"]=>
-      string(10) "SoapClient"
+      string(11) "__construct"
       ["class"]=>
       string(10) "SoapClient"
       ["type"]=>
@@ -54,12 +53,6 @@ object(SoapFault)#%d (%d) {
       }
     }
   }
-  ["previous":"Exception":private]=>
+  ["previous":"Error":private]=>
   NULL
-  ["faultstring"]=>
-  string(44) "SoapClient::SoapClient(): Invalid parameters"
-  ["faultcode"]=>
-  string(6) "Client"
-  ["faultcodens"]=>
-  string(41) "http://schemas.xmlsoap.org/soap/envelope/"
 }

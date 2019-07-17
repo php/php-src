@@ -59,6 +59,7 @@ final class StreamWrapper
     public function stream_close() : bool { return \fclose($this->stream); }
     public function stream_eof() : bool { return \feof($this->stream); }
     public function stream_stat() { return \fstat($this->stream); }
+    public function stream_set_option($option, $arg1, $arg2) { return false; }
 
     private $stream = false;
 }

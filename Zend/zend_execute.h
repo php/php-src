@@ -44,10 +44,10 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name);
-ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name);
-ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions);
-ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions);
+ZEND_API int zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
+ZEND_API int zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
+ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, int handle_exceptions);
+ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, int handle_exceptions);
 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;
@@ -119,11 +119,6 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 					break;
 				}
-			}
-			if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
-	    		UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
-				Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value);
-				return variable_ptr;
 			}
 			garbage = Z_COUNTED_P(variable_ptr);
 			zend_copy_to_variable(variable_ptr, value, value_type, ref);

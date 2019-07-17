@@ -753,7 +753,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("auto_globals_jit",		"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateBool,	auto_globals_jit,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
-	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"-1",	PHP_INI_ALL,		OnSetSerializePrecision,			serialize_precision,	php_core_globals,	core_globals)
@@ -1117,18 +1116,6 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	if (PG(track_errors) && module_initialized && EG(active) &&
-			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
-		zval tmp;
-		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		if (EG(current_execute_data)) {
-			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-				zval_ptr_dtor(&tmp);
-			}
-		} else {
-			zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
-		}
-	}
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
@@ -1436,19 +1423,6 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		return;
 	}
 
-	if (PG(track_errors) && module_initialized && EG(active)) {
-		zval tmp;
-
-		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		if (EG(current_execute_data)) {
-			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-				zval_ptr_dtor(&tmp);
-			}
-		} else {
-			zend_hash_str_update_ind(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
-		}
-	}
-
 	efree(buffer);
 }
 /* }}} */
@@ -1562,16 +1536,6 @@ static void php_zend_stream_closer(void *handle) /* {{{ */
 }
 /* }}} */
 
-static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
-{
-	php_stream_statbuf  ssb;
-	if (php_stream_stat((php_stream*)handle, &ssb) == 0) {
-		return ssb.sb.st_size;
-	}
-	return 0;
-}
-/* }}} */
-
 static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
@@ -1589,11 +1553,12 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
-		handle->handle.stream.fsizer  = php_zend_stream_fsizer;
 		handle->handle.stream.isatty  = 0;
 		handle->handle.stream.closer = php_zend_stream_closer;
 		/* suppress warning if this stream is not explicitly closed */
 		php_stream_auto_cleanup(stream);
+		/* Disable buffering to avoid double buffering between PHP and Zend streams. */
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 
 		return SUCCESS;
 	}
@@ -2350,13 +2315,12 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[17]; /* Remember to change this if the number of directives change */
+			const char *directives[18]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
 				"Directive '%s' is deprecated",
 				{
-					"track_errors",
 					NULL
 				}
 			},
@@ -2380,6 +2344,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 					"safe_mode_allowed_env_vars",
 					"safe_mode_protected_env_vars",
 					"zend.ze1_compatibility_mode",
+					"track_errors",
 					NULL
 				}
 			}

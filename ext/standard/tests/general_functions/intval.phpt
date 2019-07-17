@@ -146,13 +146,6 @@ foreach ($not_int_types as $type ) {
    var_dump( intval($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( intval() );
-
-//arguments more than expected
-var_dump( intval(TRUE, FALSE, TRUE) );
-
 echo "\n--- Done ---\n";
 
 
@@ -294,13 +287,5 @@ int(1)
 int(0)
 int(0)
 int(0)
-
-*** Testing error conditions ***
-
-Warning: intval() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: intval() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 --- Done ---

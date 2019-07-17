@@ -3,7 +3,6 @@ metaphone() tests
 --FILE--
 <?php
 
-var_dump(metaphone());
 var_dump(metaphone(""));
 var_dump(metaphone(-1));
 var_dump(metaphone(-1, -1));
@@ -26,8 +25,6 @@ foreach($array as $str) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: metaphone() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 string(0) ""
 string(0) ""
 bool(false)

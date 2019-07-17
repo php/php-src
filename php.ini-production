@@ -148,11 +148,6 @@
 ;   Development Value: Off
 ;   Production Value: Off
 
-; track_errors
-;   Default Value: Off
-;   Development Value: On
-;   Production Value: Off
-
 ; variables_order
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
@@ -524,16 +519,6 @@ report_memleaks = On
 
 ; This setting is on by default.
 ;report_zend_debug = 0
-
-; Store the last error/warning message in $php_errormsg (boolean). Setting this value
-; to On can assist in debugging and is appropriate for development servers. It should
-; however be disabled on production servers.
-; This directive is DEPRECATED.
-; Default Value: Off
-; Development Value: Off
-; Production Value: Off
-; http://php.net/track-errors
-;track_errors = Off
 
 ; Turn off normal error reporting and emit XML-RPC error XML
 ; http://php.net/xmlrpc-errors
@@ -964,10 +949,10 @@ cli_server.color = On
 ;date.default_longitude = 35.2333
 
 ; http://php.net/date.sunrise-zenith
-;date.sunrise_zenith = 90.583333
+;date.sunrise_zenith = 90.833333
 
 ; http://php.net/date.sunset-zenith
-;date.sunset_zenith = 90.583333
+;date.sunset_zenith = 90.833333
 
 [filter]
 ; http://php.net/filter.default
@@ -1043,8 +1028,6 @@ cli_server.color = On
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
 ; http://php.net/pdo-odbc.connection-pooling
 ;pdo_odbc.connection_pooling=strict
-
-;pdo_odbc.db2_instance_name
 
 [Pdo_mysql]
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
@@ -1587,11 +1570,6 @@ zend.assertions = -1
 ; http://php.net/assert.callback
 ;assert.callback = 0
 
-; Eval the expression with current error_reporting().  Set to true if you want
-; error_reporting(0) around the eval().
-; http://php.net/assert.quiet-eval
-;assert.quiet_eval = 0
-
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
 ; http://php.net/com.typelib-file
@@ -1665,17 +1643,6 @@ zend.assertions = -1
 ; one from another
 ; http://php.net/mbstring.substitute-character
 ;mbstring.substitute_character = none
-
-; overload(replace) single byte functions by mbstring functions.
-; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
-; etc. Possible values are 0,1,2,4 or combination of them.
-; For example, 7 for overload everything.
-; 0: No overload
-; 1: Overload mail() function
-; 2: Overload str*() functions
-; 4: Overload ereg*() functions
-; http://php.net/mbstring.func-overload
-;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
 ; Default: Off

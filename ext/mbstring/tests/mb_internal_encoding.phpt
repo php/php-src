@@ -35,16 +35,6 @@ $r = mb_internal_encoding('BAD');
 $enc = mb_internal_encoding();
 print "$enc\n";
 
-$r = mb_internal_encoding($t_ary);
-($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
-
-$r = mb_internal_encoding($t_obj);
-($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
-$enc = mb_internal_encoding();
-print "$enc\n";
-
 ?>
 --EXPECTF--
 OK_EUC-JP_SET
@@ -57,12 +47,4 @@ ASCII
 
 Warning: mb_internal_encoding(): Unknown encoding "BAD" in %s on line %d
 OK_BAD_SET
-ASCII
-
-Warning: mb_internal_encoding() expects parameter 1 to be string, array given in %s on line %d
-OK_BAD_ARY_SET
-ASCII
-
-Warning: mb_internal_encoding() expects parameter 1 to be string, object given in %s on line %d
-OK_BAD_OBJ_SET
 ASCII

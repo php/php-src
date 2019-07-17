@@ -34,11 +34,6 @@
 #define ZEND_FUNC_HAS_EXTENDED_FCALL       (1<<10)
 #define ZEND_FUNC_HAS_EXTENDED_STMT        (1<<11)
 
-/* The following flags are valid only for return values of internal functions
- * returned by zend_get_func_info()
- */
-#define FUNC_MAY_WARN                      (1<<30)
-
 typedef struct _zend_func_info zend_func_info;
 typedef struct _zend_call_info zend_call_info;
 

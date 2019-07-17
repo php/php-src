@@ -9,16 +9,12 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
-$image = imagecreatetruecolor(180, 30);
 $resource = tmpfile();
-
-imageistruecolor('string');
-imageistruecolor($resource);
-imageistruecolor(array());
+try {
+    imageistruecolor($resource);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imageistruecolor() expects parameter 1 to be resource, string given in %s on line %d
-
-Warning: imageistruecolor(): supplied resource is not a valid Image resource in %s on line %d
-
-Warning: imageistruecolor() expects parameter 1 to be resource, array given in %s on line %d
+--EXPECT--
+imageistruecolor(): supplied resource is not a valid Image resource

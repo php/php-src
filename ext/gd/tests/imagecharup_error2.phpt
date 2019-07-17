@@ -10,8 +10,12 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 
-$result = imagecharup(tmpfile(), 1, 5, 5, 'C', 1);
+try {
+    $result = imagecharup(tmpfile(), 1, 5, 5, 'C', 1);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: imagecharup(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagecharup(): supplied resource is not a valid Image resource

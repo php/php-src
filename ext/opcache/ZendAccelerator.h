@@ -185,6 +185,11 @@ typedef struct _zend_accel_directives {
 	zend_bool      huge_code_pages;
 #endif
 	char *preload;
+#ifdef HAVE_JIT
+	zend_long      jit;
+	zend_long      jit_buffer_size;
+	zend_long      jit_debug;
+#endif
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -215,6 +220,9 @@ typedef struct _zend_accel_globals {
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
 	zend_bool               is_immutable_class;
+#ifdef HAVE_JIT
+	zend_bool               jit_enabled;
+#endif
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
@@ -311,5 +319,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
+
+/* memory write protection */
+#define SHM_PROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(1); \
+		} \
+	} while (0)
+
+#define SHM_UNPROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(0); \
+		} \
+	} while (0)
 
 #endif /* ZEND_ACCELERATOR_H */

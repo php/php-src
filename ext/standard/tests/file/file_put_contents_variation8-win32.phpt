@@ -35,14 +35,18 @@ $names_arr = array(
 );
 
 foreach($names_arr as $key =>$value) {
-      echo "\n-- Filename: $key --\n";
-      $res = file_put_contents($value, "Some data");
-  	  if ($res !== false && $res != null) {
-     	 echo "$res bytes written to: $value\n";
-     	 unlink($value);
-  	  } else {
-         echo "Failed to write data to: $key\n";
-      }
+  echo "\n-- Filename: $key --\n";
+  try {
+    $res = file_put_contents($value, "Some data");
+    if ($res !== false && $res != null) {
+       echo "$res bytes written to: $value\n";
+       unlink($value);
+    } else {
+       echo "Failed to write data to: $key\n";
+    }
+  } catch (TypeError $e) {
+      echo $e->getMessage(), "\n";
+  }
 };
 
 ?>
@@ -77,14 +81,10 @@ Warning: file_put_contents( ): failed to open stream: Permission denied in %s on
 Failed to write data to: " "
 
 -- Filename: \0 --
-
-Warning: file_put_contents() expects parameter 1 to be a valid path, string given in %s on line %d
-Failed to write data to: \0
+file_put_contents() expects parameter 1 to be a valid path, string given
 
 -- Filename: array() --
-
-Warning: file_put_contents() expects parameter 1 to be a valid path, array given in %s on line %d
-Failed to write data to: array()
+file_put_contents() expects parameter 1 to be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

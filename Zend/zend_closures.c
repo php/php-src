@@ -84,12 +84,8 @@ static zend_bool zend_valid_closure_binding(
 		}
 	} else if (is_fake_closure && func->common.scope
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (func->type == ZEND_INTERNAL_FUNCTION) {
-			zend_error(E_WARNING, "Cannot unbind $this of internal method");
-			return 0;
-		} else {
-			zend_error(E_DEPRECATED, "Unbinding $this of a method is deprecated");
-		}
+		zend_error(E_WARNING, "Cannot unbind $this of method");
+		return 0;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
@@ -336,7 +332,7 @@ ZEND_METHOD(Closure, fromCallable)
 	success = zend_create_closure_from_callable(return_value, callable, &error);
 	EG(current_execute_data) = execute_data;
 
-	if (success == FAILURE || error) {
+	if (success == FAILURE) {
 		if (error) {
 			zend_type_error("Failed to create closure from callable: %s", error);
 			efree(error);
@@ -412,28 +408,28 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_closure_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return value;
 }
 /* }}} */
 
-static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static ZEND_COLD int zend_closure_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -442,7 +438,7 @@ static ZEND_COLD int zend_closure_has_property(zval *object, zval *member, int h
 }
 /* }}} */
 
-static ZEND_COLD void zend_closure_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
@@ -478,9 +474,9 @@ static zend_object *zend_closure_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
+static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(zobject);
+	zend_closure *closure = (zend_closure *)zobject;
 	zval result;
 
 	zend_create_closure(&result, &closure->func,
@@ -489,9 +485,9 @@ static zend_object *zend_closure_clone(zval *zobject) /* {{{ */
 }
 /* }}} */
 
-int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)obj;
 	*fptr_ptr = &closure->func;
 	*ce_ptr = closure->called_scope;
 
@@ -505,9 +501,9 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 }
 /* }}} */
 
-static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(object);
+	zend_closure *closure = (zend_closure *)object;
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
 	HashTable *debug_info;
@@ -570,9 +566,9 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 }
 /* }}} */
 
-static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
+static HashTable *zend_closure_get_gc(zend_object *obj, zval **table, int *n) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)obj;
 
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;

@@ -275,7 +275,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 }
 
 
-/* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
+/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Send an email message */
 PHP_FUNCTION(mail)
 {

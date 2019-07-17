@@ -12,9 +12,11 @@ $var1=fopen(__FILE__, 'r');
 $var2=2;
 $var3=3;
 
-openssl_spki_new($var1, $var2, $var3);
+try {
+    openssl_spki_new($var1, $var2, $var3);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: openssl_spki_new(): supplied resource is not a valid OpenSSL X.509/key resource in %sbug68912.php on line %d
-
-Warning: openssl_spki_new(): Unable to use supplied private key in %sbug68912.php on line %d
+--EXPECT--
+openssl_spki_new(): supplied resource is not a valid OpenSSL X.509/key resource

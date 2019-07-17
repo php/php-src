@@ -12,10 +12,9 @@ $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump($p->getStub());
 $p->setStub("<?php
-function __autoload(\$class)
-{
+spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
-}
+});
 Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER();
@@ -32,10 +31,9 @@ unlink(__DIR__ . '/phar_commitwrite.phar.zip');
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 string(%d) "<?php
-function __autoload($class)
-{
+spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);
-}
+});
 Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>

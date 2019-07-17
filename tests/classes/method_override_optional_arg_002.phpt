@@ -18,5 +18,4 @@ $b->foo();
 
 ?>
 --EXPECTF--
-Warning: Declaration of B::foo() should be compatible with A::foo($arg = 1) in %s on line %d
-foo
+Fatal error: Declaration of B::foo() must be compatible with A::foo($arg = 1) in %s on line %d

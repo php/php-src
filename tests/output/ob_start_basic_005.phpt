@@ -25,9 +25,10 @@ checkAndClean();
 
 ?>
 --EXPECTF--
-Warning: ob_start(): non-static method C::h() should not be called statically in %s on line 20
-bool(true)
+Warning: ob_start(): non-static method C::h() cannot be called statically in %s on line %d
+
+Notice: ob_start(): failed to create buffer in %s on line %d
+bool(false)
 Array
 (
-    [0] => C::h
 )

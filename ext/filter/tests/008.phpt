@@ -6,7 +6,6 @@ filter_list()
 <?php
 
 var_dump(filter_list());
-var_dump(filter_list(array()));
 
 echo "Done\n";
 ?>
@@ -57,7 +56,4 @@ array(22) {
   [21]=>
   string(8) "callback"
 }
-
-Warning: filter_list() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
 Done

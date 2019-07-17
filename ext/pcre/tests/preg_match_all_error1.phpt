@@ -20,11 +20,19 @@ $regex_array = array('abcdef', //Regex without delimiter
 $subject = 'test';
 foreach($regex_array as $regex_value) {
     print "\nArg value is $regex_value\n";
-    var_dump(preg_match_all($regex_value, $subject, $matches1));
+    try {
+        var_dump(preg_match_all($regex_value, $subject, $matches1));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($matches1);
 }
 $regex_value = new stdclass(); //Object
-var_dump(preg_match_all($regex_value, $subject, $matches));
+try {
+    var_dump(preg_match_all($regex_value, $subject, $matches));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($matches);
 ?>
 --EXPECTF--
@@ -55,9 +63,7 @@ bool(false)
 NULL
 
 Arg value is Array
-
-Warning: preg_match_all() expects parameter 1 to be string, array given in %spreg_match_all_error1.php on line %d
-bool(false)
+preg_match_all() expects parameter 1 to be string, array given
 NULL
 
 Arg value is /[a-zA-Z]/
@@ -75,7 +81,5 @@ array(1) {
     string(1) "t"
   }
 }
-
-Warning: preg_match_all() expects parameter 1 to be string, object given in %spreg_match_all_error1.php on line %d
-bool(false)
+preg_match_all() expects parameter 1 to be string, object given
 NULL

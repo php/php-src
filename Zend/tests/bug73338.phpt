@@ -14,5 +14,6 @@ try { (function() { call_user_func("fail"); })(); } catch (Error $e) {}
 try { [new class { static function foo() {} function __destruct () { throw new Error; } }, "foo"](); } catch (Error $e) {}
 
 ?>
---EXPECTF--
-Warning: call_user_func() expects parameter 1 to be a valid callback, no array or string given in %s on line %d
+===DONE===
+--EXPECT--
+===DONE===

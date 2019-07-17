@@ -36,8 +36,12 @@ $names_arr = array(
 );
 
 foreach($names_arr as $key => $value) {
-      echo "\n-- Filename: $key --\n";
-      readfile($value);
+    echo "\n-- Filename: $key --\n";
+    try {
+        readfile($value);
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 ?>
@@ -70,12 +74,10 @@ Warning: readfile(): Filename cannot be empty in %s on line %d
 Warning: readfile( ): failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
-
-Warning: readfile() expects parameter 1 to be a valid path, string given in %s on line %d
+readfile() expects parameter 1 to be a valid path, string given
 
 -- Filename: array() --
-
-Warning: readfile() expects parameter 1 to be a valid path, array given in %s on line %d
+readfile() expects parameter 1 to be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

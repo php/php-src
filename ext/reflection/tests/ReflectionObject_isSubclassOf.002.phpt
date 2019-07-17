@@ -11,12 +11,12 @@ $ro = new ReflectionObject(new C);
 echo "\n\nTest bad arguments:\n";
 try {
 	var_dump($ro->isSubclassOf());
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 try {
 	var_dump($ro->isSubclassOf('C', 'C'));
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 try {
@@ -35,14 +35,10 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Test bad arguments:
-
-Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given in %s on line 7
-NULL
-
-Warning: ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given in %s on line 12
-NULL
+ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given
+ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given
 Parameter one must either be a string or a ReflectionClass object
 Class ThisClassDoesNotExist does not exist
 Parameter one must either be a string or a ReflectionClass object
