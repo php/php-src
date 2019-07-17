@@ -1594,6 +1594,8 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		handle->handle.stream.closer = php_zend_stream_closer;
 		/* suppress warning if this stream is not explicitly closed */
 		php_stream_auto_cleanup(stream);
+		/* Disable buffering to avoid double buffering between PHP and Zend streams. */
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
 
 		return SUCCESS;
 	}

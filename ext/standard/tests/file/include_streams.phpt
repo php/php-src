@@ -96,6 +96,9 @@ class mystream
 		}
 	}
 
+	function stream_set_option($option, $arg1, $arg2) {
+		return false;
+	}
 }
 
 if (!stream_wrapper_register("test", "mystream")) {
