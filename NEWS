@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #78066 (PHP eats the first byte of a program that comes from
     process substitution). (Nikita)
+  . Fixed bug #52752 (Crash when lexing). (Nikita)
 
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between

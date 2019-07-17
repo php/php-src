@@ -9,7 +9,7 @@ if(!extension_loaded('zip')) die('skip');
 
 $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_addfile.zip';
+$file = $dirname . 'oo_addemptydir.zip';
 
 copy($dirname . 'test.zip', $file);
 

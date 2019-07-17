@@ -398,8 +398,6 @@ PHP_CHECK_FUNC(socketpair, socket)
 PHP_CHECK_FUNC(htonl, socket)
 PHP_CHECK_FUNC(gethostname, nsl)
 PHP_CHECK_FUNC(gethostbyaddr, nsl)
-PHP_CHECK_FUNC(yp_get_default_domain, nsl)
-
 PHP_CHECK_FUNC(dlopen, dl)
 PHP_CHECK_FUNC(dlsym, dl)
 if test "$ac_cv_func_dlopen" = "yes"; then
@@ -588,7 +586,6 @@ fpclass \
 ftok \
 funopen \
 gai_strerror \
-gcvt \
 getcwd \
 getloadavg \
 getlogin \
@@ -608,10 +605,7 @@ grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
-isascii \
-link \
 localtime_r \
-lockf \
 lchown \
 mbrlen \
 memmove \
@@ -627,11 +621,8 @@ rand_r \
 scandir \
 setitimer \
 setenv \
-setsockopt \
-setvbuf \
 shutdown \
 sigprocmask \
-sin \
 statfs \
 statvfs \
 std_syslog \
@@ -641,7 +632,6 @@ strnlen \
 strptime \
 strtok_r \
 symlink \
-tempnam \
 tzset \
 unlockpt \
 unsetenv \

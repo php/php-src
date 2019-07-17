@@ -219,11 +219,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				name_len = spprintf(&name, 4096, "phar://%s/%s", arch, entry);
 			}
 
-			file_handle.type = ZEND_HANDLE_FILENAME;
-			file_handle.handle.fd = 0;
-			file_handle.filename = name;
-			file_handle.opened_path = NULL;
-			file_handle.free_filename = 0;
+			zend_stream_init_filename(&file_handle, name);
 
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;

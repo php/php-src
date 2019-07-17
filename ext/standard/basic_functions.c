@@ -5315,11 +5315,7 @@ PHP_FUNCTION(php_strip_whitespace)
 
 	php_output_start_default();
 
-	memset(&file_handle, 0, sizeof(file_handle));
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
+	zend_stream_init_filename(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
 	if (open_file_for_scanning(&file_handle) == FAILURE) {
 		zend_restore_lexical_state(&original_lex_state);
@@ -6082,9 +6078,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	/* Setup filehandle */
-	memset(&fh, 0, sizeof(fh));
-	fh.filename = filename;
-	fh.type = ZEND_HANDLE_FILENAME;
+	zend_stream_init_filename(&fh, filename);
 
 	array_init(return_value);
 	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {

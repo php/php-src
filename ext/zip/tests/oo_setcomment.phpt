@@ -8,7 +8,7 @@ if(!extension_loaded('zip')) die('skip');
 <?php
 $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_set_comment.zip';
+$file = $dirname . 'oo_setcomment.zip';
 
 @unlink($file);
 

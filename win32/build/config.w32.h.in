@@ -28,7 +28,6 @@
 
 /* Platform-Specific Configuration. Should not be changed. */
 #define PHP_SIGCHILD 0
-#define HAVE_LIBBIND 1
 #define HAVE_GETSERVBYNAME 1
 #define HAVE_GETSERVBYPORT 1
 #define HAVE_GETPROTOBYNAME 1
@@ -40,7 +39,6 @@
 #define HAVE_ERRMSG_H 0
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
-#undef HAVE_LINK
 #undef HAVE_SYMLINK
 
 /* its in win32/time.c */
@@ -48,7 +46,6 @@
 #define HAVE_NANOSLEEP 1
 #define PHP_SLEEP_NON_VOID 1
 
-#define HAVE_GETHOSTNAME 1
 #define HAVE_GETCWD 1
 #define NEED_ISBLANK 1
 #define DISCARD_PATH 0
@@ -67,18 +64,12 @@
 #define HAVE_STRUCT_STAT_ST_RDEV 1
 #define REGEX 1
 #define HSREGEX 1
-#define HAVE_GCVT 1
 #define HAVE_GETLOGIN 1
 #define HAVE_MEMMOVE 1
-#define HAVE_PUTENV 1
 #define HAVE_REGCOMP 1
 #define HAVE_LOCALE_H 1
-#ifndef HAVE_LIBBIND
-# define HAVE_SETVBUF 1
-#endif
 #define HAVE_SHUTDOWN 1
 #define HAVE_STRCASECMP 1
-#define HAVE_TEMPNAM 1
 #define HAVE_UTIME 1
 #undef HAVE_DIRENT_H
 #define HAVE_FCNTL_H 1
@@ -96,7 +87,7 @@
 #define HAVE_LIBM 1
 #undef HAVE_RINT
 #define SIZEOF_SHORT 2
-/* int and long are stll 32bit in 64bit compiles */
+/* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
 /* MSVC.6/NET don't allow 'long long' or know 'intmax_t' */

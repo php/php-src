@@ -292,9 +292,6 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle)
 	zend_llist_del_element(&CG(open_files), file_handle, (int (*)(void *, void *)) zend_compare_file_handles);
 	/* zend_file_handle_dtor() operates on the copy, so we have to NULLify the original here */
 	file_handle->opened_path = NULL;
-	if (file_handle->free_filename) {
-		file_handle->filename = NULL;
-	}
 }
 
 ZEND_API void zend_lex_tstring(zval *zv)
@@ -659,11 +656,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 		ZVAL_STR(&tmp, zval_get_string(filename));
 		filename = &tmp;
 	}
-	file_handle.filename = Z_STRVAL_P(filename);
-	file_handle.free_filename = 0;
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.opened_path = NULL;
-	file_handle.handle.fp = NULL;
+	zend_stream_init_filename(&file_handle, Z_STRVAL_P(filename));
 
 	retval = zend_compile_file(&file_handle, type);
 	if (retval && file_handle.handle.stream.handle) {
@@ -789,10 +782,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	zend_lex_state original_lex_state;
 	zend_file_handle file_handle;
 
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
+	zend_stream_init_filename(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
 	if (open_file_for_scanning(&file_handle)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
@@ -2031,6 +2021,20 @@ string:
 	RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
 }
 
+<INITIAL>"<?php" {
+	/* Allow <?php followed by end of file. */
+	if (YYCURSOR == YYLIMIT) {
+		BEGIN(ST_IN_SCRIPTING);
+		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
+	}
+	/* Degenerate case: <?phpX is interpreted as <? phpX with short tags. */
+	if (CG(short_tags)) {
+		yyless(2);
+		BEGIN(ST_IN_SCRIPTING);
+		RETURN_OR_SKIP_TOKEN(T_OPEN_TAG);
+	}
+	goto inline_char_handler;
+}
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {

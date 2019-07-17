@@ -289,7 +289,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - Removed unused check for dev/arandom and the HAVE_DEV_ARANDOM symbol.
     - Remove unused functions checks: HAVE_MBSINIT, HAVE_MEMPCPY, HAVE_SETPGID,
       HAVE_STRPNCPY, HAVE_STRTOULL, HAVE_VSNPRINTF, HAVE_CUSERID, HAVE_LRAND48,
-      HAVE_RANDOM, HAVE_SRAND48, HAVE_SRANDOM, HAVE_STRDUP.
+      HAVE_RANDOM, HAVE_SRAND48, HAVE_SRANDOM, HAVE_STRDUP, HAVE_GCVT,
+      HAVE_ISASCII, HAVE_LINK, HAVE_LOCKF, HAVE_SOCKOPT, HAVE_SETVBUF, HAVE_SIN,
+      HAVE_TEMPNAM.
     - Unused check for struct cmsghdr and symbol HAVE_CMSGHDR have been removed.
     - Unused ApplicationServices/ApplicationServices.h headers check and
       HAVE_APPLICATIONSERVICES_APPLICATIONSERVICES_H symbol have been removed.
@@ -301,6 +303,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   c. Windows build system changes
 
     . Visual Studio 2019 is utilized for the Windows builds
+    . Removed unused defined symbol HAVE_LIBBIND.
 
 ========================
 3. Module changes

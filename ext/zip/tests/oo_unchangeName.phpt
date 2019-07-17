@@ -7,7 +7,7 @@ PHP TestFest 2017 - Bergfreunde, Florian Engelhardt
 --FILE--
 <?php
 $dirname = __DIR__ . '/';
-$file = $dirname . '__tmp_oo_unchangeIndex.zip';
+$file = $dirname . 'oo_unchangeName.zip';
 copy($dirname.'test.zip', $file);
 
 var_dump(md5_file($file));
@@ -32,7 +32,7 @@ var_dump(md5_file($file));
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__.'/__tmp_oo_unchangeIndex.zip');
+unlink(__DIR__.'/oo_unchangeName.zip');
 ?>
 --EXPECT--
 string(32) "cb753d0a812b2edb386bdcbc4cd7d131"

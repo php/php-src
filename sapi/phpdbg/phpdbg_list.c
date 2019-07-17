@@ -248,6 +248,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 		} else {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file->filename);
 		}
+		return NULL;
 	}
 
 	data.buf = estrndup(bufptr, len);
@@ -293,10 +294,6 @@ zend_op_array *phpdbg_init_compile_file(zend_file_handle *file, int type) {
 			zend_string_release(file->opened_path);
 			file->opened_path = zend_string_init(filename, strlen(filename), 0);
 		} else {
-			if (file->free_filename) {
-				efree((char *) file->filename);
-			}
-			file->free_filename = 0;
 			file->filename = filename;
 		}
 	}

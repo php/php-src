@@ -326,7 +326,7 @@ $op1_get_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "NULL",
 	"CV"       => "EX_VAR(opline->op1.var)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op1.var)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_zval_ptr_ptr_undef = array(
@@ -337,7 +337,7 @@ $op2_get_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "NULL",
 	"CV"       => "EX_VAR(opline->op2.var)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op2.var)",
+	"TMPVARCV" => "???",
 );
 
 $op1_get_obj_zval_ptr = array(
@@ -436,7 +436,7 @@ $op1_get_obj_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "&EX(This)",
 	"CV"       => "EX_VAR(opline->op1.var)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op1.var)",
+	"TMPVARCV" => "???",
 );
 
 $op2_get_obj_zval_ptr_ptr_undef = array(
@@ -447,7 +447,7 @@ $op2_get_obj_zval_ptr_ptr_undef = array(
 	"UNUSED"   => "&EX(This)",
 	"CV"       => "EX_VAR(opline->op2.var)",
 	"TMPVAR"   => "???",
-	"TMPVARCV" => "EX_VAR(opline->op2.var)",
+	"TMPVARCV" => "???",
 );
 
 $op1_free_op = array(
@@ -1100,6 +1100,20 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 		return;
 	}
 
+	/* Skip SMART_BRANCH specialization for "cold" CONST_CONST instructions */
+	if (isset($extra_spec["SMART_BRANCH"])) {
+		if ($opcode["hot"] === 'HOT_NOCONSTCONST_'
+		 || $opcode["hot"] === 'COLD_CONSTCONST_') {
+			if (($op1 === 'CONST') && ($op2 === 'CONST')) {
+				if ($extra_spec["SMART_BRANCH"] == 0) {
+					unset($extra_spec["SMART_BRANCH"]);
+				} else {
+					return;
+				}
+			}
+		}
+	}
+
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1193,10 +1207,6 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 		return;
 	}
 
-	if ($spec && $name === "zend_binary_assign_op_helper") {
-		return;
-	}
-
 	if (ZEND_VM_LINES) {
 		out($f, "#line $lineno \"$definition_file\"\n");
 	}
@@ -1216,7 +1226,7 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 				if ($cold) {
 					$zend_attributes = " zend_never_inline ZEND_COLD";
 				} else {
-					$zend_attributes = "";
+					$zend_attributes = " zend_never_inline";
 				}
 				$zend_fastcall = " ZEND_FASTCALL";
 			}
@@ -1412,6 +1422,16 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						$list[$label] = null;
 						$label++;
 						return;
+					}
+
+					/* Skip SMART_BRANCH specialization for "cold" CONST_CONST instructions */
+					if (isset($extra_spec["SMART_BRANCH"])) {
+						if ($dsc["hot"] === 'HOT_NOCONSTCONST_'
+						 || $dsc["hot"] === 'COLD_CONSTCONST_') {
+							if (($op1 === 'CONST') && ($op2 === 'CONST')) {
+								unset($extra_spec["SMART_BRANCH"]);
+							}
+						}
 					}
 
 					// Emit pointer to specialized handler

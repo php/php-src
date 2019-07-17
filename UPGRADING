@@ -34,6 +34,10 @@ PHP 7.4 UPGRADE NOTES
   . Passing the result of a (non-reference) list() assignment by reference is
     consistently disallowed now. Previously this worked if the right hand side
     was a simple (CV) variable and did not occur as part of the list().
+  . `<?php` at the end of the file (without trailing newline) will now be
+    interpreted as an opening PHP tag. Previously it was interpreted either as
+    `<? php` and resulted in a syntax error (with short_open_tag=1) or was
+    interpreted as a literal `<?php` string (with short_open_tag=0).
 
 - BCMath:
   . BCMath functions will now warn if a non well-formed number is passed, such

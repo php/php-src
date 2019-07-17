@@ -25,7 +25,7 @@ various fgetcsv() functionality tests
 		'aaa"\\"a","bbb"'
 	);
 
-	$file = __DIR__ . 'fgetcsv.csv';
+	$file = __DIR__ . '/fgetcsv.csv';
 	@unlink($file);
 	foreach ($list as $v) {
 		$fp = fopen($file, "w");

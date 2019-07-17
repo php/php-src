@@ -399,7 +399,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				 || opline->opcode == ZEND_SEND_VAL_EX
 				 || opline->opcode == ZEND_QM_ASSIGN) {
 					/* Update handlers to eliminate REFCOUNTED check */
-					zend_vm_set_opcode_handler_ex(opline, 0, 0, 0);
+					zend_vm_set_opcode_handler_ex(opline, 1 << Z_TYPE_P(opline->op1.zv), 0, 0);
 				}
 			}
 			if (opline->op2_type == IS_CONST) {
