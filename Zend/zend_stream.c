@@ -23,10 +23,6 @@
 #include "zend_compile.h"
 #include "zend_stream.h"
 
-#ifndef S_ISREG
-# define S_ISREG(m) 1
-#endif
-
 ZEND_DLIMPORT int isatty(int fd);
 
 static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len) /* {{{ */
@@ -39,6 +35,29 @@ static void zend_stream_stdio_closer(void *handle) /* {{{ */
 	if (handle && (FILE*)handle != stdin) {
 		fclose((FILE*)handle);
 	}
+} /* }}} */
+
+static size_t zend_stream_stdio_fsizer(void *handle) /* {{{ */
+{
+	zend_stat_t buf;
+	if (handle && zend_fstat(fileno((FILE*)handle), &buf) == 0) {
+#ifdef S_ISREG
+		if (!S_ISREG(buf.st_mode)) {
+			return 0;
+		}
+#endif
+		return buf.st_size;
+	}
+	return -1;
+} /* }}} */
+
+static size_t zend_stream_fsize(zend_file_handle *file_handle) /* {{{ */
+{
+	ZEND_ASSERT(file_handle->type == ZEND_HANDLE_STREAM);
+	if (file_handle->handle.stream.isatty) {
+		return 0;
+	}
+	return file_handle->handle.stream.fsizer(file_handle->handle.stream.handle);
 } /* }}} */
 
 ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char *filename) {
@@ -96,7 +115,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len) /* {{{ */
 {
-	size_t size = 0;
+	size_t size;
 
 	if (file_handle->buf) {
 		*buf = file_handle->buf;
@@ -111,25 +130,21 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	}
 
 	if (file_handle->type == ZEND_HANDLE_FP) {
-		FILE *fp = file_handle->handle.fp;
-		int is_tty;
-		if (!fp) {
+		if (!file_handle->handle.fp) {
 			return FAILURE;
 		}
 
-		is_tty = isatty(fileno(fp));
-		if (!is_tty) {
-			zend_stat_t buf;
-			if (zend_fstat(fileno(fp), &buf) == 0 && S_ISREG(buf.st_mode)) {
-				size = buf.st_size;
-			}
-		}
-
 		file_handle->type = ZEND_HANDLE_STREAM;
-		file_handle->handle.stream.handle = fp;
-		file_handle->handle.stream.isatty = is_tty;
+		file_handle->handle.stream.handle = file_handle->handle.fp;
+		file_handle->handle.stream.isatty = isatty(fileno((FILE *)file_handle->handle.stream.handle));
 		file_handle->handle.stream.reader = (zend_stream_reader_t)zend_stream_stdio_reader;
 		file_handle->handle.stream.closer = (zend_stream_closer_t)zend_stream_stdio_closer;
+		file_handle->handle.stream.fsizer = (zend_stream_fsizer_t)zend_stream_stdio_fsizer;
+	}
+
+	size = zend_stream_fsize(file_handle);
+	if (size == (size_t)-1) {
+		return FAILURE;
 	}
 
 	if (size) {
