@@ -1562,6 +1562,16 @@ static void php_zend_stream_closer(void *handle) /* {{{ */
 }
 /* }}} */
 
+static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
+{
+	php_stream_statbuf  ssb;
+	if (php_stream_stat((php_stream*)handle, &ssb) == 0) {
+		return ssb.sb.st_size;
+	}
+	return 0;
+}
+/* }}} */
+
 static int php_stream_open_for_zend(const char *filename, zend_file_handle *handle) /* {{{ */
 {
 	return php_stream_open_for_zend_ex(filename, handle, USE_PATH|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE);
@@ -1579,6 +1589,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 		handle->opened_path = opened_path;
 		handle->handle.stream.handle  = stream;
 		handle->handle.stream.reader  = (zend_stream_reader_t)_php_stream_read;
+		handle->handle.stream.fsizer  = php_zend_stream_fsizer;
 		handle->handle.stream.isatty  = 0;
 		handle->handle.stream.closer = php_zend_stream_closer;
 		/* suppress warning if this stream is not explicitly closed */
