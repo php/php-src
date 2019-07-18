@@ -32,6 +32,5 @@ bool(true)
 option: 3, 2, 50
 int(-1)
 int(8192)
-size: 42
-size: 28
+size: 70
 int(70)
