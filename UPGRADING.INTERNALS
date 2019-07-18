@@ -300,6 +300,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       --enable-option-checking=fatal option can be used in the configure step
       to enable error when invalid options are used.
     - Removed unused check and symbols HAVE_SHM_MMAP_ZERO, HAVE_SHM_MMAP_FILE.
+    - Removed unused check and symbol MISSING_MSGHDR_MSGFLAGS.
 
   c. Windows build system changes
 
