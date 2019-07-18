@@ -2371,7 +2371,7 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 
 static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
-	if (ast->attr == ZEND_ALTERNATIVE_ARRAY_SYNTAX) {
+	if (ast->attr == ZEND_DIM_ALTERNATIVE_SYNTAX) {
 		zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
 	}
 
@@ -8802,7 +8802,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 			}
 
-			if (ast->attr & ZEND_ALTERNATIVE_ARRAY_SYNTAX) {
+			if (ast->attr & ZEND_DIM_ALTERNATIVE_SYNTAX) {
 				zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
 			}
 
