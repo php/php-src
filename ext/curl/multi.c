@@ -379,7 +379,7 @@ PHP_FUNCTION(curl_multi_info_read)
 
 			/* we must save result to be able to read error message */
 			ch = (php_curl*)zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl);
-			SAVE_CURLM_ERROR(ch, tmp_msg->data.result);
+			SAVE_CURL_ERROR(ch, tmp_msg->data.result);
 
 			/* add_assoc_resource automatically creates a new zval to
 			   wrap the "resource" represented by the current pz_ch */
