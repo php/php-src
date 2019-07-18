@@ -212,61 +212,6 @@ int main() {
     msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
-  AC_MSG_CHECKING(for mmap() using /dev/zero shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-
-#ifndef MAP_FAILED
-# define MAP_FAILED ((void*)-1)
-#endif
-
-int main() {
-  pid_t pid;
-  int status;
-  int fd;
-  char *shm;
-
-  fd = open("/dev/zero", O_RDWR, S_IRUSR | S_IWUSR);
-  if (fd == -1) {
-    return 1;
-  }
-
-  shm = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (shm == MAP_FAILED) {
-    return 2;
-  }
-
-  strcpy(shm, "hello");
-
-  pid = fork();
-  if (pid < 0) {
-    return 5;
-  } else if (pid == 0) {
-    strcpy(shm, "bye");
-    return 6;
-  }
-  if (wait(&status) != pid) {
-    return 7;
-  }
-  if (!WIFEXITED(status) || WEXITSTATUS(status) != 6) {
-    return 8;
-  }
-  if (strcmp(shm, "bye") != 0) {
-    return 9;
-  }
-  return 0;
-}
-]])],[dnl
-    AC_DEFINE(HAVE_SHM_MMAP_ZERO, 1, [Define if you have mmap("/dev/zero") SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
-
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
@@ -333,75 +278,6 @@ int main() {
 }
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
-
-  AC_MSG_CHECKING(for mmap() using regular file shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#ifndef MAP_FAILED
-# define MAP_FAILED ((void*)-1)
-#endif
-
-int main() {
-  pid_t pid;
-  int status;
-  int fd;
-  char *shm;
-  char tmpname[4096];
-
-  sprintf(tmpname,"opcache.test.shm.%dXXXXXX", getpid());
-  if (mktemp(tmpname) == NULL) {
-    return 1;
-  }
-  fd = open(tmpname, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-  if (fd == -1) {
-    return 2;
-  }
-  if (ftruncate(fd, 4096) < 0) {
-    close(fd);
-    unlink(tmpname);
-    return 3;
-  }
-
-  shm = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (shm == MAP_FAILED) {
-    return 4;
-  }
-  unlink(tmpname);
-  close(fd);
-
-  strcpy(shm, "hello");
-
-  pid = fork();
-  if (pid < 0) {
-    return 5;
-  } else if (pid == 0) {
-    strcpy(shm, "bye");
-    return 6;
-  }
-  if (wait(&status) != pid) {
-    return 7;
-  }
-  if (!WIFEXITED(status) || WEXITSTATUS(status) != 6) {
-    return 8;
-  }
-  if (strcmp(shm, "bye") != 0) {
-    return 9;
-  }
-  return 0;
-}
-]])],[dnl
-    AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
     msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
