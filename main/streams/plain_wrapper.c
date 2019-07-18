@@ -128,6 +128,7 @@ typedef struct {
 	unsigned is_pipe:1;			/* don't try and seek */
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
+	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
 	unsigned _reserved:28;
 
 	int lock_flag;			/* stores the lock state */
@@ -152,7 +153,7 @@ typedef struct {
 
 static int do_fstat(php_stdio_stream_data *d, int force)
 {
-	if (!d->cached_fstat || force) {
+	if (!d->cached_fstat || (force && !d->no_forced_fstat)) {
 		int fd;
 		int r;
 
@@ -694,18 +695,15 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 
 					case PHP_STREAM_MMAP_MAP_RANGE:
-						if(do_fstat(data, 1) != 0) {
+						if (do_fstat(data, 1) != 0) {
 							return PHP_STREAM_OPTION_RETURN_ERR;
 						}
-						if (range->length == 0 && range->offset > 0 && range->offset < data->sb.st_size) {
-							range->length = data->sb.st_size - range->offset;
-						}
-						if (range->length == 0 || range->length > data->sb.st_size) {
-							range->length = data->sb.st_size;
-						}
-						if (range->offset >= data->sb.st_size) {
+						if (range->offset > data->sb.st_size) {
 							range->offset = data->sb.st_size;
-							range->length = 0;
+						}
+						if (range->length == 0 ||
+								range->length > data->sb.st_size - range->offset) {
+							range->length = data->sb.st_size - range->offset;
 						}
 						switch (range->mode) {
 							case PHP_STREAM_MAP_MODE_READONLY:
@@ -1079,6 +1077,10 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 					php_stream_close(ret);
 					return NULL;
 				}
+
+				/* Make sure the fstat result is reused when we later try to get the
+				 * file size. */
+				self->no_forced_fstat = 1;
 			}
 
 			if (options & STREAM_USE_BLOCKING_PIPE) {

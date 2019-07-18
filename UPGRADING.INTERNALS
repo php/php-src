@@ -250,6 +250,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
       PHP_SOLID_LIBS, PHP_EMPRESS_INCLUDE, PHP_EMPRESS_LIBS, PHP_SYBASE_INCLUDE,
       PHP_SYBASE_LFLAGS, PHP_SYBASE_LIBS, PHP_DBM_TYPE, PHP_DBM_LIB,
       PHP_LDAP_LFLAGS, PHP_LDAP_INCLUDE, PHP_LDAP_LIBS.
+    - Removed unused symbols: HAVE_CURL_EASY_STRERROR, HAVE_CURL_MULTI_STRERROR,
+      HAVE_MPIR, HAVE_NEW_MIME2TEXT, HAVE_MBSTR_CN, HAVE_MBSTR_JA,
+      HAVE_MBSTR_KR, HAVE_MBSTR_RU, HAVE_MBSTR_TW.
 
   b. Unix build system changes
     - Added --ini-path and --ini-dir options to php-config.
@@ -299,6 +302,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
     - PHP_CHECK_CONFIGURE_OPTIONS macro has been removed. Default Autoconf's
       --enable-option-checking=fatal option can be used in the configure step
       to enable error when invalid options are used.
+    - Removed unused check and symbols HAVE_SHM_MMAP_ZERO, HAVE_SHM_MMAP_FILE.
+    - Removed unused check and symbol MISSING_MSGHDR_MSGFLAGS.
 
   c. Windows build system changes
 

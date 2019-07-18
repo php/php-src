@@ -97,9 +97,6 @@ static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
 static void _php_curl_close_ex(php_curl *ch);
 static void _php_curl_close(zend_resource *rsrc);
 
-#define SAVE_CURL_ERROR(__handle, __err) \
-    do { (__handle)->err.no = (int) __err; } while (0)
-
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s) - 1, (zend_long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s) - 1, (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s) - 1, (char *) (v ? v : ""));

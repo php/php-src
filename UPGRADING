@@ -135,6 +135,10 @@ PHP 7.4 UPGRADE NOTES
     Applications correctly using the constants PASSWORD_DEFAULT,
     PASSWORD_BCRYPT, PASSWORD_ARGON2I, and PASSWORD_ARGON2ID will continue to
     function correctly.
+  . htmlentities() will now throw a notice (instead of a strict standards
+    warning) if it is used with an encoding for which only basic entity
+    substitution is supported, in which case it is equivalent to
+    htmlspecialchars().
 
 - Tokenizer:
   . token_get_all() will now emit a T_BAD_CHARACTER token for unexpected
@@ -609,6 +613,10 @@ PHP 7.4 UPGRADE NOTES
 
 - configure now regards additional CFLAGS and LDFLAGS set as environment
   variables.
+
+- OPcache now supports an arbitrary amount of separate caches per user via the
+  the INI directive opcache.cache_id. All processes with the same cache ID and
+  user share an OPcache instance.
 
 ========================================
 13. Migration to pkg-config

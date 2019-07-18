@@ -19,6 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php.h"
 #include "ZendAccelerator.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
@@ -67,38 +68,24 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
-	char *uname;
-
-	uname = php_win32_get_username();
-	if (!uname) {
-		return NULL;
-	}
-	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, accel_system_id);
-
-	free(uname);
+	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32];
+	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.32s", name, accel_uname_id, accel_system_id);
 
 	return newname;
 }
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
-	char *uname;
+	static char windir[MAXPATHLEN+ 32 + 3 + sizeof("\\\\@") + 1 + 32];
 	int l;
 
-	uname = php_win32_get_username();
-	if (!uname) {
-		return NULL;
-	}
 	GetTempPath(MAXPATHLEN, windir);
 	l = strlen(windir);
 	if ('\\' == windir[l-1]) {
 		l--;
 	}
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, accel_system_id);
 
-	free(uname);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%.32s@%.32s", ACCEL_FILEMAP_BASE, accel_uname_id, accel_system_id);
 
 	return windir;
 }

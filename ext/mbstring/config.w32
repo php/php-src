@@ -15,8 +15,7 @@ if (PHP_MBSTRING != "no") {
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
 		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
-			/D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
-			/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H \
+			/D HAVE_CONFIG_H \
 			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
 		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
@@ -56,14 +55,8 @@ if (PHP_MBSTRING != "no") {
 		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h php_mbregex.h php_onig_compat.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
 
 		AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
-		AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
-		AC_DEFINE('HAVE_MBSTR_JA', 1, 'JA');
-		AC_DEFINE('HAVE_MBSTR_KR', 1, 'KR');
-		AC_DEFINE('HAVE_MBSTR_RU', 1, 'RU');
-		AC_DEFINE('HAVE_MBSTR_TW', 1, 'TW');
 
 		if (PHP_MBREGEX != "no") {
-			AC_DEFINE('HAVE_STDARG_PROTOTYPES', 1, 'have stdarg.h');
 			AC_DEFINE('HAVE_MBREGEX', 1);
 			ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 			PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
