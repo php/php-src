@@ -1480,7 +1480,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 		echo "$i ";
 	}
 	echo "… done!\n";
-	echo "====⚡️===========================================================⚡️====\n";
+	echo "=====================================================================\n";
 	echo "\n";
 
 	$rawMessageBuffers = [];
