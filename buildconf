@@ -2,7 +2,6 @@
 #
 # A wrapper around Autoconf that generates files to build PHP on *nix systems.
 
-MAKE=${MAKE:-make}
 PHP_AUTOCONF=${PHP_AUTOCONF:-autoconf}
 PHP_AUTOHEADER=${PHP_AUTOHEADER:-autoheader}
 force=0
@@ -38,15 +37,13 @@ SYNOPSIS:
   buildconf [<options>]
 
 OPTIONS:
-  -f, --force     Clean cache and overwrite configure files.
+  -f, --force     Regenerate configure files in PHP release packages.
   --debug         Display warnings emitted by Autoconf.
   -h, --help      Display this help.
 
 ENVIRONMENT:
   The following optional variables are supported:
 
-  MAKE            Overrides the path to make tool.
-                  MAKE=/path/to/make ./buildconf
   PHP_AUTOCONF    Overrides the path to autoconf tool.
                   PHP_AUTOCONF=/path/to/autoconf ./buildconf
   PHP_AUTOHEADER  Overrides the path to autoheader tool.
@@ -66,22 +63,16 @@ HELP
   shift
 done
 
-if test "$dev" = "0" -a "$force" = "0"; then
-  if test -f "configure"; then
-    echo "The configure script has already been built for you. All done."
-    echo "Run ./configure to proceed with customizing the PHP build."
+if test "$dev" = "0" && test "$force" = "0"; then
+  if test -f "configure" && test -f "main/php_config.h.in"; then
+    echo "buildconf: The configure script is already built. All done."
+    echo "           Run ./configure to proceed with customizing the PHP build."
     exit 0
   else
-    echo "Configure script is missing." >&2
-    echo "Run ./buildconf --force to create a configure script." >&2
+    echo "buildconf: Configure files are missing." >&2
+    echo "           Run ./buildconf --force to create a configure script." >&2
     exit 1
   fi
-fi
-
-if test "$force" = "1"; then
-  echo "buildconf: Forcing buildconf"
-  echo "buildconf: Removing configure caches and files"
-  rm -rf autom4te.cache config.cache configure
 fi
 
 echo "buildconf: Checking installation"
@@ -114,23 +105,33 @@ else
   echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
-# Check if make exists.
-if ! test -x "$(command -v $MAKE)"; then
-  echo "buildconf: make not found." >&2
-  echo "           You need to have make installed to build PHP." >&2
-  exit 1
+if test "$force" = "1"; then
+  echo "buildconf: Forcing buildconf. The configure files will be regenerated."
 fi
 
-echo "buildconf: Building configure files"
+# Clean cache and explicitly remove all targets if present. Remove also
+# aclocal.m4 if present. It is automatically included by autoconf but not used
+# by the PHP build system since PHP 7.4.
+echo "buildconf: Cleaning cache and configure files"
+rm -rf \
+  aclocal.m4 \
+  autom4te.cache \
+  config.cache \
+  configure \
+  main/php_config.h.in
 
 if test "$debug" = "1"; then
   autoconf_flags="-f -Wall"
+  autoheader_flags="-Wall"
 else
   autoconf_flags="-f"
+  autoheader_flags=""
 fi
 
-$MAKE -s -f build/build.mk \
-  PHP_AUTOCONF="$PHP_AUTOCONF" \
-  PHP_AUTOHEADER="$PHP_AUTOHEADER" \
-  PHP_AUTOCONF_FLAGS="$autoconf_flags" \
-  PHP_M4_FILES="$(echo TSRM/*.m4 Zend/Zend.m4 build/*.m4 ext/*/config*.m4 sapi/*/config*.m4)"
+echo "buildconf: Rebuilding configure"
+$PHP_AUTOCONF $autoconf_flags
+
+echo "buildconf: Rebuilding main/php_config.h.in"
+$PHP_AUTOHEADER $autoheader_flags
+
+echo "buildconf: Run ./configure to proceed with customizing the PHP build."
