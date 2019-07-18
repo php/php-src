@@ -2133,9 +2133,9 @@ PHP_FUNCTION(curl_copy_handle)
 static size_t read_cb(char *buffer, size_t size, size_t nitems, void *arg) /* {{{ */
 {
 	php_stream *stream = (php_stream *) arg;
-	size_t numread = php_stream_read(stream, buffer, nitems * size);
+	ssize_t numread = php_stream_read(stream, buffer, nitems * size);
 
-	if (numread == (size_t)-1) {
+	if (numread < 0) {
 		return CURL_READFUNC_ABORT;
 	}
 	return numread;

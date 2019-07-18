@@ -634,7 +634,7 @@ struct oci_lob_self {
 	ub4 offset;
 };
 
-static size_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct oci_lob_self *self = (struct oci_lob_self*)stream->abstract;
 	ub4 amt;
@@ -647,7 +647,7 @@ static size_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
 		NULL, NULL, 0, SQLCS_IMPLICIT);
 
 	if (r != OCI_SUCCESS) {
-		return (size_t)-1;
+		return (ssize_t)-1;
 	}
 
 	self->offset += amt;

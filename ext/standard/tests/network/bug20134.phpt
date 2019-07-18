@@ -21,4 +21,4 @@ else {
 ?>
 --EXPECT--
 int(1)
-string(0) ""
+bool(false)

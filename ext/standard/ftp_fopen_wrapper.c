@@ -613,7 +613,7 @@ errexit:
 
 /* {{{ php_ftp_dirsteam_read
  */
-static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_dirent *ent = (php_stream_dirent *)buf;
 	php_stream *innerstream;
@@ -623,7 +623,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	innerstream =  ((php_ftp_dirstream_data *)stream->abstract)->datastream;
 
 	if (count != sizeof(php_stream_dirent)) {
-		return 0;
+		return -1;
 	}
 
 	if (php_stream_eof(innerstream)) {
@@ -631,7 +631,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	}
 
 	if (!php_stream_get_line(innerstream, ent->d_name, sizeof(ent->d_name), &tmp_len)) {
-		return 0;
+		return -1;
 	}
 
 	basename = php_basename(ent->d_name, tmp_len, NULL, 0);

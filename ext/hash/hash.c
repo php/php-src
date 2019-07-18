@@ -149,12 +149,16 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		size_t n;
+		ssize_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
+		if (n < 0) {
+			efree(context);
+			RETURN_FALSE;
+		}
 	} else {
 		ops->hash_update(context, (unsigned char *) data, data_len);
 	}
@@ -277,13 +281,20 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		size_t n;
+		ssize_t n;
 		ops->hash_init(context);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
+		if (n < 0) {
+			efree(context);
+			efree(K);
+			zend_string_release(digest);
+			RETURN_FALSE;
+		}
+
 		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	} else {
 		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) data, data_len);
@@ -447,14 +458,14 @@ PHP_FUNCTION(hash_update_stream)
 
 	while (length) {
 		char buf[1024];
-		zend_long n, toread = 1024;
+		zend_long toread = 1024;
+		ssize_t n;
 
 		if (length > 0 && toread > length) {
 			toread = length;
 		}
 
 		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
-			/* Nada mas */
 			RETURN_LONG(didread);
 		}
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
@@ -476,7 +487,7 @@ PHP_FUNCTION(hash_update_file)
 	php_stream *stream;
 	zend_string *filename;
 	char buf[1024];
-	size_t n;
+	ssize_t n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
 		return;
@@ -497,7 +508,7 @@ PHP_FUNCTION(hash_update_file)
 	}
 	php_stream_close(stream);
 
-	RETURN_TRUE;
+	RETURN_BOOL(n >= 0);
 }
 /* }}} */
 
