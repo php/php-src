@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
+  . Added new INI directive opcache.cache_id (Windows only). (cmb)
 
 - Recode:
   . Unbundled the recode extension. (cmb)
