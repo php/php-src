@@ -24,6 +24,9 @@ if (function_exists("opcache_get_status")) {
     $status = opcache_get_status();
     if (is_array($status) && ($status["opcache_enabled"] || (isset($status["file_cache_only"]) && $status["file_cache_only"]))) {
         opcache_invalidate($pname . '/a.php', true);
+        // opcache_invalidate is buggy and doesn't work as expected so we add a
+        // minor delay here.
+        sleep(2);
     }
 }
 
