@@ -8803,6 +8803,7 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			if (ast->attr & ZEND_DIM_ALTERNATIVE_SYNTAX) {
+				ast->attr &= ~ZEND_DIM_ALTERNATIVE_SYNTAX; /* remove flag to avoid duplicate warning */
 				zend_error(E_DEPRECATED, "Array and string offset access syntax with curly braces is deprecated");
 			}
 
