@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.9
 
+- Curl:
+  . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
+    (Abyr Valg)
+
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)

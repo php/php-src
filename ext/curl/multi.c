@@ -334,6 +334,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	CURLMsg	  *tmp_msg;
 	int        queued_msgs;
 	zval      *zmsgs_in_queue = NULL;
+	php_curl  *ch;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_RESOURCE(z_mh)
@@ -370,6 +371,10 @@ PHP_FUNCTION(curl_multi_info_read)
 			   SEPARATE_ZVAL, but those create new zvals, which is already
 			   being done in add_assoc_resource */
 			Z_ADDREF_P(pz_ch);
+
+			/* we must save result to be able to read error message */
+			ch = (php_curl*)zend_fetch_resource(Z_RES_P(pz_ch), le_curl_name, le_curl);
+			SAVE_CURL_ERROR(ch, tmp_msg->data.result);
 
 			/* add_assoc_resource automatically creates a new zval to
 			   wrap the "resource" represented by the current pz_ch */
