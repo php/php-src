@@ -22565,8 +22565,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -22597,15 +22597,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -22651,9 +22648,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -22674,17 +22668,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -22717,8 +22712,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -22749,15 +22744,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -22803,9 +22795,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -22826,17 +22815,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -22869,8 +22859,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -22901,15 +22891,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -22955,9 +22942,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -22978,17 +22962,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -23021,8 +23006,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -23053,15 +23038,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -23107,9 +23089,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -23130,17 +23109,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -24975,8 +24955,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -25007,15 +24987,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -25061,9 +25038,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -25084,17 +25058,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -25127,8 +25102,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -25159,15 +25134,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -25213,9 +25185,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -25236,17 +25205,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -25279,8 +25249,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -25311,15 +25281,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -25365,9 +25332,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -25388,17 +25352,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -25431,8 +25396,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -25463,15 +25428,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -25517,9 +25479,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -25540,17 +25499,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -28838,8 +28798,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -28870,15 +28830,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -28924,9 +28881,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -28947,17 +28901,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -28990,8 +28945,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -29022,15 +28977,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -29076,9 +29028,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -29099,17 +29048,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -29142,8 +29092,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -29174,15 +29124,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -29228,9 +29175,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -29251,17 +29195,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -29294,8 +29239,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -29326,15 +29271,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -29380,9 +29322,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -29403,17 +29342,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -31464,8 +31404,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -31496,15 +31436,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -31550,9 +31487,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -31573,17 +31507,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -31616,8 +31551,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -31648,15 +31583,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -31702,9 +31634,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -31725,17 +31654,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -31768,8 +31698,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -31800,15 +31730,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -31854,9 +31781,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -31877,17 +31801,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -31920,8 +31845,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -31952,15 +31877,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -32006,9 +31928,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -32029,17 +31948,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -33452,8 +33372,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -33484,15 +33404,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -33538,9 +33455,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -33561,17 +33475,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -33604,8 +33519,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -33636,15 +33551,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -33690,9 +33602,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -33713,17 +33622,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -33756,8 +33666,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -33788,15 +33698,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -33842,9 +33749,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -33865,17 +33769,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -33908,8 +33813,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -33940,15 +33845,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -33994,9 +33896,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -34017,17 +33916,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -36111,8 +36011,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -36143,15 +36043,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -36197,9 +36094,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -36220,17 +36114,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -36263,8 +36158,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -36295,15 +36190,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -36349,9 +36241,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -36372,17 +36261,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -36415,8 +36305,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -36447,15 +36337,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -36501,9 +36388,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -36524,17 +36408,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -36567,8 +36452,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -36599,15 +36484,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -36653,9 +36535,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -36676,17 +36555,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -40621,8 +40501,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -40653,15 +40533,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -40707,9 +40584,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -40730,17 +40604,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -40773,8 +40648,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -40805,15 +40680,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -40859,9 +40731,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -40882,17 +40751,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -40925,8 +40795,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -40957,15 +40827,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -41011,9 +40878,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -41034,17 +40898,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -41077,8 +40942,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -41109,15 +40974,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -41163,9 +41025,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -41186,17 +41045,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CONST != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -44278,8 +44138,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -44310,15 +44170,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -44364,9 +44221,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -44387,17 +44241,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -44430,8 +44285,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -44462,15 +44317,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -44516,9 +44368,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -44539,17 +44388,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -44582,8 +44432,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -44614,15 +44464,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -44668,9 +44515,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -44691,17 +44535,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -44734,8 +44579,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -44766,15 +44611,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -44820,9 +44662,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -44843,17 +44682,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
@@ -49498,8 +49338,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -49530,15 +49370,12 @@ assign_object:
 					if (IS_CONST == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -49584,9 +49421,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -49607,17 +49441,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -49650,8 +49485,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -49682,15 +49517,12 @@ assign_object:
 					if (IS_TMP_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -49736,9 +49568,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -49759,17 +49588,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -49802,8 +49632,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			zval_ptr_dtor_nogc(free_op_data);
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -49834,15 +49664,12 @@ assign_object:
 					if (IS_VAR == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					zval_ptr_dtor_nogc(free_op_data);
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -49888,9 +49715,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -49911,17 +49735,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */
@@ -49954,8 +49779,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-
-			goto exit_assign_obj;
+			value = &EG(uninitialized_zval);
+			goto free_and_exit_assign_obj;
 		}
 	}
 
@@ -49986,15 +49811,12 @@ assign_object:
 					if (IS_CV == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-
+					goto free_and_exit_assign_obj;
 				} else {
 fast_assign_obj:
 					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					goto exit_assign_obj;
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				goto exit_assign_obj;
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -50040,9 +49862,6 @@ fast_assign_obj:
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				goto exit_assign_obj;
 			}
 		}
@@ -50063,17 +49882,18 @@ fast_assign_obj:
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (IS_CV != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+free_and_exit_assign_obj:
 
 exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 
 
 	/* assign_obj has two opcodes! */

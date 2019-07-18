@@ -2529,8 +2529,8 @@ ZEND_VM_HANDLER(24, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_
 		}
 		object = make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC);
 		if (UNEXPECTED(!object)) {
-			FREE_OP_DATA();
-			ZEND_VM_C_GOTO(exit_assign_obj);
+			value = &EG(uninitialized_zval);
+			ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 		}
 	}
 
@@ -2561,15 +2561,12 @@ ZEND_VM_C_LABEL(assign_object):
 					if (OP_DATA_TYPE == IS_CONST && Z_TYPE_P(value) == orig_type) {
 						CACHE_PTR_EX(cache_slot + 2, NULL);
 					}
-					FREE_OP_DATA();
+					ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 				} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
 					value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+					ZEND_VM_C_GOTO(exit_assign_obj);
 				}
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
-				ZEND_VM_C_GOTO(exit_assign_obj);
 			}
 		} else {
 			if (EXPECTED(zobj->properties != NULL)) {
@@ -2615,9 +2612,6 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), value);
-				}
 				ZEND_VM_C_GOTO(exit_assign_obj);
 			}
 		}
@@ -2638,17 +2632,18 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 		}
 	}
 
-	property = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	value = zobj->handlers->write_property(zobj, name, value, (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (OP2_TYPE != IS_CONST) {
 		zend_tmp_string_release(tmp_name);
 	}
 
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), property);
-	}
+ZEND_VM_C_LABEL(free_and_exit_assign_obj):
 	FREE_OP_DATA();
 ZEND_VM_C_LABEL(exit_assign_obj):
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	/* assign_obj has two opcodes! */
