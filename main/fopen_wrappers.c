@@ -483,16 +483,19 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		return NULL;
 	}
 
-	/* Don't resolve paths which contain protocol (except of file://) */
+	/* Stream wrappers do not resolve against the include path. */
 	for (p = filename; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++);
 	if ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/')) {
 		wrapper = php_stream_locate_url_wrapper(filename, &actual_path, STREAM_OPEN_FOR_INCLUDE);
+		if (!wrapper) {
+			return NULL;
+		}
 		if (wrapper == &php_plain_files_wrapper) {
 			if (tsrm_realpath(actual_path, resolved_path)) {
 				return zend_string_init(resolved_path, strlen(resolved_path), 0);
 			}
 		}
-		return NULL;
+		return zend_string_init(actual_path, strlen(actual_path), 0);
 	}
 
 	if ((*filename == '.' &&
