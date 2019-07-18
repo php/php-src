@@ -1351,9 +1351,9 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	$workerProcs = [];
 	$workerSocks = [];
 
-	echo "====⚡️===========================================================⚡️====\n";
-	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
-	echo "====⚡️===========================================================⚡️====\n";
+	echo "=====================================================================\n";
+	echo "========= WELCOME TO THE FUTURE: run-tests PARALLEL EDITION =========\n";
+	echo "=====================================================================\n";
 
 	// Each test may specify a list of conflict keys. While a test that conflicts with
 	// key K is running, no other test that conflicts with K may run. Conflict keys are
