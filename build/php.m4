@@ -1323,26 +1323,6 @@ fi
 ])
 
 dnl
-dnl PHP_SOCKLEN_T
-dnl
-AC_DEFUN([PHP_SOCKLEN_T],[
-AC_CACHE_CHECK(for socklen_t,ac_cv_socklen_t,
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/socket.h>
-]],[[
-socklen_t x;
-]])],[
-  ac_cv_socklen_t=yes
-],[
-  ac_cv_socklen_t=no
-]))
-if test "$ac_cv_socklen_t" = "yes"; then
-  AC_DEFINE(HAVE_SOCKLEN_T, 1, [Whether you have socklen_t])
-fi
-])
-
-dnl
 dnl PHP_MISSING_FCLOSE_DECL
 dnl
 dnl See if we have broken header files like SunOS has.
