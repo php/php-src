@@ -43,5 +43,4 @@ option: %d, %d, %d
 int(%i)
 int(%d)
 size: %d
-size: %d
 int(%d)

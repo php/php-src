@@ -1105,7 +1105,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
 static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
 {
-	ssize_t didwrite = 0, justwrote;
+	ssize_t didwrite = 0;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
@@ -1116,13 +1116,8 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position);
 	}
 
-
 	while (count > 0) {
-		size_t towrite = count;
-		if (towrite > stream->chunk_size)
-			towrite = stream->chunk_size;
-
-		justwrote = stream->ops->write(stream, buf, towrite);
+		ssize_t justwrote = stream->ops->write(stream, buf, count);
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */
