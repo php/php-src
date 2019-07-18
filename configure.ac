@@ -499,7 +499,15 @@ AC_STRUCT_TIMEZONE
 PHP_MISSING_TIME_R_DECL
 PHP_MISSING_FCLOSE_DECL
 PHP_STRUCT_FLOCK
-PHP_SOCKLEN_T
+
+AC_CHECK_TYPES(socklen_t, [], [], [
+  #ifdef HAVE_SYS_TYPES_H
+  # include <sys/types.h>
+  #endif
+  #ifdef HAVE_SYS_SOCKET_H
+  # include <sys/socket.h>
+  #endif
+])
 
 dnl These are defined elsewhere than stdio.h.
 PHP_CHECK_SIZEOF(intmax_t, 0)
