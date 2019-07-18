@@ -588,14 +588,14 @@ PHP_FUNCTION(stream_wrapper_restore)
 }
 /* }}} */
 
-static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count)
 {
 	zval func_name;
 	zval retval;
 	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval args[1];
-	size_t didwrite = 0;
+	ssize_t didwrite;
 
 	assert(us != NULL);
 
@@ -612,18 +612,21 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&func_name);
 
-	didwrite = 0;
-
 	if (EG(exception)) {
-		return 0;
+		return -1;
 	}
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		convert_to_long(&retval);
-		didwrite = Z_LVAL(retval);
-	} else if (call_result == FAILURE) {
+		if (Z_TYPE(retval) == IS_FALSE) {
+			didwrite = -1;
+		} else {
+			convert_to_long(&retval);
+			didwrite = Z_LVAL(retval);
+		}
+	} else {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_WRITE " is not implemented!",
 				us->wrapper->classname);
+		didwrite = -1;
 	}
 
 	/* don't allow strange buffer overruns due to bogus return */

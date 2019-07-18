@@ -44,13 +44,13 @@ typedef struct {
 
 
 /* {{{ */
-static size_t php_stream_memory_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
 	if (ms->mode & TEMP_STREAM_READONLY) {
-		return 0;
+		return (ssize_t) -1;
 	} else if (ms->mode & TEMP_STREAM_APPEND) {
 		ms->fpos = ms->fsize;
 	}
@@ -368,7 +368,7 @@ typedef struct {
 
 
 /* {{{ */
-static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
 	assert(ts != NULL);

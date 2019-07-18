@@ -115,7 +115,7 @@ typedef struct _php_stream_dirent {
 /* operations on streams that are file-handles */
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
-	size_t (*write)(php_stream *stream, const char *buf, size_t count);
+	ssize_t (*write)(php_stream *stream, const char *buf, size_t count);
 	size_t (*read)(php_stream *stream, char *buf, size_t count);
 	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
@@ -308,7 +308,7 @@ PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count);
 #define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count))
 
-PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
+PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str))
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count))
 

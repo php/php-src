@@ -32,7 +32,7 @@ var_dump($file_handle);  //Check for the content of handle
 var_dump( get_resource_type($file_handle) );  //Check for the type of resource
 var_dump( ftell($file_handle) );  //Initial position of file pointer
 var_dump( fread($file_handle, 100) );  //Check for read operation
-var_dump( fwrite($file_handle, $string) );  //Check for write operation; fails; expected: 0 bytes
+var_dump( fwrite($file_handle, $string) );  //Check for write operation; fails
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 echo "*** Done ***\n";
@@ -48,7 +48,7 @@ int(0)
 string(20) "line
 line of text
 li"
-int(0)
+bool(false)
 bool(true)
 string(7) "Unknown"
 *** Done ***

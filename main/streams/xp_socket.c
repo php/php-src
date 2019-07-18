@@ -56,10 +56,10 @@ const php_stream_ops php_stream_unixdg_socket_ops;
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
 /* {{{ Generic socket stream operations */
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int didwrite;
+	ssize_t didwrite;
 	struct timeval *ptimeout;
 
 	if (!sock || sock->socket == -1) {
@@ -107,10 +107,6 @@ retry:
 
 	if (didwrite > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
-	}
-
-	if (didwrite < 0) {
-		didwrite = 0;
 	}
 
 	return didwrite;

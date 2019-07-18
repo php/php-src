@@ -31,7 +31,7 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	PHPWRITE(buf, count);
 	return count;
@@ -69,7 +69,7 @@ typedef struct php_stream_input { /* {{{ */
 } php_stream_input_t;
 /* }}} */
 
-static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_input_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	return -1;
 }

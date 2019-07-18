@@ -124,7 +124,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 /* }}} */
 
 /* {{{ pdo_pgsql_create_lob_stream */
-static size_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	return lo_write(self->conn, self->lfd, (char*)buf, count);

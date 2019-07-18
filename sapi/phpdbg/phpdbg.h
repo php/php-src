@@ -290,7 +290,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
 	int eol;                                     /* type of line ending to use */
-	size_t (*php_stdiop_write)(php_stream *, const char *, size_t);
+	ssize_t (*php_stdiop_write)(php_stream *, const char *, size_t);
 	int in_script_xml;                           /* in <stream> output mode */
 	struct {
 		zend_bool active;

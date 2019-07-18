@@ -28,7 +28,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 
 /* file/stream handlers */
-static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count);
+static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count);
 static size_t phar_stream_read( php_stream *stream, char *buf, size_t count);
 static int    phar_stream_close(php_stream *stream, int close_handle);
 static int    phar_stream_flush(php_stream *stream);

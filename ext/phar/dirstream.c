@@ -118,9 +118,9 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ 
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
-	return 0;
+	return -1;
 }
 /* }}} */
 
