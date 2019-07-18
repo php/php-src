@@ -13,5 +13,5 @@ filter.default=unsafe_raw
 --EXPECTF--
 Shift_JIS
 
-Strict Standards: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s on line %d
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s on line %d
 string(6) "ÅAÅBÅC"
