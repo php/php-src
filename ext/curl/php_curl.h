@@ -58,6 +58,9 @@ extern zend_module_entry curl_module_entry;
 #define PHP_CURL_RETURN 4
 #define PHP_CURL_IGNORE 7
 
+#define SAVE_CURL_ERROR(__handle, __err) \
+    do { (__handle)->err.no = (int) __err; } while (0)
+
 extern int  le_curl;
 #define le_curl_name "cURL handle"
 extern int  le_curl_multi_handle;
