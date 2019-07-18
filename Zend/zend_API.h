@@ -1486,14 +1486,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_ZVAL(dest) \
 	Z_PARAM_ZVAL_EX(dest, 0, 0)
 
-/* old "z" (with dereference) */
-#define Z_PARAM_ZVAL_DEREF_EX(dest, check_null, separate) \
-		Z_PARAM_PROLOGUE(1, separate); \
-		zend_parse_arg_zval_deref(_arg, &dest, check_null);
-
-#define Z_PARAM_ZVAL_DEREF(dest) \
-	Z_PARAM_ZVAL_DEREF_EX(dest, 0, 0)
-
 /* old "+" and "*" */
 #define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \
 		int _num_varargs = _num_args - _i - (post_varargs); \
