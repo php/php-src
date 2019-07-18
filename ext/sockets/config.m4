@@ -6,12 +6,6 @@ PHP_ARG_ENABLE([sockets],
 if test "$PHP_SOCKETS" != "no"; then
   AC_CHECK_FUNCS([hstrerror if_nametoindex if_indextoname])
   AC_CHECK_HEADERS([netinet/tcp.h sys/un.h sys/sockio.h])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/socket.h>
-  ]], [[static struct msghdr tp; int n = (int) tp.msg_flags; return n]])],[],
-    [AC_DEFINE(MISSING_MSGHDR_MSGFLAGS, 1, [ ])]
-  )
   AC_DEFINE([HAVE_SOCKETS], 1, [ ])
 
   dnl Check for fied ss_family in sockaddr_storage (missing in AIX until 5.3)
