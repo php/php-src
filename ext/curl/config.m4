@@ -72,20 +72,6 @@ int main(int argc, char *argv[])
     $CURL_LIBS
   ])
 
-  PHP_CHECK_LIBRARY(curl,curl_easy_strerror,
-  [
-    AC_DEFINE(HAVE_CURL_EASY_STRERROR,1,[ ])
-  ],[],[
-    $CURL_LIBS
-  ])
-
-  PHP_CHECK_LIBRARY(curl,curl_multi_strerror,
-  [
-    AC_DEFINE(HAVE_CURL_MULTI_STRERROR,1,[ ])
-  ],[],[
-    $CURL_LIBS
-  ])
-
   PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi
