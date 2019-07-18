@@ -1191,7 +1191,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zval *res;
 	char *input;
 	size_t inputlen;
-	size_t ret;
+	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
 	php_stream *stream;
@@ -1218,6 +1218,9 @@ PHPAPI PHP_FUNCTION(fwrite)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	ret = php_stream_write(stream, input, num_bytes);
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(ret);
 }
@@ -1864,7 +1867,7 @@ PHP_FUNCTION(fputcsv)
 	int escape_char = (unsigned char) '\\';	/* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
-	size_t ret;
+	ssize_t ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
@@ -1916,12 +1919,15 @@ PHP_FUNCTION(fputcsv)
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char);
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
 	RETURN_LONG(ret);
 }
 /* }}} */
 
 /* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char) */
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
 {
 	int count, i = 0;
 	size_t ret;

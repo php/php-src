@@ -35,7 +35,7 @@ bool(false)
 
 Warning: fwrite() expects parameter 2 to be string, array given in %s on line %d
 bool(false)
-int(0)
+bool(false)
 int(0)
 int(4)
 int(0)

@@ -1074,9 +1074,9 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
-static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
+static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
 {
-	size_t didwrite = 0, towrite, justwrote;
+	ssize_t didwrite = 0, justwrote;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
@@ -1089,29 +1089,31 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 
 
 	while (count > 0) {
-		towrite = count;
+		size_t towrite = count;
 		if (towrite > stream->chunk_size)
 			towrite = stream->chunk_size;
 
 		justwrote = stream->ops->write(stream, buf, towrite);
+		if (justwrote < 0) {
+			return justwrote;
+		}
 
-		/* convert justwrote to an integer, since normally it is unsigned */
-		if ((int)justwrote > 0) {
-			buf += justwrote;
-			count -= justwrote;
-			didwrite += justwrote;
-
-			/* Only screw with the buffer if we can seek, otherwise we lose data
-			 * buffered from fifos and sockets */
-			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-				stream->position += justwrote;
-			}
-		} else {
+		if (justwrote == 0) {
 			break;
 		}
-	}
-	return didwrite;
 
+		buf += justwrote;
+		count -= justwrote;
+		didwrite += justwrote;
+
+		/* Only screw with the buffer if we can seek, otherwise we lose data
+		 * buffered from fifos and sockets */
+		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+			stream->position += justwrote;
+		}
+	}
+
+	return didwrite;
 }
 
 /* push some data through the write filter chain.
@@ -1119,7 +1121,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
  * This may trigger a real write to the stream.
  * Returns the number of bytes consumed from buf by the first filter in the chain.
  * */
-static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
+static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
 {
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
@@ -1157,7 +1159,10 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 			 * underlying stream */
 			while (brig_inp->head) {
 				bucket = brig_inp->head;
-				_php_stream_write_buffer(stream, bucket->buf, bucket->buflen);
+				if (_php_stream_write_buffer(stream, bucket->buf, bucket->buflen) < 0) {
+					consumed = (ssize_t) -1;
+				}
+
 				/* Potential error situation - eg: no space on device. Perhaps we should keep this brigade
 				 * hanging around and try to write it later.
 				 * At the moment, we just drop it on the floor
@@ -1174,7 +1179,7 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 		case PSFS_ERR_FATAL:
 			/* some fatal error.  Theoretically, the stream is borked, so all
 			 * further writes should fail. */
-			break;
+			return (ssize_t) -1;
 	}
 
 	return consumed;
@@ -1197,12 +1202,16 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 	return ret;
 }
 
-PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
+PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
 {
-	size_t bytes;
+	ssize_t bytes;
 
-	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
+	if (count == 0) {
 		return 0;
+	}
+
+	if (buf == NULL || stream->ops->write == NULL) {
+		return (ssize_t) -1;
 	}
 
 	if (stream->writefilters.head) {

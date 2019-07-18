@@ -5372,9 +5372,9 @@ PHP_FUNCTION(pg_get_pid)
 }
 /* }}} */
 
-static size_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
-	return 0;
+	return -1;
 }
 /* }}} */
 

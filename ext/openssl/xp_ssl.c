@@ -2085,7 +2085,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 }
 /* }}} */
 
-static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	return php_openssl_sockop_io( 0, stream, (char*)buf, count );
 }

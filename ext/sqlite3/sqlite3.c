@@ -1125,22 +1125,22 @@ typedef struct {
 	int          flags;
 } php_stream_sqlite3_data;
 
-static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 
 	if (sqlite3_stream->flags & SQLITE_OPEN_READONLY) {
 		php_error_docref(NULL, E_WARNING, "Can't write to blob stream: is open as read only");
-		return 0;
+		return -1;
 	}
 
 	if (sqlite3_stream->position + count > sqlite3_stream->size) {
 		php_error_docref(NULL, E_WARNING, "It is not possible to increase the size of a BLOB");
-		return 0;
+		return -1;
 	}
 
 	if (sqlite3_blob_write(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
-		return 0;
+		return -1;
 	}
 
 	if (sqlite3_stream->position + count >= sqlite3_stream->size) {

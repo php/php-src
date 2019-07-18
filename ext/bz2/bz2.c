@@ -160,11 +160,10 @@ static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 	return ret;
 }
 
-static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
-	size_t wrote = 0;
+	ssize_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
-
 
 	do {
 		int just_wrote;
@@ -172,8 +171,10 @@ static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count
 		int to_write = (int)(remain <= INT_MAX ? remain : INT_MAX);
 
 		just_wrote = BZ2_bzwrite(self->bz_file, (char*)buf, to_write);
-
-		if (just_wrote < 1) {
+		if (just_wrote < 0) {
+			return just_wrote;
+		}
+		if (just_wrote == 0) {
 			break;
 		}
 

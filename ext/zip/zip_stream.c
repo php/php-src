@@ -80,10 +80,10 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 /* }}} */
 
 /* {{{ php_zip_ops_write */
-static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
 {
 	if (!stream) {
-		return 0;
+		return -1;
 	}
 
 	return count;
