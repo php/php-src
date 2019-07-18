@@ -30,7 +30,6 @@ if test "$PHP_CURL" != "no"; then
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS="$LDFLAGS $CURL_LIBS"
 
-    AC_PROG_CPP
     AC_MSG_CHECKING([for openssl support in libcurl])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <strings.h>
