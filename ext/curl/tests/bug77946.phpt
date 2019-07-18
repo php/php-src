@@ -11,7 +11,7 @@ if (!extension_loaded('curl')) {
 --FILE--
 <?php
 $urls = array(
-   'http://nonexistent.tld',
+   'unknown://scheme.tld',
 );
 
 $mh = curl_multi_init();
@@ -37,7 +37,7 @@ foreach ($urls as $i => $url) {
 
 curl_multi_close($mh);
 ?>
---EXPECT--
-int(6)
-int(6)
-string(39) "Could not resolve host: nonexistent.tld"
+--EXPECTF--
+int(1)
+int(1)
+string(%d) "Protocol %Sunknown%S not supported or disabled in libcurl"
