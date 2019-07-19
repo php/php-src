@@ -5,12 +5,8 @@ ARG_ENABLE("mbregex", "multibyte regex support", "no");
 
 if (PHP_MBSTRING != "no") {
 
-	if (CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING) &&
-		CHECK_HEADER_ADD_INCLUDE("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
+	if (CHECK_HEADER_ADD_INCLUDE("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
 		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
-
-		/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */
-		ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		STDOUT.WriteLine("Using bundled libmbfl...");
 
@@ -52,14 +48,23 @@ if (PHP_MBSTRING != "no") {
 			nls_kr.c nls_neutral.c nls_ru.c nls_uni.c nls_zh.c nls_hy.c \
 			nls_ua.c nls_tr.c", "mbstring");
 
-		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h php_mbregex.h php_onig_compat.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
+		PHP_INSTALL_HEADERS("ext/mbstring", "mbstring.h libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h");
 
 		AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 
 		if (PHP_MBREGEX != "no") {
-			AC_DEFINE('HAVE_MBREGEX', 1);
-			ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
-			PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h");
+			if (CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX) &&
+				CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING)) {
+				AC_DEFINE('HAVE_MBREGEX', 1);
+
+				/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */
+				ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+
+				ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
+				PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h php_onig_compat.h");
+			} else {
+				WARNING("mbregex not enabled; libraries and headers not found");
+			}
 		}
 
 	} else {
