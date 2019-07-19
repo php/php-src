@@ -45,7 +45,7 @@ struct php_zip_stream_data_t {
 
 
 /* {{{ php_zip_ops_read */
-static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 {
 	ssize_t n = 0;
 	STREAM_DATA_FROM_STREAM();
@@ -65,7 +65,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
 			zip_error_fini(err);
 #endif
-			return 0;
+			return -1;
 		}
 		/* cast count to signed value to avoid possibly negative n
 		 * being cast to unsigned value */
@@ -75,7 +75,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			self->cursor += n;
 		}
 	}
-	return (n < 1 ? 0 : (size_t)n);
+	return n;
 }
 /* }}} */
 

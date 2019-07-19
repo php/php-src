@@ -116,7 +116,7 @@ typedef struct _php_stream_dirent {
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
 	ssize_t (*write)(php_stream *stream, const char *buf, size_t count);
-	size_t (*read)(php_stream *stream, char *buf, size_t count);
+	ssize_t (*read)(php_stream *stream, char *buf, size_t count);
 	int    (*close)(php_stream *stream, int close_handle);
 	int    (*flush)(php_stream *stream);
 
@@ -305,14 +305,16 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence);
 PHPAPI zend_off_t _php_stream_tell(php_stream *stream);
 #define php_stream_tell(stream)	_php_stream_tell((stream))
 
-PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count);
+PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t count);
 #define php_stream_read(stream, buf, count)		_php_stream_read((stream), (buf), (count))
+
+PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len);
 
 PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count);
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str))
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count))
 
-PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size);
+PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size);
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
 
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -462,7 +464,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 #define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC)
 
 /* output all data from a stream */
-PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC);
+PHPAPI ssize_t _php_stream_passthru(php_stream * src STREAMS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC)
 END_EXTERN_C()
 

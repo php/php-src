@@ -133,7 +133,7 @@ struct php_bz2_stream_data_t {
 
 /* {{{ BZip2 stream implementation */
 
-static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	size_t ret = 0;
@@ -149,6 +149,9 @@ static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 			/* it is not safe to keep reading after an error, see #72613 */
 			stream->eof = 1;
 			if (just_read < 0) {
+				if (ret) {
+					return ret;
+				}
 				return -1;
 			}
 			break;
@@ -385,11 +388,12 @@ static PHP_FUNCTION(bzread)
 		php_error_docref(NULL, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
-	data = zend_string_alloc(len, 0);
-	ZSTR_LEN(data) = php_stream_read(stream, ZSTR_VAL(data), ZSTR_LEN(data));
-	ZSTR_VAL(data)[ZSTR_LEN(data)] = '\0';
 
-	RETURN_NEW_STR(data);
+	data = php_stream_read_to_str(stream, len);
+	if (!data) {
+		RETURN_FALSE;
+	}
+	RETURN_STR(data);
 }
 /* }}} */
 

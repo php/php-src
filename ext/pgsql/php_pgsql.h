@@ -226,7 +226,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
 static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count);
-static size_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count);
+static ssize_t php_pgsql_fd_read(php_stream *stream, char *buf, size_t count);
 static int php_pgsql_fd_close(php_stream *stream, int close_handle);
 static int php_pgsql_fd_flush(php_stream *stream);
 static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, void *ptrparam);

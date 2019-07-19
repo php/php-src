@@ -1154,7 +1154,7 @@ static ssize_t php_sqlite3_stream_write(php_stream *stream, const char *buf, siz
 	return count;
 }
 
-static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 
@@ -1164,7 +1164,7 @@ static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t coun
 	}
 	if (count) {
 		if (sqlite3_blob_read(sqlite3_stream->blob, buf, count, sqlite3_stream->position) != SQLITE_OK) {
-			return 0;
+			return -1;
 		}
 		sqlite3_stream->position += count;
 	}

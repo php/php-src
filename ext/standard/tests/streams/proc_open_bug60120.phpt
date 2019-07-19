@@ -91,7 +91,7 @@ fclose($pipes[2]);
 --EXPECTF--
 string(10000) "%s"
 string(10000) "%s"
-string(0) ""
-string(0) ""
+bool(false)
+bool(false)
 --CLEAN--
 unlink($file);

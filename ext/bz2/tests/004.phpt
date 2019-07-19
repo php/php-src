@@ -60,7 +60,7 @@ array(2) {
 }
 string(2) "OK"
 int(0)
-string(0) ""
+bool(false)
 array(2) {
   ["errno"]=>
   int(-5)
@@ -69,7 +69,7 @@ array(2) {
 }
 string(16) "DATA_ERROR_MAGIC"
 int(-5)
-string(0) ""
+bool(false)
 array(2) {
   ["errno"]=>
   int(-4)
@@ -78,7 +78,7 @@ array(2) {
 }
 string(10) "DATA_ERROR"
 int(-4)
-string(0) ""
+bool(false)
 array(2) {
   ["errno"]=>
   int(-5)
@@ -87,7 +87,7 @@ array(2) {
 }
 string(16) "DATA_ERROR_MAGIC"
 int(-5)
-string(0) ""
+bool(false)
 array(2) {
   ["errno"]=>
   int(-4)

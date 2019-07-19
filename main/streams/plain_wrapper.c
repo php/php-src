@@ -365,7 +365,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 	}
 }
 
-static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 	size_t ret;
@@ -410,6 +410,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
 
+		// TODO Return value for EWOULDBLOCK?
 		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR && errno != EBADF));
 
 	} else {
@@ -920,7 +921,7 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 /* }}} */
 
 /* {{{ plain files opendir/readdir implementation */
-static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count)
 {
 	DIR *dir = (DIR*)stream->abstract;
 	struct dirent *result;
@@ -928,7 +929,7 @@ static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count != sizeof(php_stream_dirent))
-		return 0;
+		return -1;
 
 	result = readdir(dir);
 	if (result) {

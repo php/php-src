@@ -30,7 +30,7 @@ struct php_gz_stream_data_t	{
 	php_stream *stream;
 };
 
-static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int read;
@@ -42,7 +42,7 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 		stream->eof = 1;
 	}
 
-	return (size_t)((read < 0) ? 0 : read);
+	return read;
 }
 
 static ssize_t php_gziop_write(php_stream *stream, const char *buf, size_t count)

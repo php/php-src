@@ -642,7 +642,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	return didwrite;
 }
 
-static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 {
 	zval func_name;
 	zval retval;
@@ -672,6 +672,10 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 	}
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+		if (Z_TYPE(retval) == IS_FALSE) {
+			return -1;
+		}
+
 		if (!try_convert_to_string(&retval)) {
 			return -1;
 		}
@@ -1404,7 +1408,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 }
 
-static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count)
+static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count)
 {
 	zval func_name;
 	zval retval;
@@ -1415,7 +1419,7 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count != sizeof(php_stream_dirent))
-		return 0;
+		return -1;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_READ, sizeof(USERSTREAM_DIR_READ)-1);
 

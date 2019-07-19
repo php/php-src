@@ -77,7 +77,7 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 
 
 /* {{{ */
-static size_t php_stream_memory_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_stream_memory_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
@@ -398,7 +398,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 
 
 /* {{{ */
-static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_stream_temp_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
 	size_t got;

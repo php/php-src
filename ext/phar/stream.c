@@ -361,7 +361,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 /**
  * used for fread($fp) and company on a fopen()ed phar file handle
  */
-static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
@@ -375,7 +375,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {
 
 	if (entry->is_deleted) {
 		stream->eof = 1;
-		return 0;
+		return -1;
 	}
 
 	/* use our proxy position */
