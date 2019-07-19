@@ -1130,11 +1130,24 @@ ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_
 }
 /* }}} */
 
-ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline) /* {{{ */
+ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline) /* {{{ */
 {
 	if (first_early_binding_opline != (uint32_t)-1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
 		uint32_t opline_num = first_early_binding_opline;
+		void **run_time_cache;
+
+		if (!ZEND_MAP_PTR(op_array->run_time_cache)) {
+			void *ptr;
+
+			ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
+			ptr = emalloc(op_array->cache_size + sizeof(void*));
+			ZEND_MAP_PTR_INIT(op_array->run_time_cache, ptr);
+			ptr = (char*)ptr + sizeof(void*);
+			ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
+			memset(ptr, 0, op_array->cache_size);
+		}
+		run_time_cache = RUN_TIME_CACHE(op_array);
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
@@ -1148,7 +1161,10 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint3
 				zend_class_entry *parent_ce = zend_hash_find_ex_ptr(EG(class_table), lc_parent_name, 1);
 
 				if (parent_ce) {
-					zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv);
+					if (zend_try_early_bind(ce, parent_ce, Z_STR_P(lcname), zv)) {
+						/* Store in run-time cache */
+						((void**)((char*)run_time_cache + opline->extended_value))[0] = ce;
+					}
 				}
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -6385,6 +6401,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		) {
 			CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 			opline->opcode = ZEND_DECLARE_CLASS_DELAYED;
+			opline->extended_value = zend_alloc_cache_slot();
 			opline->result_type = IS_UNUSED;
 			opline->result.opline_num = -1;
 		}
