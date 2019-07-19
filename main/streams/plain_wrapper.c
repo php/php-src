@@ -368,7 +368,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
-	size_t ret;
+	ssize_t ret;
 
 	assert(data != NULL);
 
@@ -410,8 +410,20 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
 
-		// TODO Return value for EWOULDBLOCK?
-		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR && errno != EBADF));
+		if (ret < 0) {
+			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+				/* Not an error. */
+				ret = 0;
+			} else if (errno == EINTR) {
+				/* An error, but not EOF */
+			} else if (errno == EBADF) {
+				/* TODO: Remove this special-case? */
+			} else {
+				stream->eof = 1;
+			}
+		} else if (ret == 0) {
+			stream->eof = 1;
+		}
 
 	} else {
 #if HAVE_FLUSHIO
