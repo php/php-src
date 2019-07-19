@@ -172,7 +172,10 @@ static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t coun
 
 		just_wrote = BZ2_bzwrite(self->bz_file, (char*)buf, to_write);
 		if (just_wrote < 0) {
-			return just_wrote;
+			if (wrote == 0) {
+				return just_wrote;
+			}
+			return wrote;
 		}
 		if (just_wrote == 0) {
 			break;
