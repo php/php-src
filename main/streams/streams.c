@@ -538,6 +538,10 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		   main/streams/filter.c::_php_stream_filter_append */
 		stream->writepos = stream->readpos = 0;
 
+		if (stream->filter_errored) {
+			return FAILURE;
+		}
+
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
@@ -615,6 +619,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
 					stream->eof = 1;
+					stream->filter_errored = 1;
 					efree(chunk_buf);
 					return FAILURE;
 			}

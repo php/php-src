@@ -3,8 +3,7 @@ Bug #71263: fread() does not detects decoding errors from filter bzip2.decompres
 --FILE--
 <?php
 
-// This bug is only partially fixed. fread() returns false on the first call
-// but does not fail on the second.
+// Possibly errors should be thrown.
 
 function test($case) {
 	$plain = "The quick brown fox jumps over the lazy dog.";
@@ -50,7 +49,7 @@ test(3);
 Compressed len = 81
 read: bool(false)
 eof: 1
-read: string(0) ""
+read: bool(false)
 Compressed len = 81
 read: string(0) ""
 eof: 1
@@ -58,4 +57,4 @@ read: string(0) ""
 Compressed len = 81
 read: bool(false)
 eof: 1
-read: string(0) ""
+read: bool(false)
