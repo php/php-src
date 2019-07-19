@@ -16,8 +16,8 @@ if ($headers1 === false) {
 	exit;
 }
 
-var_dump($headers1['Title']{0} === '?');
-var_dump($headers1['Author']{0} === '?');
+var_dump($headers1['Title'][0] === '?');
+var_dump($headers1['Author'][0] === '?');
 
 ini_set('exif.decode_unicode_motorola', 'UCS-2LE');
 
