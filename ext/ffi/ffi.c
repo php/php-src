@@ -5835,7 +5835,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 			type->func.abi = FFI_REGISTER;
 			break;
 #endif
-#ifdef HAVE_FFI_MS_CDELC
+#ifdef HAVE_FFI_MS_CDECL
 		case ZEND_FFI_ABI_MS:
 			type->func.abi = FFI_MS_CDECL;
 			break;

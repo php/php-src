@@ -9,7 +9,7 @@ if (PHP_FFI != 'no') {
 		    AC_DEFINE('HAVE_FFI_FASTCALL', 1 ,'libffi supports fastcall calling convention');
 		    AC_DEFINE('HAVE_FFI_THISCALL', 1 ,'libffi supports thiscall calling convention');
 		    AC_DEFINE('HAVE_FFI_STDCALL', 1 ,'libffi supports stdcall calling convention');
-		    AC_DEFINE('HAVE_FFI_MS_CDELC', 1 ,'libffi supports ms_cdecl calling convention');
+		    AC_DEFINE('HAVE_FFI_MS_CDECL', 1 ,'libffi supports ms_cdecl calling convention');
 		    AC_DEFINE('HAVE_FFI_SYSV', 1 ,'libffi supports sysv calling convention');
 		}
 
