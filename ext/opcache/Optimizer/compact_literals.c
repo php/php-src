@@ -770,6 +770,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						bind_var_slot[opline->op2.constant] = opline->extended_value;
 					}
 					break;
+				case ZEND_DECLARE_LAMBDA_FUNCTION:
+				case ZEND_DECLARE_ANON_CLASS:
+					opline->extended_value = cache_size;
+					cache_size += sizeof(void *);
+					break;
 			}
 			opline++;
 		}
