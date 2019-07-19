@@ -53,7 +53,7 @@ if (PHP_MBSTRING != "no") {
 		AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 
 		if (PHP_MBREGEX != "no") {
-			if (CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX) &&
+			if (CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_MBSTRING", PHP_MBREGEX) &&
 				CHECK_LIB("onig_a.lib;libonig_a.lib", "mbstring", PHP_MBSTRING)) {
 				AC_DEFINE('HAVE_MBREGEX', 1);
 
