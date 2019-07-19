@@ -3,7 +3,8 @@ Bug #71263: fread() does not detects decoding errors from filter bzip2.decompres
 --FILE--
 <?php
 
-// This bug is only partially fixed.
+// This bug is only partially fixed. fread() returns false on the first call
+// but does not fail on the second.
 
 function test($case) {
 	$plain = "The quick brown fox jumps over the lazy dog.";
@@ -32,10 +33,11 @@ function test($case) {
 	
 	$r = fopen($fn, "r");
 	stream_filter_append($r, 'bzip2.decompress', STREAM_FILTER_READ);
-	while (!feof($r)) {
-		$s = fread($r, 100);
-		echo "read: "; var_dump($s);
-	}
+    $s = fread($r, 100);
+    echo "read: "; var_dump($s);
+    echo "eof: ", feof($r), "\n";
+    $s = fread($r, 100);
+    echo "read: "; var_dump($s);
 	fclose($r);
 	unlink($fn);
 }
@@ -47,9 +49,13 @@ test(3);
 --EXPECT--
 Compressed len = 81
 read: bool(false)
-read: string(43) "bthes ohe rpujumr.bthes ohe rpujumr.bthes o"
+eof: 1
+read: string(0) ""
 Compressed len = 81
+read: string(0) ""
+eof: 1
 read: string(0) ""
 Compressed len = 81
 read: bool(false)
-read: string(44) "The quick brown fox jumps over the lazy dog."
+eof: 1
+read: string(0) ""

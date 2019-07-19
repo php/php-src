@@ -614,6 +614,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				case PSFS_ERR_FATAL:
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
+					stream->eof = 1;
 					efree(chunk_buf);
 					return FAILURE;
 			}
