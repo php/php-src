@@ -104,7 +104,7 @@ require_once('skipifconnectfailure.inc');
 
 		mysqli_free_result($res);
 
-	} while (@mysqli_next_result($link));
+	} while (mysqli_next_result($link));
 
 	if ($res_num != 4)
 		printf("[015] Expecting 3 result sets got %d result set[s]\n", $res_num);
