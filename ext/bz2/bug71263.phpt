@@ -3,7 +3,6 @@ Bug #71263: fread() does not detects decoding errors from filter bzip2.decompres
 --FILE--
 <?php
 
-// Should the second fread() call return false?
 // Should notices be generated?
 
 function test($case) {
@@ -33,11 +32,10 @@ function test($case) {
 	
 	$r = fopen($fn, "r");
 	stream_filter_append($r, 'bzip2.decompress', STREAM_FILTER_READ);
-    $s = fread($r, 100);
-    echo "read: "; var_dump($s);
-    echo "eof: ", feof($r), "\n";
-    $s = fread($r, 100);
-    echo "read: "; var_dump($s);
+    while (!feof($r)) {
+        $s = fread($r, 100);
+        echo "read: "; var_dump($s);
+    }
 	fclose($r);
 	unlink($fn);
 }
@@ -49,13 +47,7 @@ test(3);
 --EXPECT--
 Compressed len = 81
 read: bool(false)
-eof: 1
-read: string(0) ""
 Compressed len = 81
-read: string(0) ""
-eof: 1
 read: string(0) ""
 Compressed len = 81
 read: bool(false)
-eof: 1
-read: string(0) ""

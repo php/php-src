@@ -19,6 +19,6 @@ var_dump(fread($fp,1));
 fclose($fp);
 echo "Done.\n";
 --EXPECT--
-string(0) ""
+bool(false)
 string(0) ""
 Done.
