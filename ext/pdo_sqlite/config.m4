@@ -23,10 +23,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     AC_MSG_ERROR([Please install SQLite 3.7.4 first or check libsqlite3 is present])
   ])
 
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_key, [
-    AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
-  ])
-
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_close_v2, [
     AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
   ])
