@@ -2471,7 +2471,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				case ZEND_ASSERT_CHECK:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
-				case ZEND_DECLARE_ANON_CLASS:
 					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
