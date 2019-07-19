@@ -1094,12 +1094,13 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 			towrite = stream->chunk_size;
 
 		justwrote = stream->ops->write(stream, buf, towrite);
-		if (justwrote < 0) {
-			return justwrote;
-		}
-
-		if (justwrote == 0) {
-			break;
+		if (justwrote <= 0) {
+			/* If we already successfully wrote some bytes and a write error occurred
+			 * later, report the successfully written bytes. */
+			if (didwrite == 0) {
+				return justwrote;
+			}
+			return didwrite;
 		}
 
 		buf += justwrote;
