@@ -2416,18 +2416,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 	zend_class_entry *ce;
 	USE_OPLINE
 
-	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
-	ZEND_ASSERT(zv != NULL);
-	ce = Z_CE_P(zv);
-	Z_CE_P(EX_VAR(opline->result.var)) = ce;
-
-	if (ce->ce_flags & ZEND_ACC_LINKED) {
-		ZEND_VM_NEXT_OPCODE();
-	} else {
-		SAVE_OPLINE();
-		zend_do_link_class(ce, (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ce = CACHED_PTR(opline->extended_value);
+	if (UNEXPECTED(ce == NULL)) {
+		zv = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
+		ZEND_ASSERT(zv != NULL);
+		ce = Z_CE_P(zv);
+		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+			SAVE_OPLINE();
+			zend_do_link_class(ce, (opline->op2_type == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+		}
+		CACHE_PTR(opline->extended_value, ce);
 	}
+	Z_CE_P(EX_VAR(opline->result.var)) = ce;
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_FUNCTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -9429,16 +9433,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_function *func;
 	zval *zfunc;
 	zval *object;
 	zend_class_entry *called_scope;
 
-	zfunc = zend_hash_find_ex(EG(function_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
-	ZEND_ASSERT(zfunc != NULL && Z_FUNC_P(zfunc)->type == ZEND_USER_FUNCTION);
+	func = CACHED_PTR(opline->extended_value);
+	if (UNEXPECTED(func == NULL)) {
+		zfunc = zend_hash_find_ex(EG(function_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
+		ZEND_ASSERT(zfunc != NULL);
+		func = Z_FUNC_P(zfunc);
+		ZEND_ASSERT(func->type == ZEND_USER_FUNCTION);
+		CACHE_PTR(opline->extended_value, func);
+	}
 
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		called_scope = Z_OBJCE(EX(This));
-		if (UNEXPECTED((Z_FUNC_P(zfunc)->common.fn_flags & ZEND_ACC_STATIC) ||
+		if (UNEXPECTED((func->common.fn_flags & ZEND_ACC_STATIC) ||
 				(EX(func)->common.fn_flags & ZEND_ACC_STATIC))) {
 			object = NULL;
 		} else {
@@ -9448,7 +9459,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_C
 		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
-	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc),
+	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
 
 	ZEND_VM_NEXT_OPCODE();

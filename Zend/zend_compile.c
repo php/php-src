@@ -5742,6 +5742,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
+		opline->extended_value = zend_alloc_cache_slot();
 		opline->op1_type = IS_CONST;
 		LITERAL_STR(opline->op1, key);
 	} else {
@@ -6354,6 +6355,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 		opline->opcode = ZEND_DECLARE_ANON_CLASS;
+		opline->extended_value = zend_alloc_cache_slot();
 		opline->result_type = IS_VAR;
 		opline->result.var = get_temporary_variable();
 
