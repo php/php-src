@@ -1,11 +1,5 @@
 --TEST--
 Test fwrite() function : usage variations - r, rb & rt modes
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == 'WIN' ) {
-   die('skip...Not valid for Windows');
-}
-?>
 --FILE--
 <?php
 /*
