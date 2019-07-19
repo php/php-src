@@ -959,7 +959,6 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			}
-			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */

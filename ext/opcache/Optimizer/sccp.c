@@ -1924,7 +1924,6 @@ static void sccp_mark_feasible_successors(
 	switch (opline->opcode) {
 		case ZEND_ASSERT_CHECK:
 		case ZEND_CATCH:
-		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);

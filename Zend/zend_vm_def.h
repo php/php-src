@@ -7366,24 +7366,24 @@ ZEND_VM_HANDLER(145, ZEND_DECLARE_CLASS_DELAYED, CONST, CONST)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY, JMP_ADDR)
+ZEND_VM_HANDLER(146, ZEND_DECLARE_ANON_CLASS, ANY, ANY)
 {
 	zval *zv;
 	zend_class_entry *ce;
 	USE_OPLINE
 
-	SAVE_OPLINE();
 	zv = zend_hash_find_ex(EG(class_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
 	ZEND_ASSERT(zv != NULL);
 	ce = Z_CE_P(zv);
 	Z_CE_P(EX_VAR(opline->result.var)) = ce;
 
 	if (ce->ce_flags & ZEND_ACC_LINKED) {
-		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
-		ZEND_VM_CONTINUE();
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		SAVE_OPLINE();
+		zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	zend_do_link_class(ce, (OP2_TYPE == IS_CONST) ? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(141, ZEND_DECLARE_FUNCTION, ANY, ANY)
