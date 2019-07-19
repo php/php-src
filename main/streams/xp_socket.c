@@ -161,8 +161,15 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 	err = php_socket_errno();
 
-	// TODO Return value for EAGAIN?
-	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && err != EWOULDBLOCK && err != EAGAIN));
+	if (nr_bytes < 0) {
+		if (err == EAGAIN || err == EWOULDBLOCK) {
+			nr_bytes = 0;
+		} else {
+			stream->eof = 1;
+		}
+	} else if (nr_bytes == 0) {
+		stream->eof = 1;
+	}
 
 	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);

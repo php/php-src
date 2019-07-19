@@ -3,8 +3,8 @@ Bug #71263: fread() does not detects decoding errors from filter bzip2.decompres
 --FILE--
 <?php
 
-// This bug is only partially fixed. fread() returns false on the first call
-// but does not fail on the second.
+// Should the second fread() call return false?
+// Should notices be generated?
 
 function test($case) {
 	$plain = "The quick brown fox jumps over the lazy dog.";
