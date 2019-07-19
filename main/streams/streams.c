@@ -531,7 +531,6 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 
 	if (stream->readfilters.head) {
 		char *chunk_buf;
-		int err_flag = 0;
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
 
@@ -542,7 +541,7 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
+		while (!stream->eof && (stream->writepos - stream->readpos < (zend_off_t)size)) {
 			ssize_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -610,18 +609,13 @@ PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* when a filter needs feeding, there is no brig_out to deal with.
 					 * we simply continue the loop; if the caller needs more data,
 					 * we will read again, otherwise out job is done here */
-					if (justread == 0) {
-						/* there is no data */
-						err_flag = 1;
-						break;
-					}
-					continue;
+					break;
 
 				case PSFS_ERR_FATAL:
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
-					err_flag = 1;
-					break;
+					efree(chunk_buf);
+					return FAILURE;
 			}
 
 			if (justread <= 0) {
