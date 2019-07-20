@@ -160,9 +160,9 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	}
 
 	if (zoi_bit->key_type == PARTS_ITERATOR_KEY_LEFT) {
-		iter->index = cur;
+		iter->index = cur ? cur - 1 : cur;   /* HACK: cater to increment in next(), but not rewind() */
 	} else if (zoi_bit->key_type == PARTS_ITERATOR_KEY_RIGHT) {
-		iter->index = next;
+		iter->index = cur ? next - 1 : next; /* HACK: cater to increment in next(), but not rewind() */
 	}
 	/* else zoi_bit->key_type == PARTS_ITERATOR_KEY_SEQUENTIAL
 	 * No need to do anything, the engine increments ->index */
