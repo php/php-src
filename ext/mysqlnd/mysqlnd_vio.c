@@ -79,14 +79,15 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 {
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = vio->data->m.get_stream(vio);
-	size_t to_read = count, ret;
+	size_t to_read = count;
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_vio::network_read");
 	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
 
 	while (to_read) {
-		if (!(ret = php_stream_read(net_stream, (char *) p, to_read))) {
+		ssize_t ret = php_stream_read(net_stream, (char *) p, to_read);
+		if (ret <= 0) {
 			DBG_ERR_FMT("Error while reading header from socket");
 			return_value = FAIL;
 			break;
@@ -451,10 +452,14 @@ MYSQLND_METHOD(mysqlnd_vio, consume_uneaten_data)(MYSQLND_VIO * const net, enum 
 
 	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
 		/* Do a read of 1 byte */
-		int bytes_consumed;
+		ssize_t bytes_consumed;
 
 		do {
-			skipped_bytes += (bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf)));
+			bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf));
+			if (bytes_consumed <= 0) {
+				break;
+			}
+			skipped_bytes += bytes_consumed;
 		} while (bytes_consumed == sizeof(tmp_buf));
 
 		if (was_blocked) {

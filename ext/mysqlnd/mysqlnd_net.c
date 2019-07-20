@@ -88,7 +88,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = net->data->m.get_stream(net);
 	size_t old_chunk_size = net_stream->chunk_size;
-	size_t to_read = count, ret;
+	size_t to_read = count;
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_net::network_read_ex");
@@ -96,7 +96,8 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 
 	net_stream->chunk_size = MIN(to_read, net->data->options.net_read_buffer_size);
 	while (to_read) {
-		if (!(ret = php_stream_read(net_stream, (char *) p, to_read))) {
+		ssize_t ret = php_stream_read(net_stream, (char *) p, to_read);
+		if (ret <= 0) {
 			DBG_ERR_FMT("Error while reading header from socket");
 			return_value = FAIL;
 			break;
@@ -866,10 +867,14 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 
 	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
 		/* Do a read of 1 byte */
-		int bytes_consumed;
+		ssize_t bytes_consumed;
 
 		do {
-			skipped_bytes += (bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf)));
+			bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf));
+			if (bytes_consumed <= 0) {
+				break;
+			}
+			skipped_bytes += bytes_consumed;
 		} while (bytes_consumed == sizeof(tmp_buf));
 
 		if (was_blocked) {
@@ -877,9 +882,9 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 		}
 
 		if (bytes_consumed) {
-			DBG_ERR_FMT("Skipped %u bytes. Last command %s hasn't consumed all the output from the server",
+			DBG_ERR_FMT("Skipped %zu bytes. Last command %s hasn't consumed all the output from the server",
 						bytes_consumed, mysqlnd_command_to_text[net->last_command]);
-			php_error_docref(NULL, E_WARNING, "Skipped %u bytes. Last command %s hasn't "
+			php_error_docref(NULL, E_WARNING, "Skipped %zu bytes. Last command %s hasn't "
 							 "consumed all the output from the server",
 							 bytes_consumed, mysqlnd_command_to_text[net->last_command]);
 		}
