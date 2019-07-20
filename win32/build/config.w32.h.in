@@ -67,7 +67,6 @@
 #define HAVE_GETLOGIN 1
 #define HAVE_MEMMOVE 1
 #define HAVE_REGCOMP 1
-#define HAVE_LOCALE_H 1
 #define HAVE_SHUTDOWN 1
 #define HAVE_STRCASECMP 1
 #define HAVE_UTIME 1
