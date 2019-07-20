@@ -177,6 +177,9 @@ dnl Various checks for GD features
     ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
 
   else
+    PHP_GD_XPM
+    PHP_GD_FREETYPE2
+
     extra_sources="gd_compat.c"
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
     PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)

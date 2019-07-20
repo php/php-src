@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     process substitution). (Nikita)
   . Fixed bug #52752 (Crash when lexing). (Nikita)
 
+- GD:
+  . Fixed bug #78314 (missing freetype support/functions with external gd)
+    (Remi)
+
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
     requests (cgi-fcgi)). (Nikita)
