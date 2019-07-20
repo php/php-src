@@ -1,5 +1,5 @@
 --TEST--
-X (PCRE_EXTRA) modififier is ignored (no error, no change)
+X (PCRE_EXTRA) modifier is ignored (no error, no change)
 --FILE--
 <?php
 
