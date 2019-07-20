@@ -1,5 +1,5 @@
 --TEST--
-X (PCRE_EXTRA) modififer
+X (PCRE_EXTRA) modifier
 --FILE--
 <?php
 
