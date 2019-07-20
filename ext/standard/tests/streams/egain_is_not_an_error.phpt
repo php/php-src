@@ -1,5 +1,9 @@
 --TEST--
 EAGAIN/EWOULDBLOCK on a non-blocking socket should not result in an error return value
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die('skip not for Windows');
+?>
 --FILE--
 <?php
 
