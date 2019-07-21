@@ -20,12 +20,6 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
-#if HAVE_LIBFREETYPE
-# ifndef ENABLE_GD_TTF
-#  define ENABLE_GD_TTF
-# endif
-#endif
-
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */
