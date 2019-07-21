@@ -44,5 +44,3 @@ Done
 require_once "tester.inc";
 FPM\Tester::clean();
 ?>
---XFAIL--
-Split flush not implemented yet

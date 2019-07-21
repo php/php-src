@@ -122,7 +122,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	struct fpm_child_s *child;
 	int is_stdout;
 	struct fpm_event_s *event;
-	int in_buf = 0, pos, start;
+	int in_buf = 0, cmd_pos = 0, pos, start;
 	int read_fail = 0, create_log_stream;
 	struct zlog_stream *log_stream;
 
@@ -163,6 +163,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	}
 
 	while (1) {
+stdio_read:
 		in_buf = read(fd, buf, max_buf_size - 1);
 		if (in_buf <= 0) { /* no data */
 			if (in_buf == 0 || (errno != EAGAIN && errno != EWOULDBLOCK)) {
@@ -171,8 +172,15 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 			}
 			break;
 		}
-
-		for (start = 0, pos = 0; pos < in_buf; pos++) {
+		start = 0;
+		if (cmd_pos > 0) {
+			if 	(!memcmp(buf, &FPM_STDIO_CMD_FLUSH[cmd_pos], sizeof(FPM_STDIO_CMD_FLUSH) - cmd_pos)) {
+				zlog_stream_finish(log_stream);
+				start = cmd_pos;
+			}
+			cmd_pos = 0;
+		}
+		for (pos = 0; pos < in_buf; pos++) {
 			switch (buf[pos]) {
 				case '\n':
 					zlog_stream_str(log_stream, buf + start, pos - start);
@@ -180,12 +188,17 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 					start = pos + 1;
 					break;
 				case '\0':
-					if (pos + sizeof(FPM_STDIO_CMD_FLUSH) <= in_buf &&
-							!memcmp(buf + pos, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
+					if (pos + sizeof(FPM_STDIO_CMD_FLUSH) <= in_buf) {
+						if (!memcmp(buf + pos, FPM_STDIO_CMD_FLUSH, sizeof(FPM_STDIO_CMD_FLUSH))) {
+							zlog_stream_str(log_stream, buf + start, pos - start);
+							zlog_stream_finish(log_stream);
+							start = pos + sizeof(FPM_STDIO_CMD_FLUSH);
+							pos = start - 1;
+						}
+					} else if (!memcmp(buf + pos, FPM_STDIO_CMD_FLUSH, in_buf - pos)) {
+						cmd_pos = in_buf - pos;
 						zlog_stream_str(log_stream, buf + start, pos - start);
-						zlog_stream_finish(log_stream);
-						start = pos + sizeof(FPM_STDIO_CMD_FLUSH);
-						pos = start - 1;
+						goto stdio_read;
 					}
 					break;
 			}
