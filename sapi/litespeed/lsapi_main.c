@@ -55,6 +55,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/time.h>
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 #include "lscriu.c"
@@ -609,7 +610,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.4.3",
+    "LiteSpeed V7.5",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -692,65 +693,89 @@ static void lsapi_sigsegv( int signal )
 
 static int clean_onexit = 1;
 
-static void lsapi_sigterm( int signal )
+
+static void lsapi_clean_shutdown()
 {
-    struct sigaction act, old_act;
+    struct sigaction act;
     int sa_rc;
+    struct itimerval tmv;
+#if PHP_MAJOR_VERSION >= 7
+    zend_string * key;
+#endif
+    clean_onexit = 1;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    act.sa_handler = lsapi_sigsegv;
+    sa_rc = sigaction(SIGINT,  &act, NULL);
+    sa_rc = sigaction(SIGQUIT, &act, NULL);
+    sa_rc = sigaction(SIGILL,  &act, NULL);
+    sa_rc = sigaction(SIGABRT, &act, NULL);
+    sa_rc = sigaction(SIGBUS,  &act, NULL);
+    sa_rc = sigaction(SIGSEGV, &act, NULL);
+    sa_rc = sigaction(SIGTERM, &act, NULL);
+
+    sa_rc = sigaction(SIGPROF, &act, NULL);
+    memset(&tmv, 0, sizeof(struct itimerval));
+    tmv.it_value.tv_sec = 0;
+    tmv.it_value.tv_usec = 100000;
+    setitimer(ITIMER_PROF, &tmv, NULL);
+
+#if PHP_MAJOR_VERSION >= 7
+    key = zend_string_init("error_reporting", 15, 1);
+    zend_alter_ini_entry_chars_ex(key, "0", 1,
+                        PHP_INI_SYSTEM, PHP_INI_STAGE_SHUTDOWN, 1);
+    zend_string_release(key);
+#else
+    zend_alter_ini_entry("error_reporting", 16, "0", 1,
+                        PHP_INI_SYSTEM, PHP_INI_STAGE_SHUTDOWN);
+#endif
+
+    zend_try {
+        php_request_shutdown(NULL);
+    } zend_end_try();
+}
+
+static void lsapi_sigterm(int signal)
+{
 
     // fprintf(stderr, "lsapi_sigterm: %d: clean_onexit %d\n", getpid(), clean_onexit );
     if(!clean_onexit)
     {
-        clean_onexit = 1;
-        act.sa_flags = 0;
-        act.sa_handler = lsapi_sigsegv;
-        sa_rc = sigaction( SIGINT, &act, &old_act );
-        sa_rc = sigaction( SIGQUIT, &act, &old_act );
-        sa_rc = sigaction( SIGILL, &act, &old_act );
-        sa_rc = sigaction( SIGABRT, &act, &old_act );
-        sa_rc = sigaction( SIGBUS, &act, &old_act );
-        sa_rc = sigaction( SIGSEGV, &act, &old_act );
-        sa_rc = sigaction( SIGTERM, &act, &old_act );
-
-        zend_try {
-            php_request_shutdown(NULL);
-        } zend_end_try();
+        lsapi_clean_shutdown();
     }
     exit(1);
 }
 
-static void lsapi_atexit( void )
+static void lsapi_atexit(void)
 {
-    struct sigaction act, old_act;
-    int sa_rc;
-
     //fprintf(stderr, "lsapi_atexit: %d: clean_onexit %d\n", getpid(), clean_onexit );
     if(!clean_onexit)
     {
-        clean_onexit = 1;
-        act.sa_flags = 0;
-        act.sa_handler = lsapi_sigsegv;
-        sa_rc = sigaction( SIGINT, &act, &old_act );
-        sa_rc = sigaction( SIGQUIT, &act, &old_act );
-        sa_rc = sigaction( SIGILL, &act, &old_act );
-        sa_rc = sigaction( SIGABRT, &act, &old_act );
-        sa_rc = sigaction( SIGBUS, &act, &old_act );
-        sa_rc = sigaction( SIGSEGV, &act, &old_act );
-        sa_rc = sigaction( SIGTERM, &act, &old_act );
-
-        //fprintf(stderr, "lsapi_atexit: %d: before php_request_shutdown\n", getpid(), clean_onexit );
-        zend_try {
-            php_request_shutdown(NULL);
-        } zend_end_try();
+        lsapi_clean_shutdown();
     }
 }
 
+
 static int lsapi_module_main(int show_source)
 {
+    struct sigaction act;
+    int sa_rc;
     zend_file_handle file_handle;
     memset(&file_handle, 0, sizeof(file_handle));
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
+
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = SA_NODEFER;
+    act.sa_handler = lsapi_sigterm;
+    sa_rc = sigaction( SIGINT, &act, NULL);
+    sa_rc = sigaction( SIGQUIT, &act, NULL);
+    sa_rc = sigaction( SIGILL, &act, NULL);
+    sa_rc = sigaction( SIGABRT, &act, NULL);
+    sa_rc = sigaction( SIGBUS, &act, NULL);
+    sa_rc = sigaction( SIGSEGV, &act, NULL);
+    sa_rc = sigaction( SIGTERM, &act, NULL);
 
     clean_onexit = 0;
 
@@ -1382,6 +1407,7 @@ void start_children( int children )
     setsid();
 
     /* Set up handler to kill children upon exit */
+    sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
     act.sa_handler = litespeed_cleanup;
     if( sigaction( SIGTERM, &act, &old_term ) ||
@@ -1458,15 +1484,6 @@ int main( int argc, char * argv[] )
     int slow_script_msec = 0;
     char time_buf[40];
 
-    struct sigaction act, old_act;
-    struct sigaction INT_act;
-    struct sigaction QUIT_act;
-    struct sigaction ILL_act;
-    struct sigaction ABRT_act;
-    struct sigaction BUS_act;
-    struct sigaction SEGV_act;
-    struct sigaction TERM_act;
-    int sa_rc;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1568,15 +1585,6 @@ int main( int argc, char * argv[] )
 
     int result;
 
-    act.sa_flags = SA_NODEFER;
-    act.sa_handler = lsapi_sigterm;
-    sa_rc = sigaction( SIGINT, &act, &INT_act );
-    sa_rc = sigaction( SIGQUIT, &act, &QUIT_act );
-    sa_rc = sigaction( SIGILL, &act, &ILL_act );
-    sa_rc = sigaction( SIGABRT, &act, &ABRT_act );
-    sa_rc = sigaction( SIGBUS, &act, &BUS_act );
-    sa_rc = sigaction( SIGSEGV, &act, &SEGV_act );
-    sa_rc = sigaction( SIGTERM, &act, &TERM_act );
     atexit(lsapi_atexit);
 
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
@@ -1608,14 +1616,6 @@ int main( int argc, char * argv[] )
             break;
         }
     }
-
-    sa_rc = sigaction( SIGINT, &INT_act, &old_act );
-    sa_rc = sigaction( SIGQUIT, &QUIT_act, &old_act );
-    sa_rc = sigaction( SIGILL, &ILL_act, &old_act );
-    sa_rc = sigaction( SIGABRT, &ABRT_act, &old_act );
-    sa_rc = sigaction( SIGBUS, &BUS_act, &old_act );
-    sa_rc = sigaction( SIGSEGV, &SEGV_act, &old_act );
-    sa_rc = sigaction( SIGTERM, &TERM_act, &old_act );
 
     php_module_shutdown();
 
