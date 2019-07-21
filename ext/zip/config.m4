@@ -9,8 +9,6 @@ if test "$PHP_ZIP" != "no"; then
   PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
   PHP_EVAL_LIBLINE($LIBZIP_LIBS, ZIP_SHARED_LIBADD)
 
-  AC_DEFINE(HAVE_LIBZIP, 1, [ ])
-
   PHP_CHECK_LIBRARY(zip, zip_file_set_encryption,
   [
     AC_DEFINE(HAVE_ENCRYPTION, 1, [Libzip >= 1.2.0 with encryption support])
