@@ -27,7 +27,7 @@ if (PHP_CURL != "no") {
 			CHECK_LIB("nghttp2.lib", "curl", PHP_CURL))
 		) {
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
-		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
+		AC_DEFINE('HAVE_CURL', 1, 'Define to 1 if you have the curl extension enabled.');
 		AC_DEFINE('HAVE_CURL_SSL', 1, 'Have SSL suppurt in cURL');
 		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB");
 		// TODO: check for curl_version_info

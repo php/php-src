@@ -11,7 +11,7 @@ if test "$PHP_SIMPLEXML" != "no"; then
   fi
 
   PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_SIMPLEXML,1,[ ])
+    AC_DEFINE(HAVE_SIMPLEXML, 1, [Define to 1 if you have the simplexml extension enabled.])
     PHP_NEW_EXTENSION(simplexml, simplexml.c sxe.c, $ext_shared)
     PHP_INSTALL_HEADERS([ext/simplexml/php_simplexml.h ext/simplexml/php_simplexml_exports.h])
     PHP_SUBST(SIMPLEXML_SHARED_LIBADD)

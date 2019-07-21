@@ -26,7 +26,7 @@ if test "$PHP_ZIP" != "no"; then
     $LIBZIP_LIBS
   ])
 
-  AC_DEFINE(HAVE_ZIP,1,[ ])
+  AC_DEFINE(HAVE_ZIP, 1, [Define to 1 if you have the zip extension enabled.])
 
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"
   PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared)

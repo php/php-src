@@ -9,7 +9,7 @@ if test "$PHP_ENCHANT" != "no"; then
   PHP_EVAL_INCLINE($ENCHANT_CFLAGS)
   PHP_EVAL_LIBLINE($ENCHANT_LIBS, ENCHANT_SHARED_LIBADD)
 
-  AC_DEFINE(HAVE_ENCHANT, 1, [ ])
+  AC_DEFINE(HAVE_ENCHANT, 1, [Define to 1 if you have the enchant extension enabled.])
 
   PHP_CHECK_LIBRARY(enchant, enchant_get_version,
   [

@@ -46,7 +46,7 @@ if test "$PHP_SNMP" != "no"; then
   dnl Test build.
   PHP_CHECK_LIBRARY($SNMP_LIBNAME, init_snmp,
   [
-    AC_DEFINE(HAVE_SNMP,1,[ ])
+    AC_DEFINE(HAVE_SNMP, 1, [Define to 1 if you have the snmp extension enabled.])
   ], [
     AC_MSG_ERROR([SNMP sanity check failed. Please check config.log for more information.])
   ], [

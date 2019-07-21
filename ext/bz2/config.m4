@@ -26,7 +26,7 @@ if test "$PHP_BZ2" != "no"; then
   [
     PHP_ADD_INCLUDE($BZIP_DIR/include)
     PHP_ADD_LIBRARY_WITH_PATH(bz2, $BZIP_DIR/$PHP_LIBDIR, BZ2_SHARED_LIBADD)
-    AC_DEFINE(HAVE_BZ2,1,[ ])
+    AC_DEFINE(HAVE_BZ2, 1, [Define to 1 if you have the bz2 extension enabled.])
   ], [
     AC_MSG_ERROR(bz2 module requires libbz2 >= 1.0.0)
   ], [

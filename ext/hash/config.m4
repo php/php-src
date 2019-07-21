@@ -12,7 +12,7 @@ if test "$PHP_MHASH" != "no"; then
 fi
 
 dnl Defined for BC.
-AC_DEFINE(HAVE_HASH_EXT,1,[Have HASH Extension])
+AC_DEFINE(HAVE_HASH_EXT, 1, [Define to 1 if you have the hash extension enabled. (deprecated)])
 
 if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"

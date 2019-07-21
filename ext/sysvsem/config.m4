@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([sysvsem],
 
 if test "$PHP_SYSVSEM" != "no"; then
  PHP_NEW_EXTENSION(sysvsem, sysvsem.c, $ext_shared)
- AC_DEFINE(HAVE_SYSVSEM, 1, [ ])
+ AC_DEFINE(HAVE_SYSVSEM, 1, [Define to 1 if you have the sysvsem extension enabled.])
  AC_CACHE_CHECK(for union semun,php_cv_semun,
    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>

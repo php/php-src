@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([json],
   [yes])
 
 if test "$PHP_JSON" != "no"; then
-  AC_DEFINE([HAVE_JSON],1 ,[whether to enable JavaScript Object Serialization support])
+  AC_DEFINE(HAVE_JSON, 1, [Define to 1 if you have the json extension enabled.])
 
 PHP_NEW_EXTENSION(json,
 	  json.c \

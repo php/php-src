@@ -10,7 +10,7 @@ if test "$PHP_LIBXML" != "no"; then
   ext_shared=no
 
   PHP_SETUP_LIBXML(LIBXML_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_LIBXML,1,[ ])
+    AC_DEFINE(HAVE_LIBXML, 1, [Define to 1 if you have the libxml extension enabled.])
     PHP_NEW_EXTENSION(libxml, [libxml.c], $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_INSTALL_HEADERS([ext/libxml/php_libxml.h])
   ])

@@ -16,7 +16,7 @@ if (PHP_DOM == "yes") {
 			notation.c xpath.c dom_iterators.c typeinfo.c domerror.c \
 			domlocator.c namednodemap.c userdatahandler.c");
 
-		AC_DEFINE("HAVE_DOM", 1, "DOM support");
+		AC_DEFINE("HAVE_DOM", 1, "Define to 1 if you have the dom extension enabled.");
 
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");

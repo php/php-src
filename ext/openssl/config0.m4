@@ -32,7 +32,7 @@ if test "$PHP_OPENSSL" != "no"; then
 
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
-    AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
+    AC_DEFINE(HAVE_OPENSSL_EXT, 1, [Define to 1 if you have the openssl extension enabled.])
   ], [
     AC_MSG_ERROR([OpenSSL check failed. Please check config.log for more information.])
   ])

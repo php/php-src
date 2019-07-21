@@ -58,7 +58,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   AC_CHECK_LIB(dnet_stub, dnet_addr, [
     PHP_ADD_LIBRARY_WITH_PATH(dnet_stub,,PDO_DBLIB_SHARED_LIBADD)
   ])
-  AC_DEFINE(HAVE_PDO_DBLIB,1,[ ])
+  AC_DEFINE(HAVE_PDO_DBLIB, 1, [Define to 1 if you have the pdo_dblib extension enabled.])
   PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
 
   PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)

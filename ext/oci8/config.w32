@@ -47,7 +47,7 @@ if (PHP_OCI8 != "no") {
 	{
 		EXTENSION('oci8', 'oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c oci8_failover.c');
 
-		AC_DEFINE('HAVE_OCI8', 1);
+		AC_DEFINE('HAVE_OCI8', 1, 'Define to 1 if you have the oci8 extension enabled.');
 		AC_DEFINE('HAVE_OCI_INSTANT_CLIENT', 1);
 
 	} else {

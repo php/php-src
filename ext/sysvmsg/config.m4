@@ -9,6 +9,6 @@ if test "$PHP_SYSVMSG" != "no"; then
     [AC_MSG_ERROR([Cannot enable System V IPC support, sys/msg.h is missing])
   ])
 
-  AC_DEFINE(HAVE_SYSVMSG, 1, [ ])
+  AC_DEFINE(HAVE_SYSVMSG, 1, [Define to 1 if you have the sysvmsg extension enabled.])
   PHP_NEW_EXTENSION(sysvmsg, sysvmsg.c, $ext_shared)
 fi

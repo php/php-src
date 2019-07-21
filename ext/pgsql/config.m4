@@ -64,7 +64,7 @@ if test "$PHP_PGSQL" != "no"; then
     AC_MSG_ERROR([Unable to find libpq anywhere under $PGSQL_SEARCH_PATHS])
   fi
 
-  AC_DEFINE(HAVE_PGSQL,1,[Whether to build PostgreSQL support or not])
+  AC_DEFINE(HAVE_PGSQL, 1, [Define to 1 if you have the pgsql extension enabled.])
   old_LIBS=$LIBS
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="-L$PGSQL_LIBDIR $LDFLAGS"

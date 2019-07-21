@@ -71,7 +71,7 @@ elif test "$PHP_MYSQLI" != "no"; then
   [
     PHP_EVAL_INCLINE($MYSQLI_INCLINE)
     PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
-    AC_DEFINE(HAVE_MYSQLILIB, 1, [ ])
+    AC_DEFINE(HAVE_MYSQLILIB, 1, [Define to 1 if you have the mysqli extension enabled.])
     PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_set_character_set,
     [ ],[
       AC_MSG_ERROR([MySQLI doesn't support versions < 4.1.13 (for MySQL 4.1.x) and < 5.0.7 for (MySQL 5.0.x) anymore. Please update your libraries.])

@@ -8,7 +8,7 @@ if (PHP_SIMPLEXML == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_SIMPLEXML", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("simplexml", "simplexml.c sxe.c");
-		AC_DEFINE("HAVE_SIMPLEXML", 1, "Simple XML support");
+		AC_DEFINE("HAVE_SIMPLEXML", 1, "Define to 1 if you have the simplexml extension enabled.");
 		if (!PHP_SIMPLEXML_SHARED) {
 			ADD_FLAG("CFLAGS_SIMPLEXML", "/D LIBXML_STATIC");
 		} else {

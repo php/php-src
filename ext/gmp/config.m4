@@ -29,5 +29,5 @@ if test "$PHP_GMP" != "no"; then
 
   PHP_NEW_EXTENSION(gmp, gmp.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(GMP_SHARED_LIBADD)
-  AC_DEFINE(HAVE_GMP, 1, [ ])
+  AC_DEFINE(HAVE_GMP, 1, [Define to 1 if you have the gmp extension enabled.])
 fi

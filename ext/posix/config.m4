@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([posix],
   [yes])
 
 if test "$PHP_POSIX" = "yes"; then
-  AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])
+  AC_DEFINE(HAVE_POSIX, 1, [Define to 1 if you have the posix extension enabled.])
   PHP_NEW_EXTENSION(posix, posix.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
   AC_CHECK_HEADERS([sys/mkdev.h sys/sysmacros.h])

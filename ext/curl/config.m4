@@ -23,7 +23,7 @@ if test "$PHP_CURL" != "no"; then
   esac
 
   if test "$CURL_SSL" = yes; then
-    AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
+    AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with SSL support])
 
     save_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $CURL_CFLAGS"
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
   PHP_CHECK_LIBRARY(curl,curl_easy_perform,
   [
-    AC_DEFINE(HAVE_CURL,1,[ ])
+    AC_DEFINE(HAVE_CURL, 1, [Define to 1 if you have the curl extension enabled.])
   ],[
     AC_MSG_ERROR(There is something wrong. Please check config.log for more information.)
   ],[

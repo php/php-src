@@ -108,7 +108,7 @@ PHP_ARG_WITH([imap-ssl],
 if test "$PHP_IMAP" != "no"; then
     PHP_SUBST(IMAP_SHARED_LIBADD)
     PHP_NEW_EXTENSION(imap, php_imap.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    AC_DEFINE(HAVE_IMAP,1,[ ])
+    AC_DEFINE(HAVE_IMAP, 1, [Define to 1 if you have the imap extension enabled.])
 
     for i in $PHP_IMAP /usr/local /usr; do
       IMAP_INC_CHK()

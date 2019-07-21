@@ -10,6 +10,7 @@ if (PHP_PDO_FIREBIRD != "no") {
 				PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_PDO_FIREBIRD)
 		) {
 
+		AC_DEFINE("HAVE_PDO_FIREBIRD", 1, "Define to 1 if you have the openssl extension enabled.");
 		EXTENSION("pdo_firebird", "pdo_firebird.c firebird_driver.c firebird_statement.c");
 	} else {
 		WARNING("pdo_firebird not enabled; libraries and headers not found");

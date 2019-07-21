@@ -38,5 +38,5 @@ if test "$PHP_PSPELL" != "no"; then
 
 	PHP_ADD_INCLUDE($PSPELL_INCDIR)
 	PHP_SUBST(PSPELL_SHARED_LIBADD)
-	AC_DEFINE(HAVE_PSPELL,1,[ ])
+	AC_DEFINE(HAVE_PSPELL, 1, [Define to 1 if you have the pspell extension enabled.])
 fi

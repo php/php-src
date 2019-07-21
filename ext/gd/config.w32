@@ -41,7 +41,7 @@ if (PHP_GD != "no") {
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
 			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c \
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
-		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
+		AC_DEFINE('HAVE_LIBGD', 1, 'Define to 1 if you have the gd extension enabled.');
 		ADD_FLAG("CFLAGS_GD", " \
 /D HAVE_GD_DYNAMIC_CTX_EX=1 \
 /D HAVE_GD_BUNDLED=1  \

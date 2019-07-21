@@ -23,7 +23,7 @@ if (PHP_MYSQLI != "no") {
 	if (PHP_MYSQLI == "yes" || PHP_MYSQLI == "mysqlnd") {
 		EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'Using MySQL native driver');
-		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
+		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Define to 1 if you have the mysqli extension enabled.');
 		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
 		MESSAGE("\tmysqlnd build");
 		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
@@ -33,7 +33,7 @@ if (PHP_MYSQLI != "no") {
 										"\\include;" + PHP_PHP_BUILD +
 										"\\include\\mysql;" + PHP_MYSQLI)) {
 			EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-			AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
+			AC_DEFINE('HAVE_MYSQLILIB', 1, 'Define to 1 if you have the mysqli extension enabled.');
 			MESSAGE("\tlibmysql build");
 			PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
 		} else {

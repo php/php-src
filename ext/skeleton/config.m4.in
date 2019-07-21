@@ -88,7 +88,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl PHP_SUBST(%EXTNAMECAPS%_SHARED_LIBADD)
 
   dnl In case of no dependencies
-  AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [ Have %EXTNAME% support ])
+  AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [Define to 1 if you have the %EXTNAME% extension enabled.])
 
   PHP_NEW_EXTENSION(%EXTNAME%, %EXTNAME%.c, $ext_shared)
 fi

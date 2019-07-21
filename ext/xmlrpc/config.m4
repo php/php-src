@@ -21,7 +21,7 @@ if test "$PHP_XMLRPC" != "no"; then
 
   PHP_ADD_EXTENSION_DEP(xmlrpc, libxml)
   PHP_SUBST(XMLRPC_SHARED_LIBADD)
-  AC_DEFINE(HAVE_XMLRPC,1,[ ])
+  AC_DEFINE(HAVE_XMLRPC, 1, [Define to 1 if you have the xmlrpc extension enabled.])
 
   dnl
   dnl Default to libxml2 if --with-expat is not specified.

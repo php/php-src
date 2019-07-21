@@ -7,6 +7,7 @@ if (PHP_PDO_SQLITE != "no") {
 		EXTENSION("pdo_sqlite", "pdo_sqlite.c sqlite_driver.c sqlite_statement.c");
 
 		ADD_EXTENSION_DEP('pdo_sqlite', 'pdo');
+		AC_DEFINE("HAVE_PDO_SQLITELIB", 1, "Define to 1 if you have the pdo_sqlite extension enabled.");
 		AC_DEFINE("HAVE_SQLITE3_COLUMN_TABLE_NAME", 1, "have sqlite3_column_table_name");
 		AC_DEFINE("HAVE_SQLITE3_CLOSE_V2", 1, "have sqlite3_close_v2");
 	} else {

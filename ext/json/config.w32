@@ -4,6 +4,7 @@ ARG_ENABLE("json", "JavaScript Object Serialization support", "yes");
 
 if (PHP_JSON != "no") {
 	EXTENSION('json', 'json.c', PHP_JSON_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	AC_DEFINE("HAVE_JSON", 1, "Define to 1 if you have the json extension enabled.");
 
 	if (!FSO.FileExists("ext/json/json_scanner.c")) {
 		STDOUT.WriteLine("Generating ext/json/json_scanner.c");

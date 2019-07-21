@@ -11,5 +11,5 @@ libbcmath/src/sqrt.c libbcmath/src/zero.c libbcmath/src/debug.c libbcmath/src/do
 libbcmath/src/rmzero.c libbcmath/src/str2num.c,
           $ext_shared,,-I@ext_srcdir@/libbcmath/src -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR($ext_builddir/libbcmath/src)
-  AC_DEFINE(HAVE_BCMATH, 1, [Whether you have bcmath])
+  AC_DEFINE(HAVE_BCMATH, 1, [Define to 1 if you have the bcmath extension enabled.])
 fi

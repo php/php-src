@@ -5,6 +5,6 @@ PHP_ARG_ENABLE([ctype],
   [yes])
 
 if test "$PHP_CTYPE" != "no"; then
-  AC_DEFINE(HAVE_CTYPE, 1, [ ])
+  AC_DEFINE(HAVE_CTYPE, 1, [Define to 1 if you have the ctype extension enabled.])
   PHP_NEW_EXTENSION(ctype, ctype.c, $ext_shared)
 fi

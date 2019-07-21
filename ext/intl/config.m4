@@ -7,6 +7,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  AC_DEFINE(HAVE_INTL, 1, [Define to 1 if you have the intl extension enabled.])
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \

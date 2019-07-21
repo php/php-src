@@ -9,7 +9,7 @@ if test "$PHP_SODIUM" != "no"; then
   PHP_EVAL_INCLINE($LIBSODIUM_CFLAGS)
   PHP_EVAL_LIBLINE($LIBSODIUM_LIBS, SODIUM_SHARED_LIBADD)
 
-  AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
+  AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [Define to 1 if you have the sodium extension enabled.])
 
   PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared)
   PHP_SUBST(SODIUM_SHARED_LIBADD)

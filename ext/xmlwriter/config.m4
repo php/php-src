@@ -11,7 +11,7 @@ if test "$PHP_XMLWRITER" != "no"; then
   fi
 
   PHP_SETUP_LIBXML(XMLWRITER_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_XMLWRITER,1,[ ])
+    AC_DEFINE(HAVE_XMLWRITER, 1, [Define to 1 if you have the xmlwriter extension enabled.])
     PHP_NEW_EXTENSION(xmlwriter, php_xmlwriter.c, $ext_shared)
     PHP_SUBST(XMLWRITER_SHARED_LIBADD)
   ])

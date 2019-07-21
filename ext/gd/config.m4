@@ -184,7 +184,7 @@ dnl Various checks for GD features
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
     PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($GDLIB_CFLAGS)
-    AC_DEFINE(HAVE_LIBGD, 1, [ ])
+    AC_DEFINE(HAVE_LIBGD, 1, [Define to 1 if you have the gd extension enabled.])
     PHP_GD_CHECK_VERSION
 
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)

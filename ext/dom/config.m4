@@ -11,7 +11,7 @@ if test "$PHP_DOM" != "no"; then
   fi
 
   PHP_SETUP_LIBXML(DOM_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_DOM,1,[ ])
+    AC_DEFINE(HAVE_DOM, 1, [Define to 1 if you have the dom extension enabled.])
     PHP_NEW_EXTENSION(dom, [php_dom.c attr.c document.c domerrorhandler.c \
                             domstringlist.c domexception.c namelist.c \
                             processinginstruction.c cdatasection.c \

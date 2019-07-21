@@ -7,7 +7,7 @@ if (PHP_MHASH != 'no') {
 }
 
 // Defined for BC.
-AC_DEFINE('HAVE_HASH_EXT', 1);
+AC_DEFINE('HAVE_HASH_EXT', 1, 'Define to 1 if you have the hash extension enabled. (deprecated)');
 
 PHP_HASH = 'yes';
 

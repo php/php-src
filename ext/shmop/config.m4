@@ -4,6 +4,6 @@ PHP_ARG_ENABLE([shmop],
     [Enable shmop support])])
 
 if test "$PHP_SHMOP" != "no"; then
-  AC_DEFINE(HAVE_SHMOP, 1, [ ])
+  AC_DEFINE(HAVE_SHMOP, 1, [Define to 1 if you have the shmop extension enabled.])
   PHP_NEW_EXTENSION(shmop, shmop.c, $ext_shared)
 fi
