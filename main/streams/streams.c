@@ -709,7 +709,7 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			}
 
 			toread = stream->writepos - stream->readpos;
-			if (toread > size) {
+			if ((size_t) toread > size) {
 				toread = size;
 			}
 
@@ -756,7 +756,7 @@ PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
 	ZSTR_LEN(str) = read;
 	ZSTR_VAL(str)[read] = 0;
 
-	if (read < len / 2) {
+	if ((size_t) read < len / 2) {
 		return zend_string_truncate(str, read, 0);
 	}
 	return str;
