@@ -1772,15 +1772,15 @@ dnl required version MIN-VERSION and doesn't match any of the blank separated
 dnl list of excluded versions EXCLUDED-VERSION (for example "3.0 3.2").
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
-  AC_CHECK_PROG(YACC, bison, bison)
+  AC_CHECK_PROG(BISON, bison, bison)
 
   ifelse($1,,php_bison_required_version='',php_bison_required_version="$1")
   ifelse($2,,php_bison_excluded_versions='none',php_bison_excluded_versions="$2")
 
-  if test -n "$YACC"; then
+  if test -n "$BISON"; then
     AC_MSG_CHECKING([for bison version])
 
-    php_bison_version=$($YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
+    php_bison_version=$($BISON --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | tr -d a-z)
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
@@ -1822,11 +1822,11 @@ AC_DEFUN([PHP_PROG_BISON], [
         AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
-      YACC="exit 0;"
+      BISON="exit 0;"
       ;;
   esac
 
-  PHP_SUBST(YACC)
+  PHP_SUBST(BISON)
 ])
 
 dnl
