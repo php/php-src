@@ -1303,7 +1303,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_JPG
 	{
 		php_info_print_table_row(2, "JPEG Support", "enabled");
+#if defined(HAVE_GD_BUNDLED)
 		php_info_print_table_row(2, "libJPEG Version", gdJpegGetVersionString());
+#endif
 	}
 #endif
 
