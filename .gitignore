@@ -164,7 +164,7 @@ php
 /Zend/zend_language_parser.c
 /Zend/zend_language_parser.h
 
-# Report output files created by bison when using the -v option
+# Report output files created by bison when using the --verbose option
 *.output
 
 # ------------------------------------------------------------------------------

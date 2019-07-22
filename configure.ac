@@ -203,10 +203,11 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([0.13.4])
 
-BISON_FLAGS="-v -l"
+BISON_FLAGS="--verbose --no-lines"
 PHP_SUBST(BISON_FLAGS)
+
+PHP_PROG_RE2C([0.13.4])
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto gcc extension with re2c],

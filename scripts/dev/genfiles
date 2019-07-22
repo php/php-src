@@ -36,7 +36,7 @@
 #     BISON=/path/to/bison ./genfiles
 
 BISON=${BISON:-bison}
-BISON_FLAGS="-l"
+BISON_FLAGS="--no-lines"
 RE2C=${RE2C:-re2c}
 RE2C_FLAGS="-i"
 SED=${SED:-sed}
