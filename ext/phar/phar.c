@@ -3215,7 +3215,7 @@ static const zend_function_entry phar_functions[] = {
 };
 /* }}}*/
 
-static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len) /* {{{ */
+static ssize_t phar_zend_stream_reader(void *handle, char *buf, size_t len) /* {{{ */
 {
 	return php_stream_read(phar_get_pharfp((phar_archive_data*)handle), buf, len);
 }

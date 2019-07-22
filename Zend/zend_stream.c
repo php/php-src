@@ -25,7 +25,7 @@
 
 ZEND_DLIMPORT int isatty(int fd);
 
-static size_t zend_stream_stdio_reader(void *handle, char *buf, size_t len) /* {{{ */
+static ssize_t zend_stream_stdio_reader(void *handle, char *buf, size_t len) /* {{{ */
 {
 	return fread(buf, 1, len, (FILE*)handle);
 } /* }}} */
@@ -95,7 +95,7 @@ static int zend_stream_getc(zend_file_handle *file_handle) /* {{{ */
 	return EOF;
 } /* }}} */
 
-static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len) /* {{{ */
+static ssize_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len) /* {{{ */
 {
 	if (file_handle->handle.stream.isatty) {
 		int c = '*';
@@ -148,10 +148,18 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	}
 
 	if (size) {
-		file_handle->buf = *buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
-		file_handle->len = zend_stream_read(file_handle, *buf, size);
+		ssize_t read;
+		*buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
+		read = zend_stream_read(file_handle, *buf, size);
+		if (read < 0) {
+			efree(*buf);
+			return FAILURE;
+		}
+		file_handle->buf = *buf;
+		file_handle->len = read;
 	} else {
-		size_t read, remain = 4*1024;
+		size_t remain = 4*1024;
+		ssize_t read;
 		*buf = emalloc(remain);
 		size = 0;
 
@@ -164,6 +172,11 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 				remain = size;
 			}
 		}
+		if (read < 0) {
+			efree(*buf);
+			return FAILURE;
+		}
+
 		file_handle->len = size;
 		if (size && remain < ZEND_MMAP_AHEAD) {
 			*buf = safe_erealloc(*buf, size, 1, ZEND_MMAP_AHEAD);
