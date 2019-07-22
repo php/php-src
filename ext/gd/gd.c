@@ -68,11 +68,9 @@ static int le_gd, le_gd_font;
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
 
-#ifdef ENABLE_GD_TTF
-# ifdef HAVE_LIBFREETYPE
-#  include <ft2build.h>
-#  include FT_FREETYPE_H
-# endif
+#if HAVE_LIBFREETYPE
+# include <ft2build.h>
+# include FT_FREETYPE_H
 #endif
 
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
@@ -83,7 +81,7 @@ static int le_gd, le_gd_font;
 #define M_PI 3.14159265358979323846
 #endif
 
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBFREETYPE
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
@@ -723,7 +721,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagegetclip, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
-#ifdef ENABLE_GD_TTF
 #if HAVE_LIBFREETYPE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, size)
@@ -744,7 +741,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagefttext, 0, 0, 8)
 	ZEND_ARG_INFO(0, text)
 	ZEND_ARG_INFO(0, extrainfo) /* ARRAY_INFO(0, extrainfo, 0) */
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagettfbbox, 0)
 	ZEND_ARG_INFO(0, size)
@@ -964,7 +960,7 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imagegetclip,							arginfo_imagegetclip)
 	PHP_FE(imagedashedline,							arginfo_imagedashedline)
 
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBFREETYPE
 	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
 	PHP_FE(imagettftext,							arginfo_imagettftext)
 #if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
@@ -1250,9 +1246,8 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #endif
 
-#ifdef ENABLE_GD_TTF
-	php_info_print_table_row(2, "FreeType Support", "enabled");
 #if HAVE_LIBFREETYPE
+	php_info_print_table_row(2, "FreeType Support", "enabled");
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
 	{
 		char tmp[256];
@@ -1266,9 +1261,6 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 		php_info_print_table_row(2, "FreeType Version", tmp);
 	}
-#else
-	php_info_print_table_row(2, "FreeType Linkage", "with unknown library");
-#endif
 #endif
 
 	php_info_print_table_row(2, "GIF Read Support", "enabled");
@@ -1324,13 +1316,9 @@ PHP_FUNCTION(gd_info)
 
 	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING);
 
-#ifdef ENABLE_GD_TTF
-	add_assoc_bool(return_value, "FreeType Support", 1);
 #if HAVE_LIBFREETYPE
+	add_assoc_bool(return_value, "FreeType Support", 1);
 	add_assoc_string(return_value, "FreeType Linkage", "with freetype");
-#else
-	add_assoc_string(return_value, "FreeType Linkage", "with unknown library");
-#endif
 #else
 	add_assoc_bool(return_value, "FreeType Support", 0);
 #endif
@@ -3938,14 +3926,14 @@ PHP_FUNCTION(imagegetclip)
 }
 /* }}} */
 
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBFREETYPE
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
 #endif
 
-#ifdef ENABLE_GD_TTF
+#if HAVE_LIBFREETYPE
 
-#if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 /* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
@@ -3961,7 +3949,7 @@ PHP_FUNCTION(imagefttext)
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
 }
 /* }}} */
-#endif /* HAVE_GD_FREETYPE && HAVE_LIBFREETYPE */
+#endif /* HAVE_GD_FREETYPE */
 
 /* {{{ proto array imagettfbbox(float size, float angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
@@ -4064,7 +4052,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	}
 }
 /* }}} */
-#endif	/* ENABLE_GD_TTF */
+#endif	/* HAVE_LIBFREETYPE */
 
 /* Section Filters */
 #define PHP_GD_SINGLE_RES	\
