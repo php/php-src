@@ -1198,6 +1198,12 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			}
 		} ZEND_HASH_FOREACH_END();
 
+		if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
+			if (class_type->type == ZEND_INTERNAL_CLASS || (class_type->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED))) {
+				zend_class_init_statics(class_type);
+			}
+		}
+
 		ce = class_type;
 		while (ce) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
