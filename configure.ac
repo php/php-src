@@ -205,6 +205,8 @@ PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([0.13.4])
 
+RE2C_FLAGS="-i --no-generation-date"
+
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto gcc extension with re2c],
   [AS_HELP_STRING([--enable-re2c-cgoto],
@@ -212,9 +214,7 @@ PHP_ARG_ENABLE([re2c-cgoto],
   [no],
   [no])
 
-if test "$PHP_RE2C_CGOTO" = "no"; then
-  RE2C_FLAGS=""
-else
+if test "$PHP_RE2C_CGOTO" != "no"; then
   AC_MSG_CHECKING([whether re2c -g works])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
 int main(int argc, const char **argv)
@@ -228,10 +228,9 @@ label2:
   return 0;
 }
   ]])],[
-    RE2C_FLAGS=""
     AC_MSG_RESULT([no])
   ],[
-    RE2C_FLAGS="-g"
+    RE2C_FLAGS="${RE2C_FLAGS} -g"
     AC_MSG_RESULT([yes])
   ])
 fi
