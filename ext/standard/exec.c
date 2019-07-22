@@ -178,8 +178,9 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			RETVAL_EMPTY_STRING();
 		}
 	} else {
-		while((bufl = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
-			PHPWRITE(buf, bufl);
+		ssize_t read;
+		while ((read = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
+			PHPWRITE(buf, read);
 		}
 	}
 

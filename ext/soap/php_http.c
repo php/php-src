@@ -1426,7 +1426,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 			php_stream_gets(stream, headerbuf, sizeof(headerbuf));
 			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
-					int len_size = 0;
+					size_t len_size = 0;
 
 					if (http_buf_size + buf_size + 1 < 0) {
 						if (http_buf) {
@@ -1442,7 +1442,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 					}
 
 					while (len_size < buf_size) {
-						int len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
+						ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, buf_size - len_size);
 						if (len_read <= 0) {
 							/* Error or EOF */
 							done = TRUE;
@@ -1500,7 +1500,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		}
 		http_buf = zend_string_alloc(header_length, 0);
 		while (http_buf_size < header_length) {
-			int len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
+			ssize_t len_read = php_stream_read(stream, http_buf->val + http_buf_size, header_length - http_buf_size);
 			if (len_read <= 0) {
 				break;
 			}
@@ -1508,7 +1508,7 @@ static zend_string* get_http_body(php_stream *stream, int close, char *headers)
 		}
 	} else if (header_close) {
 		do {
-			int len_read;
+			ssize_t len_read;
 			if (http_buf) {
 				http_buf = zend_string_realloc(http_buf, http_buf_size + 4096, 0);
 			} else {

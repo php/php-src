@@ -68,7 +68,7 @@ PHP_FUNCTION(sha1_file)
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	size_t         n;
+	ssize_t        n;
 	php_stream    *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)

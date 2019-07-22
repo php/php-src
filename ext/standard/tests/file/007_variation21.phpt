@@ -32,7 +32,7 @@ var_dump($file_handle);  //Check for the content of handle
 var_dump( get_resource_type($file_handle) );  //Check for the type of resource
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 rewind($file_handle);
-var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: empty string
+var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: false
 var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the end of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
@@ -51,7 +51,7 @@ unlink(__DIR__."/007_variation21.tmp");
 resource(%d) of type (stream)
 string(6) "stream"
 int(37)
-string(0) ""
+bool(false)
 int(0)
 bool(true)
 string(7) "Unknown"

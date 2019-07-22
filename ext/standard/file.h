@@ -79,7 +79,7 @@ PHPAPI int php_mkdir(const char *dir, zend_long mode);
 
 #define PHP_CSV_NO_ESCAPE EOF
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
 
 #define META_DEF_BUFSIZE 8192
 

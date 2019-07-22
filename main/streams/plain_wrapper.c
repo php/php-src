@@ -335,7 +335,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	return stream;
 }
 
-static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
@@ -343,16 +343,15 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		int bytes_written;
+		ssize_t bytes_written;
 		if (ZEND_SIZE_T_UINT_OVFL(count)) {
 			count = UINT_MAX;
 		}
 		bytes_written = _write(data->fd, buf, (unsigned int)count);
 #else
-		int bytes_written = write(data->fd, buf, count);
+		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
-		if (bytes_written < 0) return 0;
-		return (size_t) bytes_written;
+		return bytes_written;
 	} else {
 
 #if HAVE_FLUSHIO
@@ -362,14 +361,14 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 		data->last_op = 'w';
 #endif
 
-		return fwrite(buf, 1, count, data->file);
+		return (ssize_t) fwrite(buf, 1, count, data->file);
 	}
 }
 
-static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
-	size_t ret;
+	ssize_t ret;
 
 	assert(data != NULL);
 
@@ -411,7 +410,20 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
 
-		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR && errno != EBADF));
+		if (ret < 0) {
+			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+				/* Not an error. */
+				ret = 0;
+			} else if (errno == EINTR) {
+				/* An error, but not EOF */
+			} else if (errno == EBADF) {
+				/* TODO: Remove this special-case? */
+			} else {
+				stream->eof = 1;
+			}
+		} else if (ret == 0) {
+			stream->eof = 1;
+		}
 
 	} else {
 #if HAVE_FLUSHIO
@@ -921,7 +933,7 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 /* }}} */
 
 /* {{{ plain files opendir/readdir implementation */
-static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size_t count)
 {
 	DIR *dir = (DIR*)stream->abstract;
 	struct dirent *result;
@@ -929,7 +941,7 @@ static size_t php_plain_files_dirstream_read(php_stream *stream, char *buf, size
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count != sizeof(php_stream_dirent))
-		return 0;
+		return -1;
 
 	result = readdir(dir);
 	if (result) {

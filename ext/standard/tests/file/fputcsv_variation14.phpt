@@ -89,7 +89,7 @@ echo "Done\n";
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -99,7 +99,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -109,7 +109,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -119,7 +119,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -129,7 +129,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -139,7 +139,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -149,7 +149,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -159,7 +159,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -169,7 +169,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -179,7 +179,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -189,7 +189,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -199,7 +199,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -209,7 +209,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -219,7 +219,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -229,7 +229,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -239,7 +239,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -249,7 +249,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -259,7 +259,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -269,7 +269,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -279,7 +279,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -289,7 +289,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -299,7 +299,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -309,7 +309,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -319,7 +319,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -329,7 +329,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -339,7 +339,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""
@@ -349,7 +349,7 @@ string(0) ""
 Notice: fputcsv(): delimiter must be a single character in %s on line %d
 
 Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(0)
+bool(false)
 int(0)
 bool(false)
 string(0) ""

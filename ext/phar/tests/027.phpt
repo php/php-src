@@ -82,7 +82,7 @@ int(4)
 int(0)
 int(1)
 fwrite on dir handle
-int(0)
+bool(false)
 bool(false)
 opendir edge cases
 

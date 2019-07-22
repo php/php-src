@@ -955,7 +955,7 @@ typedef struct {
 	int fd;
 } php_stdio_stream_data;
 
-static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
+static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	while (data->fd >= 0) {

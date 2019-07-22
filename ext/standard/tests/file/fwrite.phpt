@@ -26,7 +26,7 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(0)
-int(0)
+bool(false)
 int(0)
 int(4)
 int(0)

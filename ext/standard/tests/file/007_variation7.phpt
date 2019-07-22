@@ -32,7 +32,7 @@ var_dump( ftell($file_handle) );  //Initial file pointer position, expected at t
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 rewind($file_handle);
-var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: empty string
+var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: false
 var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the beginning of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
@@ -49,7 +49,7 @@ string(6) "stream"
 int(0)
 int(37)
 int(37)
-string(0) ""
+bool(false)
 int(0)
 bool(true)
 string(7) "Unknown"
