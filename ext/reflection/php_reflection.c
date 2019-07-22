@@ -6143,6 +6143,16 @@ ZEND_METHOD(reflection_reference, __construct)
 }
 /* }}} */
 
+static zend_bool is_ignorable_reference(HashTable *ht, zval *ref) {
+	if (Z_REFCOUNT_P(ref) != 1) {
+		return 0;
+	}
+
+	/* Directly self-referential arrays are treated as proper references
+	 * in zend_array_dup() despite rc=1. */
+	return Z_TYPE_P(Z_REFVAL_P(ref)) != IS_ARRAY || Z_ARRVAL_P(Z_REFVAL_P(ref)) != ht;
+}
+
 /* {{{ proto public ReflectionReference|null ReflectionReference::fromArrayElement(array array, mixed key)
  *     Create ReflectionReference for array item. Returns null if not a reference. */
 ZEND_METHOD(reflection_reference, fromArrayElement)
@@ -6169,8 +6179,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 		return;
 	}
 
-	/* Treat singleton reference as non-reference. */
-	if (Z_TYPE_P(item) != IS_REFERENCE || Z_REFCOUNT_P(item) == 1) {
+	if (Z_TYPE_P(item) != IS_REFERENCE || is_ignorable_reference(ht, item)) {
 		RETURN_NULL();
 	}
 
