@@ -38,7 +38,7 @@
 YACC=${YACC:-bison}
 YACC="$YACC -l"
 RE2C=${RE2C:-re2c}
-RE2C_FLAGS="-i --no-generation-date"
+RE2C_FLAGS="--no-debug-info --no-generation-date"
 SED=${SED:-sed}
 MAKE=${MAKE:-make}
 

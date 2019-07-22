@@ -205,7 +205,7 @@ PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([0.13.4])
 
-RE2C_FLAGS="-i --no-generation-date"
+RE2C_FLAGS="--no-debug-info --no-generation-date"
 
 PHP_ARG_ENABLE([re2c-cgoto],
   [whether to enable computed goto gcc extension with re2c],
