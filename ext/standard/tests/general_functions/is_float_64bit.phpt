@@ -53,7 +53,7 @@ foreach ($floats as $float ) {
   echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_float($float) );
   var_dump( is_double($float) );
-  var_dump( is_real($float) );
+  var_dump( @is_real($float) );
 }
 
 echo "\n*** Testing is_float(), is_double() & is_real() with non float values ***\n";
@@ -126,7 +126,7 @@ foreach ($not_floats as $value ) {
   echo "--Iteration $loop_counter--\n"; $loop_counter++;
   var_dump( is_float($value) );
   var_dump( is_double($value) );
-  var_dump( is_real($value) );
+  var_dump( @is_real($value) );
 }
 
 echo "Done\n";

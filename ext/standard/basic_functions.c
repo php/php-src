@@ -2778,7 +2778,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strripos,														arginfo_strripos)
 	PHP_FE(strrev,															arginfo_strrev)
 	PHP_FE(hebrev,															arginfo_hebrev)
-	PHP_FE(hebrevc,															arginfo_hebrevc)
+	PHP_DEP_FE(hebrevc,														arginfo_hebrevc)
 	PHP_FE(nl2br,															arginfo_nl2br)
 	PHP_FE(basename,														arginfo_basename)
 	PHP_FE(dirname,															arginfo_dirname)
@@ -2798,7 +2798,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strcoll,															arginfo_strcoll)
 
 #ifdef HAVE_STRFMON
-	PHP_FE(money_format,													arginfo_money_format)
+	PHP_DEP_FE(money_format,												arginfo_money_format)
 #endif
 
 	PHP_FE(substr,															arginfo_substr)
@@ -2999,14 +2999,14 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(quoted_printable_decode,											arginfo_quoted_printable_decode)
 	PHP_FE(quoted_printable_encode,											arginfo_quoted_printable_encode)
-	PHP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
+	PHP_DEP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
-	PHP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
+	PHP_DEP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
+	PHP_DEP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
@@ -3041,7 +3041,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(ini_restore,														arginfo_ini_restore)
 	PHP_FE(get_include_path,												arginfo_get_include_path)
 	PHP_FE(set_include_path,												arginfo_set_include_path)
-	PHP_FE(restore_include_path,											arginfo_restore_include_path)
+	PHP_DEP_FE(restore_include_path,											arginfo_restore_include_path)
 
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
@@ -3103,7 +3103,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(is_integer,			is_int,									arginfo_is_int)
 	PHP_FALIAS(is_long,				is_int,									arginfo_is_int)
 	PHP_FALIAS(is_double,			is_float,								arginfo_is_float)
-	PHP_FALIAS(is_real,				is_float,								arginfo_is_float)
+	PHP_DEP_FALIAS(is_real,			is_float,								arginfo_is_float)
 	PHP_FE(is_numeric,														arginfo_is_numeric)
 	PHP_FE(is_string,														arginfo_is_string)
 	PHP_FE(is_array,														arginfo_is_array)
@@ -3284,7 +3284,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	/* functions from mail.c */
 	PHP_FE(mail,															arginfo_mail)
-	PHP_FE(ezmlm_hash,														arginfo_ezmlm_hash)
+	PHP_DEP_FE(ezmlm_hash,													arginfo_ezmlm_hash)
 
 	/* functions from syslog.c */
 #ifdef HAVE_SYSLOG_H

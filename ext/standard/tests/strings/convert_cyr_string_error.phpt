@@ -31,15 +31,21 @@ var_dump(bin2hex( convert_cyr_string($str, ">", "?")) );
 
 -- Testing convert_cyr_string() function with invalid 'from' character set --
 
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
+
 Warning: convert_cyr_string(): Unknown source charset: ? in %s on line %d
 string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'to' character set --
 
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
+
 Warning: convert_cyr_string(): Unknown destination charset: ? in %s on line %d
 string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 
 Warning: convert_cyr_string(): Unknown source charset: > in %s on line %d
 

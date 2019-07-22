@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::export() : very basic test with no dynamic properties
+ReflectionObject::__toString() : very basic test with no dynamic properties
 --FILE--
 <?php
 
@@ -8,7 +8,7 @@ class Foo  {
 }
 $f = new foo;
 
-ReflectionObject::export($f);
+echo new ReflectionObject($f);
 
 ?>
 --EXPECTF--

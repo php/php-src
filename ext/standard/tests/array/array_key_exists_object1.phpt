@@ -46,13 +46,17 @@ var_dump($class2);
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_key_exists() : object functionality ***
 
 -- Do not assign a value to $class1->var3 --
 $key = var1:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(true)
 $key = var3:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(true)
 $class1:
 object(myClass)#1 (3) {
@@ -66,6 +70,8 @@ object(myClass)#1 (3) {
 
 -- Assign a value to $class2->var3 --
 $key = var3:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(true)
 $class2:
 object(myClass)#2 (3) {

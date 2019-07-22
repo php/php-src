@@ -2500,6 +2500,9 @@ PHP_FUNCTION(mb_strrpos)
 					break;
 				default :
 					enc_name = Z_STR_P(zoffset);
+					php_error_docref(NULL, E_DEPRECATED,
+						"Passing the encoding as third parameter is deprecated. "
+						"Use an explicit zero offset");
 					break;
 			}
 		} else {

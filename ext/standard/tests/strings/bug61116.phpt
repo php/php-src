@@ -2,8 +2,8 @@
 Bug #61116 (HTML functions use encoding, not charset)
 --FILE--
 <?php
-Reflection::export(new ReflectionFunction('htmlspecialchars'));
-Reflection::export(new ReflectionFunction('get_html_translation_table'));
+echo new ReflectionFunction('htmlspecialchars'), "\n";
+echo new ReflectionFunction('get_html_translation_table'), "\n";
 ?>
 --EXPECT--
 Function [ <internal:standard> function htmlspecialchars ] {

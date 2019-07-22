@@ -38,24 +38,36 @@ foreach ($inputs as $type => $input) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing mb_strrpos() : usage variations ***
 
 -- Double Quoted String --
 -- With fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 -- Without fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 
 -- Single Quoted String --
 -- With fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 -- Without fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 
 -- Heredoc --
 -- With fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 -- Without fourth encoding argument --
+
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(20)
 Done

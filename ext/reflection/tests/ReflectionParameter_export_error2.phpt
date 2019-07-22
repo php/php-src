@@ -26,6 +26,9 @@ catch (ReflectionException $e) {
 	echo $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function ReflectionParameter::export() is deprecated in %s on line %d
 Method ReflectionFunction::__invoke() does not exist
+
+Deprecated: Function ReflectionParameter::export() is deprecated in %s on line %d
 The parameter class is expected to be either a string, an array(class, method) or a callable object

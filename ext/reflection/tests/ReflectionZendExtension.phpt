@@ -14,10 +14,12 @@ var_dump($reflection->getURL());
 var_dump($reflection->getVersion() === PHP_VERSION);
 var_dump(gettype($reflection->export('Zend OPcache', true)) === 'string');
 ?>
---EXPECT--
+--EXPECTF--
 string(17) "Zend Technologies"
 string(13) "Copyright (c)"
 string(12) "Zend OPcache"
 string(20) "http://www.zend.com/"
 bool(true)
+
+Deprecated: Function ReflectionZendExtension::export() is deprecated in %s on line %d
 bool(true)

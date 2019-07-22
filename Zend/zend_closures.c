@@ -86,6 +86,9 @@ static zend_bool zend_valid_closure_binding(
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING, "Cannot unbind $this of method");
 		return 0;
+	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)) {
+		// TODO: Only deprecate if it had $this *originally*?
+		zend_error(E_DEPRECATED, "Unbinding $this of closure is deprecated");
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {

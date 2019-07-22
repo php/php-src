@@ -6306,6 +6306,9 @@ PHP_FUNCTION(array_key_exists)
 		ht = Z_ARRVAL_P(array);
 	} else {
 		ht = zend_get_properties_for(array, ZEND_PROP_PURPOSE_ARRAY_CAST);
+		php_error_docref(NULL, E_DEPRECATED,
+			"Using array_key_exists() on objects is deprecated. "
+			"Use isset() or property_exists() instead");
 	}
 
 	switch (Z_TYPE_P(key)) {

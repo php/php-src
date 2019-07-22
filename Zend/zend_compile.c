@@ -3676,7 +3676,6 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_typecheck(result, args, IS_LONG);
 	} else if (zend_string_equals_literal(lcname, "is_float")
 		|| zend_string_equals_literal(lcname, "is_double")
-		|| zend_string_equals_literal(lcname, "is_real")
 	) {
 		return zend_compile_func_typecheck(result, args, IS_DOUBLE);
 	} else if (zend_string_equals_literal(lcname, "is_string")) {
