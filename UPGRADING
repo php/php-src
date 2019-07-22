@@ -351,22 +351,32 @@ PHP 7.4 UPGRADE NOTES
   . The array and string offset access syntax using curly braces is deprecated.
     Use $str[$idx] instead of $str{$idx}.
     RFC: https://wiki.php.net/rfc/deprecate_curly_braces_array_access
+  . The (real) cast is deprecated, use (float) instead.
   . Unbinding $this of a non-static method through a combination of
     ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
     so is equivalent to calling a non-static method statically, which has been
     deprecated since PHP 7.0.
+  . Unbinding $this of a non-static closure is deprecated.
   . Using "parent" inside a class without parent is deprecated, and will throw
     a compile-time error in the future. Currently an error will only be
     generated if/when the parent is accessed at run-time.
+  . The allow_url_include ini directive is deprecated. Enabling it will generate
+    a deprecation notice at startup.
 
 - COM:
   . Importing type libraries with case-insensitive constant registering has been
     deprecated.
 
+- Filter:
+  . FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZER_ADD_SLASHES
+    instead.
+
 - Mbstring:
   . Passing a non-string pattern to mb_ereg_replace() is deprecated. Currently
     non-string patterns are interpreted as ASCII codepoints. In PHP 8 the
     pattern will be interpreted as a string instead.
+  . Passing the encoding as 3rd parameter to mb_strrpos() is deprecated. Instead
+    pass a 0 offset and encoding as 4th parameter.
 
 - LDAP:
   . ldap_control_paged_result_response and ldap_control_paged_result are
@@ -377,6 +387,13 @@ PHP 7.4 UPGRADE NOTES
     This method has been deprecated in favor of ReflectionNamedType::getName()
     in the documentation since PHP 7.1, but did not throw a deprecation notice
     for technical reasons.
+  . The export() methods on all Reflection classes are deprecated. Construct a
+    Reflection object and convert it to string instead:
+
+        // ReflectionClass::export(Foo::class, false) is:
+        echo new ReflectionClass(Foo::class), "\n";
+        // $str = ReflectionClass::export(Foo::class, true) is:
+        $str = (string) new ReflectionClass(Foo::class);
 
 - Standard:
   . Passing invalid characters to ''base_convert()'', ''bindec()'', ''octdec()''
@@ -384,6 +401,22 @@ PHP 7.4 UPGRADE NOTES
     still be computed as if the invalid characters did not exist. Leading and
     trailing whitespace, as well as prefixes of type 0x (depending on base)
     continue to be allowed.
+  . Using array_key_exists() on objects is deprecated. Instead either isset()
+    or property_exists() should be used.
+  . The is_real() function is deprecated, use is_float() instead.
+  . The get_magic_quotes_gpc() and get_magic_quotes_runtime() functions are
+    deprecated. They always return false.
+  . The hebrevc() function is deprecated. It can be replaced with
+    nl2br(hebrev($str)), or preferably the use of Unicode RTL support.
+  . The convert_cyr_string() function is deprecated. It can be replaced by one
+    of mb_convert_string(), iconv() or UConverter.
+  . The money_format() function is deprecated. It can be replaced by the
+    intl NumberFormatter functionality.
+  . The ezmlm_hash() function is deprecated.
+  . The restore_include_path() function is deprecated. It can be replace by
+    ini_restore('include_path').
+  . Passing parameters to implode() in reverse order is deprecated, use
+    implode($glue, $parts) instead of implode($parts, $glue).
 
 ========================================
 5. Changed Functions
