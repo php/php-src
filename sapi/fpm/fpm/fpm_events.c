@@ -34,6 +34,7 @@
 #define fpm_event_set_timeout(ev, now) timeradd(&(now), &(ev)->frequency, &(ev)->timeout);
 
 static void fpm_event_cleanup(int which, void *arg);
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg);
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg);
 static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue, struct fpm_event_s *ev);
 static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_event_s *ev);
@@ -43,11 +44,18 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue);
 static struct fpm_event_module_s *module;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
+static struct fpm_event_s children_bury_timer;
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
 	fpm_event_queue_destroy(&fpm_event_queue_timer);
 	fpm_event_queue_destroy(&fpm_event_queue_fd);
+}
+/* }}} */
+
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+{
+	fpm_children_bury();
 }
 /* }}} */
 
@@ -72,7 +80,12 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 		switch (c) {
 			case 'C' :                  /* SIGCHLD */
 				zlog(ZLOG_DEBUG, "received SIGCHLD");
-				fpm_children_bury();
+				/* epoll_wait() may report signal fd before read events for a finished child
+				 * in the same bunch of events. Prevent immediate free of the child structure
+				 * and so the fpm_event_s instance. Otherwise use after free happens during
+				 * attemp to process following read event. */
+				fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
+				fpm_event_add(&children_bury_timer, 0);
 				break;
 			case 'I' :                  /* SIGINT  */
 				zlog(ZLOG_DEBUG, "received SIGINT");
