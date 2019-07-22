@@ -113,11 +113,11 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 
 
 /* {{{ mysqlnd_net::network_write_ex */
-static size_t
+static ssize_t
 MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zend_uchar * const buffer, const size_t count,
 											  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
-	size_t ret;
+	ssize_t ret;
 	DBG_ENTER("mysqlnd_net::network_write_ex");
 	DBG_INF_FMT("sending %u bytes", count);
 	ret = php_stream_write(net->data->m.get_stream(net), (char *)buffer, count);
@@ -365,11 +365,12 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 {
 	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
 	zend_uchar * safe_storage = safe_buf;
-	size_t bytes_sent, packets_sent = 1;
+	size_t packets_sent = 1;
 	size_t left = count;
 	zend_uchar * p = (zend_uchar *) buffer;
 	zend_uchar * compress_buf = NULL;
 	size_t to_be_sent;
+	ssize_t bytes_sent;
 
 	DBG_ENTER("mysqlnd_net::send_ex");
 	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, net->data->compressed);
@@ -459,7 +460,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 		  indeed it then loop once more, then to_be_sent will become 0, left will stay 0. Empty
 		  packet will be sent and this loop will end.
 		*/
-	} while (bytes_sent && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
+	} while (bytes_sent > 0 && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
 	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, net->packet_no);
 
@@ -473,7 +474,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 	}
 
 	/* Even for zero size payload we have to send a packet */
-	if (!bytes_sent) {
+	if (bytes_sent <= 0) {
 		DBG_ERR_FMT("Can't %u send bytes", count);
 		SET_CLIENT_ERROR(*error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}

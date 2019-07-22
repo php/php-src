@@ -805,7 +805,7 @@ PHPAPI int _php_stream_puts(php_stream *stream, const char *buf)
 	char newline[2] = "\n"; /* is this OK for Win? */
 	len = strlen(buf);
 
-	if (len > 0 && php_stream_write(stream, buf, len) && php_stream_write(stream, newline, 1)) {
+	if (len > 0 && php_stream_write(stream, buf, len) > 0 && php_stream_write(stream, newline, 1) > 0) {
 		return 1;
 	}
 	return 0;
@@ -1257,9 +1257,9 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 	return bytes;
 }
 
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
+PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 {
-	size_t count;
+	ssize_t count;
 	char *buf;
 	va_list ap;
 
@@ -1268,7 +1268,7 @@ PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 	va_end(ap);
 
 	if (!buf) {
-		return 0; /* error condition */
+		return -1; /* error condition */
 	}
 
 	count = php_stream_write(stream, buf, count);
@@ -1345,9 +1345,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 	/* emulate forward moving seeks with reads */
 	if (whence == SEEK_CUR && offset >= 0) {
 		char tmp[1024];
-		size_t didread;
-		while(offset > 0) {
-			if ((didread = php_stream_read(stream, tmp, MIN(offset, sizeof(tmp)))) == 0) {
+		ssize_t didread;
+		while (offset > 0) {
+			if ((didread = php_stream_read(stream, tmp, MIN(offset, sizeof(tmp)))) <= 0) {
 				return -1;
 			}
 			offset -= didread;
@@ -1520,9 +1520,8 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
 {
 	char buf[CHUNK_SIZE];
-	size_t readchunk;
 	size_t haveread = 0;
-	size_t didread, didwrite, towrite;
+	size_t towrite;
 	size_t dummy;
 	php_stream_statbuf ssbuf;
 
@@ -1557,7 +1556,11 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			didwrite = php_stream_write(dest, p, mapped);
+			ssize_t didwrite = php_stream_write(dest, p, mapped);
+			if (didwrite < 0) {
+				*len = 0;
+				return FAILURE;
+			}
 
 			php_stream_mmap_unmap_ex(src, mapped);
 
@@ -1574,7 +1577,8 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	}
 
 	while(1) {
-		readchunk = sizeof(buf);
+		size_t readchunk = sizeof(buf);
+		ssize_t didread;
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
@@ -1582,7 +1586,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 		didread = php_stream_read(src, buf, readchunk);
 
-		if (didread) {
+		if (didread > 0) {
 			/* extra paranoid */
 			char *writeptr;
 
@@ -1590,9 +1594,9 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 			writeptr = buf;
 			haveread += didread;
 
-			while(towrite) {
-				didwrite = php_stream_write(dest, writeptr, towrite);
-				if (didwrite == 0) {
+			while (towrite) {
+				ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
+				if (didwrite <= 0) {
 					*len = haveread - (didread - towrite);
 					return FAILURE;
 				}

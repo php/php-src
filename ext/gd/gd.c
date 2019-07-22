@@ -1441,11 +1441,11 @@ PHP_FUNCTION(imageloadfont)
 	 */
 	font = (gdFontPtr) emalloc(sizeof(gdFont));
 	b = 0;
-	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b))) {
+	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)) > 0) {
 		b += n;
 	}
 
-	if (!n) {
+	if (n <= 0) {
 		efree(font);
 		if (php_stream_eof(stream)) {
 			php_error_docref(NULL, E_WARNING, "End of file while reading header");
@@ -1484,11 +1484,11 @@ PHP_FUNCTION(imageloadfont)
 
 	font->data = emalloc(body_size);
 	b = 0;
-	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b))) {
+	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b)) > 0) {
 		b += n;
 	}
 
-	if (!n) {
+	if (n <= 0) {
 		efree(font->data);
 		efree(font);
 		if (php_stream_eof(stream)) {

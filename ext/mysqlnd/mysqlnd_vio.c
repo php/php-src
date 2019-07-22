@@ -102,11 +102,11 @@ MYSQLND_METHOD(mysqlnd_vio, network_read)(MYSQLND_VIO * const vio, zend_uchar * 
 
 
 /* {{{ mysqlnd_vio::network_write */
-static size_t
+static ssize_t
 MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_uchar * const buffer, const size_t count,
 										   MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
-	size_t ret;
+	ssize_t ret;
 	DBG_ENTER("mysqlnd_vio::network_write");
 	DBG_INF_FMT("sending %u bytes", count);
 	ret = php_stream_write(vio->data->m.get_stream(vio), (char *)buffer, count);

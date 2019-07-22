@@ -586,7 +586,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	size_t filename_len;
 	zval *data;
-	size_t numbytes = 0;
+	ssize_t numbytes = 0;
 	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -669,7 +669,7 @@ PHP_FUNCTION(file_put_contents)
 
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
-				size_t bytes_written;
+				ssize_t bytes_written;
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
@@ -710,7 +710,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 
-	if (numbytes == (size_t)-1) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 

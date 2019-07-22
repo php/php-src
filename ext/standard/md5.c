@@ -78,7 +78,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	size_t           n;
+	ssize_t       n;
 	php_stream    *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)

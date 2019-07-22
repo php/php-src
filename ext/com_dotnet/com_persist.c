@@ -118,13 +118,13 @@ static HRESULT STDMETHODCALLTYPE stm_read(IStream *This, void *pv, ULONG cb, ULO
 
 static HRESULT STDMETHODCALLTYPE stm_write(IStream *This, void const *pv, ULONG cb, ULONG *pcbWritten)
 {
-	ULONG nwrote;
+	ssize_t nwrote;
 	FETCH_STM();
 
-	nwrote = (ULONG)php_stream_write(stm->stream, pv, cb);
+	nwrote = php_stream_write(stm->stream, pv, cb);
 
 	if (pcbWritten) {
-		*pcbWritten = nwrote > 0 ? nwrote : 0;
+		*pcbWritten = nwrote > 0 ? (ULONG)nwrote : 0;
 	}
 	if (nwrote > 0) {
 		return S_OK;

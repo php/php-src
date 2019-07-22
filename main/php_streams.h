@@ -317,7 +317,7 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size);
 #define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
 
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 /* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
