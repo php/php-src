@@ -204,7 +204,7 @@ dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 
-BISON_FLAGS="--verbose --no-lines"
+BISON_FLAGS="--verbose --no-lines -d"
 PHP_SUBST(BISON_FLAGS)
 
 PHP_PROG_RE2C([0.13.4])

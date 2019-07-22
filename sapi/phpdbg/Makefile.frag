@@ -18,7 +18,7 @@ $(srcdir)/phpdbg_lexer.c: $(srcdir)/phpdbg_lexer.l
 
 $(srcdir)/phpdbg_parser.h: $(srcdir)/phpdbg_parser.c
 $(srcdir)/phpdbg_parser.c: $(srcdir)/phpdbg_parser.y
-	@$(BISON) $(BISON_FLAGS) -p phpdbg_ -d $(srcdir)/phpdbg_parser.y -o $@
+	@$(BISON) $(BISON_FLAGS) -p phpdbg_ $(srcdir)/phpdbg_parser.y -o $@
 
 install-phpdbg: $(BUILD_BINARY)
 	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
