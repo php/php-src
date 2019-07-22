@@ -13,19 +13,11 @@ echo "fromArrayElement():\n";
 $r0 = ReflectionReference::fromArrayElement($ary, 0);
 var_dump($r0 === null);
 $r1 = ReflectionReference::fromArrayElement($ary, 1);
-var_dump($r1 instanceof ReflectionReference);
+var_dump($r1 === null);
 $r2 = ReflectionReference::fromArrayElement($ary, 2);
 var_dump($r2 instanceof ReflectionReference);
 $r3 = ReflectionReference::fromArrayElement($ary, 3);
 var_dump($r2 instanceof ReflectionReference);
-
-echo "getRefcount():\n";
-var_dump($r1->getRefcount());
-var_dump($r2->getRefcount());
-var_dump($r3->getRefcount());
-
-unset($ary[1]);
-var_dump($r1->getRefcount());
 
 echo "getId() #1:\n";
 var_dump($r2->getId() === $r2->getId());
@@ -55,11 +47,6 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-getRefcount():
-int(2)
-int(3)
-int(3)
-int(1)
 getId() #1:
 bool(true)
 bool(true)
