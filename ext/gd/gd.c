@@ -37,10 +37,10 @@
 #include "php_open_temporary_file.h"
 
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 #ifdef PHP_WIN32
@@ -81,7 +81,7 @@ static int le_gd, le_gd_font;
 #define M_PI 3.14159265358979323846
 #endif
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
@@ -722,7 +722,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagegetclip, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, angle)
@@ -987,7 +987,7 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imagegetclip,							arginfo_imagegetclip)
 	PHP_FE(imagedashedline,							arginfo_imagedashedline)
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
 	PHP_FE(imagettftext,							arginfo_imagettftext)
 	PHP_FE(imageftbbox,								arginfo_imageftbbox)
@@ -1243,7 +1243,7 @@ PHP_MSHUTDOWN_FUNCTION(gd)
  */
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 	gdFontCacheShutdown();
 #endif
 	return SUCCESS;
@@ -1274,10 +1274,10 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #endif
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 	php_info_print_table_row(2, "FreeType Support", "enabled");
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
-#if HAVE_GD_BUNDLED
+#ifdef HAVE_GD_BUNDLED
 	{
 		char tmp[256];
 
@@ -1352,7 +1352,7 @@ PHP_FUNCTION(gd_info)
 
 	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING);
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 	add_assoc_bool(return_value, "FreeType Support", 1);
 	add_assoc_string(return_value, "FreeType Linkage", "with freetype");
 #else
@@ -3970,7 +3970,7 @@ PHP_FUNCTION(imagegetclip)
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
 
-#if HAVE_GD_FREETYPE
+#ifdef HAVE_GD_FREETYPE
 /* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
