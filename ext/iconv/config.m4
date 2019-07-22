@@ -97,7 +97,6 @@ int main() {
         ;;
 
       bsd [)]
-        AC_DEFINE([HAVE_BSD_ICONV],1,[Konstantin Chuguev's iconv implementation])
         AC_DEFINE([PHP_ICONV_IMPL],["BSD iconv"],[Which iconv implementation to use])
         ;;
 
