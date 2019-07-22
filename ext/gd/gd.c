@@ -68,7 +68,7 @@ static int le_gd, le_gd_font;
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
 
-#if HAVE_LIBFREETYPE
+#if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 # include <ft2build.h>
 # include FT_FREETYPE_H
 #endif
@@ -81,7 +81,7 @@ static int le_gd, le_gd_font;
 #define M_PI 3.14159265358979323846
 #endif
 
-#if HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif
 
@@ -722,7 +722,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagegetclip, 0)
 	ZEND_ARG_INFO(0, im)
 ZEND_END_ARG_INFO()
 
-#if HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imageftbbox, 0, 0, 4)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, angle)
@@ -987,13 +987,11 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imagegetclip,							arginfo_imagegetclip)
 	PHP_FE(imagedashedline,							arginfo_imagedashedline)
 
-#if HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
 	PHP_FE(imagettftext,							arginfo_imagettftext)
-#if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 	PHP_FE(imageftbbox,								arginfo_imageftbbox)
 	PHP_FE(imagefttext,								arginfo_imagefttext)
-#endif
 #endif
 
 	PHP_FE(imagetypes,								arginfo_imagetypes)
@@ -1027,11 +1025,7 @@ zend_module_entry gd_module_entry = {
 	PHP_MINIT(gd),
 	PHP_MSHUTDOWN(gd),
 	NULL,
-#if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 	PHP_RSHUTDOWN(gd),
-#else
-	NULL,
-#endif
 	PHP_MINFO(gd),
 	PHP_GD_VERSION,
 	STANDARD_MODULE_PROPERTIES
@@ -1099,7 +1093,7 @@ PHP_MINIT_FUNCTION(gd)
 	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
 	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
 
-#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+#if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexSetup();
 #endif
 	gdSetErrorMethod(php_gd_error_method);
@@ -1238,7 +1232,7 @@ PHP_MINIT_FUNCTION(gd)
  */
 PHP_MSHUTDOWN_FUNCTION(gd)
 {
-#if HAVE_GD_BUNDLED && HAVE_LIBFREETYPE
+#if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexShutdown();
 #endif
 	return SUCCESS;
@@ -1247,13 +1241,13 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
-#if HAVE_GD_FREETYPE && HAVE_LIBFREETYPE
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
+#if HAVE_GD_FREETYPE
 	gdFontCacheShutdown();
+#endif
 	return SUCCESS;
 }
-#endif
 /* }}} */
 
 #if defined(HAVE_GD_BUNDLED)
@@ -1280,9 +1274,10 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #endif
 
-#if HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 	php_info_print_table_row(2, "FreeType Support", "enabled");
 	php_info_print_table_row(2, "FreeType Linkage", "with freetype");
+#if HAVE_GD_BUNDLED
 	{
 		char tmp[256];
 
@@ -1295,6 +1290,7 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 		php_info_print_table_row(2, "FreeType Version", tmp);
 	}
+#endif
 #endif
 
 	php_info_print_table_row(2, "GIF Read Support", "enabled");
@@ -1356,7 +1352,7 @@ PHP_FUNCTION(gd_info)
 
 	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING);
 
-#if HAVE_LIBFREETYPE
+#if HAVE_GD_FREETYPE
 	add_assoc_bool(return_value, "FreeType Support", 1);
 	add_assoc_string(return_value, "FreeType Linkage", "with freetype");
 #else
@@ -3971,12 +3967,8 @@ PHP_FUNCTION(imagegetclip)
 }
 /* }}} */
 
-#if HAVE_LIBFREETYPE
 #define TTFTEXT_DRAW 0
 #define TTFTEXT_BBOX 1
-#endif
-
-#if HAVE_LIBFREETYPE
 
 #if HAVE_GD_FREETYPE
 /* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
@@ -3994,7 +3986,6 @@ PHP_FUNCTION(imagefttext)
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
 }
 /* }}} */
-#endif /* HAVE_GD_FREETYPE */
 
 /* {{{ proto array imagettfbbox(float size, float angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
@@ -4075,14 +4066,11 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
 
-#ifdef HAVE_GD_FREETYPE
 	if (extended) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
-	}
-	else
+	} else {
 		error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
-
-#endif /* HAVE_GD_FREETYPE */
+	}
 
 	if (error) {
 		php_error_docref(NULL, E_WARNING, "%s", error);
@@ -4097,7 +4085,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	}
 }
 /* }}} */
-#endif	/* HAVE_LIBFREETYPE */
+#endif /* HAVE_GD_FREETYPE */
 
 /* {{{ proto bool image2wbmp(resource im [, string filename [, int foreground]])
    Output WBMP image to browser or file */
