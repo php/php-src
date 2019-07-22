@@ -7,7 +7,7 @@ FPM: bug77185 - Reload robustness
 
 require_once "tester.inc";
 
-$workers = 10;
+$workers = 4;
 $loops   = 10;
 
 $cfg = <<<EOT
