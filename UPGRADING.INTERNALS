@@ -25,6 +25,7 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   v. Compound assignment opcodes
   w. APACHE symbol removed
   x. php_error_docref0() renamed to php_error_docref()
+  y. Stream wrapper read/write ops
 
 2. Build system changes
   a. Abstract
@@ -224,6 +225,9 @@ PHP 7.4 INTERNALS UPGRADE NOTES
   w. APACHE symbol has been removed and is no longer defined.
 
   x. php_error_docref0() has been removed and renamed to php_error_docref().
+
+  y. The read and write operations of php_stream_ops now return ssize_t, with
+     negative values indicating an error.
 
 ========================
 2. Build system changes

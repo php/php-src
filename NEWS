@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #78282 (atime and mtime mismatch). (cmb)
+  . Fixed bug #73535 (php_sockop_write() returns 0 on error, can be used to
+    trigger Denial of Service). (Nikita)
 
 11 Jul 2019, PHP 7.4.0alpha3
 
