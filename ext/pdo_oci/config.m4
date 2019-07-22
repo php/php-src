@@ -174,34 +174,6 @@ if test "$PHP_PDO_OCI" != "no"; then
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
-  dnl
-  dnl Check if we need to add -locijdbc8
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
-  [
-    AC_DEFINE(HAVE_OCILOBISTEMPORARY,1,[ ])
-  ], [
-    PHP_CHECK_LIBRARY(ocijdbc8, OCILobIsTemporary,
-    [
-      PHP_ADD_LIBRARY(ocijdbc8, 1, PDO_OCI_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCILOBISTEMPORARY,1,[ ])
-    ], [], [
-      -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-    ])
-  ], [
-    -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-  ])
-
-  dnl
-  dnl Check if we have collections
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
-  [
-    AC_DEFINE(HAVE_OCICOLLASSIGN,1,[ ])
-  ], [], [
-    -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-  ])
-
   dnl Scrollable cursors?
   PHP_CHECK_LIBRARY(clntsh, OCIStmtFetch2,
   [
