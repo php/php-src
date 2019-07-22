@@ -1309,7 +1309,9 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
+#if defined(HAVE_GD_BUNDLED)
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
+#endif
 #endif
 	php_info_print_table_row(2, "WBMP Support", "enabled");
 #if defined(HAVE_GD_XPM)

@@ -2,8 +2,6 @@
 #define GD_COMPAT_H 1
 
 #ifndef HAVE_GD_BUNDLED
-/* from gd_compat.c */
-const char * gdPngGetVersionString();
 const char * gdJpegGetVersionString();
 #endif
 

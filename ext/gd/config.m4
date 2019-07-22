@@ -176,8 +176,6 @@ dnl Various checks for GD features
     ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
 
   else
-    dnl for png.h in gd_compat (PNG_LIBPNG_VER_STRING)
-    PHP_GD_PNG
     dnl for jpeglib.h in gd_compat (JPEG_LIB_VERSION)
     PHP_GD_JPEG
     dnl for X11/xpm.h in gd.c (XpmLibraryVersion)

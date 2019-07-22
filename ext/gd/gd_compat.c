@@ -4,11 +4,6 @@
 #include "php_config.h"
 #endif
 
-#ifdef HAVE_GD_PNG
-/* needs to be first */
-# include <png.h>
-#endif
-
 #ifdef HAVE_GD_JPG
 # include <jpeglib.h>
 #endif
@@ -35,13 +30,6 @@ const char * gdJpegGetVersionString()
 		default:
 			return "unknown";
 	}
-}
-#endif
-
-#ifdef HAVE_GD_PNG
-const char * gdPngGetVersionString()
-{
-	return PNG_LIBPNG_VER_STRING;
 }
 #endif
 
