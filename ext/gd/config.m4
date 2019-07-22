@@ -17,7 +17,7 @@ if test -z "$PHP_WEBP"; then
   PHP_ARG_WITH([webp],
     [for libwebp],
     [AS_HELP_STRING([--with-webp],
-      [GD: Enable WEBP support])],
+      [GD: Enable WEBP support (only for bundled libgd)])],
     [no],
     [no])
 fi
@@ -26,7 +26,7 @@ if test -z "$PHP_JPEG"; then
   PHP_ARG_WITH([jpeg],
     [for libjpeg],
     [AS_HELP_STRING([--with-jpeg],
-      [GD: Enable JPEG support])],
+      [GD: Enable JPEG support (only for bundled libgd)])],
     [no],
     [no])
 fi
@@ -34,21 +34,21 @@ fi
 PHP_ARG_WITH([xpm],
   [for libXpm],
   [AS_HELP_STRING([--with-xpm],
-    [GD: Enable XPM support])],
+    [GD: Enable XPM support  (only for bundled libgd)])],
   [no],
   [no])
 
 PHP_ARG_WITH([freetype],
   [for FreeType 2],
   [AS_HELP_STRING([--with-freetype],
-    [GD: Enable FreeType 2 support])],
+    [GD: Enable FreeType 2 support (only for bundled libgd)])],
   [no],
   [no])
 
 PHP_ARG_ENABLE([gd-jis-conv],
   [whether to enable JIS-mapped Japanese font support in GD],
   [AS_HELP_STRING([--enable-gd-jis-conv],
-    [GD: Enable JIS-mapped Japanese font support])],
+    [GD: Enable JIS-mapped Japanese font support (only for bundled libgd)])],
   [no],
   [no])
 
