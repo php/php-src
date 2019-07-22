@@ -51,7 +51,7 @@
 # include <Wingdi.h>
 #endif
 
-#ifdef HAVE_GD_XPM
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 # include <X11/xpm.h>
 #endif
 
@@ -1318,11 +1318,13 @@ PHP_MINFO_FUNCTION(gd)
 	php_info_print_table_row(2, "WBMP Support", "enabled");
 #if defined(HAVE_GD_XPM)
 	php_info_print_table_row(2, "XPM Support", "enabled");
+#if defined(HAVE_GD_BUNDLED)
 	{
 		char tmp[12];
 		snprintf(tmp, sizeof(tmp), "%d", XpmLibraryVersion());
 		php_info_print_table_row(2, "libXpm Version", tmp);
 	}
+#endif
 #endif
 	php_info_print_table_row(2, "XBM Support", "enabled");
 #if defined(USE_GD_JISX0208)

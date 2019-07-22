@@ -176,8 +176,6 @@ dnl Various checks for GD features
     ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
 
   else
-    dnl for X11/xpm.h in gd.c (XpmLibraryVersion)
-    PHP_GD_XPM
     dnl for ft2build.h in gd.c (FREETYPE_MAJOR...)
     PHP_GD_FREETYPE2
 
