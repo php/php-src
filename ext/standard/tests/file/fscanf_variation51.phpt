@@ -65,88 +65,214 @@ if(file_exists($filename)) {
   unlink($filename);
 }
 ?>
---EXPECT--
+--EXPECTF--
 *** Test fscanf(): to read from a file opened in write only mode ***
 
 -- iteration 1 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 2 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 3 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 4 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 5 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 6 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 7 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 8 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 -- iteration 9 --
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
+
+Notice: fscanf(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 
 *** Done ***

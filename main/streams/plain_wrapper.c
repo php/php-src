@@ -351,6 +351,16 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 #else
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
+		if (bytes_written < 0) {
+			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+				return 0;
+			}
+			if (errno == EINTR) {
+				/* TODO: Should this be treated as a proper error or not? */
+				return bytes_written;
+			}
+			php_error_docref(NULL, E_NOTICE, "write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+		}
 		return bytes_written;
 	} else {
 
@@ -415,11 +425,14 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 				/* Not an error. */
 				ret = 0;
 			} else if (errno == EINTR) {
-				/* An error, but not EOF */
-			} else if (errno == EBADF) {
-				/* TODO: Remove this special-case? */
+				/* TODO: Should this be treated as a proper error or not? */
 			} else {
-				stream->eof = 1;
+				php_error_docref(NULL, E_NOTICE, "read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+
+				/* TODO: Remove this special-case? */
+				if (errno != EBADF) {
+					stream->eof = 1;
+				}
 			}
 		} else if (ret == 0) {
 			stream->eof = 1;

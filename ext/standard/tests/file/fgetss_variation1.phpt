@@ -75,7 +75,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgetss() : usage variations ***
 
 -- Testing fgetss() with file opened using w mode --
@@ -84,6 +84,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -94,6 +96,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -104,6 +108,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -114,6 +120,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -124,6 +132,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -134,6 +144,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -144,6 +156,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -154,6 +168,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -164,6 +180,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
