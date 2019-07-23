@@ -58,7 +58,7 @@ static void fpm_pctl_action(struct fpm_event_s *ev, short which, void *arg) /* {
 
 static int fpm_pctl_timeout_set(int sec) /* {{{ */
 {
-	fpm_event_set_timer(&pctl_event, 0, &fpm_pctl_action, NULL);
+	fpm_event_set_timer(&pctl_event, FPM_EV_PERSIST, &fpm_pctl_action, NULL);
 	fpm_event_add(&pctl_event, sec * 1000);
 	return 0;
 }
