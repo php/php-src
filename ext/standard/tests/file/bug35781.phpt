@@ -18,7 +18,8 @@ var_dump(file_get_contents($filename));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Notice: fpassthru(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 string(15) "Guvf vf n grfg
 "
 Done

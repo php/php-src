@@ -142,6 +142,8 @@ PHP 7.4 UPGRADE NOTES
   . fread() and fwrite() will now return false if the operation failed.
     Previously an empty string or 0 was returned. EAGAIN/EWOULDBLOCK are not
     considered failures.
+  . fread() and fwrite() on plain files will now throw a notice on failure,
+    such as when trying to write to a read-only file resource.
 
 - Tokenizer:
   . token_get_all() will now emit a T_BAD_CHARACTER token for unexpected

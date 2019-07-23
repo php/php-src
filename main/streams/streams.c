@@ -1240,7 +1240,9 @@ PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t cou
 		return 0;
 	}
 
-	if (buf == NULL || stream->ops->write == NULL) {
+	ZEND_ASSERT(buf != NULL);
+	if (stream->ops->write == NULL) {
+		php_error_docref(NULL, E_NOTICE, "Stream is not writable");
 		return (ssize_t) -1;
 	}
 

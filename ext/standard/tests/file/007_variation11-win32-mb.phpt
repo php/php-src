@@ -68,6 +68,8 @@ string(6) "stream"
 int(0)
 int(37)
 int(37)
+
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(true)
