@@ -231,7 +231,7 @@ $op2_get_zval_ptr = array(
 );
 
 $op1_get_zval_ptr_ptr = array(
-	"ANY"      => "get_zval_ptr_ptr(opline->op1_type, opline->op1 \\1)",
+	"ANY"      => "get_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
 	"TMP"      => "NULL",
 	"VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC)",
 	"CONST"    => "NULL",
