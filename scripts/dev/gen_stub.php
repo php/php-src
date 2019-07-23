@@ -113,18 +113,21 @@ class FuncInfo {
     public $return;
     /** @var int */
     public $numRequiredArgs;
+    /** @var string|null */
+    public $cond;
 
     public function __construct(
-        string $name, array $args, ReturnInfo $return, int $numRequiredArgs
+        string $name, array $args, ReturnInfo $return, int $numRequiredArgs, ?string $cond
     ) {
         $this->name = $name;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
+        $this->cond = $cond;
     }
 }
 
-function parseFunctionLike(string $name, Node\FunctionLike $func): FuncInfo {
+function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
     $args = [];
     $numRequiredArgs = 0;
     foreach ($func->getParams() as $i => $param) {
@@ -143,7 +146,7 @@ function parseFunctionLike(string $name, Node\FunctionLike $func): FuncInfo {
     $return = new ReturnInfo(
         $func->returnsByRef(),
         $returnType ? Type::fromNode($returnType) : null);
-    return new FuncInfo($name, $args, $return, $numRequiredArgs);
+    return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
 }
 
 function parseClass(Stmt\Class_ $class): ClassInfo {
@@ -176,13 +179,26 @@ function parseStubFile(string $fileName) {
     $nodeTraverser->traverse($stmts);
 
     $funcInfos = [];
+    $cond = null;
     foreach ($stmts as $stmt) {
+        foreach ($stmt->getComments() as $comment) {
+            $text = trim($comment->getText());
+            if (preg_match('/^#if\s+(.+)$/', $text, $matches)) {
+                if ($cond !== null) {
+                    throw new Exception("Not implemented");
+                }
+                $cond = $matches[1];
+            } else if ($text === '#endif') {
+                $cond = null;
+            }
+        }
+
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt);
+            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond);
             continue;
         }
 
@@ -194,12 +210,11 @@ function parseStubFile(string $fileName) {
                 }
 
                 $funcInfos[] = parseFunctionLike(
-                    $className . '_' . $classStmt->name->toString(), $classStmt);
+                    $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
             }
             continue;
         }
 
-        // TODO Collect #if?
         throw new Exception("Unexpected node {$stmt->getType()}");
     }
 
@@ -208,6 +223,9 @@ function parseStubFile(string $fileName) {
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
+    if ($funcInfo->cond) {
+        $code .= "#if {$funcInfo->cond}\n";
+    }
     if ($funcInfo->return->type) {
         $returnType = $funcInfo->return->type;
         if ($returnType->isBuiltin) {
@@ -250,6 +268,9 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     $code .= "ZEND_END_ARG_INFO()";
+    if ($funcInfo->cond) {
+        $code .= "\n#endif";
+    }
     return $code;
 }
 
