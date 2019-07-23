@@ -261,19 +261,20 @@ function generateArginfoCode(array $funcInfos): string {
 
 function initPhpParser() {
     $version = "4.2.2";
-    if (!is_dir(__DIR__ . "/PHP-Parser")) {
+    $phpParserDir = __DIR__ . "/PHP-Parser-$version";
+    if (!is_dir($phpParserDir)) {
         $cwd = getcwd();
         chdir(__DIR__);
         passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz");
-        passthru("mkdir PHP-Parser");
-        passthru("tar xvzf v$version.tar.gz -C PHP-Parser --strip-components 1");
+        passthru("mkdir PHP-Parser-$version");
+        passthru("tar xvzf v$version.tar.gz -C PHP-Parser-$version --strip-components 1");
         passthru("rm v$version.tar.gz");
         chdir($cwd);
     }
 
-    spl_autoload_register(function(string $class) {
+    spl_autoload_register(function(string $class) use($phpParserDir) {
         if (strpos($class, "PhpParser\\") == 0) {
-            $fileName = __DIR__ . "/PHP-Parser/lib/" . str_replace("\\", "/", $class) . ".php";
+            $fileName = $phpParserDir . "/lib/" . str_replace("\\", "/", $class) . ".php";
             require $fileName;
         }
     });

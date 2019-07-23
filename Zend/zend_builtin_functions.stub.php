@@ -61,7 +61,7 @@ function class_alias(string $user_class_name, string $alias_name, bool $autoload
 
 function get_included_files(): array {}
 
-/** @lias get_included_files */
+/** @alias get_included_files */
 function get_required_files(): array {}
 
 function trigger_error(string $message, int $error_type = E_USER_NOTICE): bool {}
