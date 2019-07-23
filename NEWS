@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
+  . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
+    with fixed length buffer). (Albert Casademont)
 
 01 Aug 2019, PHP 7.2.21
 
