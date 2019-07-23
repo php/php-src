@@ -1123,12 +1123,17 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
-		if (!prop || Z_TYPE_P(prop) == IS_UNDEF) {
+		if (!prop) {
 			continue;
 		}
 
-		/* copy: enforce read only access */
-		ZVAL_COPY_OR_DUP(&prop_copy, prop);
+		if (Z_ISUNDEF_P(prop)) {
+			/* Return uninitialized typed properties as a null value */
+			ZVAL_NULL(&prop_copy);
+		} else {
+			/* copy: enforce read only access */
+			ZVAL_COPY_OR_DUP(&prop_copy, prop);
+		}
 		prop = &prop_copy;
 
 		/* this is necessary to make it able to work with default array
