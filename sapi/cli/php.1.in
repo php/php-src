@@ -222,7 +222,7 @@ Show compiled in modules
 Run PHP
 .IR code
 without using script tags
-.B '<?..?>'
+.B '<?php...?>'
 .TP
 .PD 0
 .B \-\-process\-begin \fIcode\fP

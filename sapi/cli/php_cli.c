@@ -510,7 +510,7 @@ static void php_cli_usage(char *argv0)
 				"  -i               PHP information\n"
 				"  -l               Syntax check only (lint)\n"
 				"  -m               Show compiled in modules\n"
-				"  -r <code>        Run PHP <code> without using script tags <?..?>\n"
+				"  -r <code>        Run PHP <code> without using script tags <?php...?>\n"
 				"  -B <begin_code>  Run PHP <begin_code> before processing input lines\n"
 				"  -R <code>        Run PHP <code> for every input line\n"
 				"  -F <file>        Parse and execute <file> for every input line\n"
