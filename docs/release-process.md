@@ -91,7 +91,13 @@
  5. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
     `configure.ac` and possibly `NEWS`. Do not use abbreviations for alpha and
     beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
-    not `#define PHP_VERSION "7.4.22-RC1"`
+    not `#define PHP_VERSION "7.4.22-RC1"`.
+
+    When releasing the first alpha version, bump also API version numbers in
+    `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and `main/php.h`. The API
+    versions between the alpha/beta/.0RCx releases can be left the same or
+    bumped as little as possible because PHP extensions will need to be rebuilt
+    with each bump.
 
  6. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
@@ -118,7 +124,7 @@
     changes to the main branch.
 
 11. Push the changes to the main repo, the tag, the main branch and the release
-    branch. Release branches for alpha/beta/.0RCx releases before to GA release
+    branch. Release branches for alpha/beta/.0RCx releases before the GA release
     don't need to be pushed (a local temporary branch should be used).
 
     ```sh
@@ -378,8 +384,13 @@
     Add a commit on master after the branch point clearing the `NEWS`,
     `UPGRADING` and `UPGRADING.INTERNALS` files, updating the version in
     `configure.ac` (run `./configure` to automatically update
-    `main/php_versions.h`, too) and `Zend/zend.h`. Also list the new branch in
-    `CONTRIBUTING.md`.
+    `main/php_versions.h`, too) and `Zend/zend.h`. Bump the default initial
+    version also in `win32/build/confutils.js`.
+
+    Also list the new branch in `CONTRIBUTING.md`.
+
+    Bump API version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`,
+    and `main/php.h`.
 
     Example: https://git.php.net/?p=php-src.git;a=commit;h=a63c99b
     Push the new branch and the commit just added to master.
