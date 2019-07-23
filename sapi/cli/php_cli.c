@@ -167,7 +167,7 @@ const opt_struct OPTIONS[] = {
 	{'S', 1, "server"},
 	{'t', 1, "docroot"},
 	{'w', 0, "strip"},
-	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
+	{'h', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
 	{10,  1, "rf"},
@@ -1328,8 +1328,11 @@ int main(int argc, char *argv[])
 				break;
 #endif
 			case 'h': /* help & quit */
+				php_cli_usage(argv[0]);
+				goto out;
 			case '?':
 				php_cli_usage(argv[0]);
+				exit_status = 1;
 				goto out;
 			case 'i': case 'v': case 'm':
 				sapi_module = &cli_sapi_module;
