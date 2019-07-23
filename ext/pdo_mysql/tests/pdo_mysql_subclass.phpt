@@ -19,9 +19,9 @@ MySQLPDOTest::skip();
 				return call_user_func_array(array($this, 'parent::__construct'), func_get_args());
 			}
 
-			public function exec($query) {
+			public function exec($statement) {
 				$this->protocol();
-				return call_user_func_array(array($this, 'parent::exec'), func_get_args());
+				return parent::exec($statement);
 			}
 
 			public function query() {

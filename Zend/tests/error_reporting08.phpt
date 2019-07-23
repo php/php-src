@@ -3,7 +3,7 @@ testing @ and error_reporting - 8
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 function foo1($arg) {
 }
@@ -12,7 +12,7 @@ function foo2($arg) {
 }
 
 function foo3() {
-	error_reporting(E_ALL|E_STRICT);
+	error_reporting(E_ALL);
 	echo $undef3;
 	throw new Exception("test");
 }

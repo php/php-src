@@ -74,7 +74,7 @@ class PHPUnit_Framework_TestResult
 
         $oldErrorHandler = set_error_handler(
             'handleError',
-            E_ALL | E_STRICT
+            E_ALL
         );
 
         try {

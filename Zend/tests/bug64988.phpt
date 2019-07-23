@@ -1,5 +1,5 @@
 --TEST--
-Bug #64988 (Class loading order affects E_STRICT warning)
+Bug #64988 (Class loading order affects E_WARNING warning)
 --FILE--
 <?php
 abstract class Base1 {

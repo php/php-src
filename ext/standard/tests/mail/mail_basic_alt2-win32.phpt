@@ -18,8 +18,6 @@ max_execution_time = 120
  * Alias to functions:
  */
 
-error_reporting(E_ALL & ~E_STRICT);
-
 echo "*** Testing mail() : basic functionality ***\n";
 require_once(__DIR__.'/mail_include.inc');
 $subject_prefix = "!**PHPT**!";

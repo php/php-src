@@ -3,7 +3,7 @@ testing @ and error_reporting - 3
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 function foo($arg) {
 	echo @$nonex_foo;
@@ -16,7 +16,7 @@ function bar() {
 
 function foo1() {
 	echo $undef1;
-	error_reporting(E_ALL|E_STRICT);
+	error_reporting(E_ALL);
 	echo $undef2;
 }
 

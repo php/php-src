@@ -4,7 +4,6 @@ Bug #46427 (SoapClient() stumbles over its "stream_context" parameter)
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-error_reporting(E_ALL|E_STRICT);
 
 function getSoapClient_1() {
     $ctx = stream_context_create();
