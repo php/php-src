@@ -9,14 +9,22 @@ PHP                                                                        NEWS
   . Fixed bug #78066 (PHP eats the first byte of a program that comes from
     process substitution). (Nikita)
   . Fixed bug #52752 (Crash when lexing). (Nikita)
+  . Implemented RFC: Deprecate curly brace syntax for accessing array elements
+    and string offsets.
+    https://wiki.php.net/rfc/deprecate_curly_braces_array_access (Andrey Gromov)
+  . Implemented RFC: Deprecations for PHP 7.4.
+    https://wiki.php.net/rfc/deprecations_php_7_4 (Kalle, Nikita)
 
 - GD:
-  . Fixed bug #78314 (missing freetype support/functions with external gd)
+  . Fixed bug #78314 (missing freetype support/functions with external gd).
     (Remi)
 
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
     requests (cgi-fcgi)). (Nikita)
+
+- LiteSpeed:
+  . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
 - Opcache:
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
