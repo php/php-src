@@ -1338,6 +1338,7 @@ static int cli_main( int argc, char * argv[] )
                             highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini);
                         } else if (source_highlight == 2) {
                             file_handle.filename = *p;
+                            file_handle.free_filename = 0;
                             file_handle.opened_path = NULL;
                             ret = php_lint_script(&file_handle);
                             if (ret==SUCCESS) {
@@ -1348,6 +1349,7 @@ static int cli_main( int argc, char * argv[] )
 
                         } else {
                             file_handle.filename = *p;
+                            file_handle.free_filename = 0;
                             file_handle.opened_path = NULL;
 
                             php_execute_script(&file_handle);

@@ -223,6 +223,10 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 		efree(fh->buf);
 		fh->buf = NULL;
 	}
+	if (fh->free_filename && fh->filename) {
+		efree((char*)fh->filename);
+		fh->filename = NULL;
+	}
 }
 /* }}} */
 
