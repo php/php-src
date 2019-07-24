@@ -144,13 +144,12 @@ ZEND_API const zend_internal_function zend_pass_function = {
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv)
 
-#define FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op, result) do {	\
-	zval *__container_to_free = (free_op);									\
-	if (UNEXPECTED(__container_to_free)										\
-	 && EXPECTED(Z_REFCOUNTED_P(__container_to_free))) {					\
+#define FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_var) do {			\
+	zval *__container_to_free = EX_VAR(free_var);							\
+	if (UNEXPECTED(Z_REFCOUNTED_P(__container_to_free))) {					\
 		zend_refcounted *__ref = Z_COUNTED_P(__container_to_free);			\
 		if (UNEXPECTED(!GC_DELREF(__ref))) {								\
-			zval *__zv = (result);											\
+			zval *__zv = EX_VAR(opline->result.var);						\
 			if (EXPECTED(Z_TYPE_P(__zv) == IS_INDIRECT)) {					\
 				ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));						\
 			}																\
