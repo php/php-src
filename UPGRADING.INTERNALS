@@ -7,6 +7,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   d. get() and set() object handlers
   e. zend_parse_parameters 'L' specifier
   f. Arginfo argument types
+  g. zend_free_op type and should_free argument of zend_get_zval_ptr()
 
 2. Build system changes
   a. Abstract
@@ -56,6 +57,14 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   f. Arginfo argument types for internal functions are no longer checked.
      Instead type checks should be performed using the zend_parse_parameters()
      or ZEND_PARSE_PARAMETERS_*() APIs.
+
+  g. zend_free_op type and "should_free" argument of zend_get_zval_ptr() were
+     removed. It's possible to get the old "should_free" value using the
+     following code.
+
+     zval *ret = zend_get_zval_ptr(opline, opline->op1_type, &opline->op1,
+         execute_data, BP_VAR_R);
+     zval *should_free = (op_type & (IS_TMP_VAR|IS_VAR)) ? ret : NULL;
 
 ========================
 2. Build system changes
