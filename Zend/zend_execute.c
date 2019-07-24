@@ -1979,7 +1979,6 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 	} else if (EXPECTED(!Z_ISERROR_P(container))) {
 		zend_use_scalar_as_array();
 	}
-	get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 }
 
@@ -2934,9 +2933,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 	if (UNEXPECTED(op1_type != IS_CONST)) {
 		zend_tmp_string_release(tmp_name);
 
-		if (op1_type != IS_CV) {
-			FREE_OP(op1_type, opline->op1.var);
-		}
+		FREE_OP(op1_type, opline->op1.var);
 	}
 
 	if (UNEXPECTED(*retval == NULL)) {
