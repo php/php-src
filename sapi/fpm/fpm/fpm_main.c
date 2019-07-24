@@ -86,6 +86,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm.h"
 #include "fpm_request.h"
 #include "fpm_status.h"
+#include "fpm_signals.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
 #include "fpm_log.h"
@@ -1570,6 +1571,15 @@ int main(int argc, char *argv[])
 								closes it.  in apache|apxs mode apache
 								does that for us!  thies@thieso.net
 								20000419 */
+
+	/* Subset of signals from fpm_signals_init_main() to avoid unexpected death during early init
+		or during reload just after execvp() or fork */
+	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
+	if (0 > fpm_signals_init_mask(init_signal_array, sizeof(init_signal_array)/sizeof(init_signal_array[0])) ||
+	    0 > fpm_signals_block()) {
+		zlog(ZLOG_WARNING, "Could die in the case of too early reload signal");
+	}
+	zlog(ZLOG_DEBUG, "Blocked some signals");
 #endif
 
 #ifdef ZTS

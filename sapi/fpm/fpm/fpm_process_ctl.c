@@ -77,6 +77,10 @@ static void fpm_pctl_exit() /* {{{ */
 
 static void fpm_pctl_exec() /* {{{ */
 {
+	zlog(ZLOG_DEBUG, "Blocking some signals before reexec");
+	if (0 > fpm_signals_block()) {
+		zlog(ZLOG_WARNING, "concurrent reloads may be unstable");
+	}
 
 	zlog(ZLOG_NOTICE, "reloading: execvp(\"%s\", {\"%s\""
 			"%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s" "%s%s%s"
