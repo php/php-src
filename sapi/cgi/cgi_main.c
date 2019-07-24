@@ -1957,6 +1957,7 @@ consult the installation file that came with this distribution, or visit \n\
 			 */
 			tsrm_shutdown();
 #endif
+			free(bindpath);
 			return FAILURE;
 		}
 	}
