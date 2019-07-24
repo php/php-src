@@ -3783,13 +3783,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CONST_HANDLER(Z
 	zval *arg, *param;
 
 	SAVE_OPLINE();
-	arg = RT_CONSTANT(opline, opline->op1);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
 		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
+	arg = RT_CONSTANT(opline, opline->op1);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY(param, arg);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -17796,15 +17796,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_TMP_HANDLER(ZEN
 	zval *arg, *param;
 
 	SAVE_OPLINE();
-	arg = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
 		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
+	arg = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY(param, arg);
-
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -20881,15 +20880,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 	zval *arg, *param;
 
 	SAVE_OPLINE();
-	arg = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
 		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
+	arg = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY(param, arg);
-
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -37775,13 +37773,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 	zval *arg, *param;
 
 	SAVE_OPLINE();
-	arg = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
 		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
+	arg = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY(param, arg);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
