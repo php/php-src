@@ -3910,6 +3910,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
 
+#if ZEND_VM_SPEC
 static void zend_swap_operands(zend_op *op) /* {{{ */
 {
 	znode_op     tmp;
@@ -3923,6 +3924,7 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 	op->op2_type = tmp_type;
 }
 /* }}} */
+#endif
 
 static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args) /* {{{ */
 {

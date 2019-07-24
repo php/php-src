@@ -2109,7 +2109,9 @@ ZEND_VM_COLD_HELPER(zend_use_undef_in_read_context_helper, ANY, ANY)
 
 ZEND_VM_COLD_CONSTCONST_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 {
+#if !ZEND_VM_SPEC
 	USE_OPLINE
+#endif
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
@@ -2435,7 +2437,9 @@ ZEND_VM_C_LABEL(fetch_obj_is_finish):
 
 ZEND_VM_COLD_CONST_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH_REF|CACHE_SLOT)
 {
+#if !ZEND_VM_SPEC
 	USE_OPLINE
+#endif
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
@@ -4301,7 +4305,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 		zend_verify_missing_return_type(EX(func), CACHE_ADDR(opline->op2.num));
 	} else {
 /* prevents "undefined variable opline" errors */
-#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED)
+#if !ZEND_VM_SPEC || (OP1_TYPE != IS_UNUSED)
 		zval *retval_ref, *retval_ptr;
 		zend_free_op free_op1;
 		zend_arg_info *ret_info = EX(func)->common.arg_info - 1;
