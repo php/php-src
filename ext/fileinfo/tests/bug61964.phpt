@@ -45,15 +45,10 @@ rmdir($dir);
 ?>
 ===DONE===
 --EXPECTF--
-bool(false)
-
-Notice: finfo_open(): read of 8192 bytes failed with errno=21 Is a directory in %sbug61964.php on line %d
+bool(false)%A
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
-bool(false)
-
-Notice: finfo_open(): read of 8192 bytes failed with errno=21 Is a directory in %sbug61964.php on line %d
-
+bool(false)%A
 Notice: finfo_open(): Warning: offset `string' invalid in %sbug61964.php on line %d
 
 Notice: finfo_open(): Warning: offset ` Core' invalid in %sbug61964.php on line %d
