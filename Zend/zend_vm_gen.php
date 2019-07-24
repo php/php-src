@@ -484,7 +484,7 @@ $op1_free_op_var_ptr = array(
 );
 
 $op2_free_op_var_ptr = array(
-	"ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));}",
+	"ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));}",
 	"TMP"      => "",
 	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));",
 	"CONST"    => "",
