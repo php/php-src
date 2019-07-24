@@ -772,9 +772,9 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* 
 		}
 	}
 
-	strncpy(header.magic, "ustar", sizeof("ustar")-1);
-	strncpy(header.version, "00", sizeof("00")-1);
-	strncpy(header.checksum, "        ", sizeof("        ")-1);
+	memcpy(header.magic, "ustar", sizeof("ustar")-1);
+	memcpy(header.version, "00", sizeof("00")-1);
+	memcpy(header.checksum, "        ", sizeof("        ")-1);
 	entry->crc32 = phar_tar_checksum((char *)&header, sizeof(header));
 
 	if (FAILURE == phar_tar_octal(header.checksum, entry->crc32, sizeof(header.checksum)-1)) {

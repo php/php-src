@@ -990,7 +990,10 @@ static char *php_openssl_cipher_get_version(const SSL_CIPHER *c, char *buffer, s
 {
 	const char *version = SSL_CIPHER_get_version(c);
 
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
 	strncpy(buffer, version, max_len);
+# pragma GCC diagnostic pop
 	if (max_len <= strlen(version)) {
 		buffer[max_len - 1] = 0;
 	}

@@ -293,7 +293,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			period = wildcard + (period - filtername);
 			while (period) {
 				*period = '\0';
-				strncat(wildcard, ".*", 2);
+				strncat(wildcard, ".*", 3);
 				if (NULL != (fdat = zend_hash_str_find_ptr(BG(user_filter_map), wildcard, strlen(wildcard)))) {
 					period = NULL;
 				} else {

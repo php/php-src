@@ -821,8 +821,8 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	memset(&local, 0, sizeof(local));
 	memset(&central, 0, sizeof(central));
 	memset(&perms, 0, sizeof(perms));
-	strncpy(local.signature, "PK\3\4", 4);
-	strncpy(central.signature, "PK\1\2", 4);
+	memcpy(local.signature, "PK\3\4", 4);
+	memcpy(central.signature, "PK\1\2", 4);
 	PHAR_SET_16(central.extra_len, sizeof(perms));
 	PHAR_SET_16(local.extra_len, sizeof(perms));
 	perms.tag[0] = 'n';
@@ -1409,7 +1409,7 @@ fperror:
 	pass.free_fp = pass.free_ufp = 1;
 	memset(&eocd, 0, sizeof(eocd));
 
-	strncpy(eocd.signature, "PK\5\6", 4);
+	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
 		phar->sig_flags = PHAR_SIG_SHA1;
 	}

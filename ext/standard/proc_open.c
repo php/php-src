@@ -125,7 +125,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		if (key) {
 			l = ZSTR_LEN(key) + ZSTR_LEN(str) + 2;
 			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
-			strncat(p, "=", 1);
+			strncat(p, "=", 2);
 			strncat(p, ZSTR_VAL(str), ZSTR_LEN(str));
 
 #ifndef PHP_WIN32

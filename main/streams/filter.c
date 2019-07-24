@@ -240,7 +240,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		period = wildname + (period - filtername);
 		while (period && !filter) {
 			*period = '\0';
-			strncat(wildname, ".*", 2);
+			strncat(wildname, ".*", 3);
 			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
 				filter = factory->create_filter(filtername, filterparams, persistent);
 			}
