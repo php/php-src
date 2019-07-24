@@ -1,5 +1,5 @@
 --TEST--
-mysqli_connect()
+mysqli check the session_connect_attrs table for connection attributes
 --SKIPIF--
 <?php
 require_once('skipif.inc');
