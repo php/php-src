@@ -3012,6 +3012,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
+	zend_uchar op1_type;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -3029,12 +3030,13 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 	}
 
 	SAVE_OPLINE();
+	op1_type = OP1_TYPE;
 	if (i_zend_is_true(val)) {
 		opline++;
 	} else {
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
-	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+	if (op1_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(val);
 	}
 	ZEND_VM_JMP(opline);
@@ -3044,6 +3046,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
+	zend_uchar op1_type;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -3061,12 +3064,13 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 	}
 
 	SAVE_OPLINE();
+	op1_type = OP1_TYPE;
 	if (i_zend_is_true(val)) {
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	} else {
 		opline++;
 	}
-	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+	if (op1_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(val);
 	}
 	ZEND_VM_JMP(opline);
@@ -3076,6 +3080,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_ADDR
 {
 	USE_OPLINE
 	zval *val;
+	zend_uchar op1_type;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -3094,12 +3099,13 @@ ZEND_VM_HOT_NOCONST_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_ADDR
 	}
 
 	SAVE_OPLINE();
+	op1_type = OP1_TYPE;
 	if (i_zend_is_true(val)) {
 		opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
 	} else {
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
-	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+	if (op1_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(val);
 	}
 	ZEND_VM_JMP(opline);
