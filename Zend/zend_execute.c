@@ -4463,3 +4463,23 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 {
 	return zend_user_opcode_handlers[opcode];
 }
+
+ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data, int type)
+{
+	zval *ret;
+
+	switch (op_type) {
+		case IS_CONST:
+			ret = RT_CONSTANT(opline, *node);
+			break;
+		case IS_TMP_VAR:
+		case IS_VAR:
+		case IS_CV:
+			ret = EX_VAR(node->var);
+			break;
+		default:
+			ret = NULL;
+			break;
+	}
+	return ret;
+}
