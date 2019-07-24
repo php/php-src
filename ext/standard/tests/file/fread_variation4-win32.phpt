@@ -359,7 +359,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode ab --
@@ -372,7 +373,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode at --
@@ -384,8 +386,8 @@ int(0)
 bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
-bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode w --
@@ -398,7 +400,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode wb --
@@ -411,7 +414,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode wt --
@@ -424,7 +428,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1137)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1137)
 bool(false)
 -- File opened in mode x --
@@ -437,7 +442,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1024)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1024)
 bool(false)
 -- File opened in mode xb --
@@ -463,7 +469,8 @@ bool(false)
 -- Reading beyond filesize when file pointer pointing to EOF, expeceted : 0 bytes --
 int(1137)
 bool(false)
-Reading 10 bytes from file, expecting 0 bytes ... OK
+Reading 10 bytes from file, expecting 0 bytes ... 
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 int(1137)
 bool(false)
 Done

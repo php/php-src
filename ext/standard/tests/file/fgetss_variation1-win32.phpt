@@ -88,6 +88,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -98,6 +100,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -108,6 +112,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -118,6 +124,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -128,6 +136,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -138,6 +148,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -148,6 +160,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -158,6 +172,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -168,6 +184,8 @@ bool(true)
 int(0)
 bool(false)
 -- fgetss() with default length, file pointer at 0 , expected : no character should be read --
+
+Notice: fgetss(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
