@@ -2371,7 +2371,7 @@ ZEND_VM_COLD_CONST_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|THIS|CV, C
 							ZEND_VM_C_GOTO(fetch_obj_is_copy);
 						} else {
 ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
-							ZVAL_COPY(EX_VAR(opline->result.var), retval);
+							ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
 							ZEND_VM_NEXT_OPCODE();
 						}
 					}
@@ -2425,7 +2425,9 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 
 		if (retval != EX_VAR(opline->result.var)) {
 ZEND_VM_C_LABEL(fetch_obj_is_copy):
-			ZVAL_COPY(EX_VAR(opline->result.var), retval);
+			ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
+		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+			zend_unwrap_reference(retval);
 		}
 	} while (0);
 
@@ -7228,7 +7230,7 @@ ZEND_VM_COLD_CONST_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, JMP_ADDR)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_COLD_CONST_HANDLER(169, ZEND_COALESCE, CONST|TMPVAR|CV, JMP_ADDR)
+ZEND_VM_COLD_CONST_HANDLER(169, ZEND_COALESCE, CONST|TMP|VAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -7238,7 +7240,6 @@ ZEND_VM_COLD_CONST_HANDLER(169, ZEND_COALESCE, CONST|TMPVAR|CV, JMP_ADDR)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_IS);
 
-	/* FETCH_OBJ_IS may return IS_REFERENCE in TMP_VAR */
 	if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
 		if (OP1_TYPE & IS_VAR) {
 			ref = value;
