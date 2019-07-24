@@ -9612,7 +9612,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
-	do {
+	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
 			break;
@@ -9636,13 +9636,20 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
 			count = 1;
-		} else if (Z_TYPE_P(op1) == IS_NULL) {
+		} else if ((IS_CONST & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+			op1 = Z_REFVAL_P(op1);
+			continue;
+		} else if (Z_TYPE_P(op1) <= IS_NULL) {
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
 			count = 0;
 		} else {
 			count = 1;
 		}
 		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-	} while (0);
+		break;
+	}
 
 	ZVAL_LONG(EX_VAR(opline->result.var), count);
 
@@ -9669,11 +9676,20 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CO
 
 		SAVE_OPLINE();
 		op1 = RT_CONSTANT(opline, opline->op1);
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
-		} else {
-			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
-			ZVAL_FALSE(EX_VAR(opline->result.var));
+		while (1) {
+			if (Z_TYPE_P(op1) == IS_OBJECT) {
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
+			} else if ((IS_CONST & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+				op1 = Z_REFVAL_P(op1);
+				continue;
+			} else {
+				if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+					ZVAL_UNDEFINED_OP1();
+				}
+				zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
 		}
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -16724,6 +16740,99 @@ try_instanceof:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *op1;
+	zend_long count;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	while (1) {
+		if (Z_TYPE_P(op1) == IS_ARRAY) {
+			count = zend_array_count(Z_ARRVAL_P(op1));
+			break;
+		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+			/* first, we check if the handler is defined */
+			if (Z_OBJ_HT_P(op1)->count_elements) {
+				if (SUCCESS == Z_OBJ_HT_P(op1)->count_elements(op1, &count)) {
+					break;
+				}
+			}
+
+			/* if not and the object implements Countable we call its count() method */
+			if (instanceof_function(Z_OBJCE_P(op1), zend_ce_countable)) {
+				zval retval;
+
+				zend_call_method_with_0_params(op1, NULL, NULL, "count", &retval);
+				count = zval_get_long(&retval);
+				zval_ptr_dtor(&retval);
+				break;
+			}
+
+			/* If There's no handler and it doesn't implement Countable then add a warning */
+			count = 1;
+		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+			op1 = Z_REFVAL_P(op1);
+			continue;
+		} else if (Z_TYPE_P(op1) <= IS_NULL) {
+			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
+			count = 0;
+		} else {
+			count = 1;
+		}
+		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		break;
+	}
+
+	ZVAL_LONG(EX_VAR(opline->result.var), count);
+	zval_ptr_dtor_nogc(free_op1);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+		if (UNEXPECTED(!EX(func)->common.scope)) {
+			SAVE_OPLINE();
+			zend_error(E_WARNING, "get_class() called without object from outside a class");
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		} else {
+			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			ZEND_VM_NEXT_OPCODE();
+		}
+	} else {
+		zend_free_op free_op1;
+		zval *op1;
+
+		SAVE_OPLINE();
+		op1 = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+		while (1) {
+			if (Z_TYPE_P(op1) == IS_OBJECT) {
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
+			} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+				op1 = Z_REFVAL_P(op1);
+				continue;
+			} else {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+					ZVAL_UNDEFINED_OP1();
+				}
+				zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
+		}
+		zval_ptr_dtor_nogc(free_op1);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COPY_TMP_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -19716,83 +19825,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_free_op free_op1;
-	zval *op1;
-	zend_long count;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	do {
-		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
-			break;
-		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-			/* first, we check if the handler is defined */
-			if (Z_OBJ_HT_P(op1)->count_elements) {
-				if (SUCCESS == Z_OBJ_HT_P(op1)->count_elements(op1, &count)) {
-					break;
-				}
-			}
-
-			/* if not and the object implements Countable we call its count() method */
-			if (instanceof_function(Z_OBJCE_P(op1), zend_ce_countable)) {
-				zval retval;
-
-				zend_call_method_with_0_params(op1, NULL, NULL, "count", &retval);
-				count = zval_get_long(&retval);
-				zval_ptr_dtor(&retval);
-				break;
-			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
-		} else if (Z_TYPE_P(op1) == IS_NULL) {
-			count = 0;
-		} else {
-			count = 1;
-		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-	} while (0);
-
-	ZVAL_LONG(EX_VAR(opline->result.var), count);
-	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	if (IS_TMP_VAR == IS_UNUSED) {
-		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		} else {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
-			ZEND_VM_NEXT_OPCODE();
-		}
-	} else {
-		zend_free_op free_op1;
-		zval *op1;
-
-		SAVE_OPLINE();
-		op1 = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
-		} else {
-			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-		}
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_TYPE_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27835,83 +27867,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_free_op free_op1;
-	zval *op1;
-	zend_long count;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_var_deref(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	do {
-		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
-			break;
-		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-			/* first, we check if the handler is defined */
-			if (Z_OBJ_HT_P(op1)->count_elements) {
-				if (SUCCESS == Z_OBJ_HT_P(op1)->count_elements(op1, &count)) {
-					break;
-				}
-			}
-
-			/* if not and the object implements Countable we call its count() method */
-			if (instanceof_function(Z_OBJCE_P(op1), zend_ce_countable)) {
-				zval retval;
-
-				zend_call_method_with_0_params(op1, NULL, NULL, "count", &retval);
-				count = zval_get_long(&retval);
-				zval_ptr_dtor(&retval);
-				break;
-			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
-		} else if (Z_TYPE_P(op1) == IS_NULL) {
-			count = 0;
-		} else {
-			count = 1;
-		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-	} while (0);
-
-	ZVAL_LONG(EX_VAR(opline->result.var), count);
-	zval_ptr_dtor_nogc(free_op1);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	if (IS_VAR == IS_UNUSED) {
-		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-		} else {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
-			ZEND_VM_NEXT_OPCODE();
-		}
-	} else {
-		zend_free_op free_op1;
-		zval *op1;
-
-		SAVE_OPLINE();
-		op1 = _get_zval_ptr_var_deref(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
-		} else {
-			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
-			ZVAL_FALSE(EX_VAR(opline->result.var));
-		}
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -34571,11 +34526,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_H
 
 		SAVE_OPLINE();
 		op1 = NULL;
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
-		} else {
-			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
-			ZVAL_FALSE(EX_VAR(opline->result.var));
+		while (1) {
+			if (Z_TYPE_P(op1) == IS_OBJECT) {
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
+			} else if ((IS_UNUSED & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+				op1 = Z_REFVAL_P(op1);
+				continue;
+			} else {
+				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+					ZVAL_UNDEFINED_OP1();
+				}
+				zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
 		}
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -46660,8 +46624,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 	zend_long count;
 
 	SAVE_OPLINE();
-	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-	do {
+	op1 = EX_VAR(opline->op1.var);
+	while (1) {
 		if (Z_TYPE_P(op1) == IS_ARRAY) {
 			count = zend_array_count(Z_ARRVAL_P(op1));
 			break;
@@ -46685,13 +46649,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
 			count = 1;
-		} else if (Z_TYPE_P(op1) == IS_NULL) {
+		} else if ((IS_CV & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+			op1 = Z_REFVAL_P(op1);
+			continue;
+		} else if (Z_TYPE_P(op1) <= IS_NULL) {
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
 			count = 0;
 		} else {
 			count = 1;
 		}
 		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-	} while (0);
+		break;
+	}
 
 	ZVAL_LONG(EX_VAR(opline->result.var), count);
 
@@ -46717,12 +46688,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CV_UNUSED_HANDL
 		zval *op1;
 
 		SAVE_OPLINE();
-		op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-		if (Z_TYPE_P(op1) == IS_OBJECT) {
-			ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
-		} else {
-			zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
-			ZVAL_FALSE(EX_VAR(opline->result.var));
+		op1 = EX_VAR(opline->op1.var);
+		while (1) {
+			if (Z_TYPE_P(op1) == IS_OBJECT) {
+				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_OBJCE_P(op1)->name);
+			} else if ((IS_CV & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+				op1 = Z_REFVAL_P(op1);
+				continue;
+			} else {
+				if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+					ZVAL_UNDEFINED_OP1();
+				}
+				zend_error(E_WARNING, "get_class() expects parameter 1 to be object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+			}
+			break;
 		}
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -52333,13 +52313,13 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_IN_ARRAY_SPEC_CV_CONST_LABEL,
 			(void*)&&ZEND_COUNT_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_COUNT_SPEC_TMP_UNUSED_LABEL,
-			(void*)&&ZEND_COUNT_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_COUNT_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_COUNT_SPEC_TMPVAR_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_COUNT_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_GET_CLASS_SPEC_CONST_UNUSED_LABEL,
-			(void*)&&ZEND_GET_CLASS_SPEC_TMP_UNUSED_LABEL,
-			(void*)&&ZEND_GET_CLASS_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_LABEL,
 			(void*)&&ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_LABEL,
 			(void*)&&ZEND_GET_CLASS_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_GET_CALLED_CLASS_SPEC_UNUSED_UNUSED_LABEL,
@@ -55066,6 +55046,14 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INSTANCEOF_SPEC_TMPVAR_UNUSED)
 				ZEND_INSTANCEOF_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_COUNT_SPEC_TMPVAR_UNUSED):
+				VM_TRACE(ZEND_COUNT_SPEC_TMPVAR_UNUSED)
+				ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED):
+				VM_TRACE(ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED)
+				ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_COPY_TMP_SPEC_TMPVAR_UNUSED):
 				VM_TRACE(ZEND_COPY_TMP_SPEC_TMPVAR_UNUSED)
 				ZEND_COPY_TMP_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -55351,14 +55339,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_YIELD_SPEC_TMP_UNUSED):
 				VM_TRACE(ZEND_YIELD_SPEC_TMP_UNUSED)
 				ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_COUNT_SPEC_TMP_UNUSED):
-				VM_TRACE(ZEND_COUNT_SPEC_TMP_UNUSED)
-				ZEND_COUNT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_GET_CLASS_SPEC_TMP_UNUSED):
-				VM_TRACE(ZEND_GET_CLASS_SPEC_TMP_UNUSED)
-				ZEND_GET_CLASS_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_GET_TYPE_SPEC_TMP_UNUSED):
 				VM_TRACE(ZEND_GET_TYPE_SPEC_TMP_UNUSED)
@@ -55949,14 +55929,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_MAKE_REF_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_MAKE_REF_SPEC_VAR_UNUSED)
 				ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_COUNT_SPEC_VAR_UNUSED):
-				VM_TRACE(ZEND_COUNT_SPEC_VAR_UNUSED)
-				ZEND_COUNT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_GET_CLASS_SPEC_VAR_UNUSED):
-				VM_TRACE(ZEND_GET_CLASS_SPEC_VAR_UNUSED)
-				ZEND_GET_CLASS_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_GET_TYPE_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_GET_TYPE_SPEC_VAR_UNUSED)
@@ -59857,13 +59829,13 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_IN_ARRAY_SPEC_CV_CONST_HANDLER,
 		ZEND_COUNT_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_COUNT_SPEC_TMP_UNUSED_HANDLER,
-		ZEND_COUNT_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_COUNT_SPEC_CV_UNUSED_HANDLER,
 		ZEND_GET_CLASS_SPEC_CONST_UNUSED_HANDLER,
-		ZEND_GET_CLASS_SPEC_TMP_UNUSED_HANDLER,
-		ZEND_GET_CLASS_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_HANDLER,
 		ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_HANDLER,
 		ZEND_GET_CLASS_SPEC_CV_UNUSED_HANDLER,
 		ZEND_GET_CALLED_CLASS_SPEC_UNUSED_UNUSED_HANDLER,
