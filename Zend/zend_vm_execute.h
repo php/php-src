@@ -2043,7 +2043,7 @@ send_array:
 		ht = Z_ARRVAL_P(args);
 		if (opline->op2_type != IS_UNUSED) {
 			zend_free_op free_op2;
-			zval *op2 = get_zval_ptr_deref(opline->op2_type, opline->op2, &free_op2, BP_VAR_R);
+			zval *op2 = get_zval_ptr(opline->op2_type, opline->op2, &free_op2, BP_VAR_R);
 			uint32_t skip = opline->extended_value;
 			uint32_t count = zend_hash_num_elements(ht);
 			zend_long len = zval_get_long(op2);
