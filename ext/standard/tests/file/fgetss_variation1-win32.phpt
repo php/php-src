@@ -79,7 +79,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing fgetss() : usage variations ***
 
 -- Testing fgetss() with file opened using w mode --
