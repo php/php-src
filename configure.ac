@@ -1443,14 +1443,6 @@ dnl
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART(Configuring libtool)
 
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
-dnl This hack works around it. Ugly.
-case $host_alias in
-*darwin9*|*darwin10*)
-  ac_cv_exeext=
-  ;;
-esac
-
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
 dnl See https://github.com/php/php-src/pull/3017
 AC_SUBST(AR_FLAGS, [cr])
