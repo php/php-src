@@ -984,21 +984,6 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 }
 /* }}} */
 
-#define PHP_SSL_MAX_VERSION_LEN 32
-
-static char *php_openssl_cipher_get_version(const SSL_CIPHER *c, char *buffer, size_t max_len) /* {{{ */
-{
-	const char *version = SSL_CIPHER_get_version(c);
-
-	strncpy(buffer, version, max_len);
-	if (max_len <= strlen(version)) {
-		buffer[max_len - 1] = 0;
-	}
-
-	return buffer;
-}
-/* }}} */
-
 #if PHP_OPENSSL_API_VERSION < 0x10100
 static int php_openssl_get_crypto_method_ctx_flags(int method_flags) /* {{{ */
 {
@@ -1843,7 +1828,6 @@ static zend_array *php_openssl_capture_session_meta(SSL *ssl_handle) /* {{{ */
 	char *proto_str;
 	long proto = SSL_version(ssl_handle);
 	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl_handle);
-	char version_str[PHP_SSL_MAX_VERSION_LEN];
 
 	switch (proto) {
 #ifdef HAVE_TLS13
@@ -1876,8 +1860,7 @@ static zend_array *php_openssl_capture_session_meta(SSL *ssl_handle) /* {{{ */
 	add_assoc_string(&meta_arr, "protocol", proto_str);
 	add_assoc_string(&meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
 	add_assoc_long(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
-	add_assoc_string(&meta_arr, "cipher_version",
-			php_openssl_cipher_get_version(cipher, version_str, PHP_SSL_MAX_VERSION_LEN));
+	add_assoc_string(&meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher));
 
 	return Z_ARR(meta_arr);
 }
@@ -2450,7 +2433,6 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 			if (sslsock->ssl_active) {
 				zval tmp;
 				char *proto_str;
-				char version_str[PHP_SSL_MAX_VERSION_LEN];
 				const SSL_CIPHER *cipher;
 
 				array_init(&tmp);
@@ -2477,8 +2459,7 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				add_assoc_string(&tmp, "protocol", proto_str);
 				add_assoc_string(&tmp, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
 				add_assoc_long(&tmp, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
-				add_assoc_string(&tmp, "cipher_version",
-						php_openssl_cipher_get_version(cipher, version_str, PHP_SSL_MAX_VERSION_LEN));
+				add_assoc_string(&tmp, "cipher_version", SSL_CIPHER_get_version(cipher));
 
 #ifdef HAVE_TLS_ALPN
 				{
