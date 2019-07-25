@@ -16,6 +16,11 @@
    +----------------------------------------------------------------------+
 */
 
+/*
+To generate ffi_parser.c use llk <https://github.com/dstogov/llk>:
+php llk.php ffi.g
+*/
+
 %start          declarations
 %sub-start      type_name
 %case-sensetive true
