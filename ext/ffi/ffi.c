@@ -765,6 +765,39 @@ again:
 }
 /* }}} */
 
+static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *name, zend_ffi_type *type) /* {{{ */
+{
+#ifdef ZEND_WIN32
+	zend_string *result;
+	uint32_t arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
+	zend_ffi_type *arg_type;
+	size_t arg_size = 0;
+
+	ZEND_HASH_FOREACH_PTR(type->func.args, arg_type) {
+		arg_size += ZEND_FFI_TYPE(arg_type)->size;
+	} ZEND_HASH_FOREACH_END();
+
+	switch (type->func.abi) {
+# ifdef HAVE_FFI_FASTCALL
+		case FFI_FASTCALL:
+			result = strpprintf(0, "@%s@%zu", ZSTR_VAL(name), arg_size);
+			break;
+# endif
+# ifdef HAVE_FFI_STDCALL
+		case FFI_STDCALL:
+			result = strpprintf(0, "_%s@%zu", ZSTR_VAL(name), arg_size);
+			break;
+# endif
+		default:
+			result = zend_string_copy(name);
+	}
+	return result;
+#else
+	return zend_string_copy(name);
+#endif
+}
+/* }}} */
+
 #if FFI_CLOSURES
 typedef struct _zend_ffi_callback_data {
 	zend_fcall_info_cache  fcc;
@@ -2842,7 +2875,10 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 					}
 					sym->addr = addr;
 				} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
-					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
+					zend_string *mangled_name = zend_ffi_mangled_func_name(name, ZEND_FFI_TYPE(sym->type));
+
+					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(mangled_name));
+					zend_string_release(mangled_name);
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C function '%s'", ZSTR_VAL(name));
 					}
@@ -3172,7 +3208,10 @@ ZEND_METHOD(FFI, load) /* {{{ */
 				}
 				sym->addr = addr;
 			} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
-				addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
+				zend_string *mangled_name = zend_ffi_mangled_func_name(name, ZEND_FFI_TYPE(sym->type));
+
+				addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(mangled_name));
+				zend_string_release(mangled_name);
 				if (!addr) {
 					if (preload) {
 						zend_error(E_WARNING, "failed pre-loading '%s', cannot resolve C function '%s'", filename, ZSTR_VAL(name));
