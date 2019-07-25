@@ -2487,7 +2487,6 @@ COMMAND $cmd
 		}
 	}
 
-	@unlink($tmp_post);
 	@unlink($preload_filename);
 
 	$leaked = false;
@@ -2690,6 +2689,10 @@ COMMAND $cmd
 
 	if ($warn) {
 		$restype[] = 'WARN';
+	}
+
+	if ($passed) {
+		@unlink($tmp_post);
 	}
 
 	if (!$passed) {
