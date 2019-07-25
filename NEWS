@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #77812 (Interactive mode does not support PHP 7.3-style heredoc).
     (cmb, Nikita)
 
+- FPM:
+  . Fixed bug #78334 (fpm log prefix message includes wrong stdout/stderr
+    notation). (Tsuyoshi Sadakata)
+
 - Intl:
   . Ensure IDNA2003 rules are used with idn_to_ascii() and idn_to_utf8()
     when requested. (Sara)

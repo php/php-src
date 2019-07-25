@@ -1080,7 +1080,7 @@ class Tester
      * @param string $message
      * @return bool
      */
-    public function expectLogLine(string $message)
+    public function expectLogLine(string $message, bool $is_stderr = true)
     {
         $messageLen = strlen($message);
         $limit = $messageLen > 1024 ? $messageLen + 16 : 1024;
@@ -1090,7 +1090,7 @@ class Tester
             $this->message("LOG LINE: " . ($logLines[0] ?? ''));
         }
 
-        return $this->logTool->checkWrappedMessage($logLines, false);
+        return $this->logTool->checkWrappedMessage($logLines, false, true, $is_stderr);
     }
 
     /**
