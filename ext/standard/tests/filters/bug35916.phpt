@@ -36,7 +36,9 @@ fclose($fp);
 readfile($file);
 unlink($file);
 ?>
---EXPECT--
+--EXPECTF--
 fffffffffff
+
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 hello
 THANK YOU
