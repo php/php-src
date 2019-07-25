@@ -2,6 +2,7 @@
 Concurrent reload signals should not kill PHP-FPM master process. (Bug: #74083)
 --SKIPIF--
 <?php
+include "skipif.inc";
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
