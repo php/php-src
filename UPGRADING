@@ -555,6 +555,13 @@ PHP 7.4 UPGRADE NOTES
   . The --disable-opcache-file|--enable-opcache-file configure options have been
     removed in favor of the opcache.file_cache INI directive.
 
+- PDO:
+  . It is now possibile to escape question marks in SQL queries to avoid them
+    being interpreted as parameter placeholders. Writing "??" allows to send
+    a single question mark to the database and e.g. use the PostgreSQL JSON key
+    exists "?" operator. For more details see the RFC:
+    https://wiki.php.net/rfc/pdo_escape_placeholders
+
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was
     changed. Don't filter methods and properties through

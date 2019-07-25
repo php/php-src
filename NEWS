@@ -5,9 +5,6 @@ PHP                                                                        NEWS
 
 25 Jul 2019, PHP 7.4.0beta1
 
-
-25 Jul 2019, PHP 7.4.0beta1
-
 - Core:
   . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
   . Fixed bug #60677 (CGI doesn't properly validate shebang line contains #!).
@@ -35,6 +32,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
   . Added new INI directive opcache.cache_id (Windows only). (cmb)
+
+- PDO:
+  . Implemented FR #71885 (Allow escaping question mark placeholders).
+    https://wiki.php.net/rfc/pdo_escape_placeholders (Matteo)
 
 - Recode:
   . Unbundled the recode extension. (cmb)
