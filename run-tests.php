@@ -1971,8 +1971,6 @@ COMMAND $cmd
 		}
 	}
 
-	@unlink($tmp_post);
-
 	$leaked = false;
 	$passed = false;
 
@@ -2162,6 +2160,10 @@ COMMAND $cmd
 
 	if ($warn) {
 		$restype[] = 'WARN';
+	}
+
+	if ($passed) {
+		@unlink($tmp_post);
 	}
 
 	if (!$passed) {
