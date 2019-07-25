@@ -640,7 +640,7 @@ PHP 7.4 UPGRADE NOTES
 ========================================
 
 - zend.exception_ignore_args
-  . New INI directive which displays or hides arguments from the stack traces
+  . New INI directive to include or exclude arguments from stack traces
     generated for exceptions.
 
 ========================================
@@ -758,10 +758,6 @@ The following extensions and SAPIs are affected:
 ========================================
 14. Other Changes
 ========================================
-
-- Core:
-  . Add zend.exception_ignore_args to force the omission of arguments from
-    stack traces collected for exceptions.
 
 ========================================
 15. Performance Improvements
