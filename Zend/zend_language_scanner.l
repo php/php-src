@@ -517,6 +517,8 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	zend_string *compiled_filename;
 
 	if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
+		/* Still add it to open_files so the file_handle destruction logic works correctly. */
+		zend_llist_add_element(&CG(open_files), file_handle);
 		return FAILURE;
 	}
 
