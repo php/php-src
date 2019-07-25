@@ -24,5 +24,5 @@ interface DateTimeInterface {
 class DateTime implements DateTimeInterface {
 }
 
-class ImmutableDateTime implements DateTimeInterface {
+class DateTimeImmutable implements DateTimeInterface {
 }

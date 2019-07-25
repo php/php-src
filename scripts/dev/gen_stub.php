@@ -294,7 +294,7 @@ function initPhpParser() {
         passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz");
         passthru("mkdir PHP-Parser-$version");
         passthru("tar xvzf v$version.tar.gz -C PHP-Parser-$version --strip-components 1");
-        passthru("rm v$version.tar.gz");
+        unlink(__DIR__ . "/v$version.tar.gz");
         chdir($cwd);
     }
 
