@@ -35,19 +35,14 @@ mysqli_close($link);
     
     //in case $host is empty, do not test for _server_host field
     if(isset($host) && trim($host) != '') {
-        if (!$res = mysqli_query($link, "select * from performance_schema.session_connect_attrs where processlist_id = connection_id()")) {
+        if (!$res = mysqli_query($link, "select * from performance_schema.session_connect_attrs where ATTR_NAME='_server_host' and processlist_id = connection_id()")) {
             printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
         }
         else {
-            var_dump($res);
-            while($tmp = mysqli_fetch_assoc($res)) {
-                var_dump($tmp);
-                foreach($tmp  as $column => $value) {
-                    echo $column . " " . $value."\n";
+            if($tmp = mysqli_fetch_assoc($res)) { //work around for Travis for now
+                if ($tmp['ATTR_VALUE'] !== $host) {
+                    printf("[003] _server_host value mismatch\n") ;
                 }
-                //if ($tmp['ATTR_VALUE'] !== $host) {
-                    //printf("[003] _server_host value mismatch\n") ;
-                //}
             }
             mysqli_free_result($res);
         }
@@ -57,14 +52,12 @@ mysqli_close($link);
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     else {
-        $tmp = mysqli_fetch_assoc($res);
+        if($tmp = mysqli_fetch_assoc($res)) {
+            if ($tmp['ATTR_VALUE'] !== "mysqlnd") {
+                printf("[005] _client_name value mismatch\n") ;
+            }
+        }
         mysqli_free_result($res);
-        foreach($tmp  as $column => $value) {
-            echo $column . " " . $value."\n";
-        }
-        if ($tmp['ATTR_VALUE'] !== "mysqlnd") {
-            printf("[005] _client_name value mismatch\n") ;
-        }
     }
 
     printf("done!");
