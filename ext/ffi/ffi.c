@@ -765,36 +765,33 @@ again:
 }
 /* }}} */
 
-static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *name, zend_ffi_type *type) /* {{{ */
+static size_t zend_ffi_arg_size(zend_ffi_type *type) /* {{{ */
 {
-#ifdef ZEND_WIN32
-	zend_string *result;
-	uint32_t arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	zend_ffi_type *arg_type;
 	size_t arg_size = 0;
 
 	ZEND_HASH_FOREACH_PTR(type->func.args, arg_type) {
 		arg_size += ZEND_FFI_TYPE(arg_type)->size;
 	} ZEND_HASH_FOREACH_END();
+	return arg_size;
+}
+/* }}} */
 
+static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *name, zend_ffi_type *type) /* {{{ */
+{
+#ifdef ZEND_WIN32
 	switch (type->func.abi) {
 # ifdef HAVE_FFI_FASTCALL
 		case FFI_FASTCALL:
-			result = strpprintf(0, "@%s@%zu", ZSTR_VAL(name), arg_size);
-			break;
+			return strpprintf(0, "@%s@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
 # ifdef HAVE_FFI_STDCALL
 		case FFI_STDCALL:
-			result = strpprintf(0, "_%s@%zu", ZSTR_VAL(name), arg_size);
-			break;
+			return strpprintf(0, "_%s@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
-		default:
-			result = zend_string_copy(name);
 	}
-	return result;
-#else
-	return zend_string_copy(name);
 #endif
+	return zend_string_copy(name);
 }
 /* }}} */
 
