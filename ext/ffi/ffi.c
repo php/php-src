@@ -765,6 +765,7 @@ again:
 }
 /* }}} */
 
+#ifdef ZEND_WIN32 && (defined(HAVE_FFI_FASTCALL) || defined(HAVE_FFI_STDCALL))
 static size_t zend_ffi_arg_size(zend_ffi_type *type) /* {{{ */
 {
 	zend_ffi_type *arg_type;
@@ -776,6 +777,7 @@ static size_t zend_ffi_arg_size(zend_ffi_type *type) /* {{{ */
 	return arg_size;
 }
 /* }}} */
+#endif
 
 static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *name, zend_ffi_type *type) /* {{{ */
 {
