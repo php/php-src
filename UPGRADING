@@ -556,7 +556,7 @@ PHP 7.4 UPGRADE NOTES
     removed in favor of the opcache.file_cache INI directive.
 
 - PDO:
-  . It is now possibile to escape question marks in SQL queries to avoid them
+  . It is now possible to escape question marks in SQL queries to avoid them
     being interpreted as parameter placeholders. Writing "??" allows sending
     a single question mark to the database and e.g. use the PostgreSQL JSON key
     exists "?" operator. For more details see the RFC:
