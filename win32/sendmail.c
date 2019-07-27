@@ -1,4 +1,4 @@
-﻿/*
+/*
  *    PHP Sendmail for Windows.
  *
  *  This file is rewritten specificly for PHPFI.  Some functionality
