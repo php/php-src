@@ -28,6 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#ifdef __linux__
+#include <linux/mman.h>
+#endif
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
@@ -41,6 +44,13 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 	void *p;
 #ifdef MAP_HUGETLB
+#ifndef MAP_HUGE_2MB
+// available since 3.8 kernels,
+// we give an additional hint we
+// wish the 2MB type of huge page
+// over the 1GB's one.
+# define MAP_HUGE_2MB 0
+#endif
 	size_t huge_page_size = 2 * 1024 * 1024;
 
 	/* Try to allocate huge pages first to reduce dTLB misses.
@@ -62,7 +72,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		if (p != MAP_FAILED) {
 			munmap(p, requested_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
-			p = mmap(p, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			p = mmap(p, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_HUGE_2MB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
 			} else {
@@ -73,7 +83,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			}
 		}
 # endif
-		p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, -1, 0);
+		p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB|MAP_HUGE_2MB, -1, 0);
 		if (p != MAP_FAILED) {
 			goto success;
 		}
