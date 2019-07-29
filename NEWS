@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
+- Opcode:
+  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
+
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
