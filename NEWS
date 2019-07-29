@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
 
+- Standard:
+  . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
+    with fixed length buffer). (Albert Casademont)
+
 25 Jul 2019, PHP 7.4.0beta1
 
 - Core:
