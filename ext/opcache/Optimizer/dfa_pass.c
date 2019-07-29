@@ -181,9 +181,8 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 
 	for (b = blocks; b < blocks_end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
-			uint32_t end;
-
 			if (b->len) {
+				uint32_t new_start, old_end;
 				while (i < b->start) {
 					shiftlist[i] = i - target;
 					i++;
@@ -196,9 +195,9 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 					b->len = 1;
 				}
 
-				end = b->start + b->len;
-				b->start = target;
-				while (i < end) {
+				new_start = target;
+				old_end = b->start + b->len;
+				while (i < old_end) {
 					shiftlist[i] = i - target;
 					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
 						is_smart_branch_inhibiting_nop(op_array, target, i, b, blocks_end)) {
@@ -211,12 +210,13 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 					}
 					i++;
 				}
-				if (target != end) {
+				b->start = new_start;
+				if (target != old_end) {
 					zend_op *opline;
 					zend_op *new_opline;
 
 					b->len = target - b->start;
-					opline = op_array->opcodes + end - 1;
+					opline = op_array->opcodes + old_end - 1;
 					if (opline->opcode == ZEND_NOP) {
 						continue;
 					}
