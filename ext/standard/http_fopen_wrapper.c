@@ -726,6 +726,11 @@ finish:
 			}
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
 			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
+		} else {
+			php_stream_close(stream);
+			stream = NULL;
+			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed!");
+			goto out;
 		}
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
