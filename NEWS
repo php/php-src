@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78340 (Include of stream wrapper not reading whole file).
     (Nikita)
+  . Fixed bug #78344 (Segmentation fault on zend_check_protected). (Nikita)
 
 - Iconv:
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
