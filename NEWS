@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #78344 (Segmentation fault on zend_check_protected). (Nikita)
 
+- Exif:
+  . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
+    invalid cast). (Nikita)
+
 - Iconv:
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
     Jung)
