@@ -1387,6 +1387,36 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 }
 /* }}} */
 
+/* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
+static zend_bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
+{
+	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
+		return c->ce == scope;
+	} else {
+		zend_class_entry *ce = c->ce;
+		while (1) {
+			if (ce == scope) {
+				return 1;
+			}
+			if (!ce->parent) {
+				break;
+			}
+			if (ce->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
+				ce = ce->parent;
+			} else {
+				ce = zend_hash_find_ptr_lc(CG(class_table), ZSTR_VAL(ce->parent_name), ZSTR_LEN(ce->parent_name));
+				if (!ce) {
+					break;
+				}
+			}
+		}
+		/* Reverse case cannot be true during compilation */
+		return 0;
+	}
+}
+
 static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend_string *name) /* {{{ */
 {
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
@@ -1410,7 +1440,7 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 		return 0;
 	}
 
-	if (!cc || !zend_verify_const_access(cc, CG(active_class_entry))) {
+	if (!cc || !zend_verify_ct_const_access(cc, CG(active_class_entry))) {
 		return 0;
 	}
 
