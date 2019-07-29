@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
 
+- Phar:
+  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
+
 - Phpdbg:
   . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
