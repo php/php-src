@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
 
+- PCRE:
+  . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
+
 - Phar:
   . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
 
