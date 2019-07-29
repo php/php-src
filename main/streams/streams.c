@@ -1413,8 +1413,13 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 			ptr += ret;
 		}
 		if (len) {
-			*ptr = '\0';
 			ZSTR_LEN(result) = len;
+			ZSTR_VAL(result)[len] = '\0';
+
+			/* Only truncate if the savings are large enough */
+			if (len < maxlen / 2) {
+				result = zend_string_truncate(result, len, persistent);
+			}
 		} else {
 			zend_string_free(result);
 			result = NULL;
