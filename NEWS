@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
 
+- Standard:
+  . Fixed bug #76342 (file_get_contents waits twice specified timeout).
+    (Thomas Calvet)
+
 26 Sep 2019, PHP 7.2.23
 
 - Core:
