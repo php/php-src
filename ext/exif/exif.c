@@ -1516,6 +1516,20 @@ static void php_ifd_set32u(char *data, size_t value, int motorola_intel)
 }
 /* }}} */
 
+static float php_ifd_get_float(char *data) {
+	/* Copy to avoid alignment issues */
+	float f;
+	memcpy(&f, data, sizeof(float));
+	return f;
+}
+
+static double php_ifd_get_double(char *data) {
+	/* Copy to avoid alignment issues */
+	double f;
+	memcpy(&f, data, sizeof(double));
+	return f;
+}
+
 #ifdef EXIF_DEBUG
 char * exif_dump_data(int *dump_free, int format, int components, int length, int motorola_intel, char *value_ptr) /* {{{ */
 {
@@ -1628,12 +1642,12 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type single");
 #endif
-			return (double)*(float *)value;
+			return (double) php_ifd_get_float(value);
 		case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type double");
 #endif
-			return *(double *)value;
+			return php_ifd_get_double(value);
 	}
 	return 0;
 }
@@ -1691,12 +1705,12 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type single");
 #endif
-			return (size_t)*(float *)value;
+			return (size_t) php_ifd_get_float(value);
 		case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type double");
 #endif
-			return (size_t)*(double *)value;
+			return (size_t) php_ifd_get_double(value);
 	}
 	return 0;
 }
@@ -2163,13 +2177,13 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type single");
 #endif
-						info_value->f = *(float *)value;
+						info_value->f = php_ifd_get_float(value);
 						break;
 					case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 						php_error_docref(NULL, E_WARNING, "Found value of type double");
 #endif
-						info_value->d = *(double *)value;
+						info_value->d = php_ifd_get_double(value);
 						break;
 				}
 			}

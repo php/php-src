@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
     (Abyr Valg)
 
+- Exif:
+  . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
+    invalid cast). (Nikita)
+
 - FPM:
   . Fixed bug #77185 (Use-after-free in FPM master event handling).
     (Maksim Nikulin)
