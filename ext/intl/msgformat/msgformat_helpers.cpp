@@ -191,10 +191,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 		if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
 			UnicodeString argName = mp.getSubstring(name_part);
-			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length() * sizeof(UChar))) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length() * sizeof(UChar),
 						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
@@ -450,7 +450,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				continue;
 			}
 
-			storedArgType = (Formattable::Type*)zend_hash_str_find_ptr(types, (char*)key.getBuffer(), key.length());
+			storedArgType = (Formattable::Type*)zend_hash_str_find_ptr(types, (char*)key.getBuffer(), key.length() * sizeof(UChar));
 		}
 
 		if (storedArgType != NULL) {
