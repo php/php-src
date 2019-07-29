@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.8
 
+- OPcache:
+  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
+
 - Phpdbg:
   . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
