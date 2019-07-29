@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
     (Abyr Valg)
 
+- Exif:
+  . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
+    invalid cast). (Nikita)
+
 - Iconv:
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
     Jung)
