@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0beta2
 
+- Core:
+  . Fixed bug #78340 (Include of stream wrapper not reading whole file).
+    (Nikita)
+
 - Iconv:
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
     Jung)
