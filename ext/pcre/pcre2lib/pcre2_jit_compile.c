@@ -7288,7 +7288,7 @@ int lgb, rgb, ricount;
 PCRE2_SPTR bptr;
 uint32_t c;
 
-GETCHARINC(c, cc);
+c = *cc++;
 lgb = UCD_GRAPHBREAK(c);
 
 while (cc < end_subject)
