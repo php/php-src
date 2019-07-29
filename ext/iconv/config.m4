@@ -161,6 +161,9 @@ int main() {
 
 int main() {
   iconv_t cd = iconv_open( "UTF-8//IGNORE", "UTF-8" );
+  if(cd == (iconv_t)-1) {
+    return 1;
+  }
   char *in_p = "\xC3\xC3\xC3\xB8";
   size_t in_left = 4, out_left = 4096;
   char *out = malloc(out_left);

@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #77185 (Use-after-free in FPM master event handling).
     (Maksim Nikulin)
 
+- Iconv:
+  . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
+    Jung)
+
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
