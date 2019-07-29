@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
     (Abyr Valg)
 
+- Exif:
+  . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
+    invalid cast). (Nikita)
+
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
