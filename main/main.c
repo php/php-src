@@ -1940,6 +1940,11 @@ void php_request_shutdown(void *dummy)
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0);
 	} zend_end_try();
 
+	/* 16. Deactivate Zend signals */
+#ifdef ZEND_SIGNALS
+	zend_signal_deactivate();
+#endif
+
 #ifdef PHP_WIN32
 	if (PG(com_initialized)) {
 		CoUninitialize();
