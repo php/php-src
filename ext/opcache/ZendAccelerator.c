@@ -4542,9 +4542,11 @@ static int accel_finish_startup(void)
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;
+#ifdef ZEND_SIGNALS
 			/* We may not have registered signal handlers due to SIGG(reset)=0, so
 			 * also disable the check that they are registered. */
 			SIGG(check) = 0;
+#endif
 			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
 			PG(report_memleaks) = orig_report_memleaks;
 		} else {
