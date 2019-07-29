@@ -1958,6 +1958,11 @@ void php_request_shutdown(void *dummy)
 		zend_unset_timeout();
 	} zend_end_try();
 
+	/* 17. Deactivate Zend signals */
+#ifdef ZEND_SIGNALS
+	zend_signal_deactivate();
+#endif
+
 #ifdef PHP_WIN32
 	if (PG(com_initialized)) {
 		CoUninitialize();
