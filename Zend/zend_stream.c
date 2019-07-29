@@ -115,7 +115,7 @@ static ssize_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t
 
 ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len) /* {{{ */
 {
-	size_t size;
+	size_t file_size;
 
 	if (file_handle->buf) {
 		*buf = file_handle->buf;
@@ -142,26 +142,28 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		file_handle->handle.stream.fsizer = (zend_stream_fsizer_t)zend_stream_stdio_fsizer;
 	}
 
-	size = zend_stream_fsize(file_handle);
-	if (size == (size_t)-1) {
+	file_size = zend_stream_fsize(file_handle);
+	if (file_size == (size_t)-1) {
 		return FAILURE;
 	}
 
-	if (size) {
+	if (file_size) {
 		ssize_t read;
-		*buf = safe_emalloc(1, size, ZEND_MMAP_AHEAD);
-		read = zend_stream_read(file_handle, *buf, size);
+		size_t size = 0;
+		*buf = safe_emalloc(1, file_size, ZEND_MMAP_AHEAD);
+		while ((read = zend_stream_read(file_handle, *buf + size, file_size - size)) > 0) {
+			size += read;
+		}
 		if (read < 0) {
 			efree(*buf);
 			return FAILURE;
 		}
 		file_handle->buf = *buf;
-		file_handle->len = read;
+		file_handle->len = size;
 	} else {
-		size_t remain = 4*1024;
+		size_t size = 0, remain = 4*1024;
 		ssize_t read;
 		*buf = emalloc(remain);
-		size = 0;
 
 		while ((read = zend_stream_read(file_handle, *buf + size, remain)) > 0) {
 			size   += read;
