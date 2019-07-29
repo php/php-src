@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   (CVE-2019-11042) (Stas)
   . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
   (CVE-2019-11041) (Stas)
+  
+- Phar:
+  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
 
 30 May 2019, PHP 7.1.30
 

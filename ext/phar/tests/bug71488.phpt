@@ -15,4 +15,7 @@ DONE
 ?>
 --EXPECTF--
 Fatal error: Uncaught BadMethodCallException: tar-based phar "%s/bug71488.test" cannot be created, link "%s" is too long for format in %sbug71488.php:%d
-Stack trace:%A
+Stack trace:
+#0 %s(%d): PharData->decompress('test')
+#1 {main}
+  thrown in %s on line %d
