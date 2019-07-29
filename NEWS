@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
     Jung)
 
+- Opcache:
+  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
+
 25 Jul 2019, PHP 7.4.0beta1
 
 - Core:
