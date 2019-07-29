@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
     (Abyr Valg)
 
+- Iconv:
+  . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
+    Jung)
+
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
