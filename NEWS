@@ -21,9 +21,6 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
-- Opcode:
-  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
-
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
@@ -63,6 +60,7 @@ PHP                                                                        NEWS
   . Fixed bug #78271 (Invalid result of if-else). (Nikita)
   . Fixed bug #78291 (opcache_get_configuration doesn't list all directives).
     (Andrew Collington)
+  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
 
 - PCRE:
   . Fixed bug #78197 (PCRE2 version check in configure fails for "##.##-xxx"
