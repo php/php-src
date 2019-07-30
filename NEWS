@@ -10,6 +10,10 @@ PHP                                                                        NEWS
 - Exif:
   . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
     invalid cast). (Nikita)
+  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
+    (CVE-2019-11042) (Stas)
+  . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
+    (CVE-2019-11041) (Stas)
 
 - Iconv:
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
@@ -17,6 +21,12 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
+
+- PCRE:
+  . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
+
+- Phar:
+  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
 
 - Standard:
   . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
