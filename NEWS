@@ -1,26 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.8
-
-- EXIF:
-  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
-    (CVE-2019-11042) (Stas)
-  . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
-    (CVE-2019-11041) (Stas)
-
-- OPcache:
-  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
-
-- PCRE:
-  . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
-
-- Phar:
-  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
-
-- Phpdbg:
-  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
-
-18 Jul 2019, PHP 7.3.8RC1
+01 Aug 2019, PHP 7.3.8
 
 - Core:
   . Added syslog.filter=raw option. (Erik Lundin)
@@ -29,6 +9,12 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
   . Updated timelib to 2018.02. (Derick)
+
+- EXIF:
+  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
+    (CVE-2019-11042) (Stas)
+  . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
+    (CVE-2019-11041) (Stas)
 
 - FTP:
   . Fixed bug #78039 (FTP with SSL memory leak). (Nikita)
@@ -49,6 +35,7 @@ PHP                                                                        NEWS
     socket-to-stream). (Nikita)
 
 - Opcache:
+  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
   . Fixed bug #78189 (file cache strips last character of uname hash). (cmb)
   . Fixed bug #78202 (Opcache stats for cache hits are capped at 32bit NUM).
     (cmb)
@@ -57,12 +44,19 @@ PHP                                                                        NEWS
     (Andrew Collington)
 
 - PCRE:
+  . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
   . Fixed bug #78197 (PCRE2 version check in configure fails for "##.##-xxx"
     version strings). (pgnet, Peter Kokot)
 
 - PDO_Sqlite:
   . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
     (Vincent Quatrevieux)
+
+- Phar:
+  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
+
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
 
 - SQLite:
   . Upgraded to SQLite 3.28.0. (cmb)
