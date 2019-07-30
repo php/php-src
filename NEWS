@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
 
+- PDO_Sqlite:
+  . Fixed bug #78348 (Remove -lrt from pdo_sqlite.so). (Peter Kokot)
+
 - Phar:
   . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
 
