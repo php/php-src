@@ -20,9 +20,6 @@ if (mysqli_get_server_version($link) >= 50600)
 	$tmp    = NULL;
 	$link   = NULL;
 
-	if (NULL !== ($tmp = @mysqli_report()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (true !== ($tmp = mysqli_report(-1)))
 		printf("[002] Expecting boolean/true even for invalid flags, got %s/%s\n", gettype($tmp), $tmp);
 
