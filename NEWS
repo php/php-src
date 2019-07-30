@@ -2,10 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.21
 
-- Phpdbg:
-  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
+- Date:
+  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
 
-18 Jul 2019, PHP 7.2.21RC1
+- EXIF:
+  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
+    (CVE-2019-11042) (Stas)
+  . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
+    (CVE-2019-11041) (Stas)
 
 - Fileinfo:
   . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
@@ -13,20 +17,6 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fixed bug #77124 (FTP with SSL memory leak). (Nikita)
-
-- PDO_Sqlite:
-  . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
-    (Vincent Quatrevieux)
-
-- SQLite:
-  . Upgraded to SQLite 3.28.0. (cmb)
-
-- XMLRPC:
-  . Fixed bug #78173 (XML-RPC mutates immutable objects during encoding).
-    (Asher Baker)
-
-- Date:
-  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
 
 - Libxml:
   . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
@@ -50,10 +40,27 @@ PHP                                                                        NEWS
   . Fixed bug #78291 (opcache_get_configuration doesn't list all directives).
     (Andrew Collington)
 
+- Phar:
+  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
+
+- Phpdbg:
+  . Fixed bug #78297 (Include unexistent file memory leak). (Nikita)
+
+- PDO_Sqlite:
+  . Fixed bug #78192 (SegFault when reuse statement after schema has changed).
+    (Vincent Quatrevieux)
+
+- SQLite:
+  . Upgraded to SQLite 3.28.0. (cmb)
+
 - Standard:
   . Fixed bug #78241 (touch() does not handle dates after 2038 in PHP 64-bit).
     (cmb)
   . Fixed bug #78269 (password_hash uses weak options for argon2). (Remi)
+
+- XMLRPC:
+  . Fixed bug #78173 (XML-RPC mutates immutable objects during encoding).
+    (Asher Baker)
 
 04 Jul 2019, PHP 7.2.20
 
