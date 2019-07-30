@@ -433,17 +433,16 @@ void fpm_event_loop(int err) /* {{{ */
 		/* trigger timers */
 		q = fpm_event_queue_timer;
 		while (q) {
+			struct fpm_event_queue_s *next = q->next;
 			fpm_clock_get(&now);
 			if (q->ev) {
 				if (timercmp(&now, &q->ev->timeout, >) || timercmp(&now, &q->ev->timeout, ==)) {
-					fpm_event_fire(q->ev);
-					/* sanity check */
-					if (fpm_globals.parent_pid != getpid()) {
-						return;
-					}
-					if (q->ev->flags & FPM_EV_PERSIST) {
-						fpm_event_set_timeout(q->ev, now);
-					} else { /* delete the event */
+					struct fpm_event_s *ev = q->ev;
+					if (ev->flags & FPM_EV_PERSIST) {
+						fpm_event_set_timeout(ev, now);
+					} else {
+						/* Delete the event. Make sure this happens before it is fired,
+						 * so that the event callback may register the same timer again. */
 						q2 = q;
 						if (q->prev) {
 							q->prev->next = q->next;
@@ -457,13 +456,18 @@ void fpm_event_loop(int err) /* {{{ */
 								fpm_event_queue_timer->prev = NULL;
 							}
 						}
-						q = q->next;
 						free(q2);
-						continue;
+					}
+
+					fpm_event_fire(ev);
+
+					/* sanity check */
+					if (fpm_globals.parent_pid != getpid()) {
+						return;
 					}
 				}
 			}
-			q = q->next;
+			q = next;
 		}
 	}
 }
