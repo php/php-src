@@ -4920,7 +4920,11 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	int arg_num;
 
 	SAVE_OPLINE();
-	args = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (OP1_TYPE & (IS_VAR|IS_CV)) {
+		args = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
+	} else {
+		args = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	}
 	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
 ZEND_VM_C_LABEL(send_again):

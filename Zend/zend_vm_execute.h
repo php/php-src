@@ -1862,7 +1862,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_
 	int arg_num;
 
 	SAVE_OPLINE();
-	args = get_zval_ptr_undef(opline->op1_type, opline->op1, &free_op1, BP_VAR_R);
+	if (opline->op1_type & (IS_VAR|IS_CV)) {
+		args = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, &free_op1, BP_VAR_RW);
+	} else {
+		args = get_zval_ptr_undef(opline->op1_type, opline->op1, &free_op1, BP_VAR_R);
+	}
 	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
 send_again:
