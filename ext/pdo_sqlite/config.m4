@@ -35,8 +35,5 @@ if test "$PHP_PDO_SQLITE" != "no"; then
   PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
     $ext_shared,,-I$pdo_cv_inc_path)
 
-  dnl Solaris fix
-  PHP_CHECK_LIBRARY(rt, fdatasync, [PHP_ADD_LIBRARY(rt,, PDO_SQLITE_SHARED_LIBADD)])
-
   PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
 fi
