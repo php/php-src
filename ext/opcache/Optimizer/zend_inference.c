@@ -3437,6 +3437,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							case ZEND_SEND_VAR_NO_REF:
 							case ZEND_SEND_VAR_NO_REF_EX:
 							case ZEND_SEND_REF:
+							case ZEND_SEND_UNPACK:
 							case ZEND_ASSIGN_REF:
 							case ZEND_YIELD:
 							case ZEND_INIT_ARRAY:
