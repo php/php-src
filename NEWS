@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.21
+01 Aug 2019, PHP 7.2.21
 
 - Date:
   . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
