@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
     Jung)
 
+- MySQLnd:
+  . Fixed bug #78213 (Empty row pocket). (cmb)
+
 - Opcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
 

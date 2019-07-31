@@ -95,7 +95,7 @@ mysqlnd_mempool_create(size_t arena_size)
 	MYSQLND_MEMORY_POOL * ret;
 
 	DBG_ENTER("mysqlnd_mempool_create");
-	arena = zend_arena_create(MAX(arena_size, sizeof(zend_arena)));
+	arena = zend_arena_create(MAX(arena_size, ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))));
 	ret = zend_arena_alloc(&arena, sizeof(MYSQLND_MEMORY_POOL));
 	ret->arena = arena;
 	ret->last = NULL;
