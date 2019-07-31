@@ -896,3 +896,16 @@ unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_scrip
 	}
 	return checksum;
 }
+
+zend_bool zend_accel_check_package_consistency(zend_package_info *cached_package)
+{
+	zend_package_info *info =
+		CG(packages) ? zend_hash_find_ptr(CG(packages), cached_package->name) : NULL;
+	if (!info) {
+		/* Package not registered, force a recompilation that will throw an error. */
+		return 0;
+	}
+
+	/* Make sure that the package declares are the same. */
+	return memcmp(&info->declares, &cached_package->declares, sizeof(info->declares)) == 0;
+}

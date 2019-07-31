@@ -492,6 +492,13 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void zend_persist_package_calc(zend_package_info *info) {
+	if (info) {
+		ADD_SIZE(sizeof(zend_package_info));
+		ADD_INTERNED_STRING(info->name);
+	}
+}
+
 uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, const char *key, unsigned int key_length, int for_shm)
 {
 	Bucket *p;
@@ -534,6 +541,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		zend_persist_op_array_calc(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
+	zend_persist_package_calc(new_persistent_script->package);
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align size to 64-byte boundary */

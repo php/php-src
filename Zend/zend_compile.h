@@ -497,6 +497,14 @@ struct _zend_execute_data {
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
 };
 
+typedef struct {
+	zend_string *name;
+	struct {
+		zend_long ticks;
+		int strict_types : 1;
+	} declares;
+} zend_package_info;
+
 #define ZEND_CALL_HAS_THIS           IS_OBJECT_EX
 
 /* Top 16 bits of Z_TYPE_INFO(EX(This)) are used as call_info flags */

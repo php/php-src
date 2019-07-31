@@ -1770,6 +1770,9 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 			zend_build_delayed_early_binding_list(op_array) :
 			(uint32_t)-1;
 
+	/* Remember the package the script is part of. */
+	new_persistent_script->package = CG(current_package);
+
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
 
     /* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
@@ -1892,7 +1895,6 @@ int check_persistent_script_access(zend_persistent_script *persistent_script)
         return ret;
     }
 }
-
 
 /* zend_compile() replacement */
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
@@ -2077,6 +2079,24 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			zend_shared_alloc_unlock();
 			persistent_script = NULL;
 		}
+	}
+
+	/* If this script is part of a package, make sure the package declaration did not change. */
+	if (persistent_script && persistent_script->package &&
+			!zend_accel_check_package_consistency(persistent_script->package)) {
+		zend_shared_alloc_lock();
+		if (!persistent_script->corrupted) {
+			persistent_script->corrupted = 1;
+			persistent_script->timestamp = 0;
+			ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
+			if (ZSMMG(memory_exhausted)) {
+				zend_accel_restart_reason reason =
+					zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+				zend_accel_schedule_restart_if_necessary(reason);
+			}
+		}
+		zend_shared_alloc_unlock();
+		persistent_script = NULL;
 	}
 
 	/* Check the second level cache */
