@@ -21,6 +21,18 @@ if($tmp['count'] == "0") {
     mysqli_close($link);
     die("skip mysql does not support session_connect_attrs table yet");
 }
+
+/* skip test if performance_schema is OFF*/
+if (!$res = mysqli_query($link, "show variables like 'performance_schema';"))
+    die("skip show variables like 'performance_schema' failed");
+
+$tmp = mysqli_fetch_assoc($res);
+mysqli_free_result($res);
+if($tmp['Value'] == "OFF") {
+    mysqli_close($link);
+    die("skip performance_schema is OFF");
+}
+
 mysqli_close($link);
 ?>
 --FILE--
@@ -32,17 +44,16 @@ mysqli_close($link);
     $res    = NULL;
 	if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",$host, $user, $db, $port, $socket);
-    
+
     //in case $host is empty, do not test for _server_host field
     if(isset($host) && trim($host) != '') {
         if (!$res = mysqli_query($link, "select * from performance_schema.session_connect_attrs where ATTR_NAME='_server_host' and processlist_id = connection_id()")) {
             printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
         }
         else {
-            if($tmp = mysqli_fetch_assoc($res)) { //work around for Travis for now
-                if ($tmp['ATTR_VALUE'] !== $host) {
-                    printf("[003] _server_host value mismatch\n") ;
-                }
+            $tmp = mysqli_fetch_assoc($res);
+            if ($tmp['ATTR_VALUE'] !== $host) {
+                printf("[003] _server_host value mismatch\n") ;
             }
             mysqli_free_result($res);
         }
@@ -52,10 +63,9 @@ mysqli_close($link);
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     else {
-        if($tmp = mysqli_fetch_assoc($res)) {
-            if ($tmp['ATTR_VALUE'] !== "mysqlnd") {
-                printf("[005] _client_name value mismatch\n") ;
-            }
+        $tmp = mysqli_fetch_assoc($res);
+        if ($tmp['ATTR_VALUE'] !== "mysqlnd") {
+            printf("[005] _client_name value mismatch\n") ;
         }
         mysqli_free_result($res);
     }
