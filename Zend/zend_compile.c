@@ -2940,15 +2940,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			uses_arg_unpack = 1;
 			fbc = NULL;
 
-			/* Unpacking may need to create interior references in the unpacked array,
-			 * but apart from that does not have any other reference semantics: It should
-			 * generate a notice if the variable does not exist and it should not convert
-			 * the variable itself into a reference. As such, use an RW fetch. */
-			if (zend_is_variable(arg->child[0])) {
-				zend_compile_var(&arg_node, arg->child[0], BP_VAR_RW, 0);
-			} else {
-				zend_compile_expr(&arg_node, arg->child[0]);
-			}
+			zend_compile_expr(&arg_node, arg->child[0]);
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
 			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_count);
