@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #78340 (Include of stream wrapper not reading whole file).
     (Nikita)
   . Fixed bug #78344 (Segmentation fault on zend_check_protected). (Nikita)
+  . Fixed bug #78356 (Array returned from ArrayAccess is incorrectly unpacked
+    as argument). (Nikita)
 
 - Exif:
   . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
