@@ -8,6 +8,9 @@ function php_cli_server_start($ini = "") {
 	$doc_root = __DIR__;
 
 	$ini_array = preg_split('/\s+/', trim($ini));
+	$ini_array = array_map(function($arg) {
+		return trim($arg, '\'"');
+	}, $ini_array);
 	$cmd = [$php_executable, '-t', $doc_root, '-n', ...$ini_array, '-S', PHP_CLI_SERVER_ADDRESS];
 	$descriptorspec = array(
 		0 => STDIN,
