@@ -5,11 +5,13 @@ PHP_ARG_WITH([gmp],
 
 if test "$PHP_GMP" != "no"; then
 
+  AC_CANONICAL_HOST
   MACHINE_INCLUDES=$($CC -dumpmachine)
 
   for i in $PHP_GMP /usr/local /usr; do
     test -f $i/include/gmp.h && GMP_DIR=$i && break
     test -f $i/include/$MACHINE_INCLUDES/gmp.h && GMP_DIR=$i && break
+    test -f $i/include/$host/gmp.h && GMP_DIR=$i && break
   done
 
   if test -z "$GMP_DIR"; then
