@@ -158,7 +158,7 @@ static const opt_struct OPTIONS[] = {
 	{'s', 0, "syntax-highlight"},
 	{'s', 0, "syntax-highlighting"},
 	{'w', 0, "strip"},
-	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
+	{'h', 0, "usage"},/* help alias */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
  	{'T', 1, "timing"},
@@ -2340,7 +2340,7 @@ parent_loop_end:
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
-					exit_status = 0;
+					exit_status = (c == 'h') ? 0 : 1;
 					goto out;
 			}
 		}

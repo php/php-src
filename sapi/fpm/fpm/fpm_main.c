@@ -149,7 +149,7 @@ static const opt_struct OPTIONS[] = {
 	{'i', 0, "info"},
 	{'m', 0, "modules"},
 	{'n', 0, "no-php-ini"},
-	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
+	{'h', 0, "usage"},/* help alias */
 	{'v', 0, "version"},
 	{'y', 1, "fpm-config"},
 	{'t', 0, "test"},
