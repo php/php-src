@@ -46,8 +46,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_called_class, 0, 0, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_called_class arginfo_func_get_args
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
@@ -59,11 +58,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_subclass_of, 0, 2, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO(0, allow_string, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_a, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, allow_string, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_is_a arginfo_is_subclass_of
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
@@ -73,9 +68,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_object_vars, 0, 1, IS_ARRAY,
 	ZEND_ARG_TYPE_INFO(0, obj, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_mangled_object_vars, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, obj, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_mangled_object_vars arginfo_get_object_vars
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_methods, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_INFO(0, class)
@@ -96,10 +89,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_exists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interface_exists, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, classname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, autoload, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_interface_exists arginfo_class_exists
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trait_exists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, traitname, IS_STRING, 0)
@@ -119,18 +109,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_included_files, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_required_files, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_required_files arginfo_get_included_files
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trigger_error, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, error_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_user_error, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, error_type, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_user_error arginfo_trigger_error
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, error_handler)
@@ -144,17 +130,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, exception_handler)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_exception_handler, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_restore_exception_handler arginfo_restore_error_handler
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_classes, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_declared_classes arginfo_get_included_files
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_traits, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_declared_traits arginfo_get_included_files
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_declared_interfaces, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_get_declared_interfaces arginfo_get_included_files
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_functions, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, exclude_disabled, _IS_BOOL, 0)
@@ -202,20 +184,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_thread_id, 0, 0, IS_LONG, 0
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_mem_caches, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_gc_mem_caches arginfo_func_num_args
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_collect_cycles, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_gc_collect_cycles arginfo_func_num_args
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enabled, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_gc_enabled arginfo_restore_error_handler
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enable, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_disable, 0, 0, IS_VOID, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_gc_disable arginfo_gc_enable
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_status, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_gc_status arginfo_get_included_files

@@ -12,19 +12,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_getTimezone, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_getOffset, 0, 0, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_DateTimeInterface_getOffset arginfo_DateTimeInterface_getTimezone
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_getTimestamp, 0, 0, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_DateTimeInterface_getTimestamp arginfo_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_diff, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 	ZEND_ARG_TYPE_INFO(0, absolute, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface___wakeup, 0, 0, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_DateTimeInterface___wakeup arginfo_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
@@ -45,8 +42,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_createFromFormat, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_getLastErrors, 0, 0, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_DateTime_getLastErrors arginfo_DateTimeInterface_getTimezone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_modify, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modify, IS_STRING, 0)

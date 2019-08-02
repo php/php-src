@@ -4,6 +4,8 @@
 use PhpParser\Node;
 use PhpParser\Node\Stmt;
 
+error_reporting(E_ALL);
+
 try {
     initPhpParser();
 } catch (Exception $e) {
@@ -77,6 +79,16 @@ class Type {
             throw new Exception("Not implemented: $this->name");
         }
     }
+
+    public static function equals(?Type $a, ?Type $b): bool {
+        if ($a === null || $b === null) {
+            return $a === $b;
+        }
+
+        return $a->name === $b->name
+            && $a->isBuiltin === $b->isBuiltin
+            && $a->isNullable === $b->isNullable;
+    }
 }
 
 class ArgInfo {
@@ -95,6 +107,13 @@ class ArgInfo {
         $this->isVariadic = $isVariadic;
         $this->type = $type;
     }
+
+    public function equals(ArgInfo $other): bool {
+        return $this->name === $other->name
+            && $this->byRef === $other->byRef
+            && $this->isVariadic === $other->isVariadic
+            && Type::equals($this->type, $other->type);
+    }
 }
 
 class ReturnInfo {
@@ -106,6 +125,11 @@ class ReturnInfo {
     public function __construct(bool $byRef, ?Type $type) {
         $this->byRef = $byRef;
         $this->type = $type;
+    }
+
+    public function equals(ReturnInfo $other): bool {
+        return $this->byRef === $other->byRef
+            && Type::equals($this->type, $other->type);
     }
 }
 
@@ -129,6 +153,22 @@ class FuncInfo {
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
         $this->cond = $cond;
+    }
+
+    public function equalsApartFromName(FuncInfo $other): bool {
+        if (count($this->args) !== count($other->args)) {
+            return false;
+        }
+
+        for ($i = 0; $i < count($this->args); $i++) {
+            if (!$this->args[$i]->equals($other->args[$i])) {
+                return false;
+            }
+        }
+
+        return $this->return->equals($other->return)
+            && $this->numRequiredArgs === $other->numRequiredArgs
+            && $this->cond === $other->cond;
     }
 }
 
@@ -290,8 +330,24 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
 
 /** @param FuncInfo[] $funcInfos */
 function generateArginfoCode(array $funcInfos): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead. */\n\n";
-    return $code . implode("\n\n", array_map('funcInfoToCode', $funcInfos));
+    $code = "/* This is a generated file, edit the .stub.php file instead. */";
+    $generatedFuncInfos = [];
+    foreach ($funcInfos as $funcInfo) {
+        /* If there already is an equivalent arginfo structure, only emit a #define */
+        foreach ($generatedFuncInfos as $generatedFuncInfo) {
+            if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
+                $code .= sprintf(
+                    "\n\n#define arginfo_%s arginfo_%s",
+                    $funcInfo->name, $generatedFuncInfo->name
+                );
+                continue 2;
+            }
+        }
+
+        $code .= "\n\n" . funcInfoToCode($funcInfo);
+        $generatedFuncInfos[] = $funcInfo;
+    }
+    return $code . "\n";
 }
 
 function initPhpParser() {
