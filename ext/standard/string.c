@@ -5206,8 +5206,7 @@ state_2:
 				} else if (lc != '\\') {
 					lc = c;
 				}
-			} else {
-				if (p != buf && *(p-1) != '\\' && (!in_q || *p == in_q)) {
+				if (p != buf && (!in_q || *p == in_q)) {
 					if (in_q) {
 						in_q = 0;
 					} else {
