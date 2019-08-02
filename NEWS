@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
+- MySQLnd:
+  . Fixed bug #78179 (MariaDB server version incorrectly detected). (cmb)
+
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
