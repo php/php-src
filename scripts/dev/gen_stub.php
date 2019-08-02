@@ -210,6 +210,10 @@ function parseStubFile(string $fileName) {
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
             foreach ($stmt->stmts as $classStmt) {
+                if ($classStmt instanceof Stmt\Nop) {
+                    continue;
+                }
+
                 if (!$classStmt instanceof Stmt\ClassMethod) {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
