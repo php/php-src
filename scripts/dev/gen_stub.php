@@ -4,7 +4,12 @@
 use PhpParser\Node;
 use PhpParser\Node\Stmt;
 
-initPhpParser();
+try {
+    initPhpParser();
+} catch (Exception $e) {
+    echo "{$e->getMessage()}\n";
+    exit(1);
+}
 
 if ($argc < 2) {
     die("Usage: php gen_stub.php foobar.stub.php\n");
@@ -291,15 +296,23 @@ function initPhpParser() {
     if (!is_dir($phpParserDir)) {
         $cwd = getcwd();
         chdir(__DIR__);
-        passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz");
-        passthru("mkdir PHP-Parser-$version");
-        passthru("tar xvzf v$version.tar.gz -C PHP-Parser-$version --strip-components 1");
+        passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz", $exit);
+        if ($exit !== 0) {
+            throw new Exception("Failed to download PHP-Parser tarball");
+        }
+        if (!mkdir($phpParserDir)) {
+            throw new Exception("Failed to create directory $phpParserDir");
+        }
+        passthru("tar xvzf v$version.tar.gz -C PHP-Parser-$version --strip-components 1", $exit);
+        if ($exit !== 0) {
+            throw new Exception("Failed to extract PHP-Parser tarball");
+        }
         unlink(__DIR__ . "/v$version.tar.gz");
         chdir($cwd);
     }
 
     spl_autoload_register(function(string $class) use($phpParserDir) {
-        if (strpos($class, "PhpParser\\") == 0) {
+        if (strpos($class, "PhpParser\\") === 0) {
             $fileName = $phpParserDir . "/lib/" . str_replace("\\", "/", $class) . ".php";
             require $fileName;
         }
