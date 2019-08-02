@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     Jung)
 
 - MySQLnd:
+  . Fixed bug #78179 (MariaDB server version incorrectly detected). (cmb)
   . Fixed bug #78213 (Empty row pocket). (cmb)
 
 - Opcache:
