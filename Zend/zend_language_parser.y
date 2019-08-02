@@ -1312,7 +1312,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 
 		if (LANG_SCNG(yy_text)[0] == 0 &&
 			LANG_SCNG(yy_leng) == 1 &&
-			memcmp(yystr, "\"end of file\"", sizeof("\"end of file\"") - 1) == 0) {
+			strcmp(yystr, "\"end of file\"") == 0) {
 			if (yyres) {
 				yystpcpy(yyres, "end of file");
 			}
