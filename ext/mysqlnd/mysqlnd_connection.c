@@ -1436,6 +1436,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 		return 0;
 	}
 
+#define MARIA_DB_VERSION_HACK_PREFIX "5.5.5-"
+
+	if (conn->server_capabilities & CLIENT_PLUGIN_AUTH
+		&& !strncmp(p, MARIA_DB_VERSION_HACK_PREFIX, sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1))
+	{
+		p += sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1;
+	}
+
 	major = ZEND_STRTOL(p, &p, 10);
 	p += 1; /* consume the dot */
 	minor = ZEND_STRTOL(p, &p, 10);
