@@ -33,6 +33,7 @@ PHP                                                                        NEWS
     with invalid length). (Nikita)
   . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
     with fixed length buffer). (Albert Casademont)
+  . Fixed bug #78346 (strip_tags no longer handling nested php tags). (cmb)
 
 01 Aug 2019, PHP 7.3.8
 
