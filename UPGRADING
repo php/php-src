@@ -178,6 +178,10 @@ PHP 8.0 UPGRADE NOTES
         ReflectionFunction::invoke($arg = null, ...$args)
         ReflectionMethod::invoke($object, $arg = null, ...$args)
 
+- Socket:
+  . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
+    flags for socket_addrinfo_lookup() have been removed.
+
 - SPL:
   . SplFileObject::fgetss() has been removed.
   . SplHeap::compare($a, $b) now specifies a method signature. Inheriting
