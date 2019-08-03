@@ -404,6 +404,11 @@ PHP 7.4 UPGRADE NOTES
         // $str = ReflectionClass::export(Foo::class, true) is:
         $str = (string) new ReflectionClass(Foo::class);
 
+- Socket:
+  . The AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES flags for
+    socket_addrinfo_lookup() are deprecated, due to an upstream deprecation in
+    glibc.
+
 - Standard:
   . Passing invalid characters to ''base_convert()'', ''bindec()'', ''octdec()''
     and ''hexdec()'' will now generate a deprecation notice. The result will

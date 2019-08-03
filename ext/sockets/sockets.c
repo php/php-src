@@ -2573,7 +2573,14 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				if (zend_string_equals_literal(key, "ai_flags")) {
-					hints.ai_flags = zval_get_long(hint);
+					zend_long flags = zval_get_long(hint);
+#if HAVE_AI_IDN
+					if (flags & (AI_IDN_ALLOW_UNASSIGNED | AI_IDN_USE_STD3_ASCII_RULES)) {
+						php_error_docref(NULL, E_DEPRECATED,
+							"AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES are deprecated");
+					}
+#endif
+					hints.ai_flags = flags;
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
 					hints.ai_socktype = zval_get_long(hint);
 				} else if (zend_string_equals_literal(key, "ai_protocol")) {
