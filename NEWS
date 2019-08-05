@@ -27,6 +27,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
+  . Fixed bug #78376 (Incorrect preloading of constant static properties).
+    (Dmitry)
 
 - PCRE:
   . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
