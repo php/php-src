@@ -2657,7 +2657,7 @@ COMMAND $cmd
 				if (isset($section_text['XFAIL'])) {
 					$warn = true;
 					$info = " (warn: XFAIL section but test passes)";
-				} if (isset($section_text['XLEAK'])) {
+				} elseif (isset($section_text['XLEAK'])) {
 					$warn = true;
 					$info = " (warn: XLEAK section but test passes)";
                 } else {
