@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0beta2
+08 Aug 2019, PHP 7.4.0beta2
 
 - Core:
   . Fixed bug #78340 (Include of stream wrapper not reading whole file).
