@@ -4017,7 +4017,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	zend_vm_stack_free_call_frame(call);
 
 	if (!RETURN_VALUE_USED(opline)) {
-		zval_ptr_dtor(ret);
+		i_zval_ptr_dtor(ret);
 	}
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4116,7 +4116,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		zend_vm_stack_free_call_frame(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(ret);
+			i_zval_ptr_dtor(ret);
 		}
 	}
 
@@ -4204,7 +4204,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		zend_vm_stack_free_args(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(ret);
+			i_zval_ptr_dtor(ret);
 		}
 
 	} else { /* ZEND_OVERLOADED_FUNCTION */
@@ -6736,7 +6736,7 @@ ZEND_VM_C_LABEL(fe_fetch_w_exit):
 
 			ref = Z_REF_P(value);
 			GC_ADDREF(ref);
-			zval_ptr_dtor(variable_ptr);
+			i_zval_ptr_dtor(variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
 		}
 	} else {
@@ -8366,7 +8366,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 	zval *variable_ptr;
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-	zval_ptr_dtor(variable_ptr);
+	i_zval_ptr_dtor(variable_ptr);
 
 	ht = ZEND_MAP_PTR_GET(EX(func)->op_array.static_variables_ptr);
 	if (!ht) {
