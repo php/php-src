@@ -425,14 +425,14 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt) && stmt->row_count);
 	}
 #else
 	if (mysql_next_result(H->server) > 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt) && stmt->row_count);
 	}
 #endif
 }
