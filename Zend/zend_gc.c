@@ -1151,8 +1151,9 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 				if (!GC_INFO(ref)) {
 					gc_add_garbage(ref);
 				}
-				if (obj->handlers->dtor_obj != zend_objects_destroy_object ||
-						obj->ce->destructor != NULL) {
+				if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)
+				 && (obj->handlers->dtor_obj != zend_objects_destroy_object
+				  || obj->ce->destructor != NULL)) {
 					*flags |= GC_HAS_DESTRUCTORS;
 				}
 				ht = obj->handlers->get_gc(obj, &zv, &n);
