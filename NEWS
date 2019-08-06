@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #69100 (Bus error from stream_copy_to_stream (file -> SSL stream)
     with invalid length). (Nikita)
+  . Fixed bug #78282 (atime and mtime mismatch). (cmb)
   . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
     with fixed length buffer). (Albert Casademont)
   . Fixed bug #78346 (strip_tags no longer handling nested php tags). (cmb)
