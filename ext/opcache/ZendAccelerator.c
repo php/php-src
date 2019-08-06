@@ -4354,7 +4354,7 @@ static int accel_preload(const char *config)
 		CG(map_ptr_last) = orig_map_ptr_last;
 
 		if (EG(full_tables_cleanup)) {
-			zend_accel_error(ACCEL_LOG_FATAL, "Preloading is not comatible with dl() function.");
+			zend_accel_error(ACCEL_LOG_FATAL, "Preloading is not compatible with dl() function.");
 			ret = FAILURE;
 			goto finish;
 		}
