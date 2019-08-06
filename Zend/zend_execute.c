@@ -141,9 +141,6 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	{NULL,NULL,NULL,NULL}   /* reserved          */
 };
 
-#undef zval_ptr_dtor
-#define zval_ptr_dtor(zv) i_zval_ptr_dtor(zv)
-
 #define FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_var) do {			\
 	zval *__container_to_free = EX_VAR(free_var);							\
 	if (UNEXPECTED(Z_REFCOUNTED_P(__container_to_free))) {					\
