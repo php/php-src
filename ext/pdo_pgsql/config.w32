@@ -7,7 +7,7 @@ if (PHP_PDO_PGSQL != "no") {
 			CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\include\\libpq;")) {
 		EXTENSION("pdo_pgsql", "pdo_pgsql.c pgsql_driver.c pgsql_statement.c");
 
-		if (CHECK_HEADER_ADD_INCLUDE("pg_config.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql")) {
+		if (CHECK_HEADER_ADD_INCLUDE("pg_config.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\include\\libpq;")) {
 			ADD_FLAG('CFLAGS_PDO_PGSQL', "/D HAVE_PG_CONFIG_H");
 		}
 		if (X64) {
