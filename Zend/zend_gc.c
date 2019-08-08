@@ -1213,6 +1213,9 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 			}
 			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			if (!GC_INFO(ref)) {
+				gc_add_garbage(ref);
+			}
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				GC_ADDREF(ref);
