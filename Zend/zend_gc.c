@@ -86,6 +86,22 @@
 #define GC_GREY     0x200000u
 #define GC_PURPLE   0x300000u
 
+/* Debug tracing */
+#if ZEND_GC_DEBUG > 1
+# define GC_TRACE(format, ...) fprintf(stderr, format "\n", ##__VA_ARGS__);
+# define GC_TRACE_REF(ref, format, ...) \
+	do { \
+		gc_trace_ref((zend_refcounted *) ref); \
+		fprintf(stderr, format "\n", ##__VA_ARGS__); \
+	} while (0)
+# define GC_TRACE_SET_COLOR(ref, color) \
+	GC_TRACE_REF(ref, "->%s", gc_color_name(color))
+#else
+# define GC_TRACE_REF(ref, format, ...)
+# define GC_TRACE_SET_COLOR(ref, new_color)
+# define GC_TRACE(str)
+#endif
+
 /* GC_INFO access */
 #define GC_REF_ADDRESS(ref) \
 	(((GC_TYPE_INFO(ref)) & (GC_ADDRESS << GC_INFO_SHIFT)) >> GC_INFO_SHIFT)
@@ -103,16 +119,19 @@
 	} while (0)
 
 #define GC_REF_SET_COLOR(ref, c) do { \
+		GC_TRACE_SET_COLOR(ref, c); \
 		GC_TYPE_INFO(ref) = \
 			(GC_TYPE_INFO(ref) & ~(GC_COLOR << GC_INFO_SHIFT)) | \
 			((c) << GC_INFO_SHIFT); \
 	} while (0)
 
 #define GC_REF_SET_BLACK(ref) do { \
+		GC_TRACE_SET_COLOR(ref, GC_BLACK); \
 		GC_TYPE_INFO(ref) &= ~(GC_COLOR << GC_INFO_SHIFT); \
 	} while (0)
 
 #define GC_REF_SET_PURPLE(ref) do { \
+		GC_TRACE_SET_COLOR(ref, GC_PURPLE); \
 		GC_TYPE_INFO(ref) |= (GC_COLOR << GC_INFO_SHIFT); \
 	} while (0)
 
@@ -230,21 +249,6 @@ static zend_gc_globals gc_globals;
 # define GC_BENCH_INC(counter)
 # define GC_BENCH_DEC(counter)
 # define GC_BENCH_PEAK(peak, counter)
-#endif
-
-#if ZEND_GC_DEBUG > 1
-# define GC_TRACE(format, ...) fprintf(stderr, format "\n", ##__VA_ARGS__);
-# define GC_TRACE_REF(ref, format, ...) \
-	do { \
-		gc_trace_ref((zend_refcounted *) ref); \
-		fprintf(stderr, format "\n", ##__VA_ARGS__); \
-	} while (0)
-# define GC_TRACE_SET_COLOR(ref, color) \
-	GC_TRACE_REF(ref, "->%s", gc_color_name(color))
-#else
-# define GC_TRACE_REF(ref, format, ...)
-# define GC_TRACE_SET_COLOR(ref, new_color)
-# define GC_TRACE(str)
 #endif
 
 
