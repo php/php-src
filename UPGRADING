@@ -38,6 +38,10 @@ PHP 7.4 UPGRADE NOTES
     interpreted as an opening PHP tag. Previously it was interpreted either as
     `<? php` and resulted in a syntax error (with short_open_tag=1) or was
     interpreted as a literal `<?php` string (with short_open_tag=0).
+  . When using include/require on a stream, stream_set_option() will be invoked
+    with the STREAM_OPTION_READ_BUFFER option. Custom stream wrapper
+    implementations may need to implement the stream_set_option() method to
+    avoid a warning (always returning false is a sufficient implementation).
 
 - BCMath:
   . BCMath functions will now warn if a non well-formed number is passed, such
