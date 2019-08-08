@@ -2272,6 +2272,7 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
 			break;
 		default:
 			return zend_std_get_properties_for(object, purpose);
@@ -2393,6 +2394,7 @@ static HashTable *date_object_get_properties_for_timezone(zend_object *object, z
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
 			break;
 		default:
 			return zend_std_get_properties_for(object, purpose);
