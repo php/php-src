@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0beta3
 
+- Date:
+  . Fixed bug #78383 (Casting a DateTime to array no longer returns its
+    properties). (Nikita)
 
 08 Aug 2019, PHP 7.4.0beta2
 
