@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #78363 (Buffer overflow in zendparse). (Nikita)
+  . Fixed bug #78379 (Cast to object confuses GC, causes crash). (Dmitry)
 
 - Curl:
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
