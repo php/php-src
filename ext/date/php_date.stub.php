@@ -57,42 +57,33 @@ function date_parse_from_format(string $format, string $date): array {}
 /** @return array|false */
 function date_get_last_errors() {}
 
-/** @return string|false */
-function date_format(DateTimeInterface $object, string $format) {}
+function date_format(DateTimeInterface $object, string $format): string {}
 
 /** @return DateTime|false */
 function date_modify(DateTime $object, string $modify) {}
 
-/** @return DateTime|false */
-function date_add(DateTime $object, DateInterval $interval) {}
+function date_add(DateTime $object, DateInterval $interval): DateTime {}
 
-/** @return DateTime|false */
-function date_sub(DateTime $object, DateInterval $interval) {}
+function date_sub(DateTime $object, DateInterval $interval): DateTime {}
 
 /** @return DateTimeZone|false */
 function date_timezone_get(DateTimeInterface $object) {}
 
-/** @return DateTime|false */
-function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone) {}
+function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone): DateTime {}
 
-/** @return int|false */
-function date_offset_get(DateTimeInterface $object) {}
+function date_offset_get(DateTimeInterface $object): int {}
 
-/** @return DateInterval|false */
-function date_diff(DateTimeInterface $object, DateTimeInterface $object2, bool $absolute = false) {}
+function date_diff(
+    DateTimeInterface $object, DateTimeInterface $object2, bool $absolute = false): DateInterval {}
 
-/** @return DateTime|false */
 function date_time_set(
-    DateTime $object, int $hour, int $minute, int $second = 0, int $microseconds = 0) {}
+    DateTime $object, int $hour, int $minute, int $second = 0, int $microseconds = 0): DateTime {}
 
-/** @return DateTime|false */
-function date_date_set(DateTime $object, int $year, int $month, int $day) {}
+function date_date_set(DateTime $object, int $year, int $month, int $day): DateTime {}
 
-/** @return DateTime|false */
-function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1) {}
+function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1): DateTime {}
 
-/** @return DateTime|false */
-function date_timestamp_set(DateTime $object, int $timestamp) {}
+function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
 /** @return int|false */
 function date_timestamp_get(DateTimeInterface $object) {}
@@ -100,14 +91,12 @@ function date_timestamp_get(DateTimeInterface $object) {}
 /** @return DateTimeZone|false */
 function timezone_open(string $timezone) {}
 
-/** @return string|false */
-function timezone_name_get(DateTimeZone $object) {}
+function timezone_name_get(DateTimeZone $object): string {}
 
 /** @return string|false */
 function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = -1) {}
 
-/** @return int|false */
-function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime) {}
+function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
 /** @return array|false */
 function timezone_transitions_get(
@@ -126,8 +115,7 @@ function timezone_version_get(): string {}
 /** @return DateInterval|false */
 function date_interval_create_from_date_string(string $time) {}
 
-/** @return string|false */
-function date_interval_format(DateInterval $object, string $format) {}
+function date_interval_format(DateInterval $object, string $format): string {}
 
 function date_default_timezone_set(string $timezone_identifier): bool {}
 
@@ -188,25 +176,25 @@ class DateTime implements DateTimeInterface {
     /** @return DateTime|false */
     public function modify(string $modify);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function add(DateInterval $interval);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function sub(DateInterval $interval);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function setTimezone(DateTimeZone $timezone);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function setTime(int $hour, int $minute, int $second = 0, int $microseconds = 0);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function setDate(int $year, int $month, int $day);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function setISODate(int $year, int $week, int $day = 1);
 
-    /** @return DateTime|false */
+    /** @return DateTime */
     public function setTimestamp(int $timestampt);
 }
 
@@ -222,35 +210,35 @@ class DateTimeImmutable implements DateTimeInterface {
     /** @return DateTimeImmutable|false */
     public function modify(string $modify);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function add(DateInterval $interval);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function sub(DateInterval $interval);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function setTimezone(DateTimeZone $timezone);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function setTime(int $hour, int $minute, int $second = 0, int $microseconds = 0);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function setDate(int $year, int $month, int $day);
 
-    /** @return DateTimeImmutable|false */
+    /** @return DateTimeImmutable */
     public function setISODate(int $year, int $week, int $day = 1);
 
-    /** @return DateTimeImmutable|false */
-    public function setTimestamp(int $timestampt);
+    /** @return DateTimeImmutable */
+    public function setTimestamp(int $timestamp);
 }
 
 class DateTimeZone {
     public function __construct(string $timezone);
 
-    /** @return string|false */
+    /** @return string */
     public function getName();
 
-    /** @return int|false */
+    /** @return int */
     public function getOffset(DateTimeInterface $datetime);
 
     /** @return array|false */
@@ -278,7 +266,7 @@ class DateInterval {
     /** @return DateInterval|false */
     public static function createFromDateString(string $time);
 
-    /** @return string|false */
+    /** @return string */
     public function format(string $format);
 
     public function __wakeup();

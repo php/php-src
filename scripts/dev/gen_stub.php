@@ -199,7 +199,7 @@ function parseClass(Stmt\Class_ $class): ClassInfo {
     $className = $class->name->toString();
     foreach ($class as $stmt) {
         if (!$stmt instanceof Stmt\ClassMethod) {
-            throw new Exception("Not implemented");
+            throw new Exception("Not implemented class statement");
         }
 
         $funcs[] = parseFunctionLike($className . '_' . $stmt->name->toString(), $stmt);
@@ -230,7 +230,7 @@ function parseStubFile(string $fileName) {
             $text = trim($comment->getText());
             if (preg_match('/^#if\s+(.+)$/', $text, $matches)) {
                 if ($cond !== null) {
-                    throw new Exception("Not implemented");
+                    throw new Exception("Not implemented preprocessor directive");
                 }
                 $cond = $matches[1];
             } else if ($text === '#endif') {
@@ -284,7 +284,11 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                 $returnType->toTypeCode(), $returnType->isNullable
             );
         } else {
-            throw new Exception("Not implemented");
+            $code .= sprintf(
+                "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
+                $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                $returnType->name, $returnType->isNullable
+            );
         }
     } else {
         $code .= sprintf(
