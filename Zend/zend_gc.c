@@ -827,6 +827,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
+						ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 						GC_DELREF(ref);
 						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 							GC_REF_SET_COLOR(ref, GC_GREY);
@@ -837,6 +838,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				}
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
+					ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 					GC_DELREF(ref);
 					if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_GREY);
@@ -857,6 +859,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
+				ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 					GC_REF_SET_COLOR(ref, GC_GREY);
@@ -889,6 +892,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
+				ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 				GC_DELREF(ref);
 				if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 					GC_REF_SET_COLOR(ref, GC_GREY);
@@ -902,6 +906,7 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 			zv = Z_INDIRECT_P(zv);
 		}
 		ref = Z_COUNTED_P(zv);
+		ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 		GC_DELREF(ref);
 		if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 			GC_REF_SET_COLOR(ref, GC_GREY);
