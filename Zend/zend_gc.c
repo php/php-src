@@ -701,11 +701,14 @@ tail_call:
 			ZVAL_OBJ(&tmp, obj);
 			ht = get_gc(&tmp, &zv, &n);
 			end = zv + n;
-			if (EXPECTED(!ht)) {
+			if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_BLACK))) {
+				ht = NULL;
 				if (!n) goto next;
 				while (!Z_REFCOUNTED_P(--end)) {
 					if (zv == end) goto next;
 				}
+			} else {
+				GC_REF_SET_BLACK(ht);
 			}
 			while (zv != end) {
 				if (Z_REFCOUNTED_P(zv)) {
@@ -820,11 +823,14 @@ static void gc_mark_grey(zend_refcounted *ref, gc_stack *stack)
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
-				if (EXPECTED(!ht)) {
+				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_GREY))) {
+					ht = NULL;
 					if (!n) goto next;
 					while (!Z_REFCOUNTED_P(--end)) {
 						if (zv == end) goto next;
 					}
+				} else {
+					GC_REF_SET_COLOR(ht, GC_GREY);
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
@@ -1010,11 +1016,14 @@ tail_call:
 					ZVAL_OBJ(&tmp, obj);
 					ht = get_gc(&tmp, &zv, &n);
 					end = zv + n;
-					if (EXPECTED(!ht)) {
+					if (EXPECTED(!ht) || UNEXPECTED(!GC_REF_CHECK_COLOR(ht, GC_GREY))) {
+						ht = NULL;
 						if (!n) goto next;
 						while (!Z_REFCOUNTED_P(--end)) {
 							if (zv == end) goto next;
 						}
+					} else {
+						GC_REF_SET_COLOR(ht, GC_WHITE);
 					}
 					while (zv != end) {
 						if (Z_REFCOUNTED_P(zv)) {
@@ -1181,7 +1190,8 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
-				if (EXPECTED(!ht)) {
+				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_CHECK_COLOR(ht, GC_BLACK))) {
+					ht = NULL;
 					if (!n) goto next;
 					while (!Z_REFCOUNTED_P(--end)) {
 						/* count non-refcounted for compatibility ??? */
@@ -1190,6 +1200,8 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 						}
 						if (zv == end) goto next;
 					}
+				} else {
+					GC_REF_SET_BLACK(ht);
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
