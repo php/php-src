@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #78383 (Casting a DateTime to array no longer returns its
     properties). (Nikita)
 
+- OpenSSL:
+  . Fixed bug #78391 (Assertion failure in openssl_random_pseudo_bytes).
+    (Nikita)
+
 08 Aug 2019, PHP 7.4.0beta2
 
 - Core:
