@@ -388,11 +388,14 @@ tail_call:
 			ZVAL_OBJ(&tmp, obj);
 			ht = get_gc(&tmp, &zv, &n);
 			end = zv + n;
-			if (EXPECTED(!ht)) {
+			if (EXPECTED(!ht) || UNEXPECTED(GC_REF_GET_COLOR(ht) == GC_BLACK)) {
+				ht = NULL;
 				if (!n) return;
 				while (!Z_REFCOUNTED_P(--end)) {
 					if (zv == end) return;
 				}
+			} else {
+				GC_REF_SET_BLACK(ht);
 			}
 			while (zv != end) {
 				if (Z_REFCOUNTED_P(zv)) {
@@ -498,11 +501,14 @@ tail_call:
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
-				if (EXPECTED(!ht)) {
+				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_GET_COLOR(ht) == GC_GREY)) {
+					ht = NULL;
 					if (!n) return;
 					while (!Z_REFCOUNTED_P(--end)) {
 						if (zv == end) return;
 					}
+				} else {
+					GC_REF_SET_COLOR(ht, GC_GREY);
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
@@ -616,11 +622,14 @@ tail_call:
 					ZVAL_OBJ(&tmp, obj);
 					ht = get_gc(&tmp, &zv, &n);
 					end = zv + n;
-					if (EXPECTED(!ht)) {
+					if (EXPECTED(!ht) || UNEXPECTED(GC_REF_GET_COLOR(ht) != GC_GREY)) {
+						ht = NULL;
 						if (!n) return;
 						while (!Z_REFCOUNTED_P(--end)) {
 							if (zv == end) return;
 						}
+					} else {
+						GC_REF_SET_COLOR(ht, GC_WHITE);
 					}
 					while (zv != end) {
 						if (Z_REFCOUNTED_P(zv)) {
@@ -791,7 +800,8 @@ tail_call:
 				ZVAL_OBJ(&tmp, obj);
 				ht = get_gc(&tmp, &zv, &n);
 				end = zv + n;
-				if (EXPECTED(!ht)) {
+				if (EXPECTED(!ht) || UNEXPECTED(GC_REF_GET_COLOR(ht) == GC_BLACK)) {
+					ht = NULL;
 					if (!n) return count;
 					while (!Z_REFCOUNTED_P(--end)) {
 						/* count non-refcounted for compatibility ??? */
@@ -800,6 +810,8 @@ tail_call:
 						}
 						if (zv == end) return count;
 					}
+				} else {
+					GC_REF_SET_BLACK(ht);
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
