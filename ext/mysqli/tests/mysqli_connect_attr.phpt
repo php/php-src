@@ -46,26 +46,28 @@ mysqli_close($link);
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",$host, $user, $db, $port, $socket);
 
     //in case $host is empty, do not test for _server_host field
-    if(isset($host) && trim($host) != '') {
+    if (isset($host) && trim($host) != '') {
         if (!$res = mysqli_query($link, "select * from performance_schema.session_connect_attrs where ATTR_NAME='_server_host' and processlist_id = connection_id()")) {
             printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-        }
-        else {
+        } else {
             $tmp = mysqli_fetch_assoc($res);
-            if ($tmp['ATTR_VALUE'] !== $host) {
-                printf("[003] _server_host value mismatch\n") ;
+            if (!$tmp || !isset($tmp['ATTR_NAME'])) {
+                echo "[003] _server_host missing\n";
+            } elseif ($tmp['ATTR_VALUE'] !== $host) {
+                printf("[004] _server_host value mismatch\n") ;
             }
             mysqli_free_result($res);
         }
     }
 
     if (!$res = mysqli_query($link, "select * from performance_schema.session_connect_attrs where ATTR_NAME='_client_name' and processlist_id = connection_id()")) {
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    }
-    else {
+        printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    } else {
         $tmp = mysqli_fetch_assoc($res);
-        if ($tmp['ATTR_VALUE'] !== "mysqlnd") {
-            printf("[005] _client_name value mismatch\n") ;
+        if (!$tmp || !isset($tmp['ATTR_NAME'])) {
+            echo "[006] _client_name missing\n";
+        } elseif ($tmp['ATTR_VALUE'] !== "mysqlnd") {
+            printf("[007] _client_name value mismatch\n") ;
         }
         mysqli_free_result($res);
     }
