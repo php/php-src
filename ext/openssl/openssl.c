@@ -7012,7 +7012,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	zend_long buffer_length;
 	zval *zstrong_result_returned = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z/", &buffer_length, &zstrong_result_returned) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &buffer_length, &zstrong_result_returned) == FAILURE) {
 		return;
 	}
 
