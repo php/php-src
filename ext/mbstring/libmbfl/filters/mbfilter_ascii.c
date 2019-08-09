@@ -94,9 +94,7 @@ int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
