@@ -507,6 +507,7 @@ tail_call:
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
+						ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 						GC_REFCOUNT(ref)--;
 						gc_mark_grey(ref);
 					}
@@ -514,6 +515,7 @@ tail_call:
 				}
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
+					ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 					GC_REFCOUNT(ref)--;
 					goto tail_call;
 				}
@@ -530,6 +532,7 @@ tail_call:
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
+				ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 				GC_REFCOUNT(ref)--;
 				goto tail_call;
 			}
@@ -559,6 +562,7 @@ tail_call:
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
+				ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 				GC_REFCOUNT(ref)--;
 				gc_mark_grey(ref);
 			}
@@ -569,6 +573,7 @@ tail_call:
 			zv = Z_INDIRECT_P(zv);
 		}
 		ref = Z_COUNTED_P(zv);
+		ZEND_ASSERT(GC_REFCOUNT(ref) > 0);
 		GC_REFCOUNT(ref)--;
 		goto tail_call;
 	}
