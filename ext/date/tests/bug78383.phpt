@@ -3,7 +3,7 @@ Bug #78383: Casting a DateTime to array no longer returns its properties
 --FILE--
 <?php
 
-var_dump((array) new DateTime('2000-01-01'));
+var_dump((array) new DateTime('2000-01-01 UTC'));
 var_dump((array) new DateTimeZone('Europe/Berlin'));
 
 ?>
