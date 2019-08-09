@@ -953,11 +953,9 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buff
 	zval *zv;
 
 tail_call:
-	if (root ||
-	    (GC_ADDRESS(GC_INFO(ref)) != 0 &&
-	     GC_REF_GET_COLOR(ref) == GC_BLACK)) {
-		GC_TRACE_REF(ref, "removing from buffer");
+	do {
 		if (root) {
+			GC_TRACE_REF(ref, "removing from buffer");
 			if (EXPECTED(GC_ADDRESS(GC_INFO(root->ref)) < GC_ROOT_BUFFER_MAX_ENTRIES)) {
 				gc_remove_from_roots(root);
 			} else {
@@ -965,8 +963,18 @@ tail_call:
 			}
 			GC_INFO(ref) = 0;
 			root = NULL;
-		} else {
+		} else if (GC_ADDRESS(GC_INFO(ref)) != 0
+		 && GC_REF_GET_COLOR(ref) == GC_BLACK) {
+			GC_TRACE_REF(ref, "removing from buffer");
 			GC_REMOVE_FROM_BUFFER(ref);
+		} else if (GC_TYPE(ref) == IS_REFERENCE) {
+			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
+				ref = Z_COUNTED(((zend_reference*)ref)->val);
+				goto tail_call;
+			}
+			return;
+		} else {
+			return;
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
@@ -1004,12 +1012,6 @@ tail_call:
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			ht = (zend_array*)ref;
-		} else if (GC_TYPE(ref) == IS_REFERENCE) {
-			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
-				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				goto tail_call;
-			}
-			return;
 		} else {
 			return;
 		}
@@ -1045,7 +1047,7 @@ tail_call:
 		}
 		ref = Z_COUNTED_P(zv);
 		goto tail_call;
-	}
+	} while (0);
 }
 
 ZEND_API int zend_gc_collect_cycles(void)
