@@ -84,6 +84,7 @@ static ZEND_FUNCTION(gc_enabled);
 static ZEND_FUNCTION(gc_enable);
 static ZEND_FUNCTION(gc_disable);
 static ZEND_FUNCTION(gc_status);
+static ZEND_FUNCTION(package_declare);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_zend__void, 0)
@@ -226,6 +227,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_package_declare, 0, 0, 1)
+	ZEND_ARG_INFO(0, info)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -287,6 +291,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(gc_enable, 		arginfo_zend__void)
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
 	ZEND_FE(gc_status, 		arginfo_zend__void)
+	ZEND_FE(package_declare, arginfo_package_declare)
 	ZEND_FE_END
 };
 /* }}} */
@@ -2529,6 +2534,98 @@ ZEND_FUNCTION(get_extension_funcs)
 
 	if (!array) {
 		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+static int init_package_declares(zend_package_info *info, HashTable *declares) {
+	zend_string *name;
+	zval *val;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(declares, name, val) {
+		ZVAL_DEREF(val);
+		if (!name) {
+			zend_throw_error(NULL, "Declares array in package specification must have string keys");
+			return FAILURE;
+		}
+
+		if (zend_string_equals_literal(name, "encoding")) {
+			zend_throw_error(NULL, "Cannot use \"encoding\" in package-level declares");
+			return FAILURE;
+		}
+
+		if (zend_string_equals_literal_ci(name, "strict_types")) {
+			if (Z_TYPE_P(val) != IS_LONG || (Z_LVAL_P(val) != 0 && Z_LVAL_P(val) != 1)) {
+				zend_throw_error(NULL, "Value of \"strict_types\" must be 0 or 1");
+				return FAILURE;
+			}
+
+			info->declares.strict_types = Z_LVAL_P(val);
+			continue;
+		}
+
+		if (zend_string_equals_literal_ci(name, "ticks")) {
+			if (Z_TYPE_P(val) != IS_LONG || Z_LVAL_P(val) < 0) {
+				zend_throw_error(NULL, "Value of \"ticks\" must be a non-negative integer");
+				return FAILURE;
+			}
+
+			info->declares.ticks = Z_LVAL_P(val);
+			continue;
+		}
+
+		/* Unknown declares intentionally ignored for forward-compatibility reasons. */
+	} ZEND_HASH_FOREACH_END();
+	return SUCCESS;
+}
+
+static void package_info_dtor(zval *zv) {
+	zend_package_info *info = Z_PTR_P(zv);
+	zend_string_release(info->name);
+	efree(info);
+}
+
+/* {{{ proto void package_declare(array spec) */
+ZEND_FUNCTION(package_declare)
+{
+	HashTable *spec;
+	zval *name_zv;
+	zval *declares_zv;
+	zend_package_info info;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &spec) == FAILURE) {
+		return;
+	}
+
+	name_zv = zend_hash_str_find_deref(spec, "name", sizeof("name") - 1);
+	declares_zv = zend_hash_str_find_deref(spec, "declares", sizeof("declares") - 1);
+
+	if (!name_zv || Z_TYPE_P(name_zv) != IS_STRING) {
+		zend_throw_error(NULL, "Package specification must contain \"name\" key of type string");
+		return;
+	}
+
+	memset(&info, 0, sizeof(zend_package_info));
+	if (declares_zv) {
+		if (Z_TYPE_P(declares_zv) != IS_ARRAY) {
+			zend_throw_error(NULL, "Package specification key \"declares\" must be of type array");
+			return;
+		}
+
+		if (init_package_declares(&info, Z_ARRVAL_P(declares_zv)) == FAILURE) {
+			return;
+		}
+	}
+
+	if (!CG(packages)) {
+		ALLOC_HASHTABLE(CG(packages));
+		zend_hash_init(CG(packages), 0, NULL, package_info_dtor, 0);
+	}
+
+	info.name = zend_string_copy(Z_STR_P(name_zv));
+	if (!zend_hash_add_mem(CG(packages), Z_STR_P(name_zv), &info, sizeof(zend_package_info))) {
+		zend_string_release(info.name);
+		zend_throw_error(NULL, "Package \"%s\" already registered", Z_STRVAL_P(name_zv));
+		return;
 	}
 }
 /* }}} */

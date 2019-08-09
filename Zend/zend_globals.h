@@ -127,6 +127,10 @@ struct _zend_compiler_globals {
 
 	HashTable *delayed_variance_obligations;
 	HashTable *delayed_autoloads;
+
+	HashTable *packages;
+	/* Available after compilation for use by opcache */
+	zend_package_info *current_package;
 };
 
 

@@ -1607,6 +1607,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_CALLABLE);
 }
 
+<ST_IN_SCRIPTING>"package" {
+	/* TODO: Implement this as a contextually-reserved keyword instead */
+	RETURN_TOKEN(T_PACKAGE);
+}
+
 <ST_IN_SCRIPTING>"++" {
 	RETURN_TOKEN(T_INC);
 }

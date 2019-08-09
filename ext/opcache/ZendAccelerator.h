@@ -111,6 +111,7 @@ typedef enum _zend_accel_restart_reason {
 
 typedef struct _zend_persistent_script {
 	zend_script    script;
+	zend_package_info *package;
 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
 	int            ping_auto_globals_mask; /* which autoglobals are used by the script */
 	accel_time_t   timestamp;              /* the script modification time */

@@ -794,6 +794,18 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	ZEND_MAP_PTR_INIT(ce->static_members_table, &ce->default_static_members_table);
 }
 
+static void zend_file_cache_serialize_package_info(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->package) {
+		zend_package_info *package;
+		SERIALIZE_PTR(script->package);
+		package = script->package;
+		UNSERIALIZE_PTR(package);
+		SERIALIZE_STR(package->name);
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -815,6 +827,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.class_table, script, info, buf, zend_file_cache_serialize_class);
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
+	zend_file_cache_serialize_package_info(new_script, info, buf);
 
 	SERIALIZE_PTR(new_script->arena_mem);
 	new_script->mem = NULL;
@@ -1498,7 +1511,22 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 
+	if (script->package) {
+		UNSERIALIZE_PTR(script->package);
+		UNSERIALIZE_STR(script->package->name);
+	}
+
 	UNSERIALIZE_PTR(script->arena_mem);
+}
+
+static zend_bool zend_file_cache_check_package_consistency(
+		zend_package_info *serialized_info, char *mem, char *str_mem) {
+	zend_package_info unserialized_info;
+	serialized_info = (zend_package_info *) (mem + (size_t) serialized_info);
+	memcpy(&unserialized_info, serialized_info, sizeof(zend_package_info));
+	/* We only need the string temporarily for a HT lookup, use it in the raw form. */
+	unserialized_info.name = (zend_string *) (mem + (size_t)(serialized_info->name));
+	return zend_accel_check_package_consistency(&unserialized_info);
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
@@ -1600,6 +1628,21 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
 		return NULL;
+	}
+
+	{
+		/* Peek at the package info of the script and make sure the package declaration
+		 * didn't change. If it has, discard the current cache. */
+		zend_persistent_script *tmp_script =
+			(zend_persistent_script *) ((char *) mem + info.script_offset);
+		char *str_mem = (char *) mem + info.mem_size;
+		if (tmp_script->package &&
+				!zend_file_cache_check_package_consistency(tmp_script->package, mem, str_mem)) {
+			zend_file_cache_unlink(filename);
+			zend_arena_release(&CG(arena), checkpoint);
+			efree(filename);
+			return NULL;
+		}
 	}
 
 	if (!file_cache_only &&

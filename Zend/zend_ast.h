@@ -101,6 +101,7 @@ enum _zend_ast_kind {
 	ZEND_AST_GOTO,
 	ZEND_AST_BREAK,
 	ZEND_AST_CONTINUE,
+	ZEND_AST_PACKAGE,
 
 	/* 2 child nodes */
 	ZEND_AST_DIM = 2 << ZEND_AST_NUM_CHILDREN_SHIFT,

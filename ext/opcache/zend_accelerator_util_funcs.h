@@ -38,5 +38,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len);
 
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);
+zend_bool zend_accel_check_package_consistency(zend_package_info *cached_package);
 
 #endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */

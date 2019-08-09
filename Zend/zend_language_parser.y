@@ -197,6 +197,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
+%token T_PACKAGE         "package (T_PACKAGE)"
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_DIR             "__DIR__ (T_DIR)"
@@ -334,6 +335,10 @@ top_statement:
 	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = ZEND_SYMBOL_CLASS; }
 	|	T_USE use_type use_declarations ';'			{ $$ = $3; $$->attr = $2; }
 	|	T_CONST const_list ';'						{ $$ = $2; }
+	|	T_PACKAGE T_CONSTANT_ENCAPSED_STRING ';'
+			{ $$ = zend_ast_create(ZEND_AST_PACKAGE, $2); }
+	|	T_PACKAGE '(' T_CONSTANT_ENCAPSED_STRING ')' ';'
+			{ $$ = zend_ast_create(ZEND_AST_PACKAGE, $3); }
 ;
 
 use_type:

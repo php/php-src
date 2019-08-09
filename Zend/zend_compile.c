@@ -312,6 +312,11 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(has_bracketed_namespaces) = 0;
 	FC(declarables).ticks = 0;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
+
+	/* This is not part of FC, because we want it to remain available after
+	 * compilation, so it may be used by opcache. Nonetheless it needs to
+	 * be reset when compiling a new file. */
+	CG(current_package) = NULL;
 }
 /* }}} */
 
@@ -373,6 +378,7 @@ void init_compiler(void) /* {{{ */
 
 	CG(delayed_variance_obligations) = NULL;
 	CG(delayed_autoloads) = NULL;
+	CG(packages) = NULL;
 }
 /* }}} */
 
@@ -392,6 +398,11 @@ void shutdown_compiler(void) /* {{{ */
 		zend_hash_destroy(CG(delayed_autoloads));
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
+	}
+	if (CG(packages)) {
+		zend_hash_destroy(CG(packages));
+		FREE_HASHTABLE(CG(packages));
+		CG(packages) = NULL;
 	}
 }
 /* }}} */
@@ -2154,7 +2165,8 @@ static inline zend_bool zend_is_unticked_stmt(zend_ast *ast) /* {{{ */
 {
 	return ast->kind == ZEND_AST_STMT_LIST || ast->kind == ZEND_AST_LABEL
 		|| ast->kind == ZEND_AST_PROP_DECL || ast->kind == ZEND_AST_CLASS_CONST_DECL
-		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD;
+		|| ast->kind == ZEND_AST_USE_TRAIT || ast->kind == ZEND_AST_METHOD
+		|| ast->kind == ZEND_AST_PACKAGE;
 }
 /* }}} */
 
@@ -5124,8 +5136,9 @@ static int zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
 		} else if (file_ast->child[i] == NULL) {
 			/* Empty statements are not allowed prior to a declare */
 			return FAILURE;
-		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
-			/* declares can only be preceded by other declares */
+		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE
+				&& file_ast->child[i]->kind != ZEND_AST_PACKAGE) {
+			/* declares can only be preceded by other declares or package declarations */
 			return FAILURE;
 		}
 		i++;
@@ -5183,8 +5196,9 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
+			} else {
+				CG(active_op_array)->fn_flags &= ~ZEND_ACC_STRICT_TYPES;
 			}
-
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
 		}
@@ -6702,6 +6716,29 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 	if (stmt_ast) {
 		zend_compile_top_stmt(stmt_ast);
 		zend_end_namespace();
+	}
+}
+/* }}} */
+
+static void zend_compile_package(zend_ast *ast) /* {{{ */
+{
+	zend_string *name = zend_ast_get_str(ast->child[0]);
+	zend_package_info *info = CG(packages) ? zend_hash_find_ptr(CG(packages), name) : NULL;
+
+	if (zend_ast_get_list(CG(ast))->child[0] != ast) {
+		zend_error(E_COMPILE_ERROR,
+			"Package declaration must be the first statement in the script");
+	}
+
+	if (!info) {
+		zend_error(E_COMPILE_ERROR, "Unknown package \"%s\"", ZSTR_VAL(name));
+	}
+
+	CG(current_package) = info;
+
+	FC(declarables).ticks = info->declares.ticks;
+	if (info->declares.strict_types) {
+		CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 	}
 }
 /* }}} */
@@ -8364,6 +8401,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_NAMESPACE:
 			zend_compile_namespace(ast);
+			break;
+		case ZEND_AST_PACKAGE:
+			zend_compile_package(ast);
 			break;
 		case ZEND_AST_HALT_COMPILER:
 			zend_compile_halt_compiler(ast);
