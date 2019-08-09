@@ -9,7 +9,7 @@ Bug #49081 (DateTime::diff() mistake if start in January and interval > 28 days)
    print_r($d);
 ?>
 --EXPECT--
-DateInterval Object
+DateComparableInterval Object
 (
     [y] => 0
     [m] => 0
