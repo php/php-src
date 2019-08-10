@@ -20,6 +20,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_pcre.h"
+#include "php_pcre_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
@@ -2909,8 +2910,6 @@ static PHP_FUNCTION(preg_last_error)
 /* }}} */
 
 /* {{{ module definition structures */
-
-#include "php_pcre_arginfo.h"
 
 static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,					arginfo_preg_match)
