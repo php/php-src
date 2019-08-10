@@ -2910,69 +2910,7 @@ static PHP_FUNCTION(preg_last_error)
 
 /* {{{ module definition structures */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(1, subpatterns) /* array */
-    ZEND_ARG_INFO(0, flags)
-    ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(1, subpatterns) /* array */
-    ZEND_ARG_INFO(0, flags)
-    ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 3)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, replace)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, callback)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback_array, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_quote, 0, 0, 1)
-    ZEND_ARG_INFO(0, str)
-    ZEND_ARG_INFO(0, delim_char)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_grep, 0, 0, 2)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, input) /* array */
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_preg_last_error, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
+#include "php_pcre_arginfo.h"
 
 static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,					arginfo_preg_match)
