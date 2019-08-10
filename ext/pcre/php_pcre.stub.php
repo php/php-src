@@ -12,7 +12,7 @@ function preg_match_all(string $pattern, string $subject, &$subpatterns = null, 
  * @param string|array $subject
  * @return string|array|null
  */
-function preg_replace($regex, $replace, $subject, int $limit = 0, &$count = 0) {}
+function preg_replace($regex, $replace, $subject, int $limit = 0, &$count = null) {}
 
 /**
  * @param string|array $regex
@@ -20,7 +20,7 @@ function preg_replace($regex, $replace, $subject, int $limit = 0, &$count = 0) {
  * @param string|array $subject
  * @return string|array|null
  */
-function preg_filter($regex, $replace, $subject, int $limit = 0, &$count = 0) {}
+function preg_filter($regex, $replace, $subject, int $limit = 0, &$count = null) {}
 
 /**
  * @param string|array $regex
@@ -29,7 +29,7 @@ function preg_filter($regex, $replace, $subject, int $limit = 0, &$count = 0) {}
  *
  * TODO: $callback should be `callable`
  */
-function preg_replace_callback($regex, $callback, $subject, int $limit = 0, &$count = 0) {}
+function preg_replace_callback($regex, $callback, $subject, int $limit = 0, &$count = null) {}
 
 /**
  * @param array $pattern
@@ -38,7 +38,7 @@ function preg_replace_callback($regex, $callback, $subject, int $limit = 0, &$co
  * @param int $count
  * @return string|array|null
  */
-function preg_replace_callback_array(array $pattern, $subject, int $limit = 0, &$count = 0) {}
+function preg_replace_callback_array(array $pattern, $subject, int $limit = 0, &$count = null) {}
 
 /**
  * @return array|false
