@@ -1392,7 +1392,7 @@ PHP_FUNCTION(ob_end_clean)
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_flush(void)
+/* {{{ proto string|false ob_get_flush(void)
    Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
@@ -1411,7 +1411,7 @@ PHP_FUNCTION(ob_get_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_clean(void)
+/* {{{ proto string|false ob_get_clean(void)
    Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
