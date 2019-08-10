@@ -384,7 +384,11 @@ function initPhpParser() {
     if (!is_dir($phpParserDir)) {
         $cwd = getcwd();
         chdir(__DIR__);
+
         passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz", $exit);
+        if ($exit !== 0) {
+            passthru("curl -LO https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz", $exit);
+        }
         if ($exit !== 0) {
             throw new Exception("Failed to download PHP-Parser tarball");
         }
