@@ -59,3 +59,10 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /** @return int|false */
 function array_push(array &$stack, ...$args) {}
+
+/* base64.c */
+
+function base64_encode(string $str): string {}
+
+/** @return string|false */
+function base64_decode(string $str[, bool $strict=false]) {}
