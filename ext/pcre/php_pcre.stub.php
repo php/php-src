@@ -1,10 +1,10 @@
 <?php
 
 /** @return int|false */
-function preg_match(string $pattern, string $subject, array &$subpatterns, int $flags = 0, int $offset = 0) {}
+function preg_match(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0) {}
 
 /** @return int|false */
-function preg_match_all(string $pattern, string $subject, array &$subpatterns, int $flags = 0, int $offset = 0) {}
+function preg_match_all(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0) {}
 
 /**
  * @param string|array $regex
@@ -12,7 +12,7 @@ function preg_match_all(string $pattern, string $subject, array &$subpatterns, i
  * @param string|array $subject
  * @return string|array|null
  */
-function preg_replace($regex, $replace, $subject, int $limit = 0, int &$count = 0) {}
+function preg_replace($regex, $replace, $subject, int $limit = 0, &$count = 0) {}
 
 /**
  * @param string|array $regex
@@ -20,7 +20,7 @@ function preg_replace($regex, $replace, $subject, int $limit = 0, int &$count = 
  * @param string|array $subject
  * @return string|array|null
  */
-function preg_filter($regex, $replace, $subject, int $limit = 0, int &$count = 0) {}
+function preg_filter($regex, $replace, $subject, int $limit = 0, &$count = 0) {}
 
 /**
  * @param string|array $regex
@@ -29,7 +29,7 @@ function preg_filter($regex, $replace, $subject, int $limit = 0, int &$count = 0
  *
  * TODO: $callback should be `callable`
  */
-function preg_replace_callback($regex, $callback, $subject, int $limit = 0, int &$count = 0) {}
+function preg_replace_callback($regex, $callback, $subject, int $limit = 0, &$count = 0) {}
 
 /**
  * @param array $pattern
@@ -38,7 +38,7 @@ function preg_replace_callback($regex, $callback, $subject, int $limit = 0, int 
  * @param int $count
  * @return string|array|null
  */
-function preg_replace_callback_array(array $pattern, $subject, int $limit = 0, int &$count = 0) {}
+function preg_replace_callback_array(array $pattern, $subject, int $limit = 0, &$count = 0) {}
 
 /**
  * @return array|false
