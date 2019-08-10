@@ -25,6 +25,7 @@
 #include "ext/standard/info.h"
 #include "php_sqlite3.h"
 #include "php_sqlite3_structs.h"
+#include "sqlite3_arginfo.h"
 #include "main/SAPI.h"
 
 #include <sqlite3.h>
@@ -322,7 +323,7 @@ PHP_METHOD(sqlite3, enableExtendedResultCodes)
 	int ret;
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &enable) == FAILURE) {
 		return;
 	}
@@ -2106,174 +2107,65 @@ PHP_METHOD(sqlite3result, __construct)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_open, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(0, encryption_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_busytimeout, 0)
-	ZEND_ARG_INFO(0, ms)
-ZEND_END_ARG_INFO()
-
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
-ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_loadextension, 0)
-	ZEND_ARG_INFO(0, shared_library)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_escapestring, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_query, 0, 0, 1)
-	ZEND_ARG_INFO(0, query)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_querysingle, 0, 0, 1)
-	ZEND_ARG_INFO(0, query)
-	ZEND_ARG_INFO(0, entire_row)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createfunction, 0, 0, 2)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, argument_count)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createaggregate, 0, 0, 3)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, step_callback)
-	ZEND_ARG_INFO(0, final_callback)
-	ZEND_ARG_INFO(0, argument_count)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_createcollation, 0, 0, 2)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, callback)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_openblob, 0, 0, 3)
-	ZEND_ARG_INFO(0, table)
-	ZEND_ARG_INFO(0, column)
-	ZEND_ARG_INFO(0, rowid)
-	ZEND_ARG_INFO(0, dbname)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableexceptions, 0, 0, 0)
-	ZEND_ARG_INFO(0, enableExceptions)
-ZEND_END_ARG_INFO()
-
-#if SQLITE_VERSION_NUMBER >= 3006011
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_backup, 0, 0, 1)
-	ZEND_ARG_INFO(0, destination_db)
-	ZEND_ARG_INFO(0, source_dbname)
-	ZEND_ARG_INFO(0, destination_dbname)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindparam, 0, 0, 2)
-	ZEND_ARG_INFO(0, param_number)
-	ZEND_ARG_INFO(1, param)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_bindvalue, 0, 0, 2)
-	ZEND_ARG_INFO(0, param_number)
-	ZEND_ARG_INFO(0, param)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, sqlite3)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3stmt_getsql, 0, 0, 0)
-	ZEND_ARG_INFO(0, expanded)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_columnname, 0, 0, 1)
-	ZEND_ARG_INFO(0, column_number)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_columntype, 0, 0, 1)
-	ZEND_ARG_INFO(0, column_number)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3result_fetcharray, 0, 0, 0)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sqlite3_enableextended, 0, 0, 1)
-	ZEND_ARG_INFO(0, enable)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_sqlite3_void, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ php_sqlite3_class_methods */
 static const zend_function_entry php_sqlite3_class_methods[] = {
-	PHP_ME(sqlite3,		open,						arginfo_sqlite3_open, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		close,						arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		exec,						arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		version,					arginfo_sqlite3_void, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME(sqlite3,		lastInsertRowID,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		lastErrorCode,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		lastExtendedErrorCode,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		enableExtendedResultCodes,	arginfo_sqlite3_enableextended, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		lastErrorMsg,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		busyTimeout,				arginfo_sqlite3_busytimeout, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		open,						arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		close,						arginfo_class_SQLite3_close, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		exec,						arginfo_class_SQLite3_query, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		version,					arginfo_class_SQLite3_version, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(sqlite3,		lastInsertRowID,			arginfo_class_SQLite3_lastInsertRowID, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		lastErrorCode,				arginfo_class_SQLite3_lastErrorCode, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		lastExtendedErrorCode,		arginfo_class_SQLite3_lastExtendedErrorCode, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		enableExtendedResultCodes,	arginfo_class_SQLite3_enableExtendedResultCodes, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		lastErrorMsg,				arginfo_class_SQLite3_lastErrorMsg, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		busyTimeout,				arginfo_class_SQLite3_busyTimeout, ZEND_ACC_PUBLIC)
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
-	PHP_ME(sqlite3,		loadExtension,				arginfo_sqlite3_loadextension, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		loadExtension,				arginfo_class_SQLite3_loadExtension, ZEND_ACC_PUBLIC)
 #endif
-	PHP_ME(sqlite3,		changes,					arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		escapeString,				arginfo_sqlite3_escapestring, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME(sqlite3,		prepare,					arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		query,						arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		querySingle,				arginfo_sqlite3_querysingle, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		createFunction,				arginfo_sqlite3_createfunction, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		createAggregate,			arginfo_sqlite3_createaggregate, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		createCollation,			arginfo_sqlite3_createcollation, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		openBlob,					arginfo_sqlite3_openblob, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3,		enableExceptions,			arginfo_sqlite3_enableexceptions, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		changes,					arginfo_class_SQLite3_changes, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		escapeString,				arginfo_class_SQLite3_escapeString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(sqlite3,		prepare,					arginfo_class_SQLite3_prepare, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		query,						arginfo_class_SQLite3_query, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		querySingle,				arginfo_class_SQLite3_querySingle, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		createFunction,				arginfo_class_SQLite3_createFunction, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		createAggregate,			arginfo_class_SQLite3_createAggregate, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		createCollation,			arginfo_class_SQLite3_createCollation, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		openBlob,					arginfo_class_SQLite3_openBlob, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		enableExceptions,			arginfo_class_SQLite3_enableExceptions, ZEND_ACC_PUBLIC)
 #if SQLITE_VERSION_NUMBER >= 3006011
-	PHP_ME(sqlite3,		backup,						arginfo_sqlite3_backup, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3,		backup,						arginfo_class_SQLite3_backup, ZEND_ACC_PUBLIC)
 #endif
 	/* Aliases */
-	PHP_MALIAS(sqlite3,	__construct, open, arginfo_sqlite3_open, ZEND_ACC_PUBLIC)
+	PHP_MALIAS(sqlite3,	__construct, open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
 
 /* {{{ php_sqlite3_stmt_class_methods */
 static const zend_function_entry php_sqlite3_stmt_class_methods[] = {
-	PHP_ME(sqlite3stmt, paramCount,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, close,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, reset,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, clear,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, execute,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, bindParam,	arginfo_sqlite3stmt_bindparam, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, bindValue,	arginfo_sqlite3stmt_bindvalue, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, readOnly,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, getSQL,		arginfo_sqlite3stmt_getsql, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3stmt, __construct, arginfo_sqlite3stmt_construct, ZEND_ACC_PRIVATE)
+	PHP_ME(sqlite3stmt, paramCount,	arginfo_class_SQLite3Stmt_paramCount, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, close,		arginfo_class_SQLite3Stmt_close, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, reset,		arginfo_class_SQLite3Stmt_reset, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, clear,		arginfo_class_SQLite3Stmt_clear, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, execute,	arginfo_class_SQLite3Stmt_execute, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, bindParam,	arginfo_class_SQLite3Stmt_bindParam, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, bindValue,	arginfo_class_SQLite3Stmt_bindValue, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, readOnly,	arginfo_class_SQLite3Stmt_readOnly, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, getSQL,		arginfo_class_SQLite3Stmt_getSQL, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3stmt, __construct, arginfo_class_SQLite3Stmt___construct, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 /* }}} */
 
 /* {{{ php_sqlite3_result_class_methods */
 static const zend_function_entry php_sqlite3_result_class_methods[] = {
-	PHP_ME(sqlite3result, numColumns,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, columnName,		arginfo_sqlite3result_columnname, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, columnType,		arginfo_sqlite3result_columntype, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, fetchArray,		arginfo_sqlite3result_fetcharray, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, reset,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, finalize,			arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
-	PHP_ME(sqlite3result, __construct, 		arginfo_sqlite3_void, ZEND_ACC_PRIVATE)
+	PHP_ME(sqlite3result, numColumns,		arginfo_class_SQLite3Result_numColumns, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, columnName,		arginfo_class_SQLite3Result_columnName, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, columnType,		arginfo_class_SQLite3Result_columnType, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, fetchArray,		arginfo_class_SQLite3Result_fetchArray, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, reset,			arginfo_class_SQLite3Result_reset, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, finalize,			arginfo_class_SQLite3Result_finalize, ZEND_ACC_PUBLIC)
+	PHP_ME(sqlite3result, __construct, 		arginfo_class_SQLite3Result___construct, ZEND_ACC_PRIVATE)
 	PHP_FE_END
 };
 /* }}} */
