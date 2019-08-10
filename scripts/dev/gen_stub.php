@@ -224,19 +224,33 @@ function parseStubFile(string $fileName) {
     $nodeTraverser->traverse($stmts);
 
     $funcInfos = [];
-    $cond = null;
+    $conds = [];
     foreach ($stmts as $stmt) {
         foreach ($stmt->getComments() as $comment) {
             $text = trim($comment->getText());
-            if (preg_match('/^#if\s+(.+)$/', $text, $matches)) {
-                if ($cond !== null) {
-                    throw new Exception("Not implemented preprocessor directive");
+            if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
+                $conds[] = $matches[1];
+            } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+                $conds[] = "defined($matches[1])";
+            } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+                $conds[] = "!defined($matches[1])";
+            } else if (preg_match('/^#\s*else$/', $text)) {
+                if (empty($conds)) {
+                    throw new Exception("Encountered else without corresponding #if");
                 }
-                $cond = $matches[1];
-            } else if ($text === '#endif') {
-                $cond = null;
+                $cond = array_pop($conds);
+                $conds[] = "!($cond)";
+            } else if (preg_match('/^#\s*endif$/', $text)) {
+                if (empty($conds)) {
+                    throw new Exception("Encountered #endif without corresponding #if");
+                }
+                array_pop($conds);
+            } else if ($text[0] === '#') {
+                throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
+
+        $cond = empty($conds) ? null : implode(' && ', $conds);
 
         if ($stmt instanceof Stmt\Nop) {
             continue;
@@ -272,9 +286,6 @@ function parseStubFile(string $fileName) {
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
-    if ($funcInfo->cond) {
-        $code .= "#if {$funcInfo->cond}\n";
-    }
     if ($funcInfo->return->type) {
         $returnType = $funcInfo->return->type;
         if ($returnType->isBuiltin) {
@@ -326,10 +337,16 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     $code .= "ZEND_END_ARG_INFO()";
-    if ($funcInfo->cond) {
-        $code .= "\n#endif";
-    }
     return $code;
+}
+
+function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
+    foreach ($generatedFuncInfos as $generatedFuncInfo) {
+        if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
+            return $generatedFuncInfo;
+        }
+    }
+    return null;
 }
 
 /** @param FuncInfo[] $funcInfos */
@@ -337,18 +354,25 @@ function generateArginfoCode(array $funcInfos): string {
     $code = "/* This is a generated file, edit the .stub.php file instead. */";
     $generatedFuncInfos = [];
     foreach ($funcInfos as $funcInfo) {
-        /* If there already is an equivalent arginfo structure, only emit a #define */
-        foreach ($generatedFuncInfos as $generatedFuncInfo) {
-            if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
-                $code .= sprintf(
-                    "\n\n#define arginfo_%s arginfo_%s",
-                    $funcInfo->name, $generatedFuncInfo->name
-                );
-                continue 2;
-            }
+        $code .= "\n\n";
+        if ($funcInfo->cond) {
+            $code .= "#if {$funcInfo->cond}\n";
         }
 
-        $code .= "\n\n" . funcInfoToCode($funcInfo);
+        /* If there already is an equivalent arginfo structure, only emit a #define */
+        if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
+            $code .= sprintf(
+                "#define arginfo_%s arginfo_%s",
+                $funcInfo->name, $generatedFuncInfo->name
+            );
+        } else {
+            $code .= funcInfoToCode($funcInfo);
+        }
+
+        if ($funcInfo->cond) {
+            $code .= "\n#endif";
+        }
+
         $generatedFuncInfos[] = $funcInfo;
     }
     return $code . "\n";
