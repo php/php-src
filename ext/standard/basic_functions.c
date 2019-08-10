@@ -761,15 +761,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ base64.c */
-ZEND_BEGIN_ARG_INFO(arginfo_base64_encode, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_base64_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
 
 /* }}} */
 /* {{{ browscap.c */
