@@ -27,6 +27,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "openssl_arginfo.h"
 #include "php_openssl.h"
 #include "zend_exceptions.h"
 
@@ -131,54 +132,6 @@ PHP_FUNCTION(openssl_pkey_derive);
 PHP_FUNCTION(openssl_random_pseudo_bytes);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(0, outfilename)
-	ZEND_ARG_INFO(0, notext)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(1, out)
-	ZEND_ARG_INFO(0, notext)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_fingerprint, 0, 0, 1)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(0, method)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
-	ZEND_ARG_INFO(0, cert)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_verify, 0)
-	ZEND_ARG_INFO(0, cert)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(0, shortname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 2)
-	ZEND_ARG_INFO(0, x509cert)
-	ZEND_ARG_INFO(0, purpose)
-	ZEND_ARG_INFO(0, cainfo) /* array */
-	ZEND_ARG_INFO(0, untrustedfile)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_read, 0)
-	ZEND_ARG_INFO(0, cert)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_free, 0)
-	ZEND_ARG_INFO(0, x509)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 0, 4)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(0, filename)
