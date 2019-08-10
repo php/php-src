@@ -194,17 +194,32 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
 }
 
-function parseClass(Stmt\Class_ $class): ClassInfo {
-    $funcs = [];
-    $className = $class->name->toString();
-    foreach ($class as $stmt) {
-        if (!$stmt instanceof Stmt\ClassMethod) {
-            throw new Exception("Not implemented class statement");
+function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
+    foreach ($stmt->getComments() as $comment) {
+        $text = trim($comment->getText());
+        if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
+            $conds[] = $matches[1];
+        } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+            $conds[] = "defined($matches[1])";
+        } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+            $conds[] = "!defined($matches[1])";
+        } else if (preg_match('/^#\s*else$/', $text)) {
+            if (empty($conds)) {
+                throw new Exception("Encountered else without corresponding #if");
+            }
+            $cond = array_pop($conds);
+            $conds[] = "!($cond)";
+        } else if (preg_match('/^#\s*endif$/', $text)) {
+            if (empty($conds)) {
+                throw new Exception("Encountered #endif without corresponding #if");
+            }
+            array_pop($conds);
+        } else if ($text[0] === '#') {
+            throw new Exception("Unrecognized preprocessor directive \"$text\"");
         }
-
-        $funcs[] = parseFunctionLike($className . '_' . $stmt->name->toString(), $stmt);
     }
-    return new ClassInfo($className, $funcs);
+
+    return empty($conds) ? null : implode(' && ', $conds);
 }
 
 /** @return FuncInfo[] */
@@ -226,32 +241,7 @@ function parseStubFile(string $fileName) {
     $funcInfos = [];
     $conds = [];
     foreach ($stmts as $stmt) {
-        foreach ($stmt->getComments() as $comment) {
-            $text = trim($comment->getText());
-            if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
-                $conds[] = $matches[1];
-            } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
-                $conds[] = "defined($matches[1])";
-            } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
-                $conds[] = "!defined($matches[1])";
-            } else if (preg_match('/^#\s*else$/', $text)) {
-                if (empty($conds)) {
-                    throw new Exception("Encountered else without corresponding #if");
-                }
-                $cond = array_pop($conds);
-                $conds[] = "!($cond)";
-            } else if (preg_match('/^#\s*endif$/', $text)) {
-                if (empty($conds)) {
-                    throw new Exception("Encountered #endif without corresponding #if");
-                }
-                array_pop($conds);
-            } else if ($text[0] === '#') {
-                throw new Exception("Unrecognized preprocessor directive \"$text\"");
-            }
-        }
-
-        $cond = empty($conds) ? null : implode(' && ', $conds);
-
+        $cond = handlePreprocessorConditions($conds, $stmt);
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
@@ -264,6 +254,7 @@ function parseStubFile(string $fileName) {
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
             foreach ($stmt->stmts as $classStmt) {
+                $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
                     continue;
                 }
