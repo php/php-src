@@ -8,7 +8,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_TYPE_INFO(1, out, IS_STRING, 0)
+	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_TYPE_INFO(0, notext, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -23,7 +23,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_check_private_key, 
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_verify, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_verify, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, cert)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
@@ -33,10 +33,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, shortname, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 2)
 	ZEND_ARG_INFO(0, x509cert)
 	ZEND_ARG_TYPE_INFO(0, purpose, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, cainfo, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, cainfo, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, untrustedfile, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
