@@ -4,33 +4,45 @@ class SQLite3
 {
     function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, ?string $encryption_key = null);
 
-    function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, ?string $encryption_key = null): void;
+    /** @return void */
+    function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, ?string $encryption_key = null);
 
-    function close(): void;
+    /** @return void */
+    function close();
 
-    function version(): void;
+    /** @return void */
+    function version();
 
-    function lastInsertRowID(): void;
+    /** @return void */
+    function lastInsertRowID();
 
-    function lastErrorCode(): void;
+    /** @return void */
+    function lastErrorCode();
 
-    function lastExtendedErrorCode(): void;
+    /** @return void */
+    function lastExtendedErrorCode();
 
-    function lastErrorMsg(): void;
+    /** @return void */
+    function lastErrorMsg();
 
-    function changes(): void;
+    /** @return void */
+    function changes();
 
-    function busyTimeout(int $ms): bool;
+    /** @return bool */
+    function busyTimeout(int $ms);
 
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
-    function loadExtension(string $shared_library): bool;
+    /** @return bool */
+    function loadExtension(string $shared_library);
 #endif
 
 #if SQLITE_VERSION_NUMBER >= 3006011
-    function backup(SQLite3 $destination_db, string $source_dbname = "main", string $destination_dbname = "main"): bool;
+    /** @return bool */
+    function backup(SQLite3 $destination_db, string $source_dbname = "main", string $destination_dbname = "main");
 #endif
 
-    function escapeString(string $value): string;
+    /** @return string */
+    function escapeString(string $value);
 
     /** @return SQLite3Result|false */
     function query(string $query);
@@ -38,31 +50,40 @@ class SQLite3
     /** @return mixed */
     function querySingle(string $query, bool $entire_row = false);
 
-    function createFunction(string $name, $callback, int $argument_count = -1, int $flags = 0): bool;
+    /** @return bool */
+    function createFunction(string $name, $callback, int $argument_count = -1, int $flags = 0);
 
-    function createAggregate(string $name, $step_callback, $final_callback, int $argument_count = -1): bool;
+    /** @return bool */
+    function createAggregate(string $name, $step_callback, $final_callback, int $argument_count = -1);
 
-    function createCollation(string $name, $callback): bool;
+    /** @return bool */
+    function createCollation(string $name, $callback);
 
     /** @return resource|false */
     function openBlob(string $table, string $column, int $rowid, string $dbname = "main", int $flags = SQLITE3_OPEN_READONLY);
 
-    function enableExceptions(bool $enableExceptions = false): bool;
+    /** @return bool */
+    function enableExceptions(bool $enableExceptions = false);
 
-    function enableExtendedResultCodes(bool $enable = true): bool;
+    /** @return bool */
+    function enableExtendedResultCodes(bool $enable = true);
 }
 
 class SQLite3Stmt
 {
     function __construct(SQLite3 $sqlite3);
 
-    function bindParam($param_number, &$param, int $type = SQLITE3_TEXT): bool;
+    /** @return bool */
+    function bindParam($param_number, &$param, int $type = SQLITE3_TEXT);
 
-    function bindValue($param_number, $param, int $type = SQLITE3_TEXT): bool;
+    /** @return bool */
+    function bindValue($param_number, $param, int $type = SQLITE3_TEXT);
 
-    function clear(): bool;
+    /** @return bool */
+    function clear();
 
-    function close(): bool;
+    /** @return bool */
+    function close();
 
     /** @return SQLite3Result|false */
     function execute();
@@ -70,18 +91,22 @@ class SQLite3Stmt
     /** @return string|false */
     function getSQL(bool $expanded = false);
 
-    function paramCount(): int;
+    /** @return int */
+    function paramCount();
 
-    function readOnly(): bool;
+    /** @return bool */
+    function readOnly();
 
-    function reset(): bool;
+    /** @return bool */
+    function reset();
 }
 
 class SQLite3Result
 {
     function __construct();
 
-    function numColumns(): void;
+    /** @return void */
+    function numColumns();
 
     /** @return int|false */
     function columnName(int $column_number);
@@ -92,7 +117,9 @@ class SQLite3Result
     /** @return array|false */
     function fetchArray(int $mode = SQLITE3_BOTH);
 
-    function reset(): void;
+    /** @return void */
+    function reset();
 
-    function finalize(): void;
+    /** @return void */
+    function finalize();
 }
