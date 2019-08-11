@@ -30,6 +30,7 @@
 #include "ext/standard/php_string.h"
 #include "php_simplexml.h"
 #include "php_simplexml_exports.h"
+#include "simplexml_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "sxe.h"
@@ -2571,73 +2572,6 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_import_dom, 0, 0, 1)
-	ZEND_ARG_INFO(0, node)
-	ZEND_ARG_INFO(0, class_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_xpath, 0, 0, 1)
-	ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_registerxpathnamespace, 0, 0, 2)
-	ZEND_ARG_INFO(0, prefix)
-	ZEND_ARG_INFO(0, ns)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_asxml, 0, 0, 0)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getnamespaces, 0, 0, 0)
-	ZEND_ARG_INFO(0, recursve)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getdocnamespaces, 0, 0, 0)
-	ZEND_ARG_INFO(0, recursve)
-	ZEND_ARG_INFO(0, from_root)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_children, 0, 0, 0)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement__construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, data_is_url)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_simplexmlelement__void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_addchild, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, ns)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry simplexml_functions[] = { /* {{{ */
 	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
 	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
@@ -2675,20 +2609,20 @@ ZEND_GET_MODULE(simplexml)
 /* the method table */
 /* each method can have its own parameters and visibility */
 static const zend_function_entry sxe_functions[] = { /* {{{ */
-	SXE_ME(__construct,            arginfo_simplexmlelement__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
-	SXE_ME(asXML,                  arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
-	SXE_MALIAS(saveXML, asXML,	   arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
-	SXE_ME(xpath,                  arginfo_simplexmlelement_xpath, ZEND_ACC_PUBLIC)
-	SXE_ME(registerXPathNamespace, arginfo_simplexmlelement_registerxpathnamespace, ZEND_ACC_PUBLIC)
-	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(getNamespaces,          arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getdocnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getName,                arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
-	SXE_ME(addChild,               arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
-	SXE_ME(addAttribute,           arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
-	SXE_ME(__toString,             arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
-	SXE_ME(count,                  arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
+	SXE_ME(__construct,            arginfo_SimpleXMLElement__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
+	SXE_ME(asXML,                  arginfo_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
+	SXE_MALIAS(saveXML, asXML,	   arginfo_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
+	SXE_ME(xpath,                  arginfo_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
+	SXE_ME(registerXPathNamespace, arginfo_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
+	SXE_ME(attributes,             arginfo_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC)
+	SXE_ME(children,               arginfo_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
+	SXE_ME(getNamespaces,          arginfo_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       arginfo_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getName,                arginfo_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
+	SXE_ME(addChild,               arginfo_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
+	SXE_ME(addAttribute,           arginfo_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
+	SXE_ME(__toString,             arginfo_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
+	SXE_ME(count,                  arginfo_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
