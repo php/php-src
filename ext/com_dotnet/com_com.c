@@ -60,12 +60,10 @@ PHP_FUNCTION(com_create_instance)
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&cp, &typelib_name, &typelib_name_len) &&
-		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+		FAILURE == zend_parse_parameters(
 			ZEND_NUM_ARGS(), "sa|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
-
-		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
 		return;
 	}
 
@@ -302,7 +300,6 @@ PHP_FUNCTION(com_get_active_object)
 	php_com_initialize();
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
 				&module_name, &module_name_len, &code_page)) {
-		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!");
 		return;
 	}
 
