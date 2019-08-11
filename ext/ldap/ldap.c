@@ -4764,17 +4764,17 @@ ZEND_END_ARG_INFO()
  */
 static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								arginfo_ldap_connect)
-	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_resource)
+	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_close)
 	PHP_FE(ldap_bind,									arginfo_ldap_bind)
 	PHP_FE(ldap_bind_ext,								arginfo_ldap_bind_ext)
 #ifdef HAVE_LDAP_SASL
 	PHP_FE(ldap_sasl_bind,								arginfo_ldap_sasl_bind)
 #endif
-	PHP_FE(ldap_unbind,									arginfo_ldap_resource)
+	PHP_FE(ldap_unbind,									arginfo_ldap_unbind)
 	PHP_FE(ldap_read,									arginfo_ldap_read)
 	PHP_FE(ldap_list,									arginfo_ldap_list)
 	PHP_FE(ldap_search,									arginfo_ldap_search)
-	PHP_FE(ldap_free_result,							arginfo_ldap_resource)
+	PHP_FE(ldap_free_result,							arginfo_ldap_free_result)
 	PHP_FE(ldap_count_entries,							arginfo_ldap_count_entries)
 	PHP_FE(ldap_first_entry,							arginfo_ldap_first_entry)
 	PHP_FE(ldap_next_entry,								arginfo_ldap_next_entry)
@@ -4803,9 +4803,9 @@ static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_mod_del_ext,							arginfo_ldap_mod_del_ext)
 /* end gjt mod */
 
-	PHP_FE(ldap_errno,									arginfo_ldap_resource)
+	PHP_FE(ldap_errno,									arginfo_ldap_errno)
 	PHP_FE(ldap_err2str,								arginfo_ldap_err2str)
-	PHP_FE(ldap_error,									arginfo_ldap_resource)
+	PHP_FE(ldap_error,									arginfo_ldap_error)
 	PHP_FE(ldap_compare,								arginfo_ldap_compare)
 
 #if (LDAP_API_VERSION > 2000) || HAVE_ORALDAP
