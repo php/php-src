@@ -70,6 +70,32 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_push, 0, 0, 1)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_krsort, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, arg, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, sort_flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_ksort arginfo_krsort
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_count, 0, 1, IS_LONG, 0)
+	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_natsort, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, arg, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_natcasesort arginfo_natsort
+
+#define arginfo_asort arginfo_krsort
+
+#define arginfo_arsort arginfo_krsort
+
+#define arginfo_sort arginfo_krsort
+
+#define arginfo_rsort arginfo_krsort
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base64_encode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
