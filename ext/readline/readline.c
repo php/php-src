@@ -25,6 +25,7 @@
 #include "php.h"
 #include "php_readline.h"
 #include "readline_cli.h"
+#include "readline_arginfo.h"
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
@@ -69,62 +70,6 @@ PHP_MSHUTDOWN_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
 PHP_MINFO_FUNCTION(readline);
 
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline, 0, 0, 0)
-	ZEND_ARG_INFO(0, prompt)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_info, 0, 0, 0)
-	ZEND_ARG_INFO(0, varname)
-	ZEND_ARG_INFO(0, newvalue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_add_history, 0, 0, 1)
-	ZEND_ARG_INFO(0, prompt)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_readline_clear_history, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_HISTORY_LIST
-ZEND_BEGIN_ARG_INFO(arginfo_readline_list_history, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_read_history, 0, 0, 0)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_write_history, 0, 0, 0)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_completion_function, 0, 0, 1)
-	ZEND_ARG_INFO(0, funcname)
-ZEND_END_ARG_INFO()
-
-#if HAVE_RL_CALLBACK_READ_CHAR
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_callback_handler_install, 0, 0, 2)
-	ZEND_ARG_INFO(0, prompt)
-	ZEND_ARG_INFO(0, callback)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_read_char, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_handler_remove, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_readline_redisplay, 0)
-ZEND_END_ARG_INFO()
-
-#if HAVE_RL_ON_NEW_LINE
-ZEND_BEGIN_ARG_INFO(arginfo_readline_on_new_line, 0)
-ZEND_END_ARG_INFO()
-#endif
-#endif
 /* }}} */
 
 /* {{{ module stuff */
