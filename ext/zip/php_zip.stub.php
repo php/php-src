@@ -6,7 +6,7 @@ function zip_open(string $filename) {}
 /**
  * @param resource $zip
  */
-function zip_close($zip): bool {}
+function zip_close($zip): void {}
 
 /**
  * @param resource $zip
