@@ -10,7 +10,7 @@ function preg_match_all(string $pattern, string $subject, &$subpatterns = null, 
  * @param string|array $regex
  * @param string|array $replace
  * @param string|array $subject
- * @return string|array|null|false
+ * @return string|array|null
  */
 function preg_replace($regex, $replace, $subject, int $limit = -1, &$count = null) {}
 
@@ -18,7 +18,7 @@ function preg_replace($regex, $replace, $subject, int $limit = -1, &$count = nul
  * @param string|array $regex
  * @param string|array $replace
  * @param string|array $subject
- * @return string|array|null|false
+ * @return string|array|null
  */
 function preg_filter($regex, $replace, $subject, int $limit = -1, &$count = null) {}
 
