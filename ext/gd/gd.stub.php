@@ -33,11 +33,14 @@ function imagelayereffect($im, int $effect): bool {}
 /** @return int|false */
 function imagecolorallocatealpha($im, int $red, int $green, int $blue, int $alpha) {}
 
-function imagecolorresolvealpha($im, int $red, int $green, int $blue, int $alpha): int {}
+/** @return int|false */
+function imagecolorresolvealpha($im, int $red, int $green, int $blue, int $alpha) {}
 
-function imagecolorclosestalpha($im, int $red, int $green, int $blue, int $alpha): int {}
+/** @return int|false */
+function imagecolorclosestalpha($im, int $red, int $green, int $blue, int $alpha) {}
 
-function imagecolorexactalpha($im, int $red, int $green, int $blue, int $alpha): int {}
+/** @return int|false */
+function imagecolorexactalpha($im, int $red, int $green, int $blue, int $alpha) {}
 
 function imagecopyresampled($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h): bool {}
 
@@ -150,15 +153,19 @@ function imagepalettecopy($dst, $src): void {}
 /** @return int|false */
 function imagecolorat($im, int $x, int $y) {}
 
-function imagecolorclosest($im, int $red, int $green, int $blue): int {}
+/** @return int|false */
+function imagecolorclosest($im, int $red, int $green, int $blue) {}
 
-function imagecolorclosesthwb($im, int $red, int $green, int $blue): int {}
+/** @return int|false */
+function imagecolorclosesthwb($im, int $red, int $green, int $blue) {}
 
 function imagecolordeallocate($im, int $index): bool {}
 
-function imagecolorresolve($im, int $red, int $green, int $blue): int {}
+/** @return int|false */
+function imagecolorresolve($im, int $red, int $green, int $blue) {}
 
-function imagecolorexact($im, int $red, int $green, int $blue): int {}
+/** @return int|false */
+function imagecolorexact($im, int $red, int $green, int $blue) {}
 
 /** @return ?false */
 function imagecolorset($im, int $color, int $red, int $green, int $blue, int $alpha = 0) {}

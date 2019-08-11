@@ -83,17 +83,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolorallocatealpha, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorresolvealpha, 0, 5, IS_LONG, 0)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imagecolorresolvealpha arginfo_imagecolorallocatealpha
 
-#define arginfo_imagecolorclosestalpha arginfo_imagecolorresolvealpha
+#define arginfo_imagecolorclosestalpha arginfo_imagecolorallocatealpha
 
-#define arginfo_imagecolorexactalpha arginfo_imagecolorresolvealpha
+#define arginfo_imagecolorexactalpha arginfo_imagecolorallocatealpha
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, dst_im)
@@ -279,23 +273,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolorat, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorclosest, 0, 4, IS_LONG, 0)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imagecolorclosest arginfo_imagecolorallocate
 
-#define arginfo_imagecolorclosesthwb arginfo_imagecolorclosest
+#define arginfo_imagecolorclosesthwb arginfo_imagecolorallocate
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolordeallocate, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorresolve arginfo_imagecolorclosest
+#define arginfo_imagecolorresolve arginfo_imagecolorallocate
 
-#define arginfo_imagecolorexact arginfo_imagecolorclosest
+#define arginfo_imagecolorexact arginfo_imagecolorallocate
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolorset, 0, 0, 5)
 	ZEND_ARG_INFO(0, im)
