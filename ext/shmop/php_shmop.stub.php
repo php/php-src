@@ -12,7 +12,7 @@ function shmop_read($shmid, int $start, int $count) {}
 /**
  * @param resource $shmid
  */
-function shmop_close($shmid): bool {}
+function shmop_close($shmid): void {}
 
 /**
  * @param resource $shmid
