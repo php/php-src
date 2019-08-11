@@ -59,7 +59,7 @@ function ldap_search($link_identifier, string $base_dn, string $filter, array $a
 /**
  * @param resource $link_identifier
  */
-function ldap_unbind($link_identifier): bool {}
+function ldap_free_result($link_identifier): bool {}
 
 
 /**
@@ -185,6 +185,7 @@ function ldap_mod_add($link_identifier, string $dn, array $entry, array $serverc
  */
 function ldap_mod_add_ext($link_identifier, string $dn, array $entry, array $servercontrols = []) {}
 
+
 /**
  * @param resource $link_identifier
  */
@@ -301,6 +302,10 @@ function ldap_parse_result($link, $result, &$errcode = null, &$matcheddn = null,
  * @param callable $callback
  */
 function ldap_set_rebind_proc($link, $callback): bool {}
+#endif
+
+#ifdef HAVE_LDAP_START_TLS_S
+function ldap_start_tls($link_identifier): bool {}
 #endif
 
 function ldap_escape(string $value, string $ignore = '', int $flags = 0): string {}

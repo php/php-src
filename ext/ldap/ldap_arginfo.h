@@ -65,6 +65,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_search arginfo_ldap_read
 
+#define arginfo_ldap_free_result arginfo_ldap_unbind
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_count_entries, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_identifier)
@@ -150,6 +152,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_ldap_mod_del arginfo_ldap_add
 
 #define arginfo_ldap_mod_del_ext arginfo_ldap_add_ext
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_errno, 0, 0, 1)
+	ZEND_ARG_INFO(0, link)
+ZEND_END_ARG_INFO()
+
+#define arginfo_ldap_error arginfo_ldap_errno
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_err2str, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, errno, IS_LONG, 0)
@@ -257,6 +265,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_LDAP_START_TLS_S)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_start_tls, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, link_identifier)
 ZEND_END_ARG_INFO()
 #endif
 
