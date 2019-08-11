@@ -255,6 +255,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           com_dotnet
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2003 - 2005)
+                     Christoph M. Becker <cmb@php.net> (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Windows
 SINCE:               5.0
