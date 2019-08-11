@@ -60,6 +60,25 @@ function stream_wrapper_restore(string $protocol): bool {}
 /** @return int|false */
 function array_push(array &$stack, ...$args) {}
 
+function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
+function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
+/** @param array|Countable $array */
+function count($var, int $mode = COUNT_NORAML): int {}
+
+function natsort(array &$arg): bool {}
+
+function natcasesort(array &$arg): bool {}
+
+function asort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
+function arsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
+function sort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
+function rsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
+
 /* base64.c */
 
 function base64_encode(string $str): string {}

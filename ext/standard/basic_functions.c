@@ -123,48 +123,6 @@ static void user_tick_function_dtor(user_tick_function_entry *tick_function_entr
 /* {{{ arginfo */
 
 /* {{{ array.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_krsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ksort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_count, 0, 0, 1)
-	ZEND_ARG_INFO(0, var)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natsort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natcasesort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_asort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_usort, 0)
 	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
