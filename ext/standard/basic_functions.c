@@ -767,12 +767,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
 	ZEND_ARG_INFO(0, return_array)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ crc32.c */
-ZEND_BEGIN_ARG_INFO(arginfo_crc32, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 /* {{{ crypt.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_crypt, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
