@@ -75,6 +75,8 @@ class Type {
             return "IS_OBJECT";
         case "void":
             return "IS_VOID";
+        case "callable":
+            return "IS_CALLABLE";
         default:
             throw new Exception("Not implemented: $this->name");
         }
