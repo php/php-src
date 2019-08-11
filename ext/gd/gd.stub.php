@@ -117,7 +117,7 @@ function imagecreatefrombmp(string $filename) {}
 function imagecreatefromtga(string $filename) {}
 #endif
 
-function imagexbm($im, string $filename, int $foreground = UNKNOWN): bool {}
+function imagexbm($im, ?string $filename, int $foreground = UNKNOWN): bool {}
 
 function imagegif($im, $to = NULL): bool {}
 
