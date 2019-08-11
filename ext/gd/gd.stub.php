@@ -243,7 +243,7 @@ function imageconvolution($im, array $matrix3x3, float $div, float $offset): boo
 
 function imageflip($im, int $mode): bool {}
 
-function imageantialias($im, int $on): bool {}
+function imageantialias($im, bool $on): bool {}
 
 /** @return resource|false */
 function imagecrop($im, array $rect) {}
