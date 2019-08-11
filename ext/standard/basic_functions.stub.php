@@ -66,3 +66,7 @@ function base64_encode(string $str): string {}
 
 /** @return string|false */
 function base64_decode(string $str, bool $strict = false) {}
+
+/* crc32.c */
+
+function crc32(string $str): int {}
