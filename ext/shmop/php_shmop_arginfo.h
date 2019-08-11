@@ -13,7 +13,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_read, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_close, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, shmid)
 ZEND_END_ARG_INFO()
 
@@ -27,4 +27,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_write, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_shmop_delete arginfo_shmop_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_delete, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, shmid)
+ZEND_END_ARG_INFO()
