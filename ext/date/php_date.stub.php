@@ -202,7 +202,7 @@ class DateTimeImmutable implements DateTimeInterface {
     public function __construct(string $time, ?DateTimeZone $timezone = null);
 
     /** @return DateTimeZone */
-    public static function __set_state();
+    public static function __set_state(array $array);
 
     /** @return DateTimeImmutable */
     public static function createFromMutable(DateTime $object);
