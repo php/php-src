@@ -653,6 +653,10 @@ PHP_FUNCTION(readline_callback_handler_install)
    Informs the readline callback interface that a character is ready for input */
 PHP_FUNCTION(readline_callback_read_char)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_read_char();
 	}
@@ -663,6 +667,10 @@ PHP_FUNCTION(readline_callback_read_char)
    Removes a previously installed callback handler and restores terminal settings */
 PHP_FUNCTION(readline_callback_handler_remove)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
 		zval_ptr_dtor(&_prepped_callback);
@@ -677,6 +685,10 @@ PHP_FUNCTION(readline_callback_handler_remove)
    Ask readline to redraw the display */
 PHP_FUNCTION(readline_redisplay)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 #if HAVE_LIBEDIT
 	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
 	 * see bug #72538 */
@@ -693,6 +705,10 @@ PHP_FUNCTION(readline_redisplay)
    Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	rl_on_new_line();
 }
 /* }}} */
