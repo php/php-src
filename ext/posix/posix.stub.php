@@ -2,7 +2,7 @@
 
 function posix_kill(int $pid, int $sig): bool {}
 
-function posx_getpid(): int {}
+function posix_getpid(): int {}
 
 function posix_getppid(): int {}
 

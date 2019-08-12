@@ -5,18 +5,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, sig, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posx_getpid, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_getpid, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_posix_getppid arginfo_posx_getpid
+#define arginfo_posix_getppid arginfo_posix_getpid
 
-#define arginfo_posix_getuid arginfo_posx_getpid
+#define arginfo_posix_getuid arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setuid, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, uid, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_posix_geteuid arginfo_posx_getpid
+#define arginfo_posix_geteuid arginfo_posix_getpid
 
 #if defined(HAVE_SETEUID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_seteuid, 0, 1, _IS_BOOL, 0)
@@ -24,13 +24,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_seteuid, 0, 1, _IS_BOOL, 0
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_posix_getgid arginfo_posx_getpid
+#define arginfo_posix_getgid arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setgid, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, gid, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_posix_getegid arginfo_posx_getpid
+#define arginfo_posix_getegid arginfo_posix_getpid
 
 #if defined(HAVE_SETEGID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setegid, 0, 1, _IS_BOOL, 0)
@@ -48,7 +48,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getlogin, 0, 0, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_posix_getpgrp arginfo_posx_getpid
+#define arginfo_posix_getpgrp arginfo_posix_getpid
 
 #if defined(HAVE_SETSID)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setsid, 0, 0, IS_LONG, 0)
@@ -142,9 +142,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_setrlimit, 0, 3, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_posix_get_last_error arginfo_posx_getpid
+#define arginfo_posix_get_last_error arginfo_posix_getpid
 
-#define arginfo_posix_errno arginfo_posx_getpid
+#define arginfo_posix_errno arginfo_posix_getpid
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_strerror, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, errno, IS_LONG, 0)
