@@ -24,7 +24,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
-#include "php_sysvmsg_arginfo.h"
+#include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 
