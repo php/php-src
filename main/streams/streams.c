@@ -370,7 +370,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	 * stream free operations in shutdown unless they come from the resource list destruction,
 	 * or by freeing an enclosed stream (in which case resource list destruction will not have
 	 * freed it). */
-	if ((EG(flags) & EG_FLAGS_IN_SHUTDOWN) &&
+	if ((EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN) &&
 			!(close_options & (PHP_STREAM_FREE_RSRC_DTOR|PHP_STREAM_FREE_IGNORE_ENCLOSING))) {
 		return 1;
 	}
