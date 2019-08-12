@@ -71,6 +71,10 @@ function base64_decode(string $str, bool $strict = false) {}
 
 function crc32(string $str): int {}
 
+/* crypt.c */
+
+function crypt(string $str, string $salt = UNKNOWN): string {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
