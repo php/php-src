@@ -1,7 +1,10 @@
 <?php
 
-/** @return resource|false */
-function sem_get(int $key, $max_acquire = 1, $perm = 0666, $auto_release = 1) {}
+/**
+ * @todo use bool for $auto_release
+ * @return resource|false
+ */
+function sem_get(int $key, int $max_acquire = 1, int $perm = 0666, int $auto_release = 1) {}
 
 /**
  * @param resource $sem_identifier
