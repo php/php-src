@@ -18,7 +18,7 @@ function zip_read($zip) {}
  * @param resource $zip_dp
  * @param resource $zip_entry
  */
-function zip_entry_open($zip_dp, $zip_entry, string $mode = null): bool {}
+function zip_entry_open($zip_dp, $zip_entry, string $mode = 'rb'): bool {}
 
 /**
  * @param resource $zip_ent
