@@ -701,7 +701,7 @@ PHP_FUNCTION(com_event_sink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z/",
 			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_com_initialize();
@@ -762,7 +762,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z/|s!b", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_com_initialize();
