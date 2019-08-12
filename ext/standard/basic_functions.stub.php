@@ -70,3 +70,7 @@ function base64_decode(string $str, bool $strict = false) {}
 /* crc32.c */
 
 function crc32(string $str): int {}
+
+/* crypt.c */
+
+function crypt(string $str, string $salt = UNKNOWN): string {}
