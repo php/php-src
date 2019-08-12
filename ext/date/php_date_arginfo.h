@@ -214,149 +214,149 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_sun_info, 0, 3, IS_ARRAY, 0
 	ZEND_ARG_TYPE_INFO(0, longitude, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_format, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeInterface_format, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeInterface_getTimezone arginfo_date_get_last_errors
+#define arginfo_class_DateTimeInterface_getTimezone arginfo_date_get_last_errors
 
-#define arginfo_DateTimeInterface_getOffset arginfo_date_get_last_errors
+#define arginfo_class_DateTimeInterface_getOffset arginfo_date_get_last_errors
 
-#define arginfo_DateTimeInterface_getTimestamp arginfo_date_get_last_errors
+#define arginfo_class_DateTimeInterface_getTimestamp arginfo_date_get_last_errors
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeInterface_diff, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeInterface_diff, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 	ZEND_ARG_TYPE_INFO(0, absolute, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeInterface___wakeup arginfo_date_get_last_errors
+#define arginfo_class_DateTimeInterface___wakeup arginfo_date_get_last_errors
 
-#define arginfo_DateTime___construct arginfo_date_create
+#define arginfo_class_DateTime___construct arginfo_date_create
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime___set_state, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime___set_state, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_createFromImmutable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromImmutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeImmutable, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTime_createFromFormat arginfo_date_create_from_format
+#define arginfo_class_DateTime_createFromFormat arginfo_date_create_from_format
 
-#define arginfo_DateTime_getLastErrors arginfo_date_get_last_errors
+#define arginfo_class_DateTime_getLastErrors arginfo_date_get_last_errors
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_modify, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_modify, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modify, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_add, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_add, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, interval, DateInterval, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTime_sub arginfo_DateTime_add
+#define arginfo_class_DateTime_sub arginfo_class_DateTime_add
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_setTimezone, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTimezone, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_setTime, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTime, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, second, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_setDate, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setDate, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_setISODate, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setISODate, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, week, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTime_setTimestamp, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timestampt, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeImmutable___construct arginfo_date_create
+#define arginfo_class_DateTimeImmutable___construct arginfo_date_create
 
-#define arginfo_DateTimeImmutable___set_state arginfo_DateTime___set_state
+#define arginfo_class_DateTimeImmutable___set_state arginfo_class_DateTime___set_state
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeImmutable_createFromMutable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_createFromMutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeImmutable_modify arginfo_DateTime_modify
+#define arginfo_class_DateTimeImmutable_modify arginfo_class_DateTime_modify
 
-#define arginfo_DateTimeImmutable_add arginfo_DateTime_add
+#define arginfo_class_DateTimeImmutable_add arginfo_class_DateTime_add
 
-#define arginfo_DateTimeImmutable_sub arginfo_DateTime_add
+#define arginfo_class_DateTimeImmutable_sub arginfo_class_DateTime_add
 
-#define arginfo_DateTimeImmutable_setTimezone arginfo_DateTime_setTimezone
+#define arginfo_class_DateTimeImmutable_setTimezone arginfo_class_DateTime_setTimezone
 
-#define arginfo_DateTimeImmutable_setTime arginfo_DateTime_setTime
+#define arginfo_class_DateTimeImmutable_setTime arginfo_class_DateTime_setTime
 
-#define arginfo_DateTimeImmutable_setDate arginfo_DateTime_setDate
+#define arginfo_class_DateTimeImmutable_setDate arginfo_class_DateTime_setDate
 
-#define arginfo_DateTimeImmutable_setISODate arginfo_DateTime_setISODate
+#define arginfo_class_DateTimeImmutable_setISODate arginfo_class_DateTime_setISODate
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeImmutable_setTimestamp, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeZone___construct arginfo_timezone_open
+#define arginfo_class_DateTimeZone___construct arginfo_timezone_open
 
-#define arginfo_DateTimeZone_getName arginfo_date_get_last_errors
+#define arginfo_class_DateTimeZone_getName arginfo_date_get_last_errors
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeZone_getOffset, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone_getOffset, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, datetime, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeZone_getTransitions, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone_getTransitions, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp_begin, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp_end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateTimeZone_getLocation arginfo_date_get_last_errors
+#define arginfo_class_DateTimeZone_getLocation arginfo_date_get_last_errors
 
-#define arginfo_DateTimeZone_listAbbreviations arginfo_date_get_last_errors
+#define arginfo_class_DateTimeZone_listAbbreviations arginfo_date_get_last_errors
 
-#define arginfo_DateTimeZone_listIdentifiers arginfo_timezone_identifiers_list
+#define arginfo_class_DateTimeZone_listIdentifiers arginfo_timezone_identifiers_list
 
-#define arginfo_DateTimeZone___wakeup arginfo_date_get_last_errors
+#define arginfo_class_DateTimeZone___wakeup arginfo_date_get_last_errors
 
-#define arginfo_DateTimeZone___set_state arginfo_DateTime___set_state
+#define arginfo_class_DateTimeZone___set_state arginfo_class_DateTime___set_state
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DateInterval___construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DateInterval_createFromDateString arginfo_date_interval_create_from_date_string
+#define arginfo_class_DateInterval_createFromDateString arginfo_date_interval_create_from_date_string
 
-#define arginfo_DateInterval_format arginfo_DateTimeInterface_format
+#define arginfo_class_DateInterval_format arginfo_class_DateTimeInterface_format
 
-#define arginfo_DateInterval___wakeup arginfo_date_get_last_errors
+#define arginfo_class_DateInterval___wakeup arginfo_date_get_last_errors
 
-#define arginfo_DateInterval___set_state arginfo_DateTime___set_state
+#define arginfo_class_DateInterval___set_state arginfo_class_DateTime___set_state
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_DatePeriod___construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DatePeriod___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, interval)
 	ZEND_ARG_INFO(0, end)
 ZEND_END_ARG_INFO()
 
-#define arginfo_DatePeriod_getStartDate arginfo_date_get_last_errors
+#define arginfo_class_DatePeriod_getStartDate arginfo_date_get_last_errors
 
-#define arginfo_DatePeriod_getEndDate arginfo_date_get_last_errors
+#define arginfo_class_DatePeriod_getEndDate arginfo_date_get_last_errors
 
-#define arginfo_DatePeriod_getDateInterval arginfo_date_get_last_errors
+#define arginfo_class_DatePeriod_getDateInterval arginfo_date_get_last_errors
 
-#define arginfo_DatePeriod_getRecurrences arginfo_date_get_last_errors
+#define arginfo_class_DatePeriod_getRecurrences arginfo_date_get_last_errors
 
-#define arginfo_DatePeriod___wakeup arginfo_date_get_last_errors
+#define arginfo_class_DatePeriod___wakeup arginfo_date_get_last_errors
 
-#define arginfo_DatePeriod___set_state arginfo_DateTime___set_state
+#define arginfo_class_DatePeriod___set_state arginfo_class_DateTime___set_state
