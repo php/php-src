@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
 #include "php_fileinfo.h"
+#include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
 
@@ -108,63 +109,13 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_open, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, finfo)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_set_flags, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_set_flags, 0, 0, 1)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_buffer, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ finfo_class_functions
  */
 static const zend_function_entry finfo_class_functions[] = {
-	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
