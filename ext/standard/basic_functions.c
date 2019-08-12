@@ -2380,23 +2380,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_utf8_decode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ syslog.c */
-#ifdef HAVE_SYSLOG_H
-ZEND_BEGIN_ARG_INFO(arginfo_openlog, 0)
-	ZEND_ARG_INFO(0, ident)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, facility)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_closelog, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_syslog, 0)
-	ZEND_ARG_INFO(0, priority)
-	ZEND_ARG_INFO(0, message)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
 /* {{{ type.c */
 ZEND_BEGIN_ARG_INFO(arginfo_gettype, 0)
 	ZEND_ARG_INFO(0, var)

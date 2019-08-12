@@ -70,3 +70,13 @@ function base64_decode(string $str, bool $strict = false) {}
 /* crc32.c */
 
 function crc32(string $str): int {}
+
+/* syslog.c */
+
+#ifdef HAVE_SYSLOG_H
+function openlog (string $ident, int $option, int $facility): bool {}
+
+function closelog (): bool {}
+
+function syslog (int $priority, string $message): bool {}
+#endif
