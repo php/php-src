@@ -4822,7 +4822,7 @@ static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_parse_result,							arginfo_ldap_parse_result)
 #endif
 #ifdef HAVE_LDAP_START_TLS_S
-	PHP_FE(ldap_start_tls,								arginfo_ldap_resource)
+	PHP_FE(ldap_start_tls,								arginfo_ldap_start_tls)
 #endif
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 	PHP_FE(ldap_exop,									arginfo_ldap_exop)
