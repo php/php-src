@@ -16,9 +16,8 @@ function shmop_close($shmid): void {}
 
 /**
  * @param resource $shmid
- * @return int|false
  */
-function shmop_size($shmid) {}
+function shmop_size($shmid): int {}
 
 /**
  * @param resource $shmid

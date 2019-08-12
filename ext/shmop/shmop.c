@@ -24,7 +24,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_shmop.h"
-#include "php_shmop_arginfo.h"
+#include "shmop_arginfo.h"
 
 # ifndef PHP_WIN32
 # include <sys/ipc.h>
