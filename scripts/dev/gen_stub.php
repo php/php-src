@@ -13,20 +13,34 @@ try {
     exit(1);
 }
 
-if ($argc < 2) {
-    die("Usage: php gen_stub.php foobar.stub.php\n");
+if ($argc >= 2) {
+    // Generate single file.
+    processStubFile($argv[1]);
+} else {
+    // Regenerate all stub files we can find.
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator('.'),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+    foreach ($it as $file) {
+        $pathName = $file->getPathName();
+        if (preg_match('/\.stub\.php$/', $pathName)) {
+            processStubFile($pathName);
+        }
+    }
 }
 
-$stubFile = $argv[1];
-$arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
+function processStubFile(string $stubFile) {
+    $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
 
-try {
-    $funcInfos = parseStubFile($stubFile);
-    $arginfoCode = generateArgInfoCode($funcInfos);
-    file_put_contents($arginfoFile, $arginfoCode);
-} catch (Exception $e) {
-    echo "Caught {$e->getMessage()} while processing $stubFile\n";
-    exit(1);
+    try {
+        $funcInfos = parseStubFile($stubFile);
+        $arginfoCode = generateArgInfoCode($funcInfos);
+        file_put_contents($arginfoFile, $arginfoCode);
+    } catch (Exception $e) {
+        echo "Caught {$e->getMessage()} while processing $stubFile\n";
+        exit(1);
+    }
 }
 
 class Type {
