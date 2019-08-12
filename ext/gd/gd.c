@@ -793,7 +793,7 @@ PHP_FUNCTION(imagesetstyle)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
     num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
@@ -855,7 +855,7 @@ PHP_FUNCTION(imageistruecolor)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_BOOL(im->trueColor);
@@ -876,7 +876,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
@@ -904,7 +904,7 @@ PHP_FUNCTION(imagepalettetotruecolor)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImagePaletteToTrueColor(im) == 0) {
@@ -928,10 +928,10 @@ PHP_FUNCTION(imagecolormatch)
 	}
 
 	if ((im1 = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM1), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	if ((im2 = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM2), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	result = gdImageColorMatch(im1, im2);
@@ -971,7 +971,7 @@ PHP_FUNCTION(imagesetthickness)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSetThickness(im, thick);
@@ -993,7 +993,7 @@ PHP_FUNCTION(imagefilledellipse)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageFilledEllipse(im, cx, cy, w, h, color);
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(imagefilledarc)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	e = E;
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(imagealphablending)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageAlphaBlending(im, blend);
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(imagesavealpha)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSaveAlpha(im, save);
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(imagelayereffect)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageAlphaBlending(im, effect);
@@ -1117,11 +1117,11 @@ PHP_FUNCTION(imagecolorallocatealpha)
 	int ct = (-1);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll", &IM, &red, &green, &blue, &alpha) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -1150,7 +1150,7 @@ PHP_FUNCTION(imagecolorresolvealpha)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -1175,7 +1175,7 @@ PHP_FUNCTION(imagecolorclosestalpha)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -1200,7 +1200,7 @@ PHP_FUNCTION(imagecolorexactalpha)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -1226,11 +1226,11 @@ PHP_FUNCTION(imagecopyresampled)
 	}
 
 	if ((im_dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(DIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	srcX = SX;
@@ -1388,11 +1388,11 @@ PHP_FUNCTION(imagerotate)
 	zend_long ignoretransparent = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rdl|l", &SIM, &degrees, &color, &ignoretransparent) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	im_dst = gdImageRotateInterpolated(im_src, (const float)degrees, color);
@@ -1417,11 +1417,11 @@ PHP_FUNCTION(imagesettile)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((tile = (gdImagePtr)zend_fetch_resource(Z_RES_P(TILE), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSetTile(im, tile);
@@ -1442,11 +1442,11 @@ PHP_FUNCTION(imagesetbrush)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((tile = (gdImagePtr)zend_fetch_resource(Z_RES_P(TILE), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSetBrush(im, tile);
@@ -1929,7 +1929,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (argc > 1) {
@@ -2118,7 +2118,7 @@ PHP_FUNCTION(imagedestroy)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(IM));
@@ -2141,7 +2141,7 @@ PHP_FUNCTION(imagecolorallocate)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2168,11 +2168,11 @@ PHP_FUNCTION(imagepalettecopy)
 	}
 
 	if ((dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(dstim), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((src = (gdImagePtr)zend_fetch_resource(Z_RES_P(srcim), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImagePaletteCopy(dst, src);
@@ -2194,7 +2194,7 @@ PHP_FUNCTION(imagecolorat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageTrueColor(im)) {
@@ -2228,7 +2228,7 @@ PHP_FUNCTION(imagecolorclosest)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2252,7 +2252,7 @@ PHP_FUNCTION(imagecolorclosesthwb)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2277,7 +2277,7 @@ PHP_FUNCTION(imagecolordeallocate)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* We can return right away for a truecolor image as deallocating colours is meaningless here */
@@ -2310,7 +2310,7 @@ PHP_FUNCTION(imagecolorresolve)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2334,7 +2334,7 @@ PHP_FUNCTION(imagecolorexact)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2359,7 +2359,7 @@ PHP_FUNCTION(imagecolorset)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CHECK_RGBA_RANGE(red, Red);
@@ -2394,7 +2394,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	col = index;
@@ -2434,7 +2434,7 @@ PHP_FUNCTION(imagegammacorrect)
 	gamma = input / output;
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageTrueColor(im))	{
@@ -2482,7 +2482,7 @@ PHP_FUNCTION(imagesetpixel)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSetPixel(im, x, y, col);
@@ -2503,7 +2503,7 @@ PHP_FUNCTION(imageline)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (im->AA) {
@@ -2528,7 +2528,7 @@ PHP_FUNCTION(imagedashedline)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageDashedLine(im, x1, y1, x2, y2, col);
@@ -2549,7 +2549,7 @@ PHP_FUNCTION(imagerectangle)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageRectangle(im, x1, y1, x2, y2, col);
@@ -2570,7 +2570,7 @@ PHP_FUNCTION(imagefilledrectangle)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	gdImageFilledRectangle(im, x1, y1, x2, y2, col);
 	RETURN_TRUE;
@@ -2591,7 +2591,7 @@ PHP_FUNCTION(imagearc)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	e = E;
@@ -2622,7 +2622,7 @@ PHP_FUNCTION(imageellipse)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageEllipse(im, cx, cy, w, h, color);
@@ -2643,7 +2643,7 @@ PHP_FUNCTION(imagefilltoborder)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageFillToBorder(im, x, y, border, col);
@@ -2664,7 +2664,7 @@ PHP_FUNCTION(imagefill)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageFill(im, x, y, col);
@@ -2684,7 +2684,7 @@ PHP_FUNCTION(imagecolorstotal)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(gdImageColorsTotal(im));
@@ -2705,7 +2705,7 @@ PHP_FUNCTION(imagecolortransparent)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (argc > 1) {
@@ -2730,7 +2730,7 @@ PHP_FUNCTION(imageinterlace)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (argc > 1) {
@@ -2760,7 +2760,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	npoints = NPOINTS;
@@ -2959,7 +2959,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	col = COL;
@@ -3052,11 +3052,11 @@ PHP_FUNCTION(imagecopy)
 	}
 
 	if ((im_dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(DIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	srcX = SX;
@@ -3085,11 +3085,11 @@ PHP_FUNCTION(imagecopymerge)
 	}
 
 	if ((im_dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(DIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	srcX = SX;
@@ -3119,11 +3119,11 @@ PHP_FUNCTION(imagecopymergegray)
 	}
 
 	if ((im_dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(DIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	srcX = SX;
@@ -3153,11 +3153,11 @@ PHP_FUNCTION(imagecopyresized)
 	}
 
 	if ((im_dst = (gdImagePtr)zend_fetch_resource(Z_RES_P(DIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	srcX = SX;
@@ -3191,7 +3191,7 @@ PHP_FUNCTION(imagesx)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(gdImageSX(im));
@@ -3210,7 +3210,7 @@ PHP_FUNCTION(imagesy)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(gdImageSY(im));
@@ -3230,7 +3230,7 @@ PHP_FUNCTION(imagesetclip)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(im_zval), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageSetClip(im, x1, y1, x2, y2);
@@ -3251,7 +3251,7 @@ PHP_FUNCTION(imagegetclip)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(im_zval), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
@@ -3319,16 +3319,16 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		if (argc < 4 || argc > ((extended) ? 5 : 4)) {
 			ZEND_WRONG_PARAM_COUNT();
 		} else if (zend_parse_parameters(argc, "ddss|a", &ptsize, &angle, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 	} else {
 		if (argc < 8 || argc > ((extended) ? 9 : 8)) {
 			ZEND_WRONG_PARAM_COUNT();
 		} else if (zend_parse_parameters(argc, "rddlllss|a", &IM, &ptsize, &angle, &x, &y, &col, &fontname, &fontname_len, &str, &str_len, &EXT) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -3389,10 +3389,10 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	zval *SIM;	\
 	gdImagePtr im_src;	\
 	if (zend_parse_parameters(1, "r", &SIM) == FAILURE) {	\
-		RETURN_FALSE;	\
+		return;	\
 	}	\
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {	\
-		RETURN_FALSE;	\
+		return;	\
 	}
 
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS)
@@ -3424,11 +3424,11 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 	zend_long brightness, tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zll", &SIM, &tmp, &brightness) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageBrightness(im_src, (int)brightness) == 1) {
@@ -3445,11 +3445,11 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	zend_long contrast, tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &SIM, &tmp, &contrast) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageContrast(im_src, (int)contrast) == 1) {
@@ -3467,11 +3467,11 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	zend_long a = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll|l", &SIM, &tmp, &r, &g, &b, &a) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageColor(im_src, (int) r, (int) g, (int) b, (int) a) == 1) {
@@ -3544,11 +3544,11 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 	double weight;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rld", &SIM, &tmp, &weight) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImageSmooth(im_src, (float)weight)==1) {
@@ -3566,11 +3566,11 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	zend_bool mode = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll|b", &IM, &tmp, &blocksize, &mode) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (gdImagePixelate(im, (int) blocksize, (const unsigned int) mode)) {
@@ -3589,11 +3589,11 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 	zend_long scatter_sub, scatter_plus;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlll|a", &IM, &tmp, &scatter_sub, &scatter_plus, &hash_colors) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (hash_colors) {
@@ -3669,11 +3669,11 @@ PHP_FUNCTION(imageconvolution)
 	float matrix[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "radd", &SIM, &hash_matrix, &div, &offset) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
@@ -3723,7 +3723,7 @@ PHP_FUNCTION(imageflip)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (mode) {
@@ -3761,7 +3761,7 @@ PHP_FUNCTION(imageantialias)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (im->trueColor) {
@@ -3788,7 +3788,7 @@ PHP_FUNCTION(imagecrop)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
@@ -3845,7 +3845,7 @@ PHP_FUNCTION(imagecropauto)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (mode) {
@@ -3894,7 +3894,7 @@ PHP_FUNCTION(imagescale)
 	method = tmp_m;
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (tmp_h < 0 || tmp_w < 0) {
@@ -3955,7 +3955,7 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if ((src = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
@@ -4192,7 +4192,7 @@ PHP_FUNCTION(imagesetinterpolation)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (method == -1) {
@@ -4215,7 +4215,7 @@ PHP_FUNCTION(imageresolution)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (ZEND_NUM_ARGS()) {

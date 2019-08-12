@@ -238,7 +238,7 @@ PHP_FUNCTION(shmop_read)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (start < 0 || start > shmop->size) {
@@ -273,7 +273,7 @@ PHP_FUNCTION(shmop_close)
 
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(shmid));
@@ -292,7 +292,7 @@ PHP_FUNCTION(shmop_size)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(shmop->size);
@@ -314,7 +314,7 @@ PHP_FUNCTION(shmop_write)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((shmop->shmatflg & SHM_RDONLY) == SHM_RDONLY) {
@@ -346,7 +346,7 @@ PHP_FUNCTION(shmop_delete)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
