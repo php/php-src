@@ -284,7 +284,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_DateTimeImmutable___construct arginfo_date_create
 
-#define arginfo_DateTimeImmutable___set_state arginfo_date_get_last_errors
+#define arginfo_DateTimeImmutable___set_state arginfo_DateTime___set_state
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateTimeImmutable_createFromMutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
@@ -329,7 +329,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_DateTimeZone___wakeup arginfo_date_get_last_errors
 
-#define arginfo_DateTimeZone___set_state arginfo_date_get_last_errors
+#define arginfo_DateTimeZone___set_state arginfo_DateTime___set_state
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 0)
