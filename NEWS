@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0beta3
 
+- Core:
+  . Fixed bug #78396 (Second file_put_contents in Shutdown hangs script).
+    (Nikita)
+
 - Date:
   . Fixed bug #78383 (Casting a DateTime to array no longer returns its
     properties). (Nikita)
