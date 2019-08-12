@@ -280,7 +280,7 @@ function parseStubFile(string $fileName) {
                 }
 
                 $funcInfos[] = parseFunctionLike(
-                    $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
+                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
             }
             continue;
         }
