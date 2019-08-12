@@ -4,7 +4,7 @@
 function readline(string $prompt = null) {}
 
 /** @return mixed */
-function readline_info(string $varname = null, string $newvalue = null) {}
+function readline_info(string $varname = null, string $newvalue = UNKNOWN) {}
 
 function readline_add_history(string $prompt): bool {}
 
