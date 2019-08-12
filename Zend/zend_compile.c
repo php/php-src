@@ -6694,6 +6694,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 		}
 
 		zend_string_addref(old_name);
+		old_name = zend_new_interned_string(old_name);
 		if (!zend_hash_add_ptr(current_import, lookup_name, old_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use%s %s as %s because the name "
 				"is already in use", zend_get_use_type_str(type), ZSTR_VAL(old_name), ZSTR_VAL(new_name));
