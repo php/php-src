@@ -18,11 +18,17 @@ function readline_read_history(string $filename = null): bool {}
 
 function readline_write_history(string $filename = null): bool {}
 
-function readline_completion_function(callable $funcname): bool {}
+/**
+ * @param callable $funcname
+ */
+function readline_completion_function($funcname): bool {}
 
 
 #if HAVE_RL_CALLBACK_READ_CHAR
-function readline_callback_handler_install(string $prompt, callable $callback): bool {}
+/**
+ * @param callable $callback
+ */
+function readline_callback_handler_install(string $prompt, $callback): bool {}
 
 function readline_callback_read_char(): void {}
 
