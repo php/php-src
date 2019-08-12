@@ -2609,7 +2609,7 @@ ZEND_GET_MODULE(simplexml)
 /* the method table */
 /* each method can have its own parameters and visibility */
 static const zend_function_entry sxe_functions[] = { /* {{{ */
-	SXE_ME(__construct,            arginfo_SimpleXMLElement__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
+	SXE_ME(__construct,            arginfo_SimpleXMLElement___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  arginfo_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
 	SXE_MALIAS(saveXML, asXML,	   arginfo_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  arginfo_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
