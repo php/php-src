@@ -1265,7 +1265,7 @@ PHP_FUNCTION(imagegrabwindow)
 	gdImagePtr im = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &lwindow_handle, &client_area) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	window = (HWND) lwindow_handle;

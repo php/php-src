@@ -120,7 +120,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (image_type != PHP_GDIMG_TYPE_BMP && argc >= 3) {
