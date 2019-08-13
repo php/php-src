@@ -1,34 +1,23 @@
 <?php
 
-/** @return bool */
-function ctype_alnum(string $text) {}
+function ctype_alnum(string $text): bool {}
 
-/** @return bool */
-function ctype_alpha(string $text) {}
+function ctype_alpha(string $text): bool {}
 
-/** @return bool */
-function ctype_cntrl(string $text) {}
+function ctype_cntrl(string $text): bool {}
 
-/** @return bool */
-function ctype_digit(string $text) {}
+function ctype_digit(string $text): bool {}
 
-/** @return bool */
-function ctype_lower(string $text) {}
+function ctype_lower(string $text): bool {}
 
-/** @return bool */
-function ctype_graph(string $text) {}
+function ctype_graph(string $text): bool {}
 
-/** @return bool */
-function ctype_print(string $text) {}
+function ctype_print(string $text): bool {}
 
-/** @return bool */
-function ctype_punct(string $text) {}
+function ctype_punct(string $text): bool {}
 
-/** @return bool */
-function ctype_space(string $text) {}
+function ctype_space(string $text): bool {}
 
-/** @return bool */
-function ctype_upper(string $text) {}
+function ctype_upper(string $text): bool {}
 
-/** @return bool */
-function ctype_xdigit(string $text) {}
+function ctype_xdigit(string $text): bool {}
