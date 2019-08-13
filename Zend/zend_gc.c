@@ -1183,10 +1183,6 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 					ht = NULL;
 					if (!n) goto next;
 					while (!Z_REFCOUNTED_P(--end)) {
-						/* count non-refcounted for compatibility ??? */
-						if (Z_TYPE_P(zv) != IS_UNDEF) {
-							count++;
-						}
 						if (zv == end) goto next;
 					}
 				} else {
@@ -1200,9 +1196,6 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 							GC_REF_SET_BLACK(ref);
 							GC_STACK_PUSH(ref);
 						}
-					/* count non-refcounted for compatibility ??? */
-					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
-						count++;
 					}
 					zv++;
 				}
@@ -1250,10 +1243,6 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 			if (Z_REFCOUNTED_P(zv)) {
 				break;
 			}
-			/* count non-refcounted for compatibility ??? */
-			if (Z_TYPE_P(zv) != IS_UNDEF) {
-				count++;
-			}
 			if (p == end) goto next;
 		}
 		while (p != end) {
@@ -1268,9 +1257,6 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags, gc_stack *sta
 					GC_REF_SET_BLACK(ref);
 					GC_STACK_PUSH(ref);
 				}
-				/* count non-refcounted for compatibility ??? */
-			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
-				count++;
 			}
 			p++;
 		}

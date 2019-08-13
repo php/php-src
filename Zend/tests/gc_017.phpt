@@ -31,12 +31,12 @@ $a->insert($c);
 unset($a);
 unset($b);
 unset($c);
-var_dump(gc_collect_cycles() >= 7);
+var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
 --EXPECTF--
 string(1) "%s"
 string(1) "%s"
 string(1) "%s"
-bool(true)
+int(4)
 ok
