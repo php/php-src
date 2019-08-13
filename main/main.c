@@ -1564,8 +1564,16 @@ static void php_zend_stream_closer(void *handle) /* {{{ */
 
 static size_t php_zend_stream_fsizer(void *handle) /* {{{ */
 {
-	php_stream_statbuf  ssb;
-	if (php_stream_stat((php_stream*)handle, &ssb) == 0) {
+	php_stream *stream = handle;
+	php_stream_statbuf ssb;
+
+	/* File size reported by stat() may be inaccurate if stream filters are used.
+	 * TODO: Should stat() be generally disabled if filters are used? */
+	if (stream->readfilters.head) {
+		return 0;
+	}
+
+	if (php_stream_stat(stream, &ssb) == 0) {
 		return ssb.sb.st_size;
 	}
 	return 0;

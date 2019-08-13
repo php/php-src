@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78396 (Second file_put_contents in Shutdown hangs script).
     (Nikita)
+  . Fixed bug #78406 (Broken file includes with user-defined stream filters).
+    (Nikita)
 
 - Date:
   . Fixed bug #78383 (Casting a DateTime to array no longer returns its
