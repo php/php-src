@@ -330,6 +330,7 @@ STATUS:              Working
 EXTENSION:           gmp
 PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2019)
                      Antony Dovgal <tony2001@php.net> (2005 - 2010)
+                     Nikita Popov <nikic@php.net> (2013 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
@@ -378,12 +379,14 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
+                     Nikita Popov <nikic@php.net> (2017 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           opcache
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2013 - 2018)
                      Xinchen Hui <laruence@php.net> (2013 - 2018)
+                     Nikita Popov <nikic@php.net> (2016 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.5.0
@@ -500,7 +503,8 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           tokenizer
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (2002 - 2002)
-MAINTENANCE:         Unknown
+                     Nikita Popov <nikic@php.net> (2013 - 2019)
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zip
