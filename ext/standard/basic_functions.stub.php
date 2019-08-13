@@ -84,3 +84,13 @@ function closelog (): bool {}
 
 function syslog (int $priority, string $message): bool {}
 #endif
+
+#ifdef HAVE_INET_NTOP
+/** @return string|false */
+function inet_ntop (string $in_addr) {}
+#endif
+
+#ifdef HAVE_INET_PTON
+/** @return string|false */
+function inet_pton (string $ip_address) {}
+#endif

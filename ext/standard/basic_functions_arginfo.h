@@ -107,3 +107,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_syslog, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
+
+#if defined(HAVE_INET_NTOP)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inet_ntop, 0, 1, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, in_addr, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_INET_PTON)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inet_pton, 0, 1, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, ip_address, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
