@@ -19,7 +19,7 @@ class MemoryLeak
     private $things = [];
 }
 
-ini_set('memory_limit', '10M');
+ini_set('memory_limit', '20M');
 
 for ($i = 0; $i < 100000; ++$i) {
     $obj = new MemoryLeak();
