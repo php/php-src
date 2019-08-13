@@ -24,6 +24,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_tokenizer.h"
+#include "tokenizer_arginfo.h"
 
 #include "zend.h"
 #include "zend_exceptions.h"
@@ -41,17 +42,6 @@
 void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
 }
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
-	ZEND_ARG_INFO(0, token)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ tokenizer_functions[]
  *

@@ -381,11 +381,11 @@ PHP_FUNCTION(finfo_close)
 	zval *zfinfo;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zfinfo) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(zfinfo));
@@ -405,15 +405,15 @@ PHP_FUNCTION(finfo_set_flags)
 
 	if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &options) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zfinfo, &options) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -471,16 +471,16 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		}
 	} else if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 		magic = finfo->magic;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|lr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 		magic = finfo->magic;
 	}

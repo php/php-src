@@ -13,20 +13,34 @@ try {
     exit(1);
 }
 
-if ($argc < 2) {
-    die("Usage: php gen_stub.php foobar.stub.php\n");
+if ($argc >= 2) {
+    // Generate single file.
+    processStubFile($argv[1]);
+} else {
+    // Regenerate all stub files we can find.
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator('.'),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+    foreach ($it as $file) {
+        $pathName = $file->getPathName();
+        if (preg_match('/\.stub\.php$/', $pathName)) {
+            processStubFile($pathName);
+        }
+    }
 }
 
-$stubFile = $argv[1];
-$arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
+function processStubFile(string $stubFile) {
+    $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
 
-try {
-    $funcInfos = parseStubFile($stubFile);
-    $arginfoCode = generateArgInfoCode($funcInfos);
-    file_put_contents($arginfoFile, $arginfoCode);
-} catch (Exception $e) {
-    echo "Caught {$e->getMessage()} while processing $stubFile\n";
-    exit(1);
+    try {
+        $funcInfos = parseStubFile($stubFile);
+        $arginfoCode = generateArgInfoCode($funcInfos);
+        file_put_contents($arginfoFile, $arginfoCode);
+    } catch (Exception $e) {
+        echo "Caught {$e->getMessage()} while processing $stubFile\n";
+        exit(1);
+    }
 }
 
 class Type {
@@ -75,6 +89,8 @@ class Type {
             return "IS_OBJECT";
         case "void":
             return "IS_VOID";
+        case "callable":
+            return "IS_CALLABLE";
         default:
             throw new Exception("Not implemented: $this->name");
         }
@@ -194,17 +210,32 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
 }
 
-function parseClass(Stmt\Class_ $class): ClassInfo {
-    $funcs = [];
-    $className = $class->name->toString();
-    foreach ($class as $stmt) {
-        if (!$stmt instanceof Stmt\ClassMethod) {
-            throw new Exception("Not implemented class statement");
+function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
+    foreach ($stmt->getComments() as $comment) {
+        $text = trim($comment->getText());
+        if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
+            $conds[] = $matches[1];
+        } else if (preg_match('/^#\s*ifdef\s+(.+)$/', $text, $matches)) {
+            $conds[] = "defined($matches[1])";
+        } else if (preg_match('/^#\s*ifndef\s+(.+)$/', $text, $matches)) {
+            $conds[] = "!defined($matches[1])";
+        } else if (preg_match('/^#\s*else$/', $text)) {
+            if (empty($conds)) {
+                throw new Exception("Encountered else without corresponding #if");
+            }
+            $cond = array_pop($conds);
+            $conds[] = "!($cond)";
+        } else if (preg_match('/^#\s*endif$/', $text)) {
+            if (empty($conds)) {
+                throw new Exception("Encountered #endif without corresponding #if");
+            }
+            array_pop($conds);
+        } else if ($text[0] === '#') {
+            throw new Exception("Unrecognized preprocessor directive \"$text\"");
         }
-
-        $funcs[] = parseFunctionLike($className . '_' . $stmt->name->toString(), $stmt);
     }
-    return new ClassInfo($className, $funcs);
+
+    return empty($conds) ? null : implode(' && ', $conds);
 }
 
 /** @return FuncInfo[] */
@@ -224,20 +255,9 @@ function parseStubFile(string $fileName) {
     $nodeTraverser->traverse($stmts);
 
     $funcInfos = [];
-    $cond = null;
+    $conds = [];
     foreach ($stmts as $stmt) {
-        foreach ($stmt->getComments() as $comment) {
-            $text = trim($comment->getText());
-            if (preg_match('/^#if\s+(.+)$/', $text, $matches)) {
-                if ($cond !== null) {
-                    throw new Exception("Not implemented preprocessor directive");
-                }
-                $cond = $matches[1];
-            } else if ($text === '#endif') {
-                $cond = null;
-            }
-        }
-
+        $cond = handlePreprocessorConditions($conds, $stmt);
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
@@ -250,6 +270,7 @@ function parseStubFile(string $fileName) {
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
             foreach ($stmt->stmts as $classStmt) {
+                $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
                     continue;
                 }
@@ -259,7 +280,7 @@ function parseStubFile(string $fileName) {
                 }
 
                 $funcInfos[] = parseFunctionLike(
-                    $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
+                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
             }
             continue;
         }
@@ -272,9 +293,6 @@ function parseStubFile(string $fileName) {
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
-    if ($funcInfo->cond) {
-        $code .= "#if {$funcInfo->cond}\n";
-    }
     if ($funcInfo->return->type) {
         $returnType = $funcInfo->return->type;
         if ($returnType->isBuiltin) {
@@ -326,10 +344,16 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     $code .= "ZEND_END_ARG_INFO()";
-    if ($funcInfo->cond) {
-        $code .= "\n#endif";
-    }
     return $code;
+}
+
+function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
+    foreach ($generatedFuncInfos as $generatedFuncInfo) {
+        if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
+            return $generatedFuncInfo;
+        }
+    }
+    return null;
 }
 
 /** @param FuncInfo[] $funcInfos */
@@ -337,18 +361,25 @@ function generateArginfoCode(array $funcInfos): string {
     $code = "/* This is a generated file, edit the .stub.php file instead. */";
     $generatedFuncInfos = [];
     foreach ($funcInfos as $funcInfo) {
-        /* If there already is an equivalent arginfo structure, only emit a #define */
-        foreach ($generatedFuncInfos as $generatedFuncInfo) {
-            if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
-                $code .= sprintf(
-                    "\n\n#define arginfo_%s arginfo_%s",
-                    $funcInfo->name, $generatedFuncInfo->name
-                );
-                continue 2;
-            }
+        $code .= "\n\n";
+        if ($funcInfo->cond) {
+            $code .= "#if {$funcInfo->cond}\n";
         }
 
-        $code .= "\n\n" . funcInfoToCode($funcInfo);
+        /* If there already is an equivalent arginfo structure, only emit a #define */
+        if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
+            $code .= sprintf(
+                "#define arginfo_%s arginfo_%s",
+                $funcInfo->name, $generatedFuncInfo->name
+            );
+        } else {
+            $code .= funcInfoToCode($funcInfo);
+        }
+
+        if ($funcInfo->cond) {
+            $code .= "\n#endif";
+        }
+
         $generatedFuncInfos[] = $funcInfo;
     }
     return $code . "\n";
@@ -360,7 +391,11 @@ function initPhpParser() {
     if (!is_dir($phpParserDir)) {
         $cwd = getcwd();
         chdir(__DIR__);
+
         passthru("wget https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz", $exit);
+        if ($exit !== 0) {
+            passthru("curl -LO https://github.com/nikic/PHP-Parser/archive/v$version.tar.gz", $exit);
+        }
         if ($exit !== 0) {
             throw new Exception("Failed to download PHP-Parser tarball");
         }

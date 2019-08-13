@@ -30,6 +30,7 @@
 #include "ext/standard/php_filestat.h"
 #include "zend_interfaces.h"
 #include "php_zip.h"
+#include "php_zip_arginfo.h"
 
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
 static PHP_NAMED_FUNCTION(zif_zip_open);
@@ -713,51 +714,6 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_open, 0, 0, 2)
-	ZEND_ARG_INFO(0, zip_dp)
-	ZEND_ARG_INFO(0, zip_entry)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_ent)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-	ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_name, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressedsize, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_filesize, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressionmethod, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ zend_function_entry */
 static const zend_function_entry zip_functions[] = {
 	ZEND_RAW_FENTRY("zip_open", zif_zip_open, arginfo_zip_open, 0)
@@ -1314,47 +1270,36 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 	switch (opt) {
 		case 0:
 			RETURN_STRING((char *)zr_rsrc->sb.name);
-			break;
 		case 1:
 			RETURN_LONG((zend_long) (zr_rsrc->sb.comp_size));
-			break;
 		case 2:
 			RETURN_LONG((zend_long) (zr_rsrc->sb.size));
-			break;
 		case 3:
 			switch (zr_rsrc->sb.comp_method) {
 				case 0:
 					RETURN_STRING("stored");
-					break;
 				case 1:
 					RETURN_STRING("shrunk");
-					break;
 				case 2:
 				case 3:
 				case 4:
 				case 5:
 					RETURN_STRING("reduced");
-					break;
 				case 6:
 					RETURN_STRING("imploded");
-					break;
 				case 7:
 					RETURN_STRING("tokenized");
 					break;
 				case 8:
 					RETURN_STRING("deflated");
-					break;
 				case 9:
 					RETURN_STRING("deflatedX");
 					break;
 				case 10:
 					RETURN_STRING("implodedX");
-					break;
 				default:
 					RETURN_FALSE;
 			}
-			RETURN_LONG((zend_long) (zr_rsrc->sb.comp_method));
-			break;
 	}
 
 }

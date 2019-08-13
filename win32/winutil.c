@@ -457,8 +457,8 @@ static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, 
 	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
 		It should be fine, if we load a module linked with an older one into
 		the core linked with the newer one, but not the otherway round.
-                Analogously, it should be fine, if a PHP build linked with an older version
-                is used with a newer CRT, but not the other way round.
+		Analogously, it should be fine, if a PHP build linked with an older version
+		is used with a newer CRT, but not the other way round.
 		Otherwise, if the linker major version is not same, it is an error, as
 		per the current knowledge.
 		

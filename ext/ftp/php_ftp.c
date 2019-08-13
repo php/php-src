@@ -450,7 +450,7 @@ PHP_FUNCTION(ftp_login)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* log in */
@@ -476,7 +476,7 @@ PHP_FUNCTION(ftp_pwd)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!(pwd = ftp_pwd(ftp))) {
@@ -500,7 +500,7 @@ PHP_FUNCTION(ftp_cdup)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!ftp_cdup(ftp)) {
@@ -526,7 +526,7 @@ PHP_FUNCTION(ftp_chdir)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* change directories */
@@ -553,7 +553,7 @@ PHP_FUNCTION(ftp_exec)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* execute serverside command */
@@ -580,7 +580,7 @@ PHP_FUNCTION(ftp_raw)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* execute arbitrary ftp command */
@@ -603,7 +603,7 @@ PHP_FUNCTION(ftp_mkdir)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* create directory */
@@ -630,7 +630,7 @@ PHP_FUNCTION(ftp_rmdir)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* remove directorie */
@@ -654,11 +654,11 @@ PHP_FUNCTION(ftp_chmod)
 	zend_long		mode;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlp", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!ftp_chmod(ftp, mode, filename, filename_len)) {
@@ -680,11 +680,11 @@ PHP_FUNCTION(ftp_alloc)
 	zend_string	*response = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z", &z_ftp, &size, &zresponse) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ret = ftp_alloc(ftp, size, zresponse ? &response : NULL);
@@ -715,7 +715,7 @@ PHP_FUNCTION(ftp_nlist)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* get list of files */
@@ -746,7 +746,7 @@ PHP_FUNCTION(ftp_rawlist)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* get raw directory listing */
@@ -777,7 +777,7 @@ PHP_FUNCTION(ftp_mlsd)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* get raw directory listing */
@@ -812,7 +812,7 @@ PHP_FUNCTION(ftp_systype)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (NULL == (syst = ftp_syst(ftp))) {
@@ -841,7 +841,7 @@ PHP_FUNCTION(ftp_fget)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
@@ -887,7 +887,7 @@ PHP_FUNCTION(ftp_nb_fget)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
@@ -933,7 +933,7 @@ PHP_FUNCTION(ftp_pasv)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!ftp_pasv(ftp, pasv ? 1 : 0)) {
@@ -961,7 +961,7 @@ PHP_FUNCTION(ftp_get)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	XTYPE(xtype, mode);
 
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(ftp_nb_get)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	XTYPE(xtype, mode);
 
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(ftp_nb_continue)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!ftp->nb) {
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(ftp_fput)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	php_stream_from_zval(stream, z_file);
 	XTYPE(xtype, mode);
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(ftp_nb_fput)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	php_stream_from_res(stream, Z_RES_P(z_file));
 	XTYPE(xtype, mode);
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(ftp_put)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	XTYPE(xtype, mode);
 
@@ -1297,7 +1297,7 @@ PHP_FUNCTION(ftp_append)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	XTYPE(xtype, mode);
 
@@ -1333,7 +1333,7 @@ PHP_FUNCTION(ftp_nb_put)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	XTYPE(xtype, mode);
 
@@ -1392,7 +1392,7 @@ PHP_FUNCTION(ftp_size)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* get file size */
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(ftp_mdtm)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* get file mod time */
@@ -1436,7 +1436,7 @@ PHP_FUNCTION(ftp_rename)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* rename the file */
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(ftp_delete)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* delete the file */
@@ -1490,7 +1490,7 @@ PHP_FUNCTION(ftp_site)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* send the site command */
@@ -1515,7 +1515,7 @@ PHP_FUNCTION(ftp_close)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ftp_quit(ftp);
@@ -1537,7 +1537,7 @@ PHP_FUNCTION(ftp_set_option)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (option) {
@@ -1593,7 +1593,7 @@ PHP_FUNCTION(ftp_get_option)
 	}
 
 	if ((ftp = (ftpbuf_t *)zend_fetch_resource(Z_RES_P(z_ftp), le_ftpbuf_name, le_ftpbuf)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (option) {

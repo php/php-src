@@ -25,6 +25,7 @@
 #if HAVE_BCMATH
 
 #include "php_ini.h"
+#include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
@@ -32,67 +33,6 @@
 ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcsub, 0, 2, IS_STRING, 0)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcmul, 0, 2, IS_STRING, 0)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcdiv, 0, 2, IS_STRING, 1)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcmod, 0, 2, IS_STRING, 1)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, mod)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcpow, 0, 2, IS_STRING, 0)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcsqrt, 0, 1, IS_STRING, 1)
-	ZEND_ARG_INFO(0, operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bccomp, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, left_operand)
-	ZEND_ARG_INFO(0, right_operand)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcscale, 0, 0, IS_LONG, 0)
-	ZEND_ARG_INFO(0, scale)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 
 static const zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									arginfo_bcadd)
@@ -400,10 +340,10 @@ PHP_FUNCTION(bcmod)
 /* }}} */
 
 /* {{{ proto string bcpowmod(string x, string y, string mod [, int scale])
-   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulous */
+   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
 {
-	zend_string *left, *right, *modulous;
+	zend_string *left, *right, *modulus;
 	bc_num first, second, mod, result;
 	zend_long scale = BCG(bc_precision);
 	int scale_int;
@@ -411,7 +351,7 @@ PHP_FUNCTION(bcpowmod)
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STR(left)
 		Z_PARAM_STR(right)
-		Z_PARAM_STR(modulous)
+		Z_PARAM_STR(modulus)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(scale)
 	ZEND_PARSE_PARAMETERS_END();
@@ -422,7 +362,7 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&result);
 	php_str2num(&first, ZSTR_VAL(left));
 	php_str2num(&second, ZSTR_VAL(right));
-	php_str2num(&mod, ZSTR_VAL(modulous));
+	php_str2num(&mod, ZSTR_VAL(modulus));
 
 	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 

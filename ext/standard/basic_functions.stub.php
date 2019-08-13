@@ -59,3 +59,38 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /** @return int|false */
 function array_push(array &$stack, ...$args) {}
+
+/* base64.c */
+
+function base64_encode(string $str): string {}
+
+/** @return string|false */
+function base64_decode(string $str, bool $strict = false) {}
+
+/* crc32.c */
+
+function crc32(string $str): int {}
+
+/* crypt.c */
+
+function crypt(string $str, string $salt = UNKNOWN): string {}
+
+/* syslog.c */
+
+#ifdef HAVE_SYSLOG_H
+function openlog (string $ident, int $option, int $facility): bool {}
+
+function closelog (): bool {}
+
+function syslog (int $priority, string $message): bool {}
+#endif
+
+#ifdef HAVE_INET_NTOP
+/** @return string|false */
+function inet_ntop (string $in_addr) {}
+#endif
+
+#ifdef HAVE_INET_PTON
+/** @return string|false */
+function inet_pton (string $ip_address) {}
+#endif

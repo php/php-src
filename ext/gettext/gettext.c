@@ -27,66 +27,7 @@
 #include <stdio.h>
 #include "ext/standard/info.h"
 #include "php_gettext.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_textdomain, 0)
-	ZEND_ARG_INFO(0, domain)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gettext, 0)
-	ZEND_ARG_INFO(0, msgid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dgettext, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, msgid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dcgettext, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, msgid)
-	ZEND_ARG_INFO(0, category)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bindtextdomain, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, dir)
-ZEND_END_ARG_INFO()
-
-#if HAVE_NGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_ngettext, 0)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_DNGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_dngettext, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_DCNGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_dcngettext, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-	ZEND_ARG_INFO(0, category)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-ZEND_BEGIN_ARG_INFO(arginfo_bind_textdomain_codeset, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, codeset)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
+#include "gettext_arginfo.h"
 
 /* {{{ php_gettext_functions[]
  */

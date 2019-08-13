@@ -18,10 +18,11 @@ $o->nested[] =& $o->nested;
 $o->ryat = $o;
 $x =& $o->chtg;
 unset($o);
-gc_collect_cycles();
+var_dump(gc_collect_cycles());
 var_dump($x);
 ?>
 --EXPECT--
+int(0)
 object(ryat)#1 (3) {
   ["ryat"]=>
   *RECURSION*

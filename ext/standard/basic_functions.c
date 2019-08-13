@@ -523,18 +523,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_constant, 0)
 	ZEND_ARG_INFO(0, const_name)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_INET_NTOP
-ZEND_BEGIN_ARG_INFO(arginfo_inet_ntop, 0)
-	ZEND_ARG_INFO(0, in_addr)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_INET_PTON
-ZEND_BEGIN_ARG_INFO(arginfo_inet_pton, 0)
-	ZEND_ARG_INFO(0, ip_address)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_INFO(arginfo_ip2long, 0)
 	ZEND_ARG_INFO(0, ip_address)
 ZEND_END_ARG_INFO()
@@ -761,33 +749,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ base64.c */
-ZEND_BEGIN_ARG_INFO(arginfo_base64_encode, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_base64_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 /* {{{ browscap.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
 	ZEND_ARG_INFO(0, browser_name)
 	ZEND_ARG_INFO(0, return_array)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ crc32.c */
-ZEND_BEGIN_ARG_INFO(arginfo_crc32, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-/* {{{ crypt.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_crypt, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, salt)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ cyr_convert.c */
@@ -2396,23 +2361,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_utf8_decode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ syslog.c */
-#ifdef HAVE_SYSLOG_H
-ZEND_BEGIN_ARG_INFO(arginfo_openlog, 0)
-	ZEND_ARG_INFO(0, ident)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, facility)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_closelog, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_syslog, 0)
-	ZEND_ARG_INFO(0, priority)
-	ZEND_ARG_INFO(0, message)
-ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 /* {{{ type.c */
 ZEND_BEGIN_ARG_INFO(arginfo_gettype, 0)
@@ -4601,10 +4549,19 @@ static void add_config_entries(HashTable *hash, zval *return_value);
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
 	if (Z_TYPE_P(entry) == IS_STRING) {
+		zend_string *str = Z_STR_P(entry);
+		if (!ZSTR_IS_INTERNED(str)) {
+			if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
+				zend_string_addref(str);
+			} else {
+				str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+			}
+		}
+
 		if (key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), zend_string_copy(Z_STR_P(entry)));
+			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), str);
 		} else {
-			add_index_str(retval, h, zend_string_copy(Z_STR_P(entry)));
+			add_index_str(retval, h, str);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		zval tmp;
