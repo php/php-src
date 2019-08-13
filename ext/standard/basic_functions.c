@@ -523,18 +523,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_constant, 0)
 	ZEND_ARG_INFO(0, const_name)
 ZEND_END_ARG_INFO()
 
-#ifdef HAVE_INET_NTOP
-ZEND_BEGIN_ARG_INFO(arginfo_inet_ntop, 0)
-	ZEND_ARG_INFO(0, in_addr)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_INET_PTON
-ZEND_BEGIN_ARG_INFO(arginfo_inet_pton, 0)
-	ZEND_ARG_INFO(0, ip_address)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_INFO(arginfo_ip2long, 0)
 	ZEND_ARG_INFO(0, ip_address)
 ZEND_END_ARG_INFO()
