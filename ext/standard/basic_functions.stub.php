@@ -82,9 +82,11 @@ function syslog (int $priority, string $message): bool {}
 #endif
 
 #ifdef HAVE_INET_NTOP
-function inet_ntop (string $in_addr): string {}
+/** @return string|false */
+function inet_ntop (string $in_addr) {}
 #endif
 
 #ifdef HAVE_INET_PTON
-function inet_pton (string $ip_address): string {}
+/** @return string|false */
+function inet_pton (string $ip_address) {}
 #endif
