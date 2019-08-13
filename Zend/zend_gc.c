@@ -1318,11 +1318,12 @@ static int gc_collect_roots(uint32_t *flags, gc_stack *stack)
 	return count;
 }
 
-static void gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buffer *root)
+static int gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buffer *root)
 {
 	HashTable *ht = NULL;
 	Bucket *p, *end;
 	zval *zv;
+	int count = 0;
 
 tail_call:
 	do {
@@ -1331,18 +1332,20 @@ tail_call:
 			gc_remove_from_roots(root);
 			GC_REF_SET_INFO(ref, 0);
 			root = NULL;
+			count++;
 		} else if (GC_REF_ADDRESS(ref) != 0
 		 && GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 			GC_TRACE_REF(ref, "removing from buffer");
 			GC_REMOVE_FROM_BUFFER(ref);
+			count++;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
 				goto tail_call;
 			}
-			return;
+			return count;
 		} else {
-			return;
+			return count;
 		}
 
 		if (GC_TYPE(ref) == IS_OBJECT) {
@@ -1357,15 +1360,15 @@ tail_call:
 				ht = obj->handlers->get_gc(&tmp, &zv, &n);
 				end = zv + n;
 				if (EXPECTED(!ht)) {
-					if (!n) return;
+					if (!n) return count;
 					while (!Z_REFCOUNTED_P(--end)) {
-						if (zv == end) return;
+						if (zv == end) return count;
 					}
 				}
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
-						gc_remove_nested_data_from_buffer(ref, NULL);
+						count += gc_remove_nested_data_from_buffer(ref, NULL);
 					}
 					zv++;
 				}
@@ -1374,15 +1377,15 @@ tail_call:
 					goto tail_call;
 				}
 			} else {
-				return;
+				return count;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
 			ht = (zend_array*)ref;
 		} else {
-			return;
+			return count;
 		}
 
-		if (!ht->nNumUsed) return;
+		if (!ht->nNumUsed) return count;
 		p = ht->arData;
 		end = p + ht->nNumUsed;
 		while (1) {
@@ -1394,7 +1397,7 @@ tail_call:
 			if (Z_REFCOUNTED_P(zv)) {
 				break;
 			}
-			if (p == end) return;
+			if (p == end) return count;
 		}
 		while (p != end) {
 			zv = &p->val;
@@ -1403,7 +1406,7 @@ tail_call:
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
-				gc_remove_nested_data_from_buffer(ref, NULL);
+				count += gc_remove_nested_data_from_buffer(ref, NULL);
 			}
 			p++;
 		}
@@ -1510,7 +1513,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
 					if (GC_REFCOUNT(p) > refcounts[idx]) {
-						gc_remove_nested_data_from_buffer(p, current);
+						count -= gc_remove_nested_data_from_buffer(p, current);
 					}
 				}
 				current++;
