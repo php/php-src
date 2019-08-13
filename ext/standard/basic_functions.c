@@ -4690,10 +4690,19 @@ static void add_config_entries(HashTable *hash, zval *return_value);
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
 	if (Z_TYPE_P(entry) == IS_STRING) {
+		zend_string *str = Z_STR_P(entry);
+		if (!ZSTR_IS_INTERNED(str)) {
+			if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
+				zend_string_addref(str);
+			} else {
+				str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+			}
+		}
+
 		if (key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), zend_string_copy(Z_STR_P(entry)));
+			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), str);
 		} else {
-			add_index_str(retval, h, zend_string_copy(Z_STR_P(entry)));
+			add_index_str(retval, h, str);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		zval tmp;
