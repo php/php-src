@@ -46,7 +46,8 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
-			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)
+					&& EXPECTED(GC_TYPE(object->properties) != IS_NULL)) {
 				zend_array_destroy(object->properties);
 			}
 		}
