@@ -491,7 +491,8 @@ static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa
 
 			if ((op_array->opcodes[def].result_type == IS_UNUSED) &&
 					(UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_STMT) ||
-					UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_FCALL_END))) {
+					UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_FCALL_END) ||
+					UNEXPECTED(op_array->opcodes[def].opcode == ZEND_END_SILENCE))) {
 				def--;
 			}
 
