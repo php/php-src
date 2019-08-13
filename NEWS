@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC4
 
+- SimpleXML:
+  . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
+    (eriklundin)
 
 03 Oct 2019, PHP 7.4.0RC3
 
