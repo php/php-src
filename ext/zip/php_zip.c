@@ -1270,47 +1270,36 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 	switch (opt) {
 		case 0:
 			RETURN_STRING((char *)zr_rsrc->sb.name);
-			break;
 		case 1:
 			RETURN_LONG((zend_long) (zr_rsrc->sb.comp_size));
-			break;
 		case 2:
 			RETURN_LONG((zend_long) (zr_rsrc->sb.size));
-			break;
 		case 3:
 			switch (zr_rsrc->sb.comp_method) {
 				case 0:
 					RETURN_STRING("stored");
-					break;
 				case 1:
 					RETURN_STRING("shrunk");
-					break;
 				case 2:
 				case 3:
 				case 4:
 				case 5:
 					RETURN_STRING("reduced");
-					break;
 				case 6:
 					RETURN_STRING("imploded");
-					break;
 				case 7:
 					RETURN_STRING("tokenized");
 					break;
 				case 8:
 					RETURN_STRING("deflated");
-					break;
 				case 9:
 					RETURN_STRING("deflatedX");
 					break;
 				case 10:
 					RETURN_STRING("implodedX");
-					break;
 				default:
 					RETURN_FALSE;
 			}
-			RETURN_LONG((zend_long) (zr_rsrc->sb.comp_method));
-			break;
 	}
 
 }
