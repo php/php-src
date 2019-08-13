@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #78391 (Assertion failure in openssl_random_pseudo_bytes).
     (Nikita)
 
+- Reflection:
+  . Fixed bug #78410 (Cannot "manually" unserialize class that is final and
+    extends an internal one). (Nikita)
+
 08 Aug 2019, PHP 7.4.0beta2
 
 - Core:
