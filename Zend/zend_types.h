@@ -1032,6 +1032,7 @@ static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 }
 
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
+	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
 	return --(p->refcount);
 }
