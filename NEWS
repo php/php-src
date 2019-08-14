@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.23
 
+- Core:
+  . Fixed bug #78412 (Generator incorrectly reports non-releasable $this as GC
+    child). (Nikita)
+
 29 Aug 2019, PHP 7.2.22
 
 - Core:

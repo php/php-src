@@ -271,7 +271,7 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
 			size += EX_NUM_ARGS() - op_array->num_args;
 		}
-		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
+		size += (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) != 0; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
 		/* Live vars */
@@ -352,7 +352,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		}
 	}
 
-	if (Z_TYPE(execute_data->This) == IS_OBJECT) {
+	if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
