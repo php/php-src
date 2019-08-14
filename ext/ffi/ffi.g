@@ -558,7 +558,7 @@ expression(zend_ffi_val *val):
 
 assignment_expression(zend_ffi_val *val):
 //	(	unary_expression
-//		("="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|=")
+//		("="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|"&="|"^="|"|="|"&&="|"||=")
 //	)* // TODO: not-implemented ???
 	conditional_expression(val)
 ;
