@@ -41,3 +41,4 @@ function enchant_dict_check($dict, string $word): bool {}
 
 /** @resource $dict */
 function enchant_dict_store_replacement($dict, string $mis, string $cor): void {}
+
