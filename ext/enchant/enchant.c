@@ -26,7 +26,7 @@
 #include "ext/standard/info.h"
 #include <enchant.h>
 #include "php_enchant.h"
-#include "enchant.stubs.php_arginfo.h"
+#include "enchant_arginfo.h"
 
 typedef EnchantBroker * EnchantBrokerPtr;
 typedef struct _broker_struct enchant_broker;
