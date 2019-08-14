@@ -405,7 +405,8 @@ static void gc_trace_ref(zend_refcounted *ref) {
 		fprintf(stderr, "[%p] rc=%d addr=%d %s %s ",
 			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
 			gc_color_name(GC_REF_COLOR(ref)),
-			zend_get_type_by_const(GC_TYPE(ref)));
+			GC_TYPE(ref) == IS_REFERENCE
+				? "reference" : zend_get_type_by_const(GC_TYPE(ref)));
 	}
 }
 #endif
