@@ -1280,11 +1280,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ hrtime.c */
-ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
-	ZEND_ARG_INFO(0, get_as_number)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ html.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)

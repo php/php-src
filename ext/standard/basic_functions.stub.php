@@ -94,6 +94,11 @@ function crc32(string $str): int {}
 
 function crypt(string $str, string $salt = UNKNOWN): string {}
 
+/* hrtime.c */
+
+/** @return array|int|float|false */
+function hrtime(bool $get_as_number = false) {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H

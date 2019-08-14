@@ -114,6 +114,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hrtime, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, get_as_number, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_SYSLOG_H)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openlog, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, ident, IS_STRING, 0)
@@ -135,13 +139,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_INET_NTOP)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inet_ntop, 0, 1, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inet_ntop, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, in_addr, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_INET_PTON)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inet_pton, 0, 1, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inet_pton, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, ip_address, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
