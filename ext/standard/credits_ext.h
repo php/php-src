@@ -28,7 +28,7 @@ CREDIT_LINE("FTP", "Stefan Esser, Andrew Skalski");
 CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead, Jouni Ahto, Ilia Alshanetsky, Pierre-Alain Joye, Marcus Boerger");
 CREDIT_LINE("GetText", "Alex Plotnick");
 CREDIT_LINE("GNU GMP support", "Stanislav Malyshev");
-CREDIT_LINE("Iconv", "Rui Hirokawa, Stig Bakken, Moriyoshi Koizumi ");
+CREDIT_LINE("Iconv", "Rui Hirokawa, Stig Bakken, Moriyoshi Koizumi");
 CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski, Chuck Hagenbuch, Daniel R Kalowsky");
 CREDIT_LINE("Input Filter", "Rasmus Lerdorf, Derick Rethans, Pierre-Alain Joye, Ilia Alshanetsky");
 CREDIT_LINE("InterBase", "Jouni Ahto, Andrew Avdeev, Ard Biesheuvel");
