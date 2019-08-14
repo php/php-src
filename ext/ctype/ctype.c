@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_ctype.h"
+#include "ctype_arginfo.h"
 #include "SAPI.h"
 #include "ext/standard/info.h"
 
@@ -43,52 +44,6 @@ static PHP_FUNCTION(ctype_punct);
 static PHP_FUNCTION(ctype_space);
 static PHP_FUNCTION(ctype_upper);
 static PHP_FUNCTION(ctype_xdigit);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_alnum, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_alpha, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_cntrl, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_digit, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_lower, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_graph, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_print, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_punct, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_space, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_upper, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ctype_xdigit, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ ctype_functions[]
