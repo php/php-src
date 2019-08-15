@@ -1,9 +1,10 @@
 <?php
 
 /**
+ * @param string|resource $file
  * @return resource|false
  */
-function bzopen (string $filename, string $mode) {}
+ function bzopen($file, string $mode) {}
 
 /**
  * @param resource $bz
@@ -15,7 +16,7 @@ function bzread ($bz, int $length = 1024) {}
  * @param resource $bz
  * @return int|false
  */
-function bzwrite ($bz, string $data, ?int $length = null) {}
+function bzwrite ($bz, string $data, int $length = UNKNOWN) {}
 
 /**
  * @param resource $bz
