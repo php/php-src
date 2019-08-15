@@ -22,6 +22,7 @@
 
 #include "php.h"
 #include "php_bz2.h"
+#include "bz2_arginfo.h"
 
 #if HAVE_BZ2
 
@@ -55,7 +56,7 @@ static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzread,       arginfo_bzread)
 	PHP_FALIAS(bzwrite,   fwrite,		arginfo_bzwrite)
 	PHP_FALIAS(bzflush,   fflush,		arginfo_bzflush)
-	PHP_FALIAS(bzclose,   fclose,		arginfo_bzflush)
+	PHP_FALIAS(bzclose,   fc1lose,		arginfo_bzflush)
 	PHP_FE(bzerrno,      arginfo_bzerrno)
 	PHP_FE(bzerrstr,     arginfo_bzerrstr)
 	PHP_FE(bzerror,      arginfo_bzerror)
