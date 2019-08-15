@@ -1429,88 +1429,76 @@ SXE_METHOD(asXML)
 	xmlOutputBufferPtr  outbuf;
 	xmlChar            *strval;
 	int                 strval_len;
-	char               *filename;
+	char               *filename = NULL;
 	size_t                 filename_len;
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
-	}
-
-	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-
-		sxe = Z_SXEOBJ_P(ZEND_THIS);
-		GET_NODE(sxe, node);
-		node = php_sxe_get_first_node(sxe, node);
-
-		if (node) {
-			if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-				int bytes;
-				bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
-				if (bytes == -1) {
-					RETURN_FALSE;
-				} else {
-					RETURN_TRUE;
-				}
-			} else {
-				outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
-
-				if (outbuf == NULL) {
-					RETURN_FALSE;
-				}
-
-				xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
-				xmlOutputBufferClose(outbuf);
-				RETURN_TRUE;
-			}
-		} else {
-			RETURN_FALSE;
-		}
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
 
-	if (node) {
+	if (!node) {
+		RETURN_FALSE;
+	}
+
+	if (filename) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-			if (!strval) {
-				RETVAL_FALSE;
+			int bytes;
+			bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
+			if (bytes == -1) {
+				RETURN_FALSE;
 			} else {
-				RETVAL_STRINGL((char *)strval, strval_len);
+				RETURN_TRUE;
 			}
-			xmlFree(strval);
 		} else {
-			char *return_content;
-			size_t return_len;
-			/* Should we be passing encoding information instead of NULL? */
-			outbuf = xmlAllocOutputBuffer(NULL);
+			outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
 
 			if (outbuf == NULL) {
 				RETURN_FALSE;
 			}
 
-			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-			xmlOutputBufferFlush(outbuf);
-#ifdef LIBXML2_NEW_BUFFER
-			return_content = (char *)xmlOutputBufferGetContent(outbuf);
-			return_len = xmlOutputBufferGetSize(outbuf);
-#else
-			return_content = (char *)outbuf->buffer->content;
-			return_len = outbuf->buffer->use;
-#endif
-			if (!return_content) {
-				RETVAL_FALSE;
-			} else {
-				RETVAL_STRINGL(return_content, return_len);
-			}
+			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
 			xmlOutputBufferClose(outbuf);
+			RETURN_TRUE;
 		}
+	}
+
+	if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
+		xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
+		if (!strval) {
+			RETVAL_FALSE;
+		} else {
+			RETVAL_STRINGL((char *)strval, strval_len);
+		}
+		xmlFree(strval);
 	} else {
-		RETVAL_FALSE;
+		char *return_content;
+		size_t return_len;
+		/* Should we be passing encoding information instead of NULL? */
+		outbuf = xmlAllocOutputBuffer(NULL);
+
+		if (outbuf == NULL) {
+			RETURN_FALSE;
+		}
+
+		xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
+		xmlOutputBufferFlush(outbuf);
+#ifdef LIBXML2_NEW_BUFFER
+		return_content = (char *)xmlOutputBufferGetContent(outbuf);
+		return_len = xmlOutputBufferGetSize(outbuf);
+#else
+		return_content = (char *)outbuf->buffer->content;
+		return_len = outbuf->buffer->use;
+#endif
+		if (!return_content) {
+			RETVAL_FALSE;
+		} else {
+			RETVAL_STRINGL(return_content, return_len);
+		}
+		xmlOutputBufferClose(outbuf);
 	}
 }
 /* }}} */
