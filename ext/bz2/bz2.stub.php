@@ -7,7 +7,7 @@ function bzopen (string $filename, string $mode) {}
 
 /**
  * @param resource $bz
- * @return string|false.
+ * @return string|false
  */
 function bzread ($bz, $length = 1024) {}
 
