@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #78410 (Cannot "manually" unserialize class that is final and
     extends an internal one). (Nikita)
 
+- SPL:
+  . Fixed bug #78409 (Segfault when creating instance of ArrayIterator without
+    constructor). (Nikita)
+
 08 Aug 2019, PHP 7.4.0beta2
 
 - Core:
