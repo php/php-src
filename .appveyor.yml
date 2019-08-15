@@ -9,6 +9,13 @@ branches:
 
 clone_depth: 64
 
+skip_commits:
+  files:
+    - docs/*
+    - NEWS
+    - UPGRADING
+    - UPGRADING.INTERNALS
+
 cache:
         - c:\build-cache
 
