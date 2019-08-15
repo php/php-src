@@ -50,51 +50,6 @@ static PHP_FUNCTION(bzerror);
 static PHP_FUNCTION(bzcompress);
 static PHP_FUNCTION(bzdecompress);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzread, 0, 0, 1)
-	ZEND_ARG_INFO(0, bz)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzopen, 0)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerrno, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerrstr, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerror, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, blocksize)
-	ZEND_ARG_INFO(0, workfactor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzdecompress, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, small)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzwrite, 0, 0, 2)
-	ZEND_ARG_INFO(0, fp)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzflush, 0)
-	ZEND_ARG_INFO(0, fp)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       arginfo_bzopen)
 	PHP_FE(bzread,       arginfo_bzread)
@@ -212,7 +167,7 @@ static int php_bz2iop_close(php_stream *stream, int close_handle)
 static int php_bz2iop_flush(php_stream *stream)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
-	return BZ2_bzflush(self->bz_file);
+	return g(self->bz_file);
 }
 /* }}} */
 
