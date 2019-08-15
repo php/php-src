@@ -26,6 +26,7 @@
 #include "ext/standard/info.h"
 #include <enchant.h>
 #include "php_enchant.h"
+#include "enchant_arginfo.h"
 
 typedef EnchantBroker * EnchantBrokerPtr;
 typedef struct _broker_struct enchant_broker;
@@ -59,63 +60,6 @@ static int le_enchant_dict;
 #define PHP_ENCHANT_MYSPELL 1
 #define PHP_ENCHANT_ISPELL 2
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_enchant_broker_init, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_free, 0, 0, 1)
-	ZEND_ARG_INFO(0, broker)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_set_dict_path, 0, 0, 3)
-	ZEND_ARG_INFO(0, broker)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_get_dict_path, 0, 0, 2)
-	ZEND_ARG_INFO(0, broker)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_request_dict, 0, 0, 2)
-	ZEND_ARG_INFO(0, broker)
-	ZEND_ARG_INFO(0, tag)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_request_pwl_dict, 0, 0, 2)
-	ZEND_ARG_INFO(0, broker)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_free_dict, 0, 0, 1)
-	ZEND_ARG_INFO(0, dict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_broker_set_ordering, 0, 0, 3)
-	ZEND_ARG_INFO(0, broker)
-	ZEND_ARG_INFO(0, tag)
-	ZEND_ARG_INFO(0, ordering)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_quick_check, 0, 0, 2)
-	ZEND_ARG_INFO(0, dict)
-	ZEND_ARG_INFO(0, word)
-	ZEND_ARG_INFO(1, suggestions)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_check, 0, 0, 2)
-	ZEND_ARG_INFO(0, dict)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_enchant_dict_store_replacement, 0, 0, 3)
-	ZEND_ARG_INFO(0, dict)
-	ZEND_ARG_INFO(0, mis)
-	ZEND_ARG_INFO(0, cor)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ enchant_functions[]
  *
  * Every user visible function must have an entry in enchant_functions[].
@@ -123,24 +67,24 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
-	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_get_error)
 	PHP_FE(enchant_broker_set_dict_path,	arginfo_enchant_broker_set_dict_path)
 	PHP_FE(enchant_broker_get_dict_path,	arginfo_enchant_broker_get_dict_path)
-	PHP_FE(enchant_broker_list_dicts, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_list_dicts, 		arginfo_enchant_broker_list_dicts)
 	PHP_FE(enchant_broker_request_dict,		arginfo_enchant_broker_request_dict)
 	PHP_FE(enchant_broker_request_pwl_dict, arginfo_enchant_broker_request_pwl_dict)
 	PHP_FE(enchant_broker_free_dict, 		arginfo_enchant_broker_free_dict)
-	PHP_FE(enchant_broker_dict_exists, 		arginfo_enchant_broker_request_dict)
+	PHP_FE(enchant_broker_dict_exists, 		arginfo_enchant_broker_dict_exists)
 	PHP_FE(enchant_broker_set_ordering, 	arginfo_enchant_broker_set_ordering)
-	PHP_FE(enchant_broker_describe, 		arginfo_enchant_broker_free)
+	PHP_FE(enchant_broker_describe, 		arginfo_enchant_broker_describe)
 	PHP_FE(enchant_dict_check, 				arginfo_enchant_dict_check)
-	PHP_FE(enchant_dict_suggest, 			arginfo_enchant_dict_check)
-	PHP_FE(enchant_dict_add_to_personal, 	arginfo_enchant_dict_check)
-	PHP_FE(enchant_dict_add_to_session, 	arginfo_enchant_dict_check)
-	PHP_FE(enchant_dict_is_in_session, 		arginfo_enchant_dict_check)
+	PHP_FE(enchant_dict_suggest, 			arginfo_enchant_dict_suggest)
+	PHP_FE(enchant_dict_add_to_personal, 	arginfo_enchant_dict_add_to_personal)
+	PHP_FE(enchant_dict_add_to_session, 	arginfo_enchant_dict_add_to_session)
+	PHP_FE(enchant_dict_is_in_session, 		arginfo_enchant_dict_is_in_session)
 	PHP_FE(enchant_dict_store_replacement, 	arginfo_enchant_dict_store_replacement)
-	PHP_FE(enchant_dict_get_error, 			arginfo_enchant_broker_free_dict)
-	PHP_FE(enchant_dict_describe, 			arginfo_enchant_broker_free_dict)
+	PHP_FE(enchant_dict_get_error, 			arginfo_enchant_dict_get_error)
+	PHP_FE(enchant_dict_describe, 			arginfo_enchant_dict_describe)
 	PHP_FE(enchant_dict_quick_check, 		arginfo_enchant_dict_quick_check)
 	PHP_FE_END
 };
