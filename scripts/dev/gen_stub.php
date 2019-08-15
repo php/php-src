@@ -316,30 +316,24 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     foreach ($funcInfo->args as $argInfo) {
-        if ($argInfo->isVariadic) {
-            if ($argInfo->type) {
-                throw new Exception("Not implemented");
-            }
-            $code .= sprintf(
-                "\tZEND_ARG_VARIADIC_INFO(%d, %s)\n",
-                $argInfo->byRef, $argInfo->name
-            );
-        } else if ($argInfo->type) {
+        $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
+        if ($argInfo->type) {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
-                    "\tZEND_ARG_TYPE_INFO(%d, %s, %s, %d)\n",
-                    $argInfo->byRef, $argInfo->name,
+                    "\tZEND_%s_TYPE_INFO(%d, %s, %s, %d)\n",
+                    $argKind, $argInfo->byRef, $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
-                    "\tZEND_ARG_OBJ_INFO(%d, %s, %s, %d)\n",
-                    $argInfo->byRef, $argInfo->name,
+                    "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
+                    $argKind, $argInfo->byRef, $argInfo->name,
                     $argInfo->type->name, $argInfo->type->isNullable
                 );
             }
         } else {
-            $code .= sprintf("\tZEND_ARG_INFO(%d, %s)\n", $argInfo->byRef, $argInfo->name);
+            $code .= sprintf(
+                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->byRef, $argInfo->name);
         }
     }
 
