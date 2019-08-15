@@ -9,13 +9,13 @@ function bzopen (string $filename, string $mode) {}
  * @param resource $bz
  * @return string|false
  */
-function bzread ($bz, $length = 1024) {}
+function bzread ($bz, int $length = 1024) {}
 
 /**
  * @param resource $bz
  * @return int|false
  */
-function bzwrite ($bz, $data, $length = null) {}
+function bzwrite ($bz, string $data, ?int $length = null) {}
 
 /**
  * @param resource $bz
