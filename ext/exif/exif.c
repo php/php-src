@@ -42,6 +42,7 @@
 #endif
 
 #include "php_exif.h"
+#include "exif_arginfo.h"
 #include <math.h>
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
@@ -65,31 +66,6 @@ typedef unsigned char uchar;
 #define EFREE_IF(ptr)	if (ptr) efree(ptr)
 
 #define MAX_IFD_NESTING_LEVEL 150
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_exif_tagname, 0)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_read_data, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, sections_needed)
-	ZEND_ARG_INFO(0, sub_arrays)
-	ZEND_ARG_INFO(0, read_thumbnail)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_exif_thumbnail, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(1, width)
-	ZEND_ARG_INFO(1, height)
-	ZEND_ARG_INFO(1, imagetype)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_exif_imagetype, 0)
-	ZEND_ARG_INFO(0, imagefile)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 
 /* {{{ exif_functions[]
  */
@@ -4391,7 +4367,7 @@ PHP_FUNCTION(exif_read_data)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(z_sections_needed)
+		Z_PARAM_STR_EX(z_sections_needed, 1, 0)
 		Z_PARAM_BOOL(sub_arrays)
 		Z_PARAM_BOOL(read_thumbnail)
 	ZEND_PARSE_PARAMETERS_END();
