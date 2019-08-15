@@ -2,15 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.10
 
-- Core:
-  . Fixed bug #78412 (Generator incorrectly reports non-releasable $this as GC
-    child). (Nikita)
-
 29 Aug 2019, PHP 7.3.9
 
 - Core:
   . Fixed bug #78363 (Buffer overflow in zendparse). (Nikita)
   . Fixed bug #78379 (Cast to object confuses GC, causes crash). (Dmitry)
+  . Fixed bug #78412 (Generator incorrectly reports non-releasable $this as GC
+    child). (Nikita)
 
 - Curl:
   . Fixed bug #77946 (Bad cURL resources returned by curl_multi_info_read()).
