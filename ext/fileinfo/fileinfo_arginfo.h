@@ -2,7 +2,7 @@
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_finfo___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, arg, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_finfo_set_flags, 0, 2, _IS_BOOL, 0)
@@ -24,10 +24,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_finfo_buffer, 0, 1, IS_STR
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_finfo_open, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_finfo_open arginfo_class_finfo___construct
 
 #define arginfo_finfo_set_flags arginfo_class_finfo_set_flags
 
@@ -35,7 +32,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_finfo_buffer arginfo_class_finfo_buffer
 
-#define arginfo_finfo_open arginfo_class_finfo_open
+#define arginfo_finfo_open arginfo_class_finfo___construct
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_finfo_close, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, finfo)

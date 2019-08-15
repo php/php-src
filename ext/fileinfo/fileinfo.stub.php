@@ -2,7 +2,7 @@
 
 class finfo
 {
-    function __construct(int $options = FILEINFO_NONE, ?string $arg = null);
+    function __construct(int $options = FILEINFO_NONE, string $file = NULL);
 
     /**
      * @param resource $finfo
