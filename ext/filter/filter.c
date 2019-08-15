@@ -28,6 +28,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
 #include "filter_private.h"
+#include "filter_arginfo.h"
 
 typedef struct filter_list_entry {
 	const char *name;
