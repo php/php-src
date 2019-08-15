@@ -109,7 +109,7 @@ PHP_METHOD(sqlite3, open)
 
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (FAILURE == zend_parse_parameters_throw(ZEND_NUM_ARGS(), "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
 		return;
 	}
 
@@ -1088,7 +1088,7 @@ PHP_METHOD(sqlite3, createCollation)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &collation_name, &collation_name_len, &callback_func) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!collation_name_len) {
@@ -1867,7 +1867,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "OS", &db_zval, php_sqlite3_sc_entry, &sql) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &db_zval, php_sqlite3_sc_entry, &sql) == FAILURE) {
 		return;
 	}
 
