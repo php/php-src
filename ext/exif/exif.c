@@ -4391,7 +4391,7 @@ PHP_FUNCTION(exif_read_data)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ZVAL(stream)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(z_sections_needed)
+		Z_PARAM_STR_EX(z_sections_needed, 1, 0)
 		Z_PARAM_BOOL(sub_arrays)
 		Z_PARAM_BOOL(read_thumbnail)
 	ZEND_PARSE_PARAMETERS_END();
