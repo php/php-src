@@ -167,7 +167,7 @@ static int php_bz2iop_close(php_stream *stream, int close_handle)
 static int php_bz2iop_flush(php_stream *stream)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
-	return g(self->bz_file);
+	return BZ2_bzflush(self->bz_file);
 }
 /* }}} */
 
