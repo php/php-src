@@ -112,10 +112,10 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 /* {{{ finfo_class_functions
  */
 static const zend_function_entry finfo_class_functions[] = {
-	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_set_flags, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_buffer, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_class_finfo_open, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
