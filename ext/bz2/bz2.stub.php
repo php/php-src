@@ -30,7 +30,6 @@ function bzclose ($bz): bool {}
 
 /**
  * @param resource $bz
- * @return int
  */
 function bzerrno ($bz): int {}
 
