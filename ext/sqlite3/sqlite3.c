@@ -1735,9 +1735,8 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 	}
 /* }}} */
 
-/* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
-   Bind Parameter to a stmt variable. */
-PHP_METHOD(sqlite3stmt, bindParam)
+/* {{{ Common implementation of ::bindParam() and ::bindValue */
+static void sqlite3stmt_bind(INTERNAL_FUNCTION_PARAMETERS)
 {
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = ZEND_THIS;
@@ -1774,42 +1773,19 @@ PHP_METHOD(sqlite3stmt, bindParam)
 }
 /* }}} */
 
+/* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
+   Bind Parameter to a stmt variable. */
+PHP_METHOD(sqlite3stmt, bindParam)
+{
+	sqlite3stmt_bind(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
 /* {{{ proto bool SQLite3Stmt::bindValue(int parameter_number, mixed parameter [, int type])
    Bind Value of a parameter to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindValue)
 {
-	php_sqlite3_stmt *stmt_obj;
-	zval *object = ZEND_THIS;
-	struct php_sqlite3_bound_param param = {0};
-	zval *parameter;
-	stmt_obj = Z_SQLITE3_STMT_P(object);
-
-	param.param_number = -1;
-	param.type = SQLITE3_TEXT;
-
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "lz|l", &param.param_number, &parameter, &param.type) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name, &parameter, &param.type) == FAILURE) {
-			return;
-		}
-	}
-
-	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
-	SQLITE3_CHECK_INITIALIZED_STMT(stmt_obj->stmt, SQLite3Stmt);
-
-	ZVAL_COPY(&param.parameter, parameter);
-
-	if (ZEND_NUM_ARGS() < 3) {
-		PHP_SQLITE3_SET_TYPE(parameter, param);
-	}
-
-	if (!register_bound_parameter_to_sqlite(&param, stmt_obj)) {
-		if (!Z_ISUNDEF(param.parameter)) {
-			zval_ptr_dtor(&(param.parameter));
-			ZVAL_UNDEF(&param.parameter);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
+	sqlite3stmt_bind(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
