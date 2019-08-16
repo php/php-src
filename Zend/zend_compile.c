@@ -2380,6 +2380,7 @@ static zend_op *zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t t
 			opline->result_type = IS_TMP_VAR;
 			result->op_type = IS_TMP_VAR;
 		}
+		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 		return opline;
 	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
 		return zend_compile_simple_var_no_cv(result, ast, type, delayed);
@@ -2474,6 +2475,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
@@ -3010,6 +3012,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 						if (is_this_fetch(arg)) {
 							zend_emit_op(&arg_node, ZEND_FETCH_THIS, NULL, NULL);
 							opcode = ZEND_SEND_VAR_EX;
+							CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 							break;
 						} else if (zend_try_compile_cv(&arg_node, arg) == SUCCESS) {
 							opcode = ZEND_SEND_VAR_EX;
@@ -3878,6 +3881,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
 		zend_compile_expr(&obj_node, obj_ast);
 	}
@@ -7785,6 +7789,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_VAR:
 			if (is_this_fetch(var_ast)) {
 				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_THIS, NULL, NULL);
+				CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 			} else if (zend_try_compile_cv(&var_node, var_ast) == SUCCESS) {
 				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_CV, &var_node, NULL);
 			} else {

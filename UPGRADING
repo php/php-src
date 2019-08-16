@@ -365,7 +365,7 @@ PHP 7.4 UPGRADE NOTES
     ReflectionMethod::getClosure() and closure rebinding is deprecated. Doing
     so is equivalent to calling a non-static method statically, which has been
     deprecated since PHP 7.0.
-  . Unbinding $this of a non-static closure is deprecated.
+  . Unbinding $this of a non-static closure that uses $this is deprecated.
   . Using "parent" inside a class without a parent is deprecated, and will throw
     a compile-time error in the future. Currently an error will only be
     generated if/when the parent is accessed at run-time.
