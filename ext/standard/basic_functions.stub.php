@@ -99,6 +99,13 @@ function crypt(string $str, string $salt = UNKNOWN): string {}
 /** @return array|int|float|false */
 function hrtime(bool $get_as_number = false) {}
 
+/* md5.c */
+
+function md5(string $str, bool $raw_output = false): string {}
+
+/** @return string|false */
+function md5_file(string $filename, bool $raw_output = false) {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
