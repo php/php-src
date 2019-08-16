@@ -116,9 +116,7 @@ function in_array($needle, array $haystack, bool $strict = false): bool {}
 /** @return int|string|false */
 function array_search($needle, array $haystack, bool $strict = false) {}
 
-/**
- * @prefer-ref $arg
- */
+/** @prefer-ref $arg */
 function extract(array &$arg, $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
 
 function compact(...$var_names): ?array {}
@@ -193,7 +191,8 @@ function array_intersect_ukey(array $arr1, array $arr2, $callback_key_compare_fu
 
 function array_intersect(array $arr1, array ...$arrays): array {}
 
-function array_uintersect(array $arr1, array ...$arr2, callable $callback_data_compare_func): array {}
+// tests break if $arr2 is variadic
+function array_uintersect(array $arr1, array $arr2, $callback_data_compare_func): array {}
 
 function array_intersect_assoc(array $arr1, array ...$arrays): array {}
 

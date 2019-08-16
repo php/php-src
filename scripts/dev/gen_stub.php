@@ -197,7 +197,9 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     $paramMeta = [];
 
     if ($comment) {
-        foreach (explode("\n", $comment->getText()) as $commentLine) {
+        $commentText = substr($comment->getText(), 2, -2);
+
+        foreach (explode("\n", $commentText) as $commentLine) {
             if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
                 $varName = $matches[1];
                 if (!isset($paramMeta[$varName])) {
