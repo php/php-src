@@ -483,7 +483,7 @@ static const char error_texts[] =
   "lookbehind assertion is not fixed length\0"
   "malformed number or name after (?(\0"
   "conditional group contains more than two branches\0"
-  "assertion expected after (?(\0"
+  "assertion expected after (?( or (?(?C)\0"
   "(?R or (?[+-]digits must be followed by )\0"
   /* 30 */
   "unknown POSIX class name\0"
@@ -6732,6 +6732,15 @@ for (;; ptr++)
           for (i = 3;; i++) if (!IS_DIGIT(ptr[i])) break;
           if (ptr[i] == CHAR_RIGHT_PARENTHESIS)
             tempptr += i + 1;
+
+          /* tempptr should now be pointing to the opening parenthesis of the
+          assertion condition. */
+
+          if (*tempptr != CHAR_LEFT_PARENTHESIS)
+            {
+            *errorcodeptr = ERR28;
+            goto FAILED;
+            }
           }
 
         /* For conditions that are assertions, check the syntax, and then exit
