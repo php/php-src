@@ -114,7 +114,9 @@ function in_array($needle, array $haystack, bool $strict = false): bool {}
 /** @return int|string|false */
 function array_search($needle, array $haystack, bool $strict = false) {}
 
-#prefref arg
+/**
+ * @prefer-ref $arg
+ */
 function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
 
 function compact(...$var_names): array {}
@@ -214,10 +216,12 @@ function array_udiff_assoc(array $arr1, array $arr2, array ...$arrays, callable 
 
 function array_udiff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func, callable $callback_key_comp_func): array {}
 
-#prefref arr1
-#prefref sort_order
-#prefref sort_flags
-#prefref arr2
+/**
+ * @prefer-ref $arr1
+ * @prefer-ref $sort_order
+ * @prefer-ref $sort_flags
+ * @prefer-ref $arr2
+ */
 function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
 
 /** @return int|string|array|null */

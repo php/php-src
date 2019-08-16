@@ -192,22 +192,28 @@ class FuncInfo {
     }
 }
 
-function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond, array &$paramMeta): FuncInfo {
+function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
+    $comment = $func->getDocComment();
+    $paramMeta = [];
+
+    if ($comment) {
+        foreach (explode("\n", $comment->getText()) as $commentLine) {
+            if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
+                $varName = $matches[1];
+                if (!isset($paramMeta[$varName])) {
+                    $paramMeta[$varName] = [];
+                }
+                $paramMeta[$varName]['preferRef'] = true;
+            }
+        }
+    }
+
     $args = [];
     $numRequiredArgs = 0;
     foreach ($func->getParams() as $i => $param) {
         $varName = $param->var->name;
-        $preferRef = !empty($paramMeta[$varName]['prefRef']);
-
-        if ($preferRef) {
-            unset($paramMeta[$varName]['prefRef']);
-
-            foreach (array_keys($paramMeta[$varName]) as $key) {
-                throw new Exception("Unexpected metadata key $key for param $varName of function $name");
-            }
-
-            unset($paramMeta[$varName]);
-        }
+        $preferRef = !empty($paramMeta[$varName]['preferRef']);
+        unset($paramMeta[$varName]);
 
         $args[] = new ArgInfo(
             $varName,
@@ -232,7 +238,7 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond,
     return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
 }
 
-function handlePreprocessorConditions(array &$conds, array &$paramMeta, Stmt $stmt): ?string {
+function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
     foreach ($stmt->getComments() as $comment) {
         $text = trim($comment->getText());
         if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
@@ -252,12 +258,6 @@ function handlePreprocessorConditions(array &$conds, array &$paramMeta, Stmt $st
                 throw new Exception("Encountered #endif without corresponding #if");
             }
             array_pop($conds);
-        } else if (preg_match('/^#\s*prefref\s+(.+)$/', $text, $matches)) {
-            $name = $matches[1];
-            if (!isset($paramMeta[$name])) {
-                $paramMeta[$name] = [];
-            }
-            $paramMeta[$name]['prefRef'] = true;
         } else if ($text[0] === '#') {
             throw new Exception("Unrecognized preprocessor directive \"$text\"");
         }
@@ -284,22 +284,21 @@ function parseStubFile(string $fileName) {
 
     $funcInfos = [];
     $conds = [];
-    $paramMeta = [];
     foreach ($stmts as $stmt) {
-        $cond = handlePreprocessorConditions($conds, $paramMeta, $stmt);
+        $cond = handlePreprocessorConditions($conds, $stmt);
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond, $paramMeta);
+            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond);
             continue;
         }
 
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
             foreach ($stmt->stmts as $classStmt) {
-                $cond = handlePreprocessorConditions($conds, $paramMeta, $classStmt);
+                $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
                     continue;
                 }
@@ -309,7 +308,7 @@ function parseStubFile(string $fileName) {
                 }
 
                 $funcInfos[] = parseFunctionLike(
-                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond, $paramMeta);
+                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
             }
             continue;
         }
