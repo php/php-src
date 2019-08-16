@@ -105,6 +105,10 @@ function ftok(string $pathname, string $proj): int {}
 /** @return array|int|float|false */
 function hrtime(bool $get_as_number = false) {}
 
+/* lcg.c */
+
+function lcg_value(): float {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
