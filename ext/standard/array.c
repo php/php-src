@@ -6419,7 +6419,7 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
+		php_exception_or_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
 		RETURN_FALSE;
 	}
 

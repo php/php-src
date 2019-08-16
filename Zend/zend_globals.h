@@ -113,6 +113,7 @@ struct _zend_compiler_globals {
 	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
+	zend_bool throw_legacy_failure;
 
 	zend_ast *ast;
 	zend_arena *ast_arena;

@@ -1170,6 +1170,27 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 }
 /* }}} */
 
+/* {{{ php_exception_or_error_docref */
+/* Throw an Exception if throw_legacy_failure declare statement is present otherwise fallback to a traditional
+ * docref error. */
+PHPAPI ZEND_COLD void php_exception_or_error_docref(const char *docref, int type, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	if (CG(throw_legacy_failure) == 1) {
+		char *message = NULL;
+
+		zend_vspprintf(&message, 0, format, args);
+		zend_throw_exception(zend_ce_error_exception, message, E_ERROR);
+		efree(message);
+	} else {
+		php_verror(docref, "", type, format, args);
+	}
+	va_end(args);
+}
+/* }}} */
+
 #ifdef PHP_WIN32
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	char *buf = php_win32_error_to_msg(error);
