@@ -93,7 +93,8 @@ function next(array &$arg) {}
 
 function reset(array &$arg) {}
 
-function current(array $arg) {}
+/** @param array|object $arg */
+function current($arg) {}
 
 /** @return int|string|null */
 function key(array $arg) {}
@@ -102,9 +103,11 @@ function min(...$args) {}
 
 function max(...$args) {}
 
-function array_walk(array &$input, callable $funcname, $userdata = null): bool {}
+/** @param array|object $input */
+function array_walk(&$input, callable $funcname, $userdata = null): bool {}
 
-function array_walk_recursive(array &$input, callable $funcname, $userdata = null): bool {}
+/** @param array|object $input */
+function array_walk_recursive(&$input, callable $funcname, $userdata = null): bool {}
 
 function in_array($needle, array $haystack, bool $strict = false): bool {}
 
@@ -112,7 +115,7 @@ function in_array($needle, array $haystack, bool $strict = false): bool {}
 function array_search($needle, array $haystack, bool $strict = false) {}
 
 #prefref arg
-function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = null): int {}
+function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
 
 function compact(...$var_names): array {}
 
@@ -179,7 +182,7 @@ function array_change_key_case(array $input, int $case = CASE_LOWER): array {}
 
 function array_unique(array $arg, int $flags = SORT_STRING): array {}
 
-function array_intersect_key(array $arr1, array ...$arrays): array {}
+function array_intersect_key(array $arr1, array $arr2, array ...$arrays): array {}
 
 function array_intersect_ukey(array $arr1, array ...$arr2, callable $callback_key_compare_func): array {}
 
@@ -189,7 +192,7 @@ function array_uintersect(array $arr1, array ...$arr2, callable $callback_data_c
 
 function array_intersect_assoc(array $arr1, array ...$arrays): array {}
 
-function array_uintersect_assoc(array $arr1, array ...$arr2, callable $callback_data_compare_func): array {}
+function array_uintersect_assoc(array $arr1, array $arr2, array ...$arrays, callable $callback_data_compare_func): array {}
 
 function array_intersect_uassoc(array $arr1, array ...$arr2, callable $callback_key_compare_func): array {}
 
@@ -197,7 +200,7 @@ function array_uintersect_uassoc(array $arr1, array ...$arr2, callable $callback
 
 function array_diff_key(array $arr1, array ...$arrays): array {}
 
-function array_diff_ukey(array $arr1, array ...$arr2, callable $callback_key_comp_func): array {}
+function array_diff_ukey(array $arr1, array $arr2, array ...$arrays, callable $callback_key_comp_func): array {}
 
 function array_diff(array $arr1, array ...$arrays): array {}
 
@@ -207,7 +210,7 @@ function array_diff_assoc(array $arr1, array ...$arrays): array {}
 
 function array_diff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func): array {}
 
-function array_udiff_assoc(array $arr1, array ...$arr2, callable $callback_key_comp_func): array {}
+function array_udiff_assoc(array $arr1, array $arr2, array ...$arrays, callable $callback_key_comp_func): array {}
 
 function array_udiff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func, callable $callback_key_comp_func): array {}
 
@@ -215,9 +218,10 @@ function array_udiff_uassoc(array $arr1, array ...$arr2, callable $callback_data
 #prefref sort_order
 #prefref sort_flags
 #prefref arr2
-function array_multisort(array &$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
+function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
 
-function array_rand(array $arg, int $num_req = 1): ?array {}
+/** @return int|string|array|null */
+function array_rand(array $arg, int $num_req = 1) {}
 
 /** @return int|float */
 function array_sum(array $arg) {}
@@ -229,7 +233,7 @@ function array_reduce(array $arg, callable $callback, $initial = null) {}
 
 function array_filter(array $arg, callable $callback, int $use_keys = 0): array {}
 
-function array_map(callable $callback, array ...$arrays): array {}
+function array_map(?callable $callback, array ...$arrays): array {}
 
 /** @param int|string $key */
 function array_key_exists($key, array $search): bool {}
