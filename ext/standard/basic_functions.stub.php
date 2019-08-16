@@ -87,9 +87,11 @@ function uksort(array &$arg, callable $cmp_function): bool {}
 
 function end(array &$arg) {}
 
-function prev(array &$arg) {}
+/** @param array|object $arg */
+function prev(&$arg) {}
 
-function next(array &$arg) {}
+/** @param array|object $arg */
+function next(&$arg) {}
 
 function reset(array &$arg) {}
 
@@ -117,9 +119,9 @@ function array_search($needle, array $haystack, bool $strict = false) {}
 /**
  * @prefer-ref $arg
  */
-function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
+function extract(array &$arg, $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
 
-function compact(...$var_names): array {}
+function compact(...$var_names): ?array {}
 
 /** @return array|false */
 function array_fill(int $start_key, int $num, $val) {}
@@ -186,7 +188,8 @@ function array_unique(array $arg, int $flags = SORT_STRING): array {}
 
 function array_intersect_key(array $arr1, array $arr2, array ...$arrays): array {}
 
-function array_intersect_ukey(array $arr1, array ...$arr2, callable $callback_key_compare_func): array {}
+// tests break if $arr2 is variadic
+function array_intersect_ukey(array $arr1, array $arr2, $callback_key_compare_func): array {}
 
 function array_intersect(array $arr1, array ...$arrays): array {}
 
@@ -194,7 +197,8 @@ function array_uintersect(array $arr1, array ...$arr2, callable $callback_data_c
 
 function array_intersect_assoc(array $arr1, array ...$arrays): array {}
 
-function array_uintersect_assoc(array $arr1, array $arr2, array ...$arrays, callable $callback_data_compare_func): array {}
+// tests break if $arr2 is variadic
+function array_uintersect_assoc(array $arr1, array $arr2, $callback_data_compare_func): array {}
 
 function array_intersect_uassoc(array $arr1, array ...$arr2, callable $callback_key_compare_func): array {}
 
@@ -202,7 +206,8 @@ function array_uintersect_uassoc(array $arr1, array ...$arr2, callable $callback
 
 function array_diff_key(array $arr1, array ...$arrays): array {}
 
-function array_diff_ukey(array $arr1, array $arr2, array ...$arrays, callable $callback_key_comp_func): array {}
+// tests break if $arr2 is variadic
+function array_diff_ukey(array $arr1, array $arr2, $callback_key_comp_func): array {}
 
 function array_diff(array $arr1, array ...$arrays): array {}
 
@@ -212,7 +217,8 @@ function array_diff_assoc(array $arr1, array ...$arrays): array {}
 
 function array_diff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func): array {}
 
-function array_udiff_assoc(array $arr1, array $arr2, array ...$arrays, callable $callback_key_comp_func): array {}
+// tests break if $arr2 is variadic
+function array_udiff_assoc(array $arr1, array $arr2, $callback_key_comp_func): array {}
 
 function array_udiff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func, callable $callback_key_comp_func): array {}
 

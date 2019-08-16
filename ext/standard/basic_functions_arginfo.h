@@ -109,9 +109,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_end, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arg, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_prev arginfo_end
+ZEND_BEGIN_ARG_INFO_EX(arginfo_prev, 0, 0, 1)
+	ZEND_ARG_INFO(1, arg)
+ZEND_END_ARG_INFO()
 
-#define arginfo_next arginfo_end
+#define arginfo_next arginfo_prev
 
 #define arginfo_reset arginfo_end
 
@@ -151,11 +153,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_extract, 0, 1, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, arg, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, extract_type, IS_LONG, 0)
+	ZEND_ARG_INFO(0, extract_type)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_compact, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_compact, 0, 0, IS_ARRAY, 1)
 	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
@@ -269,8 +271,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_intersect_ukey, 0, 3, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr1, IS_ARRAY, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, arr2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, callback_key_compare_func, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, arr2, IS_ARRAY, 0)
+	ZEND_ARG_INFO(0, callback_key_compare_func)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_intersect arginfo_array_replace
@@ -283,14 +285,17 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_intersect_assoc arginfo_array_replace
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_uintersect_assoc, 0, 4, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_uintersect_assoc, 0, 3, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr2, IS_ARRAY, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, callback_data_compare_func, IS_CALLABLE, 0)
+	ZEND_ARG_INFO(0, callback_data_compare_func)
 ZEND_END_ARG_INFO()
 
-#define arginfo_array_intersect_uassoc arginfo_array_intersect_ukey
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_intersect_uassoc, 0, 3, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, arr1, IS_ARRAY, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, arr2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback_key_compare_func, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_uintersect_uassoc, 0, 4, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr1, IS_ARRAY, 0)
@@ -301,11 +306,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_diff_key arginfo_array_replace
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_ukey, 0, 4, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_diff_ukey, 0, 3, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arr2, IS_ARRAY, 0)
-	ZEND_ARG_VARIADIC_TYPE_INFO(0, arrays, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, callback_key_comp_func, IS_CALLABLE, 0)
+	ZEND_ARG_INFO(0, callback_key_comp_func)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_diff arginfo_array_replace
