@@ -113,13 +113,16 @@ class ArgInfo {
     /** @var bool */
     public $byRef;
     /** @var bool */
+    public $preferRef;
+    /** @var bool */
     public $isVariadic;
     /** @var Type|null */
     public $type;
 
-    public function __construct(string $name, bool $byRef, bool $isVariadic, ?Type $type) {
+    public function __construct(string $name, bool $byRef, bool $preferRef, bool $isVariadic, ?Type $type) {
         $this->name = $name;
         $this->byRef = $byRef;
+        $this->preferRef = $preferRef;
         $this->isVariadic = $isVariadic;
         $this->type = $type;
     }
@@ -127,6 +130,7 @@ class ArgInfo {
     public function equals(ArgInfo $other): bool {
         return $this->name === $other->name
             && $this->byRef === $other->byRef
+            && $this->preferRef === $other->preferRef
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type);
     }
@@ -188,19 +192,37 @@ class FuncInfo {
     }
 }
 
-function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
+function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond, array &$paramMeta): FuncInfo {
     $args = [];
     $numRequiredArgs = 0;
     foreach ($func->getParams() as $i => $param) {
+        $varName = $param->var->name;
+        $preferRef = !empty($paramMeta[$varName]['prefRef']);
+
+        if ($preferRef) {
+            unset($paramMeta[$varName]['prefRef']);
+
+            foreach (array_keys($paramMeta[$varName]) as $key) {
+                throw new Exception("Unexpected metadata key $key for param $varName of function $name");
+            }
+
+            unset($paramMeta[$varName]);
+        }
+
         $args[] = new ArgInfo(
-            $param->var->name,
+            $varName,
             $param->byRef,
+            $preferRef,
             $param->variadic,
             $param->type ? Type::fromNode($param->type) : null
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
         }
+    }
+
+    foreach (array_keys($paramMeta) as $var) {
+        throw new Exception("Found metadata for invalid param $var of function $name");
     }
 
     $returnType = $func->getReturnType();
@@ -210,7 +232,7 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
 }
 
-function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
+function handlePreprocessorConditions(array &$conds, array &$paramMeta, Stmt $stmt): ?string {
     foreach ($stmt->getComments() as $comment) {
         $text = trim($comment->getText());
         if (preg_match('/^#\s*if\s+(.+)$/', $text, $matches)) {
@@ -230,6 +252,12 @@ function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
                 throw new Exception("Encountered #endif without corresponding #if");
             }
             array_pop($conds);
+        } else if (preg_match('/^#\s*prefref\s+(.+)$/', $text, $matches)) {
+            $name = $matches[1];
+            if (!isset($paramMeta[$name])) {
+                $paramMeta[$name] = [];
+            }
+            $paramMeta[$name]['prefRef'] = true;
         } else if ($text[0] === '#') {
             throw new Exception("Unrecognized preprocessor directive \"$text\"");
         }
@@ -256,21 +284,22 @@ function parseStubFile(string $fileName) {
 
     $funcInfos = [];
     $conds = [];
+    $paramMeta = [];
     foreach ($stmts as $stmt) {
-        $cond = handlePreprocessorConditions($conds, $stmt);
+        $cond = handlePreprocessorConditions($conds, $paramMeta, $stmt);
         if ($stmt instanceof Stmt\Nop) {
             continue;
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond);
+            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond, $paramMeta);
             continue;
         }
 
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
             foreach ($stmt->stmts as $classStmt) {
-                $cond = handlePreprocessorConditions($conds, $classStmt);
+                $cond = handlePreprocessorConditions($conds, $paramMeta, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
                     continue;
                 }
@@ -280,7 +309,7 @@ function parseStubFile(string $fileName) {
                 }
 
                 $funcInfos[] = parseFunctionLike(
-                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
+                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond, $paramMeta);
             }
             continue;
         }
@@ -320,25 +349,35 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         if ($argInfo->type) {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
-                    "\tZEND_%s_TYPE_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->byRef, $argInfo->name,
+                    "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
+                    $argKind, send_by($argInfo), $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
-                    "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->byRef, $argInfo->name,
+                    "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
+                    $argKind, send_by($argInfo), $argInfo->name,
                     $argInfo->type->name, $argInfo->type->isNullable
                 );
             }
         } else {
             $code .= sprintf(
-                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->byRef, $argInfo->name);
+                "\tZEND_%s_INFO(%s, %s)\n", $argKind, send_by($argInfo), $argInfo->name);
         }
     }
 
     $code .= "ZEND_END_ARG_INFO()";
     return $code;
+}
+
+function send_by(ArgInfo $arg): string {
+    if ($arg->preferRef) {
+        return 'ZEND_SEND_PREFER_REF';
+    } else if ($arg->byRef) {
+        return '1';
+    } else {
+        return '0';
+    }
 }
 
 function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
