@@ -46,9 +46,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
 {
 	op_array->type = type;
-	op_array->arg_flags[0] = 0;
-	op_array->arg_flags[1] = 0;
-	op_array->arg_flags[2] = 0;
+	op_array->arg_flags = 0;
 
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
@@ -80,6 +78,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->last_try_catch = 0;
 
 	op_array->fn_flags = 0;
+	op_array->fn_flags2 = 0;
 
 	op_array->last_literal = 0;
 	op_array->literals = NULL;

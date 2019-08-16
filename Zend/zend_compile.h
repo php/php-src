@@ -404,7 +404,8 @@ typedef struct _zend_internal_function_info {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+	zend_uchar fn_flags2;
+	uint16_t arg_flags; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
@@ -453,7 +454,8 @@ typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+	zend_uchar fn_flags2;
+	uint16_t arg_flags; /* bitset of arg_info.pass_by_reference */
 	uint32_t fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
@@ -476,7 +478,8 @@ union _zend_function {
 
 	struct {
 		zend_uchar type;  /* never used */
-		zend_uchar arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+		zend_uchar fn_flags2;
+		uint16_t arg_flags; /* bitset of arg_info.pass_by_reference */
 		uint32_t fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
@@ -952,8 +955,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	zend_check_arg_send_type(zf, arg_num, ZEND_SEND_PREFER_REF)
 
-/* Quick API to check first 12 arguments */
-#define MAX_ARG_FLAG_NUM 12
+/* Quick API to check first 8 arguments */
+#define MAX_ARG_FLAG_NUM 8
 
 #ifdef WORDS_BIGENDIAN
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
@@ -963,10 +966,10 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 	(((zf)->quick_arg_flags >> (((arg_num) - 1) * 2)) & (mask))
 #else
 # define ZEND_SET_ARG_FLAG(zf, arg_num, mask) do { \
-		(zf)->quick_arg_flags |= (((mask) << 6) << (arg_num) * 2); \
+		(zf)->quick_arg_flags |= (((mask) << (16-2)) << (arg_num) * 2); \
 	} while (0)
 # define ZEND_CHECK_ARG_FLAG(zf, arg_num, mask) \
-	(((zf)->quick_arg_flags >> (((arg_num) + 3) * 2)) & (mask))
+	(((zf)->quick_arg_flags >> (((arg_num) + (8-1)) * 2)) & (mask))
 #endif
 
 #define QUICK_ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \

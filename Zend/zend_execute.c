@@ -128,7 +128,8 @@ static ZEND_FUNCTION(pass)
 
 ZEND_API const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
-	{0, 0, 0},              /* arg_flags         */
+	0,                      /* fn_flags2         */
+	0,                      /* arg_flags         */
 	0,                      /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */

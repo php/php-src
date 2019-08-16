@@ -5237,9 +5237,7 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 {
 	uint32_t i, n;
 
-	func->common.arg_flags[0] = 0;
-	func->common.arg_flags[1] = 0;
-	func->common.arg_flags[2] = 0;
+	func->common.arg_flags = 0;
 	if (func->common.arg_info) {
 		n = MIN(func->common.num_args, MAX_ARG_FLAG_NUM);
 		i = 0;
