@@ -101,9 +101,9 @@ function current($arg) {}
 /** @return int|string|null */
 function key(array $arg) {}
 
-function min(...$args) {}
+function min($arg, ...$args) {}
 
-function max(...$args) {}
+function max($arg, ...$args) {}
 
 /** @param array|object $input */
 function array_walk(&$input, callable $funcname, $userdata = null): bool {}
@@ -119,7 +119,7 @@ function array_search($needle, array $haystack, bool $strict = false) {}
 /** @prefer-ref $arg */
 function extract(array &$arg, $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
 
-function compact(...$var_names): ?array {}
+function compact($var_name, ...$var_names): ?array {}
 
 /** @return array|false */
 function array_fill(int $start_key, int $num, $val) {}
