@@ -1229,14 +1229,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ ftok.c */
-#if HAVE_FTOK
-ZEND_BEGIN_ARG_INFO(arginfo_ftok, 0)
-	ZEND_ARG_INFO(0, pathname)
-	ZEND_ARG_INFO(0, proj)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
 /* {{{ head.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_header, 0, 0, 1)
 	ZEND_ARG_INFO(0, header)
