@@ -1585,17 +1585,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
 	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ md5.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ metaphone.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
 	ZEND_ARG_INFO(0, text)
