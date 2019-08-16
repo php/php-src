@@ -335,7 +335,7 @@ static PHP_FUNCTION(bzread)
 	zend_string *data;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_stream_from_zval(stream, bz);
@@ -535,7 +535,7 @@ static PHP_FUNCTION(bzdecompress)
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	bzs.bzalloc = NULL;
