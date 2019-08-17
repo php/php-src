@@ -735,7 +735,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 
 	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 		if (GC_IS_RECURSIVE(ht)) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			zend_throw_error(NULL, "Recursion detected");
 			return 0;
 		}
 		GC_PROTECT_RECURSION(ht);
@@ -773,9 +773,8 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(0);
-			break;
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+			return;
 		case IS_ARRAY:
 			if (mode != COUNT_RECURSIVE) {
 				cnt = zend_array_count(Z_ARRVAL_P(array));
@@ -804,14 +803,12 @@ PHP_FUNCTION(count)
 			}
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(1);
-			break;
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+			return;
 		}
 		default:
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(1);
-			break;
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+			return;
 	}
 }
 /* }}} */
@@ -972,6 +969,7 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 /* check if comparison function is valid */
 #define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
 	if (!zend_is_callable(*func_name, 0, NULL)) {	\
+		/* Convert to Exception ? */ \
 		php_error_docref(NULL, E_WARNING, "Invalid comparison function");	\
 		BG(user_compare_fci) = old_user_compare_fci; \
 		BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
@@ -1226,7 +1224,7 @@ PHP_FUNCTION(current)
 }
 /* }}} */
 
-/* {{{ proto mixed key(array array_arg)
+/* {{{ proto int|string|null key(array array_arg)
    Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
@@ -1240,7 +1238,9 @@ PHP_FUNCTION(key)
 }
 /* }}} */
 
-/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{
+ * proto mixed min(array values)
+ * proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
 {
@@ -1256,14 +1256,14 @@ PHP_FUNCTION(min)
 		zval *result;
 
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "When only one parameter is given, it must be an array");
-			RETVAL_NULL();
+			zend_type_error("When only one parameter is given, it must be an array");
+			return;
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
 				ZVAL_COPY_DEREF(return_value, result);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
-				RETVAL_FALSE;
+				zend_throw_error(NULL, "Array must contain at least one element");
+				return;
 			}
 		}
 	} else {
@@ -1285,7 +1285,9 @@ PHP_FUNCTION(min)
 }
 /* }}} */
 
-/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{
+ * proto mixed max(array values)
+ * proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
@@ -1301,14 +1303,14 @@ PHP_FUNCTION(max)
 		zval *result;
 
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "When only one parameter is given, it must be an array");
-			RETVAL_NULL();
+			zend_type_error("When only one parameter is given, it must be an array");
+			return;
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
 				ZVAL_COPY_DEREF(return_value, result);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
-				RETVAL_FALSE;
+				zend_throw_error(NULL, "Array must contain at least one element");
+				return;
 			}
 		}
 	} else {
@@ -1395,7 +1397,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			SEPARATE_ARRAY(zv);
 			thash = Z_ARRVAL_P(zv);
 			if (GC_IS_RECURSIVE(thash)) {
-				php_error_docref(NULL, E_WARNING, "recursion detected");
+				zend_throw_error(NULL, "Recursion detected");
 				result = FAILURE;
 				break;
 			}
@@ -1446,9 +1448,8 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			target_hash = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(ht_iter, target_hash);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Iterated value is no longer an array or object");
-			result = FAILURE;
-			break;
+			zend_type_error("Iterated value is no longer an array or object");
+			return -1;
 		}
 	} while (!EG(exception));
 
@@ -2448,23 +2449,24 @@ PHP_FUNCTION(extract)
 	extract_type &= 0xff;
 
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		php_error_docref(NULL, E_WARNING, "Invalid extract type");
+		zend_throw_error(NULL, "Invalid extract type");
 		return;
 	}
 
 	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
-		php_error_docref(NULL, E_WARNING, "specified extract type requires the prefix parameter");
+		zend_throw_error(NULL, "specified extract type requires the prefix parameter");
 		return;
 	}
 
 	if (prefix) {
 		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
-			php_error_docref(NULL, E_WARNING, "prefix is not a valid identifier");
+			zend_throw_error(NULL, "prefix is not a valid identifier");
 			return;
 		}
 	}
 
 	if (zend_forbid_dynamic_call("extract()") == FAILURE) {
+		/* TODO Elevate to exception ? */
 		return;
 	}
 
@@ -2551,7 +2553,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 	    if (Z_REFCOUNTED_P(entry)) {
 			if (Z_IS_RECURSIVE_P(entry)) {
-				php_error_docref(NULL, E_WARNING, "recursion detected");
+				zend_throw_error(NULL, "Recursion detected");
 				return;
 			}
 			Z_PROTECT_RECURSION_P(entry);
@@ -2602,7 +2604,7 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array|false array_fill(int start_key, int num, mixed val)
+/* {{{ proto array array_fill(int start_key, int num, mixed val)
    Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
@@ -2617,11 +2619,12 @@ PHP_FUNCTION(array_fill)
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
-			php_error_docref(NULL, E_WARNING, "Too many elements");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Too many elements");
+			return;
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL,
+					"Cannot add element to the array as the next element is already occupied");
+			return;
 		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
 			/* create packed array */
 			Bucket *p;
@@ -2666,8 +2669,8 @@ PHP_FUNCTION(array_fill)
 	} else if (EXPECTED(num == 0)) {
 		RETURN_EMPTY_ARRAY();
 	} else {
-		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Number of elements can't be negative");
+		return;
 	}
 }
 /* }}} */
@@ -2704,8 +2707,9 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
+			return; \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
 		array_init_size(return_value, size); \
@@ -2715,15 +2719,16 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
+			return; \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
 		array_init_size(return_value, size); \
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-/* {{{ proto array|false range(mixed low, mixed high[, int step])
+/* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -2812,8 +2817,8 @@ double_str:
 		high = zval_get_double(zhigh);
 
 		if (zend_isinf(high) || zend_isinf(low)) {
-			php_error_docref(NULL, E_WARNING, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
+			return;
 		}
 
 		if (low > high) { 		/* Negative steps */
@@ -2905,8 +2910,8 @@ long_str:
 	}
 err:
 	if (err) {
-		php_error_docref(NULL, E_WARNING, "step exceeds the specified range");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "step exceeds the specified range");
+		return;
 	}
 }
 /* }}} */
@@ -3146,7 +3151,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 }
 /* }}} */
 
-/* {{{ proto int|false array_push(array stack, mixed var [, mixed ...])
+/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
@@ -3168,8 +3173,9 @@ PHP_FUNCTION(array_push)
 
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
 			Z_TRY_DELREF(new_var);
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL,
+					"Cannot add element to the array as the next element is already occupied");
+			return;
 		}
 	}
 
@@ -3572,7 +3578,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				ZVAL_DEREF(dest_zval);
 				thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
 				if ((thash && GC_IS_RECURSIVE(thash)) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
-					php_error_docref(NULL, E_WARNING, "recursion detected");
+					zend_throw_error(NULL, "Recursion detected");
 					return 0;
 				}
 
@@ -3693,7 +3699,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 		if (Z_IS_RECURSIVE_P(dest_zval) ||
 		    Z_IS_RECURSIVE_P(src_zval) ||
 		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			zend_throw_error(NULL, "Recursion detected");
 			return 0;
 		}
 
@@ -4101,7 +4107,8 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_P(tmp)++;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only count STRING and INTEGER values!");
+			zend_type_error("Can only count STRING and INTEGER values!");
+			return;
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4129,7 +4136,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "The %s key should be either a string or an integer", name);
+			zend_type_error("The %s key should be either a string or an integer", name);
 			return 0;
 	}
 }
@@ -4323,7 +4330,7 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
-/* {{{ proto array|false array_pad(array input, int pad_size, mixed pad_value)
+/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
    Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
@@ -4347,8 +4354,8 @@ PHP_FUNCTION(array_pad)
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
 	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
-		php_error_docref(NULL, E_WARNING, "You may only pad up to 1048576 elements at a time");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Only 1048576 elements may be pad up at a time.");
+		return;
 	}
 
 	if (input_size >= pad_size_abs) {
@@ -4444,7 +4451,8 @@ PHP_FUNCTION(array_flip)
 			}
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only flip STRING and INTEGER values!");
+			zend_type_error("Can only flip STRING and INTEGER values!");
+			return;
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -5174,7 +5182,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			param_spec = "+f";
 			diff_data_compare_func = php_array_user_compare;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			zend_throw_error(NULL,
+					"data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;
 		}
 
@@ -5688,7 +5697,7 @@ PHP_FUNCTION(array_multisort)
 						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? PHP_SORT_DESC : PHP_SORT_ASC;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
@@ -5704,19 +5713,19 @@ PHP_FUNCTION(array_multisort)
 						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
 
 				default:
-					php_error_docref(NULL, E_WARNING, "Argument #%d is an unknown sort flag", i + 1);
+					zend_type_error("Argument #%d is an unknown sort flag", i + 1);
 					MULTISORT_ABORT;
 					break;
 
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or a sort flag", i + 1);
+			zend_type_error("Argument #%d is expected to be an array or a sort flag", i + 1);
 			MULTISORT_ABORT;
 		}
 	}
@@ -5727,7 +5736,7 @@ PHP_FUNCTION(array_multisort)
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
-			php_error_docref(NULL, E_WARNING, "Array sizes are inconsistent");
+			zend_throw_error(NULL, "Array sizes are inconsistent");
 			MULTISORT_ABORT;
 		}
 	}
@@ -5823,7 +5832,7 @@ PHP_FUNCTION(array_rand)
 	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	if (num_avail == 0) {
-		php_error_docref(NULL, E_WARNING, "Array is empty");
+		zend_throw_error(NULL, "Array is empty");
 		return;
 	}
 
@@ -5864,7 +5873,8 @@ PHP_FUNCTION(array_rand)
 	}
 
 	if (num_req <= 0 || num_req > num_avail) {
-		php_error_docref(NULL, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
+		zend_throw_error(NULL,
+				"Second argument has to be between 1 and the number of elements in the array");
 		return;
 	}
 
@@ -6322,8 +6332,8 @@ PHP_FUNCTION(array_key_exists)
 			RETVAL_BOOL(zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC()));
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
-			RETVAL_FALSE;
+			zend_type_error("The first argument should be either a string or an integer");
+			return;
 	}
 
 	if (Z_TYPE_P(array) != IS_ARRAY) {
@@ -6354,7 +6364,7 @@ PHP_FUNCTION(array_chunk)
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Size parameter expected to be greater than 0");
+		zend_throw_error(NULL, "Size parameter expected to be greater than 0");
 		return;
 	}
 
@@ -6401,7 +6411,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array|false array_combine(array keys, array values)
+/* {{{ proto array array_combine(array keys, array values)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
@@ -6419,8 +6429,8 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Both parameters should have an equal number of elements");
+		return;
 	}
 
 	if (!num_keys) {

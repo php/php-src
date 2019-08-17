@@ -10,7 +10,12 @@ function error_handle($level, $message, $file = '', $line = 0){
 }
 set_error_handler('error_handle');
 $data = [['aa'=> 'bb',], ['aa'=> 'bb',],];
-array_multisort(array_column($data, 'bb'),SORT_DESC, $data); // PHP Warning error 
+
+try {
+    array_multisort(array_column($data, 'bb'),SORT_DESC, $data); // PHP Warning error
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 ?>
 --EXPECT--
-array_multisort(): Array sizes are inconsistent
+Array sizes are inconsistent

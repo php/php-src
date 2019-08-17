@@ -26,25 +26,21 @@ $fp = fopen("array_count_file", "w+");
 
 $arrays = array ("bobk" => "bobv", "val", 6 => "val6",  $fp, $ob);
 
-var_dump (@array_count_values ($arrays));
-echo "\n";
+try {
+    var_dump (array_count_values ($arrays));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
-
-echo "Done";
 ?>
+
+DONE
 --CLEAN--
 <?php
 unlink("array_count_file");
 ?>
 --EXPECT--
 *** Testing array_count_values() : parameter variations ***
-array(3) {
-  ["bobv"]=>
-  int(1)
-  ["val"]=>
-  int(1)
-  ["val6"]=>
-  int(1)
-}
+Can only count STRING and INTEGER values!
 
-Done
+DONE

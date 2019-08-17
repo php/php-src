@@ -22,18 +22,21 @@ echo "\n-- \$mode not set: --\n";
 var_dump(count ($array1));
 
 echo "\n-- \$mode = 1: --\n";
-var_dump(count ($array1, 1));
+
+try {
+    var_dump(count ($array1, 1));
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing count() : usage variations ***
 
 -- $mode not set: --
 int(4)
 
 -- $mode = 1: --
-
-Warning: count(): recursion detected in %s on line %d
-int(4)
+Recursion detected
 Done

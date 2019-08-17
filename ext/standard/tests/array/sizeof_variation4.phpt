@@ -59,25 +59,37 @@ $values = array (
 $counter = 1;
 foreach($values as $value)
 {
-  echo "-- Iteration $counter --\n";
+    echo "-- Iteration $counter --\n";
 
-  // unset the variable
-  unset($value);
+    // unset the variable
+    unset($value);
 
-  // now check the size of unset variable when different modes are given
-  echo "Default Mode: ";
-  var_dump( sizeof($value) );
-  echo "\n";
+    // now check the size of unset variable when different modes are given
+    echo "Default Mode: ";
+    try {
+        var_dump( sizeof($value) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($value, COUNT_NORMAL) );
-  echo "\n";
+    echo "COUNT_NORMAL Mode: ";
+    try {
+        var_dump( sizeof($value, COUNT_NORMAL) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($value, COUNT_RECURSIVE) );
-  echo "\n";
+    echo "COUNT_RECURSIVE Mode: ";
+    try {
+        var_dump( sizeof($value, COUNT_RECURSIVE) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  $counter++;
+    $counter++;
 }
 
 fclose($fp);
@@ -90,381 +102,261 @@ echo "Done";
 -- Iteration 1 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 2 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 3 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 4 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 5 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 6 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 7 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 8 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 9 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 10 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 11 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 12 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 13 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 14 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 15 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 16 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 17 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 18 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 19 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 -- Iteration 20 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_NORMAL Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 COUNT_RECURSIVE Mode: 
 Notice: Undefined variable: value in %s on line %d
-
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Parameter must be an array or an object that implements Countable
 
 Done

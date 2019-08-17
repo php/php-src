@@ -9558,7 +9558,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 		break;
 	}
 
@@ -16687,7 +16687,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 		break;
 	}
 
@@ -47323,7 +47323,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 		break;
 	}
 

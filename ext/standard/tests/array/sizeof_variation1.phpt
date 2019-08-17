@@ -55,275 +55,173 @@ $values = array (
 $counter = 1;
 for($i = 0; $i < count($values); $i++)
 {
-  echo "-- Iteration $counter --\n";
+    echo "-- Iteration $counter --\n";
 
-  $var = $values[$i];
+    $value = $values[$i];
 
-  echo "Default Mode: ";
-  var_dump( sizeof($var) );
-  echo "\n";
+    echo "Default Mode: ";
+    try {
+        var_dump( sizeof($value) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
-  echo "\n";
+    echo "COUNT_NORMAL Mode: ";
+    try {
+        var_dump( sizeof($value, COUNT_NORMAL) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
-  echo "\n";
+    echo "COUNT_RECURSIVE Mode: ";
+    try {
+        var_dump( sizeof($value, COUNT_RECURSIVE) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  $counter++;
+    $counter++;
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : usage variations ***
 --- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---
 -- Iteration 1 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 2 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 3 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 4 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 5 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 6 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 7 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 8 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 9 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 10 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 11 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 12 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 13 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 14 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 15 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 16 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 17 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 18 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(0)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 -- Iteration 19 --
-Default Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+Default Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL Mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE Mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE Mode: Parameter must be an array or an object that implements Countable
 
 Done

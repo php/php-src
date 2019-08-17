@@ -10,41 +10,51 @@ Test array_column() function: error conditions
  */
 
 echo "*** Testing array_column() : error conditions ***\n";
-
 echo "\n-- Testing array_column() column key parameter should be a string or an integer (testing bool) --\n";
-var_dump(array_column(array(), true));
+try {
+    var_dump(array_column(array(), true));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
+
 
 echo "\n-- Testing array_column() column key parameter should be a string or integer (testing array) --\n";
-var_dump(array_column(array(), array()));
+try {
+    var_dump(array_column(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing array_column() index key parameter should be a string or an integer (testing bool) --\n";
-var_dump(array_column(array(), 'foo', true));
+try {
+    var_dump(array_column(array(), 'foo', true));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing array_column() index key parameter should be a string or integer (testing array) --\n";
-var_dump(array_column(array(), 'foo', array()));
+try {
+    var_dump(array_column(array(), 'foo', array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
-echo "Done\n";
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 *** Testing array_column() : error conditions ***
 
 -- Testing array_column() column key parameter should be a string or an integer (testing bool) --
-
-Warning: array_column(): The column key should be either a string or an integer in %s on line %d
-bool(false)
+The column key should be either a string or an integer
 
 -- Testing array_column() column key parameter should be a string or integer (testing array) --
-
-Warning: array_column(): The column key should be either a string or an integer in %s on line %d
-bool(false)
+The column key should be either a string or an integer
 
 -- Testing array_column() index key parameter should be a string or an integer (testing bool) --
-
-Warning: array_column(): The index key should be either a string or an integer in %s on line %d
-bool(false)
+The index key should be either a string or an integer
 
 -- Testing array_column() index key parameter should be a string or integer (testing array) --
+The index key should be either a string or an integer
 
-Warning: array_column(): The index key should be either a string or an integer in %s on line %d
-bool(false)
-Done
+DONE
