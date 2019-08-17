@@ -291,6 +291,10 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 			start = 0;
 		}
 	} else if ((size_t)start > ZSTR_LEN(s11)) {
+		/* Convert to Exception ?
+		zend_throw_exception(zend_ce_error_exception, "Offset not contained in string", E_ERROR);
+		return;
+		 */
 		RETURN_FALSE;
 	}
 
@@ -324,7 +328,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 }
 /* }}} */
 
-/* {{{ proto int|false strspn(string str, string mask [, int start [, int len]])
+/* {{{ proto int strspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
@@ -332,7 +336,7 @@ PHP_FUNCTION(strspn)
 }
 /* }}} */
 
-/* {{{ proto int|false strcspn(string str, string mask [, int start [, int len]])
+/* {{{ proto int strcspn(string str, string mask [, int start [, int len]])
    Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
@@ -682,6 +686,9 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
+			/* TODO Convert to ErrorException
+			 * zend_throw_exception(zend_ce_error_exception, "", E_ERROR);
+			 */
 			php_error_docref(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
 			RETURN_FALSE;
 	}
@@ -718,6 +725,7 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
+/* TODO (maybe) convert docref errors into ErrorException? */
 static inline int php_charmask(const unsigned char *input, size_t len, char *mask)
 {
 	const unsigned char *end;
@@ -907,7 +915,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string|false wordwrap(string str [, int width [, string break [, bool cut]]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
@@ -933,13 +941,13 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (breakchar_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Break string cannot be empty");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Break string cannot be empty", E_ERROR);
+		return;
 	}
 
 	if (linelength == 0 && docut) {
-		php_error_docref(NULL, E_WARNING, "Can't force cut when width is zero");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Can't force cut when width is zero", E_ERROR);
+		return;
 	}
 
 	/* Special case for a single-character break as it needs no
@@ -1129,7 +1137,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 }
 /* }}} */
 
-/* {{{ proto array|false explode(string separator, string str [, int limit])
+/* {{{ proto array explode(string separator, string str [, int limit])
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
@@ -1145,8 +1153,8 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Empty delimiter", E_ERROR);
+		return;
 	}
 
 	array_init(return_value);
@@ -1619,7 +1627,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string|null dirname(string path[, int levels])
+/* {{{ proto string dirname(string path[, int levels])
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
@@ -1644,7 +1652,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 #endif
 	} else if (levels < 1) {
-		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
+		zend_throw_exception(zend_ce_error_exception, "Invalid argument, levels must be >= 1", E_ERROR);
 		zend_string_efree(ret);
 		return;
 	} else {
@@ -1813,8 +1821,8 @@ PHP_FUNCTION(stristr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		return;
 	}
 
 	haystack_dup = estrndup(ZSTR_VAL(haystack), ZSTR_LEN(haystack));
@@ -1854,8 +1862,8 @@ PHP_FUNCTION(strstr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		return;
 	}
 
 	found = php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
@@ -1900,8 +1908,8 @@ PHP_FUNCTION(strpos)
 	}
 
 	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		return;
 	}
 
 	found = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,
@@ -2194,8 +2202,8 @@ PHP_FUNCTION(chunk_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
-		php_error_docref(NULL, E_WARNING, "Chunk length should be greater than zero");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Chunk length should be greater than zero", E_ERROR);
+		return;
 	}
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
@@ -2350,11 +2358,13 @@ PHP_FUNCTION(substr_replace)
 			(argc == 3 && Z_TYPE_P(from) == IS_ARRAY) ||
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
+			/* TODO can convert to TypeError ? */
 			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
+				/* TODO can convert to Exception ? */
 				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(Z_STR_P(str));
 			}
@@ -2424,6 +2434,7 @@ PHP_FUNCTION(substr_replace)
 			zend_tmp_string_release(tmp_repl_str);
 			RETURN_NEW_STR(result);
 		} else {
+			/* TODO can convert to Exception ? */
 			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
@@ -3292,7 +3303,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string|false strtr(string str, string from[, string to])
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -3310,8 +3321,8 @@ PHP_FUNCTION(strtr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac == 2 && Z_TYPE_P(from) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "The second argument is not an array");
-		RETURN_FALSE;
+		zend_type_error("The second argument is not an array");
+		return;
 	}
 
 	/* shortcut for empty string */
@@ -3359,6 +3370,7 @@ PHP_FUNCTION(strtr)
 		}
 	} else {
 		if (!try_convert_to_string(from)) {
+			zend_type_error("Cannot convert 'from' into string.");
 			return;
 		}
 
@@ -5363,7 +5375,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		php_error_docref(NULL, E_WARNING, "Second argument has to be greater than or equal to 0");
+		zend_throw_exception(zend_ce_error_exception, "Second argument has to be greater than or equal to 0", E_ERROR);
 		return;
 	}
 
@@ -5401,7 +5413,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto array|string|false count_chars(string input [, int mode])
+/* {{{ proto array|string count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
@@ -5421,8 +5433,8 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		php_error_docref(NULL, E_WARNING, "Unknown mode");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Unknown mode", E_ERROR);
+		return;
 	}
 
 	buf = (const unsigned char *) ZSTR_VAL(input);
@@ -5610,8 +5622,8 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty substring");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "Empty substring", E_ERROR);
+		return;
 	}
 
 	p = haystack;
@@ -5632,6 +5644,7 @@ PHP_FUNCTION(substr_count)
 			length += (haystack_len - offset);
 		}
 		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
+			/* Convert to Exception ? */
 			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
@@ -5687,18 +5700,19 @@ PHP_FUNCTION(str_pad)
 	}
 
 	if (pad_str_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Padding string cannot be empty");
+		zend_throw_exception(zend_ce_error_exception, "Padding string cannot be empty", E_ERROR);
 		return;
 	}
 
 	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
-		php_error_docref(NULL, E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
+		zend_throw_exception(zend_ce_error_exception,
+				"Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH", E_ERROR);
 		return;
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
 	if (num_pad_chars >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Padding length is too long");
+		zend_throw_exception(zend_ce_error_exception, "Padding length is too long", E_ERROR);
 		return;
 	}
 
@@ -5916,7 +5930,7 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]])
+/* {{{ proto array|int|null|false str_word_count(string str, [int format [, string charlist]])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
@@ -5957,6 +5971,10 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
+			/* Not sure how to proceed here
+			zend_throw_exception(zend_ce_error_exception, "Padding string cannot be empty", E_ERROR);
+			return;
+			*/
 			php_error_docref(NULL, E_WARNING, "Invalid format value " ZEND_LONG_FMT, type);
 			RETURN_FALSE;
 	}
@@ -6058,7 +6076,7 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
-/* {{{ proto array|false str_split(string str [, int split_length])
+/* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
@@ -6074,8 +6092,8 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "The length of each segment must be greater than zero", E_ERROR);
+		return;
 	}
 
 
@@ -6114,8 +6132,8 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!ZSTR_LEN(char_list)) {
-		php_error_docref(NULL, E_WARNING, "The character list cannot be empty");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_error_exception, "The character list cannot be empty", E_ERROR);
+		return;
 	}
 
 	for (haystack_ptr = ZSTR_VAL(haystack); haystack_ptr < (ZSTR_VAL(haystack) + ZSTR_LEN(haystack)); ++haystack_ptr) {
@@ -6153,8 +6171,8 @@ PHP_FUNCTION(substr_compare)
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {
-			php_error_docref(NULL, E_WARNING, "The length must be greater than or equal to zero");
-			RETURN_FALSE;
+			zend_throw_exception(zend_ce_error_exception, "The length must be greater than or equal to zero", E_ERROR);
+			return;
 		}
 	}
 
@@ -6164,6 +6182,7 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
+		/* Candidate to convert to Exception ? */
 		php_error_docref(NULL, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}

@@ -13,7 +13,12 @@ echo "*** Testing strpbrk() : error conditions ***\n";
 $haystack = 'This is a Simple text.';
 
 echo "\n-- Testing strpbrk() function with empty second argument --\n";
-var_dump( strpbrk($haystack, '') );
+
+try {
+    strpbrk($haystack, '');
+} catch (\ErrorException $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===DONE===
@@ -21,7 +26,5 @@ var_dump( strpbrk($haystack, '') );
 *** Testing strpbrk() : error conditions ***
 
 -- Testing strpbrk() function with empty second argument --
-
-Warning: strpbrk(): The character list cannot be empty in %s on line %d
-bool(false)
+The character list cannot be empty
 ===DONE===
