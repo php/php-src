@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.10
 
+- Core:
+  . Fixed bug #77922 (Double release of doc comment on inherited shadow
+    property). (Nikita)
+
 - Intl:
   . Ensure IDNA2003 rules are used with idn_to_ascii() and idn_to_utf8()
     when requested. (Sara)

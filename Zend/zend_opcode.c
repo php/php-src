@@ -235,7 +235,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				efree(ce->default_static_members_table);
 			}
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+				if (prop_info->ce == ce ||
+						((prop_info->flags & ZEND_ACC_SHADOW) && prop_info->ce == ce->parent)) {
 					zend_string_release_ex(prop_info->name, 0);
 					if (prop_info->doc_comment) {
 						zend_string_release_ex(prop_info->doc_comment, 0);
