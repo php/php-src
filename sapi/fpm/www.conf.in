@@ -366,7 +366,7 @@ pm.max_spare_servers = 3
 
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
-; Note: on highloaded environement, this can cause some delay in the page
+; Note: on highloaded environment, this can cause some delay in the page
 ; process time (several ms).
 ; Default Value: no
 ;catch_workers_output = yes
