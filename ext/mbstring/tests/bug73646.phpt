@@ -7,10 +7,16 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--
 <?php
+$v1;
 
-$v1=str_repeat("#", -1);
+try {
+    $v1=str_repeat("#", -1);
+} catch (\ErrorException $e) {
+    echo $e->getMessage() . "\n";
+}
+
 var_dump(mb_ereg_search_init($v1));
 ?>
---EXPECTF--
-Warning: str_repeat(): Second argument has to be greater than or equal to 0 in %sbug73646.php on line %d
+--EXPECT--
+Second argument has to be greater than or equal to 0
 bool(true)

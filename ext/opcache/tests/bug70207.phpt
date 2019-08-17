@@ -14,7 +14,10 @@ function bar() {
 }
 function foo() {
     try { return bar(); }
-    finally { @str_repeat("foo", -10); }
+    finally {
+        try { @str_repeat("foo", -10); }
+        catch (\ErrorException $e) {}
+    }
 }
 
 var_dump(foo());
