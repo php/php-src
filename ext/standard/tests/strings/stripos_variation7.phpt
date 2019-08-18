@@ -25,10 +25,10 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing stripos() function: with heredoc strings ***
 -- With empty heredoc string --
-bool(false)
+int(0)
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
-bool(false)
-bool(false)
+int(0)
+int(0)
 *** Done ***

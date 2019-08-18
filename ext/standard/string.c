@@ -1812,11 +1812,6 @@ PHP_FUNCTION(stristr)
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
-	}
-
 	haystack_dup = estrndup(ZSTR_VAL(haystack), ZSTR_LEN(haystack));
 	orig_needle = estrndup(ZSTR_VAL(needle), ZSTR_LEN(needle));
 	found = php_stristr(haystack_dup, orig_needle, ZSTR_LEN(haystack), ZSTR_LEN(needle));
@@ -1852,11 +1847,6 @@ PHP_FUNCTION(strstr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
-	}
 
 	found = php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 
@@ -1899,11 +1889,6 @@ PHP_FUNCTION(strpos)
 		RETURN_FALSE;
 	}
 
-	if (!ZSTR_LEN(needle)) {
-		php_error_docref(NULL, E_WARNING, "Empty needle");
-		RETURN_FALSE;
-	}
-
 	found = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,
 						ZSTR_VAL(needle), ZSTR_LEN(needle),
 						ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
@@ -1940,7 +1925,7 @@ PHP_FUNCTION(stripos)
 		RETURN_FALSE;
 	}
 
-	if (ZSTR_LEN(needle) == 0 || ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
+	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
 		RETURN_FALSE;
 	}
 
@@ -1964,22 +1949,17 @@ PHP_FUNCTION(stripos)
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
+	zend_string *needle;
 	zend_string *haystack;
-	char *needle;
-	size_t needle_len;
 	zend_long offset = 0;
 	const char *p, *e, *found;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
-		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	if (ZSTR_LEN(haystack) == 0 || needle_len == 0) {
-		RETURN_FALSE;
-	}
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
@@ -1993,15 +1973,16 @@ PHP_FUNCTION(strrpos)
 			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
+
 		p = ZSTR_VAL(haystack);
-		if ((size_t)-offset < needle_len) {
+		if ((size_t)-offset < ZSTR_LEN(needle)) {
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 		} else {
-			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset + needle_len;
+			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset + ZSTR_LEN(needle);
 		}
 	}
 
-	if ((found = zend_memnrstr(p, needle, needle_len, e))) {
+	if ((found = zend_memnrstr(p, ZSTR_VAL(needle), ZSTR_LEN(needle), e))) {
 		RETURN_LONG(found - ZSTR_VAL(haystack));
 	}
 
@@ -2025,10 +2006,6 @@ PHP_FUNCTION(strripos)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	if (ZSTR_LEN(haystack) == 0 || ZSTR_LEN(needle) == 0) {
-		RETURN_FALSE;
-	}
 
 	if (ZSTR_LEN(needle) == 1) {
 		/* Single character search can shortcut memcmps
@@ -2075,6 +2052,7 @@ PHP_FUNCTION(strripos)
 			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
+
 		p = ZSTR_VAL(haystack_dup);
 		if ((size_t)-offset < ZSTR_LEN(needle)) {
 			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);

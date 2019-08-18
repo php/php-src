@@ -16,16 +16,12 @@ var_dump( stristr("Hello World", "") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing stristr() : error conditions ***
 
 -- Testing stristr() function with empty haystack --
-
-Warning: stristr(): Empty needle in %s on line %d
-bool(false)
+string(0) ""
 
 -- Testing stristr() function with empty needle --
-
-Warning: stristr(): Empty needle in %s on line %d
-bool(false)
+string(11) "Hello World"
 ===DONE===
