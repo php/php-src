@@ -152,6 +152,10 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 	ptrdiff_t off_p;
 	size_t off_s;
 
+	if (needle_len == 0) {
+		return p;
+	}
+
 	if (needle_len == 1) {
 		return (const char *)memchr(p, *needle, (end-p));
 	}
@@ -209,6 +213,10 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const
     const char ne = needle[needle_len-1];
     ptrdiff_t off_p;
     size_t off_s;
+
+	if (needle_len == 0) {
+		return p;
+	}
 
     if (needle_len == 1) {
         return (const char *)zend_memrchr(haystack, *needle, (p - haystack));

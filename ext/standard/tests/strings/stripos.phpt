@@ -25,9 +25,9 @@ stripos() function test
 	var_dump(stripos("0", false));
 	var_dump(stripos("1", true));
 	var_dump(stripos("\\\\a", "\\a"));
-
-	echo "Done\n";
 ?>
+
+DONE
 --EXPECT--
 int(0)
 int(5)
@@ -37,19 +37,20 @@ int(10)
 int(2)
 int(0)
 int(0)
-bool(false)
-bool(false)
+int(0)
+int(0)
 bool(false)
 bool(false)
 int(0)
 bool(false)
-bool(false)
-bool(false)
-bool(false)
+int(0)
 bool(false)
 bool(false)
 int(0)
 bool(false)
+int(0)
+int(0)
 int(0)
 int(1)
-Done
+
+DONE

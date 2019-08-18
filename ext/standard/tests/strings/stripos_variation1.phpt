@@ -117,20 +117,20 @@ int(9)
 int(8)
 bool(false)
 -- Iteration 12 --
-bool(false)
-bool(false)
+int(0)
+int(11)
 -- Iteration 13 --
-bool(false)
-bool(false)
+int(0)
+int(12)
 -- Iteration 14 --
-bool(false)
-bool(false)
+int(0)
+int(13)
 -- Iteration 15 --
-bool(false)
-bool(false)
+int(0)
+int(14)
 -- Iteration 16 --
-bool(false)
-bool(false)
+int(0)
+int(15)
 -- Iteration 17 --
 int(10)
 int(47)
