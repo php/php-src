@@ -15,8 +15,7 @@ function bar() {
 function foo() {
     try { return bar(); }
     finally {
-        try { @str_repeat("foo", -10); }
-        catch (\ErrorException $e) {}
+        @fopen("non-existent", 'r');
     }
 }
 
