@@ -10,5 +10,4 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 var_dump(mb_ereg_search_init(NULL));
 ?>
 --EXPECT--
-Second argument has to be greater than or equal to 0
 bool(true)
