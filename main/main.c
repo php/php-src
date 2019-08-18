@@ -1170,6 +1170,21 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 }
 /* }}} */
 
+PHPAPI ZEND_COLD void php_error_parameter_validation(const char* docref, int argno, const char* format, ...) {
+	char* complete_msg;
+	char* message;
+	va_list args;
+
+	va_start(args, format);
+	zend_vspprintf(&message, 0, format, args);
+	va_end(args);
+	
+	spprintf(&complete_msg, 0, "Parameter %d is invalid: %s", argno + 1, (const char*)message);
+	zend_throw_exception(zend_ce_error_exception, complete_msg, E_ERROR);
+	efree(message);
+	efree(complete_msg);
+}
+
 #ifdef PHP_WIN32
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2) {
 	char *buf = php_win32_error_to_msg(error);

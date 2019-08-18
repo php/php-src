@@ -798,8 +798,8 @@ PHP_FUNCTION(imagesetstyle)
 
     num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
     if (num_styles == 0) {
-        php_error_docref(NULL, E_WARNING, "styles array must not be empty");
-        RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "styles array must not be empty");
+        return;
     }
 
 	/* copy the style values in the stylearr */
@@ -828,9 +828,14 @@ PHP_FUNCTION(imagecreatetruecolor)
 		return;
 	}
 
-	if (x_size <= 0 || y_size <= 0 || x_size >= INT_MAX || y_size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Invalid image dimensions");
-		RETURN_FALSE;
+	if (x_size <= 0 || x_size >= INT_MAX) {
+		php_error_parameter_validation(NULL, 0, "Invalid width");
+		return;
+	}
+
+	if (y_size <= 0 || y_size >= INT_MAX) {
+		php_error_parameter_validation(NULL, 1, "Invalid height dimensions");
+		return;
 	}
 
 	im = gdImageCreateTrueColor(x_size, y_size);
@@ -937,21 +942,20 @@ PHP_FUNCTION(imagecolormatch)
 	result = gdImageColorMatch(im1, im2);
 	switch (result) {
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Image1 must be TrueColor" );
-			RETURN_FALSE;
-			break;
+			php_error_parameter_validation(NULL, 0, "Image1 must be TrueColor");
+			return;
+
 		case -2:
-			php_error_docref(NULL, E_WARNING, "Image2 must be Palette" );
-			RETURN_FALSE;
-			break;
+			php_error_parameter_validation(NULL, 1, "Image2 must be Palette");
+			return;
+
 		case -3:
-			php_error_docref(NULL, E_WARNING, "Image1 and Image2 must be the same size" );
-			RETURN_FALSE;
-			break;
+			php_error_parameter_validation(NULL, 1, "Image1 and Image2 must be the same size");
+			return;
+
 		case -4:
-			php_error_docref(NULL, E_WARNING, "Image2 must have at least one color" );
-			RETURN_FALSE;
-			break;
+			php_error_parameter_validation(NULL, 1, "Image2 must have at least one color");
+			return;
 	}
 
 	RETURN_TRUE;
@@ -1101,10 +1105,10 @@ PHP_FUNCTION(imagelayereffect)
 }
 /* }}} */
 
-#define CHECK_RGBA_RANGE(component, name) \
+#define CHECK_RGBA_RANGE(component, name, parameter_index) \
 	if (component < 0 || component > gd##name##Max) { \
-		php_error_docref(NULL, E_WARNING, #name " component is out of range"); \
-		RETURN_FALSE; \
+		php_error_parameter_validation(NULL, parameter_index, #name " is out of range"); \
+		return; \
 	}
 
 /* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
@@ -1124,10 +1128,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
+	CHECK_RGBA_RANGE(alpha, Alpha, 4);
 
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
@@ -1153,10 +1157,10 @@ PHP_FUNCTION(imagecolorresolvealpha)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
+	CHECK_RGBA_RANGE(alpha, Alpha, 4);
 
 	RETURN_LONG(gdImageColorResolveAlpha(im, red, green, blue, alpha));
 }
@@ -1178,10 +1182,10 @@ PHP_FUNCTION(imagecolorclosestalpha)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
+	CHECK_RGBA_RANGE(alpha, Alpha, 4);
 
 	RETURN_LONG(gdImageColorClosestAlpha(im, red, green, blue, alpha));
 }
@@ -1203,10 +1207,10 @@ PHP_FUNCTION(imagecolorexactalpha)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
+	CHECK_RGBA_RANGE(alpha, Alpha, 4);
 
 	RETURN_LONG(gdImageColorExactAlpha(im, red, green, blue, alpha));
 }
@@ -1271,8 +1275,8 @@ PHP_FUNCTION(imagegrabwindow)
 	window = (HWND) lwindow_handle;
 
 	if (!IsWindow(window)) {
-		php_error_docref(NULL, E_NOTICE, "Invalid window handle");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Invalid window handle");
+		return;
 	}
 
 	hdc		= GetDC(0);
@@ -1466,9 +1470,13 @@ PHP_FUNCTION(imagecreate)
 		return;
 	}
 
-	if (x_size <= 0 || y_size <= 0 || x_size >= INT_MAX || y_size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Invalid image dimensions");
-		RETURN_FALSE;
+	if (x_size <= 0  || x_size >= INT_MAX) {
+		php_error_parameter_validation(NULL, 0, "Invalid image dimensions for width");
+	}
+
+	if (y_size <= 0 || y_size >= INT_MAX) {
+		php_error_parameter_validation(NULL, 1, "Invalid image dimensions for height");
+		return;
 	}
 
 	im = gdImageCreate(x_size, y_size);
@@ -1615,8 +1623,8 @@ PHP_FUNCTION(imagecreatefromstring)
 	}
 
 	if (ZSTR_LEN(data) < sizeof(sig)) {
-		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Empty string or invalid image");
+		return;
 	}
 
 	memcpy(sig, ZSTR_VAL(data), sizeof(sig));
@@ -1628,8 +1636,8 @@ PHP_FUNCTION(imagecreatefromstring)
 #ifdef HAVE_GD_JPG
 			im = _php_image_create_from_string(data, "JPEG", gdImageCreateFromJpegCtx);
 #else
-			php_error_docref(NULL, E_WARNING, "No JPEG support in this PHP build");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "No JPEG support in this PHP build");
+			return;
 #endif
 			break;
 
@@ -1637,8 +1645,8 @@ PHP_FUNCTION(imagecreatefromstring)
 #ifdef HAVE_GD_PNG
 			im = _php_image_create_from_string(data, "PNG", gdImageCreateFromPngCtx);
 #else
-			php_error_docref(NULL, E_WARNING, "No PNG support in this PHP build");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 0, "No PNG support in this PHP build");
+			return;
 #endif
 			break;
 
@@ -1663,18 +1671,18 @@ PHP_FUNCTION(imagecreatefromstring)
 			im = _php_image_create_from_string(data, "WEBP", gdImageCreateFromWebpCtx);
 			break;
 #else
-			php_error_docref(NULL, E_WARNING, "No WEBP support in this PHP build");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 0, "No WEBP support in this PHP build");
+			return;
 #endif
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 0, "Data is not in a recognized format");
+			return;
 	}
 
 	if (!im) {
-		php_error_docref(NULL, E_WARNING, "Couldn't create GD Image Stream out of Data");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Couldn't create GD Image Stream out of Data");
+		return;
 	}
 
 	RETURN_RES(zend_register_resource(im, le_gd));
@@ -1699,10 +1707,18 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "pllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
 			return;
 		}
-		if (width < 1 || height < 1) {
-			php_error_docref(NULL, E_WARNING, "Zero width or height not allowed");
-			RETURN_FALSE;
+
+		if (width < 1) {
+			php_error_parameter_validation(NULL, 4, "Zero width not allowed");
+			return;
 		}
+
+		if (height < 1) {
+			php_error_parameter_validation(NULL, 5, "Zero height not allowed");
+			return;
+		}
+
+
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &file, &file_len) == FAILURE) {
 			return;
@@ -2144,9 +2160,9 @@ PHP_FUNCTION(imagecolorallocate)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
 
 	ct = gdImageColorAllocate(im, red, green, blue);
 	if (ct < 0) {
@@ -2201,15 +2217,15 @@ PHP_FUNCTION(imagecolorat)
 		if (im->tpixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_LONG(gdImageTrueColorPixel(im, x, y));
 		} else {
-			php_error_docref(NULL, E_NOTICE, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
+			return;
 		}
 	} else {
 		if (im->pixels && gdImageBoundsSafe(im, x, y)) {
 			RETURN_LONG(im->pixels[y][x]);
 		} else {
-			php_error_docref(NULL, E_NOTICE, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "" ZEND_LONG_FMT "," ZEND_LONG_FMT " is out of bounds", x, y);
+			return;
 		}
 	}
 }
@@ -2231,9 +2247,9 @@ PHP_FUNCTION(imagecolorclosest)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
 
 	RETURN_LONG(gdImageColorClosest(im, red, green, blue));
 }
@@ -2255,9 +2271,9 @@ PHP_FUNCTION(imagecolorclosesthwb)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
 
 	RETURN_LONG(gdImageColorClosestHWB(im, red, green, blue));
 }
@@ -2291,8 +2307,8 @@ PHP_FUNCTION(imagecolordeallocate)
 		gdImageColorDeallocate(im, col);
 		RETURN_TRUE;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Color index %d out of range",	col);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Color index %d out of range",	col);
+		return;
 	}
 }
 /* }}} */
@@ -2313,9 +2329,9 @@ PHP_FUNCTION(imagecolorresolve)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
 
 	RETURN_LONG(gdImageColorResolve(im, red, green, blue));
 }
@@ -2337,9 +2353,9 @@ PHP_FUNCTION(imagecolorexact)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 1);
+	CHECK_RGBA_RANGE(green, Green, 2);
+	CHECK_RGBA_RANGE(blue, Blue, 3);
 
 	RETURN_LONG(gdImageColorExact(im, red, green, blue));
 }
@@ -2362,10 +2378,10 @@ PHP_FUNCTION(imagecolorset)
 		return;
 	}
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(alpha, Alpha, 5);
 
 	col = color;
 
@@ -2407,8 +2423,8 @@ PHP_FUNCTION(imagecolorsforindex)
 		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
 		add_assoc_long(return_value,"alpha", gdImageAlpha(im,col));
 	} else {
-		php_error_docref(NULL, E_WARNING, "Color index %d out of range", col);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Color index %d out of range", col);
+		return;
 	}
 }
 /* }}} */
@@ -2426,9 +2442,14 @@ PHP_FUNCTION(imagegammacorrect)
 		return;
 	}
 
-	if ( input <= 0.0 || output <= 0.0 ) {
-		php_error_docref(NULL, E_WARNING, "Gamma values should be positive");
-		RETURN_FALSE;
+	if ( input <= 0.0) {
+		php_error_parameter_validation(NULL, 1, "Gamma input should be positive");
+		return;
+	}
+
+	if (output <= 0.0) {
+		php_error_parameter_validation(NULL, 2, "Gamma output should be positive");
+		return;
 	}
 
 	gamma = input / output;
@@ -2768,16 +2789,16 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (nelem < 6) {
-		php_error_docref(NULL, E_WARNING, "You must have at least 3 points in your array");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "You must have at least 3 points in your array");
+		return;
 	}
 	if (npoints <= 0) {
-		php_error_docref(NULL, E_WARNING, "You must give a positive number of points");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "You must give a positive number of points");
+		return;
 	}
 	if (nelem < npoints * 2) {
-		php_error_docref(NULL, E_WARNING, "Trying to use %d points in array with only %d points", npoints, nelem/2);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "Trying to use %d points in array with only %d points", npoints, nelem/2);
+		return;
 	}
 
 	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
@@ -3162,17 +3183,33 @@ PHP_FUNCTION(imagecopyresized)
 
 	srcX = SX;
 	srcY = SY;
-	srcH = SH;
 	srcW = SW;
+	srcH = SH;
 	dstX = DX;
 	dstY = DY;
-	dstH = DH;
 	dstW = DW;
+	dstH = DH;
 
-	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid image dimensions");
-		RETURN_FALSE;
+	if (dstW <= 0) {
+		php_error_parameter_validation(NULL, 6, "Destination width must be positive");
+		return;
 	}
+
+	if (dstH <= 0) {
+		php_error_parameter_validation(NULL, 7, "Destination height must be positive");
+		return;
+	}
+
+	if (srcW <= 0) {
+		php_error_parameter_validation(NULL, 8, "Source width must be positive");
+		return;
+	}
+
+	if (srcW <= 0) {
+		php_error_parameter_validation(NULL, 9, "Source height must be positive");
+		return;
+	}
+
 
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 	RETURN_TRUE;
@@ -3678,23 +3715,23 @@ PHP_FUNCTION(imageconvolution)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
 	if (nelem != 3) {
-		php_error_docref(NULL, E_WARNING, "You must have 3x3 array");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "You must have 3x3 array");
+		return;
 	}
 
 	for (i=0; i<3; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
-				php_error_docref(NULL, E_WARNING, "You must have 3x3 array");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 1, "You must have 3x3 array");
+				return;
 			}
 
 			for (j=0; j<3; j++) {
 				if ((var2 = zend_hash_index_find(Z_ARRVAL_P(var), j)) != NULL) {
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
-					php_error_docref(NULL, E_WARNING, "You must have a 3x3 matrix");
-					RETURN_FALSE;
+					php_error_parameter_validation(NULL, 1, "You must have a 3x3 matrix");
+					return;
 				}
 			}
 		}
@@ -3740,8 +3777,8 @@ PHP_FUNCTION(imageflip)
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown flip mode");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "Unknown flip mode");
+			return;
 	}
 
 	RETURN_TRUE;
@@ -3794,29 +3831,29 @@ PHP_FUNCTION(imagecrop)
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing x position");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Missing x position");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing y position");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Missing y position");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing width");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Missing width");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing height");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Missing height");
+		return;
 	}
 
 	im_crop = gdImageCrop(im, &rect);
@@ -3859,14 +3896,14 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				php_error_docref(NULL, E_WARNING, "Color argument missing with threshold mode");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 3, "Color argument missing with threshold mode");
+				return;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown crop mode");
+			php_error_parameter_validation(NULL, 1, "Unknown crop mode %d", (int)mode);
 			RETURN_FALSE;
 	}
 	if (im_crop == NULL) {
@@ -3959,8 +3996,8 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
-		php_error_docref(NULL, E_WARNING, "Affine array must have six elements");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Affine array must have six elements");
+		return;
 	}
 
 	for (i = 0; i < nelems; i++) {
@@ -3976,7 +4013,7 @@ PHP_FUNCTION(imageaffine)
 					affine[i] = zval_get_double(zval_affine_elem);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
+					php_error_parameter_validation(NULL, 1, "Invalid type for element %i", i);
 					RETURN_FALSE;
 			}
 		}
@@ -3986,29 +4023,29 @@ PHP_FUNCTION(imageaffine)
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing x position");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 2, "Missing x position");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing y position");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 2, "Missing y position");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing width");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 2, "Missing width");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing height");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 2, "Missing height");
+			return;
 		}
 		pRect = &rect;
 	} else {
@@ -4050,21 +4087,22 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SCALE: {
 			double x, y;
 			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Array expected as options");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 1, "Array expected as options");
+				return;
 			}
+
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing x position");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 1, "Missing x position");
+				return;
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing y position");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 1, "Missing y position");
+				return;
 			}
 
 			if (type == GD_AFFINE_TRANSLATE) {
@@ -4072,6 +4110,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			} else {
 				res = gdAffineScale(affine, x, y);
 			}
+
 			break;
 		}
 
@@ -4081,8 +4120,8 @@ PHP_FUNCTION(imageaffinematrixget)
 			double angle;
 
 			if (!options) {
-				php_error_docref(NULL, E_WARNING, "Number is expected as option");
-				RETURN_FALSE;
+				php_error_parameter_validation(NULL, 1, "Number is expected as option");
+				return;
 			}
 
 			angle = zval_get_double(options);
@@ -4098,8 +4137,8 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid type for element " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 0, "Invalid type for element " ZEND_LONG_FMT, type);
+			return;
 	}
 
 	if (res == GD_FALSE) {
@@ -4129,9 +4168,14 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		return;
 	}
 
-	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
-		php_error_docref(NULL, E_WARNING, "Affine arrays must have six elements");
-		RETURN_FALSE;
+	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) {
+		php_error_parameter_validation(NULL, 0, "Affine array must have six elements");
+		return;
+	}
+
+	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
+		php_error_parameter_validation(NULL, 1, "Affine arrays must have six elements");
+		return;
 	}
 
 	for (i = 0; i < 6; i++) {
@@ -4147,8 +4191,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m1[i] = zval_get_double(tmp);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
-					RETURN_FALSE;
+					php_error_parameter_validation(NULL, 0, "Invalid type for element %i", i);
+					return;
 			}
 		}
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
@@ -4163,8 +4207,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m2[i] = zval_get_double(tmp);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
-					RETURN_FALSE;
+					php_error_parameter_validation(NULL, 1, "Invalid type for element %i", i);
+					return;
 			}
 		}
 	}
