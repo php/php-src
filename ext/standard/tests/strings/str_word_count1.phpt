@@ -4,23 +4,31 @@ str_word_count() and invalid arguments
 <?php
 
 var_dump(str_word_count(""));
-var_dump(str_word_count("", -1));
-var_dump(str_word_count("", -1, $a));
-var_dump($a);
 
-echo "Done\n";
+try {
+    var_dump(str_word_count("", -1));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    var_dump(str_word_count("", -1, $a));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+var_dump($a);
 ?>
+
+DONE
 --EXPECTF--
 int(0)
-
-Warning: str_word_count(): Invalid format value -1 in %s on line %d
-bool(false)
+Invalid format value -1
 
 Notice: Undefined variable: a in %s on line %d
-
-Warning: str_word_count(): Invalid format value -1 in %s on line %d
-bool(false)
+Invalid format value -1
 
 Notice: Undefined variable: a in %s on line %d
 NULL
-Done
+
+DONE

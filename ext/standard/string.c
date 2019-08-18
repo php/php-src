@@ -5930,7 +5930,7 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto array|int|null|false str_word_count(string str, [int format [, string charlist]])
+/* {{{ proto array|int str_word_count(string str, [int format [, string charlist]])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
@@ -5971,12 +5971,8 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
-			/* Not sure how to proceed here
 			zend_throw_error(NULL, "Invalid format value " ZEND_LONG_FMT, type);
 			return;
-			*/
-			php_error_docref(NULL, E_WARNING, "Invalid format value " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
 	}
 
 	if (char_list) {
