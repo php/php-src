@@ -36,22 +36,22 @@ foreach($delimiters as $delimiter) {
 
     try {
         var_dump( explode($delimiter, $string, -1) );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 0) );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 1) );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 2) );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
     $counter++;

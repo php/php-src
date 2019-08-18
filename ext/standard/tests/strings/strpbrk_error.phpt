@@ -8,23 +8,19 @@ Test strpbrk() function : error conditions
  * Alias to functions:
  */
 
-echo "*** Testing strpbrk() : error conditions ***\n";
-
 $haystack = 'This is a Simple text.';
 
-echo "\n-- Testing strpbrk() function with empty second argument --\n";
+echo "-- Testing strpbrk() function with empty second argument --\n";
 
 try {
     strpbrk($haystack, '');
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing strpbrk() : error conditions ***
-
 -- Testing strpbrk() function with empty second argument --
 The character list cannot be empty
 ===DONE===

@@ -4,7 +4,7 @@ Bug #63943 (Bad warning text from strpos() on empty needle)
 <?php
 try {
     strpos("lllllll", '');
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage();
 }
 ?>

@@ -16,7 +16,7 @@ echo "Test\n";
 
 try {
     substr_compare("abcde", "abc", 0, -1);
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);

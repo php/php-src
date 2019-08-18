@@ -10,7 +10,7 @@ echo "*** Testing error conditions ***\n";
 // Bad arg
 try {
     dirname("/var/tmp/bar.gz", 0);
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 

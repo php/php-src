@@ -29,7 +29,7 @@ $cut = true;
 
 try {
     wordwrap($str, $width, $break, $cut);
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 

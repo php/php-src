@@ -76,7 +76,7 @@ foreach($inputs as $input) {
     var_dump( stristr("Hello World", $input) );
   } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
-  } catch (\ErrorException $e) {
+  } catch (\Error $e) {
        echo $e->getMessage() . "\n";
    }
   $count ++;

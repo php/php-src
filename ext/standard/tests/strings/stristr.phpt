@@ -11,19 +11,19 @@ stristr() function
 
     try {
         var_dump( stristr("", "") );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 
     try {
         var_dump( stristr("a", "") );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 
     try {
         var_dump( stristr("", "a") );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 	var_dump(md5(stristr("\\\\a\\", "\\a")));

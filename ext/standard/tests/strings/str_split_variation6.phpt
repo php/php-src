@@ -39,7 +39,7 @@ for($count = 0; $count < count($values); $count++) {
 
     try {
 	    var_dump( str_split($str, $values[$count]) );
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 }

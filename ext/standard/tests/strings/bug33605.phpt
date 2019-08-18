@@ -4,7 +4,7 @@ Bug #33605 (substr_compare crashes)
 <?php
 try {
     substr_compare("aa", "a", -99999999, -1, 0);
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage();
 }
 

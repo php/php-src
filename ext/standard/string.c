@@ -292,7 +292,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		}
 	} else if ((size_t)start > ZSTR_LEN(s11)) {
 		/* Convert to Exception ?
-		zend_throw_exception(zend_ce_error_exception, "Offset not contained in string", E_ERROR);
+		zend_throw_error(NULL, "Offset not contained in string");
 		return;
 		 */
 		RETURN_FALSE;
@@ -687,7 +687,7 @@ PHP_FUNCTION(nl_langinfo)
 			break;
 		default:
 			/* TODO Convert to ErrorException
-			 * zend_throw_exception(zend_ce_error_exception, "", E_ERROR);
+			 * zend_throw_error(NULL, "");
 			 */
 			php_error_docref(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
 			RETURN_FALSE;
@@ -941,12 +941,12 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (breakchar_len == 0) {
-		zend_throw_exception(zend_ce_error_exception, "Break string cannot be empty", E_ERROR);
+		zend_throw_error(NULL, "Break string cannot be empty");
 		return;
 	}
 
 	if (linelength == 0 && docut) {
-		zend_throw_exception(zend_ce_error_exception, "Can't force cut when width is zero", E_ERROR);
+		zend_throw_error(NULL, "Can't force cut when width is zero");
 		return;
 	}
 
@@ -1153,7 +1153,7 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		zend_throw_exception(zend_ce_error_exception, "Empty delimiter", E_ERROR);
+		zend_throw_error(NULL, "Empty delimiter");
 		return;
 	}
 
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 #endif
 	} else if (levels < 1) {
-		zend_throw_exception(zend_ce_error_exception, "Invalid argument, levels must be >= 1", E_ERROR);
+		zend_throw_error(NULL, "Invalid argument, levels must be >= 1");
 		zend_string_efree(ret);
 		return;
 	} else {
@@ -1821,7 +1821,7 @@ PHP_FUNCTION(stristr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		zend_throw_error(NULL, "Empty needle");
 		return;
 	}
 
@@ -1862,7 +1862,7 @@ PHP_FUNCTION(strstr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		zend_throw_error(NULL, "Empty needle");
 		return;
 	}
 
@@ -1908,7 +1908,7 @@ PHP_FUNCTION(strpos)
 	}
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_exception(zend_ce_error_exception, "Empty needle", E_ERROR);
+		zend_throw_error(NULL, "Empty needle");
 		return;
 	}
 
@@ -2202,7 +2202,7 @@ PHP_FUNCTION(chunk_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
-		zend_throw_exception(zend_ce_error_exception, "Chunk length should be greater than zero", E_ERROR);
+		zend_throw_error(NULL, "Chunk length should be greater than zero");
 		return;
 	}
 
@@ -5375,7 +5375,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		zend_throw_exception(zend_ce_error_exception, "Second argument has to be greater than or equal to 0", E_ERROR);
+		zend_throw_error(NULL, "Second argument has to be greater than or equal to 0");
 		return;
 	}
 
@@ -5433,7 +5433,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		zend_throw_exception(zend_ce_error_exception, "Unknown mode", E_ERROR);
+		zend_throw_error(NULL, "Unknown mode");
 		return;
 	}
 
@@ -5622,7 +5622,7 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		zend_throw_exception(zend_ce_error_exception, "Empty substring", E_ERROR);
+		zend_throw_error(NULL, "Empty substring");
 		return;
 	}
 
@@ -5700,19 +5700,19 @@ PHP_FUNCTION(str_pad)
 	}
 
 	if (pad_str_len == 0) {
-		zend_throw_exception(zend_ce_error_exception, "Padding string cannot be empty", E_ERROR);
+		zend_throw_error(NULL, "Padding string cannot be empty");
 		return;
 	}
 
 	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
-		zend_throw_exception(zend_ce_error_exception,
-				"Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH", E_ERROR);
+		zend_throw_error(NULL,
+				"Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 		return;
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
 	if (num_pad_chars >= INT_MAX) {
-		zend_throw_exception(zend_ce_error_exception, "Padding length is too long", E_ERROR);
+		zend_throw_error(NULL, "Padding length is too long");
 		return;
 	}
 
@@ -5972,7 +5972,7 @@ PHP_FUNCTION(str_word_count)
 			break;
 		default:
 			/* Not sure how to proceed here
-			zend_throw_exception(zend_ce_error_exception, "Padding string cannot be empty", E_ERROR);
+			zend_throw_error(NULL, "Invalid format value " ZEND_LONG_FMT, type);
 			return;
 			*/
 			php_error_docref(NULL, E_WARNING, "Invalid format value " ZEND_LONG_FMT, type);
@@ -6092,7 +6092,7 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		zend_throw_exception(zend_ce_error_exception, "The length of each segment must be greater than zero", E_ERROR);
+		zend_throw_error(NULL, "The length of each segment must be greater than zero");
 		return;
 	}
 
@@ -6132,7 +6132,7 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!ZSTR_LEN(char_list)) {
-		zend_throw_exception(zend_ce_error_exception, "The character list cannot be empty", E_ERROR);
+		zend_throw_error(NULL, "The character list cannot be empty");
 		return;
 	}
 
@@ -6171,7 +6171,7 @@ PHP_FUNCTION(substr_compare)
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {
-			zend_throw_exception(zend_ce_error_exception, "The length must be greater than or equal to zero", E_ERROR);
+			zend_throw_error(NULL, "The length must be greater than or equal to zero");
 			return;
 		}
 	}

@@ -14,7 +14,7 @@ if((substr(PHP_OS, 0, 3) != "WIN"))
 for ($i=0 ; $i<5 ; $i++) {
     try {
 	    var_dump(dirname("/foo/bar/baz", $i));
-    } catch (\ErrorException $e) {
+    } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 }

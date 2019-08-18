@@ -11,14 +11,14 @@ echo "*** Testing stristr() : error conditions ***\n";
 echo "\n-- Testing stristr() function with empty haystack --\n";
 try {
     stristr(NULL, "");
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo "\n-- Testing stristr() function with empty needle --\n";
 try {
     stristr("Hello World", "");
-} catch (\ErrorException $e) {
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 

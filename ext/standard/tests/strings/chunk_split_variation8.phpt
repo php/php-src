@@ -50,7 +50,7 @@ for($count = 0; $count < count($values); $count++) {
     var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
   } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
-  } catch (\ErrorException $e) {
+  } catch (\Error $e) {
       echo $e->getMessage() . "\n";
   }
 }
