@@ -13,14 +13,12 @@ if((substr(PHP_OS, 0, 3) != "WIN"))
 
 for ($i=0 ; $i<5 ; $i++) {
     try {
-	    var_dump(dirname("/foo/bar/baz", $i));
+        var_dump(dirname("/foo/bar/baz", $i));
     } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }
 }
-for ($i=0 ; $i<5 ; $i++) {
-	var_dump(dirname("/foo/bar/baz", $i));
-}
+
 var_dump(dirname("/foo/bar/baz", PHP_INT_MAX));
 var_dump(dirname("g:/foo/bar/baz", PHP_INT_MAX));
 var_dump(dirname("g:foo/bar/baz", PHP_INT_MAX));
