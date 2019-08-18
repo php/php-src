@@ -2,11 +2,7 @@
 Bug #63943 (Bad warning text from strpos() on empty needle)
 --FILE--
 <?php
-try {
-    strpos("lllllll", '');
-} catch (\Error $e) {
-    echo $e->getMessage();
-}
+strpos("lllllll", '');
 ?>
 --EXPECTF--
-Empty needle
+Warning: strpos(): Empty needle in %sbug63943.php on line %d

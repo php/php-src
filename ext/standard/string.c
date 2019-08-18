@@ -1817,8 +1817,8 @@ PHP_FUNCTION(stristr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_error(NULL, "Empty needle");
-		return;
+		php_error_docref(NULL, E_WARNING, "Empty needle");
+		RETURN_FALSE;
 	}
 
 	haystack_dup = estrndup(ZSTR_VAL(haystack), ZSTR_LEN(haystack));
@@ -1858,8 +1858,8 @@ PHP_FUNCTION(strstr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_error(NULL, "Empty needle");
-		return;
+		php_error_docref(NULL, E_WARNING, "Empty needle");
+		RETURN_FALSE;
 	}
 
 	found = php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
@@ -1904,8 +1904,8 @@ PHP_FUNCTION(strpos)
 	}
 
 	if (!ZSTR_LEN(needle)) {
-		zend_throw_error(NULL, "Empty needle");
-		return;
+		php_error_docref(NULL, E_WARNING, "Empty needle");
+		RETURN_FALSE;
 	}
 
 	found = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,

@@ -76,9 +76,7 @@ foreach($inputs as $input) {
     var_dump( stristr("Hello World", $input) );
   } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
-  } catch (\Error $e) {
-       echo $e->getMessage() . "\n";
-   }
+  }
   $count ++;
 }
 
@@ -111,21 +109,33 @@ stristr() expects parameter 2 to be string, array given
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 -- Iteration 13 --
 bool(false)
 -- Iteration 14 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 -- Iteration 15 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 -- Iteration 16 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 -- Iteration 17 --
 bool(false)
 -- Iteration 18 --
 stristr() expects parameter 2 to be string, resource given
 -- Iteration 19 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 -- Iteration 20 --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 ===DONE===

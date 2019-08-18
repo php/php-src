@@ -9,18 +9,10 @@ Test stristr() function : error conditions
 echo "*** Testing stristr() : error conditions ***\n";
 
 echo "\n-- Testing stristr() function with empty haystack --\n";
-try {
-    stristr(NULL, "");
-} catch (\Error $e) {
-    echo $e->getMessage() . "\n";
-}
+var_dump( stristr(NULL, "") );
 
 echo "\n-- Testing stristr() function with empty needle --\n";
-try {
-    stristr("Hello World", "");
-} catch (\Error $e) {
-    echo $e->getMessage() . "\n";
-}
+var_dump( stristr("Hello World", "") );
 
 ?>
 ===DONE===
@@ -28,8 +20,12 @@ try {
 *** Testing stristr() : error conditions ***
 
 -- Testing stristr() function with empty haystack --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 
 -- Testing stristr() function with empty needle --
-Empty needle
+
+Warning: stristr(): Empty needle in %s on line %d
+bool(false)
 ===DONE===
