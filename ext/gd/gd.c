@@ -3205,7 +3205,7 @@ PHP_FUNCTION(imagecopyresized)
 		return;
 	}
 
-	if (srcW <= 0) {
+	if (srcH <= 0) {
 		php_error_parameter_validation(NULL, 9, "Source height must be positive");
 		return;
 	}
