@@ -291,10 +291,6 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 			start = 0;
 		}
 	} else if ((size_t)start > ZSTR_LEN(s11)) {
-		/* Convert to Exception ?
-		zend_throw_error(NULL, "Offset not contained in string");
-		return;
-		 */
 		RETURN_FALSE;
 	}
 
@@ -686,11 +682,8 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
-			/* TODO Convert to ErrorException
-			 * zend_throw_error(NULL, "");
-			 */
-			php_error_docref(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
-			RETURN_FALSE;
+			 zend_throw_error(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
+			return;
 	}
 	/* }}} */
 
@@ -725,7 +718,6 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
-/* TODO (maybe) convert docref errors into ErrorException? */
 static inline int php_charmask(const unsigned char *input, size_t len, char *mask)
 {
 	const unsigned char *end;
@@ -743,21 +735,25 @@ static inline int php_charmask(const unsigned char *input, size_t len, char *mas
 			/* Error, try to be as helpful as possible:
 			   (a range ending/starting with '.' won't be captured here) */
 			if (end-len >= input) { /* there was no 'left' char */
+				/* TODO Check if Candidate to convert to Exception */
 				php_error_docref(NULL, E_WARNING, "Invalid '..'-range, no character to the left of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input+2 >= end) { /* there is no 'right' char */
+				/* TODO Check if Candidate to convert to Exception */
 				php_error_docref(NULL, E_WARNING, "Invalid '..'-range, no character to the right of '..'");
 				result = FAILURE;
 				continue;
 			}
 			if (input[-1] > input[2]) { /* wrong order */
+				/* TODO Check if Candidate to convert to Exception */
 				php_error_docref(NULL, E_WARNING, "Invalid '..'-range, '..'-range needs to be incrementing");
 				result = FAILURE;
 				continue;
 			}
 			/* FIXME: better error (a..b..c is the only left possibility?) */
+			/* TODO Check if Candidate to convert to Exception */
 			php_error_docref(NULL, E_WARNING, "Invalid '..'-range");
 			result = FAILURE;
 			continue;
@@ -2358,13 +2354,13 @@ PHP_FUNCTION(substr_replace)
 			(argc == 3 && Z_TYPE_P(from) == IS_ARRAY) ||
 			(argc == 4 && Z_TYPE_P(from) != Z_TYPE_P(len))
 		) {
-			/* TODO can convert to TypeError ? */
+			/* TODO Check if Candidate to convert to TypeError ? */
 			php_error_docref(NULL, E_WARNING, "'start' and 'length' should be of same type - numerical or array ");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
 		if (argc == 4 && Z_TYPE_P(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(from)) != zend_hash_num_elements(Z_ARRVAL_P(len))) {
-				/* TODO can convert to Exception ? */
+				/* TODO Check if Candidate to convert to Exception */
 				php_error_docref(NULL, E_WARNING, "'start' and 'length' should have the same number of elements");
 				RETURN_STR_COPY(Z_STR_P(str));
 			}
@@ -2434,7 +2430,7 @@ PHP_FUNCTION(substr_replace)
 			zend_tmp_string_release(tmp_repl_str);
 			RETURN_NEW_STR(result);
 		} else {
-			/* TODO can convert to Exception ? */
+			/* TODO Check if Candidate to convert to Exception */
 			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
 			RETURN_STR_COPY(Z_STR_P(str));
 		}
@@ -5644,7 +5640,7 @@ PHP_FUNCTION(substr_count)
 			length += (haystack_len - offset);
 		}
 		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
-			/* Convert to Exception ? */
+			/* TODO Check if Candidate to convert to Exception */
 			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
@@ -6178,7 +6174,7 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
-		/* Candidate to convert to Exception ? */
+		/* TODO Check if Candidate to convert to Exception */
 		php_error_docref(NULL, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
