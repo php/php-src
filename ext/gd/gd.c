@@ -3904,7 +3904,8 @@ PHP_FUNCTION(imagecropauto)
 
 		default:
 			php_error_parameter_validation(NULL, 1, "Unknown crop mode %d", (int)mode);
-			RETURN_FALSE;
+			return;
+
 	}
 	if (im_crop == NULL) {
 		RETURN_FALSE;
@@ -3949,8 +3950,14 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
-		RETURN_FALSE;
+	if (tmp_h <= 0 || tmp_h > INT_MAX) {
+		php_error_parameter_validation(NULL, 2, "Out of bounds");
+		return;
+	}
+
+	if (tmp_w <= 0 || tmp_w > INT_MAX) {
+		php_error_parameter_validation(NULL, 1, "Out of bounds");
+		return;
 	}
 
 	new_width = tmp_w;
