@@ -1695,17 +1695,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 2)
 	ZEND_ARG_INFO(0, max)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ sha1.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ soundex.c */
 ZEND_BEGIN_ARG_INFO(arginfo_soundex, 0)
 	ZEND_ARG_INFO(0, str)

@@ -148,6 +148,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_getlastmod arginfo_ob_get_level
 
+#define arginfo_sha1 arginfo_md5
+
+#define arginfo_sha1_file arginfo_md5_file
+
 #if defined(HAVE_SYSLOG_H)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openlog, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, ident, IS_STRING, 0)
