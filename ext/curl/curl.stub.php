@@ -42,7 +42,7 @@ function curl_file_name(string $name): void {}
 /**
  * @param resource $handle
  *
- * @return mixed|mixed[]|false
+ * @return mixed
  */
 function curl_getinfo($handle, int $option = UNKNOWN) {}
 
