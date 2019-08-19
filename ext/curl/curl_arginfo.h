@@ -29,16 +29,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_file_create, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, postname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_file_name, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_getinfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_curl_init arginfo_curl_copy_handle
+ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_init, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_add_handle, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, multi_handle)
@@ -49,13 +47,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_close, 0, 1, IS_VOID,
 	ZEND_ARG_INFO(0, multi_handle)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_errno, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_errno, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, multi_handle)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_exec, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, multi_handle)
-	ZEND_ARG_TYPE_INFO(1, still_running, IS_LONG, 0)
+	ZEND_ARG_INFO(1, still_running)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_getcontent, 0, 1, IS_STRING, 1)
@@ -64,7 +62,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_info_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, multi_handle)
-	ZEND_ARG_TYPE_INFO(1, msgs_in_queue, IS_LONG, 1)
+	ZEND_ARG_INFO(1, msgs_in_queue)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_init, 0, 0, 0)
@@ -87,10 +85,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_strerror, 0, 1, IS_ST
 	ZEND_ARG_TYPE_INFO(0, error_number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_pause, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_TYPE_INFO(0, bitmask, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 #define arginfo_curl_reset arginfo_curl_close
 
@@ -118,7 +118,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_share_setopt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, share_handle)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 #define arginfo_curl_share_strerror arginfo_curl_multi_strerror

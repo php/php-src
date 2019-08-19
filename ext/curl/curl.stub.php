@@ -37,8 +37,6 @@ function curl_file_create(
     string $postname = UNKNOWN
 ) {}
 
-function curl_file_name(string $name): void {}
-
 /**
  * @param resource $handle
  *
@@ -102,8 +100,10 @@ function curl_multi_setopt($multi_handle, int $option, $value): bool {}
 
 function curl_multi_strerror(int $error_number): ?string {}
 
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 /** @param resource $handle */
 function curl_pause($handle, int $bitmask): int {}
+#endif
 
 /** @param resource $handle */
 function curl_reset($handle): void {}
