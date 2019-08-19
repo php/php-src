@@ -132,6 +132,13 @@ function getmyinode() {}
 
 function getlastmod(): int {}
 
+/* sha1.c */
+
+function sha1(string $str, bool $raw_output = false): string {}
+
+/** @return string|false */
+function sha1_file(string $filename, bool $raw_output = false) {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
