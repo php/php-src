@@ -129,13 +129,13 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid path");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "Invalid path");
+			return;
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
@@ -252,18 +252,18 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	else if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Non-cryptographic hashing algorithm: %s", algo);
+		return;
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid path");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 1, "Invalid path");
+			return;
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
@@ -358,19 +358,19 @@ PHP_FUNCTION(hash_init)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
-			php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 0, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+			return;
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
-			RETURN_FALSE;
+			php_error_parameter_validation(NULL, 2, "HMAC requested without a key");
+			return;
 		}
 	}
 
@@ -637,28 +637,28 @@ PHP_FUNCTION(hash_hkdf)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		php_error_docref(NULL, E_WARNING, "Input keying material cannot be empty");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Input keying material cannot be empty");
+		return;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		return;
 	} else if (length == 0) {
 		length = ops->digest_size;
 	} else if (length > (zend_long) (ops->digest_size * 255)) {
-		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+		return;
 	}
 
 	context = emalloc(ops->context_size);
@@ -737,27 +737,27 @@ PHP_FUNCTION(hash_pbkdf2)
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	else if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Non-cryptographic hashing algorithm: %s", algo);
+		return;
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL, E_WARNING, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 3, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
+		return;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 4, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		return;
 	}
 
 	if (salt_len > INT_MAX - 4) {
-		php_error_docref(NULL, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
+		return;
 	}
 
 	context = emalloc(ops->context_size);
@@ -862,13 +862,13 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 0, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		return;
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 1, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		return;
 	}
 
 	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
@@ -1052,8 +1052,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 
 	bytes = (int)l_bytes;
 	if (bytes <= 0){
-		php_error_docref(NULL, E_WARNING, "the byte parameter must be greater than 0");
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 3, "The byte parameter must be greater than 0");
+		return;
 	}
 
 	salt_len = MIN(salt_len, SALT_SIZE);
