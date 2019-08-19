@@ -682,7 +682,7 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
-			 zend_throw_error(NULL, E_WARNING, "Item '" ZEND_LONG_FMT "' is not valid", item);
+			 zend_throw_error(NULL, "Item '" ZEND_LONG_FMT "' is not valid", item);
 			return;
 	}
 	/* }}} */
