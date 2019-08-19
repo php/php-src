@@ -169,3 +169,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_inet_pton, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, ip_address, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, phones, IS_LONG, 0)
+ZEND_END_ARG_INFO()

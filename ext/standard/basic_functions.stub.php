@@ -135,3 +135,8 @@ function inet_ntop (string $in_addr) {}
 /** @return string|false */
 function inet_pton (string $ip_address) {}
 #endif
+
+/* metaphone.c */
+
+/** @return string|false */
+function metaphone(string $text, int $phones = 0) {}
