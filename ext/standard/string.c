@@ -1983,7 +1983,7 @@ PHP_FUNCTION(strrpos)
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	if (ZSTR_LEN(haystack) == 0 || needle_len == 0) {
+	if (needle_len == 0) {
 		RETURN_FALSE;
 	}
 
@@ -2032,7 +2032,7 @@ PHP_FUNCTION(strripos)
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	if (ZSTR_LEN(haystack) == 0 || ZSTR_LEN(needle) == 0) {
+	if (ZSTR_LEN(haystack) == 0 || ZSTR_LEN(needle) == 0 || ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
 		RETURN_FALSE;
 	}
 
