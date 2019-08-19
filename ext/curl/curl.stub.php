@@ -131,7 +131,7 @@ function curl_share_errno($share_handle): int {}
 function curl_share_init() {}
 
 /** @param resource $share_handle */
-function curl_share_setopt($share_handle, int $option, int $value): bool {}
+function curl_share_setopt($share_handle, int $option, $value): bool {}
 
 function curl_share_strerror(int $error_number): ?string {}
 
