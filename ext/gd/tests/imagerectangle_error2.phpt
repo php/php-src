@@ -13,7 +13,11 @@ if ( ! extension_loaded('gd') ) die( 'skip GD not present; skipping test' );
 $image = tmpfile();
 
 // Draw a rectangle
-imagerectangle( $image, 0, 0, 50, 50, 2 );
+try {
+    imagerectangle( $image, 0, 0, 50, 50, 2 );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagerectangle(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagerectangle(): supplied resource is not a valid Image resource

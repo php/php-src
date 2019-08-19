@@ -20,8 +20,16 @@ echo "\n-- Testing vfprintf() function with more than expected no. of arguments 
 $format = 'string_val';
 $args = array( 1, 2 );
 $extra_arg = 10;
-var_dump( vfprintf( $fp, $format, $args, $extra_arg ) );
-var_dump( vfprintf( $fp, "Foo %d", array(6), "bar" ) );
+try {
+    var_dump( vfprintf( $fp, $format, $args, $extra_arg ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( vfprintf( $fp, "Foo %d", array(6), "bar" ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // Close handle
 fclose($fp);
@@ -37,10 +45,6 @@ unlink( $file );
 ?>
 --EXPECTF--
 -- Testing vfprintf() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for vfprintf() in %s on line %d
-NULL
-
-Warning: Wrong parameter count for vfprintf() in %s on line %d
-NULL
+Wrong parameter count for vfprintf()
+Wrong parameter count for vfprintf()
 ===DONE===

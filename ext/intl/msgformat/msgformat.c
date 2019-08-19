@@ -27,7 +27,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
@@ -36,16 +36,13 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset( NULL );
 
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "ss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 );
 		return FAILURE;
 	}
 
@@ -98,7 +95,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( msgfmt_create )
 {
 	object_init_ex( return_value, MessageFormatter_ce_ptr );
-	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -114,7 +111,7 @@ PHP_METHOD( MessageFormatter, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = ZEND_THIS;
-	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	if (msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}
@@ -137,9 +134,6 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_code: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -165,9 +159,6 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_message: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

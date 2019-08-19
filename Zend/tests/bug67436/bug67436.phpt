@@ -2,6 +2,8 @@
 bug67436: Autoloader isn't called if user defined error handler is present
 --INI--
 error_reporting=-1
+--SKIPIF--
+<?php if (extension_loaded('Zend OPCache')) die('skip Opcache overrides error handler'); ?>
 --FILE--
 <?php
 
@@ -12,6 +14,7 @@ spl_autoload_register(function($classname) {
 });
 
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    var_dump($errstr);
 }, error_reporting());
 
 a::staticTest();
@@ -19,5 +22,6 @@ a::staticTest();
 $b = new b();
 $b->test();
 --EXPECT--
+string(76) "The magic method __invoke() must have public visibility and cannot be static"
 b::test()
 a::test(c::TESTCONSTANT)

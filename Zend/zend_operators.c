@@ -138,18 +138,11 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 #define convert_object_to_type(op, dst, ctype, conv_func)									\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE) {				\
+		if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), dst, ctype) == FAILURE) {				\
 			zend_error(E_RECOVERABLE_ERROR,													\
 				"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
 			zend_get_type_by_const(ctype));													\
 		} 																					\
-	} else if (Z_OBJ_HT_P(op)->get) {														\
-		zval *newop = Z_OBJ_HT_P(op)->get(op, dst);								\
-		if (Z_TYPE_P(newop) != IS_OBJECT) {													\
-			/* for safety - avoid loop */													\
-			ZVAL_COPY_VALUE(dst, newop);													\
-			conv_func(dst);																	\
-		}																					\
 	}
 
 /* }}} */
@@ -574,21 +567,11 @@ try_again:
 			zval tmp;
 
 			if (Z_OBJ_HT_P(op)->cast_object) {
-				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING) == SUCCESS) {
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &tmp, IS_STRING) == SUCCESS) {
 					zval_ptr_dtor(op);
 					ZVAL_COPY_VALUE(op, &tmp);
 					return;
 				}
-			} else if (Z_OBJ_HT_P(op)->get) {
-				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp);
-				if (Z_TYPE_P(z) != IS_OBJECT) {
-					zend_string *str = zval_get_string(z);
-					zval_ptr_dtor(z);
-					zval_ptr_dtor(op);
-					ZVAL_STR(op, str);
-					return;
-				}
-				zval_ptr_dtor(z);
 			}
 			if (!EG(exception)) {
 				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
@@ -892,17 +875,9 @@ try_again:
 		case IS_OBJECT: {
 			zval tmp;
 			if (Z_OBJ_HT_P(op)->cast_object) {
-				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING) == SUCCESS) {
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &tmp, IS_STRING) == SUCCESS) {
 					return Z_STR(tmp);
 				}
-			} else if (Z_OBJ_HT_P(op)->get) {
-				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp);
-				if (Z_TYPE_P(z) != IS_OBJECT) {
-					zend_string *str = try ? zval_try_get_string(z) : zval_get_string(z);
-					zval_ptr_dtor(z);
-					return str;
-				}
-				zval_ptr_dtor(z);
 			}
 			if (!EG(exception)) {
 				zend_throw_error(NULL, "Object of class %s could not be converted to string", ZSTR_VAL(Z_OBJCE_P(op)->name));
@@ -2014,8 +1989,7 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 {
 	int ret;
 	int converted = 0;
-	zval op1_copy, op2_copy;
-	zval *op_free, tmp_free;
+	zval op1_copy, op2_copy, tmp_free;
 
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
@@ -2121,15 +2095,9 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					}
 				}
 				if (Z_TYPE_P(op1) == IS_OBJECT) {
-					if (Z_OBJ_HT_P(op1)->get) {
-						zval rv;
-						op_free = Z_OBJ_HT_P(op1)->get(op1, &rv);
-						ret = compare_function(result, op_free, op2);
-						zend_free_obj_get_result(op_free);
-						return ret;
-					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
+					if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
 						ZVAL_UNDEF(&tmp_free);
-						if (Z_OBJ_HT_P(op1)->cast_object(op1, &tmp_free, ((Z_TYPE_P(op2) == IS_FALSE || Z_TYPE_P(op2) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op2))) == FAILURE) {
+						if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp_free, ((Z_TYPE_P(op2) == IS_FALSE || Z_TYPE_P(op2) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op2))) == FAILURE) {
 							ZVAL_LONG(result, 1);
 							zend_free_obj_get_result(&tmp_free);
 							return SUCCESS;
@@ -2140,15 +2108,9 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					}
 				}
 				if (Z_TYPE_P(op2) == IS_OBJECT) {
-					if (Z_OBJ_HT_P(op2)->get) {
-						zval rv;
-						op_free = Z_OBJ_HT_P(op2)->get(op2, &rv);
-						ret = compare_function(result, op1, op_free);
-						zend_free_obj_get_result(op_free);
-						return ret;
-					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
+					if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
 						ZVAL_UNDEF(&tmp_free);
-						if (Z_OBJ_HT_P(op2)->cast_object(op2, &tmp_free, ((Z_TYPE_P(op1) == IS_FALSE || Z_TYPE_P(op1) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op1))) == FAILURE) {
+						if (Z_OBJ_HT_P(op2)->cast_object(Z_OBJ_P(op2), &tmp_free, ((Z_TYPE_P(op1) == IS_FALSE || Z_TYPE_P(op1) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(op1))) == FAILURE) {
 							ZVAL_LONG(result, -1);
 							zend_free_obj_get_result(&tmp_free);
 							return SUCCESS;
@@ -2501,18 +2463,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_TRY_ADDREF_P(val);
-				increment_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(op1, val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 
@@ -2568,18 +2519,7 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, get)
-			   && Z_OBJ_HANDLER_P(op1, set)) {
-				/* proxy object */
-				zval rv;
-				zval *val;
-
-				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
-				Z_TRY_ADDREF_P(val);
-				decrement_function(val);
-				Z_OBJ_HANDLER_P(op1, set)(op1, val);
-				zval_ptr_dtor(val);
-			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 
@@ -2608,23 +2548,14 @@ ZEND_API int ZEND_FASTCALL zend_is_true(zval *op) /* {{{ */
 
 ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 {
-	if (Z_OBJ_HT_P(op)->cast_object) {
+	zend_object *zobj = Z_OBJ_P(op);
+
+	if (zobj->handlers->cast_object) {
 		zval tmp;
-		if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL) == SUCCESS) {
+		if (zobj->handlers->cast_object(zobj, &tmp, _IS_BOOL) == SUCCESS) {
 			return Z_TYPE(tmp) == IS_TRUE;
 		}
-		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(Z_OBJ_P(op)->ce->name));
-	} else if (Z_OBJ_HT_P(op)->get) {
-		int result;
-		zval rv;
-		zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv);
-
-		if (Z_TYPE_P(tmp) != IS_OBJECT) {
-			/* for safety - avoid loop */
-			result = i_zend_is_true(tmp);
-			zval_ptr_dtor(tmp);
-			return result;
-		}
+		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(zobj->ce->name));
 	}
 	return 1;
 }

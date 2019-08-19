@@ -9,7 +9,6 @@ date.timezone=Atlantic/Azores
 <?php
 
 ini_set("intl.error_level", E_WARNING);
-ini_set("error_reporting", ~E_DEPRECATED);
 
 /*
  * Test for the datefmt_set_timezone_id  function

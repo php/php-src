@@ -10,10 +10,6 @@ Test array_multisort() function : error conditions
 
 echo "*** Testing array_multisort() : error conditions ***\n";
 
-// Zero arguments
-echo "\n-- Testing array_multisort() function with Zero arguments --\n";
-var_dump( array_multisort() );
-
 echo "\n-- Testing array_multisort() function with repeated flags --\n";
 $ar1 = array(1);
 var_dump( array_multisort($ar1, SORT_ASC, SORT_ASC) );
@@ -26,11 +22,6 @@ var_dump( array_multisort($ar1, SORT_STRING, SORT_NUMERIC) );
 ===DONE===
 --EXPECTF--
 *** Testing array_multisort() : error conditions ***
-
--- Testing array_multisort() function with Zero arguments --
-
-Warning: array_multisort() expects at least 1 parameter, 0 given in %sarray_multisort_error.php on line %d
-NULL
 
 -- Testing array_multisort() function with repeated flags --
 

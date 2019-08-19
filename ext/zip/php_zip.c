@@ -30,6 +30,7 @@
 #include "ext/standard/php_filestat.h"
 #include "zend_interfaces.h"
 #include "php_zip.h"
+#include "php_zip_arginfo.h"
 
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
 static PHP_NAMED_FUNCTION(zif_zip_open);
@@ -713,51 +714,6 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_open, 0, 0, 2)
-	ZEND_ARG_INFO(0, zip_dp)
-	ZEND_ARG_INFO(0, zip_entry)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_ent)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-	ZEND_ARG_INFO(0, len)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_name, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressedsize, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_filesize, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_entry_compressionmethod, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip_entry)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ zend_function_entry */
 static const zend_function_entry zip_functions[] = {
 	ZEND_RAW_FENTRY("zip_open", zif_zip_open, arginfo_zip_open, 0)
@@ -865,62 +821,36 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 }
 /* }}} */
 
-static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static zval *php_zip_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	ze_zip_object *obj;
-	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		zend_string *str = zval_try_get_string_func(member);
-		if (UNEXPECTED(!str)) {
-			return NULL;
-		}
-		ZVAL_STR(&tmp_member, str);
-		member = &tmp_member;
-		cache_slot = NULL;
-	}
-
-	obj = Z_ZIP_P(object);
+	obj = php_zip_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd == NULL) {
-		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 	}
 
 	return retval;
 }
 /* }}} */
 
-static zval *php_zip_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static zval *php_zip_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	ze_zip_object *obj;
-	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		zend_string *str = zval_try_get_string_func(member);
-		if (UNEXPECTED(!str)) {
-			return &EG(uninitialized_zval);
-		}
-		ZVAL_STR(&tmp_member, str);
-		member = &tmp_member;
-		cache_slot = NULL;
-	}
-
-	obj = Z_ZIP_P(object);
+	obj = php_zip_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd != NULL) {
@@ -929,38 +859,23 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		retval = zend_std_read_property(object, member, type, cache_slot, rv);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
 	return retval;
 }
 /* }}} */
 
-static int php_zip_has_property(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+static int php_zip_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	ze_zip_object *obj;
-	zval tmp_member;
 	zip_prop_handler *hnd = NULL;
 	int retval = 0;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		zend_string *str = zval_try_get_string_func(member);
-		if (UNEXPECTED(!str)) {
-			return 0;
-		}
-		ZVAL_STR(&tmp_member, str);
-		member = &tmp_member;
-		cache_slot = NULL;
-	}
-
-	obj = Z_ZIP_P(object);
+	obj = php_zip_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd != NULL) {
@@ -978,18 +893,14 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 
 		zval_ptr_dtor(&tmp);
 	} else {
-		retval = zend_std_has_property(object, member, type, cache_slot);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_has_property(object, name, type, cache_slot);
 	}
 
 	return retval;
 }
 /* }}} */
 
-static HashTable *php_zip_get_gc(zval *object, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *php_zip_get_gc(zend_object *object, zval **gc_data, int *gc_data_count) /* {{{ */
 {
 	*gc_data = NULL;
 	*gc_data_count = 0;
@@ -997,14 +908,14 @@ static HashTable *php_zip_get_gc(zval *object, zval **gc_data, int *gc_data_coun
 }
 /* }}} */
 
-static HashTable *php_zip_get_properties(zval *object)/* {{{ */
+static HashTable *php_zip_get_properties(zend_object *object)/* {{{ */
 {
 	ze_zip_object *obj;
 	HashTable *props;
 	zip_prop_handler *hnd;
 	zend_string *key;
 
-	obj = Z_ZIP_P(object);
+	obj = php_zip_fetch_object(object);
 	props = zend_std_get_properties(object);
 
 	if (obj->prop_handler == NULL) {
@@ -1331,7 +1242,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 			RETURN_NEW_STR(buffer);
 		} else {
 			zend_string_efree(buffer);
-			RETURN_EMPTY_STRING()
+			RETURN_EMPTY_STRING();
 		}
 	} else {
 		RETURN_FALSE;

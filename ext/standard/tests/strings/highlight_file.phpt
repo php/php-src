@@ -13,7 +13,6 @@ allow_url_fopen=1
 
 $filename = __DIR__."/highlight_file.dat";
 
-var_dump(highlight_file());
 var_dump(highlight_file($filename));
 
 var_dump(highlight_file('data:,<?php echo "test"; ?>'));
@@ -38,9 +37,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
-
-Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
 
 Warning: highlight_file(%shighlight_file.dat): failed to open stream: No such file or directory in %s on line %d
 

@@ -5,8 +5,6 @@ gmp_rootrem() basic tests
 --FILE--
 <?php
 
-var_dump(gmp_rootrem());
-
 var_dump(gmp_rootrem(1000, 3));
 var_dump(gmp_rootrem(100, 3));
 var_dump(gmp_rootrem(-100, 3));
@@ -21,8 +19,6 @@ var_dump(gmp_rootrem(100, -3));
 
 ?>
 --EXPECTF--
-Warning: gmp_rootrem() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
 array(2) {
   [0]=>
   object(GMP)#%d (1) {

@@ -3,12 +3,13 @@ define() tests
 --FILE--
 <?php
 
-var_dump(define());
-var_dump(define("TRUE"));
-var_dump(define("TRUE", 1));
-var_dump(define("TRUE", 1, array(1)));
+try {
+    var_dump(define(array(1,2,3,4,5), 1));
+} catch (TypeError $e) {
+    echo "TypeError: ", $e->getMessage(), "\n";
+}
 
-var_dump(define(array(1,2,3,4,5), 1));
+var_dump(define("TRUE", 1));
 var_dump(define(" ", 1));
 var_dump(define("[[[", 2));
 var_dump(define("test const", 3));
@@ -24,18 +25,10 @@ var_dump(constant("test const"));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: define() expects at least 2 parameters, 0 given in %s on line %d
-NULL
+TypeError: define() expects parameter 1 to be string, array given
 
-Warning: define() expects at least 2 parameters, 1 given in %s on line %d
-NULL
-bool(true)
-
-Warning: define() expects parameter 3 to be bool, array given in %s on line %d
-NULL
-
-Warning: define() expects parameter 1 to be string, array given in %s on line %d
-NULL
+Notice: Constant TRUE already defined in %s on line %d
+bool(false)
 bool(true)
 bool(true)
 bool(true)

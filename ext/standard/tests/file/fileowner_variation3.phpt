@@ -40,7 +40,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileowner( $file_path."/".$file ) );
+  try {
+    var_dump( fileowner( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -75,12 +79,8 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-
-Warning: fileowner() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileowner() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: fileowner() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileowner() expects parameter 1 to be a valid path, string given
 
 *** Done ***

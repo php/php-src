@@ -62,8 +62,16 @@ $counter = 1;
    is a writable file */
 foreach($files_arr as $file) {
   echo "-- Iteration $counter --\n";
-  var_dump( is_writable($file) );
-  var_dump( is_writeable($file) );
+  try {
+    var_dump( is_writable($file) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
+  try {
+    var_dump( is_writeable($file) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
   clearstatcache();
 }
@@ -96,26 +104,14 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-
-Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_writable() expects parameter 1 to be a valid path, string given
+is_writeable() expects parameter 1 to be a valid path, string given
 -- Iteration 8 --
-
-Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_writable() expects parameter 1 to be a valid path, string given
+is_writeable() expects parameter 1 to be a valid path, string given
 -- Iteration 9 --
-
-Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_writable() expects parameter 1 to be a valid path, string given
+is_writeable() expects parameter 1 to be a valid path, string given
 -- Iteration 10 --
 bool(true)
 bool(true)

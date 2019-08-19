@@ -4,7 +4,7 @@ ReflectionClass::__constructor() - bad arguments
 <?php
 try {
 	var_dump(new ReflectionClass());
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 
@@ -34,7 +34,7 @@ try {
 
 try {
 	var_dump(new ReflectionClass("stdClass", 1));
-} catch (Exception $e) {
+} catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
 
@@ -46,21 +46,12 @@ try {
 
 ?>
 --EXPECTF--
-Warning: ReflectionClass::__construct() expects exactly 1 parameter, 0 given in %s on line 3
-object(ReflectionClass)#%d (1) {
-  ["name"]=>
-  string(0) ""
-}
+ReflectionClass::__construct() expects exactly 1 parameter, 0 given
 Class  does not exist
 Class 1 does not exist
 Class 1 does not exist
 
 Notice: Array to string conversion in %s on line 27
 Class Array does not exist
-
-Warning: ReflectionClass::__construct() expects exactly 1 parameter, 2 given in %s on line 33
-object(ReflectionClass)#%d (1) {
-  ["name"]=>
-  string(0) ""
-}
+ReflectionClass::__construct() expects exactly 1 parameter, 2 given
 Class X does not exist

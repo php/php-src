@@ -1,310 +1,39 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0beta3
+?? ??? ????, PHP 8.0.0alpha1
 
 - Core:
-  . Fixed bug #78396 (Second file_put_contents in Shutdown hangs script).
-    (Nikita)
-  . Fixed bug #78406 (Broken file includes with user-defined stream filters).
-    (Nikita)
-  . Fixed bug #72530 (Use After Free in GC with Certain Destructors). (Nikita)
+  . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
+  . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
+    (Fabien Villepinte)
 
 - Date:
-  . Fixed bug #78383 (Casting a DateTime to array no longer returns its
-    properties). (Nikita)
-
-- OpenSSL:
-  . Fixed bug #78391 (Assertion failure in openssl_random_pseudo_bytes).
-    (Nikita)
-
-- Reflection:
-  . Fixed bug #78410 (Cannot "manually" unserialize class that is final and
-    extends an internal one). (Nikita)
-
-- SPL:
-  . Fixed bug #78409 (Segfault when creating instance of ArrayIterator without
-    constructor). (Nikita)
-
-08 Aug 2019, PHP 7.4.0beta2
-
-- Core:
-  . Fixed bug #78340 (Include of stream wrapper not reading whole file).
-    (Nikita)
-  . Fixed bug #78344 (Segmentation fault on zend_check_protected). (Nikita)
-  . Fixed bug #78356 (Array returned from ArrayAccess is incorrectly unpacked
-    as argument). (Nikita)
-  . Fixed bug #78379 (Cast to object confuses GC, causes crash). (Dmitry)
-
-- Exif:
-  . Fixed bug #78333 (Exif crash (bus error) due to wrong alignment and
-    invalid cast). (Nikita)
-  . Fixed bug #78256 (heap-buffer-overflow on exif_process_user_comment).
-    (CVE-2019-11042) (Stas)
-  . Fixed bug #78222 (heap-buffer-overflow on exif_scan_thumbnail).
-    (CVE-2019-11041) (Stas)
-
-- Iconv:
-  . Fixed bug #78342 (Bus error in configure test for iconv //IGNORE). (Rainer
-    Jung)
-
-- MySQLnd:
-  . Fixed bug #78179 (MariaDB server version incorrectly detected). (cmb)
-  . Fixed bug #78213 (Empty row pocket). (cmb)
-
-- Opcache:
-  . Fixed bug #78341 (Failure to detect smart branch in DFA pass). (Nikita)
-  . Fixed bug #78376 (Incorrect preloading of constant static properties).
-    (Dmitry)
-
-- PCRE:
-  . Fixed bug #78338 (Array cross-border reading in PCRE). (cmb)
-
-- PDO_Sqlite:
-  . Fixed bug #78348 (Remove -lrt from pdo_sqlite.so). (Peter Kokot)
-
-- Phar:
-  . Fixed bug #77919 (Potential UAF in Phar RSHUTDOWN). (cmb)
-
-- Standard:
-  . Fixed bug #78326 (improper memory deallocation on stream_get_contents()
-    with fixed length buffer). (Albert Casademont)
-  . Fixed bug #78346 (strip_tags no longer handling nested php tags). (cmb)
-
-25 Jul 2019, PHP 7.4.0beta1
-
-- Core:
-  . Fixed bug #78212 (Segfault in built-in webserver). (cmb)
-  . Fixed bug #60677 (CGI doesn't properly validate shebang line contains #!).
-    (Nikita)
-  . Fixed bug #78066 (PHP eats the first byte of a program that comes from
-    process substitution). (Nikita)
-  . Fixed bug #52752 (Crash when lexing). (Nikita)
-  . Implemented RFC: Deprecate curly brace syntax for accessing array elements
-    and string offsets.
-    https://wiki.php.net/rfc/deprecate_curly_braces_array_access (Andrey Gromov)
-  . Implemented RFC: Deprecations for PHP 7.4.
-    https://wiki.php.net/rfc/deprecations_php_7_4 (Kalle, Nikita)
+  . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
+    (cmb)
+  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
 
 - GD:
-  . Fixed bug #78314 (missing freetype support/functions with external gd).
-    (Remi)
+  . Removed deprecated image2wbmp(). (cmb)
+  . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
 
-- Libxml:
-  . Fixed bug #78279 (libxml_disable_entity_loader settings is shared between
-    requests (cgi-fcgi)). (Nikita)
+- Intl:
+  . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 
-- LiteSpeed:
-  . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
+- JIT:
+  . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
 
-- Opcache:
-  . Fixed bug #78271 (Invalid result of if-else). (Nikita)
-  . Added new INI directive opcache.cache_id (Windows only). (cmb)
-
-- PDO:
-  . Implemented FR #71885 (Allow escaping question mark placeholders).
-    https://wiki.php.net/rfc/pdo_escape_placeholders (Matteo)
-
-- Recode:
-  . Unbundled the recode extension. (cmb)
-
-- Standard:
-  . Fixed bug #78282 (atime and mtime mismatch). (cmb)
-  . Fixed bug #73535 (php_sockop_write() returns 0 on error, can be used to
-    trigger Denial of Service). (Nikita)
-
-11 Jul 2019, PHP 7.4.0alpha3
-
-- Core:
-  . Fixed bug #78239 (Deprecation notice during string conversion converted to
-    exception hangs). (Nikita)
-  . Implemented FR #77230 (Support custom CFLAGS and LDFLAGS from environment).
-    (cmb)
-
-- Date:
-  . Updated timelib to 2018.02. (Derick)
-
-- Fileinfo:
-  . Fixed bug #78183 (finfo_file shows wrong mime-type for .tga file).
-   (Anatol)
-
-- LiteSpeed:
-  . Updated to LiteSpeed SAPI V7.4.3 (increased response header count limit from
-    100 to 1000, added crash handler to cleanly shutdown PHP request, added
-    CloudLinux mod_lsapi mode). (George Wang)
-  . Fixed bug #76058 (After "POST data can't be buffered", using php://input
-    makes huge tmp files). (George Wang)
-
-- Openssl:
-  . Fixed bug #78231 (Segmentation fault upon stream_socket_accept of exported
-    socket-to-stream). (Nikita)
-
-- Opcache:
-  . Fixed #78202 (Opcache stats for cache hits are capped at 32bit NUM). (cmb)
+- LDAP:
+  . Removed deprecated ldap_sort. (mcmic)
 
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
-- PDO:
-  . Implemented FR #78033 (PDO - support username & password specified in
-    DSN). (sjon)
-
-- PDO_Sqlite:
-  . Fixed #78192 (SegFault when reuse statement after schema has changed).
-    (Vincent Quatrevieux)
-
-- Reflection:
-  . Fixed bug #78263 (\ReflectionReference::fromArrayElement() returns null
-    while item is a reference). (Nikita)
-
-- Standard:
-  . Implemented FR #78177 (Make proc_open accept command array). (Nikita)
-  . Fixed #78208 (password_needs_rehash() with an unknown algo should always
-    return true). (Sara)
-  . Fixed #78241 (touch() does not handle dates after 2038 in PHP 64-bit). (cmb)
-  . Implemented RFC where password_hash() has argon2i(d) implementations from
-    ext/sodium when PHP is built without libargon:
-    https://wiki.php.net/rfc/sodium.argon.hash (Sara)
-
-27 Jun 2019, PHP 7.4.0alpha2
-
-- Core:
-  . Fixed bug #78151 (Segfault caused by indirect expressions in PHP 7.4a1).
-    (Nikita)
-  . Fixed bug #78154 (SEND_VAR_NO_REF does not always send reference). (Nikita)
-  . Fixed bug #78182 (Segmentation fault during by-reference property
-    assignment). (Nikita)
-
-- Date:
-  . Fixed #69044 (discrepency between time and microtime). (krakjoe)
-
-- GD:
-  . Added TGA read support. (cmb)
-
-- MySQLi:
-  . Fixed bug #67348 (Reading $dbc->stat modifies $dbc->affected_rows).
-    (Derick)
-
-- Opcache:
-  . Fixed bug #78106 (Path resolution fails if opcache disabled during request).
-    (Nikita)
-  . Fixed bug #78175 (Preloading segfaults at preload time and at runtime).
-    (Dmitry)
-
-- SQLite3:
-  . Implement FR ##70950 (Make SQLite3 Online Backup API available). (BohwaZ)
-
-13 Jun 2019, PHP 7.4.0alpha1
-
-- Core:
-  . Fixed bug #77345 (Stack Overflow caused by circular reference in garbage
-    collection). (Alexandru Patranescu, Nikita, Dmitry)
-  . Fixed bug #77877 (call_user_func() passes $this to static methods).
-    (Dmitry)
-  . Implemented FR #76148 (Add array_key_exists() to the list of specially
-    compiled functions). (Majkl578)
-  . Fixed bug #76430 (__METHOD__ inconsistent outside of method).
-    (Ryan McCullagh, Nikita)
-  . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
-    created on the fly). (David Walker)
-  . Fixed bug #71030 (Self-assignment in list() may have inconsistent behavior).
-    (Nikita)
-  . Fixed bug #76451 (Aliases during inheritance type checks affected by
-    opcache). (Nikita)
-
-- CLI:
-  . The built-in CLI server now reports the request method in log files.
-    (Simon Welsh)
-
-- COM:
-  . Deprecated registering of case-insensitive constants from typelibs. (cmb)
-
-- CURL:
-  . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).
-    (Pierrick)
-  . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
-  . Deprecated CURLPIPE_HTTP1. (cmb)
-  . Deprecated $version parameter of curl_version(). (cmb)
-
-- Date:
-  . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
-
-- FFI:
-  . Added FFI extension. (Dmitry)
-
--Fileinfo:
-  . Fixed bug #78075 (finfo_file treats JSON file as text/plain). (Anatol)
-
-- Filter:
-  . The filter extension no longer have the --with-pcre-dir on Unix builds,
-    allowing the extension to be once more compiled as shared using
-    ./configure. (Kalle)
-
-- FPM:
-  . Implemented FR #72510 (systemd service should be hardened). (Craig Andrews)
-
-- GD:
-  . Implemented the scatter filter (IMG_FILTER_SCATTER). (Kalle)
-  . Fixed bug #73291 (imagecropauto() $threshold differs from external libgd).
-    (cmb)
-  . Fixed bug #76324 (cannot detect recent versions of freetype with
-    pkg-config). (Eli Schwartz)
-  . The bundled libgd behaves now like system libgd wrt. IMG_CROP_DEFAULT never
-    falling back to IMG_CROP_SIDES.
-  . The default $mode parameter of imagecropauto() has been changed to
-    IMG_CROP_DEFAULT; passing -1 is now deprecated.
-  . Added support for aspect ratio preserving scaling to a fixed height for
-    imagescale(). (Andreas Treichel)
-
-- Hash:
-  . The hash extension is now an integral part of PHP and cannot be disabled
-    as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)
-  . Implemented FR #71890 (crc32c checksum algorithm). (Andrew Brampton)
-
-- InterBase:
-  . Unbundled the InterBase extension and moved it to PECL. (Kalle)
-
-- Intl:
-  . Raised requirements to ICU ≥ 50.1. (cmb)
-  . Changed ResourceBundle to implement Countable. (LeSuisse)
-  . Changed default of $variant parameter of idn_to_ascii() and idn_to_utf8().
-    (cmb)
-
-- LDAP:
-  . Deprecated ldap_control_paged_result_response and ldap_control_paged_result
-
-- Mbstring:
-  . Fixed bug #77907 (mb-functions do not respect default_encoding). (Nikita)
-
-- Opcache:
-  . Implemented preloading RFC: https://wiki.php.net/rfc/preload. (Dmitry)
-
-- OpenSSL:
-  . Added TLS 1.3 support to streams including new tlsv1.3 stream.
-    (Codarren Velvindron, Jakub Zelenka)
-  . Added openssl_x509_verify function. (Ben Scholzen)
-  . openssl_random_pseudo_bytes() now throws in error conditions.
-    (Sammy Kaye Powers)
-
 - PCRE:
-  . Implemented FR #77094 (Support flags in preg_replace_callback). (Nikita)
-  . Fixed bug #72685 (Repeated UTF-8 validation of same string in UTF-8 mode).
-    (Nikita)
-  . Fixed bug #73948 (Preg_match_all should return NULLs on trailing optional
-    capture groups).
+  . Don't ignore invalid escape sequences. (sjon)
 
 - PDO:
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)
-
-- PDO_OCI:
-  . Support Oracle Database tracing attributes ACTION, MODULE,
-    CLIENT_INFO, and CLIENT_IDENTIFIER. (Cameron Porter)
-  . Implemented FR #76908 (PDO_OCI getColumnMeta() not implemented).
-    (Valentin Collet, Chris Jones, Remi)
-
-- PDO_SQLite:
-  . Implemented sqlite_stmt_readonly in PDO_SQLite. (BohwaZ)
-  . Raised requirements to SQLite 3.5.0. (cmb)
 
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
@@ -312,47 +41,11 @@ PHP                                                                        NEWS
   . Fixed bug #77800 (phpdbg segfaults on listing some conditional breakpoints).
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
-
-- SimpleXML:
-  . Implemented FR #65215 (SimpleXMLElement could register as implementing
-    Countable). (LeSuisse)
-
-- Sockets:
-  . Fixed bug #67619 (Validate length on socket_write). (thiagooak)
-
+  
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
-- SQLite3:
-  . Unbundled libsqlite. (cmb)
-  . Raised requirements to SQLite 3.7.4. (cmb)
-  . Forbid (un)serialization of SQLite3, SQLite3Stmt and SQLite3Result. (cmb)
-  . Added support for the SQLite @name notation. (cmb, BohwaZ)
-  . Added SQLite3Stmt::getSQL() to retrieve the SQL of the statement. (Bohwaz)
-
-- SPL:
-  . Fixed bug #77518 (SeekableIterator::seek() should accept 'int' typehint as
-    documented). (Nikita)
-
-- Standard:
-  . Fixed bug #74764 (Bindto IPv6 works with file_get_contents but fails with
-    stream_socket_client). (Ville Hukkamäki)
-  . Implemented FR #38301 (field enclosure behavior in fputcsv). (cmb)
-  . Implemented FR #51496 (fgetcsv should take empty string as an escape). (cmb)
-  . Implemented FR #77377 (No way to handle CTRL+C in Windows). (Anatol)
-  . Implemented password hashing registry RFC:
-    https://wiki.php.net/rfc/password_registry. (Sara)
-
-- Reflection:
-  . Fixed bug #76737 (Unserialized reflection objects are broken, they
-    shouldn't be serializable). (Nikita)
-
-- Tidy:
-  . Added TIDY_TAG_* constants for HTML5 elements. (cmb)
-  . Fixed bug #76736 (wrong reflection for tidy_get_head, tidy_get_html,
-    tidy_get_root, and tidy_getopt) (tandre)
-
-- WDDX:
-  . Deprecated and unbundled the WDDX extension. (cmb)
+- XML:
+  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

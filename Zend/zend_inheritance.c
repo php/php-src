@@ -28,8 +28,7 @@
 
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
-		zend_class_entry *ce, const zend_function *child_fn, const zend_function *parent_fn,
-		zend_bool always_error);
+		zend_class_entry *ce, const zend_function *child_fn, const zend_function *parent_fn);
 
 static void overridden_ptr_dtor(zval *zv) /* {{{ */
 {
@@ -672,49 +671,26 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 }
 
 static void ZEND_COLD emit_incompatible_method_error(
-		int error_level, const char *error_verb,
 		const zend_function *child, const zend_function *parent,
 		inheritance_status status, zend_string *unresolved_class) {
 	zend_string *parent_prototype = zend_get_function_declaration(parent);
 	zend_string *child_prototype = zend_get_function_declaration(child);
 	if (status == INHERITANCE_UNRESOLVED) {
-		zend_error_at(error_level, NULL, func_lineno(child),
+		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
 			"Could not check compatibility between %s and %s, because class %s is not available",
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype), ZSTR_VAL(unresolved_class));
 	} else {
-		zend_error_at(error_level, NULL, func_lineno(child),
-			"Declaration of %s %s be compatible with %s",
-			ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(parent_prototype));
+		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
+			"Declaration of %s must be compatible with %s",
+			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
 	}
 	zend_string_efree(child_prototype);
 	zend_string_efree(parent_prototype);
 }
 
-static void ZEND_COLD emit_incompatible_method_error_or_warning(
-		const zend_function *child, const zend_function *parent,
-		inheritance_status status, zend_string *unresolved_class, zend_bool always_error) {
-	int error_level;
-	const char *error_verb;
-	if (always_error ||
-		(child->common.prototype &&
-		 (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) ||
-		((parent->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) &&
-		 (!(child->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		  zend_perform_covariant_type_check(&unresolved_class, child, child->common.arg_info - 1, parent, parent->common.arg_info - 1) != INHERITANCE_SUCCESS))
-	) {
-		error_level = E_COMPILE_ERROR;
-		error_verb = "must";
-	} else {
-		error_level = E_WARNING;
-		error_verb = "should";
-	}
-	emit_incompatible_method_error(
-		error_level, error_verb, child, parent, status, unresolved_class);
-}
-
 static void perform_delayable_implementation_check(
 		zend_class_entry *ce, const zend_function *fe,
-		const zend_function *proto, zend_bool always_error)
+		const zend_function *proto)
 {
 	zend_string *unresolved_class;
 	inheritance_status status = zend_do_perform_implementation_check(
@@ -722,16 +698,11 @@ static void perform_delayable_implementation_check(
 
 	if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 		if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
-			add_compatibility_obligation(ce, fe, proto, always_error);
+			add_compatibility_obligation(ce, fe, proto);
 		} else {
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			if (always_error) {
-				emit_incompatible_method_error(
-					E_COMPILE_ERROR, "must", fe, proto, status, unresolved_class);
-			} else {
-				emit_incompatible_method_error_or_warning(
-					fe, proto, status, unresolved_class, always_error);
-			}
+			emit_incompatible_method_error(
+				fe, proto, status, unresolved_class);
 		}
 	}
 }
@@ -835,8 +806,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 			return zend_do_perform_implementation_check(
 				&unresolved_class, child, parent);
 		}
-		perform_delayable_implementation_check(
-			ce, child, parent, /*always_error*/0);
+		perform_delayable_implementation_check(ce, child, parent);
 	}
 	return INHERITANCE_SUCCESS;
 }
@@ -1503,14 +1473,11 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->serialize_func = fe;
 	} else if (zend_string_equals_literal(mname, "unserialize")) {
 		ce->unserialize_func = fe;
-	} else if (ZSTR_LEN(ce->name) != ZSTR_LEN(mname) && (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_')) {
+	} else if (ZSTR_VAL(mname)[0] != '_' || ZSTR_VAL(mname)[1] != '_') {
 		/* pass */
 	} else if (zend_string_equals_literal(mname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
-		}
 		ce->constructor = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 		ce->destructor = fe;
@@ -1534,17 +1501,6 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__tostring = fe;
 	} else if (zend_string_equals_literal(mname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		ce->__debugInfo = fe;
-	} else if (ZSTR_LEN(ce->name) == ZSTR_LEN(mname)) {
-		zend_string *lowercase_name = zend_string_tolower(ce->name);
-		lowercase_name = zend_new_interned_string(lowercase_name);
-		if (!memcmp(ZSTR_VAL(mname), ZSTR_VAL(lowercase_name), ZSTR_LEN(mname))) {
-			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ZSTR_VAL(ce->name));
-			}
-			ce->constructor = fe;
-			fe->common.fn_flags |= ZEND_ACC_CTOR;
-		}
-		zend_string_release_ex(lowercase_name, 0);
 	}
 }
 /* }}} */
@@ -1570,13 +1526,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				if ((existing_fn = zend_hash_find_ptr(*overridden, key)) != NULL) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
-						perform_delayable_implementation_check(
-							ce, fn, existing_fn, /*always_error*/ 1);
+						perform_delayable_implementation_check(ce, fn, existing_fn);
 					}
 					if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
-						perform_delayable_implementation_check(
-							ce, existing_fn, fn, /*always_error*/ 1);
+						perform_delayable_implementation_check(ce, existing_fn, fn);
 						return;
 					}
 				}
@@ -1589,12 +1543,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
 				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
-			perform_delayable_implementation_check(
-				ce, fn, existing_fn, /*always_error*/ 1);
+			perform_delayable_implementation_check(ce, fn, existing_fn);
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
-			perform_delayable_implementation_check(
-				ce, existing_fn, fn, /*always_error*/ 1);
+			perform_delayable_implementation_check(ce, existing_fn, fn);
 			return;
 		} else if (UNEXPECTED(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
 			/* two traits can't define the same non-abstract method */
@@ -2142,32 +2094,6 @@ static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 	zend_do_traits_property_binding(ce, traits);
 
 	efree(traits);
-
-	/* Emit E_DEPRECATED for PHP 4 constructors */
-	zend_check_deprecated_constructor(ce);
-}
-/* }}} */
-
-
-static zend_bool zend_has_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
-{
-	const zend_string *constructor_name;
-	if (!ce->constructor) {
-		return 0;
-	}
-	constructor_name = ce->constructor->common.function_name;
-	return !zend_binary_strcasecmp(
-		ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-		ZSTR_VAL(constructor_name), ZSTR_LEN(constructor_name)
-	);
-}
-/* }}} */
-
-void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
-{
-	if (zend_has_deprecated_constructor(ce)) {
-		zend_error(E_DEPRECATED, "Methods with the same name as their class will not be constructors in a future version of PHP; %s has a deprecated constructor", ZSTR_VAL(ce->name));
-	}
 }
 /* }}} */
 
@@ -2239,7 +2165,6 @@ typedef struct {
 		struct {
 			const zend_function *parent_fn;
 			const zend_function *child_fn;
-			zend_bool always_error;
 		};
 	};
 } variance_obligation;
@@ -2283,14 +2208,12 @@ static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *de
 }
 
 static void add_compatibility_obligation(
-		zend_class_entry *ce, const zend_function *child_fn, const zend_function *parent_fn,
-		zend_bool always_error) {
+		zend_class_entry *ce, const zend_function *child_fn, const zend_function *parent_fn) {
 	HashTable *obligations = get_or_init_obligations_for_class(ce);
 	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
 	obligation->type = OBLIGATION_COMPATIBILITY;
 	obligation->child_fn = child_fn;
 	obligation->parent_fn = parent_fn;
-	obligation->always_error = always_error;
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
@@ -2310,15 +2233,13 @@ static int check_variance_obligation(zval *zv) {
 		zend_string *unresolved_class;
 		inheritance_status status = zend_do_perform_implementation_check(
 			&unresolved_class, obligation->child_fn, obligation->parent_fn);
-
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			emit_incompatible_method_error_or_warning(
-				obligation->child_fn, obligation->parent_fn, status, unresolved_class,
-				obligation->always_error);
+			emit_incompatible_method_error(
+				obligation->child_fn, obligation->parent_fn, status, unresolved_class);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
 	}
@@ -2380,9 +2301,8 @@ static void report_variance_errors(zend_class_entry *ce) {
 		status = zend_do_perform_implementation_check(
 			&unresolved_class, obligation->child_fn, obligation->parent_fn);
 		ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
-		emit_incompatible_method_error_or_warning(
-			obligation->child_fn, obligation->parent_fn,
-			status, unresolved_class, obligation->always_error);
+		emit_incompatible_method_error(
+			obligation->child_fn, obligation->parent_fn, status, unresolved_class);
 	} ZEND_HASH_FOREACH_END();
 
 	/* Only warnings were thrown above -- that means that there are incompatibilities, but only
@@ -2432,7 +2352,6 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 /* Check whether early binding is prevented due to unresolved types in inheritance checks. */
 static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
-	inheritance_status ret = INHERITANCE_SUCCESS;
 	zend_string *key;
 	zend_function *parent_func;
 
@@ -2444,16 +2363,12 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 				do_inheritance_check_on_method_ex(child_func, parent_func, ce, NULL, 1, 0);
 
 			if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
-				if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
-					return INHERITANCE_UNRESOLVED;
-				}
-				ZEND_ASSERT(status == INHERITANCE_ERROR);
-				ret = INHERITANCE_ERROR;
+				return status;
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return ret;
+	return INHERITANCE_SUCCESS;
 }
 /* }}} */
 

@@ -47,6 +47,10 @@
 #include "ext/standard/md5.h"
 #include "ext/hash/php_hash.h"
 
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
+
 #ifndef ZEND_WIN32
 #include  <netdb.h>
 #endif
@@ -82,19 +86,6 @@ typedef int gid_t;
 #ifdef __AVX__
 #include <immintrin.h>
 #endif
-
-#define SHM_PROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(1); \
-		} \
-	} while (0)
-#define SHM_UNPROTECT() \
-	do { \
-		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(0); \
-		} \
-	} while (0)
 
 ZEND_EXTENSION();
 
@@ -2468,12 +2459,24 @@ int accel_activate(INIT_FUNC_ARGS)
 		ZCG(pcre_reseted) = 1;
 	}
 
+
+#ifdef HAVE_JIT
+	zend_jit_activate();
+#endif
+
 	if (ZCSG(preload_script)) {
 		preload_activate();
 	}
 
 	return SUCCESS;
 }
+
+#ifdef HAVE_JIT
+void accel_deactivate(void)
+{
+	zend_jit_deactivate();
+}
+#endif
 
 int accel_post_deactivate(void)
 {
@@ -2902,12 +2905,46 @@ static int accel_post_startup(void)
 		}
 	}
 
+	/* Initialize zend_func_info_rid */
+	zend_optimizer_startup();
+
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 	if (!file_cache_only) {
-		switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
+		size_t shm_size = ZCG(accel_directives).memory_consumption;
+#ifdef HAVE_JIT
+		size_t jit_size = 0;
+		zend_bool reattached = 0;
+
+		if (ZCG(accel_directives).jit &&
+		    ZCG(accel_directives).jit_buffer_size) {
+			size_t page_size;
+
+# ifdef _WIN32
+			SYSTEM_INFO system_info;
+			GetSystemInfo(&system_info);
+			page_size = system_info.dwPageSize;
+# else
+			page_size = getpagesize();
+# endif
+			if (!page_size || (page_size & (page_size - 1))) {
+				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can't get page size.");
+				abort();
+			}
+			jit_size = ZCG(accel_directives).jit_buffer_size;
+			jit_size = ZEND_MM_ALIGNED_SIZE_EX(jit_size, page_size);
+			shm_size += jit_size;
+		} else {
+			ZCG(accel_directives).jit = 0;
+			ZCG(accel_directives).jit_buffer_size = 0;
+		}
+
+		switch (zend_shared_alloc_startup(shm_size, jit_size)) {
+#else
+		switch (zend_shared_alloc_startup(shm_size, 0)) {
+#endif
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
 					accel_startup_ok = 0;
@@ -2919,6 +2956,9 @@ static int accel_post_startup(void)
 				zend_accel_error(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - probably not enough shared memory.");
 				return SUCCESS;
 			case SUCCESSFULLY_REATTACHED:
+#ifdef HAVE_JIT
+				reattached = 1;
+#endif
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
@@ -2950,6 +2990,16 @@ static int accel_post_startup(void)
 		zend_accel_init_auto_globals();
 
 		zend_shared_alloc_lock();
+#ifdef HAVE_JIT
+		if (ZCG(accel_directives).jit &&
+		    ZCG(accel_directives).jit_buffer_size &&
+		    ZSMMG(reserved) &&
+			zend_jit_startup(ZCG(accel_directives).jit, ZSMMG(reserved), jit_size, reattached) == SUCCESS) {
+			ZCG(jit_enabled) = 1;
+		} else {
+			ZCG(jit_enabled) = 0;
+		}
+#endif
 		zend_shared_alloc_save_state();
 		zend_shared_alloc_unlock();
 
@@ -3032,6 +3082,10 @@ void accel_shutdown(void)
 {
 	zend_ini_entry *ini_entry;
 	zend_bool _file_cache_only = 0;
+
+#ifdef HAVE_JIT
+	zend_jit_shutdown();
+#endif
 
 	zend_optimizer_shutdown();
 
@@ -4482,13 +4536,13 @@ static int accel_finish_startup(void)
 		int rc;
 		int orig_error_reporting;
 
-		int (*orig_activate)(TSRMLS_D) = sapi_module.activate;
-		int (*orig_deactivate)(TSRMLS_D) = sapi_module.deactivate;
-		void (*orig_register_server_variables)(zval *track_vars_array TSRMLS_DC) = sapi_module.register_server_variables;
-		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.header_handler;
-		int (*orig_send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC) = sapi_module.send_headers;
-		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)= sapi_module.send_header;
-		char *(*orig_getenv)(char *name, size_t name_len TSRMLS_DC) = sapi_module.getenv;
+		int (*orig_activate)() = sapi_module.activate;
+		int (*orig_deactivate)() = sapi_module.deactivate;
+		void (*orig_register_server_variables)(zval *track_vars_array) = sapi_module.register_server_variables;
+		int (*orig_header_handler)(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers) = sapi_module.header_handler;
+		int (*orig_send_headers)(sapi_headers_struct *sapi_headers) = sapi_module.send_headers;
+		void (*orig_send_header)(sapi_header_struct *sapi_header, void *server_context)= sapi_module.send_header;
+		char *(*orig_getenv)(char *name, size_t name_len) = sapi_module.getenv;
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
 #ifdef ZEND_SIGNALS
@@ -4600,7 +4654,11 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	NULL,									/* per-script activation */
+#ifdef HAVE_JIT
+    accel_deactivate,                       /* per-script deactivation */
+#else
 	NULL,									/* per-script deactivation */
+#endif
 	NULL,									/* message handler */
 	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */

@@ -5,7 +5,6 @@ localtime() tests
 date_default_timezone_set('UTC');
 
 $t = mktime(0,0,0, 6, 27, 2006);
-var_dump(localtime(1,1,1));
 
 var_dump(localtime());
 var_dump(localtime($t));
@@ -15,8 +14,6 @@ var_dump(localtime($t, false));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: localtime() expects at most 2 parameters, 3 given in %s on line %d
-bool(false)
 array(9) {
   [0]=>
   int(%d)

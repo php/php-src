@@ -4,9 +4,6 @@ Hash: hash_init() function - errors test
 <?php
 echo "*** Testing hash_init(): error conditions ***\n";
 
-echo "-- Testing hash_init() function with no parameters --\n";
-var_dump(hash_init());
-
 echo "-- Testing hash_init() function with unknown algorithms --\n";
 var_dump(hash_init('dummy'));
 
@@ -19,10 +16,6 @@ var_dump(hash_init('md5', HASH_HMAC, null));
 ?>
 --EXPECTF--
 *** Testing hash_init(): error conditions ***
--- Testing hash_init() function with no parameters --
-
-Warning: hash_init() expects at least 1 parameter, 0 given in %s on line %d
-NULL
 -- Testing hash_init() function with unknown algorithms --
 
 Warning: hash_init(): Unknown hashing algorithm: dummy in %s on line %d

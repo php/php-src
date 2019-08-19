@@ -16,12 +16,6 @@ var_dump( fileinode("/no/such/file/dir") );
 var_dump( fileinode("string") );
 var_dump( fileinode(100) );
 
-/* No.of arguments less than expected */
-var_dump( fileinode() );
-
-/* No.of arguments greater than expected */
-var_dump( fileinode(__FILE__, "string") );
-
 echo "\n*** Done ***";
 --EXPECTF--
 *** Testing error conditions of fileinode() ***
@@ -33,11 +27,5 @@ bool(false)
 
 Warning: fileinode(): stat failed for 100 in %s on line 14
 bool(false)
-
-Warning: fileinode() expects exactly 1 parameter, 0 given in %s on line 17
-NULL
-
-Warning: fileinode() expects exactly 1 parameter, 2 given in %s on line 20
-NULL
 
 *** Done ***

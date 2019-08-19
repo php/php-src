@@ -2878,7 +2878,7 @@ PHP_FUNCTION(odbc_field_type)
 	}
 
 	PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)pv_num, SQL_COLUMN_TYPE_NAME, tmp, 31, &tmplen, NULL);
-	RETURN_STRING(tmp)
+	RETURN_STRING(tmp);
 }
 /* }}} */
 

@@ -29,6 +29,10 @@
 #include "zend_operators.h"
 #include "zend_interfaces.h"
 
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
+
 #define zend_set_str_gc_flags(str) do { \
 	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
@@ -535,6 +539,14 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist(op_array, ZCG(mem))));
+
+#ifdef HAVE_JIT
+	if (ZCG(jit_enabled) &&
+	    ZEND_JIT_LEVEL(ZCG(accel_directives).jit) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
+	    !ZCG(current_persistent_script)->corrupted) {
+		zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+	}
+#endif
 }
 
 static void zend_persist_op_array(zval *zv)
@@ -1068,6 +1080,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 
+#ifdef HAVE_JIT
+	if (ZCG(jit_enabled) && for_shm) {
+		zend_jit_unprotect();
+	}
+#endif
+
 	zend_map_ptr_extend(ZCSG(map_ptr_last));
 
 	zend_accel_persist_class_table(&script->script.class_table);
@@ -1080,6 +1098,15 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
 	ZCSG(map_ptr_last) = CG(map_ptr_last);
+
+#ifdef HAVE_JIT
+	if (ZCG(jit_enabled) && for_shm) {
+		if (ZEND_JIT_LEVEL(ZCG(accel_directives).jit) >= ZEND_JIT_LEVEL_OPT_SCRIPT) {
+			zend_jit_script(&script->script);
+		}
+		zend_jit_protect();
+	}
+#endif
 
 	script->corrupted = 0;
 	ZCG(current_persistent_script) = NULL;

@@ -32,10 +32,6 @@ catch(Exception $e) {
     echo $e->getMessage();
 }
 
-echo "\n\nIncorrect number of args:\n";
-ReflectionProperty::export();
-ReflectionProperty::export('TestClass', "nonExistentProperty", true, false);
-
 ?>
 --EXPECTF--
 Non-existent class:
@@ -52,13 +48,3 @@ Non-existent property:
 
 Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 Property TestClass::$nonExistentProperty does not exist
-
-Incorrect number of args:
-
-Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
-
-Warning: ReflectionProperty::export() expects at least 2 parameters, 0 given in %s on line %d
-
-Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
-
-Warning: ReflectionProperty::export() expects at most 3 parameters, 4 given in %s on line %d

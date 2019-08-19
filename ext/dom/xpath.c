@@ -329,7 +329,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	}
 
 	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }

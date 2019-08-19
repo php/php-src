@@ -265,7 +265,7 @@ ZEND_API void  zend_hash_bucket_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
 ZEND_API void  zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
 ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API int   ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
+ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
 #define zend_hash_sort(ht, compare_func, renumber) \
@@ -277,7 +277,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_
 #define zend_hash_next_free_element(ht) \
 	(ht)->nNextFreeElement
 
-ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
+ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 # define zend_new_array(size) \

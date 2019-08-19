@@ -25,22 +25,19 @@
 #include "intl_data.h"
 
 /* {{{ */
-static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
 	size_t           locale_len = 0;
 	zval*            object;
 	Collator_object* co;
-	int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 
 	intl_error_reset( NULL );
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters_ex( zpp_flags, ZEND_NUM_ARGS(), "s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_create: unable to parse input params", 0 );
 		return FAILURE;
 	}
 
@@ -64,7 +61,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
-	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -80,7 +77,7 @@ PHP_METHOD( Collator, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = ZEND_THIS;
-	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}

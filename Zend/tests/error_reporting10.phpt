@@ -8,7 +8,6 @@ error_reporting(E_ALL);
 function make_exception()
 {
 	@$blah;
-	str_replace();
 	error_reporting(0);
 	throw new Exception();
 }

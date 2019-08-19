@@ -101,6 +101,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pdostatement_setfetchmode, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, param)
 	ZEND_ARG_INFO(0, params)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -2180,34 +2181,26 @@ const zend_function_entry pdo_dbstmt_functions[] = {
 };
 
 /* {{{ overloaded handlers for PDOStatement class */
-static zval *dbstmt_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
+	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 
-	if (!try_convert_to_string(member)) {
-		return value;
-	}
-
-	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 		return value;
 	} else {
-		return zend_std_write_property(object, member, value, cache_slot);
+		return zend_std_write_property(object, name, value, cache_slot);
 	}
 }
 
-static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot)
+static void dbstmt_prop_delete(zend_object *object, zend_string *name, void **cache_slot)
 {
-	pdo_stmt_t *stmt = Z_PDO_STMT_P(object);
+	pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
 
-	if (!try_convert_to_string(member)) {
-		return;
-	}
-
-	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+	if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 	} else {
-		zend_std_unset_property(object, member, cache_slot);
+		zend_std_unset_property(object, name, cache_slot);
 	}
 }
 
@@ -2447,12 +2440,44 @@ const zend_function_entry pdo_row_functions[] = {
 	PHP_FE_END
 };
 
-static zval *row_prop_read(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
+	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
-	zval zobj;
+	zend_long lval;
+
+	ZVAL_NULL(rv);
+	if (stmt) {
+		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
+			if (lval >= 0 && lval < stmt->column_count) {
+				fetch_value(stmt, rv, lval, NULL);
+			}
+		} else {
+			/* TODO: replace this with a hash of available column names to column
+			 * numbers */
+			for (colno = 0; colno < stmt->column_count; colno++) {
+				if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
+				    strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+					fetch_value(stmt, rv, colno, NULL);
+					return rv;
+				}
+			}
+			if (strcmp(ZSTR_VAL(name), "queryString") == 0) {
+				//zval_ptr_dtor(rv);
+				return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
+			}
+		}
+	}
+
+	return rv;
+}
+
+static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
+{
+	pdo_row_t *row = (pdo_row_t *)object;
+	pdo_stmt_t *stmt = row->stmt;
+	int colno = -1;
 	zend_long lval;
 
 	ZVAL_NULL(rv);
@@ -2481,9 +2506,8 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 				}
 			}
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
-				ZVAL_OBJ(&zobj, &stmt->std);
 				//zval_ptr_dtor(rv);
-				return zend_std_read_property(&zobj, member, type, cache_slot, rv);
+				return zend_std_read_property(&stmt->std, Z_STR_P(member), type, NULL, rv);
 			}
 		}
 	}
@@ -2491,25 +2515,52 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 	return rv;
 }
 
-static zval *row_dim_read(zval *object, zval *member, int type, zval *rv)
-{
-	return row_prop_read(object, member, type, NULL, rv);
-}
-
-static zval *row_prop_write(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *row_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
 	return value;
 }
 
-static void row_dim_write(zval *object, zval *member, zval *value)
+static void row_dim_write(zend_object *object, zval *member, zval *value)
 {
 	php_error_docref(NULL, E_WARNING, "This PDORow is not from a writable result set");
 }
 
-static int row_prop_exists(zval *object, zval *member, int check_empty, void **cache_slot)
+static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
-	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
+	pdo_row_t *row = (pdo_row_t *)object;
+	pdo_stmt_t *stmt = row->stmt;
+	int colno = -1;
+	zend_long lval;
+
+	if (stmt) {
+		if (is_numeric_string_ex(ZSTR_VAL(name), ZSTR_LEN(name), &lval, NULL, 0, NULL) == IS_LONG)	{
+			return lval >=0 && lval < stmt->column_count;
+		}
+
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (ZSTR_LEN(stmt->columns[colno].name) == ZSTR_LEN(name) &&
+			    strncmp(ZSTR_VAL(stmt->columns[colno].name), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+					int res;
+					zval val;
+
+					fetch_value(stmt, &val, colno, NULL);
+					res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
+					zval_ptr_dtor_nogc(&val);
+
+					return res;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int row_dim_exists(zend_object *object, zval *member, int check_empty)
+{
+	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zend_long lval;
@@ -2547,24 +2598,19 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 	return 0;
 }
 
-static int row_dim_exists(zval *object, zval *member, int check_empty)
-{
-	return row_prop_exists(object, member, check_empty, NULL);
-}
-
-static void row_prop_delete(zval *object, zval *offset, void **cache_slot)
+static void row_prop_delete(zend_object *object, zend_string *offset, void **cache_slot)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
 }
 
-static void row_dim_delete(zval *object, zval *offset)
+static void row_dim_delete(zend_object *object, zval *offset)
 {
 	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a PDORow");
 }
 
-static HashTable *row_get_properties_for(zval *object, zend_prop_purpose purpose)
+static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose purpose)
 {
-	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
+	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	HashTable *props;
 	int i;
@@ -2603,11 +2649,6 @@ static zend_function *row_method_get(
 	zend_string_release_ex(lc_method_name, 0);
 
 	return fbc;
-}
-
-static int row_call_method(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS)
-{
-	return FAILURE;
 }
 
 static zend_function *row_get_ctor(zend_object *object)
@@ -2688,7 +2729,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
 	pdo_row_object_handlers.get_method = row_method_get;
-	pdo_row_object_handlers.call_method = row_call_method;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.get_class_name = row_get_classname;
 	pdo_row_object_handlers.compare_objects = row_compare;

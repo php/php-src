@@ -5,13 +5,14 @@ flock() tests
 
 $file = __DIR__."/flock.dat";
 
-var_dump(flock());
-var_dump(flock("", "", $var));
-
 $fp = fopen($file, "w");
 fclose($fp);
 
-var_dump(flock($fp, LOCK_SH|LOCK_NB));
+try {
+    var_dump(flock($fp, LOCK_SH|LOCK_NB));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $fp = fopen($file, "w");
 
@@ -41,14 +42,7 @@ $file = __DIR__."/flock.dat";
 unlink($file);
 ?>
 --EXPECTF--
-Warning: flock() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
-NULL
-
-Warning: flock(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+flock(): supplied resource is not a valid stream resource
 bool(true)
 bool(true)
 bool(true)

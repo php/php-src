@@ -277,13 +277,13 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	}
 
 #define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
 		DBA_ID_DONE; \
-		RETURN_FALSE; \
+		return; \
 	}
 
 #define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)

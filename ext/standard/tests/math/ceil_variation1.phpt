@@ -67,13 +67,17 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(ceil($input));
+	try {
+		var_dump(ceil($input));
+	} catch (TypeError $e) {
+		echo $e->getMessage(), "\n";
+	}
 	$iterator++;
 };
 fclose($fp);
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing ceil() : usage variations ***
 
 -- Iteration 1 --
@@ -95,27 +99,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-float(0)
+ceil() expects parameter 1 to be int or float, string given
 
 -- Iteration 8 --
-float(0)
+ceil() expects parameter 1 to be int or float, string given
 
 -- Iteration 9 --
-bool(false)
+ceil() expects parameter 1 to be int or float, array given
 
 -- Iteration 10 --
-float(0)
+ceil() expects parameter 1 to be int or float, string given
 
 -- Iteration 11 --
-float(0)
+ceil() expects parameter 1 to be int or float, string given
 
 -- Iteration 12 --
-float(0)
+ceil() expects parameter 1 to be int or float, string given
 
 -- Iteration 13 --
-
-Notice: Object of class classA could not be converted to number in %s on line %d
-float(1)
+ceil() expects parameter 1 to be int or float, object given
 
 -- Iteration 14 --
 float(0)
@@ -124,5 +126,5 @@ float(0)
 float(0)
 
 -- Iteration 16 --
-float(%d)
+ceil() expects parameter 1 to be int or float, resource given
 ===Done===

@@ -12,32 +12,27 @@ ini_set("intl.error_level", E_WARNING);
 
 $c = new IntlGregorianCalendar(NULL, 'pt_PT');
 
-var_dump($c->fieldDifference($c, 2, 3));
+try {
+    var_dump($c->fieldDifference($c, 2, 3));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($c->fieldDifference(INF, 2));
-var_dump($c->fieldDifference(1));
 
-var_dump(intlcal_field_difference($c, 0, 1, 2));
+try {
+    var_dump(intlcal_field_difference($c, 0, 1, 2));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(intlcal_field_difference(1, 0, 1));
 --EXPECTF--
-Warning: IntlCalendar::fieldDifference() expects exactly 2 parameters, 3 given in %s on line %d
-
-Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: bad arguments in %s on line %d
-bool(false)
+IntlCalendar::fieldDifference() expects exactly 2 parameters, 3 given
 
 Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: Call to ICU method has failed in %s on line %d
 bool(false)
+intlcal_field_difference() expects exactly 3 parameters, 4 given
 
-Warning: IntlCalendar::fieldDifference() expects exactly 2 parameters, 1 given in %s on line %d
-
-Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: bad arguments in %s on line %d
-bool(false)
-
-Warning: intlcal_field_difference() expects exactly 3 parameters, 4 given in %s on line %d
-
-Warning: intlcal_field_difference(): intlcal_field_difference: bad arguments in %s on line %d
-bool(false)
-
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_field_difference() must be an instance of IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_field_difference() expects parameter 1 to be IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_field_difference(1, 0, 1)
 #1 {main}

@@ -1,7 +1,5 @@
 --TEST--
 Bug #22510 (segfault among complex references)
---INI--
-error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
 class foo

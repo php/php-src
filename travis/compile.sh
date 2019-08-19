@@ -1,6 +1,6 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi

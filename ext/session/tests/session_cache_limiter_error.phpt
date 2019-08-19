@@ -75,9 +75,6 @@ $inputs = array(
 
        // Unset data
 /*23*/ @$unset_var,
-
-       // Resource variable
-/*24*/ $fp
 );
 
 
@@ -163,9 +160,4 @@ string(12) "Hello World!"
 
 -- Iteration 23 --
 string(0) ""
-
--- Iteration 24 --
-
-Warning: session_cache_limiter() expects parameter 1 to be string, resource given in %s on line %d
-NULL
 Done

@@ -12,10 +12,9 @@ $p['file1.txt'] = 'hi';
 $p->stopBuffering();
 var_dump(strlen($p->getStub()));
 $p->setStub("<?php
-function __autoload(\$class)
-{
+spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
-}
+});
 Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER();
@@ -31,10 +30,9 @@ __HALT_COMPILER();
 --EXPECTF--
 int(6641)
 string(%d) "<?php
-function __autoload($class)
-{
+spl_autoload_register(function($class) {
     include 'phar://' . str_replace('_', '/', $class);
-}
+});
 Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>

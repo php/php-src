@@ -11,25 +11,29 @@ echo "*** Testing array_intersect() : error conditions ***\n";
 
 // Testing array_intersect() with zero arguments
 echo "\n-- Testing array_intersect() function with Zero arguments --\n";
-var_dump( array_intersect() );
+try {
+    var_dump( array_intersect() );
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // Testing array_intersect() with one less than the expected number of arguments
 echo "\n-- Testing array_intersect() function with less than expected no. of arguments --\n";
 $arr1 = array(1, 2);
-var_dump( array_intersect($arr1) );
+try {
+    var_dump( array_intersect($arr1) );
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect() : error conditions ***
 
 -- Testing array_intersect() function with Zero arguments --
-
-Warning: array_intersect(): at least 2 parameters are required, 0 given in %s on line %d
-NULL
+At least 2 parameters are required, 0 given
 
 -- Testing array_intersect() function with less than expected no. of arguments --
-
-Warning: array_intersect(): at least 2 parameters are required, 1 given in %s on line %d
-NULL
+At least 2 parameters are required, 1 given
 Done

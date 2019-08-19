@@ -16,9 +16,6 @@ $db = MySQLPDOTest::factory();
 	$default =  $db->getAttribute(PDO::ATTR_STATEMENT_CLASS);
 	var_dump($default);
 
-	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS)))
-		printf("[001] Expecting boolean/false got %s\n", var_export($tmp, true));
-
 	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'foo')))
 		printf("[002] Expecting boolean/false got %s\n", var_export($tmp, true));
 

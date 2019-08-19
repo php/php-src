@@ -13,14 +13,6 @@ require "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
-// Too few parameters
-var_dump(ldap_compare($link));
-var_dump(ldap_compare($link, $link));
-var_dump(ldap_compare($link, $link, $link));
-
-// Too many parameters
-var_dump(ldap_compare($link, $link, $link, $link, [], "Additional data"));
-
 var_dump(
 	ldap_compare($link, "cn=userNotAvailable,$base", "sn", "testSN1"),
 	ldap_error($link),
@@ -36,18 +28,6 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-Warning: ldap_compare() expects at least 4 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ldap_compare() expects at least 4 parameters, 2 given in %s on line %d
-NULL
-
-Warning: ldap_compare() expects at least 4 parameters, 3 given in %s on line %d
-NULL
-
-Warning: ldap_compare() expects at most 5 parameters, 6 given in %s on line %d
-NULL
-
 Warning: ldap_compare(): Compare: No such object in %s on line %d
 int(-1)
 string(14) "No such object"

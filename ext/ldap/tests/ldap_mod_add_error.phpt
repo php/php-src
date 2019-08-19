@@ -12,14 +12,6 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
-// Too few parameters
-var_dump(ldap_mod_add());
-var_dump(ldap_mod_add($link));
-var_dump(ldap_mod_add($link, "$base"));
-
-// Too many parameters
-var_dump(ldap_mod_add($link, "$base", array(), [], "Additional data"));
-
 // DN not found
 var_dump(ldap_mod_add($link, "dc=my-domain,$base", array()));
 
@@ -57,18 +49,6 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 ldap_delete($link, "dc=my-domain,$base");
 ?>
 --EXPECTF--
-Warning: ldap_mod_add() expects at least 3 parameters, 0 given in %s on line %d
-NULL
-
-Warning: ldap_mod_add() expects at least 3 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ldap_mod_add() expects at least 3 parameters, 2 given in %s on line %d
-NULL
-
-Warning: ldap_mod_add() expects at most 4 parameters, 5 given in %s on line %d
-NULL
-
 Warning: ldap_mod_add(): Modify: No such object in %s on line %d
 bool(false)
 

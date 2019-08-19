@@ -77,11 +77,6 @@ class string1 {
 $obj = new string1;
 var_dump( explode("b", $obj) );
 
-echo "\n*** Testing error conditions ***\n";
-/* checking for arguments <2 and >3 */
-var_dump( explode(":", "array1:array2:array3", -1, -33) );
-var_dump( explode(":") );
-
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -498,12 +493,4 @@ array(2) {
   [1]=>
   string(4) "ject"
 }
-
-*** Testing error conditions ***
-
-Warning: explode() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: explode() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 Done

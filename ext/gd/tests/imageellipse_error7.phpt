@@ -14,7 +14,11 @@ if (!extension_loaded("gd")) die("skip GD not present");
 $image = tmpfile();
 
 // try to draw a white ellipse
-imageellipse($image, 200, 150, 300, 200, 16777215);
+try {
+    imageellipse($image, 200, 150, 300, 200, 16777215);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imageellipse(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imageellipse(): supplied resource is not a valid Image resource

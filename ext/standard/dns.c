@@ -120,7 +120,7 @@ static zend_string *php_gethostbyaddr(char *ip);
 static zend_string *php_gethostbyname(char *name);
 
 #ifdef HAVE_GETHOSTNAME
-/* {{{ proto string gethostname()
+/* {{{ proto string|false gethostname()
    Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
@@ -144,7 +144,7 @@ PHP_FUNCTION(gethostname)
  we can have a dns.c, dns_unix.c and dns_win32.c instead of a messy dns.c full of #ifdef
 */
 
-/* {{{ proto string gethostbyaddr(string ip_address)
+/* {{{ proto string|false gethostbyaddr(string ip_address)
    Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
 {
@@ -227,7 +227,7 @@ PHP_FUNCTION(gethostbyname)
 }
 /* }}} */
 
-/* {{{ proto array gethostbynamel(string hostname)
+/* {{{ proto array|false gethostbynamel(string hostname)
    Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
 {

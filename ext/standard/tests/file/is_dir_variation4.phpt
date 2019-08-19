@@ -38,7 +38,11 @@ $count = 1;
 /* loop through to test each element the above array */
 foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
-  var_dump( is_dir($file_path."/".$dir ) );
+  try {
+    var_dump( is_dir($file_path."/".$dir ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count++;
 }
 
@@ -77,13 +81,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-
-Warning: is_dir() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_dir() expects parameter 1 to be a valid path, string given
 
 -- Iteration 10 --
-
-Warning: is_dir() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+is_dir() expects parameter 1 to be a valid path, string given
 
 *** Done ***

@@ -99,11 +99,6 @@ $s = $euc_jp;
 $s = mb_convert_encoding($s, 'BAD');
 print("BAD: $s\n"); // BAD
 
-$s = $euc_jp;
-$s = mb_convert_encoding($s);
-print("MP: $s\n"); // Missing parameter
-
-
 ?>
 --EXPECTF--
 == BASIC TEST ==
@@ -129,6 +124,3 @@ EUC-JP:
 
 Warning: mb_convert_encoding(): Unknown encoding "BAD" in %s on line %d
 BAD: 
-
-Warning: mb_convert_encoding() expects at least 2 parameters, 1 given in %s on line %d
-MP: 

@@ -25,7 +25,7 @@
 
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
-/* {{{ proto string metaphone(string text[, int phones])
+/* {{{ proto string|false metaphone(string text[, int phones])
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {

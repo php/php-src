@@ -42,9 +42,6 @@ PHP_FUNCTION( collator_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_locale: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

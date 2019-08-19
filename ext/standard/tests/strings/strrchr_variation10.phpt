@@ -121,7 +121,11 @@ $needles =  array (
 $count = 1;
 for($index = 0; $index < count($haystacks); $index++) {
   echo "-- Iteration $count --\n";
-  var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  try {
+    var_dump( strrchr($haystacks[$index], $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count ++;
 }
 
@@ -129,108 +133,58 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function with unexpected inputs for needle ***
 -- Iteration 1 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(1) "0"
 -- Iteration 2 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(1) "1"
 -- Iteration 3 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 4 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(2) "-2"
 -- Iteration 5 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(4) "10.5"
 -- Iteration 6 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(5) "-10.5"
 -- Iteration 7 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(2) "10"
 -- Iteration 8 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(2) "10"
 -- Iteration 9 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 10 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 11 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 12 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 13 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 14 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, array given
 -- Iteration 15 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 16 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 17 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 18 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 19 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 20 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 21 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+string(6) "object"
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-
-Warning: strrchr(): needle is not a string or an integer in %s on line %d
-bool(false)
+strrchr() expects parameter 2 to be string, resource given
 -- Iteration 25 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 -- Iteration 26 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 *** Done ***

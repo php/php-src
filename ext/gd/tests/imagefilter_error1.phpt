@@ -11,8 +11,11 @@ if (!extension_loaded("gd")) die("skip GD not present");
 <?php
 $image = imagecreatetruecolor(180, 30);
 
-var_dump(imagefilter($image));
+try {
+    var_dump(imagefilter($image));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: Wrong parameter count for imagefilter() in %s on line %d
-NULL
+--EXPECT--
+Wrong parameter count for imagefilter()

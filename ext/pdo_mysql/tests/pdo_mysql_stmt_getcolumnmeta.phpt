@@ -30,21 +30,10 @@ try {
 		printf("[002] Expecting false got %s\n", var_export($tmp, true));
 
 	$stmt->execute();
-	// Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 0 given in
-	if (false !== ($tmp = @$stmt->getColumnMeta()))
-		printf("[003] Expecting false got %s\n", var_export($tmp, true));
 
 	// invalid offset
 	if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
 		printf("[004] Expecting false got %s\n", var_export($tmp, true));
-
-	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be int, array given in
-	if (false !== ($tmp = @$stmt->getColumnMeta(array())))
-		printf("[005] Expecting false got %s\n", var_export($tmp, true));
-
-	// Warning: PDOStatement::getColumnMeta() expects exactly 1 parameter, 2 given in
-	if (false !== ($tmp = @$stmt->getColumnMeta(1, 1)))
-		printf("[006] Expecting false got %s\n", var_export($tmp, true));
 
 	$emulated =  $stmt->getColumnMeta(0);
 

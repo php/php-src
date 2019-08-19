@@ -4,8 +4,6 @@ Constant scalar expressions with autoloading and classes
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
 --FILE--
 <?php
 

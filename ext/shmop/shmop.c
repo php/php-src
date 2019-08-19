@@ -24,6 +24,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_shmop.h"
+#include "shmop_arginfo.h"
+
 # ifndef PHP_WIN32
 # include <sys/ipc.h>
 # include <sys/shm.h>
@@ -43,39 +45,6 @@ php_shmop_globals shmop_globals;
 #endif
 
 int shm_type;
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_open, 0, 0, 4)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, size)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_read, 0, 0, 3)
-	ZEND_ARG_INFO(0, shmid)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, shmid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_size, 0, 0, 1)
-	ZEND_ARG_INFO(0, shmid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_write, 0, 0, 3)
-	ZEND_ARG_INFO(0, shmid)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_delete, 0, 0, 1)
-	ZEND_ARG_INFO(0, shmid)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ shmop_functions[]
  */
@@ -238,7 +207,7 @@ PHP_FUNCTION(shmop_read)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (start < 0 || start > shmop->size) {
@@ -273,7 +242,7 @@ PHP_FUNCTION(shmop_close)
 
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(shmid));
@@ -292,7 +261,7 @@ PHP_FUNCTION(shmop_size)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(shmop->size);
@@ -314,7 +283,7 @@ PHP_FUNCTION(shmop_write)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((shmop->shmatflg & SHM_RDONLY) == SHM_RDONLY) {
@@ -346,7 +315,7 @@ PHP_FUNCTION(shmop_delete)
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {

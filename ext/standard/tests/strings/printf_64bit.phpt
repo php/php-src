@@ -28,7 +28,11 @@ $strings          = array( NULL, "abc", 'aaa' );
 
 /* Zero argument */
 echo "\n*** Output for zero argument ***\n";
-printf();
+try {
+    printf();
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 /* Number of arguments not matching as specified in format field */
 echo "\n*** Output for insufficient number of arguments ***\n";
@@ -226,8 +230,7 @@ printf("%d", $tempstring);
 ?>
 --EXPECTF--
 *** Output for zero argument ***
-
-Warning: printf() expects at least 1 parameter, 0 given in %s on line %d
+printf() expects at least 1 parameter, 0 given
 
 *** Output for insufficient number of arguments ***
 

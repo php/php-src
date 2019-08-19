@@ -75,7 +75,6 @@ f  - function or array containing php method call info (returned as
 h  - array (returned as HashTable*)
 H  - array or HASH_OF(object) (returned as HashTable*)
 l  - long (zend_long)
-L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (zend_long, ZEND_LONG_MAX/ZEND_LONG_MIN)
 o  - object of any type (zval*)
 O  - object of specific type given by class entry (zval*, zend_class_entry)
 p  - valid path (string without null bytes in the middle) and its length (char*, size_t)

@@ -21,7 +21,6 @@ var_dump(gmp_perfect_square($n));
 $n = gmp_init(-5);
 var_dump(gmp_perfect_square($n));
 
-var_dump(gmp_perfect_square());
 var_dump(gmp_perfect_square(array()));
 
 echo "Done\n";
@@ -38,9 +37,6 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-
-Warning: gmp_perfect_square() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
 
 Warning: gmp_perfect_square(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

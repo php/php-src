@@ -206,7 +206,7 @@ typedef struct _zend_oparray_context {
 /* Property or method overrides private one               |     |     |     */
 #define ZEND_ACC_CHANGED                 (1 <<  3) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
-/* Staic method or property                               |     |     |     */
+/* Static method or property                              |     |     |     */
 #define ZEND_ACC_STATIC                  (1 <<  4) /*     |  X  |  X  |     */
 /*                                                        |     |     |     */
 /* Final class or method                                  |     |     |     */
@@ -237,10 +237,10 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Class linked with parent, interfacs and traits         |     |     |     */
+/* Class linked with parent, interfaces and traits        |     |     |     */
 #define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* class is abstarct, since it is set by any              |     |     |     */
+/* Class is abstract, since it is set by any              |     |     |     */
 /* abstract method                                        |     |     |     */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS (1 <<  4) /*  X  |     |     |     */
 /*                                                        |     |     |     */
@@ -299,10 +299,6 @@ typedef struct _zend_oparray_context {
 /* "main" op_array with                                   |     |     |     */
 /* ZEND_DECLARE_CLASS_DELAYED opcodes                     |     |     |     */
 #define ZEND_ACC_EARLY_BINDING           (1 << 16) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* method flag (bc only), any method that has this        |     |     |     */
-/* flag can be used statically and non statically.        |     |     |     */
-#define ZEND_ACC_ALLOW_STATIC            (1 << 17) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* call through user function trampoline. e.g.            |     |     |     */
 /* __call, __callstatic                                   |     |     |     */
@@ -712,7 +708,7 @@ void zend_file_context_begin(zend_file_context *prev_context);
 void zend_file_context_end(zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
-extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
+extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, const char *filename);
 
 ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
 void startup_scanner(void);
@@ -770,7 +766,7 @@ ZEND_API void function_add_ref(zend_function *function);
 
 /* helper functions in zend_language_scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
-ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
+ZEND_API zend_op_array *compile_string(zval *source_string, const char *filename);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename);
 ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
@@ -882,14 +878,11 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-#define ZEND_INTERNAL_FUNCTION				1
-#define ZEND_USER_FUNCTION					2
-#define ZEND_OVERLOADED_FUNCTION			3
-#define	ZEND_EVAL_CODE						4
-#define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
+#define ZEND_INTERNAL_FUNCTION		1
+#define ZEND_USER_FUNCTION			2
+#define ZEND_EVAL_CODE				4
 
-/* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
-#define ZEND_USER_CODE(type) ((type & 1) == 0)
+#define ZEND_USER_CODE(type)		((type) != ZEND_INTERNAL_FUNCTION)
 
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
@@ -927,9 +920,9 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce */
 #define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
 
-#define IS_CONSTANT_UNQUALIFIED     0x010
-#define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
-#define IS_CONSTANT_IN_NAMESPACE    0x100
+/* Make sure these don't clash with ZEND_FETCH_CLASS_* flags. */
+#define IS_CONSTANT_CLASS                    0x400 /* __CLASS__ in trait */
+#define IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE 0x800
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
@@ -1007,10 +1000,10 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 	(((opcode) >= ZEND_ADD) && ((opcode) <= ZEND_POW))
 
 /* Pseudo-opcodes that are used only temporarily during compilation */
-#define ZEND_PARENTHESIZED_CONCAT 252 /* removed with PHP 8 */
 #define ZEND_GOTO  253
 #define ZEND_BRK   254
 #define ZEND_CONT  255
+
 
 END_EXTERN_C()
 
@@ -1024,7 +1017,6 @@ END_EXTERN_C()
 #define ZEND_CALL_FUNC_NAME         "__call"
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
-#define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
 #define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
 
@@ -1052,9 +1044,6 @@ END_EXTERN_C()
 
 /* disable constant substitution at compile-time */
 #define ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION   (1<<6)
-
-/* disable usage of builtin instruction for strlen() */
-#define ZEND_COMPILE_NO_BUILTIN_STRLEN          (1<<7)
 
 /* disable substitution of persistent constants at compile-time */
 #define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<8)

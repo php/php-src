@@ -3,7 +3,7 @@ Bug #25547 (error_handler and array index with function call)
 --FILE--
 <?php
 
-function handler($errno, $errstr, $errfile, $errline, $context)
+function handler($errno, $errstr, $errfile, $errline)
 {
 	echo __FUNCTION__ . "($errstr)\n";
 }

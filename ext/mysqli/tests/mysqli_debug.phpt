@@ -19,9 +19,6 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 <?php
 	require_once('connect.inc');
 
-	if (NULL !== ($tmp = @mysqli_debug()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	// NOTE: documentation is not clear on this: function always return NULL or TRUE
 	if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s/mysqli_debug_phpt.trace', sys_get_temp_dir()))))
 		printf("[002] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);

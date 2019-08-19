@@ -69,24 +69,8 @@ foreach ($search_arrays_v as $search_array) {
 }
 
 echo "\n*** Testing error conditions ***\n";
-//Zeor args
-var_dump( array_key_exists() );
 // first args as array
 var_dump( array_key_exists(array(), array()) );
-// second args as string
-var_dump( array_key_exists("", "") );
-// second args a integer
-var_dump( array_key_exists(1, 1) );
-// second args as NULL
-var_dump( array_key_exists(1, NULL) );
-// second args as boolean
-var_dump( array_key_exists(1, true) );
-// first args as boolean
-var_dump( array_key_exists(false, true) );
-// second args as float
-var_dump( array_key_exists(false, 17.5) );
-// args more than expected
-var_dump( array_key_exists(1, array(), array()) );
 // first argument as floating point value
 var_dump( array_key_exists(17.5, array(1,23) ) ) ;
 
@@ -249,32 +233,8 @@ bool(true)
 
 *** Testing error conditions ***
 
-Warning: array_key_exists() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
 Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)
-
-Warning: array_key_exists() expects parameter 2 to be array, string given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, int given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, null given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, bool given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, bool given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
-NULL
-
-Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
 
 Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)

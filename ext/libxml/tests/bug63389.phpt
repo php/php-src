@@ -6,9 +6,13 @@ Bug #63389 (Missing context check on libxml_set_streams_context() causes memleak
 <?php
 $fp = fopen("php://input", "r");
 libxml_set_streams_context($fp);
-libxml_set_streams_context("a");
+try {
+    libxml_set_streams_context("a");
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "okey";
 ?>
---EXPECTF--
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, string given in %sbug63389.php on line %d
+--EXPECT--
+libxml_set_streams_context() expects parameter 1 to be resource, string given
 okey

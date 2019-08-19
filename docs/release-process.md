@@ -439,6 +439,8 @@
     `gpg --fingerprint "$USER@php.net"`. Let one or more of the previous RMs
     sign your key. Publish your public key to pgp.mit.edu with:
     `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
+    Add new keys in the php-keyring.gpg in distribution repository using:
+    `gpg2 --export --export-options export-minimal --armor <all RM keys>`
 
  3. Request karma to edit `main/php_version.h` and `Zend/zend.h`. Possibly karma
     for other restricted parts of php-src might come in question. To edit

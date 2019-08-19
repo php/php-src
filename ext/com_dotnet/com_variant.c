@@ -452,7 +452,6 @@ PHP_FUNCTION(com_variant_create_instance)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"z!|ll", &zvalue, &vt, &codepage)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
 			return;
 	}
 

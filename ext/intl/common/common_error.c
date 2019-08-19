@@ -54,9 +54,6 @@ PHP_FUNCTION( intl_is_failure )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intl_is_failure: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -76,9 +73,6 @@ PHP_FUNCTION( intl_error_name )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intl_error_name: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 

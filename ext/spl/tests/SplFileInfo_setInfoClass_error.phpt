@@ -7,7 +7,7 @@ $info = new SplFileInfo(__FILE__);
 
 try {
     $info->setInfoClass('stdClass');
-} catch (UnexpectedValueException $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 

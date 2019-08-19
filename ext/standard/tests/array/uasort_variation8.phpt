@@ -10,7 +10,6 @@ Test uasort() function : usage variations - built-in function as 'cmp_function'
 /*
 * Passing different built-in library functions in place of 'cmp_function'
 *   valid comparison functions: strcmp() & strcasecmp()
-*   language constructs:  echo & exit
 */
 
 echo "*** Testing uasort() : built in function as 'cmp_function' ***\n";
@@ -27,13 +26,6 @@ var_dump($builtin_fun_arg);
 echo "-- Testing uasort() with built-in 'cmp_function': strcmp() --\n";
 var_dump( uasort($array_arg, 'strcmp') );  // expecting: bool(true)
 var_dump($array_arg);
-
-// Testing with language construct as comparison function
-echo "-- Testing uasort() with language construct as 'cmp_function' --\n";
-var_dump( uasort($languageConstruct_fun_arg, 'echo') );  // expecting: bool(false)
-
-echo "-- Testing uasort() with language construct as 'cmp_function' --\n";
-var_dump( uasort($languageConstruct_fun_arg, 'exit') );  // expecting: bool(false)
 
 echo "Done"
 ?>
@@ -67,12 +59,4 @@ array(5) {
   ["o"]=>
   string(6) "orange"
 }
--- Testing uasort() with language construct as 'cmp_function' --
-
-Warning: uasort() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
--- Testing uasort() with language construct as 'cmp_function' --
-
-Warning: uasort() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
-NULL
 Done

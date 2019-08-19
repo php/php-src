@@ -20,6 +20,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_pcre.h"
+#include "php_pcre_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
@@ -50,7 +51,6 @@ struct _pcre_cache_entry {
 	uint32_t capture_count;
 	uint32_t name_count;
 	uint32_t compile_options;
-	uint32_t extra_compile_options;
 	uint32_t refcount;
 };
 
@@ -167,7 +167,6 @@ static void php_pcre_free(void *block, void *data)
 	pefree(block, 1);
 }/*}}}*/
 
-#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
@@ -187,12 +186,6 @@ static void php_pcre_init_pcre2(uint8_t jit)
 			return;
 		}
 	}
-
-	/* XXX The 'X' modifier is the default behavior in PCRE2. This option is
-		called dangerous in the manual, as typos in patterns can cause
-		unexpected results. We might want to to switch to the default PCRE2
-		behavior, too, thus causing a certain BC break. */
-	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
 
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
@@ -569,7 +562,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
-	uint32_t			 extra_coptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -703,8 +695,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
 			case 'S':	/* Pass. */					break;
+			case 'X':	/* Pass. */					break;
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
-			case 'X':	extra_coptions &= ~PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL;			break;
 			case 'u':	coptions |= PCRE2_UTF;
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
        characters, even in UTF-8 mode. However, this can be changed by setting
@@ -768,18 +760,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		pcre2_set_character_tables(cctx, tables);
 	}
 
-	/* Set extra options for the compile context. */
-	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
-		pcre2_set_compile_extra_options(cctx, extra_coptions);
-	}
-
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
-
-	/* Reset the compile context extra options to default. */
-	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
-		pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
-	}
 
 	if (re == NULL) {
 		if (key != regex) {
@@ -824,7 +806,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.re = re;
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
-	new_entry.extra_compile_options = extra_coptions;
 	new_entry.refcount = 0;
 
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
@@ -2259,8 +2240,8 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 		}
 	} else {
 		if (Z_TYPE_P(regex) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Parameter mismatch, pattern is a string while replacement is an array");
-			RETURN_FALSE;
+			zend_type_error("Parameter mismatch, pattern is a string while replacement is an array");
+			return;
 		}
 	}
 
@@ -2930,70 +2911,6 @@ static PHP_FUNCTION(preg_last_error)
 /* }}} */
 
 /* {{{ module definition structures */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(1, subpatterns) /* array */
-    ZEND_ARG_INFO(0, flags)
-    ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(1, subpatterns) /* array */
-    ZEND_ARG_INFO(0, flags)
-    ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace, 0, 0, 3)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, replace)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback, 0, 0, 3)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, callback)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_replace_callback_array, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(1, count)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_split, 0, 0, 2)
-    ZEND_ARG_INFO(0, pattern)
-    ZEND_ARG_INFO(0, subject)
-    ZEND_ARG_INFO(0, limit)
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_quote, 0, 0, 1)
-    ZEND_ARG_INFO(0, str)
-    ZEND_ARG_INFO(0, delim_char)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_grep, 0, 0, 2)
-    ZEND_ARG_INFO(0, regex)
-    ZEND_ARG_INFO(0, input) /* array */
-    ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_preg_last_error, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 static const zend_function_entry pcre_functions[] = {
 	PHP_FE(preg_match,					arginfo_preg_match)

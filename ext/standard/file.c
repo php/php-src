@@ -375,7 +375,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
+/* {{{ proto array|false get_meta_tags(string filename [, bool use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 PHP_FUNCTION(get_meta_tags)
 {
@@ -520,7 +520,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
+/* {{{ proto string|false file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -578,7 +578,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
+/* {{{ proto int|false file_put_contents(string file, mixed data [, int flags [, resource context]])
    Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
@@ -694,7 +694,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_OBJ_HT_P(data) != NULL) {
 				zval out;
 
-				if (zend_std_cast_object_tostring(data, &out, IS_STRING) == SUCCESS) {
+				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
 						php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
@@ -720,7 +720,7 @@ PHP_FUNCTION(file_put_contents)
 
 #define PHP_FILE_BUF_SIZE	80
 
-/* {{{ proto array file(string filename [, int flags[, resource context]])
+/* {{{ proto array|false file(string filename [, int flags[, resource context]])
    Read entire file into an array */
 PHP_FUNCTION(file)
 {
@@ -816,7 +816,7 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix)
+/* {{{ proto string|false tempnam(string dir, string prefix)
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
@@ -927,7 +927,7 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ proto resource popen(string command, string mode)
+/* {{{ proto resource|false popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
@@ -1090,55 +1090,6 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 		RETURN_STRINGL(buf, 1);
 	}
-}
-/* }}} */
-
-/* {{{ proto string fgetss(resource fp [, int length [, string allowable_tags]])
-   Get a line from file pointer and strip HTML tags */
-PHPAPI PHP_FUNCTION(fgetss)
-{
-	zval *fd;
-	zend_long bytes = 0;
-	size_t len = 0;
-	size_t actual_len, retval_len;
-	char *buf = NULL, *retval;
-	php_stream *stream;
-	char *allowed_tags=NULL;
-	size_t allowed_tags_len=0;
-
-	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_RESOURCE(fd)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(bytes)
-		Z_PARAM_STRING(allowed_tags, allowed_tags_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-
-	PHP_STREAM_TO_ZVAL(stream, fd);
-
-	if (ZEND_NUM_ARGS() >= 2) {
-		if (bytes <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
-		}
-
-		len = (size_t) bytes;
-		buf = safe_emalloc(sizeof(char), (len + 1), 0);
-		/*needed because recv doesn't set null char at end*/
-		memset(buf, 0, len + 1);
-	}
-
-	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
-		if (buf != NULL) {
-			efree(buf);
-		}
-		RETURN_FALSE;
-	}
-
-	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL(retval, retval_len);
-	efree(retval);
 }
 /* }}} */
 
@@ -1515,7 +1466,7 @@ PHP_FUNCTION(unlink)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1986,15 +1937,13 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
+/* {{{ proto array|false fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
 	int escape = (unsigned char) '\\';
-
-	/* first section exactly as php_fgetss */
 
 	zend_long len = 0;
 	size_t buf_len;
@@ -2349,7 +2298,7 @@ out:
 /* }}} */
 
 #if HAVE_REALPATH || defined(ZTS)
-/* {{{ proto string realpath(string path)
+/* {{{ proto string|false realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {

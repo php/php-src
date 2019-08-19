@@ -816,7 +816,7 @@ PHP_FUNCTION(mysqli_dump_debug_info)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_dump_debug_info(mysql->mysql))
+	RETURN_BOOL(!mysql_dump_debug_info(mysql->mysql));
 }
 /* }}} */
 

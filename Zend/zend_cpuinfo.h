@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Xinchen Hui <xinchen.h@zend.com>                            |
+   | Authors: Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 

@@ -9,19 +9,10 @@ Test wordwrap() function : error conditions
 
 echo "*** Testing wordwrap() : error conditions ***\n";
 
-// Zero argument
-echo "\n-- Testing wordwrap() function with Zero arguments --\n";
-var_dump( wordwrap() );
-
-// More than expected number of arguments
-echo "\n-- Testing wordwrap() function with more than expected no. of arguments --\n";
 $str = 'testing wordwrap function';
 $width = 10;
 $break = '<br />\n';
 $cut = true;
-$extra_arg = "extra_arg";
-
-var_dump( wordwrap($str, $width, $break, $cut, $extra_arg) );
 
 // $width arg as negative value
 echo "\n-- Testing wordwrap() function with negative/zero value for width argument --\n";
@@ -53,16 +44,6 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing wordwrap() : error conditions ***
-
--- Testing wordwrap() function with Zero arguments --
-
-Warning: wordwrap() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing wordwrap() function with more than expected no. of arguments --
-
-Warning: wordwrap() expects at most 4 parameters, 5 given in %s on line %d
-NULL
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --

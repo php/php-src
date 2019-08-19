@@ -33,9 +33,17 @@ class array_search_check {
 
 $array_search_obj = new array_search_check();  //creating new object
 //error: as wrong datatype for second argument
-var_dump( array_search("array_var", $array_search_obj) );
+try {
+    var_dump( array_search("array_var", $array_search_obj) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 //error: as wrong datatype for second argument
-var_dump( array_search("foo", $array_search_obj) );
+try {
+    var_dump( array_search("foo", $array_search_obj) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 //element found as "one" exists in array $array_var
 var_dump( array_search("one", $array_search_obj->array_var) );
 
@@ -48,11 +56,7 @@ string(5) "three"
 int(5)
 
 *** Testing objects with array_search() ***
-
-Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
-NULL
-
-Warning: array_search() expects parameter 2 to be array, object given in %s on line %d
-NULL
+array_search() expects parameter 2 to be array, object given
+array_search() expects parameter 2 to be array, object given
 int(1)
 Done

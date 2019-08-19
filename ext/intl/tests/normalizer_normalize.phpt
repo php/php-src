@@ -19,7 +19,6 @@ function ut_main()
 		Normalizer::FORM_D,
 		Normalizer::FORM_KC,
 		Normalizer::FORM_KD,
-		Normalizer::NONE,
 	);
 
 	$forms_str = array (
@@ -27,15 +26,13 @@ function ut_main()
 		Normalizer::FORM_D => 'UNORM_FORM_D',
 		Normalizer::FORM_KC => 'UNORM_FORM_KC',
 		Normalizer::FORM_KD => 'UNORM_FORM_KD',
-		Normalizer::NONE => 'UNORM_NONE',
 	);
 
 	/* just make sure all the form constants are defined as in the api spec */
 	if ( Normalizer::FORM_C != Normalizer::NFC ||
 		 Normalizer::FORM_D != Normalizer::NFD ||
 		 Normalizer::FORM_KC != Normalizer::NFKC ||
-		 Normalizer::FORM_KD != Normalizer::NFKD ||
-		 Normalizer::NONE == Normalizer::FORM_C ) {
+		 Normalizer::FORM_KD != Normalizer::NFKD) {
 
 			$res_str .= "Invalid normalization form declarations!\n";
 	}
@@ -69,12 +66,7 @@ function ut_main()
 	{
 		foreach( $strs as $str )
 		{
-			if (Normalizer::NONE == $form) {
-				/* Hide deprecation warning. */
-				$str_norm = @ut_norm_normalize( $str, $form );
-			} else {
-				$str_norm = ut_norm_normalize( $str, $form );
-			}
+			$str_norm = ut_norm_normalize( $str, $form );
 			$error_code = intl_get_error_code();
 			$error_message = intl_get_error_message();
 
@@ -150,15 +142,3 @@ ut_run();
 		is in form 'UNORM_FORM_KD'? = no	error info: 'U_ZERO_ERROR' (0)
 '%E1%BA%9B' normalized to form 'UNORM_FORM_KD' is 's%CC%87'	error info: 'U_ZERO_ERROR' (0)
 		is in form 'UNORM_FORM_KD'? = no	error info: 'U_ZERO_ERROR' (0)
-'ABC' normalized to form 'UNORM_NONE' is 'ABC'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-'%C3%A4%7C%7C%C3%A5%7C%7C%C3%B6' normalized to form 'UNORM_NONE' is '%C3%A4%7C%7C%C3%A5%7C%7C%C3%B6'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-'%E2%84%AB%7C%7C%C3%85%7C%7CA%CC%8A' normalized to form 'UNORM_NONE' is '%E2%84%AB%7C%7C%C3%85%7C%7CA%CC%8A'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-'%E2%84%A6%7C%7C%CE%A9' normalized to form 'UNORM_NONE' is '%E2%84%A6%7C%7C%CE%A9'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-'%EF%AC%81' normalized to form 'UNORM_NONE' is '%EF%AC%81'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)
-'%E1%BA%9B' normalized to form 'UNORM_NONE' is '%E1%BA%9B'	error info: 'U_ZERO_ERROR' (0)
-		is in form 'UNORM_NONE'? = no	error info: 'normalizer_normalize: illegal normalization form: U_ILLEGAL_ARGUMENT_ERROR' (1)

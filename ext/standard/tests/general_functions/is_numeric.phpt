@@ -145,13 +145,6 @@ foreach ($not_numerics as $type ) {
   var_dump( is_numeric($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_numeric() );
-
-//arguments more than expected
-var_dump( is_numeric("10", "20") );
-
 echo "Done\n";
 
 // close the resources used
@@ -373,12 +366,4 @@ bool(false)
 bool(false)
 -- Iteration 29 --
 bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_numeric() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
 Done

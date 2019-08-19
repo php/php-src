@@ -55,9 +55,6 @@ static void _breakiter_factory(const char *func_name,
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!",
 			&locale_str, &dummy) == FAILURE) {
-		spprintf(&msg, 0, "%s: bad arguments", func_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
-		efree(msg);
 		RETURN_NULL();
 	}
 
@@ -118,8 +115,6 @@ U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_create_code_point_instance: bad arguments", 0);
 		RETURN_NULL();
 	}
 
@@ -133,8 +128,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_text: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -155,8 +148,6 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &text) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_set_text: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -189,9 +180,6 @@ static void _breakiter_no_args_ret_int32(
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		spprintf(&msg, 0, "%s: bad arguments", func_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
-		efree(msg);
 		RETURN_FALSE;
 	}
 
@@ -213,9 +201,6 @@ static void _breakiter_int32_ret_int32(
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &arg) == FAILURE) {
-		spprintf(&msg, 0, "%s: bad arguments", func_name);
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
-		efree(msg);
 		RETURN_FALSE;
 	}
 
@@ -290,8 +275,6 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"breakiter_current: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -324,8 +307,6 @@ U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l",
 			&offset) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"breakiter_is_boundary: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -350,8 +331,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &locale_type) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_locale: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -378,8 +357,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &key_type) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_parts_iterator: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -403,8 +380,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_error_code: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -423,8 +398,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"breakiter_get_error_message: bad arguments", 0 );
 		RETURN_FALSE;
 	}
 

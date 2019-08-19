@@ -32,7 +32,6 @@ $values = array (
   0234,  //octal number
   0x1A,  //hexadecimal number
   2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
   -2147483648,  //min negative integer
 );
 
@@ -134,10 +133,6 @@ array(1) {
   string(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
-
-Warning: str_split() expects parameter 2 to be int, float given in %s on line %d
-NULL
--- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
 bool(false)

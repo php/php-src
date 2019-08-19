@@ -14,8 +14,11 @@ $m->modify('+ 1 hour');
 
 var_dump( $i->format('Y-m-d H:i:s') === $current );
 
-$m = DateTime::createFromImmutable( date_create( $current ) );
-var_dump( $m );
+try {
+    DateTime::createFromImmutable( date_create( $current ) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--
 object(DateTime)#%d (3) {
@@ -27,6 +30,4 @@ object(DateTime)#%d (3) {
   string(13) "Europe/London"
 }
 bool(true)
-
-Warning: DateTime::createFromImmutable() expects parameter 1 to be DateTimeImmutable, object given in %stests%eDateTime_createFromImmutable.php on line %d
-NULL
+DateTime::createFromImmutable() expects parameter 1 to be DateTimeImmutable, object given

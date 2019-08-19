@@ -594,8 +594,6 @@ static PHP_METHOD(UConverter, setSubstChars) {
 	int ret = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &chars, &chars_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::setSubstChars(): bad arguments", 0);
 		RETURN_FALSE;
 	}
 	intl_errors_reset(&objval->error);
@@ -729,8 +727,6 @@ static PHP_METHOD(UConverter, reasonText) {
 	zend_long reason;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &reason) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::reasonText(): bad arguments", 0);
 		RETURN_FALSE;
 	}
 	intl_error_reset(NULL);
@@ -764,8 +760,6 @@ static PHP_METHOD(UConverter, convert) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::convert(): bad arguments", 0);
 		RETURN_FALSE;
 	}
 	intl_errors_reset(&objval->error);
@@ -798,8 +792,6 @@ static PHP_METHOD(UConverter, transcode) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|a!",
 			&str, &str_len, &dest, &dest_len, &src, &src_len, &options) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::transcode(): bad arguments", 0);
 		RETURN_FALSE;
 	}
 	intl_error_reset(NULL);
@@ -918,8 +910,6 @@ static PHP_METHOD(UConverter, getAliases) {
 	uint16_t i, count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"UConverter::getAliases(): bad arguments", 0);
 		RETURN_FALSE;
 	}
 	intl_error_reset(NULL);
@@ -1050,9 +1040,9 @@ static zend_object *php_converter_create_object(zend_class_entry *ce) {
 	return retval;
 }
 
-static zend_object *php_converter_clone_object(zval *object) {
-	php_converter_object *objval, *oldobj = Z_INTL_CONVERTER_P(object);
-	zend_object *retval = php_converter_object_ctor(Z_OBJCE_P(object), &objval);
+static zend_object *php_converter_clone_object(zend_object *object) {
+	php_converter_object *objval, *oldobj = php_converter_fetch_object(object);
+	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
 	intl_errors_reset(&oldobj->error);

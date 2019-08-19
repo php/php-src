@@ -56,7 +56,6 @@ static void _php_intlgregcal_constructor_body(
 	zend_long		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
-  int zpp_flags = is_constructor ? ZEND_PARSE_PARAMS_THROW : 0;
 	intl_error_reset(NULL);
 
 	// parameter number validation / variant determination
@@ -86,10 +85,8 @@ static void _php_intlgregcal_constructor_body(
 
 	// argument parsing
 	if (variant <= 2) {
-		if (zend_parse_parameters_ex(zpp_flags, MIN(ZEND_NUM_ARGS(), 2),
+		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
 				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intlgregcal_create_instance: bad arguments", 0);
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
 				RETVAL_NULL();
@@ -97,11 +94,9 @@ static void _php_intlgregcal_constructor_body(
 			return;
 		}
 	}
-	if (variant > 2 && zend_parse_parameters_ex(zpp_flags, ZEND_NUM_ARGS(),
+	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
 			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
 			&largs[5]) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_create_instance: bad arguments", 0);
 		if (!is_constructor) {
 			zval_ptr_dtor(return_value);
 			RETVAL_NULL();
@@ -232,8 +227,6 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Od", &object, GregorianCalendar_ce_ptr, &date) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_set_gregorian_change: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -252,8 +245,6 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, GregorianCalendar_ce_ptr) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_get_gregorian_change: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -269,8 +260,6 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_is_leap_year: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
