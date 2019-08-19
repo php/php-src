@@ -78,7 +78,7 @@ function curl_multi_getcontent($multi_handle): ?string {}
 /**
  * @param resource $multi_handle
  *
- * @return array<string, mixed>|false
+ * @return array|false
  */
 function curl_multi_info_read($multi_handle, &$msgs_in_queue = null) {}
 
