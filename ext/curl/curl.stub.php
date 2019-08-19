@@ -92,7 +92,7 @@ function curl_multi_init() {}
 function curl_multi_remove_handle($multi_handle, $handle): int {}
 
 /** @param resource $multi_handle */
-function curl_multi_select($multi_handle, float $timeout = UNKNOWN): int {}
+function curl_multi_select($multi_handle, float $timeout = 1.0): int {}
 
 /**
  * @param resource $multi_handle
