@@ -26,7 +26,7 @@ function curl_escape($handle, string $string) {}
 /**
  * @param resource $handle
  *
- * @return mixed|false
+ * @return string|bool
  */
 function curl_exec($handle) {}
 
