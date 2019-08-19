@@ -80,7 +80,7 @@ function curl_multi_getcontent($multi_handle): ?string {}
  *
  * @return array<string, mixed>|false
  */
-function curl_multi_info_read($multi_handle, ?int &$msgs_in_queue = null) {}
+function curl_multi_info_read($multi_handle, &$msgs_in_queue = null) {}
 
 /** @return resource */
 function curl_multi_init() {}
