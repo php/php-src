@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.0beta3
 
 - Core:
+  . Fixed bug #78220 (Can't access OneDrive folder). (cmb, ab)
   . Fixed bug #78396 (Second file_put_contents in Shutdown hangs script).
     (Nikita)
   . Fixed bug #78406 (Broken file includes with user-defined stream filters).
