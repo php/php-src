@@ -834,7 +834,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		php_error_parameter_validation(NULL, 1, "Invalid height dimensions");
+		php_error_parameter_validation(NULL, 1, "Invalid height");
 		return;
 	}
 
@@ -885,9 +885,10 @@ PHP_FUNCTION(imagetruecolortopalette)
 	}
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
-		php_error_docref(NULL, E_WARNING, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
-		RETURN_FALSE;
+		php_error_parameter_validation(NULL, 2, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
+		return;
 	}
+
 	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
 		RETURN_TRUE;
 	} else {
