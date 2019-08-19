@@ -1710,12 +1710,12 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		if (width < 1) {
-			php_error_parameter_validation(NULL, 4, "Zero width not allowed");
+			php_error_parameter_validation(NULL, 3, "Zero width not allowed");
 			return;
 		}
 
 		if (height < 1) {
-			php_error_parameter_validation(NULL, 5, "Zero height not allowed");
+			php_error_parameter_validation(NULL, 4, "Zero height not allowed");
 			return;
 		}
 
