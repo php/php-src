@@ -1417,12 +1417,6 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 			break;
 	}
 
-	/* Log if necessary */
-	if (!display) {
-		efree(buffer);
-		return;
-	}
-
 	efree(buffer);
 }
 /* }}} */

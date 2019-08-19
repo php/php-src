@@ -94,10 +94,17 @@ function crc32(string $str): int {}
 
 function crypt(string $str, string $salt = UNKNOWN): string {}
 
+/* ftok.c */
+
+#if HAVE_FTOK
+function ftok(string $pathname, string $proj): int {}
+#endif
+
 /* hrtime.c */
 
 /** @return array|int|float|false */
 function hrtime(bool $get_as_number = false) {}
+
 
 /* md5.c */
 
@@ -105,6 +112,10 @@ function md5(string $str, bool $raw_output = false): string {}
 
 /** @return string|false */
 function md5_file(string $filename, bool $raw_output = false) {}
+
+/* lcg.c */
+
+function lcg_value(): float {}
 
 /* syslog.c */
 
