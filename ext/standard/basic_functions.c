@@ -1596,12 +1596,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ metaphone.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, phones)
-ZEND_END_ARG_INFO()
-/* }}} */
+
 /* {{{ microtime.c */
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_microtime, 0, 0, 0)
