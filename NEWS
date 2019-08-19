@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.10
 
 - Core:
+  . Fixed bug #78220 (Can't access OneDrive folder). (cmb, ab)
   . Fixed bug #77922 (Double release of doc comment on inherited shadow
     property). (Nikita)
 
