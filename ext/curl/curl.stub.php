@@ -70,7 +70,7 @@ function curl_multi_close($multi_handle): void {}
 function curl_multi_errno($multi_handle): int {}
 
 /** @param resource $multi_handle */
-function curl_multi_exec($multi_handle, int &$still_running): int {}
+function curl_multi_exec($multi_handle, &$still_running): int {}
 
 /** @param resource $multi_handle */
 function curl_multi_getcontent($multi_handle): ?string {}
