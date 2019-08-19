@@ -51,7 +51,7 @@ function curl_getinfo($handle, int $option = UNKNOWN) {}
  *
  * @return resource|false
  */
-function curl_init($handle) {}
+function curl_init(string $url = UNKNOWN) {}
 
 /**
  * @param resource $multi_handle
