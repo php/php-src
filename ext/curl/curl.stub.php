@@ -144,5 +144,5 @@ function curl_strerror(int $error_number): ?string {}
  */
 function curl_unescape($handle, string $string) {}
 
-/** @return array<string, mixed>|false */
+/** @return array|false */
 function curl_version(int $age = UNKNOWN) {}
