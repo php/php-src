@@ -3,6 +3,9 @@ Hash: hash_hkdf() function: error conditions
 --FILE--
 <?php
 
+require __DIR__ . '/exceptional.inc';
+
+
 /* Prototype  : string hkdf  ( string $algo  , string $ikm  [, int $length  , string $info = '' , string $salt = ''  ] )
  * Description: HMAC-based Key Derivation Function
  * Source code: ext/hash/hash.c
@@ -13,66 +16,43 @@ $ikm = 'input key material';
 echo "*** Testing hash_hkdf(): error conditions ***\n";
 
 echo "\n-- Testing hash_hkdf() function with invalid hash algorithm --\n";
-var_dump(hash_hkdf('foo', $ikm));
+trycatch_dump(fn() => hash_hkdf('foo', $ikm));
 
 echo "\n-- Testing hash_hkdf() function with non-cryptographic hash algorithm --\n";
-var_dump(hash_hkdf('adler32', $ikm));
-var_dump(hash_hkdf('crc32', $ikm));
-var_dump(hash_hkdf('crc32b', $ikm));
-var_dump(hash_hkdf('fnv132', $ikm));
-var_dump(hash_hkdf('fnv1a32', $ikm));
-var_dump(hash_hkdf('fnv164', $ikm));
-var_dump(hash_hkdf('fnv1a64', $ikm));
-var_dump(hash_hkdf('joaat', $ikm));
+trycatch_dump(fn() => hash_hkdf('adler32', $ikm));
+trycatch_dump(fn() => hash_hkdf('crc32', $ikm));
+trycatch_dump(fn() => hash_hkdf('crc32b', $ikm));
+trycatch_dump(fn() => hash_hkdf('fnv132', $ikm));
+trycatch_dump(fn() => hash_hkdf('fnv1a32', $ikm));
+trycatch_dump(fn() => hash_hkdf('fnv164', $ikm));
+trycatch_dump(fn() => hash_hkdf('fnv1a64', $ikm));
+trycatch_dump(fn() => hash_hkdf('joaat', $ikm));
 
 echo "\n-- Testing hash_hkdf() function with invalid parameters --\n";
-var_dump(hash_hkdf('sha1', ''));
-var_dump(hash_hkdf('sha1', $ikm, -1));
-var_dump(hash_hkdf('sha1', $ikm, 20 * 255 + 1)); // Length can't be more than 255 times the hash digest size
+trycatch_dump(fn() => hash_hkdf('sha1', ''));
+trycatch_dump(fn() => hash_hkdf('sha1', $ikm, -1));
+trycatch_dump(fn() => hash_hkdf('sha1', $ikm, 20 * 255 + 1)); // Length can't be more than 255 times the hash digest size
+
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hkdf(): error conditions ***
 
 -- Testing hash_hkdf() function with invalid hash algorithm --
-
-Warning: hash_hkdf(): Unknown hashing algorithm: foo in %s on line %d
-bool(false)
+[ErrorException] Parameter 1 is invalid: Unknown hashing algorithm: foo
 
 -- Testing hash_hkdf() function with non-cryptographic hash algorithm --
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: adler32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: crc32b in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv132 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a32 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv164 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: fnv1a64 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Non-cryptographic hashing algorithm: joaat in %s on line %d
-bool(false)
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: adler32
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: crc32
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: crc32b
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: fnv132
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: fnv1a32
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: fnv164
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: fnv1a64
+[ErrorException] Parameter 1 is invalid: Non-cryptographic hashing algorithm: joaat
 
 -- Testing hash_hkdf() function with invalid parameters --
-
-Warning: hash_hkdf(): Input keying material cannot be empty in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Length must be greater than or equal to 0: -1 in %s on line %d
-bool(false)
-
-Warning: hash_hkdf(): Length must be less than or equal to 5100: 5101 in %s on line %d
-bool(false)
+[ErrorException] Parameter 2 is invalid: Input keying material cannot be empty
+[ErrorException] Parameter 3 is invalid: Length must be greater than or equal to 0: -1
+[ErrorException] Parameter 3 is invalid: Length must be less than or equal to 5100: 5101
 ===Done===
