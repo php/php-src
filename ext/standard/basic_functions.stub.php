@@ -116,6 +116,23 @@ function md5(string $str, bool $raw_output = false): string {}
 /** @return string|false */
 function md5_file(string $filename, bool $raw_output = false) {}
 
+/* pageinfo.c */
+
+/** @return int|false */
+function getmyuid() {}
+
+/** @return int|false */
+function getmygid() {}
+
+/** @return int|false */
+function getmypid() {}
+
+/** @return int|false */
+function getmyinode() {}
+
+/** @return int|false */
+function getlastmod() {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H

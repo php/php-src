@@ -1620,22 +1620,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_unpack, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ pageinfo.c */
-ZEND_BEGIN_ARG_INFO(arginfo_getmyuid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmygid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmypid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmyinode, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ password.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, password)

@@ -125,6 +125,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hrtime, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, get_as_number, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_md5, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, raw_output, _IS_BOOL, 0)
@@ -135,8 +138,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, raw_output, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_getmyuid arginfo_ob_get_flush
+
+#define arginfo_getmygid arginfo_ob_get_flush
+
+#define arginfo_getmypid arginfo_ob_get_flush
+
+#define arginfo_getmyinode arginfo_ob_get_flush
+
+#define arginfo_getlastmod arginfo_ob_get_flush
 
 #if defined(HAVE_SYSLOG_H)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openlog, 0, 3, _IS_BOOL, 0)
