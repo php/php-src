@@ -2602,7 +2602,7 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array|false array_fill(int start_key, int num, mixed val)
+/* {{{ proto array array_fill(int start_key, int num, mixed val)
    Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
@@ -2617,11 +2617,11 @@ PHP_FUNCTION(array_fill)
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
-			php_error_docref(NULL, E_WARNING, "Too many elements");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Too many elements");
+			return;
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			return;
 		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
 			/* create packed array */
 			Bucket *p;
@@ -2666,8 +2666,8 @@ PHP_FUNCTION(array_fill)
 	} else if (EXPECTED(num == 0)) {
 		RETURN_EMPTY_ARRAY();
 	} else {
-		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Number of elements can't be negative");
+		return;
 	}
 }
 /* }}} */
