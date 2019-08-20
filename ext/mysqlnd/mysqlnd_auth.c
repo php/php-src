@@ -409,6 +409,9 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		auth_packet.auth_data_len = auth_plugin_data_len;
 		auth_packet.auth_plugin_name = auth_protocol;
 
+        if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
+			auth_packet.connect_attr = conn->options->connect_attr;
+        }
 
 		if (conn->m->get_server_version(conn) >= 50123) {
 			auth_packet.charset_no	= conn->charset->nr;

@@ -510,6 +510,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	}
 #endif
 
+    if (conn->options->connect_attr && zend_hash_num_elements(conn->options->connect_attr)) {
+		mysql_flags |= CLIENT_CONNECT_ATTRS;
+	}
+
 	DBG_RETURN(mysql_flags);
 }
 /* }}} */
@@ -653,7 +657,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		password.s = "";
 		password.l = 0;
 	}
-	if (!database.s) {
+	if (!database.s || !database.s[0]) {
 		DBG_INF_FMT("no db given, using empty string");
 		database.s = "";
 		database.l = 0;
@@ -821,6 +825,9 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_client_name", "mysqlnd");
+        if (hostname.l > 0) {
+            mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_server_host", hostname.s);
+        }
 		ret = conn->m->connect(conn, hostname, username, password, database, port, socket_or_pipe, mysql_flags);
 
 		conn->m->local_tx_end(conn, this_func, FAIL);
