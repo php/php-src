@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #78406 (Broken file includes with user-defined stream filters).
     (Nikita)
   . Fixed bug #72530 (Use After Free in GC with Certain Destructors). (Nikita)
+  . Fixed bug #78386 (fstat mode has unexpected value on PHP 7.4). (cmb)
 
 - Date:
   . Fixed bug #78383 (Casting a DateTime to array no longer returns its
