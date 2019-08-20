@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0beta3
+22 Aug 2019, PHP 7.4.0beta4
 
 - Core:
   . Fixed bug #78220 (Can't access OneDrive folder). (cmb, ab)
