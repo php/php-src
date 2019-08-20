@@ -6354,7 +6354,7 @@ PHP_FUNCTION(array_chunk)
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Size parameter expected to be greater than 0");
+		zend_throw_error(NULL, "Size parameter expected to be greater than 0");
 		return;
 	}
 
