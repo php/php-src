@@ -16,7 +16,7 @@ foreach ($a as $key => $val) {
 
 $a = FFI::new("struct {int x,y;}");
 try {
-	var_dump(@count($a));
+	var_dump(count($a));
 } catch (Throwable $e) {
 	echo get_class($e) . ": " . $e->getMessage()."\n";
 }
@@ -34,5 +34,5 @@ int(3)
 0 => 0
 1 => 10
 2 => 20
-FFI\Exception: Attempt to count() on non C array
+TypeError: Parameter must be an array or an object that implements Countable
 FFI\Exception: Attempt to iterate on non C array
