@@ -108,29 +108,29 @@ class Type {
 }
 
 class ArgInfo {
+    const SEND_BY_VAL = 0;
+    const SEND_BY_REF = 1;
+    const SEND_PREFER_REF = 2;
+
     /** @var string */
     public $name;
-    /** @var bool */
-    public $byRef;
-    /** @var bool */
-    public $preferRef;
+    /** @var int */
+    public $sendBy;
     /** @var bool */
     public $isVariadic;
     /** @var Type|null */
     public $type;
 
-    public function __construct(string $name, bool $byRef, bool $preferRef, bool $isVariadic, ?Type $type) {
+    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type) {
         $this->name = $name;
-        $this->byRef = $byRef;
-        $this->preferRef = $preferRef;
+        $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->type = $type;
     }
 
     public function equals(ArgInfo $other): bool {
         return $this->name === $other->name
-            && $this->byRef === $other->byRef
-            && $this->preferRef === $other->preferRef
+            && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type);
     }
@@ -212,15 +212,29 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
 
     $args = [];
     $numRequiredArgs = 0;
+    $foundVariadic = false;
     foreach ($func->getParams() as $i => $param) {
         $varName = $param->var->name;
         $preferRef = !empty($paramMeta[$varName]['preferRef']);
         unset($paramMeta[$varName]);
 
+        if ($preferRef) {
+            $sendBy = ArgInfo::SEND_PREFER_REF;
+        } else if ($param->byRef) {
+            $sendBy = ArgInfo::SEND_BY_REF;
+        } else {
+            $sendBy = ArgInfo::SEND_BY_VAL;
+        }
+
+        if ($foundVariadic) {
+            throw new Exception("Error in function $name: only the last parameter can be variadic");
+        }
+
+        $foundVariadic = $param->variadic;
+
         $args[] = new ArgInfo(
             $varName,
-            $param->byRef,
-            $preferRef,
+            $sendBy,
             $param->variadic,
             $param->type ? Type::fromNode($param->type) : null
         );
@@ -350,35 +364,25 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         if ($argInfo->type) {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
-                    "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
-                    $argKind, send_by($argInfo), $argInfo->name,
+                    "\tZEND_%s_TYPE_INFO(%d, %s, %s, %d)\n",
+                    $argKind, $argInfo->sendBy, $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
-                    "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
-                    $argKind, send_by($argInfo), $argInfo->name,
+                    "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
+                    $argKind, $argInfo->sendBy, $argInfo->name,
                     $argInfo->type->name, $argInfo->type->isNullable
                 );
             }
         } else {
             $code .= sprintf(
-                "\tZEND_%s_INFO(%s, %s)\n", $argKind, send_by($argInfo), $argInfo->name);
+                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->sendBy, $argInfo->name);
         }
     }
 
     $code .= "ZEND_END_ARG_INFO()";
     return $code;
-}
-
-function send_by(ArgInfo $arg): string {
-    if ($arg->preferRef) {
-        return 'ZEND_SEND_PREFER_REF';
-    } else if ($arg->byRef) {
-        return '1';
-    } else {
-        return '0';
-    }
 }
 
 function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {

@@ -85,24 +85,46 @@ function uasort(array &$arg, callable $cmp_function): bool {}
 
 function uksort(array &$arg, callable $cmp_function): bool {}
 
+/**
+ * @param array|object $arg
+ * @return mixed
+ */
 function end(array &$arg) {}
 
-/** @param array|object $arg */
+/**
+ * @param array|object $arg
+ * @return mixed
+ */
 function prev(&$arg) {}
 
-/** @param array|object $arg */
+/**
+ * @param array|object $arg
+ * @return mixed
+ */
 function next(&$arg) {}
 
-function reset(array &$arg) {}
+/**
+ * @param array|object $arg
+ * @return mixed
+ */
+function reset(&$arg) {}
 
-/** @param array|object $arg */
+/**
+ * @param array|object $arg
+ * @return mixed
+ */
 function current($arg) {}
 
-/** @return int|string|null */
-function key(array $arg) {}
+/**
+ * @param array|object $arg
+ * @return int|string|null
+ */
+function key($arg) {}
 
+/** @return mixed */
 function min($arg, ...$args) {}
 
+/** @return mixed */
 function max($arg, ...$args) {}
 
 /** @param array|object $input */
@@ -117,7 +139,7 @@ function in_array($needle, array $haystack, bool $strict = false): bool {}
 function array_search($needle, array $haystack, bool $strict = false) {}
 
 /** @prefer-ref $arg */
-function extract(array &$arg, $extract_type = EXTR_OVERWRITE, string $prefix = null): ?int {}
+function extract(array &$arg, $extract_type = EXTR_OVERWRITE, string $prefix = ""): ?int {}
 
 function compact($var_name, ...$var_names): ?array {}
 
@@ -136,8 +158,10 @@ function range($low, $high, $step = 1) {}
 
 function shuffle(array &$arg): bool {}
 
+/** @return mixed */
 function array_pop(array &$stack) {}
 
+/** @return mixed */
 function array_shift(array &$stack) {}
 
 function array_unshift(array &$stack, ...$vars): int {}
@@ -168,7 +192,7 @@ function array_count_values(array $arg): array {}
 
 /**
  * @param int|string|null $column_key
- * @param int|string $index_key
+ * @param int|string|null $index_key
  * @return array|false
  */
 function array_column(array $arg, $column_key, $index_key = null) {}
@@ -186,40 +210,35 @@ function array_unique(array $arg, int $flags = SORT_STRING): array {}
 
 function array_intersect_key(array $arr1, array $arr2, array ...$arrays): array {}
 
-// tests break if $arr2 is variadic
-function array_intersect_ukey(array $arr1, array $arr2, $callback_key_compare_func): array {}
+function array_intersect_ukey(array $arr1, array $arr2, ...$rest): array {}
 
-function array_intersect(array $arr1, array ...$arrays): array {}
+function array_intersect(array $arr1, array $arr2, array ...$arrays): array {}
 
-// tests break if $arr2 is variadic
-function array_uintersect(array $arr1, array $arr2, $callback_data_compare_func): array {}
+function array_uintersect(array $arr1, array $arr2, ...$rest): array {}
 
-function array_intersect_assoc(array $arr1, array ...$arrays): array {}
+function array_intersect_assoc(array $arr1, array $arr2, array ...$arrays): array {}
 
-// tests break if $arr2 is variadic
-function array_uintersect_assoc(array $arr1, array $arr2, $callback_data_compare_func): array {}
+function array_uintersect_assoc(array $arr1, array $arr2, ...$rest): array {}
 
-function array_intersect_uassoc(array $arr1, array ...$arr2, callable $callback_key_compare_func): array {}
+function array_intersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
 
-function array_uintersect_uassoc(array $arr1, array ...$arr2, callable $callback_data_compare_func, callable $callback_key_compare_func): array {}
+function array_uintersect_uassoc(array $arr1, array $arr2, ...$rest): array {}
 
-function array_diff_key(array $arr1, array ...$arrays): array {}
+function array_diff_key(array $arr1, array $arr2, array ...$arrays): array {}
 
-// tests break if $arr2 is variadic
-function array_diff_ukey(array $arr1, array $arr2, $callback_key_comp_func): array {}
+function array_diff_ukey(array $arr1, array $arr2, ...$rest): array {}
 
-function array_diff(array $arr1, array ...$arrays): array {}
+function array_diff(array $arr1, array $arr2, array ...$arrays): array {}
 
-function array_udiff(array $arr1, array ...$arr2, callable $callback_data_comp_func): array {}
+function array_udiff(array $arr1, array $arr2, ...$rest): array {}
 
-function array_diff_assoc(array $arr1, array ...$arrays): array {}
+function array_diff_assoc(array $arr1, array $arr2, array ...$arrays): array {}
 
-function array_diff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func): array {}
+function array_diff_uassoc(array $arr1, array $arr2, ...$rest): array {}
 
-// tests break if $arr2 is variadic
-function array_udiff_assoc(array $arr1, array $arr2, $callback_key_comp_func): array {}
+function array_udiff_assoc(array $arr1, array $arr2, ...$rest): array {}
 
-function array_udiff_uassoc(array $arr1, array ...$arr2, callable $callback_data_comp_func, callable $callback_key_comp_func): array {}
+function array_udiff_uassoc(array $arr1, array $arr2, ...$rest): array {}
 
 /**
  * @prefer-ref $arr1
@@ -242,10 +261,13 @@ function array_reduce(array $arg, callable $callback, $initial = null) {}
 
 function array_filter(array $arg, callable $callback, int $use_keys = 0): array {}
 
-function array_map(?callable $callback, array ...$arrays): array {}
+function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 
-/** @param int|string $key */
-function array_key_exists($key, array $search): bool {}
+/**
+ * @param int|string $key
+ * @param array|object $search
+ */
+function array_key_exists($key, $search): bool {}
 
 function array_chunk(array $arg, int $size, bool $preserve_keys = false): ?array {}
 
