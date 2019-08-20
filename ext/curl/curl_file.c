@@ -135,10 +135,10 @@ ZEND_METHOD(CURLFile, setPostFilename)
 
 static const zend_function_entry curlfile_funcs[] = {
 	PHP_ME(CURLFile,			__construct,        arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getFilename,        NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getMimeType,        NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getFilename,        arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getMimeType,        arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setMimeType,        arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getPostFilename,    NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getPostFilename,    arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC)
 	PHP_ME(CURLFile,			setPostFilename,    arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
