@@ -4101,7 +4101,8 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_P(tmp)++;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only count STRING and INTEGER values!");
+			zend_type_error("Can only count STRING and INTEGER values!");
+			return;
 		}
 	} ZEND_HASH_FOREACH_END();
 }

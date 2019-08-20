@@ -18,7 +18,11 @@ $arrays = array (
 );
 
 foreach ($arrays as $item) {
-	var_dump (@array_count_values ($item));
+    try {
+        var_dump (array_count_values ($item));
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
 	echo "\n";
 }
 ?>
@@ -83,12 +87,6 @@ array(3) {
   int(4)
 }
 
-array(1) {
-  [0]=>
-  int(1)
-}
+Can only count STRING and INTEGER values!
 
-array(1) {
-  [1]=>
-  int(1)
-}
+Can only count STRING and INTEGER values!
