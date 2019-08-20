@@ -1287,7 +1287,9 @@ PHP_FUNCTION(min)
 }
 /* }}} */
 
-/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
+/* {{{
+ * proto mixed max(array values)
+ * proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
    Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
@@ -1303,14 +1305,14 @@ PHP_FUNCTION(max)
 		zval *result;
 
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "When only one parameter is given, it must be an array");
-			RETVAL_NULL();
+			zend_type_error("When only one parameter is given, it must be an array");
+			return;
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
 				ZVAL_COPY_DEREF(return_value, result);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Array must contain at least one element");
-				RETVAL_FALSE;
+				zend_throw_error(NULL, "Array must contain at least one element");
+				return;
 			}
 		}
 	} else {
