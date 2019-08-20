@@ -5613,7 +5613,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 #define MULTISORT_ABORT				\
 	efree(func);	\
 	efree(arrays);					\
-	RETURN_FALSE;
+	return;
 
 static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
 	Bucket *t;
@@ -5690,7 +5690,7 @@ PHP_FUNCTION(array_multisort)
 						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? PHP_SORT_DESC : PHP_SORT_ASC;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
@@ -5706,19 +5706,19 @@ PHP_FUNCTION(array_multisort)
 						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
 
 				default:
-					php_error_docref(NULL, E_WARNING, "Argument #%d is an unknown sort flag", i + 1);
+					zend_type_error("Argument #%d is an unknown sort flag", i + 1);
 					MULTISORT_ABORT;
 					break;
 
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or a sort flag", i + 1);
+			zend_type_error("Argument #%d is expected to be an array or a sort flag", i + 1);
 			MULTISORT_ABORT;
 		}
 	}
@@ -5729,7 +5729,7 @@ PHP_FUNCTION(array_multisort)
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
-			php_error_docref(NULL, E_WARNING, "Array sizes are inconsistent");
+			zend_throw_error(NULL, "Array sizes are inconsistent");
 			MULTISORT_ABORT;
 		}
 	}
