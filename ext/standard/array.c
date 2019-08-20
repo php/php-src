@@ -4131,7 +4131,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "The %s key should be either a string or an integer", name);
+			zend_type_error("The %s key should be either a string or an integer", name);
 			return 0;
 	}
 }
@@ -4194,7 +4194,7 @@ PHP_FUNCTION(array_column)
 
 	if ((column && !array_column_param_helper(column, "column")) ||
 	    (index && !array_column_param_helper(index, "index"))) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init_size(return_value, zend_hash_num_elements(input));
