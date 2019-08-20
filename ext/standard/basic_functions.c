@@ -1230,26 +1230,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ head.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header, 0, 0, 1)
-	ZEND_ARG_INFO(0, header)
-	ZEND_ARG_INFO(0, replace)
-	ZEND_ARG_INFO(0, http_response_code)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header_remove, 0, 0, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, value)
@@ -1260,50 +1240,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_headers_sent, 0, 0, 0)
-	ZEND_ARG_INFO(1, file)
-	ZEND_ARG_INFO(1, line)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_headers_list, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
 ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ html.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_html_entity_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlentities, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_html_translation_table, 0, 0, 0)
-	ZEND_ARG_INFO(0, table)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
 /* }}} */
 /* {{{ http.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_build_query, 0, 0, 1)
