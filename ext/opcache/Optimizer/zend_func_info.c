@@ -732,7 +732,7 @@ static const func_info_t func_infos[] = {
 	F1("str_rot13",                    MAY_BE_STRING),
 	F1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("stream_filter_register",       MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("stream_bucket_make_writeable", MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("stream_bucket_make_writeable", MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("stream_bucket_prepend",        MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("stream_bucket_append",         MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("stream_bucket_new",            MAY_BE_FALSE | MAY_BE_OBJECT),

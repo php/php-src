@@ -401,7 +401,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
 					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	ZVAL_NULL(return_value);
