@@ -6,7 +6,12 @@ Gabriel Caruso (carusogabriel34@gmail.com)
 <?php
 var_dump(is_countable([1, 2, 3]));
 var_dump(is_countable((array) 1));
-var_dump(is_countable((object) ['foo', 'bar', 'baz']));
+
+try {
+    var_dump(is_countable((object) ['foo', 'bar', 'baz']));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 $foo = ['', []];
 
@@ -19,10 +24,9 @@ if (!is_countable($bar)) {
     count($bar);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(false)
 int(2)
-
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Parameter must be an array or an object that implements Countable

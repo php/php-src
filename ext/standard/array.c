@@ -1449,7 +1449,8 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			pos = zend_hash_iterator_pos(ht_iter, target_hash);
 		} else {
 			zend_type_error("Iterated value is no longer an array or object");
-			return -1;
+			result = FAILURE;
+			break;
 		}
 	} while (!EG(exception));
 
