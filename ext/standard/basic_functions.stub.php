@@ -245,7 +245,7 @@ function array_udiff_uassoc(array $arr1, array $arr2, ...$rest): array {}
  */
 function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
 
-/** @return int|string|array|null */
+/** @return int|string|array */
 function array_rand(array $arg, int $num_req = 1) {}
 
 /** @return int|float */
