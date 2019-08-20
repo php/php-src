@@ -23,7 +23,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_curl_exec arginfo_curl_copy_handle
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_file_create, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_file_create, 0, 1, CURLFile, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, mimetype, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, postname, IS_STRING, 0)

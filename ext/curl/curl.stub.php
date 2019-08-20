@@ -30,12 +30,11 @@ function curl_escape($handle, string $string) {}
  */
 function curl_exec($handle) {}
 
-/** @return CURLFile */
 function curl_file_create(
     string $filename,
     string $mimetype = UNKNOWN,
     string $postname = UNKNOWN
-) {}
+): CURLFile {}
 
 /**
  * @param resource $handle
