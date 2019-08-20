@@ -146,7 +146,7 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 		add_assoc_bool(array, "iscritical", (ctrl->ldctl_iscritical != 0));
 	}
 
-	// If it is a known oid, parse to values
+	/* If it is a known oid, parse to values */
 	if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_PASSWORDPOLICYRESPONSE) == 0) {
 		int expire = 0, grace = 0, rc;
 		LDAPPasswordPolicyError pperr;
@@ -361,8 +361,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
-					// ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
-					// See http://www.openldap.org/its/index.cgi/Incoming?id=8674
+					/* ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
+					   See http://www.openldap.org/its/index.cgi/Incoming?id=8674 */
 					int success = LDAP_SUCCESS;
 					ldap_set_option(ld, LDAP_OPT_RESULT_CODE, &success);
 					rc = ldap_create_assertion_control_value(ld, ZSTR_VAL(assert), control_value);
@@ -612,7 +612,7 @@ failure:
 		return LDAP_SUCCESS;
 	}
 
-	// Failed
+	/* Failed */
 	*ctrl = NULL;
 	return -1;
 }
@@ -1589,7 +1589,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			}
 
 			if (argcount > 8) {
-				// We have to parse controls again for each link as they use it
+				/* We have to parse controls again for each link as they use it */
 				_php_ldap_controls_free(&lserverctrls);
 				lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
 				if (lserverctrls == NULL) {
