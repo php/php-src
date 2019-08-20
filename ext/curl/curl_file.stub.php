@@ -7,13 +7,18 @@ class CURLFile {
         string $postname = UNKNOWN
     ) {}
 
-    public function getFilename(): string {}
+    /** @return string */
+    public function getFilename() {}
 
-    public function getMimeType(): string {}
+    /** @return string */
+    public function getMimeType() {}
 
-    public function getPostFilename(): string {}
+    /** @return string */
+    public function getPostFilename() {}
 
-    public function setMimeType(string $mime): void {}
+    /** @return void */
+    public function setMimeType(string $mime) {}
 
-    public function setPostFilename(string $postname): void {}
+    /** @return void */
+    public function setPostFilename(string $postname) {}
 }
