@@ -2704,8 +2704,9 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
+			return; \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
 		array_init_size(return_value, size); \
@@ -2715,15 +2716,16 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
+			return; \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
 		array_init_size(return_value, size); \
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-/* {{{ proto array|false range(mixed low, mixed high[, int step])
+/* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -2812,8 +2814,8 @@ double_str:
 		high = zval_get_double(zhigh);
 
 		if (zend_isinf(high) || zend_isinf(low)) {
-			php_error_docref(NULL, E_WARNING, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
+			return;
 		}
 
 		if (low > high) { 		/* Negative steps */
@@ -2905,8 +2907,8 @@ long_str:
 	}
 err:
 	if (err) {
-		php_error_docref(NULL, E_WARNING, "step exceeds the specified range");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "step exceeds the specified range");
+		return;
 	}
 }
 /* }}} */
