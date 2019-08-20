@@ -5823,7 +5823,7 @@ PHP_FUNCTION(array_rand)
 	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	if (num_avail == 0) {
-		php_error_docref(NULL, E_WARNING, "Array is empty");
+		zend_throw_error(NULL, "Array is empty");
 		return;
 	}
 
@@ -5864,7 +5864,7 @@ PHP_FUNCTION(array_rand)
 	}
 
 	if (num_req <= 0 || num_req > num_avail) {
-		php_error_docref(NULL, E_WARNING, "Second argument has to be between 1 and the number of elements in the array");
+		zend_throw_error(NULL, "Second argument has to be between 1 and the number of elements in the array");
 		return;
 	}
 
