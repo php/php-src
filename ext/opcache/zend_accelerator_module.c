@@ -858,6 +858,11 @@ static ZEND_FUNCTION(opcache_compile_file)
 		return;
 	}
 
+	if (!accel_startup_ok) {
+		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has not been properly started, can't compile file");
+		RETURN_FALSE;
+	}
+
 	zend_stream_init_filename(&handle, script_name);
 
 	orig_execute_data = EG(current_execute_data);

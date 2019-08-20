@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Add opcache.preload_user INI directive. (Dmitry)
   . Fixed bug #78514 (Preloading segfaults with inherited typed property).
     (Nikita)
+  . Fixed bug #78429 (opcache_compile_file(__FILE__); segfaults). (cmb)
 
 - PCRE:
   . Fixed bug #78349 (Bundled pcre2 library missing LICENCE file). (Peter Kokot)
