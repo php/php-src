@@ -223,7 +223,7 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
 /* }}} */
 #endif
 
-/* {{{ proto string|false bin2hex(string data)
+/* {{{ proto string bin2hex(string data)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
@@ -235,10 +235,6 @@ PHP_FUNCTION(bin2hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
-
-	if (!result) {
-		RETURN_FALSE;
-	}
 
 	RETURN_STR(result);
 }

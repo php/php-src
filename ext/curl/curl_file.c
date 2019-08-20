@@ -24,6 +24,8 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "php_curl.h"
+#include "curl_arginfo.h"
+#include "curl_file_arginfo.h"
 #if HAVE_CURL
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
@@ -131,24 +133,13 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curlfile_create, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, mimetype)
-	ZEND_ARG_INFO(0, postname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curlfile_name, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-
 static const zend_function_entry curlfile_funcs[] = {
-	PHP_ME(CURLFile,			__construct,        arginfo_curlfile_create, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getFilename,        NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getMimeType,        NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			setMimeType,        arginfo_curlfile_name, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			getPostFilename,    NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(CURLFile,			setPostFilename,    arginfo_curlfile_name, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			__construct,        arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getFilename,        arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getMimeType,        arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			setMimeType,        arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			getPostFilename,    arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC)
+	PHP_ME(CURLFile,			setPostFilename,    arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

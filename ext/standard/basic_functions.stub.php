@@ -304,6 +304,36 @@ function hrtime(bool $get_as_number = false) {}
 
 function lcg_value(): float {}
 
+/* md5.c */
+
+function md5(string $str, bool $raw_output = false): string {}
+
+/** @return string|false */
+function md5_file(string $filename, bool $raw_output = false) {}
+
+/* pageinfo.c */
+
+/** @return int|false */
+function getmyuid() {}
+
+/** @return int|false */
+function getmygid() {}
+
+/** @return int|false */
+function getmypid() {}
+
+/** @return int|false */
+function getmyinode() {}
+
+function getlastmod(): int {}
+
+/* sha1.c */
+
+function sha1(string $str, bool $raw_output = false): string {}
+
+/** @return string|false */
+function sha1_file(string $filename, bool $raw_output = false) {}
+
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
@@ -323,3 +353,8 @@ function inet_ntop (string $in_addr) {}
 /** @return string|false */
 function inet_pton (string $ip_address) {}
 #endif
+
+/* metaphone.c */
+
+/** @return string|false */
+function metaphone(string $text, int $phones = 0) {}

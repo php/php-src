@@ -1237,23 +1237,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
 	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ md5.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ metaphone.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, phones)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ microtime.c */
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_microtime, 0, 0, 0)
@@ -1281,22 +1265,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_unpack, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ pageinfo.c */
-ZEND_BEGIN_ARG_INFO(arginfo_getmyuid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmygid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmypid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmyinode, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ password.c */
@@ -1377,17 +1345,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 2)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ sha1.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ soundex.c */

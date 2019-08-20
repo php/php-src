@@ -148,7 +148,7 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 		add_assoc_bool(array, "iscritical", (ctrl->ldctl_iscritical != 0));
 	}
 
-	// If it is a known oid, parse to values
+	/* If it is a known oid, parse to values */
 	if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_PASSWORDPOLICYRESPONSE) == 0) {
 		int expire = 0, grace = 0, rc;
 		LDAPPasswordPolicyError pperr;
@@ -363,8 +363,8 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					rc = -1;
 					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 				} else {
-					// ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
-					// See http://www.openldap.org/its/index.cgi/Incoming?id=8674
+					/* ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
+					   See http://www.openldap.org/its/index.cgi/Incoming?id=8674 */
 					int success = LDAP_SUCCESS;
 					ldap_set_option(ld, LDAP_OPT_RESULT_CODE, &success);
 					rc = ldap_create_assertion_control_value(ld, ZSTR_VAL(assert), control_value);
@@ -614,7 +614,7 @@ failure:
 		return LDAP_SUCCESS;
 	}
 
-	// Failed
+	/* Failed */
 	*ctrl = NULL;
 	return -1;
 }
@@ -1030,7 +1030,7 @@ PHP_FUNCTION(ldap_connect)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|slssl", &host, &hostlen, &port, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZEND_NUM_ARGS() == 5) {
@@ -1038,7 +1038,7 @@ PHP_FUNCTION(ldap_connect)
 	}
 #else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &host, &hostlen, &port) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 #endif
 
@@ -1159,11 +1159,11 @@ PHP_FUNCTION(ldap_bind)
 	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ss", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
@@ -1216,11 +1216,11 @@ PHP_FUNCTION(ldap_bind_ext)
 	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ssa", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
@@ -1381,11 +1381,11 @@ PHP_FUNCTION(ldap_sasl_bind)
 	php_ldap_bictx *ctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ctx = _php_sasl_setdefs(ld->link, sasl_mech, sasl_realm, sasl_authc_id, passwd, sasl_authz_id);
@@ -1414,11 +1414,11 @@ PHP_FUNCTION(ldap_unbind)
 	ldap_linkdata *ld;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &link) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(link));
@@ -1598,7 +1598,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			}
 
 			if (argcount > 8) {
-				// We have to parse controls again for each link as they use it
+				/* We have to parse controls again for each link as they use it */
 				_php_ldap_controls_free(&lserverctrls);
 				lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
 				if (lserverctrls == NULL) {
@@ -1749,7 +1749,7 @@ PHP_FUNCTION(ldap_free_result)
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(result));  /* Delete list entry */
@@ -1770,11 +1770,11 @@ PHP_FUNCTION(ldap_count_entries)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(ldap_count_entries(ld->link, ldap_result));
@@ -1795,11 +1795,11 @@ PHP_FUNCTION(ldap_first_entry)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((entry = ldap_first_entry(ld->link, ldap_result)) == NULL) {
@@ -1828,10 +1828,10 @@ PHP_FUNCTION(ldap_next_entry)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((entry_next = ldap_next_entry(ld->link, resultentry->data)) == NULL) {
@@ -1867,10 +1867,10 @@ PHP_FUNCTION(ldap_get_entries)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ldap = ld->link;
@@ -1962,11 +1962,11 @@ PHP_FUNCTION(ldap_first_attribute)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((attribute = ldap_first_attribute(ld->link, resultentry->data, &resultentry->ber)) == NULL) {
@@ -1995,11 +1995,11 @@ PHP_FUNCTION(ldap_next_attribute)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (resultentry->ber == NULL) {
@@ -2042,11 +2042,11 @@ PHP_FUNCTION(ldap_get_attributes)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -2100,11 +2100,11 @@ PHP_FUNCTION(ldap_get_values_len)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_value_len = ldap_get_values_len(ld->link, resultentry->data, attr)) == NULL) {
@@ -2139,11 +2139,11 @@ PHP_FUNCTION(ldap_get_dn)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	text = ldap_get_dn(ld->link, resultentry->data);
@@ -2243,7 +2243,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper, int ext)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	num_attribs = zend_hash_num_elements(Z_ARRVAL_P(entry));
@@ -2483,7 +2483,7 @@ static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (serverctrls) {
@@ -2632,7 +2632,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* perform validation */
@@ -2915,7 +2915,7 @@ PHP_FUNCTION(ldap_errno)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(_get_lderrno(ld->link));
@@ -2949,7 +2949,7 @@ PHP_FUNCTION(ldap_error)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	ld_errno = _get_lderrno(ld->link);
@@ -2976,7 +2976,7 @@ PHP_FUNCTION(ldap_compare)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (serverctrls) {
@@ -3029,7 +3029,7 @@ PHP_FUNCTION(ldap_get_option)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (option) {
@@ -3201,7 +3201,7 @@ PHP_FUNCTION(ldap_set_option)
 		ldap = NULL;
 	} else {
 		if ((ld = (ldap_linkdata *)zend_fetch_resource_ex(link, "ldap link", le_link)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 		ldap = ld->link;
 	}
@@ -3312,7 +3312,7 @@ PHP_FUNCTION(ldap_set_option)
 			zend_string *val;
 			val = zval_get_string(newval);
 			if (EG(exception)) {
-				RETURN_FALSE;
+				return;
 			}
 			if (ldap_set_option(ldap, option, ZSTR_VAL(val))) {
 				zend_string_release(val);
@@ -3384,11 +3384,11 @@ PHP_FUNCTION(ldap_parse_result)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	rc = ldap_parse_result(ld->link, ldap_result, &lerrcode,
@@ -3459,11 +3459,11 @@ PHP_FUNCTION(ldap_parse_exop)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	rc = ldap_parse_extended_result(ld->link, ldap_result,
@@ -3514,11 +3514,11 @@ PHP_FUNCTION(ldap_first_reference)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((entry = ldap_first_reference(ld->link, ldap_result)) == NULL) {
@@ -3547,11 +3547,11 @@ PHP_FUNCTION(ldap_next_reference)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((entry_next = ldap_next_reference(ld->link, resultentry->data)) == NULL) {
@@ -3581,11 +3581,11 @@ PHP_FUNCTION(ldap_parse_reference)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ldap_parse_reference(ld->link, resultentry->data, &lreferrals, NULL /* &serverctrls */, 0) != LDAP_SUCCESS) {
@@ -3629,7 +3629,7 @@ static void php_ldap_do_rename(INTERNAL_FUNCTION_PARAMETERS, int ext)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (newparent_len == 0) {
@@ -3722,7 +3722,7 @@ PHP_FUNCTION(ldap_start_tls)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (((rc = ldap_set_option(ld->link, LDAP_OPT_PROTOCOL_VERSION, &protocol)) != LDAP_SUCCESS) ||
@@ -3780,11 +3780,11 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 	ldap_linkdata *ld;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &link, &callback) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (Z_TYPE_P(callback) == IS_STRING && Z_STRLEN_P(callback) == 0) {
@@ -3977,7 +3977,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 		ldap = NULL;
 	} else {
 		if ((ld = (ldap_linkdata *)zend_fetch_resource_ex(link, "ldap link", le_link)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 		ldap = ld->link;
 	}
@@ -4066,11 +4066,11 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((ldap_result = (LDAPMessage *)zend_fetch_resource(Z_RES_P(result), "ldap result", le_result)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	rc = ldap_parse_result(ld->link,
@@ -4164,7 +4164,7 @@ PHP_FUNCTION(ldap_exop)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (reqdata) {
@@ -4270,7 +4270,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (myargcount) {
@@ -4355,7 +4355,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* synchronous call */
@@ -4393,7 +4393,7 @@ PHP_FUNCTION(ldap_exop_refresh)
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	lttl = (ber_int_t)zval_get_long(ttl);
