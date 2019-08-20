@@ -735,7 +735,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 
 	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 		if (GC_IS_RECURSIVE(ht)) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			zend_throw_error(NULL, "Recursion detected");
 			return 0;
 		}
 		GC_PROTECT_RECURSION(ht);
@@ -773,7 +773,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			zend_type_error("Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
@@ -804,12 +804,12 @@ PHP_FUNCTION(count)
 			}
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			zend_type_error("Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 		}
 		default:
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
+			zend_type_error("Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 	}

@@ -1861,8 +1861,11 @@ TEST $file
 			}
 
 		} else {
-
-			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+		    $countFileSection = 0;
+            if (array_key_exists('FILE', $section_text)) { $countFileSection++; }
+            if (array_key_exists('FILEEOF', $section_text)) { $countFileSection++; }
+            if (array_key_exists('FILE_EXTERNAL', $section_text)) { $countFileSection++; }
+            if (!array_key_exists('PHPDBG', $section_text) && $countFileSection !== 1) {
 				$bork_info = "missing section --FILE--";
 			}
 
@@ -1887,7 +1890,11 @@ TEST $file
 				}
 			}
 
-			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
+			$countExpectSection = 0;
+			if (array_key_exists('EXPECT', $section_text)) { $countExpectSection++; }
+            if (array_key_exists('EXPECTF', $section_text)) { $countExpectSection++; }
+            if (array_key_exists('EXPECTREGEX', $section_text)) { $countExpectSection++; }
+            if ($countExpectSection !== 1) {
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
 			}
 		}
@@ -2244,7 +2251,7 @@ TEST $file
 		}
 	}
 
-	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
+	if (is_array($org_file) || array_key_exists('REDIRECTTEST', $section_text) == 1) {
 
 		if (is_array($org_file)) {
 			$file = $org_file[0];

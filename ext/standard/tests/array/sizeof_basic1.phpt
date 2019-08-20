@@ -20,53 +20,72 @@ $floatval = 10.5;
 $stringval = "String";
 
 echo "-- Testing sizeof() for integer type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --\n";
+
 echo "default mode: ";
-var_dump( sizeof($intval) );
+try {
+    var_dump( sizeof($intval) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 echo "\n";
+
 echo "COUNT_NORMAL mode: ";
-var_dump( sizeof($intval, COUNT_NORMAL) );
+try {
+    var_dump( sizeof($intval, COUNT_NORMAL) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 echo "\n";
+
 echo "COUNT_RECURSIVE mode: ";
-var_dump( sizeof($intval, COUNT_RECURSIVE) );
+try {
+    var_dump( sizeof($intval, COUNT_RECURSIVE) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 echo "\n";
 
 echo "-- Testing sizeof() for float  type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --\n";
-echo "default mode: ";
-var_dump( sizeof($floatval) );
-echo "\n";
-echo "COUNT_NORMAL mode: ";
-var_dump( sizeof($floatval, COUNT_NORMAL) );
-echo "\n";
-echo "COUNT_RECURSIVE mode: ";
-var_dump( sizeof($floatval, COUNT_RECURSIVE) );
 
-echo "Done";
+echo "default mode: ";
+try {
+    var_dump( sizeof($floatval) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
+echo "\n";
+
+echo "COUNT_NORMAL mode: ";
+try {
+    var_dump( sizeof($floatval, COUNT_NORMAL) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
+echo "\n";
+
+echo "COUNT_RECURSIVE mode: ";
+try {
+    var_dump( sizeof($floatval, COUNT_RECURSIVE) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 *** Testing sizeof() : basic functionality ***
 -- Testing sizeof() for integer type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+default mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_RECURSIVE mode: Parameter must be an array or an object that implements Countable
 
 -- Testing sizeof() for float  type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+default mode: Parameter must be an array or an object that implements Countable
 
-COUNT_NORMAL mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
+COUNT_NORMAL mode: Parameter must be an array or an object that implements Countable
 
-COUNT_RECURSIVE mode: 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
-int(1)
-Done
+COUNT_RECURSIVE mode: Parameter must be an array or an object that implements Countable
+
+DONE

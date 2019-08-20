@@ -11,8 +11,10 @@ try {
     count($gen);
 } catch (Exception $e) {
     echo $e;
-}
+} catch (\TypeError $e) {
+     echo $e->getMessage() . "\n";
+ }
 
 ?>
---EXPECTF--
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+--EXPECT--
+Parameter must be an array or an object that implements Countable

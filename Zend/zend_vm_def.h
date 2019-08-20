@@ -8616,7 +8616,7 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 		} else {
 			count = 1;
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 		break;
 	}
 
