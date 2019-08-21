@@ -1399,7 +1399,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			SEPARATE_ARRAY(zv);
 			thash = Z_ARRVAL_P(zv);
 			if (GC_IS_RECURSIVE(thash)) {
-				php_error_docref(NULL, E_WARNING, "recursion detected");
+				zend_throw_error(NULL, "Recursion detected");
 				result = FAILURE;
 				break;
 			}
@@ -1450,7 +1450,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			target_hash = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(ht_iter, target_hash);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Iterated value is no longer an array or object");
+			zend_type_error("Iterated value is no longer an array or object");
 			result = FAILURE;
 			break;
 		}
