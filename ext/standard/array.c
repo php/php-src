@@ -2452,23 +2452,24 @@ PHP_FUNCTION(extract)
 	extract_type &= 0xff;
 
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		php_error_docref(NULL, E_WARNING, "Invalid extract type");
+		zend_throw_error(NULL, "Invalid extract type");
 		return;
 	}
 
 	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
-		php_error_docref(NULL, E_WARNING, "specified extract type requires the prefix parameter");
+		zend_throw_error(NULL, "specified extract type requires the prefix parameter");
 		return;
 	}
 
 	if (prefix) {
 		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
-			php_error_docref(NULL, E_WARNING, "prefix is not a valid identifier");
+			zend_throw_error(NULL, "prefix is not a valid identifier");
 			return;
 		}
 	}
 
 	if (zend_forbid_dynamic_call("extract()") == FAILURE) {
+		/* TODO Elevate to exception ? */
 		return;
 	}
 
