@@ -3152,7 +3152,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 }
 /* }}} */
 
-/* {{{ proto int|false array_push(array stack, mixed var [, mixed ...])
+/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
@@ -3174,8 +3174,8 @@ PHP_FUNCTION(array_push)
 
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
 			Z_TRY_DELREF(new_var);
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			return;
 		}
 	}
 
