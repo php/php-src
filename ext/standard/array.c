@@ -2427,7 +2427,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 }
 /* }}} */
 
-/* {{{ proto int|null extract(array var_array [, int extract_type [, string prefix]])
+/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
@@ -2452,18 +2452,18 @@ PHP_FUNCTION(extract)
 	extract_type &= 0xff;
 
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		php_error_docref(NULL, E_WARNING, "Invalid extract type");
+		zend_throw_error(NULL, "Invalid extract type");
 		return;
 	}
 
 	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
-		php_error_docref(NULL, E_WARNING, "specified extract type requires the prefix parameter");
+		zend_throw_error(NULL, "Specified extract type requires the prefix parameter");
 		return;
 	}
 
 	if (prefix) {
 		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
-			php_error_docref(NULL, E_WARNING, "prefix is not a valid identifier");
+			zend_throw_error(NULL, "Prefix is not a valid identifier");
 			return;
 		}
 	}
