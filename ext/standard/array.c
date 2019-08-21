@@ -2556,7 +2556,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 	    if (Z_REFCOUNTED_P(entry)) {
 			if (Z_IS_RECURSIVE_P(entry)) {
-				php_error_docref(NULL, E_WARNING, "recursion detected");
+				zend_throw_error(NULL, "Recursion detected");
 				return;
 			}
 			Z_PROTECT_RECURSION_P(entry);
