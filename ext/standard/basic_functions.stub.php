@@ -152,9 +152,8 @@ function array_fill_keys(array $keys, $val): array {}
  * @param int|float|string $low
  * @param int|float|string $high
  * @param int|float $step
- * @return array|false
  */
-function range($low, $high, $step = 1) {}
+function range($low, $high, $step = 1): array {}
 
 function shuffle(array &$arg): bool {}
 
@@ -269,10 +268,9 @@ function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
  */
 function array_key_exists($key, $search): bool {}
 
-function array_chunk(array $arg, int $size, bool $preserve_keys = false): ?array {}
+function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
 
-/** @return array|false */
-function array_combine(array $keys, array $values) {}
+function array_combine(array $keys, array $values): array {}
 
 /* base64.c */
 

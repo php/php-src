@@ -6334,7 +6334,7 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
-/* {{{ proto array|null array_chunk(array input, int size [, bool preserve_keys])
+/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
