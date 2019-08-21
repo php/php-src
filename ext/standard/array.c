@@ -2704,8 +2704,9 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_DOUBLE_INIT_ARRAY(start, end) do { \
 		double __calc_size = ((start - end) / step) + 1; \
 		if (__calc_size >= (double)HT_MAX_SIZE) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=%0.0f end=%0.0f", end, start); \
+			return; \
 		} \
 		size = (uint32_t)_php_math_round(__calc_size, 0, PHP_ROUND_HALF_UP); \
 		array_init_size(return_value, size); \
@@ -2715,15 +2716,16 @@ PHP_FUNCTION(array_fill_keys)
 #define RANGE_CHECK_LONG_INIT_ARRAY(start, end) do { \
 		zend_ulong __calc_size = ((zend_ulong) start - end) / lstep; \
 		if (__calc_size >= HT_MAX_SIZE - 1) { \
-			php_error_docref(NULL, E_WARNING, "The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
-			RETURN_FALSE; \
+			zend_throw_error(NULL, \
+					"The supplied range exceeds the maximum array size: start=" ZEND_LONG_FMT " end=" ZEND_LONG_FMT, end, start); \
+			return; \
 		} \
 		size = (uint32_t)(__calc_size + 1); \
 		array_init_size(return_value, size); \
 		zend_hash_real_init_packed(Z_ARRVAL_P(return_value)); \
 	} while (0)
 
-/* {{{ proto array|false range(mixed low, mixed high[, int step])
+/* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
@@ -2812,8 +2814,8 @@ double_str:
 		high = zval_get_double(zhigh);
 
 		if (zend_isinf(high) || zend_isinf(low)) {
-			php_error_docref(NULL, E_WARNING, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid range supplied: start=%0.0f end=%0.0f", low, high);
+			return;
 		}
 
 		if (low > high) { 		/* Negative steps */
@@ -2905,8 +2907,8 @@ long_str:
 	}
 err:
 	if (err) {
-		php_error_docref(NULL, E_WARNING, "step exceeds the specified range");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "step exceeds the specified range");
+		return;
 	}
 }
 /* }}} */
@@ -5611,7 +5613,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 #define MULTISORT_ABORT				\
 	efree(func);	\
 	efree(arrays);					\
-	RETURN_FALSE;
+	return;
 
 static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
 	Bucket *t;
@@ -5688,7 +5690,7 @@ PHP_FUNCTION(array_multisort)
 						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? PHP_SORT_DESC : PHP_SORT_ASC;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
@@ -5704,19 +5706,19 @@ PHP_FUNCTION(array_multisort)
 						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
-						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
+						zend_type_error("Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
 
 				default:
-					php_error_docref(NULL, E_WARNING, "Argument #%d is an unknown sort flag", i + 1);
+					zend_type_error("Argument #%d is an unknown sort flag", i + 1);
 					MULTISORT_ABORT;
 					break;
 
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or a sort flag", i + 1);
+			zend_type_error("Argument #%d is expected to be an array or a sort flag", i + 1);
 			MULTISORT_ABORT;
 		}
 	}
@@ -5727,7 +5729,7 @@ PHP_FUNCTION(array_multisort)
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_P(arrays[i])) != (uint32_t)array_size) {
-			php_error_docref(NULL, E_WARNING, "Array sizes are inconsistent");
+			zend_throw_error(NULL, "Array sizes are inconsistent");
 			MULTISORT_ABORT;
 		}
 	}
@@ -6354,7 +6356,7 @@ PHP_FUNCTION(array_chunk)
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
-		php_error_docref(NULL, E_WARNING, "Size parameter expected to be greater than 0");
+		zend_throw_error(NULL, "Size parameter expected to be greater than 0");
 		return;
 	}
 
@@ -6401,7 +6403,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array|false array_combine(array keys, array values)
+/* {{{ proto array array_combine(array keys, array values)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
@@ -6419,8 +6421,8 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Both parameters should have an equal number of elements");
+		return;
 	}
 
 	if (!num_keys) {

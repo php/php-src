@@ -4,11 +4,11 @@ array_chunk() - variation 22
 <?php
 $array = array ("b" => 1, "c" => 2);
 var_dump ($array);
-for ($i = 0; $i < (sizeof($array) + 1); $i++) {
+for ($i = 1; $i < (sizeof($array) + 1); $i++) {
 	echo "[$i]\n";
-	var_dump (@array_chunk ($array, $i));
-	var_dump (@array_chunk ($array, $i, TRUE));
-	var_dump (@array_chunk ($array, $i, FALSE));
+	var_dump (array_chunk ($array, $i));
+	var_dump (array_chunk ($array, $i, TRUE));
+	var_dump (array_chunk ($array, $i, FALSE));
 	echo "\n";
 }
 ?>
@@ -19,11 +19,6 @@ array(2) {
   ["c"]=>
   int(2)
 }
-[0]
-NULL
-NULL
-NULL
-
 [1]
 array(2) {
   [0]=>
