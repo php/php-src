@@ -12,5 +12,5 @@ try {
 
 OKAY
 --EXPECT--
-
+Cannot call get_defined_vars() dynamically
 OKAY

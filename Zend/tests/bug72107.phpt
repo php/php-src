@@ -12,6 +12,5 @@ try {
     echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 Cannot call func_get_args() dynamically
-Notice: Undefined variable: undef in %s on line %d
