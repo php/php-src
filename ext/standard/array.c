@@ -3577,7 +3577,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				ZVAL_DEREF(dest_zval);
 				thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
 				if ((thash && GC_IS_RECURSIVE(thash)) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
-					php_error_docref(NULL, E_WARNING, "recursion detected");
+					zend_throw_error(NULL, "Recursion detected");
 					return 0;
 				}
 
@@ -3698,7 +3698,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 		if (Z_IS_RECURSIVE_P(dest_zval) ||
 		    Z_IS_RECURSIVE_P(src_zval) ||
 		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			zend_throw_error(NULL, "Recursion detected");
 			return 0;
 		}
 
