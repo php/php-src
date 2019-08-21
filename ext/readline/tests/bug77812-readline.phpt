@@ -16,6 +16,7 @@ var_dump($proc);
 fwrite($pipes[0], "echo <<<FOO\n    bar\n    FOO;\n");
 fwrite($pipes[0], "print(<<<FOO\nxx\nFOO);\n");
 fwrite($pipes[0], "echo <<<FOO\n    xxx\n    FOO;\nFOO\n;\n");
+fwrite($pipes[0], "echo <<<FOO\nFOOL\nFOO\n,1;\n");
 fclose($pipes[0]);
 proc_close($proc);
 ?>
@@ -39,4 +40,9 @@ php > FOO
 php > ;
 
 Warning: Use of undefined constant FOO - assumed 'FOO' (this will throw an Error in a future version of PHP) in php shell code on line %d
+php > echo <<<FOO
+<<< > FOOL
+<<< > FOO
+php > ,1;
+FOOL1
 php >
