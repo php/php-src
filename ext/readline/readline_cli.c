@@ -349,9 +349,14 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 			case heredoc:
 				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len) && code[i] == '\n') {
 					code_type = body;
-				} else if (code[i - (heredoc_len + 2)] == '\n' && !strncmp(code + i - heredoc_len - 1, heredoc_tag, heredoc_len) && code[i-1] == ';' && code[i] == '\n') {
+				} else if (!strncmp(code + i - heredoc_len + 1, heredoc_tag, heredoc_len)) {
+					char c = code[i + 1];
+					char *p = code + i - heredoc_len;
+
+					if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') break;
+					while (*p == ' ' && *p != '\n') p--;
+					if (*p != '\n') break;
 					code_type = body;
-					valid_end = 1;
 				}
 				break;
 			case outside:
