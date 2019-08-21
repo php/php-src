@@ -2,9 +2,15 @@
 Bug #71221 (Null pointer deref (segfault) in get_defined_vars via ob_start)
 --FILE--
 <?php
-ob_start("get_defined_vars");
+try {
+    ob_start("get_defined_vars");
+} catch (\Error $e) {
+    echo $e->getMessage();
+}
 ob_end_clean();
 ?>
-okey
+
+OKAY
 --EXPECT--
-okey
+Cannot call get_defined_vars() dynamically
+OKAY
