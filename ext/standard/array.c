@@ -4444,7 +4444,8 @@ PHP_FUNCTION(array_flip)
 			}
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only flip STRING and INTEGER values!");
+			zend_type_error("Can only flip STRING and INTEGER values!");
+			return;
 		}
 	} ZEND_HASH_FOREACH_END();
 }

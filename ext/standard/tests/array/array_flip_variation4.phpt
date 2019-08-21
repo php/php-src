@@ -52,39 +52,20 @@ $input = array(
   'resource_value' => $fp,
 );
 
-var_dump( array_flip($input) );
+try {
+    var_dump( array_flip($input) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 // closing resource
 fclose($fp);
 
-echo "Done"
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 *** Testing array_flip() : different invalid values in 'input' array argument ***
+Can only flip STRING and INTEGER values!
 
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-
-Warning: array_flip(): Can only flip STRING and INTEGER values! in %s on line %d
-array(0) {
-}
-Done
+DONE
