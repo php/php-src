@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #78220 (Can't access OneDrive folder). (cmb, ab)
   . Fixed bug #77922 (Double release of doc comment on inherited shadow
     property). (Nikita)
+  . Fixed bug #78441 (Parse error due to heredoc identifier followed by digit).
+    (cmb)
 
 - Intl:
   . Ensure IDNA2003 rules are used with idn_to_ascii() and idn_to_utf8()
