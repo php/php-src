@@ -347,9 +347,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 				}
 				break;
 			case heredoc:
-				if (code[i - (heredoc_len + 1)] == '\n' && !strncmp(code + i - heredoc_len, heredoc_tag, heredoc_len) && code[i] == '\n') {
-					code_type = body;
-				} else if (!strncmp(code + i - heredoc_len + 1, heredoc_tag, heredoc_len)) {
+				if (!strncmp(code + i - heredoc_len + 1, heredoc_tag, heredoc_len)) {
 					char c = code[i + 1];
 					char *p = code + i - heredoc_len;
 
