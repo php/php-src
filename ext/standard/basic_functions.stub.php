@@ -57,8 +57,7 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 /* array.c */
 
-/** @return int|false */
-function array_push(array &$stack, ...$args) {}
+function array_push(array &$stack, ...$args): int {}
 
 function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
