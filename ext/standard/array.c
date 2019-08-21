@@ -4349,7 +4349,7 @@ PHP_FUNCTION(array_pad)
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
 	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
-		zend_throw_error(NULL, "Only 1048576 elements may be pad up at a time.");
+		zend_throw_error(NULL, "You may only pad up to 1048576 elements at a time");
 		return;
 	}
 

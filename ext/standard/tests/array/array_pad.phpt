@@ -86,6 +86,6 @@ array(4) {
   [3]=>
   float(2)
 }
-Only 1048576 elements may be pad up at a time.
+You may only pad up to 1048576 elements at a time
 
 DONE
