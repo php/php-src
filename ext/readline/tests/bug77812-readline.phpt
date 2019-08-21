@@ -3,8 +3,8 @@ Bug #77812 (Interactive mode does not support PHP 7.3-style heredoc)
 --SKIPIF--
 <?php
 if (!extension_loaded('readline')) die('skip readline extension not available');
-if (READLINE_LIB !== "readline") die("skip readline only");
-if (!function_exists('proc_open')) die("proc_open() not available");
+if (READLINE_LIB !== "readline") die('skip readline only');
+if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>
 --FILE--
 <?php
