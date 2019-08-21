@@ -4325,7 +4325,7 @@ PHP_FUNCTION(array_reverse)
 }
 /* }}} */
 
-/* {{{ proto array|false array_pad(array input, int pad_size, mixed pad_value)
+/* {{{ proto array array_pad(array input, int pad_size, mixed pad_value)
    Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
@@ -4349,8 +4349,8 @@ PHP_FUNCTION(array_pad)
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
 	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
-		php_error_docref(NULL, E_WARNING, "You may only pad up to 1048576 elements at a time");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Only 1048576 elements may be pad up at a time.");
+		return;
 	}
 
 	if (input_size >= pad_size_abs) {
