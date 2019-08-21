@@ -6403,7 +6403,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array|false array_combine(array keys, array values)
+/* {{{ proto array array_combine(array keys, array values)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
@@ -6421,8 +6421,8 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Both parameters should have an equal number of elements");
+		return;
 	}
 
 	if (!num_keys) {
