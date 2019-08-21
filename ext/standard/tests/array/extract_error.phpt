@@ -36,5 +36,5 @@ echo "Done\n";
 Notice: A non well formed numeric value encountered in %s on line %d
 Invalid extract type
 Invalid extract type
-specified extract type requires the prefix parameter
+Specified extract type requires the prefix parameter
 Done
