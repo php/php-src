@@ -6401,7 +6401,7 @@ PHP_FUNCTION(array_chunk)
 }
 /* }}} */
 
-/* {{{ proto array|false array_combine(array keys, array values)
+/* {{{ proto array array_combine(array keys, array values)
    Creates an array by using the elements of the first parameter as keys and the elements of the second as the corresponding values */
 PHP_FUNCTION(array_combine)
 {
@@ -6419,8 +6419,8 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		php_error_docref(NULL, E_WARNING, "Both parameters should have an equal number of elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Both parameters should have an equal number of elements");
+		return;
 	}
 
 	if (!num_keys) {
@@ -6435,13 +6435,11 @@ PHP_FUNCTION(array_combine)
 			} else if (Z_TYPE(values->arData[pos_values].val) != IS_UNDEF) {
 				entry_values = &values->arData[pos_values].val;
 				if (Z_TYPE_P(entry_keys) == IS_LONG) {
-					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
-						Z_LVAL_P(entry_keys), entry_values);
+					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry_keys), entry_values);
 				} else {
 					zend_string *tmp_key;
 					zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
-					entry_values = zend_symtable_update(Z_ARRVAL_P(return_value),
-						key, entry_values);
+					entry_values = zend_symtable_update(Z_ARRVAL_P(return_value), key, entry_values);
 					zend_tmp_string_release(tmp_key);
 				}
 				zval_add_ref(entry_values);
