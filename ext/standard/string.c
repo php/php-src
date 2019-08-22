@@ -1619,7 +1619,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string|null dirname(string path[, int levels])
+/* {{{ proto string dirname(string path[, int levels])
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 #endif
 	} else if (levels < 1) {
-		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
+		zend_throw_error(NULL, "Invalid argument, levels must be >= 1");
 		zend_string_efree(ret);
 		return;
 	} else {
