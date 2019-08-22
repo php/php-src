@@ -18,7 +18,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 * passing different integer values for 'split_length' argument to str_split()
 */
 
-echo "*** Testing str_split() : different intger values for 'split_length' ***\n";
+echo "*** Testing str_split() : different integer values for 'split_length' ***\n";
 //Initialise variables
 $str = 'This is a string with 123 & escape char \t';
 
@@ -35,17 +35,20 @@ $values = array (
 
 //loop through each element of $values for 'split_length'
 for($count = 0; $count < count($values); $count++) {
-  echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( str_split($str, $values[$count]) );
+    echo "-- Iteration ".($count + 1)." --\n";
+
+    try {
+	    var_dump( str_split($str, $values[$count]) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 echo "Done"
 ?>
---EXPECTF--
-*** Testing str_split() : different intger values for 'split_length' ***
+--EXPECT--
+*** Testing str_split() : different integer values for 'split_length' ***
 -- Iteration 1 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 2 --
 array(42) {
   [0]=>
@@ -134,9 +137,7 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -155,7 +156,5 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 Done
