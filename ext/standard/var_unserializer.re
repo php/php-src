@@ -113,7 +113,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	if (Z_REFCOUNTED_P(rval)) {
-		zval *tmp_var = var_tmp_var(var_hashx, 0);
+		zval *tmp_var = var_tmp_var(var_hashx);
 		if (!tmp_var) {
 			return;
 		}
@@ -121,7 +121,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 	}
 }
 
-PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx, int one_more)
+static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, int extra)
 {
     var_dtor_entries *var_hash;
 
@@ -130,7 +130,7 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx, int one_more)
     }
 
     var_hash = (*var_hashx)->last_dtor;
-    if (!var_hash || var_hash->used_slots + one_more >= VAR_ENTRIES_MAX) {
+    if (!var_hash || var_hash->used_slots + extra >= VAR_ENTRIES_MAX) {
         var_hash = emalloc(sizeof(var_dtor_entries));
         var_hash->used_slots = 0;
         var_hash->next = 0;
@@ -146,6 +146,11 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx, int one_more)
     ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
 	Z_EXTRA(var_hash->data[var_hash->used_slots]) = 0;
     return &var_hash->data[var_hash->used_slots++];
+}
+
+PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
+{
+    return tmp_var(var_hashx, 0);
 }
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
@@ -652,10 +657,10 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		/* Delay __unserialize() call until end of serialization. We use two slots here to
 		 * store both the object and the unserialized data array. */
 		ZVAL_DEREF(rval);
-		tmp = var_tmp_var(var_hash, 1);
+		tmp = tmp_var(var_hash, 1);
 		ZVAL_COPY(tmp, rval);
 		Z_EXTRA_P(tmp) = VAR_UNSERIALIZE_FLAG;
-		tmp = var_tmp_var(var_hash, 0);
+		tmp = tmp_var(var_hash, 0);
 		ZVAL_COPY_VALUE(tmp, &ary);
 
 		return finish_nested_data(UNSERIALIZE_PASSTHRU);
@@ -681,7 +686,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 	ZVAL_DEREF(rval);
 	if (has_wakeup) {
 		/* Delay __wakeup call until end of serialization */
-		zval *wakeup_var = var_tmp_var(var_hash, 0);
+		zval *wakeup_var = var_tmp_var(var_hash);
 		ZVAL_COPY(wakeup_var, rval);
 		Z_EXTRA_P(wakeup_var) = VAR_WAKEUP_FLAG;
 	}
