@@ -122,16 +122,17 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 	}
 }
 
-static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, int extra)
+static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, zend_long num)
 {
     var_dtor_entries *var_hash;
+	zend_long used_slots;
 
-    if (!var_hashx || !*var_hashx) {
+    if (!var_hashx || !*var_hashx || num < 1) {
         return NULL;
     }
 
     var_hash = (*var_hashx)->last_dtor;
-    if (!var_hash || var_hash->used_slots + extra >= VAR_DTOR_ENTRIES_MAX) {
+    if (!var_hash || var_hash->used_slots + num > VAR_DTOR_ENTRIES_MAX) {
         var_hash = emalloc(sizeof(var_dtor_entries));
         var_hash->used_slots = 0;
         var_hash->next = 0;
@@ -144,14 +145,16 @@ static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, int e
 
         (*var_hashx)->last_dtor = var_hash;
     }
-    ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
-	Z_EXTRA(var_hash->data[var_hash->used_slots]) = 0;
-    return &var_hash->data[var_hash->used_slots++];
+	for (used_slots = var_hash->used_slots; var_hash->used_slots < used_slots + num; var_hash->used_slots++) {
+		ZVAL_UNDEF(&var_hash->data[var_hash->used_slots]);
+		Z_EXTRA(var_hash->data[var_hash->used_slots]) = 0;
+	}
+    return &var_hash->data[used_slots];
 }
 
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
 {
-    return tmp_var(var_hashx, 0);
+    return tmp_var(var_hashx, 1);
 }
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nzval)
@@ -658,10 +661,10 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		/* Delay __unserialize() call until end of serialization. We use two slots here to
 		 * store both the object and the unserialized data array. */
 		ZVAL_DEREF(rval);
-		tmp = tmp_var(var_hash, 1);
+		tmp = tmp_var(var_hash, 2);
 		ZVAL_COPY(tmp, rval);
 		Z_EXTRA_P(tmp) = VAR_UNSERIALIZE_FLAG;
-		tmp = tmp_var(var_hash, 0);
+		tmp++;
 		ZVAL_COPY_VALUE(tmp, &ary);
 
 		return finish_nested_data(UNSERIALIZE_PASSTHRU);
