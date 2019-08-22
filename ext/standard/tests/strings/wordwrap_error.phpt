@@ -26,7 +26,12 @@ echo "-- width = 0 & cut = true --\n";
 // width as zero and cut as true
 $width = 0;
 $cut = true;
-var_dump( wordwrap($str, $width, $break, $cut) );
+
+try {
+    wordwrap($str, $width, $break, $cut);
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "-- width = -10 & cut = false --\n";
 // width as -ne and cut as false
@@ -49,9 +54,7 @@ echo "Done\n";
 -- width = 0 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
-
-Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
-bool(false)
+Can't force cut when width is zero
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = -10 & cut = true --
