@@ -1303,30 +1303,6 @@ PHP_MINFO_FUNCTION(hash)
 /* }}} */
 
 /* {{{ arginfo */
-#ifdef PHP_HASH_MD5_NOT_IN_CORE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef PHP_HASH_SHA1_NOT_IN_CORE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, data)
@@ -1460,17 +1436,6 @@ static const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 	PHP_FE(hash_equals,								arginfo_hash_equals)
 	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)
-
-	/* BC Land */
-#ifdef PHP_HASH_MD5_NOT_IN_CORE
-	PHP_NAMED_FE(md5, php_if_md5,					arginfo_hash_md5)
-	PHP_NAMED_FE(md5_file, php_if_md5_file,			arginfo_hash_md5_file)
-#endif /* PHP_HASH_MD5_NOT_IN_CORE */
-
-#ifdef PHP_HASH_SHA1_NOT_IN_CORE
-	PHP_NAMED_FE(sha1, php_if_sha1,					arginfo_hash_sha1)
-	PHP_NAMED_FE(sha1_file, php_if_sha1_file,		arginfo_hash_sha1_file)
-#endif /* PHP_HASH_SHA1_NOT_IN_CORE */
 
 #ifdef PHP_MHASH_BC
 	PHP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
