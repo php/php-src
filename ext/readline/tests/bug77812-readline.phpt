@@ -17,6 +17,7 @@ fwrite($pipes[0], "echo <<<FOO\n    bar\n    FOO;\n");
 fwrite($pipes[0], "print(<<<FOO\nxx\nFOO);\n");
 fwrite($pipes[0], "echo <<<FOO\n    xxx\n    FOO;\nFOO\n;\n");
 fwrite($pipes[0], "echo <<<FOO\nFOOL\nFOO\n,1;\n");
+fwrite($pipes[0], "echo <<<FOO\nFOO4\nFOO\n,2;\n");
 fclose($pipes[0]);
 proc_close($proc);
 ?>
@@ -45,4 +46,9 @@ php > echo <<<FOO
 <<< > FOO
 php > ,1;
 FOOL1
+php > echo <<<FOO
+<<< > FOO4
+<<< > FOO
+php > ,2;
+FOO42
 php >
