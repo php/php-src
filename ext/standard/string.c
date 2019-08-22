@@ -5569,8 +5569,8 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty substring");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Empty substring");
+		return;
 	}
 
 	p = haystack;
