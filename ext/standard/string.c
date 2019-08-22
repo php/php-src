@@ -5610,8 +5610,8 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty substring");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Empty substring");
+		return;
 	}
 
 	p = haystack;
@@ -5632,6 +5632,7 @@ PHP_FUNCTION(substr_count)
 			length += (haystack_len - offset);
 		}
 		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
+			/* TODO Check if Candidate to convert to Exception */
 			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
