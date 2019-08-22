@@ -5363,7 +5363,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		php_error_docref(NULL, E_WARNING, "Second argument has to be greater than or equal to 0");
+		zend_throw_error(NULL, "Second argument has to be greater than or equal to 0");
 		return;
 	}
 
