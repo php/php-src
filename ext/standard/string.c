@@ -1129,7 +1129,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 }
 /* }}} */
 
-/* {{{ proto array|false explode(string separator, string str [, int limit])
+/* {{{ proto array explode(string separator, string str [, int limit])
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
@@ -1145,14 +1145,14 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Empty delimiter");
+		return;
 	}
 
 	array_init(return_value);
 
 	if (ZSTR_LEN(str) == 0) {
-	  	if (limit >= 0) {
+		if (limit >= 0) {
 			ZVAL_EMPTY_STRING(&tmp);
 			zend_hash_index_add_new(Z_ARRVAL_P(return_value), 0, &tmp);
 		}
