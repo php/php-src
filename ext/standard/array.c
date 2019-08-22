@@ -4176,7 +4176,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 }
 /* }}} */
 
-/* {{{ proto array|false array_column(array input, mixed column_key[, mixed index_key])
+/* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)

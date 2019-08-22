@@ -192,14 +192,12 @@ function array_count_values(array $arg): array {}
 /**
  * @param int|string|null $column_key
  * @param int|string|null $index_key
- * @return array|false
  */
-function array_column(array $arg, $column_key, $index_key = null) {}
+function array_column(array $arg, $column_key, $index_key = null): array {}
 
 function array_reverse(array $input, bool $preserve_keys = false): array {}
 
-/** @return array|false */
-function array_pad(array $arg, int $pad_size, $pad_value) {}
+function array_pad(array $arg, int $pad_size, $pad_value): array {}
 
 function array_flip(array $arg): array {}
 

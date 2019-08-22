@@ -236,7 +236,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_count_values arginfo_array_values
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_column, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_column, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arg, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, column_key)
 	ZEND_ARG_INFO(0, index_key)
@@ -247,7 +247,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_reverse, 0, 1, IS_ARRAY, 0
 	ZEND_ARG_TYPE_INFO(0, preserve_keys, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_pad, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_pad, 0, 3, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arg, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, pad_size, IS_LONG, 0)
 	ZEND_ARG_INFO(0, pad_value)
