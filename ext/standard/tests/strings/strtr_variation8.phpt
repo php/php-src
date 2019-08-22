@@ -75,10 +75,15 @@ $replace_pairs_arr =  array (
 // loop through with each element of the $replace_pairs array to test strtr() function
 $count = 1;
 for($index = 0; $index < count($replace_pairs_arr); $index++) {
-  echo "\n-- Iteration $count --\n";
-  $replace_pairs = $replace_pairs_arr[$index];
-  var_dump( strtr($str, $replace_pairs) );
-  $count ++;
+    echo "\n-- Iteration $count --\n";
+    $replace_pairs = $replace_pairs_arr[$index];
+    try {
+        var_dump( strtr($str, $replace_pairs) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+
+    $count ++;
 }
 
 fclose($file_handle);  //closing the file handle
@@ -89,34 +94,22 @@ echo "*** Done ***";
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 2 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 3 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 4 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 5 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 6 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 7 --
 string(6) "012atm"
@@ -128,52 +121,32 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 11 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 12 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 13 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 14 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 15 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 16 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 17 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 18 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 
 -- Iteration 19 --
-
-Warning: strtr(): The second argument is not an array in %s on line %d
-bool(false)
+The second argument is not an array
 *** Done ***
