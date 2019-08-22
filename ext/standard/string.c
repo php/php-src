@@ -1989,14 +1989,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
@@ -2042,7 +2042,7 @@ PHP_FUNCTION(strripos)
 		char lowered;
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
@@ -2050,7 +2050,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = ZSTR_VAL(haystack);
 			if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
@@ -2070,7 +2070,7 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
@@ -2078,7 +2078,7 @@ PHP_FUNCTION(strripos)
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);

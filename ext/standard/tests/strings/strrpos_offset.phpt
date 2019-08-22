@@ -19,15 +19,15 @@ echo "Done\n";
 --EXPECTF--
 strrpos() expects parameter 3 to be int, float given
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 Done
