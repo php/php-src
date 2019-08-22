@@ -6107,8 +6107,8 @@ PHP_FUNCTION(substr_compare)
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {
-			php_error_docref(NULL, E_WARNING, "The length must be greater than or equal to zero");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "The length must be greater than or equal to zero");
+			return;
 		}
 	}
 
