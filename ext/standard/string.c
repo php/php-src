@@ -3292,7 +3292,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string|false strtr(string str, string from[, string to])
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -3310,8 +3310,8 @@ PHP_FUNCTION(strtr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac == 2 && Z_TYPE_P(from) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "The second argument is not an array");
-		RETURN_FALSE;
+		zend_type_error("The second argument is not an array");
+		return;
 	}
 
 	/* shortcut for empty string */
