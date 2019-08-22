@@ -1989,14 +1989,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
@@ -2042,7 +2042,7 @@ PHP_FUNCTION(strripos)
 		char lowered;
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
@@ -2050,7 +2050,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = ZSTR_VAL(haystack);
 			if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
@@ -2070,7 +2070,7 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
@@ -2078,7 +2078,7 @@ PHP_FUNCTION(strripos)
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);
@@ -3292,7 +3292,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string|false strtr(string str, string from[, string to])
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -3310,8 +3310,8 @@ PHP_FUNCTION(strtr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac == 2 && Z_TYPE_P(from) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "The second argument is not an array");
-		RETURN_FALSE;
+		zend_type_error("The second argument is not an array");
+		return;
 	}
 
 	/* shortcut for empty string */
@@ -6058,7 +6058,7 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
-/* {{{ proto array|false str_split(string str [, int split_length])
+/* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
@@ -6074,8 +6074,8 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "The length of each segment must be greater than zero");
+		return;
 	}
 
 
