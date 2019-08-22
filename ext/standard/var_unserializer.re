@@ -23,7 +23,6 @@
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
-#define VAR_DTOR_ENTRIES_MAX 255 /* 256 - offsetof(var_dtor_entries, data) / sizeof(zval) */
 #define VAR_ENTRIES_DBG 0
 
 /* VAR_FLAG used in var_dtor entries to signify an entry on which
@@ -114,7 +113,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	if (Z_REFCOUNTED_P(rval)) {
-		zval *tmp_var = var_tmp_var(var_hashx);
+		zval *tmp_var = var_tmp_var(var_hashx, 0);
 		if (!tmp_var) {
 			return;
 		}
@@ -122,7 +121,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 	}
 }
 
-PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
+PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx, int one_more)
 {
     var_dtor_entries *var_hash;
 
@@ -131,7 +130,7 @@ PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx)
     }
 
     var_hash = (*var_hashx)->last_dtor;
-    if (!var_hash || var_hash->used_slots == VAR_DTOR_ENTRIES_MAX) {
+    if (!var_hash || var_hash->used_slots + one_more >= VAR_ENTRIES_MAX) {
         var_hash = emalloc(sizeof(var_dtor_entries));
         var_hash->used_slots = 0;
         var_hash->next = 0;
@@ -653,10 +652,10 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		/* Delay __unserialize() call until end of serialization. We use two slots here to
 		 * store both the object and the unserialized data array. */
 		ZVAL_DEREF(rval);
-		tmp = var_tmp_var(var_hash);
+		tmp = var_tmp_var(var_hash, 1);
 		ZVAL_COPY(tmp, rval);
 		Z_EXTRA_P(tmp) = VAR_UNSERIALIZE_FLAG;
-		tmp = var_tmp_var(var_hash);
+		tmp = var_tmp_var(var_hash, 0);
 		ZVAL_COPY_VALUE(tmp, &ary);
 
 		return finish_nested_data(UNSERIALIZE_PASSTHRU);
@@ -682,7 +681,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 	ZVAL_DEREF(rval);
 	if (has_wakeup) {
 		/* Delay __wakeup call until end of serialization */
-		zval *wakeup_var = var_tmp_var(var_hash);
+		zval *wakeup_var = var_tmp_var(var_hash, 0);
 		ZVAL_COPY(wakeup_var, rval);
 		Z_EXTRA_P(wakeup_var) = VAR_WAKEUP_FLAG;
 	}
