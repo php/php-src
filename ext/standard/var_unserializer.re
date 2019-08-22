@@ -23,6 +23,7 @@
 
 /* {{{ reference-handling for unserializer: var_* */
 #define VAR_ENTRIES_MAX 1018     /* 1024 - offsetof(php_unserialize_data, entries) / sizeof(void*) */
+#define VAR_DTOR_ENTRIES_MAX 255 /* 256 - offsetof(var_dtor_entries, data) / sizeof(zval) */
 #define VAR_ENTRIES_DBG 0
 
 /* VAR_FLAG used in var_dtor entries to signify an entry on which
@@ -39,7 +40,7 @@ typedef struct {
 typedef struct {
 	zend_long used_slots;
 	void *next;
-	zval data[VAR_ENTRIES_MAX];
+	zval data[VAR_DTOR_ENTRIES_MAX];
 } var_dtor_entries;
 
 struct php_unserialize_data {
@@ -130,7 +131,7 @@ static zend_always_inline zval *tmp_var(php_unserialize_data_t *var_hashx, int e
     }
 
     var_hash = (*var_hashx)->last_dtor;
-    if (!var_hash || var_hash->used_slots + extra >= VAR_ENTRIES_MAX) {
+    if (!var_hash || var_hash->used_slots + extra >= VAR_DTOR_ENTRIES_MAX) {
         var_hash = emalloc(sizeof(var_dtor_entries));
         var_hash->used_slots = 0;
         var_hash->next = 0;
