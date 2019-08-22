@@ -2194,8 +2194,8 @@ PHP_FUNCTION(chunk_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
-		php_error_docref(NULL, E_WARNING, "Chunk length should be greater than zero");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Chunk length should be greater than zero");
+		return;
 	}
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
