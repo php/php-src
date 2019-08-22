@@ -6133,7 +6133,7 @@ PHP_FUNCTION(strpbrk)
 /* {{{ proto int|false substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
    Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
 PHP_FUNCTION(substr_compare)
-{
+	{
 	zend_string *s1, *s2;
 	zend_long offset, len=0;
 	zend_bool len_is_default=1;
@@ -6153,8 +6153,8 @@ PHP_FUNCTION(substr_compare)
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {
-			php_error_docref(NULL, E_WARNING, "The length must be greater than or equal to zero");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "The length must be greater than or equal to zero");
+			return;
 		}
 	}
 
@@ -6164,6 +6164,7 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
+		/* TODO Check if Candidate to convert to Exception */
 		php_error_docref(NULL, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}
