@@ -96,7 +96,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(rval));
+	fprintf(stderr, "var_push(" ZEND_LONG_FMT "): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(rval));
 #endif
 
 	if (var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -154,7 +154,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval *nz
 	zend_long i;
 	var_entries *var_hash = &(*var_hashx)->entries;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(nzval));
+	fprintf(stderr, "var_replace(" ZEND_LONG_FMT "): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_P(nzval));
 #endif
 
 	while (var_hash) {
@@ -172,7 +172,7 @@ static zval *var_access(php_unserialize_data_t *var_hashx, zend_long id)
 {
 	var_entries *var_hash = &(*var_hashx)->entries;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_access(%ld): %ld\n", var_hash?var_hash->used_slots:-1L, id);
+	fprintf(stderr, "var_access(" ZEND_LONG_FMT "): " ZEND_LONG_FMT "\n", var_hash?var_hash->used_slots:-1L, id);
 #endif
 
 	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -199,7 +199,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	ZVAL_UNDEF(&unserialize_name);
 
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_destroy(%ld)\n", var_hash?var_hash->used_slots:-1L);
+	fprintf(stderr, "var_destroy( " ZEND_LONG_FMT ")\n", var_hash?var_hash->used_slots:-1L);
 #endif
 
 	while (var_hash) {
@@ -212,7 +212,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		for (i = 0; i < var_dtor_hash->used_slots; i++) {
 			zval *zv = &var_dtor_hash->data[i];
 #if VAR_ENTRIES_DBG
-			fprintf(stderr, "var_destroy dtor(%p, %ld)\n", var_dtor_hash->data[i], Z_REFCOUNT_P(var_dtor_hash->data[i]));
+			fprintf(stderr, "var_destroy dtor(%p, %ld)\n", &var_dtor_hash->data[i], Z_REFCOUNT_P(&var_dtor_hash->data[i]));
 #endif
 
 			if (Z_EXTRA_P(zv) == VAR_WAKEUP_FLAG) {
