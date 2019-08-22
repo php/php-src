@@ -351,7 +351,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 					char c = code[i + 1];
 					char *p = code + i - heredoc_len;
 
-					if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') break;
+					if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c >= 0x80) break;
 					while (*p == ' ' && *p != '\n') p--;
 					if (*p != '\n') break;
 					code_type = body;
