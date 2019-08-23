@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.0RC1
 
 - Core:
+  . Fixed bug #78438 (Corruption when __unserializing deeply nested structures).
+    (cmb, Nikita)
   . Fixed bug #78441 (Parse error due to heredoc identifier followed by digit).
     (cmb)
 
