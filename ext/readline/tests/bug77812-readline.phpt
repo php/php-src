@@ -40,7 +40,10 @@ xxx
 php > FOO
 php > ;
 
-Warning: Use of undefined constant FOO - assumed 'FOO' (this will throw an Error in a future version of PHP) in php shell code on line %d
+Warning: Uncaught Error: Undefined constant 'FOO' in php shell code:1
+Stack trace:
+#0 {main}
+  thrown in php shell code on line 1
 php > echo <<<FOO
 <<< > FOOL
 <<< > FOO
