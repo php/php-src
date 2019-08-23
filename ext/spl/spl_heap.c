@@ -144,7 +144,9 @@ static void spl_pqueue_extract_helper(zval *result, zval *value, int flags) /* {
 	spl_pqueue_elem *elem = Z_PTR_P(value);
 	if ((flags & SPL_PQUEUE_EXTR_BOTH) == SPL_PQUEUE_EXTR_BOTH) {
 		array_init(result);
+		Z_TRY_ADDREF(elem->data);
 		add_assoc_zval_ex(result, "data", sizeof("data") - 1, &elem->data);
+		Z_TRY_ADDREF(elem->priority);
 		add_assoc_zval_ex(result, "priority", sizeof("priority") - 1, &elem->priority);
 		return;
 	}
