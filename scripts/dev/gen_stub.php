@@ -305,7 +305,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
             $code .= sprintf(
                 "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
                 $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                $returnType->name, $returnType->isNullable
+                str_replace('\\', '\\\\', $returnType->name), $returnType->isNullable
             );
         }
     } else {
@@ -328,7 +328,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                 $code .= sprintf(
                     "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
                     $argKind, $argInfo->byRef, $argInfo->name,
-                    $argInfo->type->name, $argInfo->type->isNullable
+                    str_replace('\\', '\\\\', $argInfo->type->name), $argInfo->type->isNullable
                 );
             }
         } else {
