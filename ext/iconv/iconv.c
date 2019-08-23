@@ -2004,7 +2004,7 @@ PHP_FUNCTION(iconv_strlen)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|s",
 		&str, &charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(iconv_substr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|ls",
 		&str, &offset, &length,
 		&charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2078,7 +2078,7 @@ PHP_FUNCTION(iconv_strpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ls",
 		&haystk, &ndl,
 		&offset, &charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2132,7 +2132,7 @@ PHP_FUNCTION(iconv_strrpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|s",
 		&haystk, &ndl,
 		&charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {
@@ -2177,7 +2177,7 @@ PHP_FUNCTION(iconv_mime_encode)
 		&field_name, &field_value,
 		&pref) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (pref != NULL) {
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2315,7 +2315,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
