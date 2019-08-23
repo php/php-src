@@ -1,14 +1,5 @@
 --TEST--
-Test str_pad() function : usage variations - unexpected large value for '$pad_length' argument
---INI--
-memory_limit=128M
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-if (getenv("USE_ZEND_ALLOC") === "0") {
-    die("skip Zend MM disabled");
-}
-?>
+Test str_pad() function : usage variations - large values for '$pad_length' argument
 --FILE--
 <?php
 /* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )
@@ -24,11 +15,22 @@ echo "*** Testing str_pad() function: with large value for for 'pad_length' argu
 
 //defining '$input' argument
 $input = "Test string";
-$pad_length = PHP_INT_MAX - 16; /* zend_string header is 16 bytes */
-var_dump( str_pad($input, $pad_length) );
+
+$extra_large_pad_length = PHP_INT_MAX*5;
+try {
+    var_dump( str_pad($input, $extra_large_pad_length) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
+
+$php_int_max_pad_length = PHP_INT_MAX;
+var_dump( str_pad($input, $php_int_max_pad_length) );
+
 
 ?>
 --EXPECTF--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
+str_pad() expects parameter 2 to be int, float given
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+

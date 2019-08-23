@@ -5697,11 +5697,6 @@ PHP_FUNCTION(str_pad)
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
-	if (num_pad_chars >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Padding length is too long");
-		return;
-	}
-
 	result = zend_string_safe_alloc(1, ZSTR_LEN(input), num_pad_chars, 0);
 	ZSTR_LEN(result) = 0;
 
