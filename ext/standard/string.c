@@ -2127,7 +2127,6 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 	const char *p;
 	size_t chunks;
 	size_t restlen;
-	size_t out_len;
 	zend_string *dest;
 
 	chunks = srclen / chunklen;
@@ -2138,17 +2137,7 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 		chunks++;
 	}
 
-	out_len = chunks;
-	if (endlen !=0 && out_len > INT_MAX/endlen) {
-		return NULL;
-	}
-	out_len *= endlen;
-	if (out_len > INT_MAX - srclen) {
-		return NULL;
-	}
-	out_len += srclen;
-
-	dest = zend_string_alloc(out_len * sizeof(char), 0);
+	dest = zend_string_safe_alloc(chunks, endlen, srclen, 0);
 
 	for (p = src, q = ZSTR_VAL(dest); p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
@@ -2172,7 +2161,7 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 }
 /* }}} */
 
-/* {{{ proto string|false chunk_split(string str [, int chunklen [, string ending]])
+/* {{{ proto string chunk_split(string str [, int chunklen [, string ending]])
    Returns split line */
 PHP_FUNCTION(chunk_split)
 {
@@ -2209,11 +2198,7 @@ PHP_FUNCTION(chunk_split)
 
 	result = php_chunk_split(ZSTR_VAL(str), ZSTR_LEN(str), end, endlen, (size_t)chunklen);
 
-	if (result) {
-		RETURN_STR(result);
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_STR(result);
 }
 /* }}} */
 
