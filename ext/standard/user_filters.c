@@ -292,8 +292,9 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			memcpy(wildcard, filtername, len + 1); /* copy \0 */
 			period = wildcard + (period - filtername);
 			while (period) {
-				*period = '\0';
-				strncat(wildcard, ".*", 2);
+				ZEND_ASSERT(period[0] == '.');
+				period[1] = '*';
+				period[2] = '\0';
 				if (NULL != (fdat = zend_hash_str_find_ptr(BG(user_filter_map), wildcard, strlen(wildcard)))) {
 					period = NULL;
 				} else {
