@@ -75,7 +75,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	char **ep;
 #endif
 	char *p;
-	size_t cnt, l, sizeenv = 0;
+	size_t cnt, sizeenv = 0;
 	HashTable *env_hash;
 
 	memset(&env, 0, sizeof(env));
@@ -122,25 +122,20 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
-		if (key) {
-			l = ZSTR_LEN(key) + ZSTR_LEN(str) + 2;
-			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
-			strncat(p, "=", 1);
-			strncat(p, ZSTR_VAL(str), ZSTR_LEN(str));
+#ifndef PHP_WIN32
+		*ep = p;
+		++ep;
+#endif
 
-#ifndef PHP_WIN32
-			*ep = p;
-			++ep;
-#endif
-			p += l;
-		} else {
-			memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
-#ifndef PHP_WIN32
-			*ep = p;
-			++ep;
-#endif
-			p += ZSTR_LEN(str) + 1;
+		if (key) {
+			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
+			p += ZSTR_LEN(key);
+			*p++ = '=';
 		}
+
+		memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
+		p += ZSTR_LEN(str);
+		*p++ = '\0';
 		zend_string_release_ex(str, 0);
 	} ZEND_HASH_FOREACH_END();
 
