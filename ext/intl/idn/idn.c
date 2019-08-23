@@ -229,7 +229,10 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		int32_t     converted_ret_len;
 
 		status = U_ZERO_ERROR;
-#if (ZEND_GCC_VERSION >= 4002) && !defined(__clang__)
+#if defined(__clang__)
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif ZEND_GCC_VERSION >= 4002
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -238,7 +241,9 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		} else {
 			converted_ret_len = uidna_IDNToUnicode(ustring, ustring_len, converted, MAXPATHLEN, (int32_t)option, &parse_error, &status);
 		}
-#if (ZEND_GCC_VERSION >= 4002) && !defined(__clang__)
+#if defined(__clang__)
+# pragma clang diagnostic pop
+#elif ZEND_GCC_VERSION >= 4002
 # pragma GCC diagnostic pop
 #endif
 		efree(ustring);
