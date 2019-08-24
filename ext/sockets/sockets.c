@@ -846,6 +846,8 @@ static PHP_MINIT_FUNCTION(sockets)
 #if HAVE_AI_IDN
 	REGISTER_LONG_CONSTANT("AI_IDN",			AI_IDN,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONIDN",		AI_CANONIDN,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("AI_IDN_ALLOW_UNASSIGNED",		AI_IDN_ALLOW_UNASSIGNED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("AI_IDN_USE_STD3_ASCII_RULES",	AI_IDN_USE_STD3_ASCII_RULES, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef AI_NUMERICSERV
 	REGISTER_LONG_CONSTANT("AI_NUMERICSERV",	AI_NUMERICSERV,		CONST_CS | CONST_PERSISTENT);
@@ -2573,7 +2575,12 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				if (zend_string_equals_literal(key, "ai_flags")) {
-					hints.ai_flags = zval_get_long(hint);
+#if HAVE_AI_IDN
+				    if (zval_get_long(hint) & (AI_IDN_ALLOW_UNASSIGNED | AI_IDN_USE_STD3_ASCII_RULES)) {
+                        php_error_docref(NULL, E_DEPRECATED, "AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES is deprecated");
+                    }
+#endif
+				    hints.ai_flags = zval_get_long(hint);
 				} else if (zend_string_equals_literal(key, "ai_socktype")) {
 					hints.ai_socktype = zval_get_long(hint);
 				} else if (zend_string_equals_literal(key, "ai_protocol")) {
