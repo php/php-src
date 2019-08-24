@@ -1473,7 +1473,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	zend_long attrsonly, sizelimit, timelimit, deref;
 	zend_string *ldap_filter = NULL, *ldap_base_dn = NULL;
 	char **ldap_attrs = NULL;
-	zend_string **string_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
 	LDAPControl **lserverctrls = NULL;
@@ -1481,7 +1480,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
 	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argcount, "zzz|alllla/", &link, &base_dn, &filter, &attrs, &attrsonly,
+	if (zend_parse_parameters(argcount, "zzz|a/lllla/", &link, &base_dn, &filter, &attrs, &attrsonly,
 		&sizelimit, &timelimit, &deref, &serverctrls) == FAILURE) {
 		return;
 	}
@@ -1500,7 +1499,6 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		case 4:
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
-			string_attrs = safe_emalloc(num_attribs, sizeof(zend_string *), 0);
 
 			for (i = 0; i<num_attribs; i++) {
 				if ((attr = zend_hash_index_find(Z_ARRVAL_P(attrs), i)) == NULL) {
@@ -1509,13 +1507,12 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					goto cleanup;
 				}
 
-				zend_string *string_attr = zval_get_string(attr);
+				convert_to_string(attr);
 				if (EG(exception)) {
 					ret = 0;
 					goto cleanup;
 				}
-				string_attrs[i] = string_attr;
-				ldap_attrs[i] = ZSTR_VAL(string_attr);
+				ldap_attrs[i] = Z_STRVAL_P(attr);
 			}
 			ldap_attrs[num_attribs] = NULL;
 		default:
@@ -1703,12 +1700,6 @@ cleanup:
 	}
 	if (ldap_base_dn) {
 		zend_string_release(ldap_base_dn);
-	}
-	if (string_attrs != NULL) {
-		for (i = 0; i < num_attribs; i++) {
-			zend_string_release(string_attrs[i]);
-		}
-		efree(string_attrs);
 	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
