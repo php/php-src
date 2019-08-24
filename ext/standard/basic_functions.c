@@ -1229,21 +1229,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ head.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
-	ZEND_ARG_INFO(0, response_code)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ http.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_build_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, formdata)
