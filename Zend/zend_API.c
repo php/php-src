@@ -2701,6 +2701,7 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {
 {
 	zend_class_entry *disabled_class;
 	zend_string *key;
+	zend_function *fn;
 
 	key = zend_string_alloc(class_name_length, 0);
 	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
@@ -2709,8 +2710,16 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {
 	if (!disabled_class) {
 		return FAILURE;
 	}
+
 	INIT_CLASS_ENTRY_INIT_METHODS((*disabled_class), disabled_class_new);
 	disabled_class->create_object = display_disabled_class;
+
+	ZEND_HASH_FOREACH_PTR(&disabled_class->function_table, fn) {
+		if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
+			fn->common.scope == disabled_class) {
+			zend_free_internal_arg_info(&fn->internal_function);
+		}
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&disabled_class->function_table);
 	return SUCCESS;
 }

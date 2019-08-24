@@ -907,7 +907,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string|false wordwrap(string str [, int width [, string break [, bool cut]]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
@@ -933,13 +933,13 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (breakchar_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Break string cannot be empty");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Break string cannot be empty");
+		return;
 	}
 
 	if (linelength == 0 && docut) {
-		php_error_docref(NULL, E_WARNING, "Can't force cut when width is zero");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Can't force cut when width is zero");
+		return;
 	}
 
 	/* Special case for a single-character break as it needs no
@@ -1619,7 +1619,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string|null dirname(string path[, int levels])
+/* {{{ proto string dirname(string path[, int levels])
    Returns the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 #endif
 	} else if (levels < 1) {
-		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
+		zend_throw_error(NULL, "Invalid argument, levels must be >= 1");
 		zend_string_efree(ret);
 		return;
 	} else {
@@ -1989,14 +1989,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
@@ -2042,7 +2042,7 @@ PHP_FUNCTION(strripos)
 		char lowered;
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
@@ -2050,7 +2050,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = ZSTR_VAL(haystack);
 			if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 				RETURN_FALSE;
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
@@ -2070,7 +2070,7 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
@@ -2078,7 +2078,7 @@ PHP_FUNCTION(strripos)
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);
@@ -2194,8 +2194,8 @@ PHP_FUNCTION(chunk_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
-		php_error_docref(NULL, E_WARNING, "Chunk length should be greater than zero");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Chunk length should be greater than zero");
+		return;
 	}
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
@@ -3292,7 +3292,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string|false strtr(string str, string from[, string to])
+/* {{{ proto string strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -3310,8 +3310,8 @@ PHP_FUNCTION(strtr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac == 2 && Z_TYPE_P(from) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "The second argument is not an array");
-		RETURN_FALSE;
+		zend_type_error("The second argument is not an array");
+		return;
 	}
 
 	/* shortcut for empty string */
@@ -5363,7 +5363,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		php_error_docref(NULL, E_WARNING, "Second argument has to be greater than or equal to 0");
+		zend_throw_error(NULL, "Second argument has to be greater than or equal to 0");
 		return;
 	}
 
@@ -5916,13 +5916,13 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto mixed str_word_count(string str, [int format [, string charlist]])
+
+/* {{{ proto array|int str_word_count(string str, [int format [, string charlist]])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
    	will return an associated array where the position of the word is the key
    	and the word itself is the value.
-
    	For the purpose of this function, 'word' is defined as a locale dependent
    	string containing alphabetic characters, which also may contain, but not start
    	with "'" and "-" characters.
@@ -5957,8 +5957,8 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid format value " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid format value " ZEND_LONG_FMT, type);
+			return;
 	}
 
 	if (char_list) {
@@ -6058,7 +6058,7 @@ PHP_FUNCTION(money_format)
 /* }}} */
 #endif
 
-/* {{{ proto array|false str_split(string str [, int split_length])
+/* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)
 {
@@ -6074,8 +6074,8 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "The length of each segment must be greater than zero");
+		return;
 	}
 
 
