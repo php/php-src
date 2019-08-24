@@ -169,7 +169,11 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(string $name = null): void { }
 
-function setrawcookie(strin $name, string $value = '', int $expire = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool { }
+function setrawcookie(string $name, string $value = '', int $expire = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool { }
+
+function setcookie(string $name,string $value = '', array $options = []): bool {}
+
+function http_response_code(int $response_code = null): int {}
 
 function headers_sent(string &$file = null, int &$line = null) { }
 
