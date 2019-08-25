@@ -188,3 +188,62 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, phones, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, replace, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, http_response_code, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_header_remove, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_setrawcookie, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_INFO(0, expires_or_options)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, secure, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, httponly, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_setcookie arginfo_setrawcookie
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, response_code, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_headers_sent, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_INFO(1, file)
+	ZEND_ARG_INFO(1, line)
+ZEND_END_ARG_INFO()
+
+#define arginfo_headers_list arginfo_ob_list_handlers
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_htmlspecialchars, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, quote_style, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, double_encode, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars_decode, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, quote_style, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_html_entity_decode, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, quote_style, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_htmlentities arginfo_htmlspecialchars
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_html_translation_table, 0, 0, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, table, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, quote_style, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
+ZEND_END_ARG_INFO()

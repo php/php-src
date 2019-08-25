@@ -163,3 +163,38 @@ function inet_pton (string $ip_address) {}
 
 /** @return string|false */
 function metaphone(string $text, int $phones = 0) {}
+
+/* {{{ head.c */
+function header(string $string, bool $replace = true, int $http_response_code = null): void { }
+
+function header_remove(string $name = UNKNOWN): void { }
+
+/** @param int|array $expires_or_options */
+function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+
+
+/** @param int|array $expires_or_options */
+function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+
+/** @return int|bool */
+function http_response_code(int $response_code = 0) {}
+
+function headers_sent(&$file = null, &$line = null): bool {}
+
+function headers_list(): array { }
+
+/* {{{ html.c */
+
+function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+
+/** @return string|false */
+function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT) {}
+
+/** @return string|false */
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN) {}
+
+function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
+
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_style = ENT_COMPAT, string $encoding = "UTF-8"): array {}
+
+/* }}} */
