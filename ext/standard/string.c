@@ -2131,26 +2131,28 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 {
 	char *q;
 	const char *p;
-	size_t chunks; /* complete chunks! */
+	size_t chunks;
 	size_t restlen;
 	size_t out_len;
 	zend_string *dest;
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
-
-	if (chunks > INT_MAX - 1) {
-		return NULL;
+	if (restlen) {
+		/* We want chunks to be rounded up rather than rounded down.
+		 * Increment can't overflow because chunks <= SIZE_MAX/2 at this point. */
+		chunks++;
 	}
-	out_len = chunks + 1;
+
+	out_len = chunks;
 	if (endlen !=0 && out_len > INT_MAX/endlen) {
 		return NULL;
 	}
 	out_len *= endlen;
-	if (out_len > INT_MAX - srclen - 1) {
+	if (out_len > INT_MAX - srclen) {
 		return NULL;
 	}
-	out_len += srclen + 1;
+	out_len += srclen;
 
 	dest = zend_string_alloc(out_len * sizeof(char), 0);
 
@@ -2170,7 +2172,7 @@ static zend_string *php_chunk_split(const char *src, size_t srclen, const char *
 	}
 
 	*q = '\0';
-	ZSTR_LEN(dest) = q - ZSTR_VAL(dest);
+	ZEND_ASSERT(q - ZSTR_VAL(dest) == ZSTR_LEN(dest));
 
 	return dest;
 }
