@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78412 (Generator incorrectly reports non-releasable $this as GC
     child). (Nikita)
 
+- MBString:
+  . Fixed bug #78380 (Oniguruma 6.9.3 fixes CVEs). (CVE-2019-13224) (Stas)
+
 15 Aug 2019, PHP 7.3.9RC1
 
 - Core:
