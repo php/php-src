@@ -173,7 +173,8 @@ function header_remove(string $name = UNKNOWN): void { }
 function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 
-function setcookie(string $name,string $value = '', array $options = []): bool {}
+/** @param int|array $expires_or_options */
+function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 /** @return int|bool */
 function http_response_code(int $response_code = 0) {}
