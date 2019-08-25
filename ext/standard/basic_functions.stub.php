@@ -389,3 +389,11 @@ function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $en
 function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_style = ENT_COMPAT, string $encoding = "UTF-8"): array {}
 
 /* }}} */
+
+/* assert.c */
+
+/** @param mixed $assertion */
+function assert($assertion, $description = null): bool {}
+
+/** @return int|string|bool|null */
+function assert_options(int $what, $value = UNKNOWN) {}

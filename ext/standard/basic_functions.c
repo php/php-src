@@ -348,17 +348,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
-/* {{{ assert.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert, 0, 0, 1)
-	ZEND_ARG_INFO(0, assertion)
-	ZEND_ARG_INFO(0, description)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
-	ZEND_ARG_INFO(0, what)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ browscap.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
 	ZEND_ARG_INFO(0, browser_name)
