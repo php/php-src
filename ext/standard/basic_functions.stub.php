@@ -190,7 +190,8 @@ function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string
 /** @return string|false */
 function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT) {}
 
-function html_entity_decode(string $string, int $quote_style = null, string $charset = null): string { }
+/** @return string|false */
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN) {}
 
 function htmlentities(string $string, int $quote_style = null, string $charset = null, bool $double_encode = true): string { }
 
