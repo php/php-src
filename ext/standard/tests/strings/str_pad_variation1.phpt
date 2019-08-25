@@ -1,5 +1,11 @@
 --TEST--
 Test str_pad() function : usage variations - large values for '$pad_length' argument
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") {
+    die("skip Zend MM disabled");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )
