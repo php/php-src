@@ -195,6 +195,6 @@ function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, strin
 
 function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
-function get_html_translation_table(int $table = null, int $quote_style = null, string $encoding = "UTF-8"): array { }
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_style = ENT_COMPAT, string $encoding = "UTF-8"): array {}
 
 /* }}} */
