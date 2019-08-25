@@ -167,7 +167,7 @@ function metaphone(string $text, int $phones = 0) {}
 /* {{{ head.c */
 function header(string $string, bool $replace = true, int $http_response_code = null): void { }
 
-function header_remove(string $name = null): void { }
+function header_remove(string $name = UNKNOWN): void { }
 
 function setrawcookie(string $name, string $value = '', int $expire = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false): bool { }
 
