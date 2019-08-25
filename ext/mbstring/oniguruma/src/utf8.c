@@ -57,7 +57,7 @@ static const int EncLen_UTF8[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
+  4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 static int
@@ -280,7 +280,7 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag,
 OnigEncodingType OnigEncodingUTF8 = {
   mbc_enc_len,
   "UTF-8",     /* name */
-  6,           /* max enc length */
+  4,           /* max enc length */
   1,           /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   mbc_to_code,
@@ -297,6 +297,6 @@ OnigEncodingType OnigEncodingUTF8 = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_UNICODE,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_UNICODE|ENC_FLAG_SKIP_OFFSET_1_OR_0,
   0, 0
 };

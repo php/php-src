@@ -182,7 +182,7 @@ Oniguruma API  Version 6.8.0  2018/03/13
     ci->target_enc:      target string character encoding.
     ci->syntax:          address of pattern syntax definition.
     ci->option:          compile time option.
-    ci->case_fold_flag:  character matching case fold bit flag for 
+    ci->case_fold_flag:  character matching case fold bit flag for
                          ONIG_OPTION_IGNORECASE mode.
 
        ONIGENC_CASE_FOLD_MIN:           minimum

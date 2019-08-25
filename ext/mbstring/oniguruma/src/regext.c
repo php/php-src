@@ -171,9 +171,7 @@ onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
   if (IS_NOT_NULL(einfo)) einfo->par = (UChar* )NULL;
 
   if (ci->pattern_enc != ci->target_enc) {
-    r = conv_encoding(ci->pattern_enc, ci->target_enc, pattern, pattern_end,
-                      &cpat, &cpat_end);
-    if (r != 0) return r;
+    return ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION;
   }
   else {
     cpat     = (UChar* )pattern;

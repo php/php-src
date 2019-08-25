@@ -192,6 +192,6 @@ OnigEncodingType OnigEncodingUTF32_BE = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  ENC_FLAG_UNICODE,
+  ENC_FLAG_UNICODE|ENC_FLAG_SKIP_OFFSET_4,
   0, 0
 };

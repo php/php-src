@@ -657,8 +657,7 @@ onigenc_egcb_is_break_position(OnigEncoding enc, UChar* p, UChar* prev,
 
 #ifdef USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER
   if (! ONIGENC_IS_UNICODE_ENCODING(enc)) {
-    if (from == 0x000d && to == 0x000a) return 0;
-    else return 1;
+    return from != 0x000d || to != 0x000a;
   }
 
   btype = unicode_egcb_is_break_2code(from, to);
@@ -701,8 +700,7 @@ onigenc_egcb_is_break_position(OnigEncoding enc, UChar* p, UChar* prev,
   return 1;
 
 #else
-  if (from == 0x000d && to == 0x000a) return 0;
-  else return 1;
+  return from != 0x000d || to != 0x000a;
 #endif /* USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER */
 }
 
@@ -729,6 +727,7 @@ onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges)
   int len;
   int c;
   char* s;
+  UChar* uname;
 
   if (UserDefinedPropertyNum >= USER_DEFINED_PROPERTY_MAX_NUM)
     return ONIGERR_TOO_MANY_USER_DEFINED_OBJECTS;
@@ -741,10 +740,11 @@ onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges)
   if (s == 0)
     return ONIGERR_MEMORY;
 
+  uname = (UChar* )name;
   n = 0;
   for (i = 0; i < len; i++) {
-    c = name[i];
-    if (c <= 0 || c >= 0x80) {
+    c = uname[i];
+    if (c < 0x20 || c >= 0x80) {
       xfree(s);
       return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
     }
@@ -758,6 +758,10 @@ onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges)
 
   if (UserDefinedPropertyTable == 0) {
     UserDefinedPropertyTable = onig_st_init_strend_table_with_size(10);
+    if (IS_NULL(UserDefinedPropertyTable)) {
+      xfree(s);
+      return ONIGERR_MEMORY;
+    }
   }
 
   e = UserDefinedPropertyRanges + UserDefinedPropertyNum;

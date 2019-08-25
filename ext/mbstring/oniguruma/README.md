@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/kkos/oniguruma.svg?branch=master)](https://travis-ci.org/kkos/oniguruma)
+[![Code Quality: Cpp](https://img.shields.io/lgtm/grade/cpp/g/kkos/oniguruma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kkos/oniguruma/context:cpp)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/kkos/oniguruma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kkos/oniguruma/alerts)
 
 Oniguruma
 =========
@@ -22,6 +24,12 @@ Supported character encodings:
 
 * GB18030: contributed by KUBO Takehiro
 * CP1251:  contributed by Byte
+
+
+New feature of version 6.9.1
+--------------------------
+
+* Speed improvement (* especially UTF-8)
 
 
 New feature of version 6.9.0
@@ -193,7 +201,7 @@ Usage
   See doc/API for Oniguruma API.
 
   If you want to disable UChar type (== unsigned char) definition
-  in oniguruma.h, define ONIG_ESCAPE_UCHAR_COLLISION and then 
+  in oniguruma.h, define ONIG_ESCAPE_UCHAR_COLLISION and then
   include oniguruma.h.
 
   If you want to disable regex_t type definition in oniguruma.h,
@@ -294,4 +302,4 @@ Source Files
 |utf32_le.c         |UTF-32LE encoding                                       |
 |unicode.c          |common codes of Unicode encoding                        |
 |unicode_fold_data.c|Unicode folding data                                    |
-|windows/testc.c    |Test program for Windowns (VC++)                        |
+|windows/testc.c    |Test program for Windows (VC++)                        |

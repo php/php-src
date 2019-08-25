@@ -2988,5 +2988,3 @@ onigenc_unicode_fold1_key(OnigCodePoint codes[])
     }
   return -1;
 }
-
-

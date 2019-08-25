@@ -113,10 +113,7 @@ static int
 code_to_mbclen(OnigCodePoint code)
 {
   if (code < 256) {
-    if (EncLen_SJIS[(int )code] == 1)
-      return 1;
-    else
-      return 0;
+    return EncLen_SJIS[(int )code] == 1;
   }
   else if (code <= 0xffff) {
     return 2;
@@ -188,7 +185,7 @@ is_mbc_ambiguous(OnigCaseFoldType flag,
 		 const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_SJIS, flag, pp, end);
-                                      
+
 }
 #endif
 
@@ -223,7 +220,7 @@ left_adjust_char_head(const UChar* start, const UChar* s)
 	p++;
 	break;
       }
-    } 
+    }
   }
   len = enclen(ONIG_ENCODING_SJIS, p);
   if (p + len > s) return (UChar* )p;
@@ -338,6 +335,6 @@ OnigEncodingType OnigEncodingSJIS = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  ENC_FLAG_ASCII_COMPATIBLE,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_SKIP_OFFSET_1_OR_0,
   0, 0
 };

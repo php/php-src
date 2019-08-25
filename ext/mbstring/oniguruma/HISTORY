@@ -1,5 +1,25 @@
 History
 
+2018/12/11: Version 6.9.1
+
+2018/10/08: use ENC_FLAG_SKIP_OFFSET_XXX values
+2018/10/06: UTF-8 supports code range from 0x0000 to 0x10FFFF
+            (https://tools.ietf.org/html/rfc3629)
+2018/10/05: speed improvement
+2018/10/03: use OPTIMIZE_STR_CASE_FOLD_FAST
+2018/10/01: convert CRLF line endings to LF
+2018/09/27: set SIZEOF_SIZE_T for windows platforms
+2018/09/22: use Sunday quick search algorithm instead of Boyer-Moor-Horspool
+2018/09/20: introduce threaded code into match_at()
+2018/09/17: remove HAVE_STRINGS_H
+2018/09/16: remove HAVE_PROTOTYPES and HAVE_STDARG_PROTOTYPES
+2018/09/14: add a command line option '-gc' for make_unicode_property_data.py.
+2018/09/08: remove AC_HEADER_STDC
+2018/09/06: remove AC_OUTPUT macro call
+2018/09/06: remove AC_FUNC_MEMCMP, AC_HEADER_TIME, AC_C_CONST, HAVE__SETJMP and
+            HAVE_STRING_H
+2018/09/05: remove HAVE_LIMITS_H, HAVE_FLOAT_H and HAVE_STDLIB_H
+
 2018/09/03: Version 6.9.0
 
 2018/08/24: add Unicode Emoji properties
@@ -394,12 +414,12 @@ History
 2006/11/07: [dist] remove test.rb, testconv.rb and testconvu.rb.
 2006/11/07: [bug]  get_case_fold_codes_by_str() should handle 'Ss' and 'sS'
                    combination for ess-tsett.
-2006/11/07: [impl] apply_all_case_fold() doesn't need to return all 
+2006/11/07: [impl] apply_all_case_fold() doesn't need to return all
                    case character combination for multi-character folding.
                    (ONIGENC_CASE_FOLD_MULTI_CHAR)
 2006/11/07: [bug]  (thanks Byte)
                    add { 0xa3, 0xb3 } to CaseFoldMap[] for KOI8-R.
-2006/11/06: [spec] change ONIG_OPTION_FIND_LONGEST to search all of 
+2006/11/06: [spec] change ONIG_OPTION_FIND_LONGEST to search all of
                    the string range.
                    add USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE.
 2006/11/02: [impl] re-implement expand_case_fold_string() for
@@ -667,7 +687,7 @@ History
 
 2006/05/11: [test] success in ruby 1.9.0 (2006-03-01) [i686-linux].
 2006/05/11: [bug]  (thanks Yuji Kaneda)
-                   dead-lock in onig_end().              
+                   dead-lock in onig_end().
 2006/05/11: [dist] update index.html.
 
 2006/05/08: Version 4.0.3
@@ -719,7 +739,7 @@ History
                    use GNU libtool/automake.
                    change configure.in and add Makefile.am, sample/Makefile.am.
                    add AUTHORS file.
-2006/01/24: [dist] test programs return exit code -1 when test fails. 
+2006/01/24: [dist] test programs return exit code -1 when test fails.
 2006/01/24: [bug] (thanks KIMURA Koichi)
                    invalid syntax definition in ONIG_SYNTAX_GREP.
                    ONIG_SYN_OP_BRACE_INTERVAL
@@ -737,7 +757,7 @@ History
 2005/11/24: [test] success in ruby 1.9.0 (2005-08-09) [i686-linux].
 2005/11/21: [test] success in ruby 1.9.0 (2005-11-20) [i386-cygwin].
 2005/11/21: [bug]  (thanks Allan Odgaard)
-                   utf-8 character comments in extended mode leads 
+                   utf-8 character comments in extended mode leads
                    invalid result.
                    ex. /(?x)(?<= # <any-utf-8 multibyte char>o\n~) /
                    fix onigenc_unicode_is_code_ctype() and
@@ -819,7 +839,7 @@ History
                    add new character encoding ONIG_ENCODING_GB18030.
 2005/06/30: [bug]  invalid ctype check for multibyte encodings.
                    ("graph", "print")
-                   fix onigenc_mb2/4_is_code_ctype(), 
+                   fix onigenc_mb2/4_is_code_ctype(),
                    eucjp_is_code_ctype() and sjis_is_code_ctype().
 2005/06/30: [bug]  invalid conversion from code point to mbc in
                    onigenc_mb4_code_to_mbc().
@@ -894,7 +914,7 @@ History
                    remove oniggnu.h from make 19.
 2005/03/01: [bug]  (thanks matz) [ruby-dev:25778]
                    uninitialized member (OptEnv.backrefed_status)
-                   was used. 
+                   was used.
 
 2005/02/19: Version 3.7.0
 
@@ -945,7 +965,7 @@ History
 2005/01/19: [bug]  (thanks Isao Sonobe)
                    callback function argument name_end of onig_foreach_name()
                    was wrong.
-                   name key of name table should be null terminated for 
+                   name key of name table should be null terminated for
                    character encoding length.
                    add strdup_with_null(), rename onig_strdup() to k_strdup().
                    use e->name_len in i_names().
@@ -1217,7 +1237,7 @@ History
                    RelAddrType, AbsAddrType and LengthType change
                    from short int to int type for the very long string match.
 2004/06/14: [bug]  (thanks Greg A. Woods)
-                   fix nmatch argument of regexec() is smaller than 
+                   fix nmatch argument of regexec() is smaller than
                    reg->num_mem + 1 case. (POSIX API)
 2004/06/14: [spec] (thanks Greg A. Woods)
                    set pmatch to NULL if nmatch is 0 in regexec(). (POSIX API)
@@ -1397,7 +1417,7 @@ History
 2004/02/23: [new]  support ISO-8859-10. (ONIG_ENCODING_ISO_8859_10)
 2004/02/20: [bug]  fix iso_8859_4_mbc_is_case_ambig().
 2004/02/20: [new]  support ISO-8859-9. (ONIG_ENCODING_ISO_8859_9)
-2004/02/19: [bug]  correct ctype tables for ISO-8859-3, ISO-8859-4, 
+2004/02/19: [bug]  correct ctype tables for ISO-8859-3, ISO-8859-4,
                    ISO-8859-6, ISO-8859-7, ISO-8859-8, KOI8_R.
 2004/02/18: [bug]  wrong replaced name OnigSyntaxGnuOnigex.
 2004/02/17: [spec] check capture status for empty infinite loop.
@@ -1570,7 +1590,7 @@ History
 2003/11/11: [spec] add syntax op. REG_SYN_OP_VARIABLE_META_CHARS.
 2003/11/11: [spec] rename REG_SYN_OP_ESC_CAPITAL_Q_QUOTE to
                    REG_SYN_OP2_ESC_CAPITAL_Q_QUOTE,
-                   REG_SYN_OP_QMARK_GROUP_EFFECT to 
+                   REG_SYN_OP_QMARK_GROUP_EFFECT to
                    REG_SYN_OP2_QMARK_GROUP_EFFECT.
 2003/11/06: [impl] define THREAD_PASS as rb_thread_schedule() in Ruby mode.
 2003/11/05: [spec] add syntax behavior REG_SYN_WARN_REDUNDANT_NESTED_REPEAT.
@@ -1587,7 +1607,7 @@ History
 2003/10/03: [bug]  (thanks nobu)  [ruby-dev:21472]
                    sub-anchor of optimization map info was wrong
                    in concat_left_node_opt_info().
-                   ex. /^(x?y)/ = "xy" fail. 
+                   ex. /^(x?y)/ = "xy" fail.
 
 2003/09/17: Version 1.9.4
 
@@ -1650,7 +1670,7 @@ History
 2003/09/01: [dist] update doc/RE and doc/RE.ja.
 2003/08/26: [bug]  (thanks Guy Decoux)
                    should not double free node at the case TK_CC_CC_OPEN
-                   in parse_char_class().  
+                   in parse_char_class().
 
 2003/08/19: Version 1.9.3
 
@@ -1662,8 +1682,8 @@ History
                    REG_SYN_OP2_ATMARK_CAPTURE_HISTORY.
 2003/08/18: [spec] (thanks nobu)
                    don't use IMPORT in oniguruma.h and onigposix.h.
-2003/08/18: [impl] (thanks nobu) change error output to stdout in testconv.rb. 
-2003/08/18: [inst] (thanks nobu) lacked $(srcdir) in Makefile.in.  
+2003/08/18: [impl] (thanks nobu) change error output to stdout in testconv.rb.
+2003/08/18: [inst] (thanks nobu) lacked $(srcdir) in Makefile.in.
 2003/08/18: [bug]  REG_MBLEN_TABLE[SJIS][0xFD-0xFF] should be 1.
 2003/08/18: [bug]  (thanks nobu) mbctab_sjis[0x80] should be 0.
 2003/08/18: [bug]  (thanks nobu)
@@ -1692,7 +1712,7 @@ History
 2003/07/29: [new]  add regex_get_encoding(), regex_get_options() and
                    regex_get_syntax().
 2003/07/25: [spec] (thanks akr)
-                   change group(...) to shy-group(?:...) if named group is 
+                   change group(...) to shy-group(?:...) if named group is
                    used in the pattern.
                    add REG_SYN_CAPTURE_ONLY_NAMED_GROUP.
 2003/07/24: [spec] rename REG_OPTION_CAPTURE_ONLY_NAMED_GROUP to
@@ -1720,7 +1740,7 @@ History
                    set option status to effect memory in optimize_node_left().
 2003/07/07: [impl] add opcode OP_ANYCHAR_ML, OP_ANYCHAR_ML_STAR and
                    OP_ANYCHAR_ML_START_PEEK_NEXT.
-2003/07/07: [bug]  (thanks nobu) REG_MBLEN_TABLE[SJIS][0x80] should be 1. 
+2003/07/07: [bug]  (thanks nobu) REG_MBLEN_TABLE[SJIS][0x80] should be 1.
 2003/07/07: [spec] rename REG_SYN_OP_QUOTE to REG_SYN_OP_ESC_Q_QUOTE.
 
 2003/07/04: Version 1.9.1
@@ -1783,7 +1803,7 @@ History
 2003/06/12: [spec] add syntax behavior REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPEED.
 2003/06/12: [spec] invalid POSIX bracket should be error.   ex. [[:upper :]]
 2003/06/11: [new]  char-class in char-class (as Java(TM)).
-2003/06/11: [spec] change AND operator in char-class from &&[..] to &&. 
+2003/06/11: [spec] change AND operator in char-class from &&[..] to &&.
 2003/06/04: [spec] {n,m}+ should not be possessive operator.
                    ex. a{3}+ should be (?:a{3})+
 2003/06/03: [bug]  should compare strings with min-length in is_not_included().
@@ -1947,7 +1967,7 @@ History
 2003/02/26: [impl] add -win option to testconv.rb.
 2003/02/25: [spec] allow to assign same name to different group.
                    add OP_BACKREF_MULTI.
-2003/02/24: [impl] reduce redundant repeat of empty target. 
+2003/02/24: [impl] reduce redundant repeat of empty target.
 	           ex. /()*/ ==> /()?/, /()+/ ==> /()/, /(?:)+/ ==> //
 2003/02/24: [impl] change condition in regex_is_allow_reverse_match().
 2003/02/24: [impl] convert i(/../, ...) functions in testconv.rb.
@@ -2016,7 +2036,7 @@ History
 2003/02/04: [bug]  typo miss in regex_region_copy().
 2003/02/04: [impl] change THREAD_PASS macro. (regint.h)
 2003/02/04: [dist] add API document file doc/API.
-2003/02/04: [tune] if sub_anchor has ANCHOR_BEGIN_LINE then 
+2003/02/04: [tune] if sub_anchor has ANCHOR_BEGIN_LINE then
                    set REG_OPTIMIZE_EXACT_BM in set_optimize_exact_info().
 2003/02/04: [spec] reimplement regex_clone() and it is obsoleted.
 2003/02/04: [bug]  add REGERR_OVER_THREAD_PASS_LIMIT_COUNT
@@ -2136,7 +2156,7 @@ History
 2002/04/01: [dist] add COPYING.
 2002/03/30: [spec] warn redundant nested repeat operator
                    in Ruby verbose mode.  ex. (?:a*)?
-2002/03/30: [spec] nested repeat operator error check should be 
+2002/03/30: [spec] nested repeat operator error check should be
                    same with GNU regex.             (thanks Guy Decoux)
 2002/03/30: [new]  add \x{hexadecimal-wide-char}.   (thanks matz)
 2002/03/27: [bug]  MBCTYPE_XXX symbol values should be same with GNU regex.
@@ -2199,7 +2219,7 @@ History
                    ex. /(?:abc){10}/
 2002/03/06: [new]  add a symbol REG_TRANSTABLE_USE_DEFAULT in regex.h.
 2002/03/06: [impl] rename RegDefaultCharCode to RegDefaultCharEncoding.
-2002/03/06: [bug]  if pattern has NULL(\000) char, infinite loop happens 
+2002/03/06: [bug]  if pattern has NULL(\000) char, infinite loop happens
                    in ScanMakeNode(). (beware of strchr(). thanks Nobu)
 2002/03/06: [bug]  range argument of ForwardSearchRange() is wrong.
                    ex. /\A.a/, /\G.a/ mismatched with "aa". (thanks Nobu)

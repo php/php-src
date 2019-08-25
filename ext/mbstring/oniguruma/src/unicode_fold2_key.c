@@ -225,5 +225,3 @@ onigenc_unicode_fold2_key(OnigCodePoint codes[])
     }
   return -1;
 }
-
-

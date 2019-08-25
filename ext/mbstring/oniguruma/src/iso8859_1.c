@@ -272,6 +272,6 @@ OnigEncodingType OnigEncodingISO_8859_1 = {
   NULL, /* init */
   NULL, /* is_initialized */
   onigenc_always_true_is_valid_mbc_string,
-  ENC_FLAG_ASCII_COMPATIBLE,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_SKIP_OFFSET_1,
   0, 0
 };

@@ -151,7 +151,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
 #if 1
   if (enclen(ONIG_ENCODING_EUC_JP, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
-#endif  
+#endif
   return (int )(p - buf);
 }
 
@@ -307,6 +307,6 @@ OnigEncodingType OnigEncodingEUC_JP = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  ENC_FLAG_ASCII_COMPATIBLE,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_SKIP_OFFSET_1_OR_0,
   0, 0
 };

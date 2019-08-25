@@ -37,11 +37,7 @@
 #include "config.h"
 #include "onigposix.h"
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #if defined(__GNUC__)
 #  define ARG_UNUSED  __attribute__ ((unused))

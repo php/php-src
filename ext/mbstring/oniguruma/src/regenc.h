@@ -121,8 +121,20 @@ struct PropertyNameCtype {
 #define ONIG_ENCODING_INIT_DEFAULT           ONIG_ENCODING_ASCII
 
 
+#define ENC_SKIP_OFFSET_1_OR_0             7
+
 #define ENC_FLAG_ASCII_COMPATIBLE      (1<<0)
 #define ENC_FLAG_UNICODE               (1<<1)
+#define ENC_FLAG_SKIP_OFFSET_MASK      (7<<2)
+#define ENC_FLAG_SKIP_OFFSET_0             0
+#define ENC_FLAG_SKIP_OFFSET_1         (1<<2)
+#define ENC_FLAG_SKIP_OFFSET_2         (2<<2)
+#define ENC_FLAG_SKIP_OFFSET_3         (3<<2)
+#define ENC_FLAG_SKIP_OFFSET_4         (4<<2)
+#define ENC_FLAG_SKIP_OFFSET_1_OR_0    (ENC_SKIP_OFFSET_1_OR_0<<2)
+
+#define ENC_GET_SKIP_OFFSET(enc) \
+  (((enc)->flag & ENC_FLAG_SKIP_OFFSET_MASK)>>2)
 
 
 /* for encoding system implementation (internal) */
@@ -197,7 +209,7 @@ extern int onigenc_egcb_is_break_position P_((OnigEncoding enc, UChar* p, UChar*
   else if ((buk)->fold_len == 3)\
     addr = OnigUnicodeFolds3 + (buk)->index;\
   else\
-    addr = 0;\
+    return ONIGERR_INVALID_CODE_POINT_VALUE;\
 } while (0)
 
 extern OnigCodePoint OnigUnicodeFolds1[];
@@ -252,7 +264,7 @@ extern const unsigned short OnigEncAsciiCtypeTable[];
 #define ONIGENC_IS_ASCII_CODE_CASE_AMBIG(code) \
  (ONIGENC_IS_ASCII_CODE_CTYPE(code, ONIGENC_CTYPE_UPPER) ||\
   ONIGENC_IS_ASCII_CODE_CTYPE(code, ONIGENC_CTYPE_LOWER))
-   
+
 #define ONIGENC_IS_UNICODE_ENCODING(enc) \
   (((enc)->flag & ENC_FLAG_UNICODE) != 0)
 

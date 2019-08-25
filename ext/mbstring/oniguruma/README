@@ -94,7 +94,7 @@ Usage
   See doc/API for Oniguruma API.
 
   If you want to disable UChar type (== unsigned char) definition
-  in oniguruma.h, define ONIG_ESCAPE_UCHAR_COLLISION and then 
+  in oniguruma.h, define ONIG_ESCAPE_UCHAR_COLLISION and then
   include oniguruma.h.
 
   If you want to disable regex_t type definition in oniguruma.h,

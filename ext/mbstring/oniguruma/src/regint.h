@@ -62,7 +62,6 @@
 #define USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT    /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
-
 #define USE_RETRY_LIMIT_IN_MATCH
 
 /* internal config */
@@ -70,27 +69,13 @@
 #define USE_QUANT_PEEK_NEXT
 #define USE_ST_LIBRARY
 
+#define USE_WORD_BEGIN_END        /* "\<", "\>" */
+#define USE_CAPTURE_HISTORY
+#define USE_VARIABLE_META_CHARS
+#define USE_POSIX_API_REGION_OPTION
+#define USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
+
 #include "regenc.h"
-
-#ifdef __cplusplus
-# ifndef  HAVE_STDARG_PROTOTYPES
-#  define HAVE_STDARG_PROTOTYPES 1
-# endif
-#endif
-
-/* escape Mac OS X/Xcode 2.4/gcc 4.0.1 problem */
-#if defined(__APPLE__) && defined(__GNUC__) && __GNUC__ >= 4
-# ifndef  HAVE_STDARG_PROTOTYPES
-#  define HAVE_STDARG_PROTOTYPES 1
-# endif
-#endif
-
-#ifdef HAVE_STDARG_H
-# ifndef  HAVE_STDARG_PROTOTYPES
-#  define HAVE_STDARG_PROTOTYPES 1
-# endif
-#endif
-
 
 #define INIT_MATCH_STACK_SIZE                     160
 #define DEFAULT_MATCH_STACK_LIMIT_SIZE              0 /* unlimited */
@@ -102,12 +87,6 @@
 #ifdef ONIG_ESCAPE_UCHAR_COLLISION
 #undef ONIG_ESCAPE_UCHAR_COLLISION
 #endif
-
-#define USE_WORD_BEGIN_END        /* "\<", "\>" */
-#define USE_CAPTURE_HISTORY
-#define USE_VARIABLE_META_CHARS
-#define USE_POSIX_API_REGION_OPTION
-#define USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
 
 #define xmalloc     malloc
 #define xrealloc    realloc
@@ -152,14 +131,8 @@
 
 
 #include <stddef.h>
-
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -169,11 +142,7 @@
 #include <alloca.h>
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
+#include <string.h>
 
 #include <ctype.h>
 #ifdef HAVE_SYS_TYPES_H
@@ -217,6 +186,7 @@ typedef unsigned int  uintptr_t;
 #define CHECK_NULL_RETURN_MEMERR(p)   if (IS_NULL(p)) return ONIGERR_MEMORY
 #define NULL_UCHARP                   ((UChar* )0)
 
+#define CHAR_MAP_SIZE       256
 #define INFINITE_LEN        ONIG_INFINITE_DISTANCE
 
 #ifdef PLATFORM_UNALIGNED_WORD_ACCESS
@@ -292,9 +262,6 @@ typedef struct {
 #endif
 } RegexExt;
 
-#define REG_EXTP(reg)      ((RegexExt* )((reg)->chain))
-#define REG_EXTPL(reg)     ((reg)->chain)
-
 struct re_pattern_buffer {
   /* common members of BBuf(bytes-buffer) */
   unsigned char* p;         /* compiled pattern */
@@ -304,7 +271,6 @@ struct re_pattern_buffer {
   int num_mem;                   /* used memory(...) num counted from 1 */
   int num_repeat;                /* OP_REPEAT/OP_REPEAT_NG id-counter */
   int num_null_check;            /* OP_EMPTY_CHECK_START/END id counter */
-  int num_comb_exp_check;        /* no longer used (combination explosion check) */
   int num_call;                  /* number of subexp call */
   unsigned int capture_history;  /* (?@...) flag (1-31) */
   unsigned int bt_mem_start;     /* need backtrack flag */
@@ -323,19 +289,16 @@ struct re_pattern_buffer {
   int            optimize;          /* optimize flag */
   int            threshold_len;     /* search str-length for apply optimize */
   int            anchor;            /* BEGIN_BUF, BEGIN_POS, (SEMI_)END_BUF */
-  OnigLen   anchor_dmin;       /* (SEMI_)END_BUF anchor distance */
-  OnigLen   anchor_dmax;       /* (SEMI_)END_BUF anchor distance */
+  OnigLen        anchor_dmin;       /* (SEMI_)END_BUF anchor distance */
+  OnigLen        anchor_dmax;       /* (SEMI_)END_BUF anchor distance */
   int            sub_anchor;        /* start-anchor for exact or map */
   unsigned char *exact;
   unsigned char *exact_end;
-  unsigned char  map[ONIG_CHAR_TABLE_SIZE]; /* used as BM skip or char-map */
-  int           *int_map;                   /* BM skip for exact_len > 255 */
-  int           *int_map_backward;          /* BM skip for backward search */
-  OnigLen   dmin;                      /* min-distance of exact or map */
-  OnigLen   dmax;                      /* max-distance of exact or map */
-
-  /* regex_t link chain */
-  struct re_pattern_buffer* chain;  /* escape compile-conflict */
+  unsigned char  map[CHAR_MAP_SIZE]; /* used as BMH skip or char-map */
+  int            map_offset;
+  OnigLen        dmin;                      /* min-distance of exact or map */
+  OnigLen        dmax;                      /* max-distance of exact or map */
+  RegexExt*      extp;
 };
 
 
@@ -348,12 +311,13 @@ enum StackPopLevel {
 
 /* optimize flags */
 enum OptimizeType {
-  OPTIMIZE_NONE            = 0,
-  OPTIMIZE_EXACT           = 1,  /* Slow Search */
-  OPTIMIZE_EXACT_BM        = 2,  /* Boyer Moore Search */
-  OPTIMIZE_EXACT_BM_NO_REV = 3,  /* BM   (but not simple match) */
-  OPTIMIZE_EXACT_IC        = 4,  /* Slow Search (ignore case) */
-  OPTIMIZE_MAP             = 5   /* char map */
+  OPTIMIZE_NONE = 0,
+  OPTIMIZE_STR,                   /* Slow Search */
+  OPTIMIZE_STR_FAST,              /* Sunday quick search / BMH */
+  OPTIMIZE_STR_FAST_STEP_FORWARD, /* Sunday quick search / BMH */
+  OPTIMIZE_STR_CASE_FOLD_FAST,    /* Sunday quick search / BMH (ignore case) */
+  OPTIMIZE_STR_CASE_FOLD,         /* Slow Search (ignore case) */
+  OPTIMIZE_MAP                    /* char map */
 };
 
 /* bit status */
@@ -541,32 +505,32 @@ typedef struct _BBuf {
 
 
 /* has body */
-#define ANCHOR_PREC_READ        (1<<0)
-#define ANCHOR_PREC_READ_NOT    (1<<1)
-#define ANCHOR_LOOK_BEHIND      (1<<2)
-#define ANCHOR_LOOK_BEHIND_NOT  (1<<3)
+#define ANCR_PREC_READ        (1<<0)
+#define ANCR_PREC_READ_NOT    (1<<1)
+#define ANCR_LOOK_BEHIND      (1<<2)
+#define ANCR_LOOK_BEHIND_NOT  (1<<3)
 /* no body */
-#define ANCHOR_BEGIN_BUF        (1<<4)
-#define ANCHOR_BEGIN_LINE       (1<<5)
-#define ANCHOR_BEGIN_POSITION   (1<<6)
-#define ANCHOR_END_BUF          (1<<7)
-#define ANCHOR_SEMI_END_BUF     (1<<8)
-#define ANCHOR_END_LINE         (1<<9)
-#define ANCHOR_WORD_BOUNDARY    (1<<10)
-#define ANCHOR_NO_WORD_BOUNDARY (1<<11)
-#define ANCHOR_WORD_BEGIN       (1<<12)
-#define ANCHOR_WORD_END         (1<<13)
-#define ANCHOR_ANYCHAR_INF      (1<<14)
-#define ANCHOR_ANYCHAR_INF_ML   (1<<15)
-#define ANCHOR_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY    (1<<16)
-#define ANCHOR_NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY (1<<17)
+#define ANCR_BEGIN_BUF        (1<<4)
+#define ANCR_BEGIN_LINE       (1<<5)
+#define ANCR_BEGIN_POSITION   (1<<6)
+#define ANCR_END_BUF          (1<<7)
+#define ANCR_SEMI_END_BUF     (1<<8)
+#define ANCR_END_LINE         (1<<9)
+#define ANCR_WORD_BOUNDARY    (1<<10)
+#define ANCR_NO_WORD_BOUNDARY (1<<11)
+#define ANCR_WORD_BEGIN       (1<<12)
+#define ANCR_WORD_END         (1<<13)
+#define ANCR_ANYCHAR_INF      (1<<14)
+#define ANCR_ANYCHAR_INF_ML   (1<<15)
+#define ANCR_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY    (1<<16)
+#define ANCR_NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY (1<<17)
 
 
-#define ANCHOR_HAS_BODY(a)      ((a)->type < ANCHOR_BEGIN_BUF)
+#define ANCHOR_HAS_BODY(a)      ((a)->type < ANCR_BEGIN_BUF)
 
 #define IS_WORD_ANCHOR_TYPE(type) \
-  ((type) == ANCHOR_WORD_BOUNDARY || (type) == ANCHOR_NO_WORD_BOUNDARY || \
-   (type) == ANCHOR_WORD_BEGIN || (type) == ANCHOR_WORD_END)
+  ((type) == ANCR_WORD_BOUNDARY || (type) == ANCR_NO_WORD_BOUNDARY || \
+   (type) == ANCR_WORD_BEGIN || (type) == ANCR_WORD_END)
 
 /* operation code */
 enum OpCode {
@@ -851,6 +815,7 @@ extern void   onig_transfer P_((regex_t* to, regex_t* from));
 extern int    onig_is_code_in_cc_len P_((int enclen, OnigCodePoint code, void* /* CClassNode* */ cc));
 extern RegexExt* onig_get_regex_ext(regex_t* reg);
 extern int    onig_ext_set_pattern(regex_t* reg, const UChar* pattern, const UChar* pattern_end);
+extern int    onig_positive_int_multiply(int x, int y);
 
 #ifdef USE_CALLOUT
 

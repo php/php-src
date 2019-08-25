@@ -1513,4 +1513,3 @@ OnigCodePoint OnigUnicodeFolds3[] = {
  /* ----- LOCALE ----- */
 #define FOLDS3_END_INDEX   72
 };
-

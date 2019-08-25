@@ -3283,5 +3283,3 @@ onigenc_unicode_unfold_key(OnigCodePoint code)
     }
   return 0;
 }
-
-
