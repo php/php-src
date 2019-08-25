@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (cmb, Nikita)
   . Fixed bug #78441 (Parse error due to heredoc identifier followed by digit).
     (cmb)
+  . Fixed bug #78454 (Consecutive numeric separators cause OOM error).
+    (Theodore Brown)
 
 - SPL:
   . Fixed bug #78436 (Missing addref in SplPriorityQueue EXTR_BOTH mode).
