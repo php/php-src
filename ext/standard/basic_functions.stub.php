@@ -184,7 +184,7 @@ function headers_list(): array { }
 
 /* {{{ html.c */
 
-function htmlspecialchars(string $string, int $flags = ENT_COMPAT | ENT_HTML401, string $encoding = 'UTF-8', bool $double_encode = true): string { }
+function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
 function htmlspecialchars_decode(string $string, int $quote_style = null): string { }
 
