@@ -1775,7 +1775,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	char *end, *bin = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*bin == '0' || *bin == '_') {
+	while (len > 0 && (*bin == '0' || *bin == '_')) {
 		++bin;
 		--len;
 	}
@@ -1892,7 +1892,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	char *end, *hex = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*hex == '0' || *hex == '_') {
+	while (len > 0 && (*hex == '0' || *hex == '_')) {
 		++hex;
 		--len;
 	}
