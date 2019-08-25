@@ -178,7 +178,7 @@ function setcookie(string $name,string $value = '', array $options = []): bool {
 /** @return int|bool */
 function http_response_code(int $response_code = 0) {}
 
-function headers_sent(string &$file = null, int &$line = null) { }
+function headers_sent(&$file = null, &$line = null): bool {}
 
 function headers_list(): array { }
 
