@@ -186,7 +186,8 @@ function headers_list(): array { }
 
 function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $quote_style = null): string { }
+/** @return string|false */
+function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT) {}
 
 function html_entity_decode(string $string, int $quote_style = null, string $charset = null): string { }
 
