@@ -1960,9 +1960,7 @@ PHP_FUNCTION(stripos)
 	}
 
 	zend_string_release_ex(haystack_dup, 0);
-	if (needle_dup) {
-		zend_string_release_ex(needle_dup, 0);
-	}
+	zend_string_release_ex(needle_dup, 0);
 }
 /* }}} */
 
