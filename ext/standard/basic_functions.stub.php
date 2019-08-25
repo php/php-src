@@ -175,7 +175,8 @@ function setrawcookie(string $name, string $value = '', $expires_or_options = 0,
 
 function setcookie(string $name,string $value = '', array $options = []): bool {}
 
-function http_response_code(int $response_code = null): int {}
+/** @return int|bool */
+function http_response_code(int $response_code = 0) {}
 
 function headers_sent(string &$file = null, int &$line = null) { }
 
