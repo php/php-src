@@ -1940,10 +1940,6 @@ PHP_FUNCTION(stripos)
 		RETURN_FALSE;
 	}
 
-	if (ZSTR_LEN(haystack) == 0) {
-		RETURN_FALSE;
-	}
-
 	if (ZSTR_LEN(needle) == 0 || ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
 		RETURN_FALSE;
 	}
