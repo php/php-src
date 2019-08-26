@@ -108,25 +108,29 @@ class Type {
 }
 
 class ArgInfo {
+    const SEND_BY_VAL = 0;
+    const SEND_BY_REF = 1;
+    const SEND_PREFER_REF = 2;
+
     /** @var string */
     public $name;
-    /** @var bool */
-    public $byRef;
+    /** @var int */
+    public $sendBy;
     /** @var bool */
     public $isVariadic;
     /** @var Type|null */
     public $type;
 
-    public function __construct(string $name, bool $byRef, bool $isVariadic, ?Type $type) {
+    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type) {
         $this->name = $name;
-        $this->byRef = $byRef;
+        $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->type = $type;
     }
 
     public function equals(ArgInfo $other): bool {
         return $this->name === $other->name
-            && $this->byRef === $other->byRef
+            && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type);
     }
@@ -189,18 +193,58 @@ class FuncInfo {
 }
 
 function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
+    $comment = $func->getDocComment();
+    $paramMeta = [];
+
+    if ($comment) {
+        $commentText = substr($comment->getText(), 2, -2);
+
+        foreach (explode("\n", $commentText) as $commentLine) {
+            if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
+                $varName = $matches[1];
+                if (!isset($paramMeta[$varName])) {
+                    $paramMeta[$varName] = [];
+                }
+                $paramMeta[$varName]['preferRef'] = true;
+            }
+        }
+    }
+
     $args = [];
     $numRequiredArgs = 0;
+    $foundVariadic = false;
     foreach ($func->getParams() as $i => $param) {
+        $varName = $param->var->name;
+        $preferRef = !empty($paramMeta[$varName]['preferRef']);
+        unset($paramMeta[$varName]);
+
+        if ($preferRef) {
+            $sendBy = ArgInfo::SEND_PREFER_REF;
+        } else if ($param->byRef) {
+            $sendBy = ArgInfo::SEND_BY_REF;
+        } else {
+            $sendBy = ArgInfo::SEND_BY_VAL;
+        }
+
+        if ($foundVariadic) {
+            throw new Exception("Error in function $name: only the last parameter can be variadic");
+        }
+
+        $foundVariadic = $param->variadic;
+
         $args[] = new ArgInfo(
-            $param->var->name,
-            $param->byRef,
+            $varName,
+            $sendBy,
             $param->variadic,
             $param->type ? Type::fromNode($param->type) : null
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
         }
+    }
+
+    foreach (array_keys($paramMeta) as $var) {
+        throw new Exception("Found metadata for invalid param $var of function $name");
     }
 
     $returnType = $func->getReturnType();
@@ -321,19 +365,19 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
                     "\tZEND_%s_TYPE_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->byRef, $argInfo->name,
+                    $argKind, $argInfo->sendBy, $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
                     "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->byRef, $argInfo->name,
+                    $argKind, $argInfo->sendBy, $argInfo->name,
                     str_replace('\\', '\\\\', $argInfo->type->name), $argInfo->type->isNullable
                 );
             }
         } else {
             $code .= sprintf(
-                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->byRef, $argInfo->name);
+                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->sendBy, $argInfo->name);
         }
     }
 

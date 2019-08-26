@@ -4176,7 +4176,7 @@ static inline zval *array_column_fetch_prop(zval *data, zval *name, zval *rv) /*
 }
 /* }}} */
 
-/* {{{ proto array|false array_column(array input, mixed column_key[, mixed index_key])
+/* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
@@ -6334,7 +6334,7 @@ PHP_FUNCTION(array_key_exists)
 }
 /* }}} */
 
-/* {{{ proto array|null array_chunk(array input, int size [, bool preserve_keys])
+/* {{{ proto array array_chunk(array input, int size [, bool preserve_keys])
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
