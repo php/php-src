@@ -655,6 +655,12 @@ static void emit_live_range(
 		default:
 			start++;
 			kind = ZEND_LIVE_TMPVAR;
+
+			/* Check hook to determine whether a live range is necessary,
+			 * e.g. based on type info. */
+			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
+				return;
+			}
 			break;
 		}
 		case ZEND_COPY_TMP:
@@ -692,11 +698,6 @@ static void emit_live_range(
 			emit_live_range_raw(op_array, var_num, kind, start, end);
 			return;
 		}
-	}
-
-	/* Check hook to determine whether a live range is necessary, e.g. based on type info. */
-	if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
-		return;
 	}
 
 	emit_live_range_raw(op_array, var_num, kind, start, end);
