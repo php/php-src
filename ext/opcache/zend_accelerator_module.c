@@ -31,6 +31,7 @@
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
+#include "opcache_arginfo.h"
 
 #if HAVE_JIT
 #include "jit/zend_jit.h"
@@ -45,26 +46,6 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-ZEND_BEGIN_ARG_INFO(arginfo_opcache_none, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_get_status, 0, 0, 0)
-	ZEND_ARG_INFO(0, fetch_scripts)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_compile_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, file)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
-	ZEND_ARG_INFO(0, script)
-	ZEND_ARG_INFO(0, force)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_is_script_cached, 0, 0, 1)
-	ZEND_ARG_INFO(0, script)
-ZEND_END_ARG_INFO()
-
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
 static ZEND_FUNCTION(opcache_invalidate);
@@ -77,12 +58,12 @@ static ZEND_FUNCTION(opcache_get_configuration);
 
 static const zend_function_entry accel_functions[] = {
 	/* User functions */
-	ZEND_FE(opcache_reset,					arginfo_opcache_none)
+	ZEND_FE(opcache_reset,					arginfo_opcache_reset)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
 	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
 	/* Private functions */
-	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
+	ZEND_FE(opcache_get_configuration,		arginfo_opcache_get_configuration)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
 	ZEND_FE_END
 };
