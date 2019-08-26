@@ -691,7 +691,8 @@ PHP_FUNCTION(imageloadfont)
 
 	stream = php_stream_open_wrapper(ZSTR_VAL(file), "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Failed to open stream");
+		return;
 	}
 
 	/* Only supports a architecture-dependent binary dump format
