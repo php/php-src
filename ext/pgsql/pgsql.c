@@ -76,6 +76,16 @@
 #define PGSQL_RETURN_OID(oid) RETURN_LONG((zend_long)oid)
 #endif
 
+/* from postgresql/src/include/catalog/pg_type.h */
+
+#define PGSQL_OID_BOOL     16
+#define PGSQL_OID_BYTEA    17
+#define PGSQL_OID_INT8     20
+#define PGSQL_OID_INT2     21
+#define PGSQL_OID_INT4     23
+#define PGSQL_OID_TEXT     25
+#define PGSQL_OID_OID      26
+
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
 #else
@@ -1084,6 +1094,8 @@ STD_PHP_INI_ENTRY_EX("pgsql.max_links",            "-1",  PHP_INI_SYSTEM, OnUpda
 STD_PHP_INI_BOOLEAN( "pgsql.auto_reset_persistent", "0",  PHP_INI_SYSTEM, OnUpdateBool, auto_reset_persistent, zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.ignore_notice",         "0",  PHP_INI_ALL,    OnUpdateBool, ignore_notices,        zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.log_notice",            "0",  PHP_INI_ALL,    OnUpdateBool, log_notices,           zend_pgsql_globals, pgsql_globals)
+STD_PHP_INI_BOOLEAN( "pgsql.convert_boolean_type",  "0",  PHP_INI_ALL,    OnUpdateBool, convert_boolean_type,  zend_pgsql_globals, pgsql_globals)
+STD_PHP_INI_BOOLEAN( "pgsql.convert_integer_type",  "0",  PHP_INI_ALL,    OnUpdateBool, convert_integer_type,  zend_pgsql_globals, pgsql_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -2795,15 +2807,39 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		} else {
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
+				Oid oid = PQftype(pgsql_result, i);
 				const size_t element_len = strlen(element);
 
-				if (result_type & PGSQL_NUM) {
-					add_index_stringl(return_value, i, element, element_len);
-				}
+				if (oid == PGSQL_OID_BOOL && PGG(convert_boolean_type)){
+					int boolval = *element != 'f' ? 1 : 0;
+                    if (result_type & PGSQL_NUM) {
+						add_index_bool(return_value, i, boolval);
+                    }
 
-				if (result_type & PGSQL_ASSOC) {
-					field_name = PQfname(pgsql_result, i);
-					add_assoc_stringl(return_value, field_name, element, element_len);
+                    if (result_type & PGSQL_ASSOC) {
+                        field_name = PQfname(pgsql_result, i);
+                        add_assoc_bool(return_value, field_name, boolval);
+                    }
+				} else if ((oid == PGSQL_OID_INT2 || oid == PGSQL_OID_INT4 ||
+							(oid == PGSQL_OID_INT8 && sizeof(long)>=8)) && PGG(convert_integer_type)){
+					long int longval = atol(element);
+					if (result_type & PGSQL_NUM) {
+						add_index_long(return_value, i, longval);
+                    }
+
+					if (result_type & PGSQL_ASSOC) {
+						field_name = PQfname(pgsql_result, i);
+						add_assoc_long(return_value, field_name, longval);
+                    }
+				} else {
+                    if (result_type & PGSQL_NUM) {
+                        add_index_stringl(return_value, i, element, element_len);
+                    }
+
+                    if (result_type & PGSQL_ASSOC) {
+                        field_name = PQfname(pgsql_result, i);
+                        add_assoc_stringl(return_value, field_name, element, element_len);
+                    }
 				}
 			}
 		}
@@ -7058,8 +7094,9 @@ PHP_FUNCTION(pg_delete)
 PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, long result_type)
 {
 	zval row;
-	char *field_name;
-	size_t num_fields;
+	char **field_names;
+    Oid *field_types;
+	int num_fields;
 	int pg_numrows, pg_row;
 	uint32_t i;
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
@@ -7067,13 +7104,25 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 	if ((pg_numrows = PQntuples(pg_result)) <= 0) {
 		return FAILURE;
 	}
+    num_fields = PQnfields(pg_result);
+    if (result_type & PGSQL_ASSOC){
+		field_names = ecalloc(num_fields, sizeof*field_names);
+		for(i = 0; i < num_fields; i++){
+			field_names[i] = PQfname(pg_result, i);
+		}
+	}
+	if (PGG(convert_boolean_type) || PGG(convert_integer_type)){
+		field_types = ecalloc(num_fields, sizeof field_types);
+		for (i = 0; i < num_fields; i++){
+			field_types[i] = PQftype(pg_result, i);
+		}
+	}
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
 		array_init(&row);
-		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
-			field_name = PQfname(pg_result, i);
+		for (i = 0; i < num_fields; i++) {
 			if (PQgetisnull(pg_result, pg_row, i)) {
 				if (result_type & PGSQL_ASSOC) {
-					add_assoc_null(&row, field_name);
+					add_assoc_null(&row, field_names[i]);
 				}
 				if (result_type & PGSQL_NUM) {
 					add_next_index_null(&row);
@@ -7082,12 +7131,33 @@ PHP_PGSQL_API int php_pgsql_result2array(PGresult *pg_result, zval *ret_array, l
 				char *element = PQgetvalue(pg_result, pg_row, i);
 				if (element) {
 					const size_t element_len = strlen(element);
-					if (result_type & PGSQL_ASSOC) {
-						add_assoc_stringl(&row, field_name, element, element_len);
-					}
-					if (result_type & PGSQL_NUM) {
-						add_next_index_stringl(&row, element, element_len);
-					}
+                    if (field_types[i] == PGSQL_OID_BOOL && PGG(convert_boolean_type)){
+						int boolval = *element != 'f' ? 1 : 0;
+						if (result_type & PGSQL_NUM) {
+							add_index_bool(&row, i, boolval);
+						}
+
+						if (result_type & PGSQL_ASSOC) {
+							add_assoc_bool(&row, field_names[i], boolval);
+						}
+					} else if ((field_types[i] == PGSQL_OID_INT2 || field_types[i] == PGSQL_OID_INT4 ||
+								(field_types[i] == PGSQL_OID_INT8 && sizeof(long)>=8)) && PGG(convert_integer_type)){
+						long int longval = atol(element);
+						if (result_type & PGSQL_NUM) {
+							add_index_long(&row, i, longval);
+						}
+
+						if (result_type & PGSQL_ASSOC) {
+							add_assoc_long(&row, field_names[i], longval);
+						}
+ 					} else {
+                        if (result_type & PGSQL_ASSOC) {
+                            add_assoc_stringl(&row, field_names[i], element, element_len);
+                        }
+                        if (result_type & PGSQL_NUM) {
+                            add_next_index_stringl(&row, element, element_len);
+                        }
+                    }
 				}
 			}
 		}

@@ -316,6 +316,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	HashTable notices;  /* notice message for each connection */
 	zend_resource *default_link; /* default link when connection is omitted */
 	HashTable hashes; /* hashes for each connection */
+	int convert_boolean_type, convert_integer_type;
 ZEND_END_MODULE_GLOBALS(pgsql)
 
 ZEND_EXTERN_MODULE_GLOBALS(pgsql)
