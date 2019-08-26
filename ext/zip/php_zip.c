@@ -2313,7 +2313,7 @@ static ZIPARCHIVE_METHOD(getCommentIndex)
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	comment = zip_file_get_comment(intern, index, &comment_len, (zip_flags_t)flags);
-	RETURN_STRINGL((char *)comment, MIN(comment_len, ZEND_LONG_MAX));
+	RETURN_STRINGL((char *)comment, comment_len);
 }
 /* }}} */
 
