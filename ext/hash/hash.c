@@ -862,13 +862,13 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		return;
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		return;
 	}
 
 	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
