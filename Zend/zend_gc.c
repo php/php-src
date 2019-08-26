@@ -1007,6 +1007,10 @@ tail_call:
 					ref = Z_COUNTED_P(zv);
 					goto tail_call;
 				}
+				if (GC_ADDRESS(GC_INFO(ht)) != 0 && GC_REF_GET_COLOR(ht) == GC_BLACK) {
+					GC_TRACE_REF(ht, "removing from buffer");
+					GC_REMOVE_FROM_BUFFER(ht);
+				}
 			} else {
 				return;
 			}
