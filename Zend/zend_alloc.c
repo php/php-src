@@ -980,7 +980,7 @@ get_chunk:
 				heap->cached_chunks = chunk->next;
 			} else {
 #if ZEND_MM_LIMIT
-				if (UNEXPECTED(heap->real_size + ZEND_MM_CHUNK_SIZE > heap->limit)) {
+				if (UNEXPECTED(ZEND_MM_CHUNK_SIZE > heap->limit - heap->real_size)) {
 					if (zend_mm_gc(heap)) {
 						goto get_chunk;
 					} else if (heap->overflow == 0) {
@@ -1484,8 +1484,8 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size, si
 				}
 			} else /* if (new_size > old_size) */ {
 #if ZEND_MM_LIMIT
-				if (UNEXPECTED(heap->real_size + (new_size - old_size) > heap->limit)) {
-					if (zend_mm_gc(heap) && heap->real_size + (new_size - old_size) <= heap->limit) {
+				if (UNEXPECTED(new_size - old_size > heap->limit - heap->real_size)) {
+					if (zend_mm_gc(heap) && new_size - old_size <= heap->limit - heap->real_size) {
 						/* pass */
 					} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
@@ -1730,8 +1730,8 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	void *ptr;
 
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(heap->real_size + new_size > heap->limit)) {
-		if (zend_mm_gc(heap) && heap->real_size + new_size <= heap->limit) {
+	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {
+		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
 			/* pass */
 		} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
