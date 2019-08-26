@@ -356,7 +356,7 @@ function inet_pton (string $ip_address) {}
 function metaphone(string $text, int $phones = 0) {}
 
 /* {{{ head.c */
-function header(string $string, bool $replace = true, int $http_response_code = null): void { }
+function header(string $string, bool $replace = true, int $http_response_code = 0): void { }
 
 function header_remove(string $name = UNKNOWN): void { }
 

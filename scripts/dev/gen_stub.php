@@ -2,6 +2,7 @@
 <?php declare(strict_types=1);
 
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
 
 error_reporting(E_ALL);
@@ -38,7 +39,7 @@ function processStubFile(string $stubFile) {
         $arginfoCode = generateArgInfoCode($funcInfos);
         file_put_contents($arginfoFile, $arginfoCode);
     } catch (Exception $e) {
-        echo "Caught {$e->getMessage()} while processing $stubFile\n";
+        echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
     }
 }
@@ -228,6 +229,14 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
 
         if ($foundVariadic) {
             throw new Exception("Error in function $name: only the last parameter can be variadic");
+        }
+
+        if ($param->default instanceof Expr\ConstFetch &&
+            $param->default->name->toLowerString() === "null" &&
+            $param->type && !($param->type instanceof Node\NullableType)
+        ) {
+            throw new Exception(
+                "Parameter $varName of function $name has null default, but is not nullable");
         }
 
         $foundVariadic = $param->variadic;
