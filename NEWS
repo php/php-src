@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #78436 (Missing addref in SplPriorityQueue EXTR_BOTH mode).
     (Nikita)
+  . Fixed bug #78456 (Segfault when serializing SplDoublyLinkedList). (Nikita)
 
 22 Aug 2019, PHP 7.4.0beta4
 

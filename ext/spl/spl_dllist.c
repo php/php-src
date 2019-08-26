@@ -1241,6 +1241,7 @@ SPL_METHOD(SplDoublyLinkedList, __serialize)
 	array_init_size(&tmp, intern->llist->count);
 	while (current) {
 		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
+		Z_TRY_ADDREF(current->data);
 		current = current->next;
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
