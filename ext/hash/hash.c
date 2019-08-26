@@ -1052,8 +1052,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 
 	bytes = (int)l_bytes;
 	if (bytes <= 0){
-		php_error_docref(NULL, E_WARNING, "the byte parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "the byte parameter must be greater than 0");
+		return;
 	}
 
 	salt_len = MIN(salt_len, SALT_SIZE);
