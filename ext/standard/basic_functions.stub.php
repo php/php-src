@@ -201,8 +201,8 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_s
 
 /* assert.c */
 
-/** @params string|bool $assertion */
+/** @params mixed $assertion */
 function assert($assertion, $description = null): bool {}
 
-/** @return int|bool */
-function assert_options(int $what, $value = null) {}
+/** @return int|string|bool|null */
+function assert_options(int $what, $value = UNKNOWN) {}
