@@ -414,8 +414,8 @@ PHP_FUNCTION(hash_init)
 
 #define PHP_HASHCONTEXT_VERIFY(func, hash) { \
 	if (!hash->context) { \
-		php_error(E_WARNING, "%s(): supplied resource is not a valid Hash Context resource", func); \
-		RETURN_NULL(); \
+		zend_throw_error(NULL, "%s(): supplied resource is not a valid Hash Context resource", func); \
+		return; \
 	} \
 }
 
@@ -585,7 +585,9 @@ PHP_FUNCTION(hash_copy)
 
 	if (php_hashcontext_from_object(Z_OBJ_P(return_value))->context == NULL) {
 		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+
+		zend_throw_error(NULL, "Cannot copy hash");
+		return;
 	}
 }
 /* }}} */
