@@ -15,28 +15,40 @@ $file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
-hash_hmac_file('foo', $file, $key, TRUE);
+try { 
+    var_dump(hash_hmac_file('foo', $file, $key, TRUE));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing hash_hmac_file() function with non-cryptographic hash algorithm --\n";
-hash_hmac_file('crc32', $file, $key, TRUE);
+try {
+    var_dump(hash_hmac_file('crc32', $file, $key, TRUE));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing hash_hmac_file() function with bad path --\n";
-hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE);
+try {
+    var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-
-Warning: hash_hmac_file(): Unknown hashing algorithm: foo in %s on line %d
+Unknown hashing algorithm: foo
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-
-Warning: hash_hmac_file(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
+Non-cryptographic hashing algorithm: crc32
 
 -- Testing hash_hmac_file() function with bad path --
-
-Warning: hash_hmac_file(): Invalid path in %s on line %d
+Invalid path
 ===Done===

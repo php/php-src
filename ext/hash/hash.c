@@ -252,18 +252,18 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	else if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", algo);
+		return;
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid path");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid path");
+			return;
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
