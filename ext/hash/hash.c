@@ -358,19 +358,19 @@ PHP_FUNCTION(hash_init)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
-			php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			RETURN_FALSE;
+			zend_throw_error(NULL, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+			return;
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "HMAC requested without a key");
+			return;
 		}
 	}
 
