@@ -10,4 +10,5 @@ $img = imagerotate(imagecreate(10,10),45,0x7ffffff9);
 var_dump($img);
 ?>
 --EXPECT--
-resource(5) of type (gd)
+object(GdImage)#2 (0) {
+}

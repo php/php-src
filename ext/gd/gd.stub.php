@@ -10,39 +10,39 @@ function imagesetstyle($im, array $styles): bool {}
 /** @return resource|false */
 function imagecreatetruecolor(int $x_size, int $y_size) {}
 
-function imageistruecolor($im): bool {}
+function imageistruecolor(GdImage $im): bool {}
 
-function imagetruecolortopalette($im, bool $ditherFlag, int $colorWanted): bool {}
+function imagetruecolortopalette(GdImage $im, bool $ditherFlag, int $colorWanted): bool {}
 
-function imagepalettetotruecolor($im): bool {}
+function imagepalettetotruecolor(GdImage $im): bool {}
 
 function imagecolormatch($im1, $im2): bool {}
 
-function imagesetthickness($im, int $thickness): bool {}
+function imagesetthickness(GdImage $im, int $thickness): bool {}
 
-function imagefilledellipse($im, int $cx, int $cy, int $w, int $h, int $color): bool {}
+function imagefilledellipse(GdImage $im, int $cx, int $cy, int $w, int $h, int $color): bool {}
 
-function imagefilledarc($im, int $cx, int $cy, int $w, int $h, int $s, int $e, int $col, int $style): bool {}
+function imagefilledarc(GdImage $im, int $cx, int $cy, int $w, int $h, int $s, int $e, int $col, int $style): bool {}
 
-function imagealphablending($im, bool $blend): bool {}
+function imagealphablending(GdImage $im, bool $blend): bool {}
 
-function imagesavealpha($im, bool $save): bool {}
+function imagesavealpha(GdImage $im, bool $save): bool {}
 
-function imagelayereffect($im, int $effect): bool {}
-
-/** @return int|false */
-function imagecolorallocatealpha($im, int $red, int $green, int $blue, int $alpha) {}
+function imagelayereffect(GdImage $im, int $effect): bool {}
 
 /** @return int|false */
-function imagecolorresolvealpha($im, int $red, int $green, int $blue, int $alpha) {}
+function imagecolorallocatealpha(GdImage $im, int $red, int $green, int $blue, int $alpha) {}
 
 /** @return int|false */
-function imagecolorclosestalpha($im, int $red, int $green, int $blue, int $alpha) {}
+function imagecolorresolvealpha(GdImage $im, int $red, int $green, int $blue, int $alpha) {}
 
 /** @return int|false */
-function imagecolorexactalpha($im, int $red, int $green, int $blue, int $alpha) {}
+function imagecolorclosestalpha(GdImage $im, int $red, int $green, int $blue, int $alpha) {}
 
-function imagecopyresampled($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h): bool {}
+/** @return int|false */
+function imagecolorexactalpha(GdImage $im, int $red, int $green, int $blue, int $alpha) {}
+
+function imagecopyresampled(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h): bool {}
 
 #ifdef PHP_WIN32
 
@@ -55,11 +55,11 @@ function imagegrabscreen() {}
 #endif
 
 /** @return resource|false */
-function imagerotate($im, float $angle, int $bgdcolor, int $ignoretransparent = 0) {}
+function imagerotate(GdImage $im, float $angle, int $bgdcolor, int $ignoretransparent = 0) {}
 
-function imagesettile($im, $tile): bool {}
+function imagesettile(GdImage $im, $tile): bool {}
 
-function imagesetbrush($im, $brush): bool {}
+function imagesetbrush(GdImage $im, $brush): bool {}
 
 /** @return resource|false */
 function imagecreate(int $x_size, int $y_size) {}
@@ -117,152 +117,152 @@ function imagecreatefrombmp(string $filename) {}
 function imagecreatefromtga(string $filename) {}
 #endif
 
-function imagexbm($im, ?string $filename, int $foreground = UNKNOWN): bool {}
+function imagexbm(GdImage $im, ?string $filename, int $foreground = UNKNOWN): bool {}
 
-function imagegif($im, $to = NULL): bool {}
+function imagegif(GdImage $im, $to = NULL): bool {}
 
 #ifdef HAVE_GD_PNG
-function imagepng($im, $to = NULL, int $quality = UNKNOWN, int $filters = UNKNOWN): bool {}
+function imagepng(GdImage $im, $to = NULL, int $quality = UNKNOWN, int $filters = UNKNOWN): bool {}
 #endif
 
 #ifdef HAVE_GD_WEBP
-function imagewebp($im, $to = NULL, int $quality = UNKNOWN): bool {}
+function imagewebp(GdImage $im, $to = NULL, int $quality = UNKNOWN): bool {}
 #endif
 
 #ifdef HAVE_GD_JPG
-function imagejpeg($im, $to = NULL, int $quality = UNKNOWN): bool {}
+function imagejpeg(GdImage $im, $to = NULL, int $quality = UNKNOWN): bool {}
 #endif
 
-function imagewbmp($im, $to = NULL, int $foreground = UNKNOWN): bool {}
+function imagewbmp(GdImage $im, $to = NULL, int $foreground = UNKNOWN): bool {}
 
-function imagegd($im, $to = UNKNOWN): bool {}
+function imagegd(GdImage $im, $to = UNKNOWN): bool {}
 
-function imagegd2($im, $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
+function imagegd2(GdImage $im, $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
 
 #ifdef HAVE_GD_BMP
-function imagebmp($im, $to = NULL, int $compressed = 1): bool {}
+function imagebmp(GdImage $im, $to = NULL, int $compressed = 1): bool {}
 #endif
 
-function imagedestroy($im): bool {}
+function imagedestroy(GdImage $im): bool {}
 
 /** @return int|false */
-function imagecolorallocate($im, int $red, int $green, int $blue) {}
+function imagecolorallocate(GdImage $im, int $red, int $green, int $blue) {}
 
-function imagepalettecopy($dst, $src): void {}
-
-/** @return int|false */
-function imagecolorat($im, int $x, int $y) {}
+function imagepalettecopy(GdImage $dst, GdImage $src): void {}
 
 /** @return int|false */
-function imagecolorclosest($im, int $red, int $green, int $blue) {}
+function imagecolorat(GdImage $im, int $x, int $y) {}
 
 /** @return int|false */
-function imagecolorclosesthwb($im, int $red, int $green, int $blue) {}
-
-function imagecolordeallocate($im, int $index): bool {}
+function imagecolorclosest(GdImage $im, int $red, int $green, int $blue) {}
 
 /** @return int|false */
-function imagecolorresolve($im, int $red, int $green, int $blue) {}
+function imagecolorclosesthwb(GdImage $im, int $red, int $green, int $blue) {}
+
+function imagecolordeallocate(GdImage $im, int $index): bool {}
 
 /** @return int|false */
-function imagecolorexact($im, int $red, int $green, int $blue) {}
+function imagecolorresolve(GdImage $im, int $red, int $green, int $blue) {}
+
+/** @return int|false */
+function imagecolorexact(GdImage $im, int $red, int $green, int $blue) {}
 
 /** @return ?false */
-function imagecolorset($im, int $color, int $red, int $green, int $blue, int $alpha = 0) {}
+function imagecolorset(GdImage $im, int $color, int $red, int $green, int $blue, int $alpha = 0) {}
 
 /** @return array|false */
-function imagecolorsforindex($im, int $index) {}
+function imagecolorsforindex(GdImage $im, int $index) {}
 
-function imagegammacorrect($im, float $inputgamma, float $outputgamma): bool {}
+function imagegammacorrect(GdImage $im, float $inputgamma, float $outputgamma): bool {}
 
-function imagesetpixel($im, int $x, int $y, int $col): bool {}
+function imagesetpixel(GdImage $im, int $x, int $y, int $col): bool {}
 
-function imageline($im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
+function imageline(GdImage $im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
 
-function imagedashedline($im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
+function imagedashedline(GdImage $im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
 
-function imagerectangle($im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
+function imagerectangle(GdImage $im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
 
-function imagefilledrectangle($im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
+function imagefilledrectangle(GdImage $im, int $x1, int $y1, int $x2, int $y2, int $col): bool {}
 
-function imagearc($im, int $cx, int $cy, int $w, int $h, int $s, int $e, int $col): bool {}
+function imagearc(GdImage $im, int $cx, int $cy, int $w, int $h, int $s, int $e, int $col): bool {}
 
-function imageellipse($im, int $cx, int $cy, int $w, int $h, int $color): bool {}
+function imageellipse(GdImage $im, int $cx, int $cy, int $w, int $h, int $color): bool {}
 
-function imagefilltoborder($im, int $x, int $y, int $border, int $col): bool {}
+function imagefilltoborder(GdImage $im, int $x, int $y, int $border, int $col): bool {}
 
-function imagefill($im, int $x, int $y, int $col): bool {}
+function imagefill(GdImage $im, int $x, int $y, int $col): bool {}
 
-function imagecolorstotal($im): int {}
+function imagecolorstotal(GdImage $im): int {}
 
-function imagecolortransparent($im, int $col = UNKNOWN): ?int {}
+function imagecolortransparent(GdImage $im, int $col = UNKNOWN): ?int {}
 
-function imageinterlace($im, int $interlace = UNKNOWN): ?int {}
+function imageinterlace(GdImage $im, int $interlace = UNKNOWN): ?int {}
 
-function imagepolygon($im, array $points, int $num_pos, int $col): bool {}
+function imagepolygon(GdImage $im, array $points, int $num_pos, int $col): bool {}
 
-function imageopenpolygon($im, array $points, int $num_pos, int $col): bool {}
+function imageopenpolygon(GdImage $im, array $points, int $num_pos, int $col): bool {}
 
-function imagefilledpolygon($im, array $points, int $num_pos, int $col): bool {}
+function imagefilledpolygon(GdImage $im, array $points, int $num_pos, int $col): bool {}
 
 function imagefontwidth(int $font): int {}
 
 function imagefontheight(int $font): int {}
 
-function imagechar($im, int $font, int $x, int $y, string $c, int $col): bool {}
+function imagechar(GdImage $im, int $font, int $x, int $y, string $c, int $col): bool {}
 
-function imagecharup($im, int $font, int $x, int $y, string $c, int $col): bool {}
+function imagecharup(GdImage $im, int $font, int $x, int $y, string $c, int $col): bool {}
 
-function imagestring($im, int $font, int $x, int $y, string $str, int $col): bool {}
+function imagestring(GdImage $im, int $font, int $x, int $y, string $str, int $col): bool {}
 
 function imagestringup($im, int $font, int $x, int $y, string $str, int $col): bool {}
 
-function imagecopy($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h): bool {}
+function imagecopy(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h): bool {}
 
-function imagecopymerge($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool {}
+function imagecopymerge(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool {}
 
-function imagecopymergegray($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool {}
+function imagecopymergegray(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): bool {}
 
-function imagecopyresized($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h): bool {}
+function imagecopyresized(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h): bool {}
 
-function imagesx($im): int {}
+function imagesx(GdImage $im): int {}
 
-function imagesy($im): int {}
+function imagesy(GdImage $im): int {}
 
-function imagesetclip($im, int $x1, int $x2, int $y1, int $y2): bool {}
+function imagesetclip(GdImage $im, int $x1, int $x2, int $y1, int $y2): bool {}
 
-function imagegetclip($im): array {}
+function imagegetclip(GdImage $im): array {}
 
 #ifdef HAVE_GD_FREETYPE
 /** @return array|false */
 function imageftbbox(float $size, float $angle, string $font_file, string $text, array $extrainfo = UNKNOWN) {}
 
-function imagefttext($im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = UNKNOWN) {}
+function imagefttext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = UNKNOWN) {}
 
 function imagettfbbox(float $size, float $angle, string $font_file, string $text) {}
 
-function imagettftext($im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text) {}
+function imagettftext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text) {}
 #endif
 
-function imagefilter($im, int $filtertype, $arg1 = UNKNOWN, $arg2 = UNKNOWN, $arg3 = UNKNOWN, $arg4 = UNKNOWN): bool {}
+function imagefilter(GdImage $im, int $filtertype, $arg1 = UNKNOWN, $arg2 = UNKNOWN, $arg3 = UNKNOWN, $arg4 = UNKNOWN): bool {}
 
-function imageconvolution($im, array $matrix3x3, float $div, float $offset): bool {}
+function imageconvolution(GdImage $im, array $matrix3x3, float $div, float $offset): bool {}
 
-function imageflip($im, int $mode): bool {}
+function imageflip(GdImage $im, int $mode): bool {}
 
-function imageantialias($im, bool $on): bool {}
-
-/** @return resource|false */
-function imagecrop($im, array $rect) {}
+function imageantialias(GdImage $im, bool $on): bool {}
 
 /** @return resource|false */
-function imagecropauto($im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1) {}
+function imagecrop(GdImage $im, array $rect) {}
 
 /** @return resource|false */
-function imagescale($im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED) {}
+function imagecropauto(GdImage $im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1) {}
 
 /** @return resource|false */
-function imageaffine($im, array $affine, array $clip = UNKNOWN) {}
+function imagescale(GdImage $im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED) {}
+
+/** @return resource|false */
+function imageaffine(GdImage $im, array $affine, array $clip = UNKNOWN) {}
 
 /** @return array|false */
 function imageaffinematrixget(int $type, $options = UNKNOWN) {}
@@ -270,7 +270,7 @@ function imageaffinematrixget(int $type, $options = UNKNOWN) {}
 /** @return array|false */
 function imageaffinematrixconcat(array $m1, array $m2) {}
 
-function imagesetinterpolation($im, int $method = IMG_BILENEAR_FIXED): bool {}
+function imagesetinterpolation(GdImage $im, int $method = IMG_BILENEAR_FIXED): bool {}
 
 /** @return array|true */
-function imageresolution($im, int $res_x = UNKNOWN, int $res_y = UNKNOWN) {}
+function imageresolution(GdImage $im, int $res_x = UNKNOWN, int $res_y = UNKNOWN) {}

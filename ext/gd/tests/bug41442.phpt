@@ -31,7 +31,9 @@ var_dump(imagecreatefromstring($str2));
 
 echo "Done\n";
 ?>
---EXPECTF--
-resource(%d) of type (gd)
-resource(%d) of type (gd)
+--EXPECT--
+object(GdImage)#2 (0) {
+}
+object(GdImage)#2 (0) {
+}
 Done
