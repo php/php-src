@@ -2469,6 +2469,7 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
+	ZEND_ASSERT(symbol_table && "A symbol table should always be available here");
 
 	if (extract_refs) {
 		switch (extract_type) {
@@ -2566,7 +2567,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 }
 /* }}} */
 
-/* {{{ proto array|null compact(mixed var_names [, mixed ...])
+/* {{{ proto array compact(mixed var_names [, mixed ...])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -2583,9 +2584,7 @@ PHP_FUNCTION(compact)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
-	if (UNEXPECTED(symbol_table == NULL)) {
-		return;
-	}
+	ZEND_ASSERT(symbol_table && "A symbol table should always be available here");
 
 	/* compact() is probably most used with a single array of var_names
 	   or multiple string names, rather than a combination of both.

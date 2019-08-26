@@ -141,7 +141,7 @@ function array_search($needle, array $haystack, bool $strict = false) {}
 /** @prefer-ref $arg */
 function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): ?int {}
 
-function compact($var_name, ...$var_names): ?array {}
+function compact($var_name, ...$var_names): array {}
 
 /** @return array|false */
 function array_fill(int $start_key, int $num, $val) {}
