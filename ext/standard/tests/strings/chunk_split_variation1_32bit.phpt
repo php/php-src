@@ -21,8 +21,5 @@ var_dump(chunk_split($a,$b,$c));
 ?>
 --EXPECTF--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 1 ***
-mmap() failed: [12] Cannot allocate memory
 
-mmap() failed: [12] Cannot allocate memory
-
-Fatal error: Out of memory (allocated 2097152) in %s on line %d
+Fatal error: Out of memory (allocated %d) in %s on line %d
