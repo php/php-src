@@ -13,13 +13,18 @@ fwrite($fp, $bin);
 fclose($fp);
 
 $image = imagecreatetruecolor(50, 20);
-$font = imageloadfont($filename);
-$black = imagecolorallocate($image, 0, 0, 0);
-imagestring($image, $font, 0, 0, "Hello", $black);
+try { 
+    $font = imageloadfont($filename);
+    $black = imagecolorallocate($image, 0, 0, 0);
+    imagestring($image, $font, 0, 0, "Hello", $black);
+}
+catch (\Throwable $e) {
+    echo '!! [Error] ' . $e->getMessage() . "\n";
+}
+
 unlink($filename);
 ?>
 --EXPECTF--
 Warning: imageloadfont(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
- in %simageloadfont_invalid.php on line %d
-
-Warning: imageloadfont(): Error reading font, invalid font header in %simageloadfont_invalid.php on line %d
+ in %s on line %d
+!! [Error] Error reading font, invalid font header

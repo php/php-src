@@ -715,12 +715,12 @@ PHP_FUNCTION(imageloadfont)
 	if (n <= 0) {
 		efree(font);
 		if (php_stream_eof(stream)) {
-			php_error_docref(NULL, E_WARNING, "End of file while reading header");
+			zend_throw_error(NULL, "End of file while reading header");
 		} else {
-			php_error_docref(NULL, E_WARNING, "Error while reading header");
+			zend_throw_error(NULL, "Error while reading header");
 		}
 		php_stream_close(stream);
-		RETURN_FALSE;
+		return;
 	}
 	i = php_stream_tell(stream);
 	php_stream_seek(stream, 0, SEEK_END);
@@ -728,10 +728,10 @@ PHP_FUNCTION(imageloadfont)
 	php_stream_seek(stream, i, SEEK_SET);
 
 	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
-		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
+		zend_throw_error(NULL, "Error reading font, invalid font header");
 		efree(font);
 		php_stream_close(stream);
-		RETURN_FALSE;
+		return;
 	}
 
 	body_size = font->w * font->h * font->nchars;
@@ -743,10 +743,10 @@ PHP_FUNCTION(imageloadfont)
 	}
 
 	if (body_size != body_size_check) {
-		php_error_docref(NULL, E_WARNING, "Error reading font");
+		zend_throw_error(NULL, "Error reading font");
 		efree(font);
 		php_stream_close(stream);
-		RETURN_FALSE;
+		return;
 	}
 
 	font->data = emalloc(body_size);
@@ -759,12 +759,12 @@ PHP_FUNCTION(imageloadfont)
 		efree(font->data);
 		efree(font);
 		if (php_stream_eof(stream)) {
-			php_error_docref(NULL, E_WARNING, "End of file while reading body");
+			zend_throw_error(NULL, "End of file while reading body");
 		} else {
-			php_error_docref(NULL, E_WARNING, "Error while reading body");
+			zend_throw_error(NULL, "Error while reading body");
 		}
 		php_stream_close(stream);
-		RETURN_FALSE;
+		return;
 	}
 	php_stream_close(stream);
 
