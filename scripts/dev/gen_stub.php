@@ -135,6 +135,18 @@ class ArgInfo {
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type);
     }
+
+    public function getSendByString(): string {
+        switch ($this->sendBy) {
+        case self::SEND_BY_VAL:
+            return "0";
+        case self::SEND_BY_REF:
+            return "1";
+        case self::SEND_PREFER_REF:
+            return "ZEND_SEND_PREFER_REF";
+        }
+        throw new Exception("Invalid sendBy value");
+    }
 }
 
 class ReturnInfo {
@@ -373,20 +385,20 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         if ($argInfo->type) {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
-                    "\tZEND_%s_TYPE_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->sendBy, $argInfo->name,
+                    "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
+                    $argKind, $argInfo->getSendByString(), $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
-                    "\tZEND_%s_OBJ_INFO(%d, %s, %s, %d)\n",
-                    $argKind, $argInfo->sendBy, $argInfo->name,
+                    "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
+                    $argKind, $argInfo->getSendByString(), $argInfo->name,
                     str_replace('\\', '\\\\', $argInfo->type->name), $argInfo->type->isNullable
                 );
             }
         } else {
             $code .= sprintf(
-                "\tZEND_%s_INFO(%d, %s)\n", $argKind, $argInfo->sendBy, $argInfo->name);
+                "\tZEND_%s_INFO(%s, %s)\n", $argKind, $argInfo->getSendByString(), $argInfo->name);
         }
     }
 

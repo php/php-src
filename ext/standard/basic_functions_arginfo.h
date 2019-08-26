@@ -151,7 +151,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_search, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_extract, 0, 1, IS_LONG, 1)
-	ZEND_ARG_TYPE_INFO(2, arg, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, arg, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, extract_type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -306,10 +306,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_array_udiff_uassoc arginfo_array_intersect_ukey
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_multisort, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(2, arr1)
-	ZEND_ARG_INFO(2, sort_order)
-	ZEND_ARG_INFO(2, sort_flags)
-	ZEND_ARG_VARIADIC_INFO(2, arr2)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_order)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_flags)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, arr2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
