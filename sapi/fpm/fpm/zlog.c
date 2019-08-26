@@ -563,6 +563,18 @@ void zlog_stream_set_wrapping(struct zlog_stream *stream, zlog_bool wrap) /* {{{
 }
 /* }}} */
 
+void zlog_stream_set_is_stdout(struct zlog_stream *stream, zlog_bool is_stdout) /* {{{ */
+{
+	stream->is_stdout = is_stdout ? 1 : 0;
+}
+/* }}} */
+
+void zlog_stream_set_child_pid(struct zlog_stream *stream, int child_pid) /* {{{ */
+{
+	stream->child_pid = child_pid;
+}
+/* }}} */
+
 void zlog_stream_set_msg_quoting(struct zlog_stream *stream, zlog_bool quote) /* {{{ */
 {
 	stream->msg_quote = quote && stream->decorate ? 1 : 0;
@@ -583,9 +595,11 @@ zlog_bool zlog_stream_set_msg_prefix(struct zlog_stream *stream, const char *fmt
 	len = vsnprintf(buf, MAX_WRAPPING_PREFIX_LENGTH - 1, fmt, args);
 	va_end(args);
 
-	stream->msg_prefix = malloc(len + 1);
-	if (stream->msg_prefix == NULL) {
-		return ZLOG_FALSE;
+	if (stream->msg_prefix_len < len) {
+		stream->msg_prefix = stream->msg_prefix_len ? realloc(stream->msg_prefix, len + 1) : malloc(len + 1);
+		if (stream->msg_prefix == NULL) {
+			return ZLOG_FALSE;
+		}
 	}
 	memcpy(stream->msg_prefix, buf, len);
 	stream->msg_prefix[len] = 0;
