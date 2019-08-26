@@ -3101,7 +3101,7 @@ PHP_METHOD(SoapClient, __setCookie)
 	zval *cookies;
 	zval *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &val, &val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &name, &name_len, &val, &val_len) == FAILURE) {
 		return;
 	}
 
