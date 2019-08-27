@@ -35,3 +35,14 @@ jobs:
           exit 1
         fi
       displayName: 'Test Laravel'
+    - script: |
+        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
+        cd symfony
+        php7.3 /usr/bin/composer install
+        export USE_ZEND_ALLOC=0
+        php ./phpunit
+        status=$?
+        if [ $status -gt 128 ]; then
+          exit 1
+        fi
+      displayName: 'Test Symfony'
