@@ -16,7 +16,7 @@ environment:
         PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta6
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
         PHP_BUILD_CRT: vc15
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
