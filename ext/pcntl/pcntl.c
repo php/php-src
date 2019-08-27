@@ -642,6 +642,10 @@ PHP_FUNCTION(pcntl_fork)
 {
 	pid_t id;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	id = fork();
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
@@ -658,10 +662,11 @@ PHP_FUNCTION(pcntl_alarm)
 {
 	zend_long seconds;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &seconds) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &seconds) == FAILURE) {
 		return;
+	}
 
-	RETURN_LONG ((zend_long) alarm(seconds));
+	RETURN_LONG((zend_long) alarm(seconds));
 }
 /* }}} */
 
@@ -807,17 +812,17 @@ PHP_FUNCTION(pcntl_wait)
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
-#ifdef WIFEXITED
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
-	if (WIFEXITED(int_status_word))
+#ifdef WIFEXITED
+	int int_status_word = (int) status_word;
+	if (WIFEXITED(int_status_word)) {
 		RETURN_TRUE;
+	}
 #endif
 
 	RETURN_FALSE;
@@ -828,18 +833,19 @@ PHP_FUNCTION(pcntl_wifexited)
    Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
-#ifdef WIFSTOPPED
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
-	if (WIFSTOPPED(int_status_word))
+#ifdef WIFSTOPPED
+	int int_status_word = (int) status_word;
+	if (WIFSTOPPED(int_status_word)) {
 		RETURN_TRUE;
+	}
 #endif
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -848,18 +854,19 @@ PHP_FUNCTION(pcntl_wifstopped)
    Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
 {
-#ifdef WIFSIGNALED
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
-	if (WIFSIGNALED(int_status_word))
+#ifdef WIFSIGNALED
+	int int_status_word = (int) status_word;
+	if (WIFSIGNALED(int_status_word)) {
 		RETURN_TRUE;
+	}
 #endif
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -867,17 +874,17 @@ PHP_FUNCTION(pcntl_wifsignaled)
    Returns true if the child status code represents a process that was resumed due to a SIGCONT signal */
 PHP_FUNCTION(pcntl_wifcontinued)
 {
-#ifdef HAVE_WCONTINUED
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
-	if (WIFCONTINUED(int_status_word))
+#ifdef HAVE_WCONTINUED
+	int int_status_word = (int) status_word;
+	if (WIFCONTINUED(int_status_word)) {
 		RETURN_TRUE;
+	}
 #endif
 	RETURN_FALSE;
 }
@@ -888,15 +895,14 @@ PHP_FUNCTION(pcntl_wifcontinued)
    Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
-#ifdef WEXITSTATUS
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
+#ifdef WEXITSTATUS
+	int int_status_word = (int) status_word;
 	RETURN_LONG(WEXITSTATUS(int_status_word));
 #else
 	RETURN_FALSE;
@@ -908,15 +914,14 @@ PHP_FUNCTION(pcntl_wexitstatus)
    Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
-#ifdef WTERMSIG
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
+#ifdef WTERMSIG
+	int int_status_word = (int) status_word;
 	RETURN_LONG(WTERMSIG(int_status_word));
 #else
 	RETURN_FALSE;
@@ -928,15 +933,14 @@ PHP_FUNCTION(pcntl_wtermsig)
    Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
 {
-#ifdef WSTOPSIG
 	zend_long status_word;
-	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
-	       return;
+		return;
 	}
 
-	int_status_word = (int) status_word;
+#ifdef WSTOPSIG
+	int int_status_word = (int) status_word;
 	RETURN_LONG(WSTOPSIG(int_status_word));
 #else
 	RETURN_FALSE;
@@ -1143,6 +1147,10 @@ PHP_FUNCTION(pcntl_signal_get_handler)
    Dispatch signals to signal handlers */
 PHP_FUNCTION(pcntl_signal_dispatch)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	pcntl_signal_dispatch();
 	RETURN_TRUE;
 }
@@ -1344,7 +1352,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	int pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &pid, &who) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* needs to be cleared, since any returned value is valid */
@@ -1417,7 +1425,11 @@ PHP_FUNCTION(pcntl_setpriority)
    Retrieve the error number set by the last pcntl function which failed. */
 PHP_FUNCTION(pcntl_get_last_error)
 {
-        RETURN_LONG(PCNTL_G(last_error));
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_LONG(PCNTL_G(last_error));
 }
 /* }}} */
 
@@ -1425,13 +1437,13 @@ PHP_FUNCTION(pcntl_get_last_error)
    Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(pcntl_strerror)
 {
-        zend_long error;
+	zend_long error;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &error) == FAILURE) {
-                RETURN_FALSE;
-        }
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &error) == FAILURE) {
+		return;
+	}
 
-        RETURN_STRING(strerror(error));
+	RETURN_STRING(strerror(error));
 }
 /* }}} */
 
@@ -1537,7 +1549,7 @@ void pcntl_signal_dispatch()
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }
 
-/* {{{ proto bool pcntl_async_signals([bool on[)
+/* {{{ proto bool pcntl_async_signals([bool on])
    Enable/disable asynchronous signal handling and return the old setting. */
 PHP_FUNCTION(pcntl_async_signals)
 {
