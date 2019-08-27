@@ -75,3 +75,10 @@ jobs:
         configurationName: DEBUG_ZTS_MSAN
         configurationParameters: '--enable-debug --enable-maintainer-zts'
         runTestsParameters: --asan
+    - template: azure/community_job.yml
+      parameters:
+        configurationName: COMMUNITY
+        configurationParameters: >-
+            --enable-debug --enable-maintainer-zts
+            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
