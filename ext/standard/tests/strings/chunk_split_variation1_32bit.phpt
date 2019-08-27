@@ -22,4 +22,4 @@ var_dump(chunk_split($a,$b,$c));
 --EXPECTF--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 1 ***
 
-Fatal error: Allowed memory size of %d bytes exhausted at %s (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
