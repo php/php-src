@@ -901,6 +901,7 @@ default_socket_timeout = 60
 ;
 ;extension=bz2
 ;extension=curl
+;extension=ffi
 ;extension=fileinfo
 ;extension=gd2
 ;extension=gettext
