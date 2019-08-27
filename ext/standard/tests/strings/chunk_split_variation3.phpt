@@ -1,5 +1,9 @@
 --TEST--
 Test chunk_split() function : usage variations - unexpected large number of chunks
+--SKIPIF--
+<?php
+if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
+?>
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
