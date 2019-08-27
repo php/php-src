@@ -55,7 +55,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err);
 
 PHP_WINUTIL_API char *php_win32_get_username(void);
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *img, const char *path, char **err);
+PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *img, char **err);
 PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *img, char **err);
 
 #endif
