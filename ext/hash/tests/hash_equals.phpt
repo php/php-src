@@ -39,9 +39,9 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-[Error] Expected known_string to be a string, int given
-[Error] Expected user_string to be a string, int given
-[Error] Expected known_string to be a string, int given
-[Error] Expected known_string to be a string, null given
-[Error] Expected known_string to be a string, null given
-[Error] Expected known_string to be a string, null given
+[TypeError] Expected known_string to be a string, int given
+[TypeError] Expected user_string to be a string, int given
+[TypeError] Expected known_string to be a string, int given
+[TypeError] Expected known_string to be a string, null given
+[TypeError] Expected known_string to be a string, null given
+[TypeError] Expected known_string to be a string, null given
