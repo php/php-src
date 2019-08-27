@@ -168,7 +168,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_image_compatible(libpath, NULL, &err1)) {
+	if (!php_win32_image_compatible(libpath, &err1)) {
 			php_error_docref(NULL, error_type, err1);
 			efree(err1);
 			efree(libpath);
