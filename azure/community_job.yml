@@ -1,7 +1,6 @@
 parameters:
   configurationName: ''
   configurationParameters: ''
-  runTestsParameters: ''
   timeoutInMinutes: 60
 
 jobs:
@@ -22,22 +21,17 @@ jobs:
         sudo chmod 777 /etc/php.d
         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        echo zend_extension=opcache.so > /etc/php.d/opcache.ini
         echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
-        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
-        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
-      displayName: 'Setup'
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsParameters: ${{ parameters.runTestsParameters }}
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
+        git clone https://github.com/laravel/framework.git --branch=master --depth=1
+        cd framework
+        php7.3 /usr/bin/composer install
+        export USE_ZEND_ALLOC=0
+        php vendor/bin/phpunit
+        status=$?
+        if [ $status -gt 128 ]; then
+          exit 1
+        fi
+      displayName: 'Test Laravel'
