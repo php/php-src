@@ -9,7 +9,11 @@ class foo {
 	}
     function testNull ()
     {
-        var_dump(get_class(null));
+        try {
+            var_dump(get_class(null));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
     }
 }
 
@@ -23,7 +27,11 @@ $f1->bar();
 $f2->bar();
 
 var_dump(get_class());
-var_dump(get_class("qwerty"));
+try {
+    var_dump(get_class("qwerty"));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 var_dump(get_class($f1));
 var_dump(get_class($f2));
@@ -38,12 +46,8 @@ string(3) "foo"
 
 Warning: get_class() called without object from outside a class in %s on line %d
 bool(false)
-
-Warning: get_class() expects parameter 1 to be object, string given in %s on line %d
-bool(false)
+get_class() expects parameter 1 to be object, string given
 string(3) "foo"
 string(4) "foo2"
-
-Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
-bool(false)
+get_class() expects parameter 1 to be object, null given
 Done
