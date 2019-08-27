@@ -2427,7 +2427,7 @@ static zend_long php_extract_skip(zend_array *arr, zend_array *symbol_table) /* 
 }
 /* }}} */
 
-/* {{{ proto int|null extract(array var_array [, int extract_type [, string prefix]])
+/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
