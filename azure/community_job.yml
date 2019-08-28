@@ -29,6 +29,7 @@ jobs:
         cd framework
         php7.3 /usr/bin/composer install --no-interaction
         export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
