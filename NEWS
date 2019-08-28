@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #78454 (Consecutive numeric separators cause OOM error).
     (Theodore Brown)
+  . Fixed bug #78335 (Static properties/variables containing cycles report as
+    leak). (Nikita)
 
 - FPM:
   . Fixed bug #78334 (fpm log prefix message includes wrong stdout/stderr
