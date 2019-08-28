@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #78412 (Generator incorrectly reports non-releasable $this as GC
     child). (Nikita)
 
+- FastCGI:
+  . Fixed bug #78469 (FastCGI on_accept hook is not called when using named
+    pipes on Windows). (Sergei Turchanov)
+
 - MySQLnd:
   . Fixed connect_attr issues and added the _server_host connection attribute.
     (Qianqian Bu)
