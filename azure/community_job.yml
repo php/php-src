@@ -29,7 +29,9 @@ jobs:
         cd framework
         php7.3 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
-        export USE_TRACKED_ALLOC=1
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
+        # Avoid test using exit(), which thus leaks.
+        # We can use USE_TRACKED_ALLOC=1 if more of these show up.
+        sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
