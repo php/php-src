@@ -225,7 +225,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	{
 		zend_string *name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
-		zend_string *class_name = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
+		zend_string *class_name = zend_string_init("StdClass", sizeof("StdClass") - 1, 1);
 		zval val;
 		ZVAL_NULL(&val);
 		zend_declare_typed_property(
