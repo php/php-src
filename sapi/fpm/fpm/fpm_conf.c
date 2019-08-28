@@ -148,6 +148,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "request_slowlog_timeout",   &fpm_conf_set_time,        WPO(request_slowlog_timeout) },
 	{ "request_slowlog_trace_depth", &fpm_conf_set_integer,     WPO(request_slowlog_trace_depth) },
 	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
+	{ "request_terminate_strict",  &fpm_conf_set_boolean,     WPO(request_terminate_strict) },
 	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
 	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
 	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
@@ -1664,6 +1665,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_trace_depth = %d", wp->config->request_slowlog_trace_depth);
 		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
+		zlog(ZLOG_NOTICE, "\trequest_terminate_strict = %s",   BOOL2STR(wp->config->request_terminate_strict));
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);
 		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
