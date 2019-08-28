@@ -74,6 +74,8 @@ jobs:
       displayName: 'Make Build'
     - script: |
         sudo make install
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - template: test.yml
       parameters:
@@ -82,4 +84,4 @@ jobs:
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+        runTestsParameters: -d zend_extension=opcache.so
