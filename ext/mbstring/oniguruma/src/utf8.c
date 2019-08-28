@@ -2,7 +2,7 @@
   utf8.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,9 @@
  */
 
 #include "regenc.h"
+
+/* U+0000 - U+10FFFF */
+#define USE_RFC3629_RANGE
 
 /* #define USE_INVALID_CODE_SCHEME */
 
@@ -57,7 +60,11 @@ static const int EncLen_UTF8[] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+#ifdef USE_RFC3629_RANGE
   4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+#else
+  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1
+#endif
 };
 
 static int
@@ -78,11 +85,11 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
     len = mbc_enc_len(p++);
     if (len > 1) {
       for (i = 1; i < len; i++) {
-	if (p == end)
-	  return FALSE;
+        if (p == end)
+          return FALSE;
 
-	if (! utf8_istail(*p++))
-	  return FALSE;
+        if (! utf8_istail(*p++))
+          return FALSE;
       }
     }
   }
@@ -153,8 +160,10 @@ code_to_mbclen(OnigCodePoint code)
   else if ((code & 0xfffff800) == 0) return 2;
   else if ((code & 0xffff0000) == 0) return 3;
   else if ((code & 0xffe00000) == 0) return 4;
+#ifndef USE_RFC3629_RANGE
   else if ((code & 0xfc000000) == 0) return 5;
   else if ((code & 0x80000000) == 0) return 6;
+#endif
 #ifdef USE_INVALID_CODE_SCHEME
   else if (code == INVALID_CODE_FE) return 1;
   else if (code == INVALID_CODE_FF) return 1;
@@ -188,6 +197,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
       *p++ = UTF8_TRAILS(code, 12);
       *p++ = UTF8_TRAILS(code,  6);
     }
+#ifndef USE_RFC3629_RANGE
     else if ((code & 0xfc000000) == 0) {
       *p++ = (UChar )(((code>>24) & 0x03) | 0xf8);
       *p++ = UTF8_TRAILS(code, 18);
@@ -201,6 +211,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
       *p++ = UTF8_TRAILS(code, 12);
       *p++ = UTF8_TRAILS(code,  6);
     }
+#endif
 #ifdef USE_INVALID_CODE_SCHEME
     else if (code == INVALID_CODE_FE) {
       *p = 0xfe;
@@ -222,7 +233,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
 
 static int
 mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
-	      const UChar* end, UChar* fold)
+              const UChar* end, UChar* fold)
 {
   const UChar* p = *pp;
 
@@ -244,13 +255,13 @@ mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
   }
   else {
     return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF8, flag,
-					 pp, end, fold);
+                                         pp, end, fold);
   }
 }
 
 static int
 get_ctype_code_range(OnigCtype ctype, OnigCodePoint *sb_out,
-		     const OnigCodePoint* ranges[])
+                     const OnigCodePoint* ranges[])
 {
   *sb_out = 0x80;
   return onigenc_unicode_ctype_code_range(ctype, ranges);
@@ -274,13 +285,17 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_unicode_get_case_fold_codes_by_str(ONIG_ENCODING_UTF8,
-						    flag, p, end, items);
+                                                    flag, p, end, items);
 }
 
 OnigEncodingType OnigEncodingUTF8 = {
   mbc_enc_len,
   "UTF-8",     /* name */
+#ifdef USE_RFC3629_RANGE
   4,           /* max enc length */
+#else
+  6,
+#endif
   1,           /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   mbc_to_code,

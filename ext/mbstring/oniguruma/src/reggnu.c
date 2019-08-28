@@ -2,7 +2,7 @@
   reggnu.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ re_free_registers(OnigRegion* r)
 
 extern int
 re_adjust_startpos(regex_t* reg, const char* string, int size,
-		   int startpos, int range)
+                   int startpos, int range)
 {
   if (startpos > 0 && ONIGENC_MBC_MAXLEN(reg->enc) != 1 && startpos < size) {
     UChar *p;
@@ -59,20 +59,20 @@ re_adjust_startpos(regex_t* reg, const char* string, int size,
 
 extern int
 re_match(regex_t* reg, const char* str, int size, int pos,
-	 struct re_registers* regs)
+         struct re_registers* regs)
 {
   return onig_match(reg, (UChar* )str, (UChar* )(str + size),
-		    (UChar* )(str + pos), regs, ONIG_OPTION_NONE);
+                    (UChar* )(str + pos), regs, ONIG_OPTION_NONE);
 }
 
 extern int
 re_search(regex_t* bufp, const char* string, int size, int startpos, int range,
-	  struct re_registers* regs)
+          struct re_registers* regs)
 {
   return onig_search(bufp, (UChar* )string, (UChar* )(string + size),
-		     (UChar* )(string + startpos),
-		     (UChar* )(string + startpos + range),
-		     regs, ONIG_OPTION_NONE);
+                     (UChar* )(string + startpos),
+                     (UChar* )(string + startpos + range),
+                     regs, ONIG_OPTION_NONE);
 }
 
 extern int
@@ -103,9 +103,9 @@ re_alloc_pattern(regex_t** reg)
   if (IS_NULL(*reg)) return ONIGERR_MEMORY;
 
   return onig_reg_init(*reg, ONIG_OPTION_DEFAULT,
-		       ONIGENC_CASE_FOLD_DEFAULT,
-		       OnigEncDefaultCharEncoding,
-		       OnigDefaultSyntax);
+                       ONIGENC_CASE_FOLD_DEFAULT,
+                       OnigEncDefaultCharEncoding,
+                       OnigDefaultSyntax);
 }
 
 extern void

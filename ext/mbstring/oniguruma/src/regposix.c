@@ -2,7 +2,7 @@
   regposix.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #define regex_t   onig_regex_t
 #include "regint.h"
 #undef regex_t
+
 #include "onigposix.h"
 
 #define ONIG_C(reg)    ((onig_regex_t* )((reg)->onig))
@@ -148,6 +149,8 @@ regcomp(regex_t* reg, const char* pattern, int posix_options)
   OnigSyntaxType* syntax = OnigDefaultSyntax;
   OnigOptionType options;
 
+  reg->onig = (void* )0;
+
   if ((posix_options & REG_EXTENDED) == 0)
     syntax = ONIG_SYNTAX_POSIX_BASIC;
 
@@ -163,8 +166,8 @@ regcomp(regex_t* reg, const char* pattern, int posix_options)
 
   ENC_STRING_LEN(OnigEncDefaultCharEncoding, pattern, len);
   r = onig_new(PONIG_C(reg), (UChar* )pattern, (UChar* )(pattern + len),
-	       options, OnigEncDefaultCharEncoding, syntax,
-	       (OnigErrorInfo* )NULL);
+               options, OnigEncDefaultCharEncoding, syntax,
+               (OnigErrorInfo* )NULL);
   if (r != ONIG_NORMAL) {
     return onig2posix_error_code(r);
   }
@@ -175,7 +178,7 @@ regcomp(regex_t* reg, const char* pattern, int posix_options)
 
 extern int
 regexec(regex_t* reg, const char* str, size_t nmatch,
-	regmatch_t pmatch[], int posix_options)
+        regmatch_t pmatch[], int posix_options)
 {
   int r, i, len;
   UChar* end;
@@ -203,7 +206,7 @@ regexec(regex_t* reg, const char* str, size_t nmatch,
   ENC_STRING_LEN(ONIG_C(reg)->enc, str, len);
   end = (UChar* )(str + len);
   r = onig_search(ONIG_C(reg), (UChar* )str, end, (UChar* )str, end,
-		  (OnigRegion* )pm, options);
+                  (OnigRegion* )pm, options);
 
   if (r >= 0) {
     r = 0; /* Match */
@@ -235,6 +238,7 @@ extern void
 regfree(regex_t* reg)
 {
   onig_free(ONIG_C(reg));
+  reg->onig = (void* )0;
 }
 
 
@@ -288,7 +292,7 @@ typedef struct {
 
 static int
 i_wrapper(const UChar* name, const UChar* name_end, int ng, int* gs,
-	  onig_regex_t* reg ARG_UNUSED, void* arg)
+          onig_regex_t* reg ARG_UNUSED, void* arg)
 {
   i_wrap* warg = (i_wrap* )arg;
 

@@ -4,7 +4,7 @@
   oniguruma.h - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,9 @@ extern "C" {
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   6
 #define ONIGURUMA_VERSION_MINOR   9
-#define ONIGURUMA_VERSION_TEENY   1
+#define ONIGURUMA_VERSION_TEENY   3
 
-#define ONIGURUMA_VERSION_INT     60901
+#define ONIGURUMA_VERSION_INT     60903
 
 #ifndef P_
 #if defined(__STDC__) || defined(_WIN32)
@@ -52,6 +52,7 @@ extern "C" {
 # define PV_(args) args
 #endif
 
+#ifndef ONIG_STATIC
 #ifndef ONIG_EXTERN
 #if defined(_WIN32) && !defined(__GNUC__)
 #if defined(ONIGURUMA_EXPORT)
@@ -63,6 +64,9 @@ extern "C" {
 #endif
 
 #ifndef ONIG_EXTERN
+#define ONIG_EXTERN   extern
+#endif
+#else
 #define ONIG_EXTERN   extern
 #endif
 
@@ -385,8 +389,10 @@ typedef unsigned int        OnigOptionType;
 #define ONIG_OPTION_DIGIT_IS_ASCII       (ONIG_OPTION_WORD_IS_ASCII << 1)
 #define ONIG_OPTION_SPACE_IS_ASCII       (ONIG_OPTION_DIGIT_IS_ASCII << 1)
 #define ONIG_OPTION_POSIX_IS_ASCII       (ONIG_OPTION_SPACE_IS_ASCII << 1)
+#define ONIG_OPTION_TEXT_SEGMENT_EXTENDED_GRAPHEME_CLUSTER  (ONIG_OPTION_POSIX_IS_ASCII << 1)
+#define ONIG_OPTION_TEXT_SEGMENT_WORD    (ONIG_OPTION_TEXT_SEGMENT_EXTENDED_GRAPHEME_CLUSTER << 1)
 
-#define ONIG_OPTION_MAXBIT               ONIG_OPTION_POSIX_IS_ASCII  /* limit */
+#define ONIG_OPTION_MAXBIT               ONIG_OPTION_TEXT_SEGMENT_WORD  /* limit */
 
 #define ONIG_OPTION_ON(options,regopt)      ((options) |= (regopt))
 #define ONIG_OPTION_OFF(options,regopt)     ((options) &= ~(regopt))
@@ -490,10 +496,12 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIG_SYN_OP2_ESC_CAPITAL_R_GENERAL_NEWLINE (1U<<23) /* \R \r\n else [\x0a-\x0d] */
 #define ONIG_SYN_OP2_ESC_CAPITAL_N_O_SUPER_DOT  (1U<<24) /* \N (?-m:.), \O (?m:.) */
 #define ONIG_SYN_OP2_QMARK_TILDE_ABSENT_GROUP   (1U<<25) /* (?~...) */
-#define ONIG_SYN_OP2_ESC_X_Y_GRAPHEME_CLUSTER   (1U<<26) /* \X \y \Y */
+#define ONIG_SYN_OP2_ESC_X_Y_GRAPHEME_CLUSTER   (1U<<26) /* obsoleted: use next */
+#define ONIG_SYN_OP2_ESC_X_Y_TEXT_SEGMENT       (1U<<26) /* \X \y \Y */
 #define ONIG_SYN_OP2_QMARK_PERL_SUBEXP_CALL     (1U<<27) /* (?R), (?&name)... */
 #define ONIG_SYN_OP2_QMARK_BRACE_CALLOUT_CONTENTS (1U<<28) /* (?{...}) (?{{...}}) */
 #define ONIG_SYN_OP2_ASTERISK_CALLOUT_NAME      (1U<<29) /* (*name) (*name{a,..}) */
+#define ONIG_SYN_OP2_OPTION_ONIGURUMA           (1U<<30) /* (?imxWDSPy) */
 
 /* syntax (behavior) */
 #define ONIG_SYN_CONTEXT_INDEP_ANCHORS           (1U<<31) /* not implemented */
@@ -513,6 +521,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIG_SYN_BACKSLASH_ESCAPE_IN_CC          (1U<<21) /* [..\w..] etc.. */
 #define ONIG_SYN_ALLOW_EMPTY_RANGE_IN_CC         (1U<<22)
 #define ONIG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC     (1U<<23) /* [0-9-a]=[0-9\-a] */
+#define ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE_IN_CC (1U<<26)
 /* syntax (behavior) warning */
 #define ONIG_SYN_WARN_CC_OP_NOT_ESCAPED          (1U<<24) /* [,-,] */
 #define ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT    (1U<<25) /* (?:a*)+ */
@@ -761,6 +770,8 @@ ONIG_EXTERN
 int onig_init P_((void));
 ONIG_EXTERN
 int onig_error_code_to_str PV_((OnigUChar* s, int err_code, ...));
+ONIG_EXTERN
+int onig_is_error_code_needs_param PV_((int code));
 ONIG_EXTERN
 void onig_set_warn_func P_((OnigWarnFunc f));
 ONIG_EXTERN

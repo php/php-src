@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.8.0    2018/07/26
+Oniguruma Regular Expressions Version 6.9.2    2019/03/29
 
 syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
@@ -81,15 +81,23 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
   \O       true anychar      (?m:.)    (* original function)
 
-  \X       Extended Grapheme Cluster    (?>\O(?:\Y\O)*)
+  \X       Text Segment    \X === (?>\O(?:\Y\O)*)
 
-           \X doesn't check whether matching start position is boundary.
-           Write as \y\X if you want to ensure it.
+           The meaning of this operator changes depending on the setting of
+           the option (?y{..}).
 
-           Unicode case:
+           \X doesn't check whether matching start position is boundary or not.
+           Please write as \y\X if you want to ensure it.
+
+           [Extended Grapheme Cluster mode] (default)
+             Unicode case:
+               See [Unicode Standard Annex #29: http://unicode.org/reports/tr29/]
+
+             Not Unicode case:  \X === (?>\r\n|\O)
+
+           [Word mode]
+             Currently, this mode is supported in Unicode only.
              See [Unicode Standard Annex #29: http://unicode.org/reports/tr29/]
-
-           Not Unicode:   (?>\r\n|\O)
 
 
   Character Property
@@ -119,17 +127,17 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
     ?       1 or 0 times
     *       0 or more times
     +       1 or more times
-    {n,m}   at least n but no more than m times
+    {n,m}   (n <= m)  at least n but no more than m times
     {n,}    at least n times
     {,n}    at least 0 but no more than n times ({0,n})
     {n}     n times
 
   reluctant
 
-    ??      1 or 0 times
+    ??      0 or 1 times
     *?      0 or more times
     +?      1 or more times
-    {n,m}?  at least n but not more than m times
+    {n,m}?  (n <= m)  at least n but not more than m times
     {n,}?   at least n times
     {,n}?   at least 0 but not more than n times (== {0,n}?)
 
@@ -138,8 +146,10 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
     ?+      1 or 0 times
     *+      0 or more times
     ++      1 or more times
+    {n,m}   (n > m)  at least m but not more than n times
 
-    ({n,m}+, {n,}+, {n}+ are possessive op. in ONIG_SYNTAX_JAVA only)
+    {n,m}+, {n,}+, {n}+ are possessive operators in ONIG_SYNTAX_JAVA and
+    ONIG_SYNTAX_PERL only.
 
     ex. /a*+/ === /(?>a*)/
 
@@ -150,14 +160,30 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
   $       end of the line
   \b      word boundary
   \B      non-word boundary
-  \y      Extended Grapheme Cluster boundary
-  \Y      Extended Grapheme Cluster non-boundary
 
   \A      beginning of string
   \Z      end of string, or before newline at the end
   \z      end of string
   \G      where the current search attempt begins
   \K      keep (keep start position of the result string)
+
+
+  \y      Text Segment boundary
+  \Y      Text Segment non-boundary
+
+          The meaning of these operators(\y, \Y) changes depending on the setting
+          of the option (?y{..}).
+
+          [Extended Grapheme Cluster mode] (default)
+            Unicode case:
+              See [Unicode Standard Annex #29: http://unicode.org/reports/tr29/]
+
+            Not Unicode:
+              All positions except between \r and \n.
+
+          [Word mode]
+            Currently, this mode is supported in Unicode only.
+            See [Unicode Standard Annex #29: http://unicode.org/reports/tr29/]
 
 
 
@@ -221,20 +247,28 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
   (?#...)            comment
 
-  (?imxWDSP-imxWDSP:subexp)  option on/off for subexp
+  (?imxWDSPy-imxWDSP:subexp)  option on/off for subexp
 
-                               i: ignore case
-                               m: multi-line (dot (.) also matches newline)
-                               x: extended form
-                               W: ASCII only word (\w, \p{Word}, [[:word:]])
-                                  ASCII only word bound (\b)
-                               D: ASCII only digit (\d, \p{Digit}, [[:digit:]])
-                               S: ASCII only space (\s, \p{Space}, [[:space:]])
-                               P: ASCII only POSIX properties (includes W,D,S)
-                                  (alnum, alpha, blank, cntrl, digit, graph,
-                                   lower, print, punct, space, upper, xdigit, word)
+                           i: ignore case
+                           m: multi-line (dot (.) also matches newline)
+                           x: extended form
+                           W: ASCII only word (\w, \p{Word}, [[:word:]])
+                              ASCII only word bound (\b)
+                           D: ASCII only digit (\d, \p{Digit}, [[:digit:]])
+                           S: ASCII only space (\s, \p{Space}, [[:space:]])
+                           P: ASCII only POSIX properties (includes W,D,S)
+                              (alnum, alpha, blank, cntrl, digit, graph,
+                               lower, print, punct, space, upper, xdigit, word)
 
-  (?imxWDSP-imxWDSP)  isolated option
+                           y{?}: Text Segment mode
+                              This option changes the meaning of \X, \y, \Y.
+                              Currently, this option is supported in Unicode only.
+
+                              y{g}: Extended Grapheme Cluster mode (default)
+                              y{w}: Word mode
+                              See [Unicode Standard Annex #29]
+
+  (?imxWDSPy-imxWDSP)  isolated option
 
                       * It makes a group to the next ')' or end of the pattern.
                         /ab(?i)c|def|gh/ == /ab(?i:c|def|gh)/
@@ -336,7 +370,7 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
                else_exp can be omitted.
                Then it works as a backreference validity checker.
 
-  [ backreference validity checker ]   (* original)
+  [ Backreference validity checker ]   (* original)
 
     (?(n)), (?(-n)), (?(+n)), (?(n+level)) ...
     (?(<n>)), (?('-n')), (?(<+n>)) ...
@@ -470,10 +504,15 @@ A-1. Syntax-dependent options
 
 A-2. Original extensions
 
-   + hexadecimal digit char type  \h, \H
-   + named group                  (?<name>...), (?'name'...)
-   + named backref                \k<name>
-   + subexp call                  \g<name>, \g<group-num>
+   + hexadecimal digit char type     \h, \H
+   + true anychar                    \O
+   + text segment boundary           \y, \Y
+   + backreference validity checker  (?(...))
+   + named group                     (?<name>...), (?'name'...)
+   + named backref                   \k<name>
+   + subexp call                     \g<name>, \g<group-num>
+   + absent expression               (?~|...|...)
+   + absent stopper                  (?|...)
 
 
 A-3. Missing features compared with perl 5.8.0
@@ -527,29 +566,5 @@ A-4. Differences with Japanized GNU regex(version 0.12) of Ruby 1.8
      then changes of the capture group status are checked as stop condition.
      /(?:()|())*\1\2/ =~ ""
      /(?:\1a|())*/ =~ "a"
-
-
-A-5. Features disabled in default syntax
-
-   + capture history
-
-     (?@...) and (?@<name>...)
-
-     ex. /(?@a)*/.match("aaa") ==> [<0-1>, <1-2>, <2-3>]
-
-     see sample/listcap.c file.
-
-
-A-6. Problems
-
-   + Invalid encoding byte sequence is not checked.
-
-     ex. UTF-8
-
-     * Invalid first byte is treated as a character.
-       /./u =~ "\xa3"
-
-     * Incomplete byte sequence is not checked.
-       /\w+/ =~ "a\xf3\x8ec"
 
 // END

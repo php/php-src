@@ -2,7 +2,7 @@
   unicode.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -502,6 +502,281 @@ onigenc_unicode_get_case_fold_codes_by_str(OnigEncoding enc,
 #else
 #include "unicode_property_data_posix.c"
 #endif
+
+
+#ifdef USE_UNICODE_WORD_BREAK
+
+enum WB_TYPE {
+  WB_Any = 0,
+  WB_ALetter,
+  WB_CR,
+  WB_Double_Quote,
+  WB_Extend,
+  WB_ExtendNumLet,
+  WB_Format,
+  WB_Hebrew_Letter,
+  WB_Katakana,
+  WB_LF,
+  WB_MidLetter,
+  WB_MidNum,
+  WB_MidNumLet,
+  WB_Newline,
+  WB_Numeric,
+  WB_Regional_Indicator,
+  WB_Single_Quote,
+  WB_WSegSpace,
+  WB_ZWJ,
+};
+
+typedef struct {
+  OnigCodePoint start;
+  OnigCodePoint end;
+  enum WB_TYPE  type;
+} WB_RANGE_TYPE;
+
+#include "unicode_wb_data.c"
+
+static enum WB_TYPE
+wb_get_type(OnigCodePoint code)
+{
+  OnigCodePoint low, high, x;
+  enum WB_TYPE type;
+
+  for (low = 0, high = (OnigCodePoint )WB_RANGE_NUM; low < high; ) {
+    x = (low + high) >> 1;
+    if (code > WB_RANGES[x].end)
+      low = x + 1;
+    else
+      high = x;
+  }
+
+  type = (low < (OnigCodePoint )WB_RANGE_NUM &&
+          code >= WB_RANGES[low].start) ?
+    WB_RANGES[low].type : WB_Any;
+
+  return type;
+}
+
+#define IS_WB_IGNORE_TAIL(t)  ((t) == WB_Extend || (t) == WB_Format || (t) == WB_ZWJ)
+#define IS_WB_AHLetter(t)     ((t) == WB_ALetter || (t) == WB_Hebrew_Letter)
+#define IS_WB_MidNumLetQ(t)   ((t) == WB_MidNumLet || (t) == WB_Single_Quote)
+
+static int
+wb_get_next_main_code(OnigEncoding enc, UChar* p, const UChar* end,
+                      OnigCodePoint* rcode, enum WB_TYPE* rtype)
+{
+  OnigCodePoint code;
+  enum WB_TYPE type;
+
+  while (TRUE) {
+    p += enclen(enc, p);
+    if (p >= end) break;
+
+    code = ONIGENC_MBC_TO_CODE(enc, p, end);
+    type = wb_get_type(code);
+    if (! IS_WB_IGNORE_TAIL(type)) {
+      *rcode = code;
+      *rtype = type;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+extern int
+onigenc_wb_is_break_position(OnigEncoding enc, UChar* p, UChar* prev,
+                             const UChar* start, const UChar* end)
+{
+  int r;
+  UChar* pp;
+  OnigCodePoint cfrom;
+  OnigCodePoint cfrom2;
+  OnigCodePoint cto;
+  OnigCodePoint cto2;
+  enum WB_TYPE from;
+  enum WB_TYPE from2;
+  enum WB_TYPE to;
+  enum WB_TYPE to2;
+
+  /* WB1: sot / Any */
+  if (p == start) return TRUE;
+  /* WB2: Any / eot */
+  if (p == end)   return TRUE;
+
+  if (IS_NULL(prev)) {
+    prev = onigenc_get_prev_char_head(enc, start, p);
+    if (IS_NULL(prev)) return TRUE;
+  }
+
+  cfrom = ONIGENC_MBC_TO_CODE(enc, prev, end);
+  cto   = ONIGENC_MBC_TO_CODE(enc, p, end);
+
+  from = wb_get_type(cfrom);
+  to   = wb_get_type(cto);
+
+  /* short cut */
+  if (from == 0 && to == 0) goto WB999;
+
+  /* WB3: CR + LF */
+  if (from == WB_CR && to == WB_LF) return FALSE;
+
+  /* WB3a: (Newline|CR|LF) /  */
+  if (from == WB_Newline || from == WB_CR || from == WB_LF) return TRUE;
+  /* WB3b: / (Newline|CR|LF) */
+  if (to == WB_Newline || to == WB_CR || to == WB_LF) return TRUE;
+
+  /* WB3c: ZWJ + {Extended_Pictographic} */
+  if (from == WB_ZWJ) {
+    if (onigenc_unicode_is_code_ctype(cto, PROP_INDEX_EXTENDEDPICTOGRAPHIC))
+      return FALSE;
+  }
+
+  /* WB3d: WSegSpace + WSegSpace */
+  if (from == WB_WSegSpace && to == WB_WSegSpace) return FALSE;
+
+  /* WB4:  X (Extend|Format|ZWJ)* -> X */
+  if (IS_WB_IGNORE_TAIL(to)) return FALSE;
+  if (IS_WB_IGNORE_TAIL(from)) {
+    while ((pp = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+      prev = pp;
+      cfrom = ONIGENC_MBC_TO_CODE(enc, prev, end);
+      from = wb_get_type(cfrom);
+      if (! IS_WB_IGNORE_TAIL(from))
+        break;
+    }
+  }
+
+  if (IS_WB_AHLetter(from)) {
+    /* WB5: AHLetter + AHLetter */
+    if (IS_WB_AHLetter(to)) return FALSE;
+
+    /* WB6: AHLetter + (MidLetter | MidNumLetQ) AHLetter */
+    if (to == WB_MidLetter || IS_WB_MidNumLetQ(to)) {
+      r = wb_get_next_main_code(enc, p, end, &cto2, &to2);
+      if (r == 1) {
+        if (IS_WB_AHLetter(to2)) return FALSE;
+      }
+    }
+  }
+
+  /* WB7: AHLetter (MidLetter | MidNumLetQ) + AHLetter */
+  if (from == WB_MidLetter || IS_WB_MidNumLetQ(from)) {
+    if (IS_WB_AHLetter(to)) {
+      from2 = WB_Any;
+      while ((pp = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+        prev = pp;
+        cfrom2 = ONIGENC_MBC_TO_CODE(enc, prev, end);
+        from2 = wb_get_type(cfrom2);
+        if (! IS_WB_IGNORE_TAIL(from2))
+          break;
+      }
+
+      if (IS_WB_AHLetter(from2)) return FALSE;
+    }
+  }
+
+  if (from == WB_Hebrew_Letter) {
+    /* WB7a: Hebrew_Letter + Single_Quote */
+    if (to == WB_Single_Quote) return FALSE;
+
+    /* WB7b: Hebrew_Letter + Double_Quote Hebrew_Letter */
+    if (to == WB_Double_Quote) {
+      r = wb_get_next_main_code(enc, p, end, &cto2, &to2);
+      if (r == 1) {
+        if (to2 == WB_Hebrew_Letter) return FALSE;
+      }
+    }
+  }
+
+  /* WB7c: Hebrew_Letter Double_Quote + Hebrew_Letter */
+  if (from == WB_Double_Quote) {
+    if (to == WB_Hebrew_Letter) {
+      from2 = WB_Any;
+      while ((pp = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+        prev = pp;
+        cfrom2 = ONIGENC_MBC_TO_CODE(enc, prev, end);
+        from2 = wb_get_type(cfrom2);
+        if (! IS_WB_IGNORE_TAIL(from2))
+          break;
+      }
+
+      if (from2 == WB_Hebrew_Letter) return FALSE;
+    }
+  }
+
+  if (to == WB_Numeric) {
+    /* WB8: Numeric + Numeric */
+    if (from == WB_Numeric) return FALSE;
+
+    /* WB9: AHLetter + Numeric */
+    if (IS_WB_AHLetter(from)) return FALSE;
+
+    /* WB11: Numeric (MidNum | MidNumLetQ) + Numeric */
+    if (from == WB_MidNum || IS_WB_MidNumLetQ(from)) {
+      from2 = WB_Any;
+      while ((pp = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+        prev = pp;
+        cfrom2 = ONIGENC_MBC_TO_CODE(enc, prev, end);
+        from2 = wb_get_type(cfrom2);
+        if (! IS_WB_IGNORE_TAIL(from2))
+          break;
+      }
+
+      if (from2 == WB_Numeric) return FALSE;
+    }
+  }
+
+  if (from == WB_Numeric) {
+    /* WB10: Numeric + AHLetter */
+    if (IS_WB_AHLetter(to)) return FALSE;
+
+    /* WB12: Numeric + (MidNum | MidNumLetQ) Numeric */
+    if (to == WB_MidNum || IS_WB_MidNumLetQ(to)) {
+      r = wb_get_next_main_code(enc, p, end, &cto2, &to2);
+      if (r == 1) {
+        if (to2 == WB_Numeric) return FALSE;
+      }
+    }
+  }
+
+  /* WB13: Katakana + Katakana */
+  if (from == WB_Katakana && to == WB_Katakana) return FALSE;
+
+  /* WB13a: (AHLetter | Numeric | Katakana | ExtendNumLet) + ExtendNumLet */
+  if (IS_WB_AHLetter(from) || from == WB_Numeric || from == WB_Katakana
+      || from == WB_ExtendNumLet) {
+    if (to == WB_ExtendNumLet) return FALSE;
+  }
+
+  /* WB13b: ExtendNumLet + (AHLetter | Numeric | Katakana) */
+  if (from == WB_ExtendNumLet) {
+    if (IS_WB_AHLetter(to) || to == WB_Numeric || to == WB_Katakana)
+      return FALSE;
+  }
+
+
+  /* WB15:   sot (RI RI)* RI + RI */
+  /* WB16: [^RI] (RI RI)* RI + RI */
+  if (from == WB_Regional_Indicator && to == WB_Regional_Indicator) {
+    int n = 0;
+    while ((prev = onigenc_get_prev_char_head(enc, start, prev)) != NULL) {
+      cfrom2 = ONIGENC_MBC_TO_CODE(enc, prev, end);
+      from2  = wb_get_type(cfrom2);
+      if (from2 != WB_Regional_Indicator)
+        break;
+
+      n++;
+    }
+    if ((n % 2) == 0) return FALSE;
+  }
+
+ WB999:
+  /* WB999: Any / Any */
+  return TRUE;
+}
+
+#endif /* USE_UNICODE_WORD_BREAK */
 
 
 #ifdef USE_UNICODE_EXTENDED_GRAPHEME_CLUSTER

@@ -1,4 +1,4 @@
-鬼車インターフェース Version 6.8.0   2018/03/13
+鬼車インターフェース Version 6.9.3   2019/07/06
 
 #include <oniguruma.h>
 
@@ -91,6 +91,8 @@
                                      (alnum, alpha, blank, cntrl, digit, graph,
                                       lower, print, punct, space, upper, xdigit,
                                       word)
+      ONIG_OPTION_TEXT_SEGMENT_EXTENDED_GRAPHEME_CLUSTER  拡張書記素房モード
+      ONIG_OPTION_TEXT_SEGMENT_WORD                       単語モード
 
   5 enc:        文字エンコーディング
 
@@ -164,6 +166,9 @@
 
 # int onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
                       OnigCompileInfo* ci, OnigErrorInfo* einfo)
+
+  この関数は廃止予定。
+  パターンと対象文字列の文字エンコーディングが異なる場合を許さなくなった。
 
   正規表現オブジェクト(regex)を作成する。
   この関数は、onig_new()のデラックス版。
@@ -296,6 +301,7 @@
                    const UChar* range, OnigRegion* region, OnigOptionType option)
 
   正規表現で文字列を検索し、検索結果とマッチ領域を返す。
+  正規表現オブジェクトの文字エンコーディングで、検索文字列として不正な文字列を渡してはいけない。
 
   正常終了戻り値: マッチ位置 (p - str >= 0)
   検索失敗:       ONIG_MISMATCH (< 0)
@@ -320,15 +326,19 @@
                    const UChar* start, const UChar* range, OnigRegion* region,
                    OnigOptionType option, OnigMatchParam* mp)
 
+  正規表現で文字列を検索し、検索結果とマッチ領域を返す。
+  正規表現オブジェクトの文字エンコーディングで、検索文字列として不正な文字列を渡してはいけない。
+
   引数
   1-7:  onig_search()と同じ
   8 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
 
 
-# int onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
-		 OnigRegion* region, OnigOptionType option)
+# int onig_match(regex_t* reg, const UChar* str, const UChar* end,
+                 const UChar* at, OnigRegion* region, OnigOptionType option)
 
   文字列の指定位置でマッチングを行い、結果とマッチ領域を返す。
+  正規表現オブジェクトの文字エンコーディングで、検索文字列として不正な文字列を渡してはいけない。
 
   正常終了戻り値: マッチしたバイト長 (>= 0)
   not match:      ONIG_MISMATCH      ( < 0)
@@ -350,6 +360,9 @@
                             const UChar* at, OnigRegion* region,
                             OnigOptionType option, OnigMatchParam* mp)
 
+  文字列の指定位置でマッチングを行い、結果とマッチ領域を返す。
+  正規表現オブジェクトの文字エンコーディングで、検索文字列として不正な文字列を渡してはいけない。
+
   引数
   1-6:  onig_match()と同じ
   7 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
@@ -361,6 +374,7 @@
                 void* callback_arg)
 
   正規表現で文字列をスキャンして、マッチングする毎にコールバック関数を呼び出す。
+  正規表現オブジェクトの文字エンコーディングで、検索文字列として不正な文字列を渡してはいけない。
 
   正常終了: マッチ回数 (0回も含める)
   エラー:   エラーコード (< 0)
@@ -614,14 +628,20 @@
 
 
 # int onigenc_strlen(OnigEncoding enc, const UChar* s, const UChar* end)
+
+  文字列の文字数を返す。
+
+
 # int onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 
   文字列の文字数を返す。
+  文字エンコーディングに対して、不正な文字列を渡してはいけない。
 
 
 # int onigenc_str_bytelen_null(OnigEncoding enc, const UChar* s)
 
   文字列のバイト数を返す。
+  文字エンコーディングに対して、不正な文字列を渡してはいけない。
 
 
 # int onig_set_default_syntax(OnigSyntaxType* syntax)

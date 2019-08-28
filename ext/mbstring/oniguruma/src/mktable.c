@@ -2,7 +2,7 @@
   mktable.c
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -269,7 +269,7 @@ static int IsBlank(int enc, int c)
   if (enc == ASCII)
     return isblank(c);
 
-  if (c == 0x09	|| c == 0x20) return 1;
+  if (c == 0x09 || c == 0x20) return 1;
 
   switch (enc) {
   case UNICODE_ISO_8859_1:
@@ -308,7 +308,7 @@ static int IsCntrl(int enc, int c)
   if (enc == ASCII)
     return iscntrl(c);
 
-  if (c >= 0x00	&& c <= 0x1F) return 1;
+  if (c >= 0x00 && c <= 0x1F) return 1;
 
   switch (enc) {
   case UNICODE_ISO_8859_1:
@@ -376,10 +376,10 @@ static int IsGraph(int enc, int c)
   case ISO_8859_3:
     if (c >= 0xa1) {
       if (c == 0xa5 || c == 0xae || c == 0xbe || c == 0xc3 || c == 0xd0 ||
-	  c == 0xe3 || c == 0xf0)
-	return 0;
+          c == 0xe3 || c == 0xf0)
+        return 0;
       else
-	return 1;
+        return 1;
     }
     break;
 
@@ -392,8 +392,8 @@ static int IsGraph(int enc, int c)
 
   case ISO_8859_7:
     if (c >= 0xa1 && c <= 0xfe &&
-	c != 0xa4 && c != 0xa5 && c != 0xaa &&
-	c != 0xae && c != 0xd2) return 1;
+        c != 0xa4 && c != 0xa5 && c != 0xaa &&
+        c != 0xae && c != 0xd2) return 1;
     break;
 
   case ISO_8859_8:
@@ -583,10 +583,10 @@ static int IsPrint(int enc, int c)
   case ISO_8859_3:
     if (c >= 0xa0) {
       if (c == 0xa5 || c == 0xae || c == 0xbe || c == 0xc3 || c == 0xd0 ||
-	  c == 0xe3 || c == 0xf0)
-	return 0;
+          c == 0xe3 || c == 0xf0)
+        return 0;
       else
-	return 1;
+        return 1;
     }
     break;
 
@@ -600,8 +600,8 @@ static int IsPrint(int enc, int c)
 
   case ISO_8859_7:
     if (c >= 0xa0 && c <= 0xfe &&
-	c != 0xa4 && c != 0xa5 && c != 0xaa &&
-	c != 0xae && c != 0xd2) return 1;
+        c != 0xa4 && c != 0xa5 && c != 0xaa &&
+        c != 0xae && c != 0xd2) return 1;
     break;
 
   case ISO_8859_8:
@@ -1012,7 +1012,7 @@ static int IsWord(int enc, int c)
   case ISO_8859_10:
     if (c >= 0xa1 && c <= 0xff) {
       if (c != 0xa7 && c != 0xad && c != 0xb0 && c != 0xb7 && c != 0xbd)
-	return 1;
+        return 1;
     }
     break;
 
@@ -1037,7 +1037,7 @@ static int IsWord(int enc, int c)
   case ISO_8859_14:
     if (c >= 0xa1 && c <= 0xff) {
       if (c == 0xa3 || c == 0xa7 || c == 0xa9 || c == 0xad || c == 0xae ||
-	  c == 0xb6) return 0;
+          c == 0xb6) return 0;
       return 1;
     }
     break;

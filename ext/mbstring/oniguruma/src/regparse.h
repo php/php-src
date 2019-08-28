@@ -4,7 +4,7 @@
   regparse.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,19 +59,18 @@ enum BagType {
 
 enum GimmickType {
   GIMMICK_FAIL       = 0,
-  GIMMICK_KEEP       = 1,
-  GIMMICK_SAVE       = 2,
-  GIMMICK_UPDATE_VAR = 3,
+  GIMMICK_SAVE       = 1,
+  GIMMICK_UPDATE_VAR = 2,
 #ifdef USE_CALLOUT
-  GIMMICK_CALLOUT    = 4,
+  GIMMICK_CALLOUT    = 3,
 #endif
 };
 
-enum QuantBodyEmpty {
-  QUANT_BODY_IS_NOT_EMPTY = 0,
-  QUANT_BODY_IS_EMPTY     = 1,
-  QUANT_BODY_IS_EMPTY_MEM = 2,
-  QUANT_BODY_IS_EMPTY_REC = 3
+enum BodyEmptyType {
+  BODY_IS_NOT_EMPTY             = 0,
+  BODY_IS_EMPTY_POSSIBILITY     = 1,
+  BODY_IS_EMPTY_POSSIBILITY_MEM = 2,
+  BODY_IS_EMPTY_POSSIBILITY_REC = 3
 };
 
 typedef struct {
@@ -102,7 +101,7 @@ typedef struct {
   int lower;
   int upper;
   int greedy;
-  enum QuantBodyEmpty body_empty_info;
+  enum BodyEmptyType emptiness;
   struct _Node* head_exact;
   struct _Node* next_head_exact;
   int is_refered;     /* include called node. don't eliminate even if {0} */
@@ -253,10 +252,6 @@ typedef struct _Node {
 #define NODE_BIT_CALL       NODE_TYPE2BIT(NODE_CALL)
 #define NODE_BIT_GIMMICK    NODE_TYPE2BIT(NODE_GIMMICK)
 
-#define NODE_IS_SIMPLE_TYPE(node) \
-  ((NODE_TYPE2BIT(NODE_TYPE(node)) & \
-    (NODE_BIT_STRING | NODE_BIT_CCLASS | NODE_BIT_CTYPE | NODE_BIT_BACKREF)) != 0)
-
 #define NODE_TYPE(node)             ((node)->u.base.node_type)
 #define NODE_SET_TYPE(node, ntype)   (node)->u.base.node_type = (ntype)
 
@@ -315,7 +310,7 @@ typedef struct _Node {
 #define NODE_ST_CLEN_FIXED            (1<<2)
 #define NODE_ST_MARK1                 (1<<3)
 #define NODE_ST_MARK2                 (1<<4)
-#define NODE_ST_STOP_BT_SIMPLE_REPEAT (1<<5)
+#define NODE_ST_STRICT_REAL_REPEAT    (1<<5)
 #define NODE_ST_RECURSION             (1<<6)
 #define NODE_ST_CALLED                (1<<7)
 #define NODE_ST_ADDR_FIXED            (1<<8)
@@ -358,8 +353,8 @@ typedef struct _Node {
 #define NODE_IS_SUPER(node)           ((NODE_STATUS(node) & NODE_ST_SUPER)        != 0)
 #define NODE_IS_PROHIBIT_RECURSION(node) \
     ((NODE_STATUS(node) & NODE_ST_PROHIBIT_RECURSION) != 0)
-#define NODE_IS_STOP_BT_SIMPLE_REPEAT(node) \
-    ((NODE_STATUS(node) & NODE_ST_STOP_BT_SIMPLE_REPEAT) != 0)
+#define NODE_IS_STRICT_REAL_REPEAT(node) \
+    ((NODE_STATUS(node) & NODE_ST_STRICT_REAL_REPEAT) != 0)
 
 #define NODE_BODY(node)           ((node)->u.base.body)
 #define NODE_QUANT_BODY(node)     ((node)->body)

@@ -103,7 +103,7 @@ static const OnigPairCaseFoldCodes CaseFoldMap[] = {
 
 static int
 apply_all_case_fold(OnigCaseFoldType flag,
-		    OnigApplyAllCaseFoldFunc f, void* arg)
+                    OnigApplyAllCaseFoldFunc f, void* arg)
 {
   return onigenc_apply_all_case_fold_with_map(
             sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 1,
@@ -112,15 +112,15 @@ apply_all_case_fold(OnigCaseFoldType flag,
 
 static int
 get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
-			   const OnigUChar* p, const OnigUChar* end,
-			   OnigCaseFoldCodeItem items[])
+                           const OnigUChar* p, const OnigUChar* end,
+                           OnigCaseFoldCodeItem items[])
 {
   if (0x41 <= *p && *p <= 0x5a) {
     items[0].byte_len = 1;
     items[0].code_len = 1;
     items[0].code[0] = (OnigCodePoint )(*p + 0x20);
     if (*p == 0x53 && end > p + 1
-	&& (*(p+1) == 0x53 || *(p+1) == 0x73)) { /* SS */
+        && (*(p+1) == 0x53 || *(p+1) == 0x73)) { /* SS */
       items[1].byte_len = 2;
       items[1].code_len = 1;
       items[1].code[0] = (OnigCodePoint )0xdf;
@@ -134,7 +134,7 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
     items[0].code_len = 1;
     items[0].code[0] = (OnigCodePoint )(*p - 0x20);
     if (*p == 0x73 && end > p + 1
-	&& (*(p+1) == 0x73 || *(p+1) == 0x53)) { /* ss */
+        && (*(p+1) == 0x73 || *(p+1) == 0x53)) { /* ss */
       items[1].byte_len = 2;
       items[1].code_len = 1;
       items[1].code[0] = (OnigCodePoint )0xdf;
@@ -200,7 +200,7 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag ARG_UNUSED,
 
 static int
 mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
-	      const UChar* end ARG_UNUSED, UChar* lower)
+              const UChar* end ARG_UNUSED, UChar* lower)
 {
   const UChar* p = *pp;
 
@@ -218,8 +218,7 @@ mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
 
 #if 0
 static int
-is_mbc_ambiguous(OnigCaseFoldType flag,
-		 const UChar** pp, const UChar* end)
+is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
 {
   int v;
   const UChar* p = *pp;

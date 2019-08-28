@@ -24,37 +24,58 @@ Supported character encodings:
 
 * GB18030: contributed by KUBO Takehiro
 * CP1251:  contributed by Byte
+* doc/SYNTAX.md: contributed by seanofw
 
 
-New feature of version 6.9.1
---------------------------
+Version 6.9.3 (security fix release)
+------------------------------------
+
+* Fixed CVE-2019-13224
+* Fixed CVE-2019-13225
+* Fixed many problems (found by libfuzzer programs)
+
+
+Version 6.9.2 (Reiwa)
+---------------------
+
+* add doc/SYNTAX.md
+* Update Unicode version 12.1.0
+* NEW: Unicode Text Segment mode option (?y{g}) (?y{w})  (*original)
+
+  g: Extended Grapheme Cluster mode / w: Word mode
+
+  (Unicode Standard Annex #29 [http://unicode.org/reports/tr29/])
+
+
+Version 6.9.1
+-------------
 
 * Speed improvement (* especially UTF-8)
 
 
-New feature of version 6.9.0
---------------------------
+Version 6.9.0
+-------------
 
 * Update Unicode version 11.0.0
 * NEW: add Emoji properties
 
 
-New feature of version 6.8.2
---------------------------
+Version 6.8.2
+-------------
 
 * Fix: #80 UChar in header causes issue
 * NEW API: onig_set_callout_user_data_of_match_param()  (* omission in 6.8.0)
 * add doc/CALLOUTS.API and doc/CALLOUTS.API.ja
 
 
-New feature of version 6.8.1
---------------------------
+Version 6.8.1
+-------------
 
 * Update shared library version to 5.0.0 for API incompatible changes from 6.7.1
 
 
-New feature of version 6.8.0
---------------------------
+Version 6.8.0
+-------------
 
 * Retry-limit-in-match function enabled by default
 * NEW: configure option --enable-posix-api=no  (* enabled by default)
@@ -65,14 +86,14 @@ New feature of version 6.8.0
 * Examples of Callouts program: [callout.c](sample/callout.c), [count.c](sample/count.c), [echo.c](sample/echo.c)
 
 
-New feature of version 6.7.1
---------------------------
+Version 6.7.1
+-------------
 
 * NEW: Mechanism of retry-limit-in-match (* disabled by default)
 
 
-New feature of version 6.7.0
---------------------------
+Version 6.7.0
+-------------
 
 * NEW: hexadecimal codepoint \uHHHH
 * NEW: add ONIG_SYNTAX_ONIGURUMA (== ONIG_SYNTAX_DEFAULT)
@@ -80,17 +101,17 @@ New feature of version 6.7.0
 * Reduced size of object file
 
 
-New feature of version 6.6.0
---------------------------
+Version 6.6.0
+-------------
 
 * NEW: ASCII only mode options for character type/property (?WDSP)
-* NEW: Extended Grapheme Cluster boundary \y, \Y (*original)
+* NEW: Extended Grapheme Cluster boundary \y, \Y
 * NEW: Extended Grapheme Cluster \X
 * Range-clear (Absent-clear) operator restores previous range in retractions.
 
 
-New feature of version 6.5.0
---------------------------
+Version 6.5.0
+-------------
 
 * NEW: \K (keep)
 * NEW: \R (general newline) \N (no newline)
@@ -102,16 +123,16 @@ New feature of version 6.5.0
 * NEW: Absent stopper (?~|absent)     (*original)
 
 
-New feature of version 6.4.0
---------------------------
+Version 6.4.0
+-------------
 
 * Fix fatal problem of endless repeat on Windows
 * NEW: call zero (call the total regexp) \g<0>
 * NEW: relative backref/call by positive number \k<+n>, \g<+n>
 
 
-New feature of version 6.3.0
---------------------------
+Version 6.3.0
+-------------
 
 * NEW: octal codepoint \o{.....}
 * Fixed CVE-2017-9224
@@ -122,20 +143,20 @@ New feature of version 6.3.0
 * Fixed CVE-2017-9229
 
 
-New feature of version 6.1.2
---------------------------
+Version 6.1.2
+-------------
 
 * allow word bound, word begin and word end in look-behind.
 * NEW option: ONIG_OPTION_CHECK_VALIDITY_OF_STRING
 
-New feature of version 6.1
---------------------------
+Version 6.1
+-----------
 
 * improved doc/RE
 * NEW API: onig_scan()
 
-New feature of version 6.0
---------------------------
+Version 6.0
+-----------
 
 * Update Unicode 8.0 Property/Case-folding
 * NEW API: onig_unicode_define_user_property()

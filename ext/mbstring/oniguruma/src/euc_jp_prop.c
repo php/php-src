@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: /usr/bin/gperf -pt -T -L ANSI-C -N onigenc_euc_jp_lookup_property_name --output-file gperf1.tmp euc_jp_prop.gperf  */
+/* Command-line: /usr/local/bin/gperf -pt -T -L ANSI-C -N onigenc_euc_jp_lookup_property_name --output-file gperf1.tmp euc_jp_prop.gperf  */
 /* Computed positions: -k'1,3' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \

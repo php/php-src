@@ -85,11 +85,11 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
     }
     else if (*p < 0xa1) {
       if (*p == 0xa0 || *p == 0x80)
-	return FALSE;
+        return FALSE;
       p++;
       if (p >= end) return FALSE;
       if (*p < 0x40 || *p > 0xfc || *p == 0x7f)
-	return FALSE;
+        return FALSE;
       p++;
     }
     else if (*p < 0xe0) {
@@ -99,7 +99,7 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
       p++;
       if (p >= end) return FALSE;
       if (*p < 0x40 || *p > 0xfc || *p == 0x7f)
-	return FALSE;
+        return FALSE;
       p++;
     }
     else
@@ -158,7 +158,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
 
 static int
 mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED,
-	      const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
+              const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
 {
   const UChar* p = *pp;
 
@@ -181,8 +181,7 @@ mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED,
 
 #if 0
 static int
-is_mbc_ambiguous(OnigCaseFoldType flag,
-		 const UChar** pp, const UChar* end)
+is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_SJIS, flag, pp, end);
 
@@ -217,8 +216,8 @@ left_adjust_char_head(const UChar* start, const UChar* s)
   if (SJIS_ISMB_TRAIL(*p)) {
     while (p > start) {
       if (! SJIS_ISMB_FIRST(*--p)) {
-	p++;
-	break;
+        p++;
+        break;
       }
     }
   }
@@ -281,7 +280,7 @@ is_code_ctype(OnigCodePoint code, unsigned int ctype)
       return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
     else {
       if (CTYPE_IS_WORD_GRAPH_PRINT(ctype)) {
-	return (code_to_mbclen(code) > 1 ? TRUE : FALSE);
+        return (code_to_mbclen(code) > 1 ? TRUE : FALSE);
       }
     }
   }
@@ -298,7 +297,7 @@ is_code_ctype(OnigCodePoint code, unsigned int ctype)
 
 static int
 get_ctype_code_range(OnigCtype ctype, OnigCodePoint* sb_out,
-		     const OnigCodePoint* ranges[])
+                     const OnigCodePoint* ranges[])
 {
   if (ctype <= ONIGENC_MAX_STD_CTYPE) {
     return ONIG_NO_SUPPORT_CONFIG;

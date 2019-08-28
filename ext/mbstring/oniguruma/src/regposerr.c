@@ -2,7 +2,7 @@
   regposerr.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ static char* ESTRING[] = {
 
 extern size_t
 regerror(int posix_ecode, const regex_t* reg ARG_UNUSED, char* buf,
-	 size_t size)
+         size_t size)
 {
   char* s;
   char tbuf[35];

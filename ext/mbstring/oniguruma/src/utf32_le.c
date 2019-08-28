@@ -91,7 +91,7 @@ utf32le_code_to_mbc(OnigCodePoint code, UChar *buf)
 
 static int
 utf32le_mbc_case_fold(OnigCaseFoldType flag,
-		      const UChar** pp, const UChar* end, UChar* fold)
+                      const UChar** pp, const UChar* end, UChar* fold)
 {
   const UChar* p = *pp;
 
@@ -169,7 +169,7 @@ utf32le_get_case_fold_codes_by_str(OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_unicode_get_case_fold_codes_by_str(ONIG_ENCODING_UTF32_LE,
-						    flag, p, end, items);
+                                                    flag, p, end, items);
 }
 
 OnigEncodingType OnigEncodingUTF32_LE = {

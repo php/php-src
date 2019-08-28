@@ -2,7 +2,7 @@
   gb18030.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2005-2018  KUBO Takehiro <kubo AT jiubao DOT org>
+ * Copyright (c) 2005-2019  KUBO Takehiro <kubo AT jiubao DOT org>
  *                          K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
@@ -67,11 +67,11 @@ gb18030_mbc_enc_len(const UChar* p)
 {
   if (GB18030_MAP[*p] != CM)
     return 1;
+
   p++;
   if (GB18030_MAP[*p] == C4)
     return 4;
-  if (GB18030_MAP[*p] == C1)
-    return 1; /* illegal sequence */
+
   return 2;
 }
 

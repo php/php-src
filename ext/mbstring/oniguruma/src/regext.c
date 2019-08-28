@@ -2,7 +2,7 @@
   regext.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ conv_ext0be32(const UChar* s, const UChar* end, UChar* conv)
   }
 }
 
+#if 0
 static void
 conv_ext0le32(const UChar* s, const UChar* end, UChar* conv)
 {
@@ -91,6 +92,7 @@ conv_swap2bytes(const UChar* s, const UChar* end, UChar* conv)
     s += 2;
   }
 }
+#endif
 
 static int
 conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* end,
@@ -185,7 +187,7 @@ onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
   }
 
   r = onig_reg_init(*reg, ci->option, ci->case_fold_flag, ci->target_enc,
-		    ci->syntax);
+                    ci->syntax);
   if (r != 0) goto err;
 
   r = onig_compile(*reg, cpat, cpat_end, einfo);

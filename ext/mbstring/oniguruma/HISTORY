@@ -1,5 +1,42 @@
 History
 
+2019/08/06: Version 6.9.3 (secirity fix release)
+
+2019/07/30: add ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE
+2019/07/29: add STK_PREC_READ_START/END stack type
+2019/07/29: Fix #147: Stack Exhaustion Problem caused by some parsing functions
+2019/07/11: add a dictionary file for libfuzzer
+2019/07/07: add harnesses directory
+2019/07/05-2019/07/29: fix many problems found by libfuzzer programs
+2019/06/27: deprecate onig_new_deluxe()
+2019/06/27: Fix CVE-2019-13224: don't allow different encodings for onig_new_deluxe()
+2019/06/27: Fix CVE-2019-13225: problem in converting if-then-else pattern
+
+2019/05/07: Version 6.9.2 (same as Release Candidate 3)
+
+2019/04/23: Release Candidate 3 for 6.9.2
+2019/04/23: add doc/SYNTAX.md into distribution file
+2019/04/09: Release Candidate 2 for 6.9.2
+2019/04/09: fix #139: UAF in match_at()
+2019/04/01: Release Candidate 1 for 6.9.2
+2019/04/01: update Unicode version to 12.1.0 (draft)
+2019/03/29: allow {n,m} (n>m) as possessive interval
+2019/03/25: add ONIG_SYN_OP2_OPTION_ONIGURUMA
+2019/03/22: add new options ONIG_OPTION_TEXT_SEGMENT_EXTENDED_GRAPHEME_CLUSTER and
+            ONIG_OPTION_TEXT_SEGMENT_WORD
+2019/03/21: PR #137: fix cross-compilation
+2019/03/20: update Unicode version to 12.0.0
+2019/03/17: add doc/SYNTAX.md
+2019/03/13: {n,m}+ and {n,m}? are possessive and reluctant range operator
+            in Perl syntax
+2019/03/04: fix #132: don't execute testp if ENABLE_POSIX_API == no
+2019/02/28: re-implement bytecode by using Operation struct
+2019/02/26: fix #130: Build error on UWP with VS2017
+2019/02/03: PR #128: regerror/toascii: do not attempt to serialize NULL pointer
+2019/01/30: Build breaks without autoreconf #73
+2019/01/02: fix #127: Windows VS 2008 build errors
+2018/12/19: fix #126: Unable to compile when USE_CALLOUT is not defined
+
 2018/12/11: Version 6.9.1
 
 2018/10/08: use ENC_FLAG_SKIP_OFFSET_XXX values

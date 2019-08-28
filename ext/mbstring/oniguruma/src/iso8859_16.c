@@ -105,7 +105,7 @@ static const unsigned short EncISO_8859_16_CtypeTable[256] = {
 
 static int
 mbc_case_fold(OnigCaseFoldType flag,
-	      const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
+              const UChar** pp, const UChar* end ARG_UNUSED, UChar* lower)
 {
   const UChar* p = *pp;
 
@@ -201,7 +201,7 @@ static const OnigPairCaseFoldCodes CaseFoldMap[] = {
 
 static int
 apply_all_case_fold(OnigCaseFoldType flag,
-		    OnigApplyAllCaseFoldFunc f, void* arg)
+                    OnigApplyAllCaseFoldFunc f, void* arg)
 {
   return onigenc_apply_all_case_fold_with_map(
              sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 1,
@@ -213,8 +213,8 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_get_case_fold_codes_by_str_with_map(
-	     sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 1,
-	     flag, p, end, items);
+                 sizeof(CaseFoldMap)/sizeof(OnigPairCaseFoldCodes), CaseFoldMap, 1,
+                 flag, p, end, items);
 }
 
 OnigEncodingType OnigEncodingISO_8859_16 = {

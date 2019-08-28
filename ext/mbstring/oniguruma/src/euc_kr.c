@@ -68,7 +68,7 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
       p++;
       if (p >= end) return FALSE;
       if (*p < 0xa1 || *p == 0xff)
-	return FALSE;
+        return FALSE;
       p++;
     }
     else
@@ -101,7 +101,7 @@ euckr_mbc_case_fold(OnigCaseFoldType flag, const UChar** pp, const UChar* end,
 #if 0
 static int
 euckr_is_mbc_ambiguous(OnigCaseFoldType flag,
-		       const UChar** pp, const UChar* end)
+                       const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_EUC_KR, flag, pp, end);
 }

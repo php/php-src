@@ -2,7 +2,7 @@
   regexec.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,6 @@ onig_set_callout_user_data_of_match_param(OnigMatchParam* param, void* user_data
 }
 
 
-
 typedef struct {
   void* stack_p;
   int   stack_n;
@@ -134,120 +133,118 @@ typedef struct {
 
 /* arguments type */
 typedef enum {
-  ARG_SPECIAL =  -1,
-  ARG_NON     =   0,
-  ARG_RELADDR =   1,
-  ARG_ABSADDR =   2,
-  ARG_LENGTH  =   3,
-  ARG_MEMNUM  =   4,
-  ARG_OPTION  =   5,
-  ARG_MODE    =   6
+  ARG_SPECIAL = -1,
+  ARG_NON     =  0,
+  ARG_RELADDR =  1,
+  ARG_ABSADDR =  2,
+  ARG_LENGTH  =  3,
+  ARG_MEMNUM  =  4,
+  ARG_OPTION  =  5,
+  ARG_MODE    =  6
 } OpArgType;
 
 typedef struct {
   short int opcode;
   char*     name;
-  OpArgType arg_type;
 } OpInfoType;
 
 static OpInfoType OpInfo[] = {
-  { OP_FINISH,            "finish",          ARG_NON },
-  { OP_END,               "end",             ARG_NON },
-  { OP_EXACT1,            "exact1",          ARG_SPECIAL },
-  { OP_EXACT2,            "exact2",          ARG_SPECIAL },
-  { OP_EXACT3,            "exact3",          ARG_SPECIAL },
-  { OP_EXACT4,            "exact4",          ARG_SPECIAL },
-  { OP_EXACT5,            "exact5",          ARG_SPECIAL },
-  { OP_EXACTN,            "exactn",          ARG_SPECIAL },
-  { OP_EXACTMB2N1,        "exactmb2-n1",     ARG_SPECIAL },
-  { OP_EXACTMB2N2,        "exactmb2-n2",     ARG_SPECIAL },
-  { OP_EXACTMB2N3,        "exactmb2-n3",     ARG_SPECIAL },
-  { OP_EXACTMB2N,         "exactmb2-n",      ARG_SPECIAL },
-  { OP_EXACTMB3N,         "exactmb3n"  ,     ARG_SPECIAL },
-  { OP_EXACTMBN,          "exactmbn",        ARG_SPECIAL },
-  { OP_EXACT1_IC,         "exact1-ic",       ARG_SPECIAL },
-  { OP_EXACTN_IC,         "exactn-ic",       ARG_SPECIAL },
-  { OP_CCLASS,            "cclass",          ARG_SPECIAL },
-  { OP_CCLASS_MB,         "cclass-mb",       ARG_SPECIAL },
-  { OP_CCLASS_MIX,        "cclass-mix",      ARG_SPECIAL },
-  { OP_CCLASS_NOT,        "cclass-not",      ARG_SPECIAL },
-  { OP_CCLASS_MB_NOT,     "cclass-mb-not",   ARG_SPECIAL },
-  { OP_CCLASS_MIX_NOT,    "cclass-mix-not",  ARG_SPECIAL },
-#ifdef USE_OP_CCLASS_NODE
-  { OP_CCLASS_NODE,       "cclass-node",     ARG_SPECIAL },
+  { OP_FINISH,            "finish" },
+  { OP_END,               "end"    },
+  { OP_EXACT1,            "exact1" },
+  { OP_EXACT2,            "exact2" },
+  { OP_EXACT3,            "exact3" },
+  { OP_EXACT4,            "exact4" },
+  { OP_EXACT5,            "exact5" },
+  { OP_EXACTN,            "exactn" },
+  { OP_EXACTMB2N1,        "exactmb2-n1" },
+  { OP_EXACTMB2N2,        "exactmb2-n2" },
+  { OP_EXACTMB2N3,        "exactmb2-n3" },
+  { OP_EXACTMB2N,         "exactmb2-n"  },
+  { OP_EXACTMB3N,         "exactmb3n"   },
+  { OP_EXACTMBN,          "exactmbn"    },
+  { OP_EXACT1_IC,         "exact1-ic"   },
+  { OP_EXACTN_IC,         "exactn-ic"   },
+  { OP_CCLASS,            "cclass"      },
+  { OP_CCLASS_MB,         "cclass-mb"   },
+  { OP_CCLASS_MIX,        "cclass-mix"  },
+  { OP_CCLASS_NOT,        "cclass-not"  },
+  { OP_CCLASS_MB_NOT,     "cclass-mb-not"  },
+  { OP_CCLASS_MIX_NOT,    "cclass-mix-not" },
+  { OP_ANYCHAR,               "anychar"     },
+  { OP_ANYCHAR_ML,            "anychar-ml"  },
+  { OP_ANYCHAR_STAR,          "anychar*"    },
+  { OP_ANYCHAR_ML_STAR,       "anychar-ml*" },
+  { OP_ANYCHAR_STAR_PEEK_NEXT,    "anychar*-peek-next" },
+  { OP_ANYCHAR_ML_STAR_PEEK_NEXT, "anychar-ml*-peek-next" },
+  { OP_WORD,                  "word"       },
+  { OP_WORD_ASCII,            "word-ascii" },
+  { OP_NO_WORD,               "not-word"   },
+  { OP_NO_WORD_ASCII,         "not-word-ascii" },
+  { OP_WORD_BOUNDARY,         "word-boundary"  },
+  { OP_NO_WORD_BOUNDARY,      "not-word-boundary" },
+  { OP_WORD_BEGIN,            "word-begin" },
+  { OP_WORD_END,              "word-end"   },
+  { OP_TEXT_SEGMENT_BOUNDARY, "text-segment-boundary" },
+  { OP_BEGIN_BUF,             "begin-buf"  },
+  { OP_END_BUF,               "end-buf"    },
+  { OP_BEGIN_LINE,            "begin-line" },
+  { OP_END_LINE,              "end-line"   },
+  { OP_SEMI_END_BUF,          "semi-end-buf"   },
+  { OP_BEGIN_POSITION,        "begin-position" },
+  { OP_BACKREF1,              "backref1"       },
+  { OP_BACKREF2,              "backref2"       },
+  { OP_BACKREF_N,             "backref-n"      },
+  { OP_BACKREF_N_IC,          "backref-n-ic"   },
+  { OP_BACKREF_MULTI,         "backref_multi"  },
+  { OP_BACKREF_MULTI_IC,      "backref_multi-ic"     },
+  { OP_BACKREF_WITH_LEVEL,    "backref_with_level"   },
+  { OP_BACKREF_WITH_LEVEL_IC, "backref_with_level-c" },
+  { OP_BACKREF_CHECK,         "backref_check"        },
+  { OP_BACKREF_CHECK_WITH_LEVEL, "backref_check_with_level" },
+  { OP_MEMORY_START_PUSH,     "mem-start-push"        },
+  { OP_MEMORY_START,          "mem-start"             },
+  { OP_MEMORY_END_PUSH,       "mem-end-push"          },
+  { OP_MEMORY_END_PUSH_REC,   "mem-end-push-rec"      },
+  { OP_MEMORY_END,            "mem-end"               },
+  { OP_MEMORY_END_REC,        "mem-end-rec"           },
+  { OP_FAIL,                  "fail"                  },
+  { OP_JUMP,                  "jump"                  },
+  { OP_PUSH,                  "push"                  },
+  { OP_PUSH_SUPER,            "push-super"            },
+  { OP_POP_OUT,               "pop-out"               },
+#ifdef USE_OP_PUSH_OR_JUMP_EXACT
+  { OP_PUSH_OR_JUMP_EXACT1,   "push-or-jump-e1"       },
 #endif
-  { OP_ANYCHAR,           "anychar",         ARG_NON },
-  { OP_ANYCHAR_ML,        "anychar-ml",      ARG_NON },
-  { OP_ANYCHAR_STAR,      "anychar*",        ARG_NON },
-  { OP_ANYCHAR_ML_STAR,   "anychar-ml*",     ARG_NON },
-  { OP_ANYCHAR_STAR_PEEK_NEXT, "anychar*-peek-next", ARG_SPECIAL },
-  { OP_ANYCHAR_ML_STAR_PEEK_NEXT, "anychar-ml*-peek-next", ARG_SPECIAL },
-  { OP_WORD,                "word",            ARG_NON },
-  { OP_WORD_ASCII,          "word-ascii",      ARG_NON },
-  { OP_NO_WORD,             "not-word",        ARG_NON },
-  { OP_NO_WORD_ASCII,       "not-word-ascii",  ARG_NON },
-  { OP_WORD_BOUNDARY,       "word-boundary",     ARG_MODE },
-  { OP_NO_WORD_BOUNDARY,    "not-word-boundary", ARG_MODE },
-  { OP_WORD_BEGIN,          "word-begin",      ARG_MODE },
-  { OP_WORD_END,            "word-end",        ARG_MODE },
-  { OP_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY, "extended-grapheme-cluster-boundary", ARG_NON },
-  { OP_NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY, "no-extended-grapheme-cluster-boundary", ARG_NON },
-  { OP_BEGIN_BUF,           "begin-buf",       ARG_NON },
-  { OP_END_BUF,             "end-buf",         ARG_NON },
-  { OP_BEGIN_LINE,          "begin-line",      ARG_NON },
-  { OP_END_LINE,            "end-line",        ARG_NON },
-  { OP_SEMI_END_BUF,        "semi-end-buf",    ARG_NON },
-  { OP_BEGIN_POSITION,      "begin-position",  ARG_NON },
-  { OP_BACKREF1,            "backref1",             ARG_NON },
-  { OP_BACKREF2,            "backref2",             ARG_NON },
-  { OP_BACKREF_N,            "backref-n",           ARG_MEMNUM  },
-  { OP_BACKREF_N_IC,         "backref-n-ic",        ARG_SPECIAL },
-  { OP_BACKREF_MULTI,       "backref_multi",        ARG_SPECIAL },
-  { OP_BACKREF_MULTI_IC,    "backref_multi-ic",     ARG_SPECIAL },
-  { OP_BACKREF_WITH_LEVEL,  "backref_with_level",   ARG_SPECIAL },
-  { OP_BACKREF_CHECK,       "backref_check",        ARG_SPECIAL },
-  { OP_BACKREF_CHECK_WITH_LEVEL, "backref_check_with_level", ARG_SPECIAL },
-  { OP_MEMORY_START_PUSH,   "mem-start-push",       ARG_MEMNUM  },
-  { OP_MEMORY_START,        "mem-start",            ARG_MEMNUM  },
-  { OP_MEMORY_END_PUSH,     "mem-end-push",         ARG_MEMNUM  },
-  { OP_MEMORY_END_PUSH_REC, "mem-end-push-rec",     ARG_MEMNUM  },
-  { OP_MEMORY_END,          "mem-end",              ARG_MEMNUM  },
-  { OP_MEMORY_END_REC,      "mem-end-rec",          ARG_MEMNUM  },
-  { OP_FAIL,                "fail",                 ARG_NON },
-  { OP_JUMP,                "jump",                 ARG_RELADDR },
-  { OP_PUSH,                "push",                 ARG_RELADDR },
-  { OP_PUSH_SUPER,          "push-super",           ARG_RELADDR },
-  { OP_POP_OUT,             "pop-out",              ARG_NON },
-  { OP_PUSH_OR_JUMP_EXACT1, "push-or-jump-e1",      ARG_SPECIAL },
-  { OP_PUSH_IF_PEEK_NEXT,   "push-if-peek-next",    ARG_SPECIAL },
-  { OP_REPEAT,              "repeat",               ARG_SPECIAL },
-  { OP_REPEAT_NG,           "repeat-ng",            ARG_SPECIAL },
-  { OP_REPEAT_INC,          "repeat-inc",           ARG_MEMNUM  },
-  { OP_REPEAT_INC_NG,       "repeat-inc-ng",        ARG_MEMNUM  },
-  { OP_REPEAT_INC_SG,       "repeat-inc-sg",        ARG_MEMNUM  },
-  { OP_REPEAT_INC_NG_SG,    "repeat-inc-ng-sg",     ARG_MEMNUM  },
-  { OP_EMPTY_CHECK_START,   "empty-check-start",    ARG_MEMNUM  },
-  { OP_EMPTY_CHECK_END,     "empty-check-end",      ARG_MEMNUM  },
-  { OP_EMPTY_CHECK_END_MEMST,"empty-check-end-memst", ARG_MEMNUM  },
-  { OP_EMPTY_CHECK_END_MEMST_PUSH,"empty-check-end-memst-push", ARG_MEMNUM  },
-  { OP_PREC_READ_START,      "push-pos",             ARG_NON },
-  { OP_PREC_READ_END,        "pop-pos",              ARG_NON },
-  { OP_PREC_READ_NOT_START,  "prec-read-not-start",  ARG_RELADDR },
-  { OP_PREC_READ_NOT_END,    "prec-read-not-end",    ARG_NON },
-  { OP_ATOMIC_START,         "atomic-start",         ARG_NON },
-  { OP_ATOMIC_END,           "atomic-end",           ARG_NON },
-  { OP_LOOK_BEHIND,          "look-behind",          ARG_SPECIAL },
-  { OP_LOOK_BEHIND_NOT_START, "look-behind-not-start", ARG_SPECIAL },
-  { OP_LOOK_BEHIND_NOT_END,  "look-behind-not-end",  ARG_NON },
-  { OP_CALL,                 "call",                 ARG_ABSADDR },
-  { OP_RETURN,               "return",               ARG_NON },
-  { OP_PUSH_SAVE_VAL,        "push-save-val",        ARG_SPECIAL },
-  { OP_UPDATE_VAR,           "update-var",           ARG_SPECIAL },
+  { OP_PUSH_IF_PEEK_NEXT,     "push-if-peek-next"     },
+  { OP_REPEAT,                "repeat"                },
+  { OP_REPEAT_NG,             "repeat-ng"             },
+  { OP_REPEAT_INC,            "repeat-inc"            },
+  { OP_REPEAT_INC_NG,         "repeat-inc-ng"         },
+  { OP_REPEAT_INC_SG,         "repeat-inc-sg"         },
+  { OP_REPEAT_INC_NG_SG,      "repeat-inc-ng-sg"      },
+  { OP_EMPTY_CHECK_START,     "empty-check-start"     },
+  { OP_EMPTY_CHECK_END,       "empty-check-end"       },
+  { OP_EMPTY_CHECK_END_MEMST, "empty-check-end-memst" },
+  { OP_EMPTY_CHECK_END_MEMST_PUSH,"empty-check-end-memst-push" },
+  { OP_PREC_READ_START,       "push-pos"              },
+  { OP_PREC_READ_END,         "pop-pos"               },
+  { OP_PREC_READ_NOT_START,   "prec-read-not-start"   },
+  { OP_PREC_READ_NOT_END,     "prec-read-not-end"     },
+  { OP_ATOMIC_START,          "atomic-start"          },
+  { OP_ATOMIC_END,            "atomic-end"            },
+  { OP_LOOK_BEHIND,           "look-behind"           },
+  { OP_LOOK_BEHIND_NOT_START, "look-behind-not-start" },
+  { OP_LOOK_BEHIND_NOT_END,   "look-behind-not-end"   },
+  { OP_CALL,                  "call"                  },
+  { OP_RETURN,                "return"                },
+  { OP_PUSH_SAVE_VAL,         "push-save-val"         },
+  { OP_UPDATE_VAR,            "update-var"            },
 #ifdef USE_CALLOUT
-  { OP_CALLOUT_CONTENTS,     "callout-contents",     ARG_SPECIAL },
-  { OP_CALLOUT_NAME,         "callout-name",         ARG_SPECIAL },
+  { OP_CALLOUT_CONTENTS,      "callout-contents"      },
+  { OP_CALLOUT_NAME,          "callout-name"          },
 #endif
-  { -1, "", ARG_NON }
+  { -1, "" }
 };
 
 static char*
@@ -256,22 +253,10 @@ op2name(int opcode)
   int i;
 
   for (i = 0; OpInfo[i].opcode >= 0; i++) {
-    if (opcode == OpInfo[i].opcode)
-      return OpInfo[i].name;
+    if (opcode == OpInfo[i].opcode) return OpInfo[i].name;
   }
+
   return "";
-}
-
-static int
-op2arg_type(int opcode)
-{
-  int i;
-
-  for (i = 0; OpInfo[i].opcode >= 0; i++) {
-    if (opcode == OpInfo[i].opcode)
-      return OpInfo[i].arg_type;
-  }
-  return ARG_SPECIAL;
 }
 
 static void
@@ -291,7 +276,7 @@ p_len_string(FILE* f, LengthType len, int mb_len, UChar* s)
 }
 
 static void
-p_rel_addr(FILE* f, RelAddrType rel_addr, UChar* p, UChar* start)
+p_rel_addr(FILE* f, RelAddrType rel_addr, Operation* p, Operation* start)
 {
   RelAddrType curr = (RelAddrType )(p - start);
 
@@ -307,288 +292,328 @@ bitset_on_num(BitSetRef bs)
   for (i = 0; i < SINGLE_BYTE_SIZE; i++) {
     if (BITSET_AT(bs, i)) n++;
   }
+
   return n;
 }
 
-extern void
-onig_print_compiled_byte_code(FILE* f, UChar* bp, UChar** nextp, UChar* start,
-                              OnigEncoding enc)
+static void
+print_compiled_byte_code(FILE* f, regex_t* reg, int index,
+                         Operation* start, OnigEncoding enc)
 {
   int i, n;
-  OpArgType   arg_type;
   RelAddrType addr;
   LengthType  len;
   MemNumType  mem;
-  OnigCodePoint  code;
-  OnigOptionType option;
+  OnigCodePoint code;
   ModeType mode;
   UChar *q;
+  Operation* p;
+  enum OpCode opcode;
 
-  fprintf(f, "%s", op2name(*bp));
-  arg_type = op2arg_type(*bp);
-  if (arg_type != ARG_SPECIAL) {
-    bp++;
-    switch (arg_type) {
-    case ARG_NON:
-      break;
-    case ARG_RELADDR:
-      GET_RELADDR_INC(addr, bp);
-      fputc(':', f);
-      p_rel_addr(f, addr, bp, start);
-      break;
-    case ARG_ABSADDR:
-      GET_ABSADDR_INC(addr, bp);
-      fprintf(f, ":{/%d}", addr);
-      break;
-    case ARG_LENGTH:
-      GET_LENGTH_INC(len, bp);
-      fprintf(f, ":%d", len);
-      break;
-    case ARG_MEMNUM:
-      mem = *((MemNumType* )bp);
-      bp += SIZE_MEMNUM;
-      fprintf(f, ":%d", mem);
-      break;
-    case ARG_OPTION:
-      {
-        OnigOptionType option = *((OnigOptionType* )bp);
-        bp += SIZE_OPTION;
-        fprintf(f, ":%d", option);
-      }
-      break;
-    case ARG_MODE:
-      mode = *((ModeType* )bp);
-      bp += SIZE_MODE;
-      fprintf(f, ":%d", mode);
-      break;
-    default:
-      break;
+  p = reg->ops + index;
+
+#ifdef USE_DIRECT_THREADED_CODE
+  opcode = reg->ocs[index];
+#else
+  opcode = p->opcode;
+#endif
+
+  fprintf(f, "%s", op2name(opcode));
+  switch (opcode) {
+  case OP_EXACT1:
+    p_string(f, 1, p->exact.s); break;
+  case OP_EXACT2:
+    p_string(f, 2, p->exact.s); break;
+  case OP_EXACT3:
+    p_string(f, 3, p->exact.s); break;
+  case OP_EXACT4:
+    p_string(f, 4, p->exact.s); break;
+  case OP_EXACT5:
+    p_string(f, 5, p->exact.s); break;
+  case OP_EXACTN:
+    len = p->exact_n.n;
+    p_string(f, len, p->exact_n.s); break;
+  case OP_EXACTMB2N1:
+    p_string(f, 2, p->exact.s); break;
+  case OP_EXACTMB2N2:
+    p_string(f, 4, p->exact.s); break;
+  case OP_EXACTMB2N3:
+    p_string(f, 3, p->exact.s); break;
+  case OP_EXACTMB2N:
+    len = p->exact_n.n;
+    p_len_string(f, len, 2, p->exact_n.s); break;
+  case OP_EXACTMB3N:
+    len = p->exact_n.n;
+    p_len_string(f, len, 3, p->exact_n.s); break;
+  case OP_EXACTMBN:
+    {
+      int mb_len;
+
+      mb_len = p->exact_len_n.len;
+      len    = p->exact_len_n.n;
+      q      = p->exact_len_n.s;
+      fprintf(f, ":%d:%d:", mb_len, len);
+      n = len * mb_len;
+      while (n-- > 0) { fputc(*q++, f); }
     }
-  }
-  else {
-    switch (*bp++) {
-    case OP_EXACT1:
-    case OP_ANYCHAR_STAR_PEEK_NEXT:
-    case OP_ANYCHAR_ML_STAR_PEEK_NEXT:
-      p_string(f, 1, bp++); break;
-    case OP_EXACT2:
-      p_string(f, 2, bp); bp += 2; break;
-    case OP_EXACT3:
-      p_string(f, 3, bp); bp += 3; break;
-    case OP_EXACT4:
-      p_string(f, 4, bp); bp += 4; break;
-    case OP_EXACT5:
-      p_string(f, 5, bp); bp += 5; break;
-    case OP_EXACTN:
-      GET_LENGTH_INC(len, bp);
-      p_len_string(f, len, 1, bp);
-      bp += len;
-      break;
+    break;
+  case OP_EXACT1_IC:
+    len = enclen(enc, p->exact.s);
+    p_string(f, len, p->exact.s);
+    break;
+  case OP_EXACTN_IC:
+    len = p->exact_n.n;
+    p_len_string(f, len, 1, p->exact_n.s);
+    break;
 
-    case OP_EXACTMB2N1:
-      p_string(f, 2, bp); bp += 2; break;
-    case OP_EXACTMB2N2:
-      p_string(f, 4, bp); bp += 4; break;
-    case OP_EXACTMB2N3:
-      p_string(f, 6, bp); bp += 6; break;
-    case OP_EXACTMB2N:
-      GET_LENGTH_INC(len, bp);
-      p_len_string(f, len, 2, bp);
-      bp += len * 2;
-      break;
-    case OP_EXACTMB3N:
-      GET_LENGTH_INC(len, bp);
-      p_len_string(f, len, 3, bp);
-      bp += len * 3;
-      break;
-    case OP_EXACTMBN:
-      {
-        int mb_len;
+  case OP_CCLASS:
+  case OP_CCLASS_NOT:
+    n = bitset_on_num(p->cclass.bsp);
+    fprintf(f, ":%d", n);
+    break;
+  case OP_CCLASS_MB:
+  case OP_CCLASS_MB_NOT:
+    {
+      OnigCodePoint ncode;
+      OnigCodePoint* codes;      
 
-        GET_LENGTH_INC(mb_len, bp);
-        GET_LENGTH_INC(len, bp);
-        fprintf(f, ":%d:%d:", mb_len, len);
-        n = len * mb_len;
-        while (n-- > 0) { fputc(*bp++, f); }
-      }
-      break;
+      codes = (OnigCodePoint* )p->cclass_mb.mb;
+      GET_CODE_POINT(ncode, codes);
+      codes++;
+      GET_CODE_POINT(code, codes);
+      fprintf(f, ":%u:%u", code, ncode);
+    }
+    break;
+  case OP_CCLASS_MIX:
+  case OP_CCLASS_MIX_NOT:
+    {
+      OnigCodePoint ncode;
+      OnigCodePoint* codes;
 
-    case OP_EXACT1_IC:
-      len = enclen(enc, bp);
-      p_string(f, len, bp);
-      bp += len;
-      break;
-    case OP_EXACTN_IC:
-      GET_LENGTH_INC(len, bp);
-      p_len_string(f, len, 1, bp);
-      bp += len;
-      break;
+      codes = (OnigCodePoint* )p->cclass_mix.mb;
+      n = bitset_on_num(p->cclass_mix.bsp);
 
-    case OP_CCLASS:
-      n = bitset_on_num((BitSetRef )bp);
-      bp += SIZE_BITSET;
-      fprintf(f, ":%d", n);
-      break;
+      GET_CODE_POINT(ncode, codes);
+      codes++;
+      GET_CODE_POINT(code, codes);
+      fprintf(f, ":%d:%u:%u", n, code, ncode);
+    }
+    break;
 
-    case OP_CCLASS_NOT:
-      n = bitset_on_num((BitSetRef )bp);
-      bp += SIZE_BITSET;
-      fprintf(f, ":%d", n);
-      break;
+  case OP_ANYCHAR_STAR_PEEK_NEXT:
+  case OP_ANYCHAR_ML_STAR_PEEK_NEXT:
+    p_string(f, 1, &(p->anychar_star_peek_next.c));
+    break;
 
-    case OP_CCLASS_MB:
-    case OP_CCLASS_MB_NOT:
-      GET_LENGTH_INC(len, bp);
-      q = bp;
-#ifndef PLATFORM_UNALIGNED_WORD_ACCESS
-      ALIGNMENT_RIGHT(q);
-#endif
-      GET_CODE_POINT(code, q);
-      bp += len;
-      fprintf(f, ":%d:%d", (int )code, len);
-      break;
+  case OP_WORD_BOUNDARY:
+  case OP_NO_WORD_BOUNDARY:
+  case OP_WORD_BEGIN:
+  case OP_WORD_END:
+    mode = p->word_boundary.mode;
+    fprintf(f, ":%d", mode);
+    break;
 
-    case OP_CCLASS_MIX:
-    case OP_CCLASS_MIX_NOT:
-      n = bitset_on_num((BitSetRef )bp);
-      bp += SIZE_BITSET;
-      GET_LENGTH_INC(len, bp);
-      q = bp;
-#ifndef PLATFORM_UNALIGNED_WORD_ACCESS
-      ALIGNMENT_RIGHT(q);
-#endif
-      GET_CODE_POINT(code, q);
-      bp += len;
-      fprintf(f, ":%d:%d:%d", n, (int )code, len);
-      break;
+  case OP_BACKREF_N:
+  case OP_BACKREF_N_IC:
+    mem = p->backref_n.n1;
+    fprintf(f, ":%d", mem);
+    break;
+  case OP_BACKREF_MULTI_IC:
+  case OP_BACKREF_MULTI:
+  case OP_BACKREF_CHECK:
+    fputs(" ", f);
+    n = p->backref_general.num;
+    for (i = 0; i < n; i++) {
+      mem = (n == 1) ? p->backref_general.n1 : p->backref_general.ns[i];
+      if (i > 0) fputs(", ", f);
+      fprintf(f, "%d", mem);
+    }
+    break;
+  case OP_BACKREF_WITH_LEVEL:
+  case OP_BACKREF_WITH_LEVEL_IC:
+  case OP_BACKREF_CHECK_WITH_LEVEL:
+    {
+      LengthType level;
 
-#ifdef USE_OP_CCLASS_NODE
-    case OP_CCLASS_NODE:
-      {
-        CClassNode *cc;
-
-        GET_POINTER_INC(cc, bp);
-        n = bitset_on_num(cc->bs);
-        fprintf(f, ":%p:%d", cc, n);
-      }
-      break;
-#endif
-
-    case OP_BACKREF_N_IC:
-      mem = *((MemNumType* )bp);
-      bp += SIZE_MEMNUM;
-      fprintf(f, ":%d", mem);
-      break;
-
-    case OP_BACKREF_MULTI_IC:
-    case OP_BACKREF_MULTI:
-    case OP_BACKREF_CHECK:
+      level = p->backref_general.nest_level;
+      fprintf(f, ":%d", level);
       fputs(" ", f);
-      GET_LENGTH_INC(len, bp);
-      for (i = 0; i < len; i++) {
-        GET_MEMNUM_INC(mem, bp);
+      n = p->backref_general.num;
+      for (i = 0; i < n; i++) {
+        mem = (n == 1) ? p->backref_general.n1 : p->backref_general.ns[i];
         if (i > 0) fputs(", ", f);
         fprintf(f, "%d", mem);
       }
-      break;
+    }
+    break;
 
-    case OP_BACKREF_WITH_LEVEL:
-      GET_OPTION_INC(option, bp);
-      fprintf(f, ":%d", option);
-      /* fall */
-    case OP_BACKREF_CHECK_WITH_LEVEL:
-      {
-        LengthType level;
+  case OP_MEMORY_START:
+  case OP_MEMORY_START_PUSH:
+    mem = p->memory_start.num;
+    fprintf(f, ":%d", mem);
+    break;
+  case OP_MEMORY_END_PUSH:
+  case OP_MEMORY_END_PUSH_REC:
+  case OP_MEMORY_END:
+  case OP_MEMORY_END_REC:
+    mem = p->memory_end.num;
+    fprintf(f, ":%d", mem);
+    break;
 
-        GET_LENGTH_INC(level, bp);
-        fprintf(f, ":%d", level);
+  case OP_JUMP:
+    addr = p->jump.addr;
+    fputc(':', f);
+    p_rel_addr(f, addr, p, start);
+    break;
 
-        fputs(" ", f);
-        GET_LENGTH_INC(len, bp);
-        for (i = 0; i < len; i++) {
-          GET_MEMNUM_INC(mem, bp);
-          if (i > 0) fputs(", ", f);
-          fprintf(f, "%d", mem);
-        }
-      }
-      break;
+  case OP_PUSH:
+  case OP_PUSH_SUPER:
+    addr = p->push.addr;
+    fputc(':', f);
+    p_rel_addr(f, addr, p, start);
+    break;
 
-    case OP_REPEAT:
-    case OP_REPEAT_NG:
-      {
-        mem = *((MemNumType* )bp);
-        bp += SIZE_MEMNUM;
-        addr = *((RelAddrType* )bp);
-        bp += SIZE_RELADDR;
-        fprintf(f, ":%d:%d", mem, addr);
-      }
-      break;
-
-    case OP_PUSH_OR_JUMP_EXACT1:
-    case OP_PUSH_IF_PEEK_NEXT:
-      addr = *((RelAddrType* )bp);
-      bp += SIZE_RELADDR;
-      fputc(':', f);
-      p_rel_addr(f, addr, bp, start);
-      p_string(f, 1, bp);
-      bp += 1;
-      break;
-
-    case OP_LOOK_BEHIND:
-      GET_LENGTH_INC(len, bp);
-      fprintf(f, ":%d", len);
-      break;
-
-    case OP_LOOK_BEHIND_NOT_START:
-      GET_RELADDR_INC(addr, bp);
-      GET_LENGTH_INC(len, bp);
-      fprintf(f, ":%d:", len);
-      p_rel_addr(f, addr, bp, start);
-      break;
-
-    case OP_PUSH_SAVE_VAL:
-      {
-        SaveType type;
-        GET_SAVE_TYPE_INC(type, bp);
-        GET_MEMNUM_INC(mem, bp);
-        fprintf(f, ":%d:%d", type, mem);
-      }
-      break;
-
-    case OP_UPDATE_VAR:
-      {
-        UpdateVarType type;
-        GET_UPDATE_VAR_TYPE_INC(type, bp);
-        GET_MEMNUM_INC(mem, bp);
-        fprintf(f, ":%d:%d", type, mem);
-      }
-      break;
-
-#ifdef USE_CALLOUT
-    case OP_CALLOUT_CONTENTS:
-      {
-        GET_MEMNUM_INC(mem,  bp); /* number */
-        fprintf(f, ":%d", mem);
-      }
-      break;
-
-    case OP_CALLOUT_NAME:
-      {
-        int id;
-
-        GET_MEMNUM_INC(id,   bp); /* id */
-        GET_MEMNUM_INC(mem,  bp); /* number */
-
-        fprintf(f, ":%d:%d", id, mem);
-      }
-      break;
+#ifdef USE_OP_PUSH_OR_JUMP_EXACT
+  case OP_PUSH_OR_JUMP_EXACT1:
+    addr = p->push_or_jump_exact1.addr;
+    fputc(':', f);
+    p_rel_addr(f, addr, p, start);
+    p_string(f, 1, &(p->push_or_jump_exact1.c));
+    break;
 #endif
 
-    default:
-      fprintf(stderr, "onig_print_compiled_byte_code: undefined code %d\n", *--bp);
+  case OP_PUSH_IF_PEEK_NEXT:
+    addr = p->push_if_peek_next.addr;
+    fputc(':', f);
+    p_rel_addr(f, addr, p, start);
+    p_string(f, 1, &(p->push_if_peek_next.c));
+    break;
+
+  case OP_REPEAT:
+  case OP_REPEAT_NG:
+    mem = p->repeat.id;
+    addr = p->repeat.addr;
+    fprintf(f, ":%d:", mem);
+    p_rel_addr(f, addr, p, start);
+    break;
+
+  case OP_REPEAT_INC:
+  case OP_REPEAT_INC_NG:
+  case OP_REPEAT_INC_SG:
+  case OP_REPEAT_INC_NG_SG:
+    mem = p->repeat.id;
+    fprintf(f, ":%d", mem);
+    break;
+
+  case OP_EMPTY_CHECK_START:
+    mem = p->empty_check_start.mem;
+    fprintf(f, ":%d", mem);
+    break;
+  case OP_EMPTY_CHECK_END:
+  case OP_EMPTY_CHECK_END_MEMST:
+  case OP_EMPTY_CHECK_END_MEMST_PUSH:
+    mem = p->empty_check_end.mem;
+    fprintf(f, ":%d", mem);
+    break;
+
+  case OP_PREC_READ_NOT_START:
+    addr = p->prec_read_not_start.addr;
+    fputc(':', f);
+    p_rel_addr(f, addr, p, start);
+    break;
+
+  case OP_LOOK_BEHIND:
+    len = p->look_behind.len;
+    fprintf(f, ":%d", len);
+    break;
+
+  case OP_LOOK_BEHIND_NOT_START:
+    addr = p->look_behind_not_start.addr;
+    len  = p->look_behind_not_start.len;
+    fprintf(f, ":%d:", len);
+    p_rel_addr(f, addr, p, start);
+    break;
+
+  case OP_CALL:
+    addr = p->call.addr;
+    fprintf(f, ":{/%d}", addr);
+    break;
+
+  case OP_PUSH_SAVE_VAL:
+    {
+      SaveType type;
+
+      type = p->push_save_val.type;
+      mem  = p->push_save_val.id;
+      fprintf(f, ":%d:%d", type, mem);
     }
+    break;
+
+  case OP_UPDATE_VAR:
+    {
+      UpdateVarType type;
+
+      type = p->update_var.type;
+      mem  = p->update_var.id;
+      fprintf(f, ":%d:%d", type, mem);
+    }
+    break;
+
+#ifdef USE_CALLOUT
+  case OP_CALLOUT_CONTENTS:
+    mem = p->callout_contents.num;
+    fprintf(f, ":%d", mem);
+    break;
+
+  case OP_CALLOUT_NAME:
+    {
+      int id;
+
+      id  = p->callout_name.id;
+      mem = p->callout_name.num;
+      fprintf(f, ":%d:%d", id, mem);
+    }
+    break;
+#endif
+
+  case OP_TEXT_SEGMENT_BOUNDARY:
+    if (p->text_segment_boundary.not != 0)
+      fprintf(f, ":not");
+    break;
+
+  case OP_FINISH:
+  case OP_END:
+  case OP_ANYCHAR:
+  case OP_ANYCHAR_ML:
+  case OP_ANYCHAR_STAR:
+  case OP_ANYCHAR_ML_STAR:
+  case OP_WORD:
+  case OP_WORD_ASCII:
+  case OP_NO_WORD:
+  case OP_NO_WORD_ASCII:
+  case OP_BEGIN_BUF:
+  case OP_END_BUF:
+  case OP_BEGIN_LINE:
+  case OP_END_LINE:
+  case OP_SEMI_END_BUF:
+  case OP_BEGIN_POSITION:
+  case OP_BACKREF1:
+  case OP_BACKREF2:
+  case OP_FAIL:
+  case OP_POP_OUT:
+  case OP_PREC_READ_START:
+  case OP_PREC_READ_END:
+  case OP_PREC_READ_NOT_END:
+  case OP_ATOMIC_START:
+  case OP_ATOMIC_END:
+  case OP_LOOK_BEHIND_NOT_END:
+  case OP_RETURN:
+    break;
+
+  default:
+    fprintf(stderr, "print_compiled_byte_code: undefined code %d\n", opcode);
+    break;
   }
-  if (nextp) *nextp = bp;
 }
 #endif /* ONIG_DEBUG */
 
@@ -596,21 +621,22 @@ onig_print_compiled_byte_code(FILE* f, UChar* bp, UChar** nextp, UChar* start,
 extern void
 onig_print_compiled_byte_code_list(FILE* f, regex_t* reg)
 {
-  UChar* bp;
-  UChar* start = reg->p;
-  UChar* end   = reg->p + reg->used;
+  Operation* bp;
+  Operation* start = reg->ops;
+  Operation* end   = reg->ops + reg->ops_used;
 
   fprintf(f, "bt_mem_start: 0x%x, bt_mem_end: 0x%x\n",
           reg->bt_mem_start, reg->bt_mem_end);
-  fprintf(f, "code-length: %d\n", reg->used);
+  fprintf(f, "code-length: %d\n", reg->ops_used);
 
   bp = start;
   while (bp < end) {
     int pos = bp - start;
 
     fprintf(f, "%4d: ", pos);
-    onig_print_compiled_byte_code(f, bp, &bp, start, reg->enc);
+    print_compiled_byte_code(f, reg, pos, start, reg->enc);
     fprintf(f, "\n");
+    bp++;
   }
   fprintf(f, "\n");
 }
@@ -625,36 +651,38 @@ history_tree_clear(OnigCaptureTreeNode* node)
 {
   int i;
 
-  if (IS_NOT_NULL(node)) {
-    for (i = 0; i < node->num_childs; i++) {
-      if (IS_NOT_NULL(node->childs[i])) {
-        history_tree_free(node->childs[i]);
-      }
+  if (IS_NULL(node)) return ;
+
+  for (i = 0; i < node->num_childs; i++) {
+    if (IS_NOT_NULL(node->childs[i])) {
+      history_tree_free(node->childs[i]);
     }
-    for (i = 0; i < node->allocated; i++) {
-      node->childs[i] = (OnigCaptureTreeNode* )0;
-    }
-    node->num_childs = 0;
-    node->beg = ONIG_REGION_NOTPOS;
-    node->end = ONIG_REGION_NOTPOS;
-    node->group = -1;
   }
+  for (i = 0; i < node->allocated; i++) {
+    node->childs[i] = (OnigCaptureTreeNode* )0;
+  }
+  node->num_childs = 0;
+  node->beg = ONIG_REGION_NOTPOS;
+  node->end = ONIG_REGION_NOTPOS;
+  node->group = -1;
 }
 
 static void
 history_tree_free(OnigCaptureTreeNode* node)
 {
   history_tree_clear(node);
+  if (IS_NOT_NULL(node->childs)) xfree(node->childs);
+
   xfree(node);
 }
 
 static void
 history_root_free(OnigRegion* r)
 {
-  if (IS_NOT_NULL(r->history_root)) {
-    history_tree_free(r->history_root);
-    r->history_root = (OnigCaptureTreeNode* )0;
-  }
+  if (IS_NULL(r->history_root)) return ;
+
+  history_tree_free(r->history_root);
+  r->history_root = (OnigCaptureTreeNode* )0;
 }
 
 static OnigCaptureTreeNode*
@@ -664,9 +692,10 @@ history_node_new(void)
 
   node = (OnigCaptureTreeNode* )xmalloc(sizeof(OnigCaptureTreeNode));
   CHECK_NULL_RETURN(node);
+
   node->childs     = (OnigCaptureTreeNode** )0;
-  node->allocated  = 0;
-  node->num_childs = 0;
+  node->allocated  =  0;
+  node->num_childs =  0;
   node->group      = -1;
   node->beg        = ONIG_REGION_NOTPOS;
   node->end        = ONIG_REGION_NOTPOS;
@@ -685,13 +714,13 @@ history_tree_add_child(OnigCaptureTreeNode* parent, OnigCaptureTreeNode* child)
     if (IS_NULL(parent->childs)) {
       n = HISTORY_TREE_INIT_ALLOC_SIZE;
       parent->childs =
-        (OnigCaptureTreeNode** )xmalloc(sizeof(OnigCaptureTreeNode*) * n);
+        (OnigCaptureTreeNode** )xmalloc(sizeof(parent->childs[0]) * n);
     }
     else {
       n = parent->allocated * 2;
       parent->childs =
         (OnigCaptureTreeNode** )xrealloc(parent->childs,
-                                         sizeof(OnigCaptureTreeNode*) * n);
+                                         sizeof(parent->childs[0]) * n);
     }
     CHECK_NULL_RETURN_MEMERR(parent->childs);
     for (i = parent->allocated; i < n; i++) {
@@ -951,6 +980,8 @@ onig_region_copy(OnigRegion* to, OnigRegion* from)
 #define STK_CALL_FRAME             0x0400
 #define STK_RETURN                 0x0500
 #define STK_SAVE_VAL               0x0600
+#define STK_PREC_READ_START        0x0700
+#define STK_PREC_READ_END          0x0800
 
 /* stack type check mask */
 #define STK_MASK_POP_USED          STK_ALT_FLAG
@@ -966,13 +997,13 @@ typedef struct _StackType {
   int zid;
   union {
     struct {
-      UChar *pcode;      /* byte code position */
-      UChar *pstr;       /* string position */
-      UChar *pstr_prev;  /* previous char position of pstr */
+      Operation* pcode;     /* byte code position */
+      UChar*     pstr;      /* string position */
+      UChar*     pstr_prev; /* previous char position of pstr */
     } state;
     struct {
-      int   count;       /* for OP_REPEAT_INC, OP_REPEAT_INC_NG */
-      UChar *pcode;      /* byte code position (head of repeated target) */
+      int        count;  /* for OP_REPEAT_INC, OP_REPEAT_INC_NG */
+      Operation* pcode;  /* byte code position (head of repeated target) */
     } repeat;
     struct {
       StackIndex si;     /* index of stack */
@@ -988,8 +1019,8 @@ typedef struct _StackType {
     } empty_check;
 #ifdef USE_CALL
     struct {
-      UChar *ret_addr;   /* byte code position */
-      UChar *pstr;       /* string position */
+      Operation *ret_addr; /* byte code position */
+      UChar *pstr;         /* string position */
     } call_frame;
 #endif
     struct {
@@ -1164,8 +1195,10 @@ onig_set_retry_limit_in_match(unsigned long size)
 #endif
 }
 
+#ifdef USE_CALLOUT
 static OnigCalloutFunc DefaultProgressCallout;
 static OnigCalloutFunc DefaultRetractionCallout;
+#endif
 
 extern OnigMatchParam*
 onig_new_match_param(void)
@@ -1207,10 +1240,10 @@ onig_initialize_match_param(OnigMatchParam* mp)
 #ifdef USE_RETRY_LIMIT_IN_MATCH
   mp->retry_limit_in_match = RetryLimitInMatch;
 #endif
-  mp->progress_callout_of_contents   = DefaultProgressCallout;
-  mp->retraction_callout_of_contents = DefaultRetractionCallout;
 
 #ifdef USE_CALLOUT
+  mp->progress_callout_of_contents   = DefaultProgressCallout;
+  mp->retraction_callout_of_contents = DefaultRetractionCallout;
   mp->match_at_call_counter  = 0;
   mp->callout_user_data      = 0;
   mp->callout_data           = 0;
@@ -1513,8 +1546,8 @@ stack_double(int is_alloca, char** arg_alloc_base,
 
 #define STACK_PUSH_ALT(pat,s,sprev)       STACK_PUSH(STK_ALT,pat,s,sprev)
 #define STACK_PUSH_SUPER_ALT(pat,s,sprev) STACK_PUSH(STK_SUPER_ALT,pat,s,sprev)
-#define STACK_PUSH_POS(s,sprev) \
-  STACK_PUSH(STK_TO_VOID_START,NULL_UCHARP,s,sprev)
+#define STACK_PUSH_PREC_READ_START(s,sprev) \
+  STACK_PUSH(STK_PREC_READ_START,(Operation* )0,s,sprev)
 #define STACK_PUSH_ALT_PREC_READ_NOT(pat,s,sprev) \
   STACK_PUSH(STK_ALT_PREC_READ_NOT,pat,s,sprev)
 #define STACK_PUSH_TO_VOID_START        STACK_PUSH_TYPE(STK_TO_VOID_START)
@@ -1856,6 +1889,27 @@ stack_double(int is_alloca, char** arg_alloc_base,
   }\
 } while(0)
 
+#define STACK_GET_PREC_READ_START(k) do {\
+  int level = 0;\
+  k = stk;\
+  while (1) {\
+    k--;\
+    STACK_BASE_CHECK(k, "STACK_GET_PREC_READ_START");\
+    if (IS_TO_VOID_TARGET(k)) {\
+      k->type = STK_VOID;\
+    }\
+    else if (k->type == STK_PREC_READ_START) {\
+      if (level == 0) {\
+        break;\
+      }\
+      level--;\
+    }\
+    else if (k->type == STK_PREC_READ_END) {\
+      level++;\
+    }\
+  }\
+} while(0)
+
 #define STACK_EMPTY_CHECK(isnull,sid,s) do {\
   StackType* k = stk;\
   while (1) {\
@@ -1882,7 +1936,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
   }\
 } while (0)
 
-#ifdef USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT
+#ifdef USE_STUBBORN_CHECK_CAPTURES_IN_EMPTY_REPEAT
 #define STACK_EMPTY_CHECK_MEM(isnull,sid,s,reg) do {\
   StackType* k = stk;\
   while (1) {\
@@ -1896,9 +1950,10 @@ stack_double(int is_alloca, char** arg_alloc_base,
         }\
         else {\
           UChar* endp;\
+          int level = 0;\
           (isnull) = 1;\
           while (k < stk) {\
-            if (k->type == STK_MEM_START) {\
+            if (k->type == STK_MEM_START && level == 0) {\
               STACK_MEM_START_GET_PREV_END_ADDR(k, reg, endp);\
               if (endp == 0) {\
                 (isnull) = 0; break;\
@@ -1909,6 +1964,12 @@ stack_double(int is_alloca, char** arg_alloc_base,
               else if (endp != s) {\
                 (isnull) = -1; /* empty, but position changed */ \
               }\
+            }\
+            else if (k->type == STK_PREC_READ_START) {\
+              level++;\
+            }\
+            else if (k->type == STK_PREC_READ_END) {\
+              level--;\
             }\
             k++;\
           }\
@@ -1934,10 +1995,11 @@ stack_double(int is_alloca, char** arg_alloc_base,
           }\
           else {\
             UChar* endp;\
+            int prec_level = 0;\
             (isnull) = 1;\
             while (k < stk) {\
               if (k->type == STK_MEM_START) {\
-                if (level == 0) {\
+                if (level == 0 && prec_level == 0) {\
                   STACK_MEM_START_GET_PREV_END_ADDR(k, reg, endp);\
                   if (endp == 0) {\
                     (isnull) = 0; break;\
@@ -1955,6 +2017,12 @@ stack_double(int is_alloca, char** arg_alloc_base,
               }\
               else if (k->type == STK_EMPTY_CHECK_END) {\
                 if (k->zid == (sid)) level--;\
+              }\
+              else if (k->type == STK_PREC_READ_START) {\
+                prec_level++;\
+              }\
+              else if (k->type == STK_PREC_READ_END) {\
+                prec_level--;\
               }\
               k++;\
             }\
@@ -1992,7 +2060,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     }\
   }\
 } while(0)
-#endif /* USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT */
+#endif /* USE_STUBBORN_CHECK_CAPTURES_IN_EMPTY_REPEAT */
 
 #define STACK_GET_REPEAT(sid, k) do {\
   int level = 0;\
@@ -2139,14 +2207,12 @@ make_capture_history_tree(OnigCaptureTreeNode* node, StackType** kp,
 #endif
 
 #ifdef USE_BACKREF_WITH_LEVEL
-static int mem_is_in_memp(int mem, int num, UChar* memp)
+static int mem_is_in_memp(int mem, int num, MemNumType* memp)
 {
   int i;
-  MemNumType m;
 
   for (i = 0; i < num; i++) {
-    GET_MEMNUM_INC(m, memp);
-    if (mem == (int )m) return 1;
+    if (mem == (int )memp[i]) return 1;
   }
   return 0;
 }
@@ -2155,7 +2221,7 @@ static int
 backref_match_at_nested_level(regex_t* reg,
                               StackType* top, StackType* stk_base,
                               int ignore_case, int case_fold_flag,
-                              int nest, int mem_num, UChar* memp,
+                              int nest, int mem_num, MemNumType* memp,
                               UChar** s, const UChar* send)
 {
   UChar *ss, *p, *pstart, *pend = NULL_UCHARP;
@@ -2212,7 +2278,7 @@ backref_match_at_nested_level(regex_t* reg,
 static int
 backref_check_at_nested_level(regex_t* reg,
                               StackType* top, StackType* stk_base,
-                              int nest, int mem_num, UChar* memp)
+                              int nest, int mem_num, MemNumType* memp)
 {
   int level;
   StackType* k;
@@ -2338,18 +2404,20 @@ typedef struct {
 } posix_regmatch_t;
 
 
-#ifdef __GNUC__
-#define USE_THREADED_CODE
-#endif
 
 #ifdef USE_THREADED_CODE
 
-#define BYTECODE_INTERPRETER_START      JUMP_OP;
+#define BYTECODE_INTERPRETER_START      GOTO_OP;
 #define BYTECODE_INTERPRETER_END
-#define CASE_OP(x)   L_##x: SOP_IN(OP_##x); sbegin = s; MATCH_DEBUG_OUT(1)
+#define CASE_OP(x)   L_##x: SOP_IN(OP_##x); sbegin = s; MATCH_DEBUG_OUT(0)
 #define DEFAULT_OP   /* L_DEFAULT: */
 #define NEXT_OP      sprev = sbegin; JUMP_OP
-#define JUMP_OP      goto *opcode_to_label[*p++]
+#define JUMP_OP      GOTO_OP
+#ifdef USE_DIRECT_THREADED_CODE
+#define GOTO_OP      goto *(p->opaddr)
+#else
+#define GOTO_OP      goto *opcode_to_label[p->opcode]
+#endif
 #define BREAK_OP     /* Nothing */
 
 #else
@@ -2358,16 +2426,18 @@ typedef struct {
   while (1) {\
   MATCH_DEBUG_OUT(0)\
   sbegin = s;\
-  switch (*p++) {
+  switch (p->opcode) {
 #define BYTECODE_INTERPRETER_END  } sprev = sbegin; }
 #define CASE_OP(x)   case OP_##x: SOP_IN(OP_##x);
 #define DEFAULT_OP   default:
 #define NEXT_OP      break
-#define JUMP_OP      continue; break
+#define JUMP_OP      GOTO_OP
+#define GOTO_OP      continue; break
 #define BREAK_OP     break
 
 #endif /* USE_THREADED_CODE */
 
+#define INC_OP       p++
 #define NEXT_OUT     SOP_OUT; NEXT_OP
 #define JUMP_OUT     SOP_OUT; JUMP_OP
 #define BREAK_OUT    SOP_OUT; BREAK_OP
@@ -2376,7 +2446,8 @@ typedef struct {
 
 #ifdef ONIG_DEBUG_MATCH
 #define MATCH_DEBUG_OUT(offset) do {\
-      UChar *xp, *q, *bp, buf[50];\
+      Operation *xp;\
+      UChar *q, *bp, buf[50];\
       int len, spos;\
       spos = IS_NOT_NULL(s) ? (int )(s - str) : -1;\
       xp = p - (offset);\
@@ -2399,10 +2470,11 @@ typedef struct {
       fputs((char* )buf, stderr);\
       for (i = 0; i < 20 - (bp - buf); i++) fputc(' ', stderr);\
       if (xp == FinishCode)\
-        fprintf(stderr, "----: ");\
-      else\
-        fprintf(stderr, "%4d: ", (int )(xp - reg->p));\
-      onig_print_compiled_byte_code(stderr, xp, NULL, reg->p, encode);\
+        fprintf(stderr, "----: finish");\
+      else {\
+        fprintf(stderr, "%4d: ", (int )(xp - reg->ops));\
+        print_compiled_byte_code(stderr, reg, (int )(xp - reg->ops), reg->ops, encode);\
+      }\
       fprintf(stderr, "\n");\
   } while(0);
 #else
@@ -2417,7 +2489,12 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
          const UChar* in_right_range, const UChar* sstart, UChar* sprev,
          MatchArg* msa)
 {
-  static UChar FinishCode[] = { OP_FINISH };
+
+#if defined(USE_DIRECT_THREADED_CODE)
+  static Operation FinishCode[] = { { .opaddr=&&L_FINISH } };
+#else
+  static Operation FinishCode[] = { { OP_FINISH } };
+#endif
 
 #ifdef USE_THREADED_CODE
   static const void *opcode_to_label[] = {
@@ -2443,9 +2520,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   &&L_CCLASS_NOT,
   &&L_CCLASS_MB_NOT,
   &&L_CCLASS_MIX_NOT,
-#ifdef USE_OP_CCLASS_NODE
-  &&L_CCLASS_NODE,
-#endif
   &&L_ANYCHAR,
   &&L_ANYCHAR_ML,
   &&L_ANYCHAR_STAR,
@@ -2460,8 +2534,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   &&L_NO_WORD_BOUNDARY,
   &&L_WORD_BEGIN,
   &&L_WORD_END,
-  &&L_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY,
-  &&L_NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY,
+  &&L_TEXT_SEGMENT_BOUNDARY,
   &&L_BEGIN_BUF,
   &&L_END_BUF,
   &&L_BEGIN_LINE,
@@ -2475,6 +2548,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   &&L_BACKREF_MULTI,
   &&L_BACKREF_MULTI_IC,
   &&L_BACKREF_WITH_LEVEL,
+  &&L_BACKREF_WITH_LEVEL_IC,
   &&L_BACKREF_CHECK,
   &&L_BACKREF_CHECK_WITH_LEVEL,
   &&L_MEMORY_START,
@@ -2488,7 +2562,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   &&L_PUSH,
   &&L_PUSH_SUPER,
   &&L_POP_OUT,
+#ifdef USE_OP_PUSH_OR_JUMP_EXACT
   &&L_PUSH_OR_JUMP_EXACT1,
+#endif
   &&L_PUSH_IF_PEEK_NEXT,
   &&L_REPEAT,
   &&L_REPEAT_NG,
@@ -2524,7 +2600,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   LengthType tlen, tlen2;
   MemNumType mem;
   RelAddrType addr;
-  UChar *s, *q, *sbegin;
+  UChar *s, *q, *ps, *sbegin;
   UChar *right_range;
   int is_alloca;
   char *alloc_base;
@@ -2543,13 +2619,25 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   int of;
 #endif
 
-  UChar *p = reg->p;
+  Operation* p = reg->ops;
   OnigOptionType option = reg->options;
   OnigEncoding encode = reg->enc;
   OnigCaseFoldType case_fold_flag = reg->case_fold_flag;
 
 #ifdef ONIG_DEBUG_MATCH
   static unsigned int counter = 1;
+#endif
+
+#ifdef USE_DIRECT_THREADED_CODE
+  if (IS_NULL(msa)) {
+    for (i = 0; i < reg->ops_used; i++) {
+       const void* addr;
+       addr = opcode_to_label[reg->ocs[i]];
+       p->opaddr = addr;
+       p++;
+    }
+    return ONIG_NORMAL;
+  }
 #endif
 
 #ifdef USE_CALLOUT
@@ -2700,8 +2788,10 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
     CASE_OP(EXACT1)
       DATA_ENSURE(1);
-      if (*p != *s) goto fail;
-      p++; s++;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      s++;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(EXACT1_IC)
@@ -2716,70 +2806,80 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
                                     &s, end, lowbuf);
         DATA_ENSURE(0);
         q = lowbuf;
+        ps = p->exact.s;
         while (len-- > 0) {
-          if (*p != *q) {
-            goto fail;
-          }
-          p++; q++;
+          if (*ps != *q) goto fail;
+          ps++; q++;
         }
       }
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(EXACT2)
       DATA_ENSURE(2);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
       sprev = s;
-      p++; s++;
+      s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACT3)
       DATA_ENSURE(3);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
       sprev = s;
-      p++; s++;
+      s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACT4)
       DATA_ENSURE(4);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
       sprev = s;
-      p++; s++;
+      s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACT5)
       DATA_ENSURE(5);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
       sprev = s;
-      p++; s++;
+      s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTN)
-      GET_LENGTH_INC(tlen, p);
+      tlen = p->exact_n.n;
       DATA_ENSURE(tlen);
+      ps = p->exact_n.s;
       while (tlen-- > 0) {
-        if (*p++ != *s++) goto fail;
+        if (*ps++ != *s++) goto fail;
       }
       sprev = s - 1;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTN_IC)
@@ -2787,10 +2887,10 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         int len;
         UChar *q, *endp, lowbuf[ONIGENC_MBC_CASE_FOLD_MAXLEN];
 
-        GET_LENGTH_INC(tlen, p);
-        endp = p + tlen;
-
-        while (p < endp) {
+        tlen = p->exact_n.n;
+        ps   = p->exact_n.s;
+        endp = ps + tlen;
+        while (ps < endp) {
           sprev = s;
           DATA_ENSURE(1);
           len = ONIGENC_MBC_CASE_FOLD(encode,
@@ -2800,102 +2900,115 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
           DATA_ENSURE(0);
           q = lowbuf;
           while (len-- > 0) {
-            if (*p != *q) goto fail;
-            p++; q++;
+            if (*ps != *q) goto fail;
+            ps++; q++;
           }
         }
       }
 
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTMB2N1)
       DATA_ENSURE(2);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      s++;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(EXACTMB2N2)
       DATA_ENSURE(4);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
       sprev = s;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTMB2N3)
       DATA_ENSURE(6);
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
+      ps = p->exact.s;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
       sprev = s;
-      if (*p != *s) goto fail;
-      p++; s++;
-      if (*p != *s) goto fail;
-      p++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      if (*ps != *s) goto fail;
+      ps++; s++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTMB2N)
-      GET_LENGTH_INC(tlen, p);
+      tlen = p->exact_n.n;
       DATA_ENSURE(tlen * 2);
+      ps = p->exact_n.s;
       while (tlen-- > 0) {
-        if (*p != *s) goto fail;
-        p++; s++;
-        if (*p != *s) goto fail;
-        p++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
       }
       sprev = s - 2;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTMB3N)
-      GET_LENGTH_INC(tlen, p);
+      tlen = p->exact_n.n;
       DATA_ENSURE(tlen * 3);
+      ps = p->exact_n.s;
       while (tlen-- > 0) {
-        if (*p != *s) goto fail;
-        p++; s++;
-        if (*p != *s) goto fail;
-        p++; s++;
-        if (*p != *s) goto fail;
-        p++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
       }
       sprev = s - 3;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EXACTMBN)
-      GET_LENGTH_INC(tlen,  p);  /* mb-len */
-      GET_LENGTH_INC(tlen2, p);  /* string len */
+      tlen  = p->exact_len_n.len; /* mb byte len */
+      tlen2 = p->exact_len_n.n;   /* number of chars */
       tlen2 *= tlen;
       DATA_ENSURE(tlen2);
+      ps = p->exact_len_n.s;
       while (tlen2-- > 0) {
-        if (*p != *s) goto fail;
-        p++; s++;
+        if (*ps != *s) goto fail;
+        ps++; s++;
       }
       sprev = s - tlen;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(CCLASS)
       DATA_ENSURE(1);
-      if (BITSET_AT(((BitSetRef )p), *s) == 0) goto fail;
-      p += SIZE_BITSET;
-      s += enclen(encode, s);   /* OP_CCLASS can match mb-code. \D, \S */
+      if (BITSET_AT(p->cclass.bsp, *s) == 0) goto fail;
+      s++;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(CCLASS_MB)
+      DATA_ENSURE(1);
       if (! ONIGENC_IS_MBC_HEAD(encode, s)) goto fail;
 
     cclass_mb:
-      GET_LENGTH_INC(tlen, p);
       {
         OnigCodePoint code;
         UChar *ss;
@@ -2907,53 +3020,40 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         ss = s;
         s += mb_len;
         code = ONIGENC_MBC_TO_CODE(encode, ss, s);
-
-#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
-        if (! onig_is_in_code_range(p, code)) goto fail;
-#else
-        q = p;
-        ALIGNMENT_RIGHT(q);
-        if (! onig_is_in_code_range(q, code)) goto fail;
-#endif
+        if (! onig_is_in_code_range(p->cclass_mb.mb, code)) goto fail;
       }
-      p += tlen;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(CCLASS_MIX)
       DATA_ENSURE(1);
       if (ONIGENC_IS_MBC_HEAD(encode, s)) {
-        p += SIZE_BITSET;
         goto cclass_mb;
       }
       else {
-        if (BITSET_AT(((BitSetRef )p), *s) == 0)
+        if (BITSET_AT(p->cclass_mix.bsp, *s) == 0)
           goto fail;
 
-        p += SIZE_BITSET;
-        GET_LENGTH_INC(tlen, p);
-        p += tlen;
         s++;
       }
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(CCLASS_NOT)
       DATA_ENSURE(1);
-      if (BITSET_AT(((BitSetRef )p), *s) != 0) goto fail;
-      p += SIZE_BITSET;
+      if (BITSET_AT(p->cclass.bsp, *s) != 0) goto fail;
       s += enclen(encode, s);
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(CCLASS_MB_NOT)
       DATA_ENSURE(1);
       if (! ONIGENC_IS_MBC_HEAD(encode, s)) {
         s++;
-        GET_LENGTH_INC(tlen, p);
-        p += tlen;
         goto cc_mb_not_success;
       }
 
     cclass_mb_not:
-      GET_LENGTH_INC(tlen, p);
       {
         OnigCodePoint code;
         UChar *ss;
@@ -2962,63 +3062,32 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         if (! DATA_ENSURE_CHECK(mb_len)) {
           DATA_ENSURE(1);
           s = (UChar* )end;
-          p += tlen;
           goto cc_mb_not_success;
         }
 
         ss = s;
         s += mb_len;
         code = ONIGENC_MBC_TO_CODE(encode, ss, s);
-
-#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
-        if (onig_is_in_code_range(p, code)) goto fail;
-#else
-        q = p;
-        ALIGNMENT_RIGHT(q);
-        if (onig_is_in_code_range(q, code)) goto fail;
-#endif
+        if (onig_is_in_code_range(p->cclass_mb.mb, code)) goto fail;
       }
-      p += tlen;
 
     cc_mb_not_success:
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(CCLASS_MIX_NOT)
       DATA_ENSURE(1);
       if (ONIGENC_IS_MBC_HEAD(encode, s)) {
-        p += SIZE_BITSET;
         goto cclass_mb_not;
       }
       else {
-        if (BITSET_AT(((BitSetRef )p), *s) != 0)
+        if (BITSET_AT(p->cclass_mix.bsp, *s) != 0)
           goto fail;
 
-        p += SIZE_BITSET;
-        GET_LENGTH_INC(tlen, p);
-        p += tlen;
         s++;
       }
+      INC_OP;
       NEXT_OUT;
-
-#ifdef USE_OP_CCLASS_NODE
-    CASE_OP(CCLASS_NODE)
-      {
-        OnigCodePoint code;
-        void *node;
-        int mb_len;
-        UChar *ss;
-
-        DATA_ENSURE(1);
-        GET_POINTER_INC(node, p);
-        mb_len = enclen(encode, s);
-        ss = s;
-        s += mb_len;
-        DATA_ENSURE(0);
-        code = ONIGENC_MBC_TO_CODE(encode, ss, s);
-        if (onig_is_code_in_cc_len(mb_len, code, node) == 0) goto fail;
-      }
-      NEXT_OUT;
-#endif
 
     CASE_OP(ANYCHAR)
       DATA_ENSURE(1);
@@ -3026,6 +3095,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       DATA_ENSURE(n);
       if (ONIGENC_IS_MBC_NEWLINE(encode, s, end)) goto fail;
       s += n;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(ANYCHAR_ML)
@@ -3033,9 +3103,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       n = enclen(encode, s);
       DATA_ENSURE(n);
       s += n;
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(ANYCHAR_STAR)
+      INC_OP;
       while (DATA_ENSURE_CHECK1) {
         STACK_PUSH_ALT(p, s, sprev);
         n = enclen(encode, s);
@@ -3047,6 +3119,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       JUMP_OUT;
 
     CASE_OP(ANYCHAR_ML_STAR)
+      INC_OP;
       while (DATA_ENSURE_CHECK1) {
         STACK_PUSH_ALT(p, s, sprev);
         n = enclen(encode, s);
@@ -3063,36 +3136,46 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       JUMP_OUT;
 
     CASE_OP(ANYCHAR_STAR_PEEK_NEXT)
-      while (DATA_ENSURE_CHECK1) {
-        if (*p == *s) {
-          STACK_PUSH_ALT(p + 1, s, sprev);
-        }
-        n = enclen(encode, s);
-        DATA_ENSURE(n);
-        if (ONIGENC_IS_MBC_NEWLINE(encode, s, end))  goto fail;
-        sprev = s;
-        s += n;
-      }
-      p++;
-      NEXT_OUT;
+      {
+        UChar c;
 
-    CASE_OP(ANYCHAR_ML_STAR_PEEK_NEXT)
-      while (DATA_ENSURE_CHECK1) {
-        if (*p == *s) {
-          STACK_PUSH_ALT(p + 1, s, sprev);
-        }
-        n = enclen(encode, s);
-        if (n > 1) {
+        c = p->anychar_star_peek_next.c;
+        INC_OP;
+        while (DATA_ENSURE_CHECK1) {
+          if (c == *s) {
+            STACK_PUSH_ALT(p, s, sprev);
+          }
+          n = enclen(encode, s);
           DATA_ENSURE(n);
+          if (ONIGENC_IS_MBC_NEWLINE(encode, s, end))  goto fail;
           sprev = s;
           s += n;
         }
-        else {
-          sprev = s;
-          s++;
+      }
+      NEXT_OUT;
+
+    CASE_OP(ANYCHAR_ML_STAR_PEEK_NEXT)
+      {
+        UChar c;
+
+        c = p->anychar_star_peek_next.c;
+        INC_OP;
+        while (DATA_ENSURE_CHECK1) {
+          if (c == *s) {
+            STACK_PUSH_ALT(p, s, sprev);
+          }
+          n = enclen(encode, s);
+          if (n > 1) {
+            DATA_ENSURE(n);
+            sprev = s;
+            s += n;
+          }
+          else {
+            sprev = s;
+            s++;
+          }
         }
       }
-      p++;
       NEXT_OUT;
 
     CASE_OP(WORD)
@@ -3101,6 +3184,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         goto fail;
 
       s += enclen(encode, s);
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(WORD_ASCII)
@@ -3109,6 +3193,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         goto fail;
 
       s += enclen(encode, s);
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(NO_WORD)
@@ -3117,6 +3202,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         goto fail;
 
       s += enclen(encode, s);
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(NO_WORD_ASCII)
@@ -3125,13 +3211,14 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         goto fail;
 
       s += enclen(encode, s);
+      INC_OP;
       NEXT_OUT;
 
     CASE_OP(WORD_BOUNDARY)
       {
         ModeType mode;
-        GET_MODE_INC(mode, p); /* ascii_mode */
 
+        mode = p->word_boundary.mode;
         if (ON_STR_BEGIN(s)) {
           DATA_ENSURE(1);
           if (! IS_MBC_WORD_ASCII_MODE(encode, s, end, mode))
@@ -3147,13 +3234,14 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
             goto fail;
         }
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(NO_WORD_BOUNDARY)
       {
         ModeType mode;
-        GET_MODE_INC(mode, p); /* ascii_mode */
 
+        mode = p->word_boundary.mode;
         if (ON_STR_BEGIN(s)) {
           if (DATA_ENSURE_CHECK1 && IS_MBC_WORD_ASCII_MODE(encode, s, end, mode))
             goto fail;
@@ -3168,16 +3256,18 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
             goto fail;
         }
       }
+      INC_OP;
       JUMP_OUT;
 
 #ifdef USE_WORD_BEGIN_END
     CASE_OP(WORD_BEGIN)
       {
         ModeType mode;
-        GET_MODE_INC(mode, p); /* ascii_mode */
 
+        mode = p->word_boundary.mode;
         if (DATA_ENSURE_CHECK1 && IS_MBC_WORD_ASCII_MODE(encode, s, end, mode)) {
           if (ON_STR_BEGIN(s) || !IS_MBC_WORD_ASCII_MODE(encode, sprev, end, mode)) {
+            INC_OP;
             JUMP_OUT;
           }
         }
@@ -3187,10 +3277,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
     CASE_OP(WORD_END)
       {
         ModeType mode;
-        GET_MODE_INC(mode, p); /* ascii_mode */
 
+        mode = p->word_boundary.mode;
         if (!ON_STR_BEGIN(s) && IS_MBC_WORD_ASCII_MODE(encode, sprev, end, mode)) {
           if (ON_STR_END(s) || ! IS_MBC_WORD_ASCII_MODE(encode, s, end, mode)) {
+            INC_OP;
             JUMP_OUT;
           }
         }
@@ -3198,34 +3289,56 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       goto fail;
 #endif
 
-    CASE_OP(EXTENDED_GRAPHEME_CLUSTER_BOUNDARY)
-      if (onigenc_egcb_is_break_position(encode, s, sprev, str, end)) {
-        JUMP_OUT;
+    CASE_OP(TEXT_SEGMENT_BOUNDARY)
+      {
+        int is_break;
+
+        switch (p->text_segment_boundary.type) {
+        case EXTENDED_GRAPHEME_CLUSTER_BOUNDARY:
+          is_break = onigenc_egcb_is_break_position(encode, s, sprev, str, end);
+          break;
+#ifdef USE_UNICODE_WORD_BREAK
+        case WORD_BOUNDARY:
+          is_break = onigenc_wb_is_break_position(encode, s, sprev, str, end);
+          break;
+#endif
+        default:
+          goto bytecode_error;
+          break;
+        }
+
+        if (p->text_segment_boundary.not != 0)
+          is_break = ! is_break;
+
+        if (is_break != 0) {
+          INC_OP;
+          JUMP_OUT;
+        }
+        else {
+          goto fail;
+        }
       }
-      goto fail;
-
-    CASE_OP(NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY)
-      if (onigenc_egcb_is_break_position(encode, s, sprev, str, end))
-        goto fail;
-
-      JUMP_OUT;
 
     CASE_OP(BEGIN_BUF)
       if (! ON_STR_BEGIN(s)) goto fail;
 
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(END_BUF)
       if (! ON_STR_END(s)) goto fail;
 
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(BEGIN_LINE)
       if (ON_STR_BEGIN(s)) {
         if (IS_NOTBOL(msa->options)) goto fail;
+        INC_OP;
         JUMP_OUT;
       }
       else if (ONIGENC_IS_MBC_NEWLINE(encode, sprev, end) && !ON_STR_END(s)) {
+        INC_OP;
         JUMP_OUT;
       }
       goto fail;
@@ -3236,16 +3349,19 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         if (IS_EMPTY_STR || !ONIGENC_IS_MBC_NEWLINE(encode, sprev, end)) {
 #endif
           if (IS_NOTEOL(msa->options)) goto fail;
+          INC_OP;
           JUMP_OUT;
 #ifndef USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
         }
 #endif
       }
       else if (ONIGENC_IS_MBC_NEWLINE(encode, s, end)) {
+        INC_OP;
         JUMP_OUT;
       }
 #ifdef USE_CRNL_AS_LINE_TERMINATOR
       else if (ONIGENC_IS_MBC_CRNL(encode, s, end)) {
+        INC_OP;
         JUMP_OUT;
       }
 #endif
@@ -3257,6 +3373,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         if (IS_EMPTY_STR || !ONIGENC_IS_MBC_NEWLINE(encode, sprev, end)) {
 #endif
           if (IS_NOTEOL(msa->options)) goto fail;
+          INC_OP;
           JUMP_OUT;
 #ifndef USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
         }
@@ -3264,6 +3381,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       }
       else if (ONIGENC_IS_MBC_NEWLINE(encode, s, end) &&
                ON_STR_END(s + enclen(encode, s))) {
+        INC_OP;
         JUMP_OUT;
       }
 #ifdef USE_CRNL_AS_LINE_TERMINATOR
@@ -3271,6 +3389,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         UChar* ss = s + enclen(encode, s);
         ss += enclen(encode, ss);
         if (ON_STR_END(ss)) {
+          INC_OP;
           JUMP_OUT;
         }
       }
@@ -3281,38 +3400,45 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       if (s != msa->start)
         goto fail;
 
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(MEMORY_START_PUSH)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_start.num;
       STACK_PUSH_MEM_START(mem, s);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(MEMORY_START)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_start.num;
       mem_start_stk[mem] = (StackIndex )((void* )s);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(MEMORY_END_PUSH)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_end.num;
       STACK_PUSH_MEM_END(mem, s);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(MEMORY_END)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_end.num;
       mem_end_stk[mem] = (StackIndex )((void* )s);
+      INC_OP;
       JUMP_OUT;
 
 #ifdef USE_CALL
     CASE_OP(MEMORY_END_PUSH_REC)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_end.num;
       STACK_GET_MEM_START(mem, stkp); /* should be before push mem-end. */
+      si = GET_STACK_INDEX(stkp);
       STACK_PUSH_MEM_END(mem, s);
-      mem_start_stk[mem] = GET_STACK_INDEX(stkp);
+      mem_start_stk[mem] = si;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(MEMORY_END_REC)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->memory_end.num;
       mem_end_stk[mem] = (StackIndex )((void* )s);
       STACK_GET_MEM_START(mem, stkp);
 
@@ -3322,6 +3448,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         mem_start_stk[mem] = (StackIndex )((void* )stkp->u.mem.pstr);
 
       STACK_PUSH_MEM_END_MARK(mem);
+      INC_OP;
       JUMP_OUT;
 #endif
 
@@ -3334,7 +3461,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       goto backref;
 
     CASE_OP(BACKREF_N)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->backref_n.n1;
     backref:
       {
         int len;
@@ -3352,16 +3479,19 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
                 ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
                 : (UChar* )((void* )mem_end_stk[mem]));
         n = (int )(pend - pstart);
-        DATA_ENSURE(n);
-        sprev = s;
-        STRING_CMP(pstart, s, n);
-        while (sprev + (len = enclen(encode, sprev)) < s)
-          sprev += len;
+        if (n != 0) {
+          DATA_ENSURE(n);
+          sprev = s;
+          STRING_CMP(s, pstart, n);
+          while (sprev + (len = enclen(encode, sprev)) < s)
+            sprev += len;
+        }
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(BACKREF_N_IC)
-      GET_MEMNUM_INC(mem, p);
+      mem = p->backref_n.n1;
       {
         int len;
         UChar *pstart, *pend;
@@ -3378,12 +3508,15 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
                 ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
                 : (UChar* )((void* )mem_end_stk[mem]));
         n = (int )(pend - pstart);
-        DATA_ENSURE(n);
-        sprev = s;
-        STRING_CMP_IC(case_fold_flag, pstart, &s, n);
-        while (sprev + (len = enclen(encode, sprev)) < s)
-          sprev += len;
+        if (n != 0) {
+          DATA_ENSURE(n);
+          sprev = s;
+          STRING_CMP_IC(case_fold_flag, pstart, &s, n);
+          while (sprev + (len = enclen(encode, sprev)) < s)
+            sprev += len;
+        }
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(BACKREF_MULTI)
@@ -3391,9 +3524,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         int len, is_fail;
         UChar *pstart, *pend, *swork;
 
-        GET_LENGTH_INC(tlen, p);
+        tlen = p->backref_general.num;
         for (i = 0; i < tlen; i++) {
-          GET_MEMNUM_INC(mem, p);
+          mem = tlen == 1 ? p->backref_general.n1 : p->backref_general.ns[i];
 
           if (mem_end_stk[mem]   == INVALID_STACK_INDEX) continue;
           if (mem_start_stk[mem] == INVALID_STACK_INDEX) continue;
@@ -3407,20 +3540,21 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
                   ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
                   : (UChar* )((void* )mem_end_stk[mem]));
           n = (int )(pend - pstart);
-          DATA_ENSURE(n);
-          sprev = s;
-          swork = s;
-          STRING_CMP_VALUE(pstart, swork, n, is_fail);
-          if (is_fail) continue;
-          s = swork;
-          while (sprev + (len = enclen(encode, sprev)) < s)
-            sprev += len;
-
-          p += (SIZE_MEMNUM * (tlen - i - 1));
+          if (n != 0) {
+            DATA_ENSURE(n);
+            sprev = s;
+            swork = s;
+            STRING_CMP_VALUE(swork, pstart, n, is_fail);
+            if (is_fail) continue;
+            s = swork;
+            while (sprev + (len = enclen(encode, sprev)) < s)
+              sprev += len;
+          }
           break; /* success */
         }
         if (i == tlen) goto fail;
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(BACKREF_MULTI_IC)
@@ -3428,9 +3562,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         int len, is_fail;
         UChar *pstart, *pend, *swork;
 
-        GET_LENGTH_INC(tlen, p);
+        tlen = p->backref_general.num;
         for (i = 0; i < tlen; i++) {
-          GET_MEMNUM_INC(mem, p);
+          mem = tlen == 1 ? p->backref_general.n1 : p->backref_general.ns[i];
 
           if (mem_end_stk[mem]   == INVALID_STACK_INDEX) continue;
           if (mem_start_stk[mem] == INVALID_STACK_INDEX) continue;
@@ -3444,125 +3578,140 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
                   ? STACK_AT(mem_end_stk[mem])->u.mem.pstr
                   : (UChar* )((void* )mem_end_stk[mem]));
           n = (int )(pend - pstart);
-          DATA_ENSURE(n);
-          sprev = s;
-          swork = s;
-          STRING_CMP_VALUE_IC(case_fold_flag, pstart, &swork, n, is_fail);
-          if (is_fail) continue;
-          s = swork;
-          while (sprev + (len = enclen(encode, sprev)) < s)
-            sprev += len;
-
-          p += (SIZE_MEMNUM * (tlen - i - 1));
+          if (n != 0) {
+            DATA_ENSURE(n);
+            sprev = s;
+            swork = s;
+            STRING_CMP_VALUE_IC(case_fold_flag, pstart, &swork, n, is_fail);
+            if (is_fail) continue;
+            s = swork;
+            while (sprev + (len = enclen(encode, sprev)) < s)
+              sprev += len;
+          }
           break; /* success */
         }
         if (i == tlen) goto fail;
       }
+      INC_OP;
       JUMP_OUT;
 
 #ifdef USE_BACKREF_WITH_LEVEL
+    CASE_OP(BACKREF_WITH_LEVEL_IC)
+      n = 1; /* ignore case */
+      goto backref_with_level;
     CASE_OP(BACKREF_WITH_LEVEL)
       {
         int len;
-        OnigOptionType ic;
-        LengthType level;
+        int level;
+        MemNumType* mems;
+        UChar* ssave;
 
-        GET_OPTION_INC(ic,    p);
-        GET_LENGTH_INC(level, p);
-        GET_LENGTH_INC(tlen,  p);
+        n = 0;
+      backref_with_level:
+        level = p->backref_general.nest_level;
+        tlen  = p->backref_general.num;
+        mems = tlen == 1 ? &(p->backref_general.n1) : p->backref_general.ns;
 
-        sprev = s;
-        if (backref_match_at_nested_level(reg, stk, stk_base, ic
-                     , case_fold_flag, (int )level, (int )tlen, p, &s, end)) {
-          if (sprev < end) {
+        ssave = s;
+        if (backref_match_at_nested_level(reg, stk, stk_base, n,
+                    case_fold_flag, level, (int )tlen, mems, &s, end)) {
+          if (ssave != s) {
+            sprev = ssave;
             while (sprev + (len = enclen(encode, sprev)) < s)
               sprev += len;
           }
-          p += (SIZE_MEMNUM * tlen);
         }
         else
           goto fail;
       }
+      INC_OP;
       JUMP_OUT;
 #endif
 
     CASE_OP(BACKREF_CHECK)
       {
-        GET_LENGTH_INC(tlen, p);
-        for (i = 0; i < tlen; i++) {
-          GET_MEMNUM_INC(mem, p);
+        MemNumType* mems;
 
+        tlen  = p->backref_general.num;
+        mems = tlen == 1 ? &(p->backref_general.n1) : p->backref_general.ns;
+
+        for (i = 0; i < tlen; i++) {
+          mem = mems[i];
           if (mem_end_stk[mem]   == INVALID_STACK_INDEX) continue;
           if (mem_start_stk[mem] == INVALID_STACK_INDEX) continue;
-
-          p += (SIZE_MEMNUM * (tlen - i - 1));
           break; /* success */
         }
         if (i == tlen) goto fail;
       }
+      INC_OP;
       JUMP_OUT;
 
 #ifdef USE_BACKREF_WITH_LEVEL
     CASE_OP(BACKREF_CHECK_WITH_LEVEL)
       {
         LengthType level;
+        MemNumType* mems;
 
-        GET_LENGTH_INC(level, p);
-        GET_LENGTH_INC(tlen,  p);
+        level = p->backref_general.nest_level;
+        tlen  = p->backref_general.num;
+        mems = tlen == 1 ? &(p->backref_general.n1) : p->backref_general.ns;
 
         if (backref_check_at_nested_level(reg, stk, stk_base,
-                                          (int )level, (int )tlen, p) != 0) {
-          p += (SIZE_MEMNUM * tlen);
-        }
-        else
+                                          (int )level, (int )tlen, mems) == 0)
           goto fail;
       }
+      INC_OP;
       JUMP_OUT;
 #endif
 
     CASE_OP(EMPTY_CHECK_START)
-      GET_MEMNUM_INC(mem, p);    /* mem: null check id */
+      mem = p->empty_check_start.mem;   /* mem: null check id */
       STACK_PUSH_EMPTY_CHECK_START(mem, s);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(EMPTY_CHECK_END)
       {
         int is_empty;
 
-        GET_MEMNUM_INC(mem, p); /* mem: null check id */
+        mem = p->empty_check_end.mem;  /* mem: null check id */
         STACK_EMPTY_CHECK(is_empty, mem, s);
+        INC_OP;
         if (is_empty) {
 #ifdef ONIG_DEBUG_MATCH
           fprintf(stderr, "EMPTY_CHECK_END: skip  id:%d, s:%p\n", (int )mem, s);
 #endif
         empty_check_found:
           /* empty loop founded, skip next instruction */
-          switch (*p++) {
+#if defined(ONIG_DEBUG) && !defined(USE_DIRECT_THREADED_CODE)
+          switch (p->opcode) {
           case OP_JUMP:
           case OP_PUSH:
-            p += SIZE_RELADDR;
-            break;
           case OP_REPEAT_INC:
           case OP_REPEAT_INC_NG:
           case OP_REPEAT_INC_SG:
           case OP_REPEAT_INC_NG_SG:
-            p += SIZE_MEMNUM;
+            INC_OP;
             break;
           default:
             goto unexpected_bytecode_error;
             break;
           }
+#else
+          INC_OP;
+#endif
         }
       }
       JUMP_OUT;
 
-#ifdef USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT
+#ifdef USE_STUBBORN_CHECK_CAPTURES_IN_EMPTY_REPEAT
     CASE_OP(EMPTY_CHECK_END_MEMST)
       {
         int is_empty;
 
-        GET_MEMNUM_INC(mem, p); /* mem: null check id */
+        mem = p->empty_check_end.mem;  /* mem: null check id */
         STACK_EMPTY_CHECK_MEM(is_empty, mem, s, reg);
+        INC_OP;
         if (is_empty) {
 #ifdef ONIG_DEBUG_MATCH
           fprintf(stderr, "EMPTY_CHECK_END_MEM: skip  id:%d, s:%p\n", (int)mem, s);
@@ -3579,12 +3728,13 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       {
         int is_empty;
 
-        GET_MEMNUM_INC(mem, p); /* mem: null check id */
-#ifdef USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT
+        mem = p->empty_check_end.mem;  /* mem: null check id */
+#ifdef USE_STUBBORN_CHECK_CAPTURES_IN_EMPTY_REPEAT
         STACK_EMPTY_CHECK_MEM_REC(is_empty, mem, s, reg);
 #else
         STACK_EMPTY_CHECK_REC(is_empty, mem, s);
 #endif
+        INC_OP;
         if (is_empty) {
 #ifdef ONIG_DEBUG_MATCH
           fprintf(stderr, "EMPTY_CHECK_END_MEM_PUSH: skip  id:%d, s:%p\n",
@@ -3601,88 +3751,104 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 #endif
 
     CASE_OP(JUMP)
-      GET_RELADDR_INC(addr, p);
+      addr = p->jump.addr;
       p += addr;
       CHECK_INTERRUPT_JUMP_OUT;
 
     CASE_OP(PUSH)
-      GET_RELADDR_INC(addr, p);
+      addr = p->push.addr;
       STACK_PUSH_ALT(p + addr, s, sprev);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(PUSH_SUPER)
-      GET_RELADDR_INC(addr, p);
+      addr = p->push.addr;
       STACK_PUSH_SUPER_ALT(p + addr, s, sprev);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(POP_OUT)
       STACK_POP_ONE;
       /* for stop backtrack */
       /* CHECK_RETRY_LIMIT_IN_MATCH; */
+      INC_OP;
       JUMP_OUT;
 
+ #ifdef USE_OP_PUSH_OR_JUMP_EXACT
     CASE_OP(PUSH_OR_JUMP_EXACT1)
-      GET_RELADDR_INC(addr, p);
-      if (*p == *s && DATA_ENSURE_CHECK1) {
-        p++;
-        STACK_PUSH_ALT(p + addr, s, sprev);
-        JUMP_OUT;
+      {
+        UChar c;
+
+        addr = p->push_or_jump_exact1.addr;
+        c    = p->push_or_jump_exact1.c;
+        if (DATA_ENSURE_CHECK1 && c == *s) {
+          STACK_PUSH_ALT(p + addr, s, sprev);
+          INC_OP;
+          JUMP_OUT;
+        }
       }
-      p += (addr + 1);
+      p += addr;
       JUMP_OUT;
+#endif
 
     CASE_OP(PUSH_IF_PEEK_NEXT)
-      GET_RELADDR_INC(addr, p);
-      if (*p == *s) {
-        p++;
-        STACK_PUSH_ALT(p + addr, s, sprev);
-        JUMP_OUT;
+      {
+        UChar c;
+
+        addr = p->push_if_peek_next.addr;
+        c    = p->push_if_peek_next.c;
+        if (c == *s) {
+          STACK_PUSH_ALT(p + addr, s, sprev);
+          INC_OP;
+          JUMP_OUT;
+        }
       }
-      p++;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(REPEAT)
-      {
-        GET_MEMNUM_INC(mem, p);    /* mem: OP_REPEAT ID */
-        GET_RELADDR_INC(addr, p);
+      mem  = p->repeat.id;  /* mem: OP_REPEAT ID */
+      addr = p->repeat.addr;
 
-        STACK_ENSURE(1);
-        repeat_stk[mem] = GET_STACK_INDEX(stk);
-        STACK_PUSH_REPEAT(mem, p);
+      STACK_ENSURE(1);
+      repeat_stk[mem] = GET_STACK_INDEX(stk);
+      STACK_PUSH_REPEAT(mem, p + 1);
 
-        if (reg->repeat_range[mem].lower == 0) {
-          STACK_PUSH_ALT(p + addr, s, sprev);
-        }
+      if (reg->repeat_range[mem].lower == 0) {
+        STACK_PUSH_ALT(p + addr, s, sprev);
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(REPEAT_NG)
-      {
-        GET_MEMNUM_INC(mem, p);    /* mem: OP_REPEAT ID */
-        GET_RELADDR_INC(addr, p);
+      mem  = p->repeat.id;  /* mem: OP_REPEAT ID */
+      addr = p->repeat.addr;
 
-        STACK_ENSURE(1);
-        repeat_stk[mem] = GET_STACK_INDEX(stk);
-        STACK_PUSH_REPEAT(mem, p);
+      STACK_ENSURE(1);
+      repeat_stk[mem] = GET_STACK_INDEX(stk);
+      STACK_PUSH_REPEAT(mem, p + 1);
 
-        if (reg->repeat_range[mem].lower == 0) {
-          STACK_PUSH_ALT(p, s, sprev);
-          p += addr;
-        }
+      if (reg->repeat_range[mem].lower == 0) {
+        STACK_PUSH_ALT(p + 1, s, sprev);
+        p += addr;
       }
+      else
+        INC_OP;
       JUMP_OUT;
 
     CASE_OP(REPEAT_INC)
-      GET_MEMNUM_INC(mem, p); /* mem: OP_REPEAT ID */
-      si = repeat_stk[mem];
+      mem  = p->repeat_inc.id;  /* mem: OP_REPEAT ID */
+      si   = repeat_stk[mem];
       stkp = STACK_AT(si);
 
     repeat_inc:
       stkp->u.repeat.count++;
       if (stkp->u.repeat.count >= reg->repeat_range[mem].upper) {
         /* end of repeat. Nothing to do. */
+        INC_OP;
       }
       else if (stkp->u.repeat.count >= reg->repeat_range[mem].lower) {
+        INC_OP;
         STACK_PUSH_ALT(p, s, sprev);
         p = STACK_AT(si)->u.repeat.pcode; /* Don't use stkp after PUSH. */
       }
@@ -3693,13 +3859,13 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       CHECK_INTERRUPT_JUMP_OUT;
 
     CASE_OP(REPEAT_INC_SG)
-      GET_MEMNUM_INC(mem, p); /* mem: OP_REPEAT ID */
+      mem = p->repeat_inc.id;  /* mem: OP_REPEAT ID */
       STACK_GET_REPEAT(mem, stkp);
       si = GET_STACK_INDEX(stkp);
       goto repeat_inc;
 
     CASE_OP(REPEAT_INC_NG)
-      GET_MEMNUM_INC(mem, p); /* mem: OP_REPEAT ID */
+      mem = p->repeat_inc.id;  /* mem: OP_REPEAT ID */
       si = repeat_stk[mem];
       stkp = STACK_AT(si);
 
@@ -3707,10 +3873,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       stkp->u.repeat.count++;
       if (stkp->u.repeat.count < reg->repeat_range[mem].upper) {
         if (stkp->u.repeat.count >= reg->repeat_range[mem].lower) {
-          UChar* pcode = stkp->u.repeat.pcode;
+          Operation* pcode = stkp->u.repeat.pcode;
 
           STACK_PUSH_REPEAT_INC(si);
           STACK_PUSH_ALT(pcode, s, sprev);
+          INC_OP;
         }
         else {
           p = stkp->u.repeat.pcode;
@@ -3719,30 +3886,33 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       }
       else if (stkp->u.repeat.count == reg->repeat_range[mem].upper) {
         STACK_PUSH_REPEAT_INC(si);
+        INC_OP;
       }
       CHECK_INTERRUPT_JUMP_OUT;
 
     CASE_OP(REPEAT_INC_NG_SG)
-      GET_MEMNUM_INC(mem, p); /* mem: OP_REPEAT ID */
+      mem = p->repeat_inc.id;  /* mem: OP_REPEAT ID */
       STACK_GET_REPEAT(mem, stkp);
       si = GET_STACK_INDEX(stkp);
       goto repeat_inc_ng;
 
     CASE_OP(PREC_READ_START)
-      STACK_PUSH_POS(s, sprev);
+      STACK_PUSH_PREC_READ_START(s, sprev);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(PREC_READ_END)
-      {
-        STACK_EXEC_TO_VOID(stkp);
-        s     = stkp->u.state.pstr;
-        sprev = stkp->u.state.pstr_prev;
-      }
+      STACK_GET_PREC_READ_START(stkp);
+      s     = stkp->u.state.pstr;
+      sprev = stkp->u.state.pstr_prev;
+      STACK_PUSH(STK_PREC_READ_END,0,0,0);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(PREC_READ_NOT_START)
-      GET_RELADDR_INC(addr, p);
+      addr = p->prec_read_not_start.addr;
       STACK_PUSH_ALT_PREC_READ_NOT(p + addr, s, sprev);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(PREC_READ_NOT_END)
@@ -3751,22 +3921,25 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
     CASE_OP(ATOMIC_START)
       STACK_PUSH_TO_VOID_START;
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(ATOMIC_END)
       STACK_EXEC_TO_VOID(stkp);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(LOOK_BEHIND)
-      GET_LENGTH_INC(tlen, p);
+      tlen = p->look_behind.len;
       s = (UChar* )ONIGENC_STEP_BACK(encode, str, s, (int )tlen);
       if (IS_NULL(s)) goto fail;
       sprev = (UChar* )onigenc_get_prev_char_head(encode, str, s);
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(LOOK_BEHIND_NOT_START)
-      GET_RELADDR_INC(addr, p);
-      GET_LENGTH_INC(tlen, p);
+      addr = p->look_behind_not_start.addr;
+      tlen = p->look_behind_not_start.len;
       q = (UChar* )ONIGENC_STEP_BACK(encode, str, s, (int )tlen);
       if (IS_NULL(q)) {
         /* too short case -> success. ex. /(?<!XXX)a/.match("a")
@@ -3778,18 +3951,20 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         STACK_PUSH_ALT_LOOK_BEHIND_NOT(p + addr, s, sprev);
         s = q;
         sprev = (UChar* )onigenc_get_prev_char_head(encode, str, s);
+        INC_OP;
       }
       JUMP_OUT;
 
     CASE_OP(LOOK_BEHIND_NOT_END)
       STACK_POP_TIL_ALT_LOOK_BEHIND_NOT;
+      INC_OP;
       goto fail;
 
 #ifdef USE_CALL
     CASE_OP(CALL)
-      GET_ABSADDR_INC(addr, p);
-      STACK_PUSH_CALL_FRAME(p);
-      p = reg->p + addr;
+      addr = p->call.addr;
+      INC_OP; STACK_PUSH_CALL_FRAME(p);
+      p = reg->ops + addr;
       JUMP_OUT;
 
     CASE_OP(RETURN)
@@ -3801,8 +3976,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
     CASE_OP(PUSH_SAVE_VAL)
       {
         SaveType type;
-        GET_SAVE_TYPE_INC(type, p);
-        GET_MEMNUM_INC(mem, p); /* mem: save id */
+
+        type = p->push_save_val.type;
+        mem  = p->push_save_val.id; /* mem: save id */
         switch ((enum SaveType )type) {
         case SAVE_KEEP:
           STACK_PUSH_SAVE_VAL(mem, type, s);
@@ -3817,6 +3993,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
           break;
         }
       }
+      INC_OP;
       JUMP_OUT;
 
     CASE_OP(UPDATE_VAR)
@@ -3824,8 +4001,9 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         UpdateVarType type;
         enum SaveType save_type;
 
-        GET_UPDATE_VAR_TYPE_INC(type, p);
-        GET_MEMNUM_INC(mem, p); /* mem: save id */
+        type = p->update_var.type;
+        mem  = p->update_var.id; /* mem: save id */
+
         switch ((enum UpdateVarType )type) {
         case UPDATE_VAR_KEEP_FROM_STACK_LAST:
           STACK_GET_SAVE_VAL_TYPE_LAST(SAVE_KEEP, keep);
@@ -3847,11 +4025,13 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
           break;
         }
       }
+      INC_OP;
       JUMP_OUT;
 
 #ifdef USE_CALLOUT
     CASE_OP(CALLOUT_CONTENTS)
       of = ONIG_CALLOUT_OF_CONTENTS;
+      mem = p->callout_contents.num;
       goto callout_common_entry;
       BREAK_OUT;
 
@@ -3859,21 +4039,20 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       {
         int call_result;
         int name_id;
-        int num;
         int in;
         CalloutListEntry* e;
         OnigCalloutFunc func;
         OnigCalloutArgs args;
 
         of = ONIG_CALLOUT_OF_NAME;
-        GET_MEMNUM_INC(name_id, p);
+        name_id = p->callout_name.id;
+        mem     = p->callout_name.num;
 
       callout_common_entry:
-        GET_MEMNUM_INC(num, p);
-        e = onig_reg_callout_list_at(reg, num);
+        e = onig_reg_callout_list_at(reg, mem);
         in = e->in;
         if (of == ONIG_CALLOUT_OF_NAME) {
-          func = onig_get_callout_start_func(reg, num);
+          func = onig_get_callout_start_func(reg, mem);
         }
         else {
           name_id = ONIG_NON_NAME_ID;
@@ -3882,7 +4061,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
 
         if (IS_NOT_NULL(func) && (in & ONIG_CALLOUT_IN_PROGRESS) != 0) {
           CALLOUT_BODY(func, ONIG_CALLOUT_IN_PROGRESS, name_id,
-                       num, msa->mp->callout_user_data, args, call_result);
+                       (int )mem, msa->mp->callout_user_data, args, call_result);
           switch (call_result) {
           case ONIG_CALLOUT_FAIL:
             goto fail;
@@ -3904,18 +4083,19 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
           if ((in & ONIG_CALLOUT_IN_RETRACTION) != 0) {
             if (of == ONIG_CALLOUT_OF_NAME) {
               if (IS_NOT_NULL(func)) {
-                STACK_PUSH_CALLOUT_NAME(name_id, num, func);
+                STACK_PUSH_CALLOUT_NAME(name_id, mem, func);
               }
             }
             else {
               func = msa->mp->retraction_callout_of_contents;
               if (IS_NOT_NULL(func)) {
-                STACK_PUSH_CALLOUT_CONTENTS(num, func);
+                STACK_PUSH_CALLOUT_CONTENTS(mem, func);
               }
             }
           }
         }
       }
+      INC_OP;
       JUMP_OUT;
 #endif
 
@@ -3959,9 +4139,11 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   STACK_SAVE;
   return ONIGERR_UNDEFINED_BYTECODE;
 
+#if defined(ONIG_DEBUG) && !defined(USE_DIRECT_THREADED_CODE)
  unexpected_bytecode_error:
   STACK_SAVE;
   return ONIGERR_UNEXPECTED_BYTECODE;
+#endif
 
 #ifdef USE_RETRY_LIMIT_IN_MATCH
  retry_limit_in_match_over:
@@ -5028,6 +5210,16 @@ onig_copy_encoding(OnigEncoding to, OnigEncoding from)
   *to = *from;
 }
 
+#ifdef USE_DIRECT_THREADED_CODE
+extern int
+onig_init_for_match_at(regex_t* reg)
+{
+  return match_at(reg, (const UChar* )NULL, (const UChar* )NULL,
+                  (const UChar* )NULL, (const UChar* )NULL, (UChar* )NULL,
+                  (MatchArg* )NULL);
+}
+#endif
+
 
 /* for callout functions */
 
@@ -5296,6 +5488,9 @@ onig_builtin_error(OnigCalloutArgs* args, void* user_data ARG_UNUSED)
 
   n = (int )val.l;
   if (n >= 0) {
+    n = ONIGERR_INVALID_CALLOUT_BODY;
+  }
+  else if (onig_is_error_code_needs_param(n)) {
     n = ONIGERR_INVALID_CALLOUT_BODY;
   }
 

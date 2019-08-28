@@ -1,4 +1,4 @@
-Oniguruma API  Version 6.8.0  2018/03/13
+Oniguruma API  Version 6.9.3  2019/07/06
 
 #include <oniguruma.h>
 
@@ -92,6 +92,8 @@ Oniguruma API  Version 6.8.0  2018/03/13
                                      (alnum, alpha, blank, cntrl, digit, graph,
                                       lower, print, punct, space, upper, xdigit,
                                       word)
+      ONIG_OPTION_TEXT_SEGMENT_EXTENDED_GRAPHEME_CLUSTER  Extended Grapheme Cluster mode
+      ONIG_OPTION_TEXT_SEGMENT_WORD                       Word mode
 
   5 enc:        character encoding.
 
@@ -165,6 +167,9 @@ Oniguruma API  Version 6.8.0  2018/03/13
 
 # int onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
                       OnigCompileInfo* ci, OnigErrorInfo* einfo)
+
+  This function is deprecate, and it does not allow the case where
+  the encoding of pattern and target is different.
 
   Create a regex object.
   This function is deluxe version of onig_new().
@@ -297,6 +302,7 @@ Oniguruma API  Version 6.8.0  2018/03/13
                    const UChar* range, OnigRegion* region, OnigOptionType option)
 
   Search string and return search result and matching region.
+  Do not pass invalid byte string in the regex character encoding.
 
   normal return: match position offset (i.e.  p - str >= 0)
   not found:     ONIG_MISMATCH (< 0)
@@ -321,15 +327,19 @@ Oniguruma API  Version 6.8.0  2018/03/13
                    const UChar* start, const UChar* range, OnigRegion* region,
                    OnigOptionType option, OnigMatchParam* mp)
 
-   arguments
-   1-7:  same as onig_search()
-   8 mp: match parameter values (match_stack_limit, retry_limit_in_match)
+  Search string and return search result and matching region.
+  Do not pass invalid byte string in the regex character encoding.
+
+  arguments
+  1-7:  same as onig_search()
+  8 mp: match parameter values (match_stack_limit, retry_limit_in_match)
 
 
 # int onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
                  OnigRegion* region, OnigOptionType option)
 
   Match string and return result and matching region.
+  Do not pass invalid byte string in the regex character encoding.
 
   normal return: match length  (>= 0)
   not match:     ONIG_MISMATCH ( < 0)
@@ -351,6 +361,9 @@ Oniguruma API  Version 6.8.0  2018/03/13
                             const UChar* at, OnigRegion* region,
                             OnigOptionType option, OnigMatchParam* mp)
 
+  Match string and return result and matching region.
+  Do not pass invalid byte string in the regex character encoding.
+
    arguments
    1-6:  same as onig_match()
    7 mp: match parameter values (match_stack_limit, retry_limit_in_match)
@@ -362,6 +375,7 @@ Oniguruma API  Version 6.8.0  2018/03/13
                 void* callback_arg)
 
   Scan string and callback with matching region.
+  Do not pass invalid byte string in the regex character encoding.
 
   normal return: number of matching times
   error:         error code
@@ -609,14 +623,20 @@ Oniguruma API  Version 6.8.0  2018/03/13
 
 
 # int onigenc_strlen(OnigEncoding enc, const UChar* s, const UChar* end)
+
+  Return number of characters in the string.
+
+
 # int onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 
   Return number of characters in the string.
+  Do not pass invalid byte string in the character encoding.
 
 
 # int onigenc_str_bytelen_null(OnigEncoding enc, const UChar* s)
 
   Return number of bytes in the string.
+  Do not pass invalid byte string in the character encoding.
 
 
 # int onig_set_default_syntax(OnigSyntaxType* syntax)

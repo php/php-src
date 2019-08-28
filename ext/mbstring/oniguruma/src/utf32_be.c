@@ -91,7 +91,7 @@ utf32be_code_to_mbc(OnigCodePoint code, UChar *buf)
 
 static int
 utf32be_mbc_case_fold(OnigCaseFoldType flag,
-		      const UChar** pp, const UChar* end, UChar* fold)
+                      const UChar** pp, const UChar* end, UChar* fold)
 {
   const UChar* p = *pp;
 
@@ -117,7 +117,7 @@ utf32be_mbc_case_fold(OnigCaseFoldType flag,
   }
   else
     return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF32_BE, flag, pp, end,
-					 fold);
+                                         fold);
 }
 
 #if 0
@@ -169,7 +169,7 @@ utf32be_get_case_fold_codes_by_str(OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_unicode_get_case_fold_codes_by_str(ONIG_ENCODING_UTF32_BE,
-						    flag, p, end, items);
+                                                    flag, p, end, items);
 }
 
 OnigEncodingType OnigEncodingUTF32_BE = {

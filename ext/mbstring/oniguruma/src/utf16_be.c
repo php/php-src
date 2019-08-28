@@ -2,7 +2,7 @@
   utf16_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,25 @@ utf16be_mbc_enc_len(const UChar* p)
 static int
 is_valid_mbc_string(const UChar* s, const UChar* end)
 {
-  return onigenc_length_check_is_valid_mbc_string(ONIG_ENCODING_UTF16_BE, s, end);
+  while (s < end) {
+    int len = utf16be_mbc_enc_len(s);
+    if (len == 4) {
+      if (s + 2 >= end)
+        return FALSE;
+      if (! UTF16_IS_SURROGATE_SECOND(*(s+2)))
+        return FALSE;
+    }
+    else
+      if (UTF16_IS_SURROGATE_SECOND(*s))
+        return FALSE;
+
+    s += len;
+  }
+
+  if (s != end)
+    return FALSE;
+  else
+    return TRUE;
 }
 
 static int
@@ -148,7 +166,15 @@ utf16be_mbc_to_code(const UChar* p, const UChar* end)
 static int
 utf16be_code_to_mbclen(OnigCodePoint code)
 {
-  return (code > 0xffff ? 4 : 2);
+  if (code > 0xffff) {
+    if (code > 0x10ffff)
+      return ONIGERR_INVALID_CODE_POINT_VALUE;
+    else
+      return 4;
+  }
+  else {
+    return 2;
+  }
 }
 
 static int
@@ -176,7 +202,7 @@ utf16be_code_to_mbc(OnigCodePoint code, UChar *buf)
 
 static int
 utf16be_mbc_case_fold(OnigCaseFoldType flag,
-		      const UChar** pp, const UChar* end, UChar* fold)
+                      const UChar** pp, const UChar* end, UChar* fold)
 {
   const UChar* p = *pp;
 
@@ -200,7 +226,7 @@ utf16be_mbc_case_fold(OnigCaseFoldType flag,
   }
   else
     return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF16_BE, flag,
-					 pp, end, fold);
+                                         pp, end, fold);
 }
 
 #if 0
@@ -220,8 +246,7 @@ utf16be_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* e
     }
 
     c = *p;
-    v = ONIGENC_IS_UNICODE_ISO_8859_1_BIT_CTYPE(c,
-		(BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
+    v = ONIGENC_IS_UNICODE_ISO_8859_1_BIT_CTYPE(c, (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
 
     if ((v | BIT_CTYPE_LOWER) != 0) {
       /* 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
@@ -246,7 +271,8 @@ utf16be_left_adjust_char_head(const UChar* start, const UChar* s)
     s--;
   }
 
-  if (UTF16_IS_SURROGATE_SECOND(*s) && s > start + 1)
+  if (UTF16_IS_SURROGATE_SECOND(*s) && s > start + 1 &&
+      UTF16_IS_SURROGATE_FIRST(*(s-2)))
     s -= 2;
 
   return (UChar* )s;
@@ -257,7 +283,7 @@ utf16be_get_case_fold_codes_by_str(OnigCaseFoldType flag,
     const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
 {
   return onigenc_unicode_get_case_fold_codes_by_str(ONIG_ENCODING_UTF16_BE,
-						    flag, p, end, items);
+                                                    flag, p, end, items);
 }
 
 OnigEncodingType OnigEncodingUTF16_BE = {
