@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed connect_attr issues and added the _server_host connection attribute.
     (Qianqian Bu)
 
+- ODBC:
+  . Fixed bug #78473 (odbc_close() closes arbitrary resources). (cmb)
+
 29 Aug 2019, PHP 7.2.22
 
 - Core:
