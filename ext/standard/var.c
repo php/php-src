@@ -565,7 +565,7 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 
-			/* stdClass has no __set_state method, but can be casted to */
+			/* StdClass has no __set_state method, but can be casted to */
 			if (Z_OBJCE_P(struc) == zend_standard_class_def) {
 				smart_str_appendl(buf, "(object) array(\n", 16);
 			} else {

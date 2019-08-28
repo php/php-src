@@ -2623,14 +2623,14 @@ static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_referen
 	return 1;
 }
 
-/* Checks whether an stdClass can be assigned to the reference. Returns conflicting property if
+/* Checks whether an StdClass can be assigned to the reference. Returns conflicting property if
  * assignment is not possible, NULL otherwise. */
 static zend_never_inline zend_bool zend_verify_ref_stdClass_assignable(zend_reference *ref) {
 	zend_property_info *prop;
 	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		if (!check_type_stdClass_assignable(prop->type)) {
-			zend_throw_auto_init_in_ref_error(prop, "stdClass");
+			zend_throw_auto_init_in_ref_error(prop, "StdClass");
 			return 0;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
@@ -2681,7 +2681,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 					}
 				}
 				if (!check_type_stdClass_assignable(prop_info->type)) {
-					zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
+					zend_throw_auto_init_in_prop_error(prop_info, "StdClass");
 					if (result) ZVAL_ERROR(result);
 					return 0;
 				}

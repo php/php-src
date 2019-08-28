@@ -1613,7 +1613,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field)(MYSQLND_RES * const result)
 			  save time. However, when a metadata call is done, we need to calculate max_length.
 			  We don't have control whether max_length will be used, unfortunately. Otherwise we
 			  could have been able to skip that step.
-			  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
+			  Well, if the mysqli API switches from returning StdClass to class like mysqli_field_metadata,
 			  then we can have max_length as dynamic property, which will be calculated during runtime and
 			  not during mysqli_fetch_field() time.
 			*/
@@ -1650,7 +1650,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_field_direct)(MYSQLND_RES * const result, cons
 			  save time. However, when a metadata call is done, we need to calculate max_length.
 			  We don't have control whether max_length will be used, unfortunately. Otherwise we
 			  could have been able to skip that step.
-			  Well, if the mysqli API switches from returning stdClass to class like mysqli_field_metadata,
+			  Well, if the mysqli API switches from returning StdClass to class like mysqli_field_metadata,
 			  then we can have max_length as dynamic property, which will be calculated during runtime and
 			  not during mysqli_fetch_field_direct() time.
 			*/
