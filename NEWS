@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #78334 (fpm log prefix message includes wrong stdout/stderr
     notation). (Tsuyoshi Sadakata)
 
+- ODBC:
+  . Fixed bug #78473 (odbc_close() closes arbitrary resources). (cmb)
+
 - SPL:
   . Fixed bug #78436 (Missing addref in SplPriorityQueue EXTR_BOTH mode).
     (Nikita)
