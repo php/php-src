@@ -1550,6 +1550,8 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
+dnl Make directories when building in a separate build directory.
+$php_shtool mkdir -p pear
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
