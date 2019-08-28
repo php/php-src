@@ -316,7 +316,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown value " ZEND_LONG_FMT, what);
+		zend_throw_error(NULL, "Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 
