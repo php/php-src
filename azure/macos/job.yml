@@ -82,4 +82,4 @@ jobs:
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
