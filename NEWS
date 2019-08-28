@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
 
+- FPM:
+  . Fixed bug #78413 (request_terminate_timeout does not take effect after
+    fastcgi_finish_request). (Sergei Turchanov)
+
 - MBString:
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)

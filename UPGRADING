@@ -273,6 +273,10 @@ FPM:
     disabling output decoration for workers output when catch_workers_output
     enabled.
   . The getallheaders() function is now also available.
+  . In PHP 7.3.11 a new pool option
+    request_terminate_timeout_track_finished has been added. When enabled,
+    request_terminate_timeout will also apply after fastcgi_finish_request()
+    has been called, as well as during execution of shutdown functions.
 
 ========================================
 4. Deprecated Functionality

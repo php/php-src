@@ -339,6 +339,14 @@ pm.max_spare_servers = 3
 ; Default Value: 0
 ;request_terminate_timeout = 0
 
+; The timeout set by 'request_terminate_timeout' ini option is not engaged after
+; application calls 'fastcgi_finish_request' or when application has finished and
+; shutdown functions are being called (registered via register_shutdown_function).
+; This option will enable timeout limit to be applied unconditionally
+; even in such cases.
+; Default Value: no
+;request_terminate_timeout_track_finished = no
+
 ; Set open file descriptor rlimit.
 ; Default Value: system defined value
 ;rlimit_files = 1024
