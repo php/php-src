@@ -316,6 +316,21 @@ void shutdown_executor(void) /* {{{ */
 			}
 		} ZEND_HASH_FOREACH_END();
 
+		/* Also release error and exception handlers, which may hold objects. */
+		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_error_handler));
+			ZVAL_UNDEF(&EG(user_error_handler));
+		}
+
+		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_exception_handler));
+			ZVAL_UNDEF(&EG(user_exception_handler));
+		}
+
+		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+
 #if ZEND_DEBUG
 		if (gc_enabled() && !CG(unclean_shutdown)) {
 			gc_collect_cycles();
@@ -342,22 +357,6 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
 	} else {
-		/* remove error handlers before destroying classes and functions,
-		 * so that if handler used some class, crash would not happen */
-		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-		}
-
-		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_exception_handler));
-			ZVAL_UNDEF(&EG(user_exception_handler));
-		}
-
-		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-
 		zend_vm_stack_destroy();
 
 		if (EG(full_tables_cleanup)) {
