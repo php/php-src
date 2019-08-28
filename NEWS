@@ -1,5 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+29 Aug 2019, PHP 7.1.32
+
+- mbstring:
+  . Fixed CVE-2019-13224 (don't allow different encodings for onig_new_deluxe) (stas)
+
+- pcre:
+  . Fixed bug #75457 (heap use-after-free in pcrelib) (cmb)
+
 01 Aug 2019, PHP 7.1.31
 
 - SQLite:
