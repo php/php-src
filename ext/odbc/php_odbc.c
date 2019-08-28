@@ -2695,7 +2695,10 @@ PHP_FUNCTION(odbc_close)
 		return;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn);
+	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
+		RETURN_FALSE;
+	}
+
 	if (Z_RES_P(pv_conn)->type == le_pconn) {
 		is_pconn = 1;
 	}
