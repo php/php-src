@@ -18,7 +18,12 @@ echo "\n-- Open a file using fopen --\n";
 var_dump($fp = fopen(__FILE__, 'r'));
 
 $result1 = fread($fp, 5);
-var_dump(rewinddir($fp));
+
+try {
+    var_dump(rewinddir($fp));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 $result2 = fread($fp, 5);
 
 echo "\n-- Check if rewinddir() has repositioned the file pointer --\n";
@@ -34,9 +39,7 @@ if ($result1 === $result2) {
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-
-Warning: rewinddir(): %d is not a valid Directory resource in %s on line %d
-bool(false)
+%d is not a valid Directory resource
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers
