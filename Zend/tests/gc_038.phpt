@@ -5,7 +5,7 @@ zend.enable_gc = 1
 --FILE--
 <?php
 function test_add() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x += 5;
 	$n = gc_collect_cycles();
@@ -14,7 +14,7 @@ function test_add() {
 test_add();
 
 function test_sub() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x -= 5;
 	$n = gc_collect_cycles();
@@ -23,7 +23,7 @@ function test_sub() {
 test_sub();
 
 function test_mul() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x *= 5;
 	$n = gc_collect_cycles();
@@ -32,7 +32,7 @@ function test_mul() {
 test_mul();
 
 function test_div() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x /= 5;
 	$n = gc_collect_cycles();
@@ -41,7 +41,7 @@ function test_div() {
 test_div();
 
 function test_mod() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x %= 5;
 	$n = gc_collect_cycles();
@@ -50,7 +50,7 @@ function test_mod() {
 test_mod();
 
 function test_sl() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x <<= 5;
 	$n = gc_collect_cycles();
@@ -59,7 +59,7 @@ function test_sl() {
 test_sl();
 
 function test_sr() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x >>= 5;
 	$n = gc_collect_cycles();
@@ -68,7 +68,7 @@ function test_sr() {
 test_sr();
 
 function test_or() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x |= 1;
 	$n = gc_collect_cycles();
@@ -77,7 +77,7 @@ function test_or() {
 test_or();
 
 function test_and() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x &= 1;
 	$n = gc_collect_cycles();
@@ -86,7 +86,7 @@ function test_and() {
 test_and();
 
 function test_xor() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x ^= 1;
 	$n = gc_collect_cycles();
@@ -95,7 +95,7 @@ function test_xor() {
 test_xor();
 
 function test_pow() {
-	$x = new stdClass;
+	$x = new StdClass;
 	$x->x= $x;
 	@$x **= 1;
 	$n = gc_collect_cycles();

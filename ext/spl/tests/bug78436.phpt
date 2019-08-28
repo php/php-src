@@ -4,7 +4,7 @@ Bug #78436: Missing addref in SplPriorityQueue EXTR_BOTH mode
 <?php
 
 $pq = new SplPriorityQueue();
-$pq->insert(new stdClass, 1);
+$pq->insert(new StdClass, 1);
 var_dump($pq);
 var_dump($pq);
 
@@ -20,7 +20,7 @@ object(SplPriorityQueue)#1 (3) {
     [0]=>
     array(2) {
       ["data"]=>
-      object(stdClass)#2 (0) {
+      object(StdClass)#2 (0) {
       }
       ["priority"]=>
       int(1)
@@ -37,7 +37,7 @@ object(SplPriorityQueue)#1 (3) {
     [0]=>
     array(2) {
       ["data"]=>
-      object(stdClass)#2 (0) {
+      object(StdClass)#2 (0) {
       }
       ["priority"]=>
       int(1)

@@ -20,7 +20,7 @@ function check(&$obj) {
 
 echo "\n\n--- a refs container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = &$obj;
 $obj->b = 1;
 $obj->c = 1;
@@ -28,7 +28,7 @@ check($obj);
 
 echo "\n\n--- a eqs container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = $obj;
 $obj->b = 1;
 $obj->c = 1;
@@ -36,7 +36,7 @@ check($obj);
 
 echo "\n\n--- a,b ref container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = &$obj;
 $obj->b = &$obj;
 $obj->c = 1;
@@ -44,7 +44,7 @@ check($obj);
 
 echo "\n\n--- a,b eq container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = $obj;
 $obj->b = $obj;
 $obj->c = 1;
@@ -52,7 +52,7 @@ check($obj);
 
 echo "\n\n--- a,b,c ref container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = &$obj;
 $obj->b = &$obj;
 $obj->c = &$obj;
@@ -60,7 +60,7 @@ check($obj);
 
 echo "\n\n--- a,b,c eq container:\n";
 $ext = 1;
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = $obj;
 $obj->b = $obj;
 $obj->c = $obj;
@@ -70,7 +70,7 @@ echo "Done";
 ?>
 --EXPECTF--
 --- a refs container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -78,8 +78,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";i:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";R:1;s:1:"b";i:1;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -87,7 +87,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -95,7 +95,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -103,7 +103,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -114,7 +114,7 @@ object(stdClass)#%d (3) {
 
 
 --- a eqs container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -122,8 +122,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";i:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";r:1;s:1:"b";i:1;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -131,7 +131,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -139,7 +139,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -147,7 +147,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -158,7 +158,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b ref container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -166,8 +166,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -175,7 +175,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -183,7 +183,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -191,7 +191,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -202,7 +202,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b eq container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -210,8 +210,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -219,7 +219,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -227,7 +227,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -235,7 +235,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -246,7 +246,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b,c ref container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -254,8 +254,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";R:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";R:1;s:1:"b";R:1;s:1:"c";R:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -263,7 +263,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -271,7 +271,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -279,7 +279,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->c.changed"
   ["b"]=>
@@ -290,7 +290,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b,c eq container:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -298,8 +298,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";r:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";r:1;s:1:"b";r:1;s:1:"c";r:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   *RECURSION*
   ["b"]=>
@@ -307,7 +307,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -315,7 +315,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -323,7 +323,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   *RECURSION*
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>

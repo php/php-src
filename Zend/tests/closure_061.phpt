@@ -23,8 +23,8 @@ $tests = [
         [new Cls,      null],
         [new Cls,      'Cls'],
         [null,         'Cls'],
-        [null,         'stdClass'],
-        [new stdClass, null],
+        [null,         'StdClass'],
+        [new StdClass, null],
     ]],
 
     ['strlen', [
@@ -32,8 +32,8 @@ $tests = [
         [new Cls,      null],
         [new Cls,      'Cls'],
         [null,         'Cls'],
-        [null,         'stdClass'],
-        [new stdClass, null],
+        [null,         'StdClass'],
+        [new StdClass, null],
     ]],
 
     [['Cls', 'staticMethod'], [
@@ -70,8 +70,8 @@ $tests = [
         [new Cls,      null],
         [new Cls,      'Cls'],
         [null,         'Cls'],
-        [null,         'stdClass'],
-        [new stdClass, null],
+        [null,         'StdClass'],
+        [new StdClass, null],
     ]],
 ];
 
@@ -123,10 +123,10 @@ Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure
 bindTo(null, Cls::class):
 Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
 
-bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+bindTo(null, StdClass::class):
+Cannot bind closure to scope of internal class StdClass
 
-bindTo(new stdClass, null):
+bindTo(new StdClass, null):
 Success!
 
 strlen()
@@ -144,10 +144,10 @@ Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure
 bindTo(null, Cls::class):
 Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
 
-bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+bindTo(null, StdClass::class):
+Cannot bind closure to scope of internal class StdClass
 
-bindTo(new stdClass, null):
+bindTo(new StdClass, null):
 Success!
 
 Cls::staticMethod()
@@ -234,8 +234,8 @@ Success!
 bindTo(null, Cls::class):
 Success!
 
-bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+bindTo(null, StdClass::class):
+Cannot bind closure to scope of internal class StdClass
 
-bindTo(new stdClass, null):
+bindTo(new StdClass, null):
 Success!

@@ -60,7 +60,7 @@ $values = array(
       "''" => '',
 
       // object data
-      "new stdclass()" => new stdclass(),
+      "new StdClass()" => new StdClass(),
 
       // undefined data
       "undefined_var" => $undefined_var,
@@ -150,7 +150,7 @@ string(28) "4a46494600010201006000600000"
 -- Arg value '' --
 string(28) "4a46494600010201006000600000"
 
--- Arg value new stdclass() --
+-- Arg value new StdClass() --
 string(28) "4a46494600010201006000600000"
 
 -- Arg value undefined_var --

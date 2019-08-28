@@ -14,7 +14,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    call_user_func(array('stdclass', NULL));
+    call_user_func(array('StdClass', NULL));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

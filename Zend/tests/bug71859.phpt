@@ -7,7 +7,7 @@ class constructs_in_destructor {
     //We are now in zend_objects_store_call_destructors
     //This causes a realloc in zend_objects_store_put
     for ($i = 0; $i < 10000; ++$i) {
-      $GLOBALS["a$i"] = new stdClass;
+      $GLOBALS["a$i"] = new StdClass;
     }
     //Returns to zend_objects_store_call_destructors, to access freed memory.
   }
@@ -20,7 +20,7 @@ $a->a = $a;
 // Create some objects so zend_objects_store_call_destructors has something
 // to do after constructs_in_destructor is destroyed.
 for ($i = 0; $i < 200; ++$i) {
-  $GLOBALS["b$i"] = new stdClass;
+  $GLOBALS["b$i"] = new StdClass;
 }
 ?>
 okey

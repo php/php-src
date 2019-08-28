@@ -23,7 +23,7 @@ var_dump(filter_var_array(array("aaa"=>"bbb"), 1000000));
 var_dump(filter_var_array(array("aaa"=>"bbb"), ""));
 
 echo "-- (4)\n";
-var_dump(filter_var_array(array(), new stdclass));
+var_dump(filter_var_array(array(), new StdClass));
 var_dump(filter_var_array(array(), array()));
 var_dump(filter_var_array(array(), array("var_name"=>1)));
 var_dump(filter_var_array(array(), array("var_name"=>-1)));

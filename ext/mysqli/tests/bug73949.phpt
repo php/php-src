@@ -16,7 +16,7 @@ class cc{
 };
 $i=mysqli_connect('p:'.$host, $user, $passwd, $db);
 $res=mysqli_query($i, "SHOW STATUS LIKE 'Connections'");
-$t=array(new stdClass);
+$t=array(new StdClass);
 while($db= mysqli_fetch_object($res,'cc',$t)){}
 print "done!";
 ?>

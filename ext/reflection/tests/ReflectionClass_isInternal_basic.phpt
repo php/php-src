@@ -5,7 +5,7 @@ ReflectionClass::isInternal()
 class C {
 }
 
-$r1 = new ReflectionClass("stdClass");
+$r1 = new ReflectionClass("StdClass");
 $r2 = new ReflectionClass("ReflectionClass");
 $r3 = new ReflectionClass("ReflectionProperty");
 $r4 = new ReflectionClass("Exception");

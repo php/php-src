@@ -219,17 +219,17 @@ try {
 
 ?>
 --EXPECTF--
-TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass given, called in %s on line 8 and defined in %s:5
+TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, instance of StdClass given, called in %s on line 8 and defined in %s:5
 Stack trace:
-#0 %s(8): unloadedClass(Object(stdClass))
+#0 %s(8): unloadedClass(Object(StdClass))
 #1 {main}
-TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, instance of stdClass given, called in %s on line 20 and defined in %s:16
+TypeError: Argument 1 passed to loadedClass() must be an instance of RealClass or null, instance of StdClass given, called in %s on line 20 and defined in %s:16
 Stack trace:
-#0 %s(20): loadedClass(Object(stdClass))
+#0 %s(20): loadedClass(Object(StdClass))
 #1 {main}
-TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, instance of stdClass given, called in %s on line 26 and defined in %s:17
+TypeError: Argument 1 passed to loadedInterface() must implement interface RealInterface or be null, instance of StdClass given, called in %s on line 26 and defined in %s:17
 Stack trace:
-#0 %s(26): loadedInterface(Object(stdClass))
+#0 %s(26): loadedInterface(Object(StdClass))
 #1 {main}
 TypeError: Argument 1 passed to unloadedClass() must be an instance of I\Dont\Exist or null, int given, called in %s on line 32 and defined in %s:5
 Stack trace:
@@ -253,17 +253,17 @@ Stack trace:
 #1 {main}
 TypeError: Argument 1 passed to intF() must be of the type int or null, object given, called in %s on line 68 and defined in %s:65
 Stack trace:
-#0 %s(68): intF(Object(stdClass))
+#0 %s(68): intF(Object(StdClass))
 #1 {main}
-TypeError: Return value of returnUnloadedClass() must be an instance of I\Dont\Exist or null, instance of stdClass returned in %s:74
+TypeError: Return value of returnUnloadedClass() must be an instance of I\Dont\Exist or null, instance of StdClass returned in %s:74
 Stack trace:
 #0 %s(78): returnUnloadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedClass() must be an instance of RealClass or null, instance of stdClass returned in %s:84
+TypeError: Return value of returnLoadedClass() must be an instance of RealClass or null, instance of StdClass returned in %s:84
 Stack trace:
 #0 %s(88): returnLoadedClass()
 #1 {main}
-TypeError: Return value of returnLoadedInterface() must implement interface RealInterface or be null, instance of stdClass returned in %s:94
+TypeError: Return value of returnLoadedInterface() must implement interface RealInterface or be null, instance of StdClass returned in %s:94
 Stack trace:
 #0 %s(98): returnLoadedInterface()
 #1 {main}

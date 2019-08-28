@@ -15,7 +15,7 @@ set_error_handler("error_handler");
 test();
 ?>
 --EXPECT--
-stdClass Object
+StdClass Object
 (
     [id] => 1
 )

@@ -9,7 +9,7 @@ var_dump(get_browser(""));
 
 ?>
 --EXPECT--
-object(stdClass)#1 (34) {
+object(StdClass)#1 (34) {
   ["browser_name_regex"]=>
   string(6) "~^.*$~"
   ["browser_name_pattern"]=>

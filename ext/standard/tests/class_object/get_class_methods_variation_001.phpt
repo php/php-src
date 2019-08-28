@@ -64,7 +64,7 @@ $values = array(
       'string',
 
       // object data
-      new stdclass(),
+      new StdClass(),
 
       // undefined data
       $undefined_var,
@@ -163,7 +163,7 @@ NULL
 Arg value string 
 NULL
 
-Arg value stdClass 
+Arg value StdClass
 array(0) {
 }
 

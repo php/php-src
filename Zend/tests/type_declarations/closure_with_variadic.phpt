@@ -2,14 +2,14 @@
 Closure with variadic type declaration
 --FILE--
 <?php
-$f = function (stdClass ...$a) {
+$f = function (StdClass ...$a) {
     var_dump($a);
 };
-$f(new stdClass);
+$f(new StdClass);
 ?>
 --EXPECT--
 array(1) {
   [0]=>
-  object(stdClass)#2 (0) {
+  object(StdClass)#2 (0) {
   }
 }

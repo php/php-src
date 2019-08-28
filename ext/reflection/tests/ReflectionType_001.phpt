@@ -2,15 +2,15 @@
 ReflectionParameter::get/hasType and ReflectionType tests
 --FILE--
 <?php
-function foo(stdClass $a, array $b, callable $c, stdClass $d = null, $e = null, string $f, bool $g, int $h, float $i, NotExisting $j) { }
+function foo(StdClass $a, array $b, callable $c, StdClass $d = null, $e = null, string $f, bool $g, int $h, float $i, NotExisting $j) { }
 
-function bar(): stdClass { return new stdClass; }
+function bar(): StdClass { return new StdClass; }
 
-class c extends stdClass {
+class c extends StdClass {
   function bar(self $x): int { return 1; }
   function pbar(parent $x): int { return 1; }
   function factory(): self { return new c; }
-  function pfactory(): parent { return new stdClass; }
+  function pfactory(): parent { return new StdClass; }
 }
 
 $closure = function (Test $a): Test { return $a; };
@@ -81,7 +81,7 @@ class PropTypeTest {
 	public string $string;
 	public array $arr;
 	public iterable $iterable;
-	public stdClass $std;
+	public StdClass $std;
 	public OtherThing $other;
 	public $mixed;
 }
@@ -97,7 +97,7 @@ foreach ($reflector->getProperties() as $name => $property) {
 
 echo "*** resolved property types\n";
 $obj = new PropTypeTest;
-$obj->std = new stdClass;
+$obj->std = new StdClass;
 $r = (new ReflectionProperty($obj, 'std'))->getType();
 var_dump($r->getName());
 ?>
@@ -107,7 +107,7 @@ var_dump($r->getName());
 bool(true)
 bool(false)
 bool(false)
-string(8) "stdClass"
+string(8) "StdClass"
 ** Function 0 - Parameter 1
 bool(true)
 bool(false)
@@ -122,7 +122,7 @@ string(8) "callable"
 bool(true)
 bool(true)
 bool(false)
-string(8) "stdClass"
+string(8) "StdClass"
 ** Function 0 - Parameter 4
 bool(false)
 ** Function 0 - Parameter 5
@@ -185,7 +185,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
-string(8) "stdClass"
+string(8) "StdClass"
 ** Function/method return type 2
 bool(true)
 bool(false)
@@ -217,8 +217,8 @@ public int $int;
 public string $string;
 public array $arr;
 public iterable $iterable;
-public stdClass $std;
+public StdClass $std;
 public OtherThing $other;
 public $mixed;
 *** resolved property types
-string(8) "stdClass"
+string(8) "StdClass"

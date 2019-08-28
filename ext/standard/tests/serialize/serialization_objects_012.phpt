@@ -14,7 +14,7 @@ Object serialization / unserialization: real references and COW references
  */
 
 echo "\n\nArray containing same object twice:\n";
-$obj = new stdclass;
+$obj = new StdClass;
 $a[0] = $obj;
 $a[1] = $a[0];
 var_dump($a);
@@ -31,7 +31,7 @@ var_dump($ua);
 
 
 echo "\n\nArray containing object and reference to that object:\n";
-$obj = new stdclass;
+$obj = new StdClass;
 $a[0] = $obj;
 $a[1] = &$a[0];
 var_dump($a);
@@ -47,8 +47,8 @@ $ua[0] = "a0.changed";
 var_dump($ua);
 
 echo "\n\nObject containing same object twice:";
-$obj = new stdclass;
-$contaner = new stdclass;
+$obj = new StdClass;
+$contaner = new StdClass;
 $contaner->a = $obj;
 $contaner->b = $contaner->a;
 var_dump($contaner);
@@ -65,8 +65,8 @@ var_dump($ucontainer);
 
 
 echo "\n\nObject containing object and reference to that object:\n";
-$obj = new stdclass;
-$contaner = new stdclass;
+$obj = new StdClass;
+$contaner = new StdClass;
 $contaner->a = $obj;
 $contaner->b = &$contaner->a;
 var_dump($contaner);
@@ -87,29 +87,29 @@ echo "Done";
 Array containing same object twice:
 array(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+string(37) "a:2:{i:0;O:8:"StdClass":0:{}i:1;r:2;}"
 array(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(2) {
   [0]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
   [1]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -118,7 +118,7 @@ array(2) {
   [0]=>
   string(10) "a0.changed"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -128,29 +128,29 @@ array(2) {
 Array containing object and reference to that object:
 array(2) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
   [1]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
 }
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;R:2;}"
+string(37) "a:2:{i:0;O:8:"StdClass":0:{}i:1;R:2;}"
 array(2) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
   [1]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
 }
 array(2) {
   [0]=>
-  &object(stdClass)#%d (1) {
+  &object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
   [1]=>
-  &object(stdClass)#%d (1) {
+  &object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -163,40 +163,40 @@ array(2) {
 }
 
 
-Object containing same object twice:object(stdClass)#%d (2) {
+Object containing same object twice:object(StdClass)#%d (2) {
   ["a"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   ["b"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
-string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";r:2;}"
-object(stdClass)#%d (2) {
+string(58) "O:8:"StdClass":2:{s:1:"a";O:8:"StdClass":0:{}s:1:"b";r:2;}"
+object(StdClass)#%d (2) {
   ["a"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   ["b"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
   ["b"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   string(20) "container->a.changed"
   ["b"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -204,36 +204,36 @@ object(stdClass)#%d (2) {
 
 
 Object containing object and reference to that object:
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
   ["b"]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
 }
-string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";R:2;}"
-object(stdClass)#%d (2) {
+string(58) "O:8:"StdClass":2:{s:1:"a";O:8:"StdClass":0:{}s:1:"b";R:2;}"
+object(StdClass)#%d (2) {
   ["a"]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
   ["b"]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
-  &object(stdClass)#%d (1) {
+  &object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
   ["b"]=>
-  &object(stdClass)#%d (1) {
+  &object(StdClass)#%d (1) {
     ["a"]=>
     string(7) "newProp"
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   &string(20) "container->a.changed"
   ["b"]=>

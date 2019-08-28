@@ -75,7 +75,7 @@ array(2) {
     NULL
   }
   [1]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["value"]=>
     NULL
   }

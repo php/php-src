@@ -35,7 +35,7 @@ var_dump(get_parent_class("i"));
 var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
-var_dump(get_parent_class(new stdclass));
+var_dump(get_parent_class(new StdClass));
 var_dump(get_parent_class(array()));
 var_dump(get_parent_class(1));
 

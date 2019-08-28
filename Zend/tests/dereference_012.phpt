@@ -24,7 +24,7 @@ $foo = new foo;
 $foo->a()[0] = 2;
 var_dump($foo::$x);
 
-$foo->b()[] = new stdClass;
+$foo->b()[] = new StdClass;
 
 $h = $foo->b();
 var_dump($h);

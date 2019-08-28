@@ -9,14 +9,14 @@ class bad {
 	public function __destruct() {
 		global $bar;
 		$bar = $this;
-		$bar->y = new stdClass;
+		$bar->y = new StdClass;
 	}
 }
 
-$foo = new stdClass;
+$foo = new StdClass;
 $foo->foo = $foo;
 $foo->bad = new bad;
-$foo->bad->x = new stdClass;
+$foo->bad->x = new StdClass;
 
 unset($foo);
 gc_collect_cycles();
@@ -24,9 +24,9 @@ var_dump($bar);
 --EXPECT--
 object(bad)#2 (2) {
   ["x"]=>
-  object(stdClass)#3 (0) {
+  object(StdClass)#3 (0) {
   }
   ["y"]=>
-  object(stdClass)#4 (0) {
+  object(StdClass)#4 (0) {
   }
 }

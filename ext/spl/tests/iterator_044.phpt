@@ -60,7 +60,7 @@ catch(Exception $e)
 
 $it = new MyCachingIterator(new ArrayIterator(array(0, 'foo'=>1, 2, 'bar'=>3, 4)), CachingIterator::FULL_CACHE);
 
-$checks = array(0, new stdClass, new MyFoo, NULL, 2, 'foo', 3);
+$checks = array(0, new StdClass, new MyFoo, NULL, 2, 'foo', 3);
 
 $it->test($checks);
 
@@ -83,7 +83,7 @@ bool(false)
 Notice: Undefined index: 0 in %siterator_044.php on line %d
 NULL
 ===1===
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 CachingIterator::offsetExists() expects parameter 1 to be string, object given
 CachingIterator::offsetGet() expects parameter 1 to be string, object given
@@ -124,7 +124,7 @@ int(0)
 bool(true)
 int(0)
 ===1===
-object(stdClass)#1 (0) {
+object(StdClass)#1 (0) {
 }
 CachingIterator::offsetExists() expects parameter 1 to be string, object given
 CachingIterator::offsetGet() expects parameter 1 to be string, object given

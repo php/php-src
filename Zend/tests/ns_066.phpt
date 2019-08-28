@@ -3,8 +3,8 @@
 --FILE--
 <?php
 include __DIR__ . '/ns_027.inc';
-use Foo\Bar\Foo as stdClass;
+use Foo\Bar\Foo as StdClass;
 
-new stdClass();
+new StdClass();
 --EXPECT--
 Foo\Bar\Foo

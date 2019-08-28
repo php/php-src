@@ -45,13 +45,13 @@ $ary[id($bar)] ??= $foo;
 var_dump($ary);
 
 echo "\nObjects:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->foo ??= 123;
 $obj->$foo ??= $bar;
 $obj->$bar ??= $foo;
 var_dump($obj);
 
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->{id($foo)} ??= 123;
 $obj->{id($foo)} ??= $bar;
 $obj->{id($bar)} ??= $foo;
@@ -101,7 +101,7 @@ array(2) {
 }
 
 Objects:
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["foo"]=>
   int(123)
   ["bar"]=>
@@ -110,7 +110,7 @@ object(stdClass)#1 (2) {
 id(foo)
 id(foo)
 id(bar)
-object(stdClass)#2 (2) {
+object(StdClass)#2 (2) {
   ["foo"]=>
   int(123)
   ["bar"]=>

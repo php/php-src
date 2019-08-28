@@ -21,7 +21,7 @@ print_r($obj);
 echo "Done\n";
 ?>
 --EXPECTF--
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["scalar"]=>
   string(16) "6-01-01 20:00:00"
   ["xmlrpc_type"]=>
@@ -29,13 +29,13 @@ object(stdClass)#1 (3) {
   ["timestamp"]=>
   int(%d)
 }
-stdClass Object
+StdClass Object
 (
     [scalar] => 2001-0-08T21:46:40-0400
     [xmlrpc_type] => datetime
     [timestamp] => %s
 )
-stdClass Object
+StdClass Object
 (
     [scalar] => 34770-0-08T21:46:40-0400
     [xmlrpc_type] => datetime

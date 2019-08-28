@@ -48,7 +48,7 @@ array(3) {
   [2]=>
   float(12.3)
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["float"]=>
   float(12)
   ["integer"]=>

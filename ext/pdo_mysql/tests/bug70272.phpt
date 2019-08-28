@@ -10,7 +10,7 @@ MySQLPDOTest::skip();
 report_memleaks=off
 --FILE--
 <?php
-$a = new Stdclass();
+$a = new StdClass();
 $a->a = &$a;
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 

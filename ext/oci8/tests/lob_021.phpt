@@ -30,7 +30,7 @@ var_dump(oci_free_descriptor($blob));
 var_dump($blob->write("test"));
 
 var_dump(oci_free_descriptor($blob));
-var_dump(oci_free_descriptor(new stdclass));
+var_dump(oci_free_descriptor(new StdClass));
 
 $blob = oci_new_descriptor($c,OCI_D_LOB);
 unset($blob->descriptor);

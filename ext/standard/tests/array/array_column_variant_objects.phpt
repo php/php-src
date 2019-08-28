@@ -17,7 +17,7 @@ class User
 
 function newUser($id, $first_name, $last_name)
 {
-    $o = new stdClass;
+    $o = new StdClass;
     $o->{0} = $id;
     $o->{1} = $first_name;
     $o->{2} = $last_name;

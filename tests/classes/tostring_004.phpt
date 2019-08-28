@@ -10,7 +10,7 @@ error_reporting(8191);
 
 
 echo "Object with no __toString():\n";
-$obj = new stdClass;
+$obj = new StdClass;
 echo "Try 1:\n";
 try {
     printf($obj);
@@ -53,11 +53,11 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string
 
 
 Try 2:
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string
 
 
 Object with bad __toString():

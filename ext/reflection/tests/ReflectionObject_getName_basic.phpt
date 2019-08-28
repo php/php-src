@@ -3,7 +3,7 @@ ReflectionObject::getName() - basic function test
 --FILE--
 <?php
 
-$r1 = new ReflectionObject(new stdClass);
+$r1 = new ReflectionObject(new StdClass);
 var_dump($r1->getName());
 
 class C { }
@@ -16,6 +16,6 @@ var_dump($r3->getName());
 
 ?>
 --EXPECTF--
-string(8) "stdClass"
+string(8) "StdClass"
 string(1) "C"
 string(16) "ReflectionObject"

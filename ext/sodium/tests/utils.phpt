@@ -42,7 +42,7 @@ if (SODIUM_LIBRARY_MAJOR_VERSION > 7 ||
     var_dump(-1, 0, 1);
 }
 
-$str = 'stdClass';
+$str = 'StdClass';
 sodium_memzero($str);
 $obj = (object)array('foo' => 'bar');
 var_dump($obj);
@@ -115,7 +115,7 @@ string(22) "0102840507090b0d000305"
 int(-1)
 int(0)
 int(1)
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["foo"]=>
   string(3) "bar"
 }

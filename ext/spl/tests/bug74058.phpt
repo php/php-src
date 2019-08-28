@@ -44,14 +44,14 @@ class MyArray extends ArrayObject
 }
 
 $x = new MyArrayObject;
-$x->a1 = new stdClass();
+$x->a1 = new StdClass();
 var_dump($x->a1);
 
 $x->a1->b = 'some value';
 var_dump($x->a1);
 
 $y = new MyArray();
-$y['a2'] = new stdClass();
+$y['a2'] = new StdClass();
 var_dump($y['a2']);
 
 $y['a2']->b = 'some value';
@@ -61,21 +61,21 @@ var_dump($y['a2']);
 --EXPECTF--
 offsetSet('a1')
 offsetGet('a1')
-object(stdClass)#%s (0) {
+object(StdClass)#%s (0) {
 }
 offsetGet('a1')
 offsetGet('a1')
-object(stdClass)#%s (1) {
+object(StdClass)#%s (1) {
   ["b"]=>
   string(10) "some value"
 }
 offsetSet('a2')
 offsetGet('a2')
-object(stdClass)#%s (0) {
+object(StdClass)#%s (0) {
 }
 offsetGet('a2')
 offsetGet('a2')
-object(stdClass)#%s (1) {
+object(StdClass)#%s (1) {
   ["b"]=>
   string(10) "some value"
 }

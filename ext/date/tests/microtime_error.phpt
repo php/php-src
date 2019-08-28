@@ -13,7 +13,7 @@ $bad_args = array(null,
 				  1.5,
 				  "hello",
 				  array('k'=>'v', array(0)),
-				  new stdClass,
+				  new StdClass,
 				  1);
 foreach ($bad_args as $bad_arg) {
 	echo "\n--> bad arg: ";
@@ -50,7 +50,7 @@ float(%s)
 }
 microtime() expects parameter 1 to be bool, array given
 
---> bad arg: object(stdClass)#%d (0) {
+--> bad arg: object(StdClass)#%d (0) {
 }
 microtime() expects parameter 1 to be bool, object given
 

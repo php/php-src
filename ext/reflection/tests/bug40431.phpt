@@ -4,7 +4,7 @@ Bug #40431 (dynamic properties may cause crash in ReflectionProperty methods)
 <?php
 
 echo "=== 1st test ===\n";
-$Obj = new stdClass;
+$Obj = new StdClass;
 $Obj->value = 'value';
 $RefObj = new ReflectionObject($Obj);
 
@@ -84,7 +84,7 @@ array(1) {
     ["name"]=>
     string(5) "value"
     ["class"]=>
-    string(8) "stdClass"
+    string(8) "StdClass"
   }
 }
 bool(false)

@@ -27,7 +27,7 @@ $array = array(
 	"some string",
 	$fp,
 	$fp1,
-	new stdclass,
+	new StdClass,
 );
 
 $types = array(
@@ -112,7 +112,7 @@ bool(true)
 int(%d)
 bool(true)
 int(%d)
-string(54) "Object of class stdClass could not be converted to int"
+string(54) "Object of class StdClass could not be converted to int"
 bool(true)
 int(%d)
 bool(true)
@@ -135,7 +135,7 @@ bool(true)
 float(%d)
 bool(true)
 float(%d)
-string(56) "Object of class stdClass could not be converted to float"
+string(56) "Object of class StdClass could not be converted to float"
 bool(true)
 float(%d)
 bool(true)
@@ -206,7 +206,7 @@ bool(false)
 resource(%d) of type (stream)
 string(42) "settype(): Cannot convert to resource type"
 bool(false)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 bool(true)
 array(3) {
@@ -268,7 +268,7 @@ bool(true)
 array(0) {
 }
 bool(true)
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -277,12 +277,12 @@ object(stdClass)#%d (3) {
   int(3)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   string(14) "another string"
 }
 bool(true)
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["0"]=>
   int(2)
   ["1"]=>
@@ -291,40 +291,40 @@ object(stdClass)#%d (3) {
   int(4)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   int(1)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   float(2)
 }
 bool(true)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   bool(false)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   string(11) "some string"
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   resource(%d) of type (Unknown)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }
 bool(true)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 string(26) "Array to string conversion"
 bool(true)
@@ -348,6 +348,6 @@ bool(true)
 string(14) "Resource id #%d"
 bool(true)
 string(14) "Resource id #%d"
-Error: Object of class stdClass could not be converted to string
+Error: Object of class StdClass could not be converted to string
 string(0) ""
 Done

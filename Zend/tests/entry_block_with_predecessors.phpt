@@ -19,7 +19,7 @@ function test2() {
         if (@$i++ > 1) {
             break;
         }
-        $a = new stdClass;
+        $a = new StdClass;
     }
 }
 

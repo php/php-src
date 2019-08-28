@@ -3,8 +3,8 @@ SPL: SplObjectStorage null coalescing operator memory leak
 --FILE--
 <?php
 // In zts mode, this should no longer detect memory leaks for the objects
-$a = new stdClass();
-$b = new stdClass();
+$a = new StdClass();
+$b = new StdClass();
 $map = new SplObjectStorage();
 $map[$a] = 'foo';
 var_dump($map[$b] ?? null);

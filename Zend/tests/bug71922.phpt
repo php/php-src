@@ -8,7 +8,7 @@ assert.exception=1
 
 try {
     assert(0 && new class {
-    } && new class(42) extends stdclass {
+    } && new class(42) extends StdClass {
     });
 } catch (AssertionError $e) {
     echo "Assertion failure: ", $e->getMessage(), "\n";
@@ -17,5 +17,5 @@ try {
 ?>
 --EXPECT--
 Assertion failure: assert(0 && new class {
-} && new class(42) extends stdclass {
+} && new class(42) extends StdClass {
 })

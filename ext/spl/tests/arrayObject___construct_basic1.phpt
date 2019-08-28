@@ -6,7 +6,7 @@ echo "--> No arguments:\n";
 var_dump(new ArrayObject());
 
 echo "--> Object argument:\n";
-$a = new stdClass;
+$a = new StdClass;
 $a->p = 'hello';
 var_dump(new ArrayObject($a));
 
@@ -26,7 +26,7 @@ object(ArrayObject)#1 (1) {
 --> Object argument:
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#1 (1) {
+  object(StdClass)#1 (1) {
     ["p"]=>
     string(5) "hello"
   }
@@ -44,7 +44,7 @@ object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(ArrayObject)#3 (1) {
     ["storage":"ArrayObject":private]=>
-    object(stdClass)#1 (1) {
+    object(StdClass)#1 (1) {
       ["p"]=>
       string(5) "hello"
     }

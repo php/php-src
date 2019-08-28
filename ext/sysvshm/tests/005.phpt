@@ -12,7 +12,7 @@ $key = ftok(__FILE__, 't');
 $s = shm_attach($key, 1024);
 
 shm_put_var($s, -1, "test string");
-shm_put_var($s, 0, new stdclass);
+shm_put_var($s, 0, new StdClass);
 shm_put_var($s, 1, array(1,2,3));
 shm_put_var($s, 2, false);
 shm_put_var($s, 3, null);
@@ -42,7 +42,7 @@ bool(false)
 Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 string(11) "test string"
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 array(3) {
   [0]=>

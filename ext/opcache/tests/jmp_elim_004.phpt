@@ -14,7 +14,7 @@ function test() {
 
     $null = null;
     var_dump($null ?? 3);
-    var_dump($null ?? new stdClass);
+    var_dump($null ?? new StdClass);
 }
 test();
 
@@ -22,5 +22,5 @@ test();
 --EXPECT--
 string(4) "test"
 int(3)
-object(stdClass)#1 (0) {
+object(StdClass)#1 (0) {
 }

@@ -10,7 +10,7 @@ $extra = $array; // make the refcount == 2
 
 class A {
     public function getObj($array) {
-        $obj = new Stdclass;
+        $obj = new StdClass;
         $obj->arr = $array; // make the refcount == 3;
         return $obj;
     }

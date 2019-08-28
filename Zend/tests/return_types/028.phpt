@@ -3,8 +3,8 @@ Memory leak when returning TMP/VAR with wrong return type
 --FILE--
 <?php
 
-function foo(): stdClass {
-	$a = new stdClass;
+function foo(): StdClass {
+	$a = new StdClass;
 	$b = [];
 	return [$a, $b];
 }
@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECTF--
-Return value of foo() must be an instance of stdClass, array returned in %s on line %d
+Return value of foo() must be an instance of StdClass, array returned in %s on line %d

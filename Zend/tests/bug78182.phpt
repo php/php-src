@@ -9,7 +9,7 @@ var_dump($var);
 ?>
 --EXPECTF--
 Warning: Creating default object from empty value in %s on line %d
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["prop"]=>
   *RECURSION*
 }

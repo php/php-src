@@ -10,7 +10,7 @@ $data_provider = array(
     1.2345,
     PHP_INT_MAX,
     'x:rubbish', // rubbish after the 'x:' prefix
-    'x:i:2;O:8:"stdClass":0:{},s:5:"value";;m:a:0:{}',
+    'x:i:2;O:8:"StdClass":0:{},s:5:"value";;m:a:0:{}',
 );
 
 foreach($data_provider as $input) {

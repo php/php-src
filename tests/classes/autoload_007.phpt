@@ -7,7 +7,7 @@ spl_autoload_register(function ($name) {
   var_dump($name);
 });
 
-$a = new stdClass;
+$a = new StdClass;
 var_dump($a instanceof UndefC);
 ?>
 --EXPECT--

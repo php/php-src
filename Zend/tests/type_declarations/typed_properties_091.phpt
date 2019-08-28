@@ -5,11 +5,11 @@ Automatic promotion of falsy to object
 
 class Test {
     public ?Test $prop;
-    public ?stdClass $stdProp;
+    public ?StdClass $stdProp;
     public ?object $objectProp;
 
     public static ?Test $staticProp = null;
-    public static ?stdClass $staticStdProp = null;
+    public static ?StdClass $staticStdProp = null;
     public static ?object $staticObjectProp = null;
 }
 
@@ -92,7 +92,7 @@ var_dump($test);
 
 ?>
 --EXPECTF--
-Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
+Cannot auto-initialize an StdClass inside property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -101,17 +101,17 @@ object(Test)#1 (2) {
   ["prop"]=>
   uninitialized(?Test)
   ["stdProp"]=>
-  object(stdClass)#3 (1) {
+  object(StdClass)#3 (1) {
     ["wat"]=>
     int(123)
   }
   ["objectProp"]=>
-  object(stdClass)#4 (1) {
+  object(StdClass)#4 (1) {
     ["wat"]=>
     int(123)
   }
 }
-Cannot auto-initialize an stdClass inside a reference held by property Test::$prop of type ?Test
+Cannot auto-initialize an StdClass inside a reference held by property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -120,17 +120,17 @@ object(Test)#5 (3) {
   ["prop"]=>
   &NULL
   ["stdProp"]=>
-  &object(stdClass)#2 (1) {
+  &object(StdClass)#2 (1) {
     ["wat"]=>
     int(123)
   }
   ["objectProp"]=>
-  &object(stdClass)#4 (1) {
+  &object(StdClass)#4 (1) {
     ["wat"]=>
     int(123)
   }
 }
-Cannot auto-initialize an stdClass inside a reference held by property Test::$prop of type ?Test
+Cannot auto-initialize an StdClass inside a reference held by property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -143,46 +143,46 @@ object(Test)#3 (3) {
   ["prop"]=>
   &NULL
   ["stdProp"]=>
-  &object(stdClass)#1 (1) {
+  &object(StdClass)#1 (1) {
     ["wat"]=>
-    object(stdClass)#2 (1) {
+    object(StdClass)#2 (1) {
       ["wat"]=>
       int(123)
     }
   }
   ["objectProp"]=>
-  &object(stdClass)#5 (1) {
+  &object(StdClass)#5 (1) {
     ["wat"]=>
-    object(stdClass)#6 (1) {
+    object(StdClass)#6 (1) {
       ["wat"]=>
       int(123)
     }
   }
 }
-Cannot auto-initialize an stdClass inside property Test::$staticProp of type ?Test
+Cannot auto-initialize an StdClass inside property Test::$staticProp of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
 Warning: Creating default object from empty value in %s on line %d
 NULL
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["wat"]=>
   int(123)
 }
-object(stdClass)#8 (1) {
+object(StdClass)#8 (1) {
   ["wat"]=>
   int(123)
 }
-Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
+Cannot auto-initialize an StdClass inside property Test::$prop of type ?Test
 object(Test)#9 (0) {
   ["prop"]=>
   uninitialized(?Test)
   ["stdProp"]=>
-  uninitialized(?stdClass)
+  uninitialized(?StdClass)
   ["objectProp"]=>
   uninitialized(?object)
 }
-Cannot auto-initialize an stdClass inside property Test::$prop of type ?Test
+Cannot auto-initialize an StdClass inside property Test::$prop of type ?Test
 
 Warning: Creating default object from empty value in %s on line %d
 
@@ -191,12 +191,12 @@ object(Test)#7 (3) {
   ["prop"]=>
   NULL
   ["stdProp"]=>
-  object(stdClass)#10 (1) {
+  object(StdClass)#10 (1) {
     ["wat"]=>
     int(123)
   }
   ["objectProp"]=>
-  object(stdClass)#11 (1) {
+  object(StdClass)#11 (1) {
     ["wat"]=>
     int(123)
   }

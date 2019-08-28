@@ -16,7 +16,7 @@ var_dump($bool[FALSE]);
 $fp = fopen(__FILE__, "r");
 var_dump($bool[$fp]);
 
-$obj = new stdClass;
+$obj = new StdClass;
 var_dump($bool[$obj]);
 
 $arr = Array(1,2,3);

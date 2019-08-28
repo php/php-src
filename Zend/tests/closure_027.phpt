@@ -8,7 +8,7 @@ function test(closure $a) {
 }
 
 
-test(function() { return new stdclass; });
+test(function() { return new StdClass; });
 
 test(function() { });
 
@@ -19,19 +19,19 @@ try {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 
-test(new stdclass);
+test(new StdClass);
 
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 NULL
 
 Notice: Undefined variable: y in %s on line %d
 Exception: Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 
-Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance of Closure, instance of stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to test() must be an instance of Closure, instance of StdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): test(Object(stdClass))
+#0 %s(%d): test(Object(StdClass))
 #1 {main}
   thrown in %s on line %d

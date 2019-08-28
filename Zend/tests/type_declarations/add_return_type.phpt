@@ -11,7 +11,7 @@ interface One {
 }
 
 interface Two extends One {
-    public function a() : stdClass;
+    public function a() : StdClass;
     public function c() : callable;
     public function b() : array;
     public function d() : int;

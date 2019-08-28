@@ -23,7 +23,7 @@ foreach($regex_array as $regex_value) {
     print "\nArg value is $regex_value\n";
     var_dump(preg_replace($regex_value, $replace, $subject));
 }
-$regex_value = new stdclass(); //Object
+$regex_value = new StdClass(); //Object
 try {
     var_dump(preg_replace($regex_value, $replace, $subject));
 } catch (Error $e) {
@@ -58,4 +58,4 @@ string(1) "a"
 
 Arg value is /[a-zA-Z]/
 string(1) "1"
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string

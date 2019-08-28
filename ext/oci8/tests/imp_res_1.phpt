@@ -177,55 +177,55 @@ array(2) {
 }
 
 Test 2 - oci_fetch_object
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "1"
   ["C2"]=>
   string(5) "abcde"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "2"
   ["C2"]=>
   string(5) "fghij"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "3"
   ["C2"]=>
   string(5) "klmno"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["C3"]=>
   string(1) "t"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["C3"]=>
   string(1) "u"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   [99]=>
   string(2) "99"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["NULL"]=>
   NULL
   ["'Z'"]=>
   string(1) "Z"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "1"
   ["C2"]=>
   string(5) "abcde"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "2"
   ["C2"]=>
   string(5) "fghij"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "3"
   ["C2"]=>

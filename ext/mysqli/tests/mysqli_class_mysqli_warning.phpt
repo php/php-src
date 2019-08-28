@@ -28,7 +28,7 @@ if (!$TEST_EXPERIMENTAL)
 	$stmt = $mysqli->stmt_init();
 	$warning = new mysqli_warning($stmt);
 
-	$obj = new stdClass();
+	$obj = new StdClass();
 	$warning = new mysqli_warning($obj);
 
 	include("table.inc");

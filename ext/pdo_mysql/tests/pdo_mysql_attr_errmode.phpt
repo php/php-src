@@ -24,7 +24,7 @@ error_reporting=E_ALL
 	if (false != @$db->setAttribute(PDO::ATTR_ERRMODE, $tmp))
 		printf("[001] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...\n");
 
-	$tmp = new stdClass();
+	$tmp = new StdClass();
 	$ret = @$db->setAttribute(PDO::ATTR_ERRMODE, $tmp);
 	if (false != $ret)
 		printf("[002] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...%s\n",

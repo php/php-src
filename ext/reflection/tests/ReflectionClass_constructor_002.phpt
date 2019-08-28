@@ -33,7 +33,7 @@ try {
 }
 
 try {
-	var_dump(new ReflectionClass("stdClass", 1));
+	var_dump(new ReflectionClass("StdClass", 1));
 } catch (TypeError $e) {
 	echo $e->getMessage() . "\n";
 }

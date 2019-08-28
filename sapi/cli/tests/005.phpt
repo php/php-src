@@ -10,7 +10,7 @@ include "skipif.inc";
 $php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n --rc unknown`);
-var_dump(`"$php" -n --rc stdclass`);
+var_dump(`"$php" -n --rc StdClass`);
 var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
@@ -18,7 +18,7 @@ echo "Done\n";
 --EXPECT--
 string(40) "Exception: Class unknown does not exist
 "
-string(183) "Class [ <internal:Core> class stdClass ] {
+string(183) "Class [ <internal:Core> class StdClass ] {
 
   - Constants [0] {
   }

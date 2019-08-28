@@ -23,7 +23,7 @@ if ($x);
 $a = [[$x]];
 if ($a[0]);
 
-if (new stdClass());
+if (new StdClass());
 
 $x = 2;
 $a = [1,$x];

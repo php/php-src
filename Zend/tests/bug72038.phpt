@@ -3,7 +3,7 @@ Bug #72038 (Function calls with values to a by-ref parameter don't always throw 
 --FILE--
 <?php
 
-test($foo = new stdClass);
+test($foo = new StdClass);
 var_dump($foo);
 test($bar = 2);
 var_dump($bar);
@@ -17,7 +17,7 @@ function test(&$param) {
 ?>
 --EXPECTF--
 Notice: Only variables should be passed by reference in %s on line %d
-object(stdClass)#1 (0) {
+object(StdClass)#1 (0) {
 }
 
 Notice: Only variables should be passed by reference in %s on line %d

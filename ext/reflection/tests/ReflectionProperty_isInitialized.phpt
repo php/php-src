@@ -57,7 +57,7 @@ $rp = new ReflectionProperty('B', 'i');
 var_dump($rp->isInitialized($a));
 
 try {
-    var_dump($rp->isInitialized(new stdClass));
+    var_dump($rp->isInitialized(new StdClass));
 } catch (ReflectionException $e) {
     echo $e->getMessage(), "\n";
 }

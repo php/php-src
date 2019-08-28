@@ -27,21 +27,21 @@ var_dump($stmt->fetchAll(PDO::FETCH_OBJ));
 --EXPECTF--
 array(3) {
   [0]=>
-  object(stdClass)#%d (2) {
+  object(StdClass)#%d (2) {
     ["id"]=>
     string(1) "1"
     ["val"]=>
     string(1) "A"
   }
   [1]=>
-  object(stdClass)#%d (2) {
+  object(StdClass)#%d (2) {
     ["id"]=>
     string(1) "2"
     ["val"]=>
     string(1) "B"
   }
   [2]=>
-  object(stdClass)#%d (2) {
+  object(StdClass)#%d (2) {
     ["id"]=>
     string(1) "3"
     ["val"]=>

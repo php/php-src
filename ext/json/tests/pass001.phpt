@@ -155,7 +155,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#1 (1) {
+  object(StdClass)#1 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -163,7 +163,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#2 (0) {
+  object(StdClass)#2 (0) {
   }
   [3]=>
   array(0) {
@@ -177,7 +177,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#3 (31) {
+  object(StdClass)#3 (31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -200,7 +200,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -223,7 +224,7 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#4 (0) {
+    object(StdClass)#4 (0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -272,7 +273,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -336,7 +338,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -408,7 +411,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -431,7 +435,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#5 (1) {
+  object(StdClass)#5 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -439,7 +443,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#6 (0) {
+  object(StdClass)#6 (0) {
   }
   [3]=>
   array(0) {
@@ -453,7 +457,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#7 (31) {
+  object(StdClass)#7 (31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -476,7 +480,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -499,7 +504,7 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#8 (0) {
+    object(StdClass)#8 (0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -548,7 +553,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -612,7 +618,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -684,7 +691,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>

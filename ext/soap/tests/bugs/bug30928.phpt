@@ -44,7 +44,7 @@ var_dump($x->test(new foo()));
 echo "ok\n";
 ?>
 --EXPECTF--
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>

@@ -74,7 +74,7 @@ catch (Exception $e) { echo $e->getMessage(), "\n"; }
 try { $x = isset(${$badStr}); }
 catch (Exception $e) { echo $e->getMessage(), "\n"; }
 
-$obj = new stdClass;
+$obj = new StdClass;
 try { $x = $obj->{$badStr} = $str; }
 catch (Exception $e) { echo $e->getMessage(), "\n"; }
 var_dump($obj);
@@ -124,7 +124,7 @@ int(42)
 Exception
 Exception
 Exception
-object(stdClass)#2 (0) {
+object(StdClass)#2 (0) {
 }
 Exception
 string(1) "a"

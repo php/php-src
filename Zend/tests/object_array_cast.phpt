@@ -13,7 +13,7 @@ var_dump($obj);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -37,7 +37,7 @@ array(3) {
   [2]=>
   int(3)
 }
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["0"]=>
   int(1)
   ["1"]=>

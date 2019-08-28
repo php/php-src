@@ -13,12 +13,12 @@ if ($zend_mm_enabled === "0") {
 <?php
 
 register_shutdown_function(function() {
-    new stdClass;
+    new StdClass;
 });
 
 $ary = [];
 while (true) {
-    $ary[] = new stdClass;
+    $ary[] = new StdClass;
 }
 
 ?>

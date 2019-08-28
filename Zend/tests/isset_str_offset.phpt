@@ -53,7 +53,7 @@ print "- array ---\n";
 var_dump(isset($str[array()]));
 var_dump(isset($str[array(1,2,3)]));
 print "- object ---\n";
-var_dump(isset($str[new stdClass()]));
+var_dump(isset($str[new StdClass()]));
 print "- resource ---\n";
 $f = fopen(__FILE__, 'r');
 var_dump(isset($str[$f]));

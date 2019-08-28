@@ -18,7 +18,7 @@ try {
 }
 
 try {
-    var_dump(max(new stdclass));
+    var_dump(max(new StdClass));
 } catch (\TypeError $e) {
     echo $e->getMessage() . "\n";
 }

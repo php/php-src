@@ -10,17 +10,17 @@ trait Test {
 }
 
 try {
-    Test::$selfProp = new stdClass;
+    Test::$selfProp = new StdClass;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    Test::$selfNullProp = new stdClass;
+    Test::$selfNullProp = new StdClass;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    Test::$parentProp = new stdClass;
+    Test::$parentProp = new StdClass;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

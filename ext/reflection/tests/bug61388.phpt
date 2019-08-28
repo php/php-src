@@ -20,13 +20,13 @@ Array
     [0] => ReflectionProperty Object
         (
             [name] => 0
-            [class] => stdClass
+            [class] => StdClass
         )
 
     [1] => ReflectionProperty Object
         (
             [name] => oo
-            [class] => stdClass
+            [class] => StdClass
         )
 
 )

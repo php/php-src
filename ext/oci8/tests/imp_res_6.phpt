@@ -87,7 +87,7 @@ array(2) {
   [1]=>
   string(1) "b"
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["C1"]=>
   string(1) "3"
   ["C2"]=>

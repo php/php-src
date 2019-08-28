@@ -20,8 +20,8 @@ $a = array(
 	NULL,
 	true,
 	false,
-	new stdclass,
-	new stdclass,
+	new StdClass,
+	new StdClass,
 	new test,
 	array(),
 	-PHP_INT_MAX-1,
@@ -60,8 +60,8 @@ array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== string(3) "2.5"
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== NULL
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== bool(true)
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== bool(false)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== object(stdClass)#1 (0) {}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== object(stdClass)#2 (0) {}
+array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== object(StdClass)#1 (0) {}
+array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== object(StdClass)#2 (0) {}
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== object(test)#3 (0) {}
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== array(0) {}
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== int(-2147483648)
@@ -77,8 +77,8 @@ string(0) "" !== string(3) "2.5"
 string(0) "" !== NULL
 string(0) "" !== bool(true)
 string(0) "" !== bool(false)
-string(0) "" !== object(stdClass)#1 (0) {}
-string(0) "" !== object(stdClass)#2 (0) {}
+string(0) "" !== object(StdClass)#1 (0) {}
+string(0) "" !== object(StdClass)#2 (0) {}
 string(0) "" !== object(test)#3 (0) {}
 string(0) "" !== array(0) {}
 string(0) "" !== int(-2147483648)
@@ -94,8 +94,8 @@ int(1) !== string(3) "2.5"
 int(1) !== NULL
 int(1) !== bool(true)
 int(1) !== bool(false)
-int(1) !== object(stdClass)#1 (0) {}
-int(1) !== object(stdClass)#2 (0) {}
+int(1) !== object(StdClass)#1 (0) {}
+int(1) !== object(StdClass)#2 (0) {}
 int(1) !== object(test)#3 (0) {}
 int(1) !== array(0) {}
 int(1) !== int(-2147483648)
@@ -111,8 +111,8 @@ float(2.5) !== string(3) "2.5"
 float(2.5) !== NULL
 float(2.5) !== bool(true)
 float(2.5) !== bool(false)
-float(2.5) !== object(stdClass)#1 (0) {}
-float(2.5) !== object(stdClass)#2 (0) {}
+float(2.5) !== object(StdClass)#1 (0) {}
+float(2.5) !== object(StdClass)#2 (0) {}
 float(2.5) !== object(test)#3 (0) {}
 float(2.5) !== array(0) {}
 float(2.5) !== int(-2147483648)
@@ -128,8 +128,8 @@ int(0) !== string(3) "2.5"
 int(0) !== NULL
 int(0) !== bool(true)
 int(0) !== bool(false)
-int(0) !== object(stdClass)#1 (0) {}
-int(0) !== object(stdClass)#2 (0) {}
+int(0) !== object(StdClass)#1 (0) {}
+int(0) !== object(StdClass)#2 (0) {}
 int(0) !== object(test)#3 (0) {}
 int(0) !== array(0) {}
 int(0) !== int(-2147483648)
@@ -145,8 +145,8 @@ string(6) "string" !== string(3) "2.5"
 string(6) "string" !== NULL
 string(6) "string" !== bool(true)
 string(6) "string" !== bool(false)
-string(6) "string" !== object(stdClass)#1 (0) {}
-string(6) "string" !== object(stdClass)#2 (0) {}
+string(6) "string" !== object(StdClass)#1 (0) {}
+string(6) "string" !== object(StdClass)#2 (0) {}
 string(6) "string" !== object(test)#3 (0) {}
 string(6) "string" !== array(0) {}
 string(6) "string" !== int(-2147483648)
@@ -162,8 +162,8 @@ string(3) "123" !== string(3) "2.5"
 string(3) "123" !== NULL
 string(3) "123" !== bool(true)
 string(3) "123" !== bool(false)
-string(3) "123" !== object(stdClass)#1 (0) {}
-string(3) "123" !== object(stdClass)#2 (0) {}
+string(3) "123" !== object(StdClass)#1 (0) {}
+string(3) "123" !== object(StdClass)#2 (0) {}
 string(3) "123" !== object(test)#3 (0) {}
 string(3) "123" !== array(0) {}
 string(3) "123" !== int(-2147483648)
@@ -179,8 +179,8 @@ string(3) "2.5" === string(3) "2.5"
 string(3) "2.5" !== NULL
 string(3) "2.5" !== bool(true)
 string(3) "2.5" !== bool(false)
-string(3) "2.5" !== object(stdClass)#1 (0) {}
-string(3) "2.5" !== object(stdClass)#2 (0) {}
+string(3) "2.5" !== object(StdClass)#1 (0) {}
+string(3) "2.5" !== object(StdClass)#2 (0) {}
 string(3) "2.5" !== object(test)#3 (0) {}
 string(3) "2.5" !== array(0) {}
 string(3) "2.5" !== int(-2147483648)
@@ -196,8 +196,8 @@ NULL !== string(3) "2.5"
 NULL === NULL
 NULL !== bool(true)
 NULL !== bool(false)
-NULL !== object(stdClass)#1 (0) {}
-NULL !== object(stdClass)#2 (0) {}
+NULL !== object(StdClass)#1 (0) {}
+NULL !== object(StdClass)#2 (0) {}
 NULL !== object(test)#3 (0) {}
 NULL !== array(0) {}
 NULL !== int(-2147483648)
@@ -213,8 +213,8 @@ bool(true) !== string(3) "2.5"
 bool(true) !== NULL
 bool(true) === bool(true)
 bool(true) !== bool(false)
-bool(true) !== object(stdClass)#1 (0) {}
-bool(true) !== object(stdClass)#2 (0) {}
+bool(true) !== object(StdClass)#1 (0) {}
+bool(true) !== object(StdClass)#2 (0) {}
 bool(true) !== object(test)#3 (0) {}
 bool(true) !== array(0) {}
 bool(true) !== int(-2147483648)
@@ -230,46 +230,46 @@ bool(false) !== string(3) "2.5"
 bool(false) !== NULL
 bool(false) !== bool(true)
 bool(false) === bool(false)
-bool(false) !== object(stdClass)#1 (0) {}
-bool(false) !== object(stdClass)#2 (0) {}
+bool(false) !== object(StdClass)#1 (0) {}
+bool(false) !== object(StdClass)#2 (0) {}
 bool(false) !== object(test)#3 (0) {}
 bool(false) !== array(0) {}
 bool(false) !== int(-2147483648)
 bool(false) !== string(11) "-2147483648"
-object(stdClass)#1 (0) {} !== array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-object(stdClass)#1 (0) {} !== string(0) ""
-object(stdClass)#1 (0) {} !== int(1)
-object(stdClass)#1 (0) {} !== float(2.5)
-object(stdClass)#1 (0) {} !== int(0)
-object(stdClass)#1 (0) {} !== string(6) "string"
-object(stdClass)#1 (0) {} !== string(3) "123"
-object(stdClass)#1 (0) {} !== string(3) "2.5"
-object(stdClass)#1 (0) {} !== NULL
-object(stdClass)#1 (0) {} !== bool(true)
-object(stdClass)#1 (0) {} !== bool(false)
-object(stdClass)#1 (0) {} === object(stdClass)#1 (0) {}
-object(stdClass)#1 (0) {} !== object(stdClass)#2 (0) {}
-object(stdClass)#1 (0) {} !== object(test)#3 (0) {}
-object(stdClass)#1 (0) {} !== array(0) {}
-object(stdClass)#1 (0) {} !== int(-2147483648)
-object(stdClass)#1 (0) {} !== string(11) "-2147483648"
-object(stdClass)#2 (0) {} !== array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-object(stdClass)#2 (0) {} !== string(0) ""
-object(stdClass)#2 (0) {} !== int(1)
-object(stdClass)#2 (0) {} !== float(2.5)
-object(stdClass)#2 (0) {} !== int(0)
-object(stdClass)#2 (0) {} !== string(6) "string"
-object(stdClass)#2 (0) {} !== string(3) "123"
-object(stdClass)#2 (0) {} !== string(3) "2.5"
-object(stdClass)#2 (0) {} !== NULL
-object(stdClass)#2 (0) {} !== bool(true)
-object(stdClass)#2 (0) {} !== bool(false)
-object(stdClass)#2 (0) {} !== object(stdClass)#1 (0) {}
-object(stdClass)#2 (0) {} === object(stdClass)#2 (0) {}
-object(stdClass)#2 (0) {} !== object(test)#3 (0) {}
-object(stdClass)#2 (0) {} !== array(0) {}
-object(stdClass)#2 (0) {} !== int(-2147483648)
-object(stdClass)#2 (0) {} !== string(11) "-2147483648"
+object(StdClass)#1 (0) {} !== array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+object(StdClass)#1 (0) {} !== string(0) ""
+object(StdClass)#1 (0) {} !== int(1)
+object(StdClass)#1 (0) {} !== float(2.5)
+object(StdClass)#1 (0) {} !== int(0)
+object(StdClass)#1 (0) {} !== string(6) "string"
+object(StdClass)#1 (0) {} !== string(3) "123"
+object(StdClass)#1 (0) {} !== string(3) "2.5"
+object(StdClass)#1 (0) {} !== NULL
+object(StdClass)#1 (0) {} !== bool(true)
+object(StdClass)#1 (0) {} !== bool(false)
+object(StdClass)#1 (0) {} === object(StdClass)#1 (0) {}
+object(StdClass)#1 (0) {} !== object(StdClass)#2 (0) {}
+object(StdClass)#1 (0) {} !== object(test)#3 (0) {}
+object(StdClass)#1 (0) {} !== array(0) {}
+object(StdClass)#1 (0) {} !== int(-2147483648)
+object(StdClass)#1 (0) {} !== string(11) "-2147483648"
+object(StdClass)#2 (0) {} !== array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+object(StdClass)#2 (0) {} !== string(0) ""
+object(StdClass)#2 (0) {} !== int(1)
+object(StdClass)#2 (0) {} !== float(2.5)
+object(StdClass)#2 (0) {} !== int(0)
+object(StdClass)#2 (0) {} !== string(6) "string"
+object(StdClass)#2 (0) {} !== string(3) "123"
+object(StdClass)#2 (0) {} !== string(3) "2.5"
+object(StdClass)#2 (0) {} !== NULL
+object(StdClass)#2 (0) {} !== bool(true)
+object(StdClass)#2 (0) {} !== bool(false)
+object(StdClass)#2 (0) {} !== object(StdClass)#1 (0) {}
+object(StdClass)#2 (0) {} === object(StdClass)#2 (0) {}
+object(StdClass)#2 (0) {} !== object(test)#3 (0) {}
+object(StdClass)#2 (0) {} !== array(0) {}
+object(StdClass)#2 (0) {} !== int(-2147483648)
+object(StdClass)#2 (0) {} !== string(11) "-2147483648"
 object(test)#3 (0) {} !== array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 object(test)#3 (0) {} !== string(0) ""
 object(test)#3 (0) {} !== int(1)
@@ -281,8 +281,8 @@ object(test)#3 (0) {} !== string(3) "2.5"
 object(test)#3 (0) {} !== NULL
 object(test)#3 (0) {} !== bool(true)
 object(test)#3 (0) {} !== bool(false)
-object(test)#3 (0) {} !== object(stdClass)#1 (0) {}
-object(test)#3 (0) {} !== object(stdClass)#2 (0) {}
+object(test)#3 (0) {} !== object(StdClass)#1 (0) {}
+object(test)#3 (0) {} !== object(StdClass)#2 (0) {}
 object(test)#3 (0) {} === object(test)#3 (0) {}
 object(test)#3 (0) {} !== array(0) {}
 object(test)#3 (0) {} !== int(-2147483648)
@@ -298,8 +298,8 @@ array(0) {} !== string(3) "2.5"
 array(0) {} !== NULL
 array(0) {} !== bool(true)
 array(0) {} !== bool(false)
-array(0) {} !== object(stdClass)#1 (0) {}
-array(0) {} !== object(stdClass)#2 (0) {}
+array(0) {} !== object(StdClass)#1 (0) {}
+array(0) {} !== object(StdClass)#2 (0) {}
 array(0) {} !== object(test)#3 (0) {}
 array(0) {} === array(0) {}
 array(0) {} !== int(-2147483648)
@@ -315,8 +315,8 @@ int(-2147483648) !== string(3) "2.5"
 int(-2147483648) !== NULL
 int(-2147483648) !== bool(true)
 int(-2147483648) !== bool(false)
-int(-2147483648) !== object(stdClass)#1 (0) {}
-int(-2147483648) !== object(stdClass)#2 (0) {}
+int(-2147483648) !== object(StdClass)#1 (0) {}
+int(-2147483648) !== object(StdClass)#2 (0) {}
 int(-2147483648) !== object(test)#3 (0) {}
 int(-2147483648) !== array(0) {}
 int(-2147483648) === int(-2147483648)
@@ -332,8 +332,8 @@ string(11) "-2147483648" !== string(3) "2.5"
 string(11) "-2147483648" !== NULL
 string(11) "-2147483648" !== bool(true)
 string(11) "-2147483648" !== bool(false)
-string(11) "-2147483648" !== object(stdClass)#1 (0) {}
-string(11) "-2147483648" !== object(stdClass)#2 (0) {}
+string(11) "-2147483648" !== object(StdClass)#1 (0) {}
+string(11) "-2147483648" !== object(StdClass)#2 (0) {}
 string(11) "-2147483648" !== object(test)#3 (0) {}
 string(11) "-2147483648" !== array(0) {}
 string(11) "-2147483648" !== int(-2147483648)

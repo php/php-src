@@ -5,7 +5,7 @@ Bug #75193 segfault in collator_convert_object_to_string
 --FILE--
 <?php
 $a = new \Collator('en_US');
-$b = [new stdclass, new stdclass];
+$b = [new StdClass, new StdClass];
 var_dump($a->sort($b));
 ?>
 ===DONE===

@@ -9,9 +9,9 @@ class TrickClass {
 	}
 }
 
-$r1 = new ReflectionClass("stdClass");
+$r1 = new ReflectionClass("StdClass");
 
-$myInstance = new stdClass;
+$myInstance = new StdClass;
 $r2 = new ReflectionClass($myInstance);
 
 $r3 = new ReflectionClass("TrickClass");
@@ -20,6 +20,6 @@ var_dump($r1->getName(), $r2->getName(), $r3->getName());
 
 ?>
 --EXPECT--
-string(8) "stdClass"
-string(8) "stdClass"
+string(8) "StdClass"
+string(8) "StdClass"
 string(10) "TrickClass"

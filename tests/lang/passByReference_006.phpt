@@ -86,22 +86,22 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   string(12) "Ref3 changed"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
     string(12) "Ref4 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["c"]=>
       string(12) "Ref5 changed"
     }
@@ -132,22 +132,22 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   string(12) "Ref3 changed"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
     string(12) "Ref4 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["c"]=>
       string(12) "Ref5 changed"
     }
@@ -179,22 +179,22 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   string(12) "Ref3 changed"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
     string(12) "Ref4 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["c"]=>
       string(12) "Ref5 changed"
     }
@@ -225,22 +225,22 @@ array(1) {
     string(12) "Ref2 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   string(12) "Ref3 changed"
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
     string(12) "Ref4 changed"
   }
 }
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["b"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["c"]=>
       string(12) "Ref5 changed"
     }

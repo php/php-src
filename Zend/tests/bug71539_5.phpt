@@ -13,7 +13,7 @@ array(2) {
   [0]=>
   &int(42)
   [""]=>
-  object(stdClass)#1 (1) {
+  object(StdClass)#1 (1) {
     ["prop"]=>
     &int(42)
   }

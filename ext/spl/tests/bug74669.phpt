@@ -75,7 +75,7 @@ foreach($arObj as $key => $value) {
     echo $key . ' => ' . $value . PHP_EOL;
 }
 
-$payload = 'x:i:33554432;O:8:"stdClass":0:{};m:a:0:{}';
+$payload = 'x:i:33554432;O:8:"StdClass":0:{};m:a:0:{}';
 $str = 'C:11:"ArrayObject":' . strlen($payload) . ':{' . $payload . '}';
 
 $ao = unserialize($str);

@@ -10,7 +10,7 @@ try {
 }
 
 try {
-    ReflectionReference::fromArrayElement(new stdClass, "test");
+    ReflectionReference::fromArrayElement(new StdClass, "test");
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

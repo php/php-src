@@ -2,7 +2,7 @@
 Bug #31486 (ArrayIterator::next segfaults)
 --FILE--
 <?php
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->var1=1;
 
 $ao = new ArrayObject($obj);

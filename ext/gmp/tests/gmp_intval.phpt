@@ -12,7 +12,7 @@ var_dump(gmp_intval("-1"));
 var_dump(gmp_intval(-1));
 var_dump(gmp_intval(-2349828));
 var_dump(gmp_intval(2342344));
-var_dump(gmp_intval(new stdclass));
+var_dump(gmp_intval(new StdClass));
 var_dump(gmp_intval(array()));
 
 $fp = fopen(__FILE__, 'r');
@@ -32,7 +32,7 @@ int(-1)
 int(-2349828)
 int(2342344)
 
-Notice: Object of class stdClass could not be converted to int in %s on line %d
+Notice: Object of class StdClass could not be converted to int in %s on line %d
 int(1)
 int(0)
 int(%d)

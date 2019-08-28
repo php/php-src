@@ -32,25 +32,25 @@ class B extends A {
     }
 }
 
-$common = new stdClass;
+$common = new StdClass;
 $obj = new B([$common], [$common]);
 var_dump($s = serialize($obj));
 var_dump(unserialize($s));
 
 ?>
 --EXPECT--
-string(63) "O:1:"B":2:{i:0;a:1:{i:0;O:8:"stdClass":0:{}}i:1;a:1:{i:0;r:3;}}"
+string(63) "O:1:"B":2:{i:0;a:1:{i:0;O:8:"StdClass":0:{}}i:1;a:1:{i:0;r:3;}}"
 object(B)#3 (2) {
   ["data2":"B":private]=>
   array(1) {
     [0]=>
-    object(stdClass)#4 (0) {
+    object(StdClass)#4 (0) {
     }
   }
   ["data":"A":private]=>
   array(1) {
     [0]=>
-    object(stdClass)#4 (0) {
+    object(StdClass)#4 (0) {
     }
   }
 }

@@ -2,7 +2,7 @@
 Bug #29015 (Incorrect behavior of member vars(non string ones)-numeric mem vars und others)
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 $x = "";
 $a->$x = "string('')";
 var_dump($a);
@@ -10,7 +10,7 @@ $a->{"\0"} = 42;
 var_dump($a);
 ?>
 --EXPECTF--
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   [""]=>
   string(10) "string('')"
 }

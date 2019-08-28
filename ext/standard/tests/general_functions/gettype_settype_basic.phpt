@@ -739,7 +739,7 @@ string(5) "array"
 -- Setting type of data to object --
 -- Iteration 1 --
 bool(true)
-object(stdClass)#2 (3) {
+object(StdClass)#2 (3) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -750,14 +750,14 @@ object(stdClass)#2 (3) {
 string(6) "object"
 -- Iteration 2 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   string(14) "another string"
 }
 string(6) "object"
 -- Iteration 3 --
 bool(true)
-object(stdClass)#2 (3) {
+object(StdClass)#2 (3) {
   ["0"]=>
   int(2)
   ["1"]=>
@@ -768,68 +768,68 @@ object(stdClass)#2 (3) {
 string(6) "object"
 -- Iteration 4 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   int(1)
 }
 string(6) "object"
 -- Iteration 5 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   int(-20)
 }
 string(6) "object"
 -- Iteration 6 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   float(2.54)
 }
 string(6) "object"
 -- Iteration 7 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   float(-2.54)
 }
 string(6) "object"
 -- Iteration 8 --
 bool(true)
-object(stdClass)#2 (0) {
+object(StdClass)#2 (0) {
 }
 string(6) "object"
 -- Iteration 9 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   bool(false)
 }
 string(6) "object"
 -- Iteration 10 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   string(11) "some string"
 }
 string(6) "object"
 -- Iteration 11 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   string(6) "string"
 }
 string(6) "object"
 -- Iteration 12 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }
 string(6) "object"
 -- Iteration 13 --
 bool(true)
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }

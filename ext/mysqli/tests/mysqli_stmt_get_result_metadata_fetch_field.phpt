@@ -66,7 +66,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -94,7 +94,7 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(5) "label"
   ["orgname"]=>
@@ -122,7 +122,7 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(3) "_id"
   ["orgname"]=>
@@ -150,7 +150,7 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(8) "___label"
   ["orgname"]=>

@@ -7,15 +7,15 @@ function gen1() {
 }
 
 $gen = gen1();
-$gen->send(new stdClass);
+$gen->send(new StdClass);
 
 function gen2() {
     $x = yield;
     yield from [1, 2, 3];
 }
 $gen = gen2();
-$gen->send(new stdClass);
-$gen->send(new stdClass);
+$gen->send(new StdClass);
+$gen->send(new StdClass);
 ?>
 ===DONE===
 --EXPECT--

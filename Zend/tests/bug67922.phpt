@@ -5,11 +5,11 @@ Bug #67922: Member function not found when dereferencing in write-context
 
 class C {
 	public function test() {
-		return new stdClass;
+		return new StdClass;
 	}
 }
 
-$b = new stdClass;
+$b = new StdClass;
 $b->c = new C;
 $b->c->test()->d = 'str';
 

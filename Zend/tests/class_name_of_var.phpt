@@ -3,7 +3,7 @@ $var::class is not supported
 --FILE--
 <?php
 
-$obj = new stdClass;
+$obj = new StdClass;
 var_dump($obj::class);
 
 ?>

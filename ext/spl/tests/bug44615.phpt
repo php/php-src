@@ -5,7 +5,7 @@ Julien Pauli <doctorrock83@gmail.com>
 #testfest phpcampparis 2008-06-07
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 
 $array = array(array('z',$a),array('q','s'));
 
@@ -22,7 +22,7 @@ foreach (new RecursiveIteratorIterator($rai) as $t) {
 ?>
 --EXPECT--
 string(1) "z"
-object(stdClass)#1 (0) {
+object(StdClass)#1 (0) {
 }
 string(1) "q"
 string(1) "s"

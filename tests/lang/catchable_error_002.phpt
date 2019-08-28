@@ -25,5 +25,5 @@ Catchable fatal error [2]
 	echo "ALIVE!\n";
 ?>
 --EXPECTF--
-Argument 1 passed to blah() must be an instance of Foo, instance of stdClass given, called in %scatchable_error_002.php on line %d
+Argument 1 passed to blah() must be an instance of Foo, instance of StdClass given, called in %scatchable_error_002.php on line %d
 ALIVE!

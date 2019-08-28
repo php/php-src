@@ -12,7 +12,7 @@ $client = new class(null, [ 'location' => '', 'uri' => 'http://example.org']) ex
     }
 };
 $ref = array("foo");
-$data = new stdClass;
+$data = new StdClass;
 $data->prop =& $ref;
 $client->foo($data);
 

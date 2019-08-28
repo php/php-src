@@ -11,8 +11,8 @@ var_dump(interface_exists(""));
 var_dump(interface_exists("test", false));
 var_dump(interface_exists("foo", false));
 var_dump(interface_exists("foo"));
-var_dump(interface_exists("stdClass", false));
-var_dump(interface_exists("stdClass"));
+var_dump(interface_exists("StdClass", false));
+var_dump(interface_exists("StdClass"));
 
 echo "Done\n";
 ?>

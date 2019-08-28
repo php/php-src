@@ -4,7 +4,7 @@ Bug #55543 (json_encode() with JSON_NUMERIC_CHECK & numeric string properties)
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
-$a = new stdClass;
+$a = new StdClass;
 $a->{"1"} = "5";
 
 var_dump(json_encode($a, JSON_NUMERIC_CHECK));

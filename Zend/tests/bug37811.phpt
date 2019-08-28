@@ -13,7 +13,7 @@ class TestClass
 
 define("Bar",new TestClass);
 var_dump(Bar);
-define("Baz",new stdClass);
+define("Baz",new StdClass);
 var_dump(Baz);
 
 ?>

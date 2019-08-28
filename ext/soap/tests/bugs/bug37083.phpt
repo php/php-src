@@ -44,9 +44,9 @@ for ($i = 0; $i < 10; $i++) {
 	$ws=new TestSoapClient(__DIR__.'/bug37083.wsdl',
                    array('encoding'=>'ISO-8859-1',
                          'cache_wsdl'=>WSDL_CACHE_BOTH));
-	$search=new stdClass();
+	$search=new StdClass();
 	$search->queryString='argo';
-	$search->ranges[]=$r=new stdClass();
+	$search->ranges[]=$r=new StdClass();
 	$r->field='maxDateTime';
 	$r->min='2003-04-01';
 	$search->index='all';

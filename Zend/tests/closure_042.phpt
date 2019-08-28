@@ -4,13 +4,13 @@ Closure 042: Binding an instance to a non-scoped non-static closures gives it a 
 <?php
 
 $c = function() { var_dump($this); };
-$d = $c->bindTo(new stdClass);
+$d = $c->bindTo(new StdClass);
 $d();
 $rm = new ReflectionFunction($d);
 var_dump($rm->getClosureScopeClass()->name); //dummy sope is Closure
 
 //should have the same effect
-$d = $c->bindTo(new stdClass, NULL);
+$d = $c->bindTo(new StdClass, NULL);
 $d();
 $rm = new ReflectionFunction($d);
 var_dump($rm->getClosureScopeClass()->name); //dummy sope is Closure
@@ -18,10 +18,10 @@ var_dump($rm->getClosureScopeClass()->name); //dummy sope is Closure
 echo "Done.\n";
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 string(7) "Closure"
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 string(7) "Closure"
 Done.

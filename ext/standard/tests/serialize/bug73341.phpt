@@ -10,7 +10,7 @@ $obj = unserialize($token);
 }
 
 try {
-$inner = 'x:i:1;O:8:"stdClass":1:{};m:a:0:{}';
+$inner = 'x:i:1;O:8:"StdClass":1:{};m:a:0:{}';
 $exploit = 'C:11:"ArrayObject":'.strlen($inner).':{'.$inner.'}';
 unserialize($exploit);
 } catch(Exception $e) {

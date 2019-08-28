@@ -23,7 +23,7 @@ class TestClass
 }
 
 $obj = new TestClass;
-TestClass::Test2(new stdClass);
+TestClass::Test2(new StdClass);
 
 ?>
 ===DONE===

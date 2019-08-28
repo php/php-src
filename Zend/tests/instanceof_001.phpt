@@ -3,18 +3,18 @@ Testing instanceof operator with several operators
 --FILE--
 <?php
 
-$a = new stdClass;
-var_dump($a instanceof stdClass);
+$a = new StdClass;
+var_dump($a instanceof StdClass);
 
-var_dump(new stdCLass instanceof stdClass);
+var_dump(new StdClass instanceof StdClass);
 
-$b = function() { return new stdClass; };
-var_dump($b() instanceof stdClass);
+$b = function() { return new StdClass; };
+var_dump($b() instanceof StdClass);
 
-$c = array(new stdClass);
-var_dump($c[0] instanceof stdClass);
+$c = array(new StdClass);
+var_dump($c[0] instanceof StdClass);
 
-var_dump(@$inexistent instanceof stdClass);
+var_dump(@$inexistent instanceof StdClass);
 
 ?>
 --EXPECTF--

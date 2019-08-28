@@ -9,7 +9,7 @@ $method = "AES-128-CBC";
 $password = "openssl";
 $iv = str_repeat("\0", openssl_cipher_iv_length($method));
 $wrong = "wrong";
-$object = new stdclass;
+$object = new StdClass;
 $arr = array(1);
 
 // wrong parameters tests

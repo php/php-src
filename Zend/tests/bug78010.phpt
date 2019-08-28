@@ -12,7 +12,7 @@ class foo
         $this->x = $this;
 
         for ($i = 0; $i < 898; $i++) { //Will not trigger with <898
-            $obj = [new stdClass, new stdClass]; //This must have at least 2 elements
+            $obj = [new StdClass, new StdClass]; //This must have at least 2 elements
             $this->y[] = $obj;
         }
     }

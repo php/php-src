@@ -3,11 +3,11 @@ Testing multiple clone statements
 --FILE--
 <?php
 
-$a = clone clone $b = new stdClass;
+$a = clone clone $b = new StdClass;
 var_dump($a == $b);
 
 
-$c = clone clone clone $b = new stdClass;
+$c = clone clone clone $b = new StdClass;
 var_dump($a == $b, $b == $c);
 
 class foo { }

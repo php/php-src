@@ -2,9 +2,9 @@
 ReflectionClass::__constructor()
 --FILE--
 <?php
-$r1 = new ReflectionClass("stdClass");
+$r1 = new ReflectionClass("StdClass");
 
-$myInstance = new stdClass;
+$myInstance = new StdClass;
 $r2 = new ReflectionClass($myInstance);
 
 class TrickClass {
@@ -21,11 +21,11 @@ var_dump($r1, $r2, $r3);
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>
-  string(8) "stdClass"
+  string(8) "StdClass"
 }
 object(ReflectionClass)#%d (1) {
   ["name"]=>
-  string(8) "stdClass"
+  string(8) "StdClass"
 }
 object(ReflectionClass)#%d (1) {
   ["name"]=>

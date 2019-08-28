@@ -11,7 +11,7 @@ class bad1 implements IteratorAggregate {
 
 class bad2 implements IteratorAggregate {
 	function getIterator() {
-		return new stdClass;
+		return new StdClass;
 	}
 }
 

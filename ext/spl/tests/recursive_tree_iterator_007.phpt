@@ -5,7 +5,7 @@ error_reporting=E_ALL&~E_NOTICE
 --FILE--
 <?php
 
-$ary = array(new stdClass);
+$ary = array(new StdClass);
 
 class RecursiveArrayIteratorAggregated implements IteratorAggregate {
 	public $it;
@@ -29,5 +29,5 @@ try {
 ?>
 ===DONE===
 --EXPECT--
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string
 ===DONE===

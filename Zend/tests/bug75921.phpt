@@ -26,13 +26,13 @@ unset($null);
 ?>
 --EXPECTF--
 Warning: Creating default object from empty value in %sbug75921.php on line 3
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["a"]=>
   int(42)
 }
 
 Warning: Creating default object from empty value in %sbug75921.php on line 7
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["a"]=>
   array(1) {
     ["hello"]=>
@@ -43,9 +43,9 @@ object(stdClass)#1 (1) {
 Warning: Creating default object from empty value in %sbug75921.php on line 11
 
 Warning: Creating default object from empty value in %sbug75921.php on line 11
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["a"]=>
-  object(stdClass)#2 (1) {
+  object(StdClass)#2 (1) {
     ["b"]=>
     int(42)
   }
@@ -54,11 +54,11 @@ object(stdClass)#1 (1) {
 Warning: Creating default object from empty value in %sbug75921.php on line 15
 
 Warning: Creating default object from empty value in %sbug75921.php on line 15
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["a"]=>
   array(1) {
     ["hello"]=>
-    object(stdClass)#2 (1) {
+    object(StdClass)#2 (1) {
       ["b"]=>
       int(42)
     }
@@ -68,9 +68,9 @@ object(stdClass)#1 (1) {
 Warning: Creating default object from empty value in %sbug75921.php on line 19
 
 Warning: Creating default object from empty value in %sbug75921.php on line 19
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["a"]=>
-  object(stdClass)#2 (1) {
+  object(StdClass)#2 (1) {
     ["b"]=>
     array(1) {
       ["hello"]=>

@@ -38,7 +38,7 @@ class myIterator implements Iterator
 try {
 	chdir(__DIR__);
 	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
+	var_dump($phar->buildFromIterator(new myIterator(array('a' => new StdClass))));
 } catch (Exception $e) {
 	var_dump(get_class($e));
 	echo $e->getMessage() . "\n";

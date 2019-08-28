@@ -17,7 +17,7 @@ array(2) {
   [1]=>
   int(1)
 }
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["1"]=>
   int(1)
   ["0"]=>
@@ -25,7 +25,7 @@ object(stdClass)#1 (2) {
 }
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#1 (2) {
+  object(StdClass)#1 (2) {
     ["1"]=>
     int(1)
     ["0"]=>

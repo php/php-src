@@ -3,7 +3,7 @@ Testing creation of alias to an internal class
 --FILE--
 <?php
 
-class_alias('stdclass', 'foo');
+class_alias('StdClass', 'foo');
 
 ?>
 --EXPECTF--

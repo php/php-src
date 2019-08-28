@@ -5,7 +5,7 @@ adding arrays to objects
 
 $a = array(1,2,3);
 
-$o = new stdclass;
+$o = new StdClass;
 $o->prop = "value";
 
 try {
@@ -20,11 +20,11 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Object of class stdClass could not be converted to number in %sadd_003.php on line %d
+Notice: Object of class StdClass could not be converted to number in %sadd_003.php on line %d
 
 Exception: Unsupported operand types
 
-Notice: Object of class stdClass could not be converted to number in %s on line %d
+Notice: Object of class StdClass could not be converted to number in %s on line %d
 
 Fatal error: Uncaught Error: Unsupported operand types in %s:%d
 Stack trace:

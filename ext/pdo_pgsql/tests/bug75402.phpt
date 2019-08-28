@@ -12,7 +12,7 @@ PDOTest::skip();
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-$resp = new \stdClass();
+$resp = new \StdClass();
 $resp->entries = [];
 
 $db->query('DROP TABLE IF EXISTS bug75402 CASCADE');
@@ -82,11 +82,11 @@ if ($db) {
 
 var_dump($resp);
 --EXPECT--
-object(stdClass)#2 (1) {
+object(StdClass)#2 (1) {
   ["entries"]=>
   array(1) {
     [0]=>
-    object(stdClass)#4 (10) {
+    object(StdClass)#4 (10) {
       ["sid"]=>
       string(19) "20171016083645_5337"
       ["sgroupid"]=>

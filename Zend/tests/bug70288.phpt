@@ -4,7 +4,7 @@ Bug #70288 (Apache crash related to ZEND_SEND_REF)
 <?php
 class A {
 	public function __get($name) {
-		return new Stdclass();
+		return new StdClass();
 	}
 }
 
@@ -15,5 +15,5 @@ $a = new A;
 test($a->dummy);
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }

@@ -4,7 +4,7 @@ SPL: FixedArray: Invalid arguments
 <?php
 
 try {
-	$a = new SplFixedArray(new stdClass);
+	$a = new SplFixedArray(new StdClass);
 } catch (TypeError $iae) {
 	echo "Ok - ".$iae->getMessage().PHP_EOL;
 }

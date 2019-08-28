@@ -193,7 +193,7 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 	testStatement(460, $link, 'SHOW OPEN TABLES', array(), array(1), false, false);
 	testStatement(460, $link, 'SHOW VARIABLES', array(), array(1), false, false);
 
-	$field0 = new stdClass();
+	$field0 = new StdClass();
 	$field0->name 		= 'id';
 	$field0->orgname 	= 'id';
 	$field0->table		= 'test';

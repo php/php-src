@@ -5,7 +5,7 @@ Test typed properties error condition (type mismatch object)
 class Dummy {}
 
 new class(new Dummy) {
-	public stdClass $std;
+	public StdClass $std;
 
 	public function __construct(Dummy $dummy) {
 		$this->std = $dummy;
@@ -13,7 +13,7 @@ new class(new Dummy) {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property class@anonymous::$std must be an instance of stdClass, Dummy used in %s:8
+Fatal error: Uncaught TypeError: Typed property class@anonymous::$std must be an instance of StdClass, Dummy used in %s:8
 Stack trace:
 #0 %s(4): class@anonymous->__construct(Object(Dummy))
 #1 {main}

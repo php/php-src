@@ -17,7 +17,7 @@ $id->tester($obj);
 print_r($obj);
 ?>
 --EXPECT--
-stdClass Object
+StdClass Object
 (
     [foo] => bar
     [id] => bar

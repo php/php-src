@@ -12,7 +12,7 @@ class bar {
 }
 
 new bar(null);
-new bar(new \stdclass);
+new bar(new \StdClass);
 
 ?>
 --EXPECTF--
@@ -20,6 +20,6 @@ NULL
 
 Fatal error: Uncaught TypeError: Argument 1 passed to foo\bar::__construct() must be of the type array or null, object given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): foo\bar->__construct(Object(stdClass))
+#0 %s(%d): foo\bar->__construct(Object(StdClass))
 #1 {main}
   thrown in %s on line %d

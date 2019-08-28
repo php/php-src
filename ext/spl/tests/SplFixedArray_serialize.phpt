@@ -5,7 +5,7 @@ SplFixedArray serialisation
 
 $array = new SplFixedArray(5);
 
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->prop = 'value';
 
 $array[0] = 'foo';
@@ -27,13 +27,13 @@ var_dump($unser[4]);
 
 ?>
 --EXPECT--
-O:13:"SplFixedArray":5:{i:0;s:3:"foo";i:1;N;i:2;i:42;i:3;O:8:"stdClass":1:{s:4:"prop";s:5:"value";}i:4;a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;i:5;}}
+O:13:"SplFixedArray":5:{i:0;s:3:"foo";i:1;N;i:2;i:42;i:3;O:8:"StdClass":1:{s:4:"prop";s:5:"value";}i:4;a:5:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;i:5;}}
 count: 5
 getSize(): 5
 string(3) "foo"
 NULL
 int(42)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["prop"]=>
   string(5) "value"
 }

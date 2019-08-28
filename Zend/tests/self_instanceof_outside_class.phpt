@@ -5,7 +5,7 @@ instanceof self outside a class
 
 $fn = function() {
     try {
-        new stdClass instanceof self;
+        new StdClass instanceof self;
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }

@@ -2,11 +2,11 @@
 Check key execution order with new.
 --FILE--
 <?php
-$a[2][3] = 'stdClass';
+$a[2][3] = 'StdClass';
 $a[$i=0][++$i] = new $a[++$i][++$i];
 print_r($a);
 
-$o = new stdClass;
+$o = new StdClass;
 $o->a = new $a[$i=2][++$i];
 $o->a->b = new $a[$i=2][++$i];
 print_r($o);
@@ -16,23 +16,23 @@ Array
 (
     [2] => Array
         (
-            [3] => stdClass
+            [3] => StdClass
         )
 
     [0] => Array
         (
-            [1] => stdClass Object
+            [1] => StdClass Object
                 (
                 )
 
         )
 
 )
-stdClass Object
+StdClass Object
 (
-    [a] => stdClass Object
+    [a] => StdClass Object
         (
-            [b] => stdClass Object
+            [b] => StdClass Object
                 (
                 )
 

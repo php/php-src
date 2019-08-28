@@ -4,7 +4,7 @@ Bug #76737: Unserialized reflection objects are broken, they shouldn't be serial
 <?php
 
 try {
-    $r = new ReflectionClass('stdClass');
+    $r = new ReflectionClass('StdClass');
     var_dump(serialize($r));
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";

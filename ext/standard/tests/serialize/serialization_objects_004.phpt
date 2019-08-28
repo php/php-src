@@ -13,7 +13,7 @@ Test serialize() & unserialize() functions: objects - ensure that COW references
  * Alias to functions:
  */
 
-$x = new stdClass;
+$x = new StdClass;
 $ref = &$x;
 var_dump(serialize(array($x, $x)));
 
@@ -40,7 +40,7 @@ var_dump(serialize(array($x, $x)));
 echo "Done";
 ?>
 --EXPECT--
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+string(37) "a:2:{i:0;O:8:"StdClass":0:{}i:1;r:2;}"
 string(22) "a:2:{i:0;i:1;i:1;i:1;}"
 string(30) "a:2:{i:0;s:1:"a";i:1;s:1:"a";}"
 string(22) "a:2:{i:0;b:1;i:1;b:1;}"

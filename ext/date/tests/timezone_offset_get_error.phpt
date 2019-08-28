@@ -16,7 +16,7 @@ $date = date_create("GMT");
 echo "*** Testing timezone_offset_get() : error conditions ***\n";
 
 echo "\n-- Testing timezone_offset_get() function with an invalid values for \$object argument --\n";
-$invalid_obj = new stdClass();
+$invalid_obj = new StdClass();
 try {
 	var_dump( timezone_offset_get($invalid_obj, $date) );
 } catch (Error $ex) {
@@ -39,7 +39,7 @@ try {
 }
 
 echo "\n-- Testing timezone_offset_get() function with an invalid values for \$datetime argument --\n";
-$invalid_obj = new stdClass();
+$invalid_obj = new StdClass();
 try {
 	var_dump( timezone_offset_get($tz, $invalid_obj) );
 } catch (Error $ex) {

@@ -2,7 +2,7 @@
 SPL: ArrayObject::getFlags() basic usage
 --FILE--
 <?php
-$ao = new ArrayObject(new ArrayObject(new stdClass));
+$ao = new ArrayObject(new ArrayObject(new StdClass));
 var_dump($ao->getFlags());
 
 $ao = new ArrayObject(new ArrayObject(array(1,2,3)), ArrayObject::STD_PROP_LIST);

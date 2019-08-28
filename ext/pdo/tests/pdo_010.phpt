@@ -15,7 +15,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(10) NOT NULL UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')');
+$db->exec('INSERT INTO classtypes VALUES(0, \'StdClass\')');
 $db->exec('INSERT INTO classtypes VALUES(1, \'Test1\')');
 $db->exec('INSERT INTO classtypes VALUES(2, \'Test2\')');
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(10), grp VARCHAR(10))');
@@ -66,7 +66,7 @@ array(2) {
   ["Group1"]=>
   array(2) {
     [0]=>
-    object(stdClass)#%d (2) {
+    object(StdClass)#%d (2) {
       ["id"]=>
       string(1) "1"
       ["val"]=>

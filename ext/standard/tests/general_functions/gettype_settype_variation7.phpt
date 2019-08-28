@@ -189,13 +189,13 @@ echo "Done\n";
 -- Iteration 1 --
 string(4) "NULL"
 bool(true)
-object(stdClass)#4 (0) {
+object(StdClass)#4 (0) {
 }
 string(6) "object"
 -- Iteration 2 --
 string(7) "boolean"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   bool(false)
 }
@@ -203,7 +203,7 @@ string(6) "object"
 -- Iteration 3 --
 string(7) "boolean"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   bool(true)
 }
@@ -211,7 +211,7 @@ string(6) "object"
 -- Iteration 4 --
 string(7) "boolean"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   bool(true)
 }
@@ -219,15 +219,15 @@ string(6) "object"
 -- Iteration 5 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
-  string(1) "ÿ"
+  string(1) "ï¿½"
 }
 string(6) "object"
 -- Iteration 6 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(1) "f"
 }
@@ -235,7 +235,7 @@ string(6) "object"
 -- Iteration 7 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) "
 3"
@@ -244,7 +244,7 @@ string(6) "object"
 -- Iteration 8 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(0) ""
 }
@@ -252,7 +252,7 @@ string(6) "object"
 -- Iteration 9 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(0) ""
 }
@@ -260,7 +260,7 @@ string(6) "object"
 -- Iteration 10 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(1) " "
 }
@@ -268,7 +268,7 @@ string(6) "object"
 -- Iteration 11 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(1) " "
 }
@@ -276,7 +276,7 @@ string(6) "object"
 -- Iteration 12 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) "10"
 }
@@ -284,7 +284,7 @@ string(6) "object"
 -- Iteration 13 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) "10"
 }
@@ -292,7 +292,7 @@ string(6) "object"
 -- Iteration 14 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(8) "10string"
 }
@@ -300,7 +300,7 @@ string(6) "object"
 -- Iteration 15 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(8) "10string"
 }
@@ -308,7 +308,7 @@ string(6) "object"
 -- Iteration 16 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(1) "1"
 }
@@ -316,7 +316,7 @@ string(6) "object"
 -- Iteration 17 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) "-1"
 }
@@ -324,7 +324,7 @@ string(6) "object"
 -- Iteration 18 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(3) "1e2"
 }
@@ -332,7 +332,7 @@ string(6) "object"
 -- Iteration 19 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) " 1"
 }
@@ -340,7 +340,7 @@ string(6) "object"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(22) "2974394749328742328432"
 }
@@ -348,7 +348,7 @@ string(6) "object"
 -- Iteration 21 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "-1e-2"
 }
@@ -356,7 +356,7 @@ string(6) "object"
 -- Iteration 22 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(1) "1"
 }
@@ -364,7 +364,7 @@ string(6) "object"
 -- Iteration 23 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) "-1"
 }
@@ -372,7 +372,7 @@ string(6) "object"
 -- Iteration 24 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(3) "1e2"
 }
@@ -380,7 +380,7 @@ string(6) "object"
 -- Iteration 25 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(2) " 1"
 }
@@ -388,7 +388,7 @@ string(6) "object"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(22) "2974394749328742328432"
 }
@@ -396,7 +396,7 @@ string(6) "object"
 -- Iteration 27 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "-1e-2"
 }
@@ -404,7 +404,7 @@ string(6) "object"
 -- Iteration 28 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(4) "0xff"
 }
@@ -412,7 +412,7 @@ string(6) "object"
 -- Iteration 29 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(4) "0x55"
 }
@@ -420,7 +420,7 @@ string(6) "object"
 -- Iteration 30 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "0XA55"
 }
@@ -428,7 +428,7 @@ string(6) "object"
 -- Iteration 31 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "0X123"
 }
@@ -436,7 +436,7 @@ string(6) "object"
 -- Iteration 32 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(4) "0123"
 }
@@ -444,7 +444,7 @@ string(6) "object"
 -- Iteration 33 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(4) "0123"
 }
@@ -452,7 +452,7 @@ string(6) "object"
 -- Iteration 34 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "-0123"
 }
@@ -460,7 +460,7 @@ string(6) "object"
 -- Iteration 35 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "+0123"
 }
@@ -468,7 +468,7 @@ string(6) "object"
 -- Iteration 36 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "-0123"
 }
@@ -476,7 +476,7 @@ string(6) "object"
 -- Iteration 37 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(5) "+0123"
 }
@@ -484,7 +484,7 @@ string(6) "object"
 -- Iteration 38 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(8) "-0x80001"
 }
@@ -492,7 +492,7 @@ string(6) "object"
 -- Iteration 39 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(8) "+0x80001"
 }
@@ -500,7 +500,7 @@ string(6) "object"
 -- Iteration 40 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(10) "-0x80001.5"
 }
@@ -508,7 +508,7 @@ string(6) "object"
 -- Iteration 41 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(9) "0x80001.5"
 }
@@ -516,7 +516,7 @@ string(6) "object"
 -- Iteration 42 --
 string(6) "string"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   string(12) "@$%#$%^$%^&^"
 }
@@ -524,13 +524,13 @@ string(6) "object"
 -- Iteration 43 --
 string(5) "array"
 bool(true)
-object(stdClass)#4 (0) {
+object(StdClass)#4 (0) {
 }
 string(6) "object"
 -- Iteration 44 --
 string(5) "array"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["0"]=>
   NULL
 }
@@ -538,7 +538,7 @@ string(6) "object"
 -- Iteration 45 --
 string(5) "array"
 bool(true)
-object(stdClass)#4 (4) {
+object(StdClass)#4 (4) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -552,7 +552,7 @@ string(6) "object"
 -- Iteration 46 --
 string(5) "array"
 bool(true)
-object(stdClass)#4 (4) {
+object(StdClass)#4 (4) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -566,7 +566,7 @@ string(6) "object"
 -- Iteration 47 --
 string(5) "array"
 bool(true)
-object(stdClass)#4 (3) {
+object(StdClass)#4 (3) {
   ["0"]=>
   float(1.5)
   ["1"]=>
@@ -578,7 +578,7 @@ string(6) "object"
 -- Iteration 48 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-2147483648)
 }
@@ -586,7 +586,7 @@ string(6) "object"
 -- Iteration 49 --
 string(7) "integer"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   int(2147483647)
 }
@@ -594,7 +594,7 @@ string(6) "object"
 -- Iteration 50 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(2147483649)
 }
@@ -602,7 +602,7 @@ string(6) "object"
 -- Iteration 51 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(1232147483649)
 }
@@ -610,7 +610,7 @@ string(6) "object"
 -- Iteration 52 --
 string(7) "integer"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   int(85)
 }
@@ -618,7 +618,7 @@ string(6) "object"
 -- Iteration 53 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(1058513956921)
 }
@@ -626,7 +626,7 @@ string(6) "object"
 -- Iteration 54 --
 string(7) "integer"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   int(-21903)
 }
@@ -634,7 +634,7 @@ string(6) "object"
 -- Iteration 55 --
 string(7) "integer"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   int(365)
 }
@@ -642,7 +642,7 @@ string(6) "object"
 -- Iteration 56 --
 string(7) "integer"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   int(-365)
 }
@@ -650,7 +650,7 @@ string(6) "object"
 -- Iteration 57 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(80561044571754)
 }
@@ -658,7 +658,7 @@ string(6) "object"
 -- Iteration 58 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(100000)
 }
@@ -666,7 +666,7 @@ string(6) "object"
 -- Iteration 59 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-100000)
 }
@@ -674,7 +674,7 @@ string(6) "object"
 -- Iteration 60 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(100000)
 }
@@ -682,7 +682,7 @@ string(6) "object"
 -- Iteration 61 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-100000)
 }
@@ -690,7 +690,7 @@ string(6) "object"
 -- Iteration 62 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-1.5)
 }
@@ -698,7 +698,7 @@ string(6) "object"
 -- Iteration 63 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(0.5)
 }
@@ -706,7 +706,7 @@ string(6) "object"
 -- Iteration 64 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-0.5)
 }
@@ -714,7 +714,7 @@ string(6) "object"
 -- Iteration 65 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(500000)
 }
@@ -722,7 +722,7 @@ string(6) "object"
 -- Iteration 66 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-500000)
 }
@@ -730,7 +730,7 @@ string(6) "object"
 -- Iteration 67 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-5.0E-7)
 }
@@ -738,7 +738,7 @@ string(6) "object"
 -- Iteration 68 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(500000)
 }
@@ -746,7 +746,7 @@ string(6) "object"
 -- Iteration 69 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-500000)
 }
@@ -754,7 +754,7 @@ string(6) "object"
 -- Iteration 70 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(512000)
 }
@@ -762,7 +762,7 @@ string(6) "object"
 -- Iteration 71 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-512000)
 }
@@ -770,7 +770,7 @@ string(6) "object"
 -- Iteration 72 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(5.12E-7)
 }
@@ -778,7 +778,7 @@ string(6) "object"
 -- Iteration 73 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(5.12E-7)
 }
@@ -786,7 +786,7 @@ string(6) "object"
 -- Iteration 74 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(512000)
 }
@@ -794,7 +794,7 @@ string(6) "object"
 -- Iteration 75 --
 string(6) "double"
 bool(true)
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["scalar"]=>
   float(-512000)
 }
@@ -832,13 +832,13 @@ string(6) "object"
 -- Iteration 79 --
 string(4) "NULL"
 bool(true)
-object(stdClass)#4 (0) {
+object(StdClass)#4 (0) {
 }
 string(6) "object"
 -- Iteration 80 --
 string(4) "NULL"
 bool(true)
-object(stdClass)#4 (0) {
+object(StdClass)#4 (0) {
 }
 string(6) "object"
 Done

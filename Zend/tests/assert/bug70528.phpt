@@ -11,13 +11,13 @@ namespace Foo;
 class Bar {}
 
 $bar = "Bar";
-assert(new \stdClass instanceof $bar);
-assert(new \stdClass instanceof Bar);
-assert(new \stdClass instanceof \Foo\Bar);
+assert(new \StdClass instanceof $bar);
+assert(new \StdClass instanceof Bar);
+assert(new \StdClass instanceof \Foo\Bar);
 ?>
 --EXPECTF--
-Warning: assert(): assert(new \stdClass() instanceof $bar) failed in %sbug70528.php on line %d
+Warning: assert(): assert(new \StdClass() instanceof $bar) failed in %sbug70528.php on line %d
 
-Warning: assert(): assert(new \stdClass() instanceof Bar) failed in %sbug70528.php on line %d
+Warning: assert(): assert(new \StdClass() instanceof Bar) failed in %sbug70528.php on line %d
 
-Warning: assert(): assert(new \stdClass() instanceof \Foo\Bar) failed in %sbug70528.php on line %d
+Warning: assert(): assert(new \StdClass() instanceof \Foo\Bar) failed in %sbug70528.php on line %d

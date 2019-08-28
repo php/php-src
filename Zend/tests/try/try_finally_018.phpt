@@ -2,11 +2,11 @@
 Combination of foreach, finally and goto
 --FILE--
 <?php
-foreach ([new stdClass] as $a) {
+foreach ([new StdClass] as $a) {
     try {
-        foreach ([new stdClass] as $a) {
+        foreach ([new StdClass] as $a) {
             try {
-                foreach ([new stdClass] as $a) {
+                foreach ([new StdClass] as $a) {
                     goto out;
                 }
             } finally {

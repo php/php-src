@@ -19,7 +19,7 @@ var_dump($str[FALSE]);
 $fp = fopen(__FILE__, "r");
 var_dump($str[$fp]);
 
-$obj = new stdClass;
+$obj = new StdClass;
 var_dump($str[$obj]);
 
 $arr = Array(1,2,3);
@@ -57,7 +57,7 @@ string(1) "%s"
 
 Warning: Illegal offset type in %s on line %d
 
-Notice: Object of class stdClass could not be converted to int in %s on line %d
+Notice: Object of class StdClass could not be converted to int in %s on line %d
 string(1) "%s"
 
 Warning: Illegal offset type in %s on line %d

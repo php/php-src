@@ -6,7 +6,7 @@ function & test($arg) {
 	return $arg;
 }
 
-$arg = new Stdclass();
+$arg = new StdClass();
 $arg->name = array();
 
 test($arg)->name[1] = "xxxx";
@@ -14,7 +14,7 @@ test($arg)->name[1] = "xxxx";
 print_r($arg);
 ?>
 --EXPECT--
-stdClass Object
+StdClass Object
 (
     [name] => Array
         (

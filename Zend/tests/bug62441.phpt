@@ -4,16 +4,16 @@ Bug #62441: Incorrect strong typing in namespaced child classes
 <?php
 namespace {
     interface Iface {
-        function method(stdClass $o);
+        function method(StdClass $o);
     }
 }
 namespace ns {
     class Foo implements \Iface {
-        function method(stdClass $o) { }
+        function method(StdClass $o) { }
     }
 
-    (new Foo)->method(new \stdClass);
+    (new Foo)->method(new \StdClass);
 }
 ?>
 --EXPECTF--
-Fatal error: Could not check compatibility between ns\Foo::method(ns\stdClass $o) and Iface::method(stdClass $o), because class ns\stdClass is not available in %s on line %d
+Fatal error: Could not check compatibility between ns\Foo::method(ns\StdClass $o) and Iface::method(StdClass $o), because class ns\StdClass is not available in %s on line %d

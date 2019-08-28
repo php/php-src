@@ -4,7 +4,7 @@ GC 014: Too many cycles in one object
 zend.enable_gc=1
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 for ($i = 0; $i < 10001; $i++) {
 	$b =& $a;
 	$a->{"a".$i} = $a;

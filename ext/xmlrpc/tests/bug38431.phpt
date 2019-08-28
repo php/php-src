@@ -5,7 +5,7 @@ Bug #38431 (xmlrpc_get_type() crashes PHP on objects)
 --FILE--
 <?php
 
-var_dump(xmlrpc_get_type(new stdclass));
+var_dump(xmlrpc_get_type(new StdClass));
 var_dump(xmlrpc_get_type(array()));
 $var = array(1,2,3);
 var_dump(xmlrpc_get_type($var));

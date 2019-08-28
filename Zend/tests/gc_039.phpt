@@ -6,7 +6,7 @@ GC 039: Garbage created by replacing argument send by reference
 zend.enable_gc = 1
 --FILE--
 <?php
-$out = new stdClass;
+$out = new StdClass;
 $out->x = $out;
 mb_parse_str("a=b", $out);
 var_dump(gc_collect_cycles());

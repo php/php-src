@@ -7,7 +7,7 @@ mime_content_type(): Testing wrong parameters
 
 mime_content_type(1);
 mime_content_type(NULL);
-mime_content_type(new stdclass);
+mime_content_type(new StdClass);
 mime_content_type(array());
 mime_content_type('foo/inexistent');
 mime_content_type('');

@@ -9,7 +9,7 @@ class foo {
 	public $x = array();
 	public function __construct() {
 		$h = array();
-		$h[] = new stdclass;
+		$h[] = new StdClass;
 		$this->x = $h;
 	}
 	public function __invoke() {
@@ -23,5 +23,5 @@ var_dump($fo()[0]);
 
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }

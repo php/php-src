@@ -102,7 +102,7 @@ int(0)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(StdClass)#%s (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
@@ -156,7 +156,7 @@ float(0)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(StdClass)#%s (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, object given, called in %s on line %d
 
@@ -209,7 +209,7 @@ string(0) ""
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(StdClass)#%s (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, object given, called in %s on line %d
 
@@ -262,7 +262,7 @@ bool(false)
 }
 *** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
 
-*** Trying object(stdClass)#%s (0) {
+*** Trying object(StdClass)#%s (0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 

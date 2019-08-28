@@ -9,7 +9,7 @@ function test1($x) : callable {
     if ($x == 1) {
         $c = 'foo';
     } elseif ($x == 2) {
-        $c = new stdClass;
+        $c = new StdClass;
     } else {
         $c = [$x => &$x];
     }
@@ -24,7 +24,7 @@ try {
 
 class Foo {}
 function test2() : Foo {
-    $obj = new stdClass;
+    $obj = new StdClass;
     return $obj;
 }
 
@@ -37,4 +37,4 @@ try {
 ?>
 --EXPECT--
 Error: Return value of test1() must be callable, string returned
-Error: Return value of test2() must be an instance of Foo, instance of stdClass returned
+Error: Return value of test2() must be an instance of Foo, instance of StdClass returned

@@ -13,7 +13,7 @@ $item->otherAttribute = $item->attribute;
 var_dump($item->otherAttribute);
 
 $a = array();
-$item->$a = new stdclass;
+$item->$a = new StdClass;
 
 echo "Done\n";
 ?>

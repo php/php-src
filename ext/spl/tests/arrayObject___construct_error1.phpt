@@ -3,7 +3,7 @@ SPL: ArrayObject::__construct with bad iterator.
 --FILE--
 <?php
 echo "Bad iterator type:\n";
-$a = new stdClass;
+$a = new StdClass;
 $a->p = 1;
 try {
   var_dump(new ArrayObject($a, 0, "Exception"));
@@ -13,7 +13,7 @@ try {
 
 echo "Non-existent class:\n";
 try {
-  var_dump(new ArrayObject(new stdClass, 0, "nonExistentClassName"));
+  var_dump(new ArrayObject(new StdClass, 0, "nonExistentClassName"));
 } catch (TypeError $e) {
   echo $e->getMessage() . "(" . $e->getLine() .  ")\n";
 }

@@ -77,7 +77,7 @@ var_dump($a <= 42);
 var_dump($a > 42);
 var_dump($a >= 42);
 
-var_dump($a == new stdClass);
+var_dump($a == new StdClass);
 
 $a += 1;
 var_dump($a);

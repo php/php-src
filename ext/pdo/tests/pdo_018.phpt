@@ -67,7 +67,7 @@ class TestLeaf extends TestDerived
 }
 
 $db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')');
+$db->exec('INSERT INTO classtypes VALUES(0, \'StdClass\')');
 $db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')');
 $db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')');
 
@@ -89,7 +89,7 @@ var_dump($db->query('SELECT COUNT(*) FROM classtypes')->fetchColumn());
 var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 
 $objs = array();
-$objs[0] = new stdClass;
+$objs[0] = new StdClass;
 $objs[1] = new TestBase;
 $objs[2] = new TestDerived;
 $objs[3] = new TestLeaf;
@@ -186,7 +186,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIAL
 string(1) "3"
 array(3) {
   [0]=>
-  string(8) "stdClass"
+  string(8) "StdClass"
   [1]=>
   string(8) "TestBase"
   [2]=>
@@ -194,7 +194,7 @@ array(3) {
 }
 ===TYPES===
 array(4) {
-  ["stdClass"]=>
+  ["StdClass"]=>
   string(1) "0"
   ["TestBase"]=>
   string(1) "1"

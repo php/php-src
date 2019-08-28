@@ -3,8 +3,8 @@ SplObjectStorage::getHash implementation
 --FILE--
 <?php
 $s = new SplObjectStorage();
-$o1 = new Stdclass;
-$o2 = new Stdclass;
+$o1 = new StdClass;
+$o2 = new StdClass;
 $s[$o1] = "some_value\n";
 echo $s->offsetGet($o1);
 
@@ -54,7 +54,7 @@ var_dump($s3[$o1] === $s3[$o2]);
 some_value
 caught
 caught
-object(stdClass)#2 (0) {
+object(StdClass)#2 (0) {
 }
 bool(true)
 ===DONE===

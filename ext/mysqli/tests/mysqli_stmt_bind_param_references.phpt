@@ -153,7 +153,7 @@ require_once('skipifconnectfailure.inc');
 	unset($id);
 	unset($label);
 	$id = 102;
-	$label = new stdClass();
+	$label = new StdClass();
 	$label->label = 'y';
 	$id_ref = &$GLOBALS['id'];
 	$label_ref = &$label->label;

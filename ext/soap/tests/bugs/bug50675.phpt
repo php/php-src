@@ -39,7 +39,7 @@ $parameters = [
 ];
 $client = new TestSoapClient(__DIR__ . '/bug50675.wsdl', $parameters);
 
-$person = new stdClass();
+$person = new StdClass();
 $person->name = 'name';
 
 $result = $client->echoPerson($person, $person);

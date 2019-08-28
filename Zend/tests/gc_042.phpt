@@ -10,7 +10,7 @@ class Test {
 }
 
 $t = new Test;
-$t->x = new stdClass;
+$t->x = new StdClass;
 $t->x->t = $t;
 $a = (array) $t->x;
 unset($t, $a);
@@ -21,7 +21,7 @@ var_dump($x);
 --EXPECT--
 object(Test)#1 (1) {
   ["x"]=>
-  object(stdClass)#2 (1) {
+  object(StdClass)#2 (1) {
     ["t"]=>
     *RECURSION*
   }

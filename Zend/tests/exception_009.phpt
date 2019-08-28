@@ -15,7 +15,7 @@ class my_exception extends exception
 {
          public  function __construct()
          {
-                 $this->message = new stdclass ;
+                 $this->message = new StdClass ;
                  $this->file = new my_file ;
                  $this->line = "12" ;
          }
@@ -25,7 +25,7 @@ throw new my_exception;
 
 ?>
 --EXPECT--
-Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in [no active file]:0
+Fatal error: Uncaught Error: Object of class StdClass could not be converted to string in [no active file]:0
 Stack trace:
 #0 [internal function]: Exception->__toString()
 #1 {main}

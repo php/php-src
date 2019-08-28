@@ -11,7 +11,7 @@ foreach ($a as $v) {
 }
 
 echo "\nChange from object to non iterable:\n";
-$a = new stdClass;
+$a = new StdClass;
 $a->a=1;
 $a->b=2;
 $b=&$a;

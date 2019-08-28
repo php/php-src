@@ -65,7 +65,7 @@ int(3)
 int(7)
 string(3) "bar"
 int(3)
-object(stdClass)#%d (%d) {
+object(StdClass)#%d (%d) {
   ["boo"]=>
   int(7)
 }

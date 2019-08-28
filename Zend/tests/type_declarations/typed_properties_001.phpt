@@ -2,15 +2,15 @@
 Test typed properties basic operation
 --FILE--
 <?php
-var_dump(new class(1, 2.2, true, ["four"], new stdClass) {
+var_dump(new class(1, 2.2, true, ["four"], new StdClass) {
 	public int $int;
 	public float $float;
 	public bool $bool;
 	public array $array;
-	public stdClass $std;
+	public StdClass $std;
 	public iterable $it;
 
-	public function __construct(int $int, float $float, bool $bool, array $array, stdClass $std) {
+	public function __construct(int $int, float $float, bool $bool, array $array, StdClass $std) {
 		$this->int = $int;
 		$this->float = $float;
 		$this->bool = $bool;
@@ -34,7 +34,7 @@ object(class@anonymous)#%d (6) {
     string(4) "four"
   }
   ["std"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   ["it"]=>
   array(1) {

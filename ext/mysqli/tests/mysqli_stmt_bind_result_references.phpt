@@ -102,7 +102,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "reference, simple object...\n";
 	unset($obj);
-	$obj = new stdClass();
+	$obj = new StdClass();
 	$obj->id = null;
 	$obj->label = null;
 
@@ -118,7 +118,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "reference, simple object w reference...\n";
 	unset($id); unset($label); unset($obj);
-	$obj = new stdClass();
+	$obj = new StdClass();
 	$obj->id = null;
 	$obj->label = null;
 	$id = &$obj->id;
@@ -135,7 +135,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "reference, simple object w reference, change after bind...\n";
 	unset($id); unset($label); unset($obj);
-	$obj = new stdClass();
+	$obj = new StdClass();
 	$obj->id = null;
 	$obj->label = null;
 	$id = &$obj->id;

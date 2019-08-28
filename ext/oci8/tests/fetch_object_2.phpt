@@ -67,7 +67,7 @@ oci8_test_sql_execute($c, $stmtarray);
 <?php exit(0); ?>
 --EXPECTF--
 Test 1
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["COL1"]=>
   string(3) "123"
   ["COL2"]=>
@@ -78,7 +78,7 @@ object(stdClass)#%d (3) {
   ["COL3"]=>
   string(11) "1 more text"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["COL1"]=>
   string(3) "456"
   ["COL2"]=>
@@ -89,7 +89,7 @@ object(stdClass)#%d (3) {
   ["COL3"]=>
   NULL
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["COL1"]=>
   string(3) "789"
   ["COL2"]=>

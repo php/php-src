@@ -91,7 +91,7 @@ int(0)
 *** Trying array(0) {
 }
 *** Caught Return value of {closure}() must be of the type int, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(StdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type int, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
@@ -129,7 +129,7 @@ float(0)
 *** Trying array(0) {
 }
 *** Caught Return value of {closure}() must be of the type float, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(StdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type float, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
@@ -166,7 +166,7 @@ string(0) ""
 *** Trying array(0) {
 }
 *** Caught Return value of {closure}() must be of the type string, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(StdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type string, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
@@ -203,7 +203,7 @@ bool(false)
 *** Trying array(0) {
 }
 *** Caught Return value of {closure}() must be of the type bool, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(StdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {

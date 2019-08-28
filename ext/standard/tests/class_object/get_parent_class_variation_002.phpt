@@ -65,7 +65,7 @@ $values = array(
       'String',
 
       // object data
-      new stdclass(),
+      new StdClass(),
 
       // undefined data
       $undefined_var,
@@ -167,7 +167,7 @@ Arg value String
 In autoload(String)
 bool(false)
 
-Arg value stdClass 
+Arg value StdClass
 bool(false)
 
 Arg value  

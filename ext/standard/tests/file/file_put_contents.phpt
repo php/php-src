@@ -16,7 +16,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(file_put_contents($file, new stdClass));
+var_dump(file_put_contents($file, new StdClass));
 var_dump(file_put_contents($file, new foo));
 $fp = fopen($file, "r");
 try {

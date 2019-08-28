@@ -5,7 +5,7 @@ json_encode() & endless loop - 2
 --FILE--
 <?php
 
-$a = new stdclass;
+$a = new StdClass;
 $a->prop = $a;
 
 var_dump($a);
@@ -23,7 +23,7 @@ var_dump(json_last_error(), json_last_error_msg());
 echo "Done\n";
 ?>
 --EXPECTF--
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["prop"]=>
   *RECURSION*
 }

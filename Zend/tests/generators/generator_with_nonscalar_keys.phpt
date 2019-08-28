@@ -34,11 +34,11 @@ array(3) {
   [2]=>
   int(6)
 }
-object(stdClass)#3 (1) {
+object(StdClass)#3 (1) {
   ["a"]=>
   string(1) "b"
 }
-object(stdClass)#4 (1) {
+object(StdClass)#4 (1) {
   ["b"]=>
   string(1) "a"
 }

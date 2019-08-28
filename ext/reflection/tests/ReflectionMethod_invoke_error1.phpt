@@ -36,7 +36,7 @@ try {
 
 echo "\ninvoke() on a non-instance:\n";
 try {
-    var_dump($foo->invoke(new stdClass()));
+    var_dump($foo->invoke(new StdClass()));
 } catch (ReflectionException $e) {
     var_dump($e->getMessage());
 }

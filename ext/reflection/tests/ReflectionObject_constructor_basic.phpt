@@ -2,7 +2,7 @@
 ReflectionObject::__construct - basic function test
 --FILE--
 <?php
-$r1 = new ReflectionObject(new stdClass);
+$r1 = new ReflectionObject(new StdClass);
 var_dump($r1);
 
 class C { }
@@ -16,7 +16,7 @@ var_dump($r3);
 --EXPECTF--
 object(ReflectionObject)#%d (1) {
   ["name"]=>
-  string(8) "stdClass"
+  string(8) "StdClass"
 }
 object(ReflectionObject)#%d (1) {
   ["name"]=>

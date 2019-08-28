@@ -10,11 +10,11 @@ spl_autoload_register(function ($name) {
 function f(UndefClass $x)
 {
 }
-f(new stdClass);
+f(new StdClass);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to f() must be an instance of UndefClass, instance of stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to f() must be an instance of UndefClass, instance of StdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): f(Object(stdClass))
+#0 %s(%d): f(Object(StdClass))
 #1 {main}
   thrown in %s on line %d

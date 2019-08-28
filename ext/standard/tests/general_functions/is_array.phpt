@@ -70,7 +70,7 @@ $varient_arrays = array (
   1e5,
 
   /* objects */
-  new stdclass,
+  new StdClass,
 
   /* resources */
   $fp,

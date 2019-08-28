@@ -21,7 +21,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-$obj->classProp = new stdClass;
+$obj->classProp = new StdClass;
 var_dump($obj);
 
 // Inherit from internal class
@@ -43,7 +43,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-$obj->classProp = new stdClass;
+$obj->classProp = new StdClass;
 var_dump($obj);
 
 // Static internal typed properties
@@ -61,22 +61,22 @@ var_dump(_ZendTestClass::$staticIntProp);
 --EXPECT--
 int(123)
 Typed property _ZendTestClass::$intProp must be int, string used
-Typed property _ZendTestClass::$classProp must be an instance of stdClass or null, _ZendTestClass used
+Typed property _ZendTestClass::$classProp must be an instance of StdClass or null, _ZendTestClass used
 object(_ZendTestClass)#1 (2) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>
-  object(stdClass)#2 (0) {
+  object(StdClass)#2 (0) {
   }
 }
 int(123)
 Typed property _ZendTestClass::$intProp must be int, string used
-Typed property _ZendTestClass::$classProp must be an instance of stdClass or null, Test used
+Typed property _ZendTestClass::$classProp must be an instance of StdClass or null, Test used
 object(Test)#4 (2) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>
-  object(stdClass)#1 (0) {
+  object(StdClass)#1 (0) {
   }
 }
 int(123)

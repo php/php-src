@@ -7,7 +7,7 @@ Check that bad arguments return the same
 $funcs = get_extension_funcs("intl");
 function ignore_err() {}
 set_error_handler("ignore_err");
-$arg = new stdClass();
+$arg = new StdClass();
 foreach($funcs as $func) {
         $rfunc = new ReflectionFunction($func);
         if($rfunc->getNumberOfRequiredParameters() == 0) {

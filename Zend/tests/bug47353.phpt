@@ -13,7 +13,7 @@ class A
 			if(!isset($myArray[$i]))
 				$myArray[$i] = array();
 			$ref = & $myArray[$i];
-			$ref[] = new stdClass();
+			$ref[] = new StdClass();
 		}
 	}
 }

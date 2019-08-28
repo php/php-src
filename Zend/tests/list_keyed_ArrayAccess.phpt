@@ -12,13 +12,13 @@ var_dump($good, $happy);
 
 echo PHP_EOL;
 
-$stdClassCollection = new SplObjectStorage;
+$StdClassCollection = new SplObjectStorage;
 $foo = new StdClass;
-$stdClassCollection[$foo] = "foo";
+$StdClassCollection[$foo] = "foo";
 $bar = new StdClass;
-$stdClassCollection[$bar] = "bar";
+$StdClassCollection[$bar] = "bar";
 
-list($foo => $fooStr, $bar => $barStr) = $stdClassCollection;
+list($foo => $fooStr, $bar => $barStr) = $StdClassCollection;
 var_dump($fooStr, $barStr);
 
 echo PHP_EOL;

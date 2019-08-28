@@ -3,7 +3,7 @@ Bug #40794 (ReflectionObject::getValues() may crash when used with dynamic prope
 --FILE--
 <?php
 
-$obj = new stdClass();
+$obj = new StdClass();
 $obj->prop1 = '1';
 $obj->prop2 = '2';
 $obj->prop3 = '3';

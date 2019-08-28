@@ -15,7 +15,7 @@ class obj
 	}
 }
 
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->aa = 1;
 $obj->bb = 2;
 
@@ -31,7 +31,7 @@ array(1) {
   [0]=>
   int(1)
 }
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["aa"]=>
   int(1)
   ["bb"]=>

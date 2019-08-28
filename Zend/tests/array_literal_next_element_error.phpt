@@ -4,7 +4,7 @@ Next free element may overflow in array literals
 <?php
 
 $i = PHP_INT_MAX;
-$array = [$i => 42, new stdClass];
+$array = [$i => 42, new StdClass];
 var_dump($array);
 
 const FOO = [PHP_INT_MAX => 42, "foo"];

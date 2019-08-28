@@ -3,7 +3,7 @@ Bug #68191: Broken reference across objects
 --FILE--
 <?php
 
-$obj = new stdClass;
+$obj = new StdClass;
 
 $obj->prop1 = 'abc';
 $obj->prop2 =& $obj->prop1;

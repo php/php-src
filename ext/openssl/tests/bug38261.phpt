@@ -19,7 +19,7 @@ var_dump(openssl_x509_parse($t));
 var_dump(openssl_x509_parse(array()));
 var_dump(openssl_x509_parse($cert));
 try {
-    var_dump(openssl_x509_parse(new stdClass));
+    var_dump(openssl_x509_parse(new StdClass));
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -30,4 +30,4 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string

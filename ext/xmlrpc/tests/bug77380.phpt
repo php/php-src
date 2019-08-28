@@ -9,7 +9,7 @@ if (!extension_loaded("xmlrpc")) print "skip";
 var_dump(xmlrpc_decode(base64_decode("PGJhc2U2ND7CkzwvYmFzZTY0Pgo=")));
 ?>
 --EXPECT--
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["scalar"]=>
   string(0) ""
   ["xmlrpc_type"]=>

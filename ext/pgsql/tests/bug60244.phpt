@@ -47,7 +47,7 @@ array(1) {
   ["?column?"]=>
   string(1) "a"
 }
-object(stdClass)#1 (1) {
+object(StdClass)#1 (1) {
   ["?column?"]=>
   string(1) "a"
 }

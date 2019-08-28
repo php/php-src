@@ -25,7 +25,7 @@ try {
 	print_exception($e);
 }
 try {
-	var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdclass));
+	var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new StdClass));
 } catch (IntlException $e) {
 	print_exception($e);
 }

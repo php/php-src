@@ -10,12 +10,12 @@ $bad_utf8 = quoted_printable_decode('=B0');
 json_encode($bad_utf8);
 var_dump(json_last_error(), json_last_error_msg());
 
-$a = new stdclass;
+$a = new StdClass;
 $a->foo = quoted_printable_decode('=B0');
 json_encode($a);
 var_dump(json_last_error(), json_last_error_msg());
 
-$b = new stdclass;
+$b = new StdClass;
 $b->foo = $bad_utf8;
 $b->bar = 1;
 json_encode($b);

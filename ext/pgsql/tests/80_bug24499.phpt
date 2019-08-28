@@ -1,5 +1,5 @@
 --TEST--
-Bug #24499 (Notice: Undefined property: stdClass::)
+Bug #24499 (Notice: Undefined property: StdClass::)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -58,7 +58,7 @@ Array
     [0] => 2
     [id] => 2
 )
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["id"]=>
   string(1) "3"
 }

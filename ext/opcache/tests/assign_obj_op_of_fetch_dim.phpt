@@ -16,5 +16,5 @@ Notice: Undefined offset: 0 in %s on line %d
 
 Warning: Creating default object from empty value in %s on line %d
 
-Notice: Undefined property: stdClass::$y in %s on line %d
+Notice: Undefined property: StdClass::$y in %s on line %d
 bool(true)

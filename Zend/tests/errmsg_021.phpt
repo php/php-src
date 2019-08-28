@@ -1,11 +1,11 @@
 --TEST--
 errmsg: disabled class
 --INI--
-disable_classes=stdclass
+disable_classes=StdClass
 --FILE--
 <?php
 
-class test extends stdclass {
+class test extends StdClass {
 }
 
 $t = new test;

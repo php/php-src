@@ -1,14 +1,14 @@
 --TEST--
-Instantiate stdClass
+Instantiate StdClass
 --FILE--
 <?php
 
-$obj = new stdClass;
+$obj = new StdClass;
 
 echo get_class($obj)."\n";
 
 echo "Done\n";
 ?>
 --EXPECT--
-stdClass
+StdClass
 Done

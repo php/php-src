@@ -5,7 +5,7 @@ Bug #52193 (converting closure to array yields empty array)
 
 var_dump((array) 1);
 var_dump((array) NULL);
-var_dump((array) new stdclass);
+var_dump((array) new StdClass);
 var_dump($h = (array) function () { return 2; });
 var_dump($h[0]());
 

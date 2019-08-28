@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->xmlrpc_type = 'base64';
 $obj->scalar = 0x1122334455;
 var_dump(xmlrpc_encode($obj));
@@ -23,7 +23,7 @@ string(135) "<?xml version="1.0" encoding="utf-8"?>
 </param>
 </params>
 "
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["xmlrpc_type"]=>
   string(6) "base64"
   ["scalar"]=>

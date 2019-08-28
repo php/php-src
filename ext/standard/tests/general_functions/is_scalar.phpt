@@ -60,7 +60,7 @@ $int_var = 10;
 $float_var = 1e5;
 $string_var = "string";
 $boolean_var = true;
-$object = new stdclass;
+$object = new StdClass;
 $array = array(10);
 $resource = opendir('.');
 unset($int_var, $float_var, $string_var, $boolean_var, $object, $array, $resource);
@@ -82,7 +82,7 @@ $variation_array = array(
   $fp,  // resources
   $dfp,
 
-  new stdclass, // object
+  new StdClass, // object
 
   @$int_var,  // scalars that are unset
   @$float_var,

@@ -5,7 +5,7 @@ SPL: MultipleIterator
 
 $iter1 = new ArrayIterator(array(1,2,3));
 $iter2 = new ArrayIterator(array(1,2));
-$iter3 = new ArrayIterator(array(new stdClass(),"string",3));
+$iter3 = new ArrayIterator(array(new StdClass(),"string",3));
 
 $m = new MultipleIterator();
 
@@ -78,7 +78,7 @@ foreach($m as $key => $value) {
 echo "-- Associate with invalid value --\n";
 
 try {
-	$m->attachIterator($iter3, new stdClass());
+	$m->attachIterator($iter3, new StdClass());
 } catch(InvalidArgumentException $e) {
 	echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
 }
@@ -122,7 +122,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(3) {
@@ -159,7 +159,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(3) {
@@ -209,7 +209,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(3) {
@@ -261,7 +261,7 @@ array(3) {
   ["iter2"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(3) {
@@ -316,7 +316,7 @@ array(2) {
   ["iter1"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }
 array(2) {

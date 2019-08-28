@@ -31,7 +31,7 @@ var_dump($ao5);
 --EXPECT--
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#1 (2) {
+  object(StdClass)#1 (2) {
     ["b"]=>
     int(1)
     ["a"]=>
@@ -42,7 +42,7 @@ object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
   object(ArrayObject)#2 (1) {
     ["storage":"ArrayObject":private]=>
-    object(stdClass)#1 (2) {
+    object(StdClass)#1 (2) {
       ["a"]=>
       int(2)
       ["b"]=>

@@ -52,7 +52,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
 --EXPECTF--
 array(3) {
   [0]=>
-  object(stdClass)#%d (3) {
+  object(StdClass)#%d (3) {
     ["id"]=>
     string(1) "1"
     ["val"]=>
@@ -61,7 +61,7 @@ array(3) {
     string(2) "AA"
   }
   [1]=>
-  object(stdClass)#%d (3) {
+  object(StdClass)#%d (3) {
     ["id"]=>
     string(1) "2"
     ["val"]=>
@@ -70,7 +70,7 @@ array(3) {
     string(2) "BB"
   }
   [2]=>
-  object(stdClass)#%d (3) {
+  object(StdClass)#%d (3) {
     ["id"]=>
     string(1) "3"
     ["val"]=>

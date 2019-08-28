@@ -60,7 +60,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 /*
 	set_and_get(2, $db, PDO::ATTR_AUTOCOMMIT, 0);
 	set_and_get(3, $db, PDO::ATTR_AUTOCOMMIT, -1);
-	$obj = new stdClass();
+	$obj = new StdClass();
 	set_and_get(4, $db, PDO::ATTR_AUTOCOMMIT, $obj);
 
 	set_and_get(5, $db, PDO::MYSQL_ATTR_LOCAL_INFILE, 1);

@@ -70,7 +70,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($staticMethod->invoke(new stdClass()));
+var_dump($staticMethod->invoke(new StdClass()));
 
 echo "\nMethod that throws an exception:\n";
 try {

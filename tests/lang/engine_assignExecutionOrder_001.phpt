@@ -23,19 +23,19 @@ $a[f()] = g();
 var_dump($a);
 
 echo "\n\nOrder with object property assignment:\n";
-$oa = new stdClass;
+$oa = new StdClass;
 $oa->${f()} = g();
 var_dump($oa);
 
 echo "\n\nOrder with nested object property assignment:\n";
-$ob = new stdClass;
-$ob->o1 = new stdClass;
-$ob->o1->o2 = new stdClass;
+$ob = new StdClass;
+$ob->o1 = new StdClass;
+$ob->o1->o2 = new StdClass;
 $ob->o1->o2->${f()} = g();
 var_dump($ob);
 
 echo "\n\nOrder with dim_list property assignment:\n";
-$oc = new stdClass;
+$oc = new StdClass;
 $oc->a[${f()}] = g();
 var_dump($oc);
 
@@ -90,7 +90,7 @@ array(1) {
 Order with object property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["assigned value"]=>
   string(14) "assigned value"
 }
@@ -99,11 +99,11 @@ object(stdClass)#%d (1) {
 Order with nested object property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["o1"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["o2"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["assigned value"]=>
       string(14) "assigned value"
     }
@@ -114,7 +114,7 @@ object(stdClass)#%d (1) {
 Order with dim_list property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   array(1) {
     ["assigned value"]=>

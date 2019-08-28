@@ -3,10 +3,10 @@
 --FILE--
 <?php
 namespace Foo;
-use \stdClass;
-use \stdClass as A;
-echo get_class(new stdClass)."\n";
+use \StdClass;
+use \StdClass as A;
+echo get_class(new StdClass)."\n";
 echo get_class(new A)."\n";
 --EXPECT--
-stdClass
-stdClass
+StdClass
+StdClass

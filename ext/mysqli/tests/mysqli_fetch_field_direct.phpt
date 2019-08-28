@@ -35,7 +35,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
   ["orgname"]=>

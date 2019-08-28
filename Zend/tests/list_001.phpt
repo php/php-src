@@ -3,18 +3,18 @@
 --FILE--
 <?php
 
-list($a, list($b)) = array(new stdclass, array(new stdclass));
+list($a, list($b)) = array(new StdClass, array(new StdClass));
 var_dump($a, $b);
-[$a, [$b]] = array(new stdclass, array(new stdclass));
+[$a, [$b]] = array(new StdClass, array(new StdClass));
 var_dump($a, $b);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(StdClass)#1 (0) {
 }
-object(stdClass)#2 (0) {
+object(StdClass)#2 (0) {
 }
-object(stdClass)#3 (0) {
+object(StdClass)#3 (0) {
 }
-object(stdClass)#4 (0) {
+object(StdClass)#4 (0) {
 }

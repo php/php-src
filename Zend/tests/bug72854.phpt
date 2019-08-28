@@ -4,7 +4,7 @@ Bug #72854: PHP Crashes on duplicate destructor call
 <?php
 
 function get() {
-    $t = new stdClass;
+    $t = new StdClass;
     $t->prop = $t;
     return $t;
 }

@@ -3,15 +3,15 @@ ReflectionParameter::getClass(), getDeclaringClass(), getDeclaringFunction()
 --FILE--
 <?php
 
-function test($nix, Array $ar, &$ref, stdClass $std,
-    NonExistingClass $na, stdClass &$opt = NULL, $def = "FooBar")
+function test($nix, Array $ar, &$ref, StdClass $std,
+    NonExistingClass $na, StdClass &$opt = NULL, $def = "FooBar")
 {
 }
 
 class test
 {
-	function method($nix, Array $ar, &$ref, stdClass $std,
-        NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
+	function method($nix, Array $ar, &$ref, StdClass $std,
+        NonExistingClass $na, StdClass $opt = NULL, $def = "FooBar")
 	{
 	}
 }
@@ -106,7 +106,7 @@ isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
-getClass: stdClass
+getClass: StdClass
 getDeclaringClass: NULL
 isArray: bool(false)
 allowsNull: bool(false)
@@ -124,7 +124,7 @@ isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(true)
-getClass: stdClass
+getClass: StdClass
 getDeclaringClass: NULL
 isArray: bool(false)
 allowsNull: bool(true)
@@ -172,7 +172,7 @@ isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
-getClass: stdClass
+getClass: StdClass
 getDeclaringClass: test
 isArray: bool(false)
 allowsNull: bool(false)
@@ -190,7 +190,7 @@ isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(false)
-getClass: stdClass
+getClass: StdClass
 getDeclaringClass: test
 isArray: bool(false)
 allowsNull: bool(true)

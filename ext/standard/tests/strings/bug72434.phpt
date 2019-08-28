@@ -24,6 +24,6 @@ debug_zval_dump($unserialized_payload[1]);
 --EXPECTF--
 array(1) refcount(3){
   [0]=>
-  object(stdClass)#%d (0) refcount(1){
+  object(StdClass)#%d (0) refcount(1){
   }
 }

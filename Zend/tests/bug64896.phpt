@@ -21,7 +21,7 @@ class bad
 	}
 }
 
-$foo = new stdclass;
+$foo = new StdClass;
 $foo->foo = $foo;
 $foo->bad = new bad;
 

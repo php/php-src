@@ -9,7 +9,7 @@ var_dump($ao['key']);
 var_dump($ao);
 
 echo "\n--> exchangeArray(normal object):\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->key = 'normal object prop';
 $ao->exchangeArray($obj);
 var_dump($ao['key']);
@@ -48,7 +48,7 @@ object(ArrayObject)#%d (1) {
 string(18) "normal object prop"
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["key"]=>
     string(18) "normal object prop"
   }

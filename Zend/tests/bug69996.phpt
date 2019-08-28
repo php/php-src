@@ -10,7 +10,7 @@ function method($cache) {
 	  return $prepared;
 }
 
-$cache = new stdClass();
+$cache = new StdClass();
 $cache->data = "good";
 
 for ($i = 0; $i < 5; ++$i) {

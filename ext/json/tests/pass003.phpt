@@ -47,9 +47,9 @@ Testing:
 }
 
 DECODE: AS OBJECT
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
+  object(StdClass)#%d (2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>
@@ -71,9 +71,9 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 {"JSON Test Pattern pass3":{"The outermost value":"must be an object or array.","In this test":"It is an object."}}
 DECODE AGAIN: AS OBJECT
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["JSON Test Pattern pass3"]=>
-  object(stdClass)#%d (2) {
+  object(StdClass)#%d (2) {
     ["The outermost value"]=>
     string(27) "must be an object or array."
     ["In this test"]=>

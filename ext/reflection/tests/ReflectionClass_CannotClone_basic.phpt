@@ -5,7 +5,7 @@ Stefan Koopmanschap <stefan@phpgg.nl>
 TestFest PHP|Tek
 --FILE--
 <?php
-$rc = new ReflectionClass("stdClass");
+$rc = new ReflectionClass("StdClass");
 $rc2 = clone($rc);
 ?>
 --EXPECTF--

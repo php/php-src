@@ -41,7 +41,7 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	$obj = mysqli_fetch_object($res);
-	if (($obj->ID !== "1") || ($obj->label !== "a") || (get_class($obj) != 'stdClass')) {
+	if (($obj->ID !== "1") || ($obj->label !== "a") || (get_class($obj) != 'StdClass')) {
 		printf("[007] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
 		var_dump($obj);
 	}

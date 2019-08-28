@@ -20,7 +20,7 @@ var_dump(get_browser($agent));
 
 ?>
 --EXPECT--
-object(stdClass)#1 (35) {
+object(StdClass)#1 (35) {
   ["browser_name_regex"]=>
   string(41) "~^opera/7\.1.* \(windows nt 5\.1; .\).*$~"
   ["browser_name_pattern"]=>

@@ -4,7 +4,7 @@ GC 006: Simple array-object cycle
 zend.enable_gc=1
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 $a->a = array();
 $a->a[0] =& $a;
 var_dump($a);
@@ -13,7 +13,7 @@ var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
 --EXPECTF--
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   array(1) {
     [0]=>

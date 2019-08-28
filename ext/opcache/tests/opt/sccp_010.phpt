@@ -11,7 +11,7 @@ opcache.preload=
 --FILE--
 <?php
 function foo() {
-    $o = new stdClass();
+    $o = new StdClass();
     $o->foo = 0;
 	$i = 1;
 	$c = $i < 2;

@@ -39,7 +39,7 @@ $privateMethod = new ReflectionMethod("TestClass::privateMethod");
 
 echo "\nNon-instance:\n";
 try {
-    var_dump($foo->invokeArgs(new stdClass(), array()));
+    var_dump($foo->invokeArgs(new StdClass(), array()));
 } catch (ReflectionException $e) {
     var_dump($e->getMessage());
 }

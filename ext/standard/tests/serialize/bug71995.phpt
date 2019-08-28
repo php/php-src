@@ -19,9 +19,9 @@ var_dump(unserialize($s));
 ?>
 --EXPECTF--
 Notice: serialize(): "b" is returned from __sleep multiple times in %sbug71995.php on line %d
-string(39) "O:1:"A":1:{s:1:"b";O:8:"stdClass":0:{}}"
+string(39) "O:1:"A":1:{s:1:"b";O:8:"StdClass":0:{}}"
 object(A)#%d (1) {
   ["b"]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }

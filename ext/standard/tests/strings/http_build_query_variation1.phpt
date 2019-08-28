@@ -17,7 +17,7 @@ class UrlBuilder
   private $access = 'admin';
 }
 
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->name = 'homepage';
 $obj->page = 1;
 $obj->sort = 'desc,name';

@@ -13,7 +13,7 @@ require_once('skipifconnectfailure.inc');
 	$tmp    = NULL;
 	$link   = NULL;
 
-	$obj = new stdClass();
+	$obj = new StdClass();
 
 	if ($mysqli = new mysqli($host, $user . 'unknown_really', $passwd . 'non_empty', $db, $port, $socket) && !mysqli_connect_errno())
 		printf("[003] Can connect to the server using host=%s, user=%s, passwd=***non_empty, dbname=%s, port=%s, socket=%s\n",

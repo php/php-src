@@ -6,7 +6,7 @@ namespace A\B;
 class Foo {
 }
 
-$function = new \ReflectionClass('stdClass');
+$function = new \ReflectionClass('StdClass');
 var_dump($function->inNamespace());
 var_dump($function->getName());
 var_dump($function->getNamespaceName());
@@ -20,9 +20,9 @@ var_dump($function->getShortName());
 ?>
 --EXPECT--
 bool(false)
-string(8) "stdClass"
+string(8) "StdClass"
 string(0) ""
-string(8) "stdClass"
+string(8) "StdClass"
 bool(true)
 string(7) "A\B\Foo"
 string(3) "A\B"

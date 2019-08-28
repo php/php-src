@@ -171,7 +171,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -179,7 +179,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [3]=>
   array(0) {
@@ -193,7 +193,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(StdClass)#%d (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -218,7 +218,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -247,14 +248,14 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(StdClass)#%d (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(StdClass)#%d (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(StdClass)#%d (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
@@ -331,7 +332,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -397,7 +399,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -510,7 +513,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -533,7 +537,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -541,7 +545,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [3]=>
   array(0) {
@@ -555,7 +559,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(StdClass)#%d (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -580,7 +584,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -609,14 +614,14 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(StdClass)#%d (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(StdClass)#%d (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(StdClass)#%d (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(StdClass)#%d (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
@@ -693,7 +698,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>
@@ -759,7 +765,8 @@ array(14) {
     string(1) "\"
     ["controls"]=>
     string(5) "
-	"
+
+	"
     ["slash"]=>
     string(5) "/ & /"
     ["alpha"]=>
@@ -872,7 +879,8 @@ array(14) {
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
     ["/\"쫾몾ꮘﳞ볚
-	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
+
+	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
   [9]=>

@@ -5,7 +5,7 @@ ReflectionObject::isUserDefined() - basic function test
 class C {
 }
 
-$r1 = new ReflectionObject(new stdClass);
+$r1 = new ReflectionObject(new StdClass);
 $r2 = new ReflectionObject(new ReflectionClass('C'));
 $r3 = new ReflectionObject(new ReflectionProperty('Exception', 'message'));
 $r4 = new ReflectionObject(new Exception);

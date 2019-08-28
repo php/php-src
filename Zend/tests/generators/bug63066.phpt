@@ -8,13 +8,13 @@ function gen($o)
 	$o->fatalError();
 }
 
-foreach(gen(new stdClass()) as $value)
+foreach(gen(new StdClass()) as $value)
 	echo $value, "\n";
 --EXPECTF--
 foo
 
-Fatal error: Uncaught Error: Call to undefined method stdClass::fatalError() in %sbug63066.php:5
+Fatal error: Uncaught Error: Call to undefined method StdClass::fatalError() in %sbug63066.php:5
 Stack trace:
-#0 %s(%d): gen(Object(stdClass))
+#0 %s(%d): gen(Object(StdClass))
 #1 {main}
   thrown in %sbug63066.php on line 5

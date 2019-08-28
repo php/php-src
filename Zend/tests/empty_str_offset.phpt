@@ -55,7 +55,7 @@ print "- array ---\n";
 var_dump(empty($str[array()]));
 var_dump(empty($str[array(1,2,3)]));
 print "- object ---\n";
-var_dump(empty($str[new stdClass()]));
+var_dump(empty($str[new StdClass()]));
 print "- resource ---\n";
 $f = fopen(__FILE__, 'r');
 var_dump(empty($str[$f]));

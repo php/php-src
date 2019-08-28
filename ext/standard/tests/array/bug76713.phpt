@@ -7,7 +7,7 @@ function test($obj) {
 	return array_column(array($obj), "prop");
 }
 
-$obj = new Stdclass();
+$obj = new StdClass();
 
 $obj->prop = str_pad("a", 10, 'a');
 

@@ -22,7 +22,7 @@ foreach($replace as $value) {
         echo $e->getMessage(), "\n";
     }
 }
-$value = new stdclass(); //Object
+$value = new StdClass(); //Object
 try {
     var_dump(preg_replace($regex, $value, $subject));
 } catch (Error $e) {
@@ -38,5 +38,5 @@ string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
 Parameter mismatch, pattern is a string while replacement is an array
-Object of class stdClass could not be converted to string
+Object of class StdClass could not be converted to string
 Done

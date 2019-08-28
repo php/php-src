@@ -14,7 +14,7 @@ try {
 
 try {
   $ao = new ArrayObject(array('a'=>1,'b'=>2,'c'=>3));
-  $ao->setIteratorClass("stdClass");
+  $ao->setIteratorClass("StdClass");
   foreach($ao as $key=>$value) {
     echo "  $key=>$value\n";
   }
@@ -33,7 +33,7 @@ try {
 }
 
 try {
-  $ao = new ArrayObject(array('a'=>1,'b'=>2,'c'=>3), 0, "stdClass");
+  $ao = new ArrayObject(array('a'=>1,'b'=>2,'c'=>3), 0, "StdClass");
   foreach($ao as $key=>$value) {
     echo "  $key=>$value\n";
   }
@@ -44,6 +44,6 @@ try {
 ?>
 --EXPECTF--
 string(118) "ArrayObject::setIteratorClass() expects parameter 1 to be a class name derived from Iterator, 'nonExistentClass' given"
-string(110) "ArrayObject::setIteratorClass() expects parameter 1 to be a class name derived from Iterator, 'stdClass' given"
+string(110) "ArrayObject::setIteratorClass() expects parameter 1 to be a class name derived from Iterator, 'StdClass' given"
 string(113) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'nonExistentClass' given"
-string(105) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'stdClass' given"
+string(105) "ArrayObject::__construct() expects parameter 3 to be a class name derived from Iterator, 'StdClass' given"

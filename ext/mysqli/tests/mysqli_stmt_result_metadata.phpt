@@ -86,7 +86,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
  in %s on line %d
-object(stdClass)#5 (13) {
+object(StdClass)#5 (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>

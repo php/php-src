@@ -5,9 +5,9 @@ SPL: Test that serialized blob contains unique elements (CVE-2010-2225)
 
 $badblobs = array(
 'x:i:2;i:0;,i:1;;i:0;,i:2;;m:a:0:{}',
-'x:i:3;O:8:"stdClass":0:{},O:8:"stdClass":0:{};R:2;,i:1;;O:8:"stdClass":0:{},r:2;;m:a:0:{}',
-'x:i:3;O:8:"stdClass":0:{},O:8:"stdClass":0:{};r:2;,i:1;;O:8:"stdClass":0:{},r:2;;m:a:0:{}',
-'x:i:1;O:8:"stdClass":0:{},N;;m:s:40:"1234567890123456789012345678901234567890"',
+'x:i:3;O:8:"StdClass":0:{},O:8:"StdClass":0:{};R:2;,i:1;;O:8:"StdClass":0:{},r:2;;m:a:0:{}',
+'x:i:3;O:8:"StdClass":0:{},O:8:"StdClass":0:{};r:2;,i:1;;O:8:"StdClass":0:{},r:2;;m:a:0:{}',
+'x:i:1;O:8:"StdClass":0:{},N;;m:s:40:"1234567890123456789012345678901234567890"',
 );
 foreach($badblobs as $blob) {
 try {
@@ -28,7 +28,7 @@ object(SplObjectStorage)#2 (1) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#3 (0) {
+      object(StdClass)#3 (0) {
       }
       ["inf"]=>
       int(1)
@@ -36,10 +36,10 @@ object(SplObjectStorage)#2 (1) {
     ["%s"]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#1 (0) {
+      object(StdClass)#1 (0) {
       }
       ["inf"]=>
-      object(stdClass)#3 (0) {
+      object(StdClass)#3 (0) {
       }
     }
   }

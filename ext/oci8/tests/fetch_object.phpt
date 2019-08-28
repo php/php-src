@@ -81,7 +81,7 @@ oci8_test_sql_execute($c, $stmtarray);
 <?php exit(0); ?>
 --EXPECTF--
 Test 1
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["caseSensitive"]=>
   string(3) "123"
   ["SECONDCOL"]=>
@@ -89,7 +89,7 @@ object(stdClass)#1 (3) {
   ["ANOTHERCOL"]=>
   string(15) "1 more text    "
 }
-object(stdClass)#2 (3) {
+object(StdClass)#2 (3) {
   ["caseSensitive"]=>
   string(3) "456"
   ["SECONDCOL"]=>
@@ -97,7 +97,7 @@ object(stdClass)#2 (3) {
   ["ANOTHERCOL"]=>
   string(15) "2 more text    "
 }
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["caseSensitive"]=>
   string(3) "789"
   ["SECONDCOL"]=>
@@ -118,6 +118,6 @@ Test 2
 Test 3
 123
 
-Notice: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object.php on line %d
+Notice: Undefined property: StdClass::$CASESENSITIVE in %sfetch_object.php on line %d
 
 ===DONE===

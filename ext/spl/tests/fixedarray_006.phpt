@@ -8,7 +8,7 @@ $a = new SplFixedArray($b);
 
 try {
 	for ($i = 0; $i < 100; $i++) {
-		$a[] = new stdClass;
+		$a[] = new StdClass;
 	}
 } catch (Exception $e) {
 	echo $e->getMessage(), "\n";

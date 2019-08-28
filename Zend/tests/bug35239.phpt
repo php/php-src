@@ -2,8 +2,8 @@
 Bug #35239 (Objects can lose references)
 --FILE--
 <?php
-$a = new stdClass;
-$a->x0 = new stdClass;
+$a = new StdClass;
+$a->x0 = new StdClass;
 $a->x0->y0 = 'a';
 $a->x0->y1 =& $a->x0;
 $a->x0->y2 =& $a->x0;
@@ -13,9 +13,9 @@ $a->x0->y1 = "ok\n";
 echo $a->x0;
 ?>
 --EXPECTF--
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["x0"]=>
-  &object(stdClass)#%d (3) {
+  &object(StdClass)#%d (3) {
     ["y0"]=>
     string(1) "b"
     ["y1"]=>

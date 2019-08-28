@@ -37,7 +37,7 @@ $result = $soapClient->getObject();
 var_dump($result);
 ?>
 --EXPECTF--
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["accountId"]=>
   int(1234)
   ["parent"]=>

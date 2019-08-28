@@ -67,7 +67,7 @@ $args = substr(PHP_OS, 0, 3) == 'WIN'
     ? ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=php_soap.dll"] : [];
 $code = <<<'PHP'
 $s = new SoapServer(NULL, array('uri' => 'http://here'));
-$s->setObject(new stdclass());
+$s->setObject(new StdClass());
 $s->handle();
 PHP;
 

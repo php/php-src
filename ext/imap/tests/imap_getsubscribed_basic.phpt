@@ -58,7 +58,7 @@ Warning: imap_getsubscribed() expects exactly 3 parameters, 2 given in %s on lin
 bool(false)
 Checking OK
 bool(true)
-object(stdClass)#%d (%d) {
+object(StdClass)#%d (%d) {
   [%sname"]=>
   string(%d) "{%s}%s"
   [%sattributes"]=>

@@ -1,5 +1,5 @@
 --TEST--
-Foreach on stdClass with properties looking like mangled properties
+Foreach on StdClass with properties looking like mangled properties
 --FILE--
 <?php
 

@@ -7,7 +7,7 @@ var_dump($rc->getFileName());
 var_dump($rc->getStartLine());
 var_dump($rc->getEndLine());
 
-$rc = new ReflectionObject(new stdclass);
+$rc = new ReflectionObject(new StdClass);
 var_dump($rc->getFileName());
 var_dump($rc->getStartLine());
 var_dump($rc->getEndLine());

@@ -4,9 +4,9 @@ GC 033: Crash in GC while run with phpspec
 zend.enable_gc = 1
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 $a->a = array();
-$a->a[0] = new Stdclass();
+$a->a[0] = new StdClass();
 $a->a[0]->a = $a;
 $a->a[1] = &$a->a;
 

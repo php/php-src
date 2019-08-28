@@ -11,7 +11,7 @@ Test is_a() function : usage variations  - wrong type for arg 1
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$class_name = 'stdClass';
+$class_name = 'StdClass';
 
 //get an unset variable
 $unset_var = 10;

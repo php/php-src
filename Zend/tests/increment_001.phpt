@@ -19,7 +19,7 @@ $a = array(
 	NULL,
 	true,
 	false,
-	new stdclass,
+	new StdClass,
 	array(),
 	PHP_INT_MAX,
 	(string)PHP_INT_MAX
@@ -51,7 +51,7 @@ float(3.5)
 int(1)
 bool(true)
 bool(false)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 array(0) {
 }

@@ -16,7 +16,7 @@ MySQLPDOTest::skip();
 	if (false !== @$db->setAttribute(PDO::ATTR_ORACLE_NULLS, $tmp))
 		printf("[001] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
 
-	$tmp = new stdClass();
+	$tmp = new StdClass();
 	if (false !== @$db->setAttribute(PDO::ATTR_ORACLE_NULLS, $tmp));
 		printf("[002] Maybe PDO could indicate that this is not a proper way of setting ATTR_ORACLE_NULLS...\n");
 

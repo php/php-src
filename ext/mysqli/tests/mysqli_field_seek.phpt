@@ -113,7 +113,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -142,7 +142,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -171,7 +171,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(5) "label"
   ["orgname"]=>
@@ -205,7 +205,7 @@ Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
 bool(false)
 bool(true)
-object(stdClass)#%d (13) {
+object(StdClass)#%d (13) {
   ["name"]=>
   string(5) "_null"
   ["orgname"]=>

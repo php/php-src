@@ -9,7 +9,7 @@ class Test {
     }
 }
 
-(new Test)->method()(new stdClass);
+(new Test)->method()(new StdClass);
 
 ?>
 --EXPECTF--

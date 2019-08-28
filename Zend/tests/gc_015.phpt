@@ -4,7 +4,7 @@ GC 015: Object as root of cycle
 zend.enable_gc=1
 --FILE--
 <?php
-$a = new stdClass();
+$a = new StdClass();
 $c =& $a;
 $b = $a;
 $a->a = $a;

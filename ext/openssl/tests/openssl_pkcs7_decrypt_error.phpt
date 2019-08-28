@@ -12,8 +12,8 @@ set_error_handler("myErrorHandler");
 
 $a = 1;
 $b = 1;
-$c = new stdclass;
-$d = new stdclass;
+$c = new StdClass;
+$d = new StdClass;
 
 try {
     var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
@@ -30,8 +30,8 @@ var_dump(openssl_pkcs7_decrypt($a, $b, 0, 0));
 echo "Done\n";
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
-object(stdClass)#1 (0) {
+Object of class StdClass could not be converted to string
+object(StdClass)#1 (0) {
 }
 string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
 bool(false)

@@ -21,7 +21,7 @@ set_error_handler('test_error_handler');
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$class_name = 'stdClass';
+$class_name = 'StdClass';
 
 //get an unset variable
 $unset_var = 10;

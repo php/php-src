@@ -9,10 +9,10 @@ class bar { }
 
 class_alias('foo\bar', 'baz');
 
-use \baz as stdClass;
+use \baz as StdClass;
 
 var_dump(new bar);
-var_dump(new stdClass);
+var_dump(new StdClass);
 var_dump(new \baz);
 
 ?>

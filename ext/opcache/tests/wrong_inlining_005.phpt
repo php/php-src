@@ -9,7 +9,7 @@ function by_ref(&$var)
 {
 }
 function &get_array() {
-    $array = [new stdClass];
+    $array = [new StdClass];
     return $array;
 }
 function test()

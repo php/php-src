@@ -9,8 +9,8 @@ function ops() {
 
 try {
 	$x = 2;
-	$y = new stdClass;
-	while ($x-- && new stdClass) {
+	$y = new StdClass;
+	while ($x-- && new StdClass) {
 		$r = [$x] + ($y ? ((array) $x) + [2] : ops());
 		$y = (array) $y;
 	}

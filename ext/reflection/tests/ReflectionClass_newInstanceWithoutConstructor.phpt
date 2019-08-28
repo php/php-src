@@ -38,7 +38,7 @@ var_dump($class->newInstanceWithoutConstructor());
 --EXPECTF--
 object(Foo)#%d (0) {
 }
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 object(DateTime)#%d (0) {
 }

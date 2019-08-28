@@ -8,7 +8,7 @@ get_object_vars() - ensure references are preserved
  * Alias to functions:
  */
 
-$obj = new stdClass;
+$obj = new StdClass;
 var_dump(get_object_vars($obj));
 
 $a='original.a';
@@ -38,7 +38,7 @@ array(2) {
   ["val"]=>
   string(11) "changed.val"
 }
-object(stdClass)#1 (2) {
+object(StdClass)#1 (2) {
   ["ref"]=>
   &string(11) "changed.ref"
   ["val"]=>

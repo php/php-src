@@ -16,7 +16,7 @@ var_dump($arr[FALSE]);
 $fp = fopen(__FILE__, "r");
 var_dump($arr[$fp]);
 
-$obj = new stdClass;
+$obj = new StdClass;
 var_dump($arr[$obj]);
 
 $arr1 = Array(1,2,3);

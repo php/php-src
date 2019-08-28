@@ -27,7 +27,7 @@ class foo {
 	}
 
 	public function f5() {
-		$this->o2 = new stdClass;
+		$this->o2 = new StdClass;
 		return $this->o2;
 	}
 
@@ -74,7 +74,7 @@ array(0) {
 
 Warning: Creating default object from empty value in %sbug52614.php on line 52
 NULL
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   int(1)
 }

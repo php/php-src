@@ -6,7 +6,7 @@ Dynamic calls to scope introspection functions are forbidden (misoptimization)
 function test() {
     $i = 1;
     try {
-        array_map('extract', [['i' => new stdClass]]);
+        array_map('extract', [['i' => new StdClass]]);
     } catch (\Error $e) {
         echo $e->getMessage() . "\n";
     }

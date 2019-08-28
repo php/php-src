@@ -13,7 +13,7 @@ function get_const() {
 }
 
 function test() {
-    $x = new stdClass;
+    $x = new StdClass;
     var_dump(call_user_func('get_const', $x));
 }
 

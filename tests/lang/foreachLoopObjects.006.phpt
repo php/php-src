@@ -13,7 +13,7 @@ class C {
 
 echo "\nSubstituting the iterated object for a different object.\n";
 $obj = new C;
-$obj2 = new stdclass;
+$obj2 = new StdClass;
 $obj2->a = "new a";
 $obj2->b = "new b";
 $obj2->c = "new c";
@@ -76,7 +76,7 @@ string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
 string(10) "Original e"
-object(stdClass)#%d (6) {
+object(StdClass)#%d (6) {
   ["a"]=>
   string(5) "new a"
   ["b"]=>

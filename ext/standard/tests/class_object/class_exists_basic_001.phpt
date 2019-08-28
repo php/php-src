@@ -17,17 +17,17 @@ spl_autoload_register(function ($className) {
 echo "Calling class_exists() on non-existent class with autoload explicitly enabled:\n";
 var_dump( class_exists('C', true) );
 echo "\nCalling class_exists() on existing class with autoload explicitly enabled:\n";
-var_dump( class_exists('stdclass', true) );
+var_dump( class_exists('StdClass', true) );
 
 echo "\nCalling class_exists() on non-existent class with autoload explicitly enabled:\n";
 var_dump( class_exists('D', false) );
 echo "\nCalling class_exists() on existing class with autoload explicitly disabled:\n";
-var_dump( class_exists('stdclass', false) );
+var_dump( class_exists('StdClass', false) );
 
 echo "\nCalling class_exists() on non-existent class with autoload unspecified:\n";
 var_dump( class_exists('E') );
 echo "\nCalling class_exists() on existing class with autoload unspecified:\n";
-var_dump( class_exists('stdclass') );
+var_dump( class_exists('StdClass') );
 
 echo "Done";
 ?>

@@ -8,7 +8,7 @@ $x->h = 42;
 var_dump($x);
 ?>
 --EXPECT--
-object(stdClass)#1 (9) {
+object(StdClass)#1 (9) {
   ["a"]=>
   int(1)
   ["b"]=>

@@ -21,7 +21,7 @@ foreach($input as $value) {
         echo $e->getMessage(), "\n";
     }
 }
-$value = new stdclass(); //Object
+$value = new StdClass(); //Object
 try {
     var_dump(preg_match($regex, $value));
 } catch (TypeError $e) {

@@ -7,7 +7,7 @@ Steve Seear <stevseea@php.net>
 <?php
 
 echo "An object is in an array and is referenced. As expected, var_dumping the array shows '&':\n";
-$a = array(new stdclass);
+$a = array(new StdClass);
 $b =& $a[0];
 var_dump($a);
 
@@ -34,13 +34,13 @@ var_dump($a);
 An object is in an array and is referenced. As expected, var_dumping the array shows '&':
 array(1) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(StdClass)#%d (0) {
   }
 }
 Naturally, this remains true if we modify the object:
 array(1) {
   [0]=>
-  &object(stdClass)#%d (1) {
+  &object(StdClass)#%d (1) {
     ["x"]=>
     int(1)
   }

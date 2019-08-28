@@ -26,7 +26,7 @@ foreach($regex_array as $regex_value) {
         echo $e->getMessage(), "\n";
     }
 }
-$regex_value = new stdclass(); //Object
+$regex_value = new StdClass(); //Object
 try {
     var_dump(preg_split($regex_value, $subject));
 } catch (TypeError $e) {

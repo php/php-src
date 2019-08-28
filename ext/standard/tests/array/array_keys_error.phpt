@@ -5,11 +5,11 @@ Test array_keys() function (error conditions)
 
 echo "\n*** Testing error conditions ***\n";
 try {
-    var_dump(array_keys(new stdclass));  // object
+    var_dump(array_keys(new StdClass));  // object
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(array_keys(array(1,2,3, new stdClass => array())));  // (W)illegal offset
+var_dump(array_keys(array(1,2,3, new StdClass => array())));  // (W)illegal offset
 
 echo "Done\n";
 ?>

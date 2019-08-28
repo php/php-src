@@ -20,7 +20,7 @@ $n = gmp_nextprime(array());
 var_dump(gmp_strval($n));
 $n = gmp_nextprime("");
 var_dump(gmp_strval($n));
-$n = gmp_nextprime(new stdclass());
+$n = gmp_nextprime(new StdClass());
 var_dump(gmp_strval($n));
 
 echo "Done\n";

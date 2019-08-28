@@ -8,11 +8,11 @@ class foo {
   }
 }
 
-new foo(array(new stdClass));
+new foo(array(new StdClass));
 ?>
 --EXPECTF--
 array(1) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
 }

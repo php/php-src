@@ -46,7 +46,7 @@ $fh = fopen(__FILE__, 'r', true);
 $values = array(
 	array(
 		'id' => 1,
-		'value' => new stdClass
+		'value' => new StdClass
 	),
 	array(
 		'id' => 2,
@@ -178,7 +178,7 @@ array(3) {
 *** Testing multiple data types ***
 array(8) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [1]=>
   float(34.2345)
@@ -197,7 +197,7 @@ array(8) {
 }
 array(8) {
   [1]=>
-  object(stdClass)#%d (0) {
+  object(StdClass)#%d (0) {
   }
   [2]=>
   float(34.2345)

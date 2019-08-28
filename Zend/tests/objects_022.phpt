@@ -25,7 +25,7 @@ $foo = new foo;
 $foo->testFoo(new foo);
 $foo->testBar(new bar);
 $foo->testBaz(new baz);
-$foo->testFoo(new stdClass); // Recoverable fatal error
+$foo->testFoo(new StdClass); // Recoverable fatal error
 
 ?>
 --EXPECTF--
@@ -36,8 +36,8 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to foo::testFoo() must be an instance of foo, instance of StdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %s(%d): foo->testFoo(Object(stdClass))
+#0 %s(%d): foo->testFoo(Object(StdClass))
 #1 {main}
   thrown in %s on line %d

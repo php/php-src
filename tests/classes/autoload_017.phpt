@@ -7,7 +7,7 @@ spl_autoload_register(function ($name) {
   var_dump($name);
 });
 
-$rc = new ReflectionClass("stdClass");
+$rc = new ReflectionClass("StdClass");
 
 try {
   $rc->implementsInterface("UndefI");

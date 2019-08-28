@@ -1,5 +1,5 @@
 --TEST--
-Magic methods in overridden stdClass inside namespace
+Magic methods in overridden StdClass inside namespace
 --FILE--
 <?php
 
@@ -21,9 +21,9 @@ class foo {
 	}
 }
 
-use test\foo as stdClass;
+use test\foo as StdClass;
 
-$x = new stdClass;
+$x = new StdClass;
 $x->a = 1;
 $x->b->c = 1;
 $x->d->e[0]->f = 2;

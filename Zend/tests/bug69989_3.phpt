@@ -7,7 +7,7 @@ Generator cycle collection edge cases
 function gen1() {
     yield;
 }
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->gen = gen1($obj);
 
 // Symtable

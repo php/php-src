@@ -21,7 +21,7 @@ $o->test();
 print_r($o->test());
 ?>
 --EXPECT--
-stdClass Object
+StdClass Object
 (
     [children] => Array
         (

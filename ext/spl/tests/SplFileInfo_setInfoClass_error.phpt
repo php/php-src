@@ -6,11 +6,11 @@ SplFileInfo::setInfoClass() throws exception for invalid class
 $info = new SplFileInfo(__FILE__);
 
 try {
-    $info->setInfoClass('stdClass');
+    $info->setInfoClass('StdClass');
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'stdClass' given
+SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'StdClass' given

@@ -6,7 +6,7 @@ PHPNW Testfest 2009 - Simon Westcott (swestcott@gmail.com)
 <?php
 
 $s = new SplObjectStorage();
-$o1 = new stdClass();
+$o1 = new StdClass();
 $s[$o1] = 'some_value';
 
 echo $s->offsetGet($o1);

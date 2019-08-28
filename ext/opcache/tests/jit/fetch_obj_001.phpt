@@ -63,18 +63,18 @@ bar();
 ?>
 --EXPECTF--
 Warning: Creating default object from empty value in %s on line 14
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   int(2)
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   int(2)
   ["b"]=>
   array(0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   array(0) {
   }
@@ -82,7 +82,7 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   &resource(5) of type (stream)
   ["b"]=>
@@ -91,18 +91,18 @@ object(stdClass)#%d (2) {
 }
 
 Warning: Creating default object from empty value in %s on line 27
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["a"]=>
   int(2)
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   int(2)
   ["b"]=>
   array(0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   array(0) {
   }
@@ -110,7 +110,7 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-object(stdClass)#%d (2) {
+object(StdClass)#%d (2) {
   ["a"]=>
   &resource(6) of type (stream)
   ["b"]=>
@@ -123,13 +123,13 @@ array(0) {
 }
 
 Warning: Creating default object from empty value in %s on line 44
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["abc"]=>
   int(2)
 }
 
 Warning: Creating default object from empty value in %s on line 48
-object(stdClass)#%d (1) {
+object(StdClass)#%d (1) {
   ["abc"]=>
   int(2)
 }

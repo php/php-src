@@ -10,13 +10,13 @@ $xml = <<<XML
 </foo>
 XML;
 $d = new domdocument;
-$d->dynamicProperty = new stdclass;
+$d->dynamicProperty = new StdClass;
 $d->loadXML($xml);
 print_r($d);
 --EXPECTF--
 DOMDocument Object
 (
-    [dynamicProperty] => stdClass Object
+    [dynamicProperty] => StdClass Object
         (
         )
 

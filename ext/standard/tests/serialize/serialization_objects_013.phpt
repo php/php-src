@@ -29,63 +29,63 @@ function check(&$obj) {
 }
 
 echo "\n\n--- a refs b:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->b = 1;
 $obj->a = &$obj->b;
 $obj->c = 1;
 check($obj);
 
 echo "\n\n--- a refs c:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->c = 1;
 $obj->a = &$obj->c;
 $obj->b = 1;
 check($obj);
 
 echo "\n\n--- b refs a:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = 1;
 $obj->b = &$obj->a;
 $obj->c = 1;
 check($obj);
 
 echo "\n\n--- b refs c:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = 1;
 $obj->c = 1;
 $obj->b = &$obj->c;
 check($obj);
 
 echo "\n\n--- c refs a:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = 1;
 $obj->b = 1;
 $obj->c = &$obj->a;
 check($obj);
 
 echo "\n\n--- c refs b:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = 1;
 $obj->b = 1;
 $obj->c = &$obj->b;
 check($obj);
 
 echo "\n\n--- a,b refs c:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->c = 1;
 $obj->a = &$obj->c;
 $obj->b = &$obj->c;
 check($obj);
 
 echo "\n\n--- a,c refs b:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->b = 1;
 $obj->a = &$obj->b;
 $obj->c = &$obj->b;
 check($obj);
 
 echo "\n\n--- b,c refs a:\n";
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->a = 1;
 $obj->b = &$obj->a;
 $obj->c = &$obj->a;
@@ -95,7 +95,7 @@ echo "Done";
 ?>
 --EXPECTF--
 --- a refs b:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &int(1)
   ["a"]=>
@@ -103,8 +103,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["b"]=>
   &int(1)
   ["a"]=>
@@ -112,7 +112,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->a.changed"
   ["a"]=>
@@ -120,7 +120,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->b.changed"
   ["a"]=>
@@ -128,7 +128,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->b.changed"
   ["a"]=>
@@ -139,7 +139,7 @@ object(stdClass)#%d (3) {
 
 
 --- a refs c:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &int(1)
   ["a"]=>
@@ -147,8 +147,8 @@ object(stdClass)#%d (3) {
   ["b"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";i:1;}"
+object(StdClass)#%d (3) {
   ["c"]=>
   &int(1)
   ["a"]=>
@@ -156,7 +156,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
   ["a"]=>
@@ -164,7 +164,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
   ["a"]=>
@@ -172,7 +172,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->c.changed"
   ["a"]=>
@@ -183,7 +183,7 @@ object(stdClass)#%d (3) {
 
 
 --- b refs a:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -191,8 +191,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";i:1;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -200,7 +200,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -208,7 +208,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -216,7 +216,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -227,7 +227,7 @@ object(stdClass)#%d (3) {
 
 
 --- b refs c:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   int(1)
   ["c"]=>
@@ -235,8 +235,8 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"c";i:1;s:1:"b";R:3;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";i:1;s:1:"c";i:1;s:1:"b";R:3;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   int(1)
   ["c"]=>
@@ -244,7 +244,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["c"]=>
@@ -252,7 +252,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["c"]=>
@@ -260,7 +260,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["c"]=>
@@ -271,7 +271,7 @@ object(stdClass)#%d (3) {
 
 
 --- c refs a:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -279,8 +279,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:2;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:2;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -288,7 +288,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -296,7 +296,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -304,7 +304,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->c.changed"
   ["b"]=>
@@ -315,7 +315,7 @@ object(stdClass)#%d (3) {
 
 
 --- c refs b:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -323,8 +323,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:3;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";R:3;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -332,7 +332,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -340,7 +340,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -348,7 +348,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -359,7 +359,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b refs c:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &int(1)
   ["a"]=>
@@ -367,8 +367,8 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";R:2;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"c";i:1;s:1:"a";R:2;s:1:"b";R:2;}"
+object(StdClass)#%d (3) {
   ["c"]=>
   &int(1)
   ["a"]=>
@@ -376,7 +376,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
   ["a"]=>
@@ -384,7 +384,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
   ["a"]=>
@@ -392,7 +392,7 @@ object(stdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->c.changed"
   ["a"]=>
@@ -403,7 +403,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,c refs b:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &int(1)
   ["a"]=>
@@ -411,8 +411,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";R:2;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"b";i:1;s:1:"a";R:2;s:1:"c";R:2;}"
+object(StdClass)#%d (3) {
   ["b"]=>
   &int(1)
   ["a"]=>
@@ -420,7 +420,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->a.changed"
   ["a"]=>
@@ -428,7 +428,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->b.changed"
   ["a"]=>
@@ -436,7 +436,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["b"]=>
   &string(14) "obj->c.changed"
   ["a"]=>
@@ -447,7 +447,7 @@ object(stdClass)#%d (3) {
 
 
 --- b,c refs a:
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -455,8 +455,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";R:2;}"
-object(stdClass)#%d (3) {
+string(55) "O:8:"StdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";R:2;}"
+object(StdClass)#%d (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -464,7 +464,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -472,7 +472,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -480,7 +480,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(StdClass)#%d (3) {
   ["a"]=>
   &string(14) "obj->c.changed"
   ["b"]=>

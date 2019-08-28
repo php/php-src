@@ -19,7 +19,7 @@ DecodeDatetime("2001-09-08T21:46:40-0400");
 ?>
 --EXPECT--
 ISO 8601 datetime 20010909T01:46:40Z
-stdClass Object
+StdClass Object
 (
     [scalar] => 20010909T01:46:40Z
     [xmlrpc_type] => datetime
@@ -27,7 +27,7 @@ stdClass Object
 )
 
 ISO 8601 datetime 20010909T00:46:40-01
-stdClass Object
+StdClass Object
 (
     [scalar] => 20010909T00:46:40-01
     [xmlrpc_type] => datetime
@@ -35,7 +35,7 @@ stdClass Object
 )
 
 ISO 8601 datetime 2001-09-09T08:46:40+07:00
-stdClass Object
+StdClass Object
 (
     [scalar] => 2001-09-09T08:46:40+07:00
     [xmlrpc_type] => datetime
@@ -43,7 +43,7 @@ stdClass Object
 )
 
 ISO 8601 datetime 2001-09-08T21:46:40-0400
-stdClass Object
+StdClass Object
 (
     [scalar] => 2001-09-08T21:46:40-0400
     [xmlrpc_type] => datetime

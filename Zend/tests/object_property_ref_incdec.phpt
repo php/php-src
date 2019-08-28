@@ -3,7 +3,7 @@ Inc/dec of reference object properties
 --FILE--
 <?php
 
-$obj = new stdClass;
+$obj = new StdClass;
 $obj->cursor = 0;
 $ref =& $obj->cursor;
 

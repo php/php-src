@@ -13,7 +13,7 @@ class Test {
 
 $test = new Test ();
 $test->name = 'test';
-$test->_columns['name'] = new stdClass;
+$test->_columns['name'] = new StdClass;
 
 function test ($value, $column, &$columns) {}
 
@@ -40,7 +40,7 @@ object(Test)#%d (4) {
   ["_columns"]=>
   array(1) {
     ["name"]=>
-    object(stdClass)#%d (0) {
+    object(StdClass)#%d (0) {
     }
   }
   ["_primary"]=>

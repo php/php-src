@@ -10,7 +10,7 @@ ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", "Europe/Lisbon");
 
-var_dump(IntlDateFormatter::formatObject(new stdclass));
+var_dump(IntlDateFormatter::formatObject(new StdClass));
 
 class A extends IntlCalendar {function __construct(){}}
 var_dump(IntlDateFormatter::formatObject(new A));

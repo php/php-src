@@ -62,7 +62,7 @@ invalid($test, 'A', 'object', new Test);
 valid($test, 'iterable', 'Iterator', new ArrayIterator);
 invalid($test, 'Iterator', 'iterable', [1, 2, 3]);
 valid($test, 'object', 'iterable', new ArrayIterator);
-invalid($test, 'iterable', 'object', new stdClass);
+invalid($test, 'iterable', 'object', new StdClass);
 
 echo "Done\n";
 

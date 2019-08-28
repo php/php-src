@@ -8,7 +8,7 @@ class bar {
 	public $z;
 
 	public function __construct() {
-		$this->z = new stdclass;
+		$this->z = new StdClass;
 	}
 	public function getZ() {
 		return $this->z;
@@ -20,7 +20,7 @@ var_dump(clone (new bar)->getZ());
 
 ?>
 --EXPECTF--
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }

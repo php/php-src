@@ -9,9 +9,9 @@ var_export(): simple test with arrays and objects
  */
 
 echo "\n\n-- Var export on a simple  object --\n";
-$o1 = new stdclass;
+$o1 = new StdClass;
 $o1->p = '22';
-$o2 = new stdclass;
+$o2 = new StdClass;
 $o2->a = 1;
 $o2->b = array('k'=>2);
 $o2->x = $o1;

@@ -25,7 +25,7 @@ echo "Ok\n";
 ?>
 --EXPECT--
 bool(true)
-object(stdClass)#1 (3) {
+object(StdClass)#1 (3) {
   ["num"]=>
   string(1) "1"
   ["str"]=>

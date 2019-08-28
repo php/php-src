@@ -32,113 +32,113 @@ try {
 	$a .= [];
 } catch (Throwable $e) { var_dump($a); }
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x += 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x += new stdClass; }
+try { $x += new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x -= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x -= new stdClass; }
+try { $x -= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x *= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x *= new stdClass; }
+try { $x *= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x /= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x /= new stdClass; }
+try { $x /= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x %= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x %= new stdClass; }
+try { $x %= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x **= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x **= new stdClass; }
+try { $x **= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x ^= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x ^= new stdClass; }
+try { $x ^= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x &= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x &= new stdClass; }
+try { $x &= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x |= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x |= new stdClass; }
+try { $x |= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x <<= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x <<= new stdClass; }
+try { $x <<= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 
-$x = new stdClass;
+$x = new StdClass;
 try { $x >>= 1; }
 catch (Exception $e) {}
 var_dump($x);
 
 $x = 1;
-try { $x >>= new stdClass; }
+try { $x >>= new StdClass; }
 catch (Exception $e) {}
 var_dump($x);
 ?>
@@ -149,36 +149,36 @@ int(1)
 array(0) {
 }
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)
-object(stdClass)#%d (0) {
+object(StdClass)#%d (0) {
 }
 int(1)

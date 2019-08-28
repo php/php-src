@@ -9,12 +9,12 @@ function test() {
 
     var_dump($array[] = 123);
     var_dump($array[[]] = 123);
-    var_dump($array[new stdClass] = 123);
+    var_dump($array[new StdClass] = 123);
     var_dump($true[123] = 456);
 
     var_dump($array[] += 123);
     var_dump($array[[]] += 123);
-    var_dump($array[new stdClass] += 123);
+    var_dump($array[new StdClass] += 123);
     var_dump($true[123] += 456);
 
     var_dump($true->foo = 123);

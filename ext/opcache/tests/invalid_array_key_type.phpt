@@ -6,7 +6,7 @@ Don't add array value type is key type is illegal
 <?php
 
 function test(\SplObjectStorage $definitions = null) {
-    $argument = new stdClass;
+    $argument = new StdClass;
     $definitions[$argument] = 1;
     $definitions[$argument] += 1;
     $argument = [];

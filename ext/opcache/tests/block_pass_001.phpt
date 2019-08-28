@@ -5,8 +5,8 @@ Block pass: Bugs in BOOL/QM_ASSIGN elision
 --FILE--
 <?php
 (bool) (true ? $x : $y);
-(bool) (true ? new stdClass : null);
-(bool) new stdClass;
+(bool) (true ? new StdClass : null);
+(bool) new StdClass;
 ?>
 --EXPECTF--
 Notice: Undefined variable: x in %s on line %d

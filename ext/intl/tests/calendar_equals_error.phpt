@@ -23,7 +23,7 @@ try {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump($c->equals(new stdclass));
+	var_dump($c->equals(new StdClass));
 } catch (Error $ex) {
 	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }

@@ -8,7 +8,7 @@ error_reporting=0
 --FILE--
 <?php
 ini_set("session.save_handler","files");
-$x = new stdClass();
+$x = new StdClass();
 echo "ok";
 ?>
 --EXPECT--

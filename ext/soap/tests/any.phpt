@@ -56,9 +56,9 @@ var_dump($g);
 var_dump($ret);
 ?>
 --EXPECT--
-object(stdClass)#5 (1) {
+object(StdClass)#5 (1) {
   ["inputAny"]=>
-  object(stdClass)#6 (1) {
+  object(StdClass)#6 (1) {
     ["any"]=>
     array(1) {
       ["SOAPComplexType"]=>
@@ -73,9 +73,9 @@ object(stdClass)#5 (1) {
     }
   }
 }
-object(stdClass)#8 (1) {
+object(StdClass)#8 (1) {
   ["return"]=>
-  object(stdClass)#9 (1) {
+  object(StdClass)#9 (1) {
     ["any"]=>
     array(1) {
       ["SOAPComplexType"]=>

@@ -77,14 +77,14 @@ try {
 
 try {
 	var_dump((function() { return new class {
-		function __construct() { $this->foo = new stdClass; }
+		function __construct() { $this->foo = new StdClass; }
 		function __destruct() { throw new Exception; }
 	}; })()->foo++);
 } catch (Exception $e) { print "caught Exception 9\n"; }
 
 try {
 	var_dump((function() { return new class {
-		function __get($x) { return new stdClass; }
+		function __get($x) { return new StdClass; }
 		function __set($x, $y) {}
 		function __destruct() { throw new Exception; }
 	}; })()->foo++);
@@ -92,7 +92,7 @@ try {
 
 try {
 	var_dump((function() { return new class {
-		function __construct() { $this->bar = new stdClass; }
+		function __construct() { $this->bar = new StdClass; }
 		function &__get($x) { return $this->bar; }
 		function __destruct() { throw new Exception; }
 	}; })()->foo++);
@@ -100,14 +100,14 @@ try {
 
 try {
 	var_dump(++(function() { return new class {
-		function __construct() { $this->foo = new stdClass; }
+		function __construct() { $this->foo = new StdClass; }
 		function __destruct() { throw new Exception; }
 	}; })()->foo);
 } catch (Exception $e) { print "caught Exception 12\n"; }
 
 try {
 	var_dump(++(function() { return new class {
-		function __get($x) { return new stdClass; }
+		function __get($x) { return new StdClass; }
 		function __set($x, $y) {}
 		function __destruct() { throw new Exception; }
 	}; })()->foo);
@@ -115,7 +115,7 @@ try {
 
 try {
 	var_dump(++(function() { return new class {
-		function __construct() { $this->bar = new stdClass; }
+		function __construct() { $this->bar = new StdClass; }
 		function &__get($x) { return $this->bar; }
 		function __destruct() { throw new Exception; }
 	}; })()->foo);
@@ -123,7 +123,7 @@ try {
 
 try {
 	var_dump((function() { return new class implements ArrayAccess {
-		function offsetGet($x) { return [new stdClass]; }
+		function offsetGet($x) { return [new StdClass]; }
 		function offsetSet($x, $y) {}
 		function offsetExists($x) { return true; }
 		function offsetUnset($x) {}
@@ -133,7 +133,7 @@ try {
 
 try {
 	var_dump(++(function() { return new class implements ArrayAccess {
-		function offsetGet($x) { return [new stdClass]; }
+		function offsetGet($x) { return [new StdClass]; }
 		function offsetSet($x, $y) {}
 		function offsetExists($x) { return true; }
 		function offsetUnset($x) {}
@@ -143,14 +143,14 @@ try {
 
 try {
 	var_dump((new class {
-		function __construct() { $this->foo = new stdClass; }
+		function __construct() { $this->foo = new StdClass; }
 		function __destruct() { throw new Exception; }
 	})->foo);
 } catch (Exception $e) { print "caught Exception 17\n"; }
 
 try {
 	var_dump((new class {
-		function __get($x) { return new stdClass; }
+		function __get($x) { return new StdClass; }
 		function __set($x, $y) {}
 		function __destruct() { throw new Exception; }
 	})->foo);
@@ -158,7 +158,7 @@ try {
 
 try {
 	var_dump((new class implements ArrayAccess {
-		function offsetGet($x) { return [new stdClass]; }
+		function offsetGet($x) { return [new StdClass]; }
 		function offsetSet($x, $y) {}
 		function offsetExists($x) { return true; }
 		function offsetUnset($x) {}
@@ -168,14 +168,14 @@ try {
 
 try {
 	var_dump(isset((new class {
-		function __construct() { $this->foo = new stdClass; }
+		function __construct() { $this->foo = new StdClass; }
 		function __destruct() { throw new Exception; }
 	})->foo->bar));
 } catch (Exception $e) { print "caught Exception 20\n"; }
 
 try {
 	var_dump(isset((new class {
-		function __get($x) { return new stdClass; }
+		function __get($x) { return new StdClass; }
 		function __set($x, $y) {}
 		function __destruct() { throw new Exception; }
 	})->foo->bar));
@@ -183,7 +183,7 @@ try {
 
 try {
 	var_dump(isset((new class implements ArrayAccess {
-		function offsetGet($x) { return [new stdClass]; }
+		function offsetGet($x) { return [new StdClass]; }
 		function offsetSet($x, $y) {}
 		function offsetExists($x) { return true; }
 		function offsetUnset($x) {}
@@ -195,21 +195,21 @@ try {
 	$foo = new class {
 		function __destruct() { throw new Exception; }
 	};
-	var_dump($foo = new stdClass);
+	var_dump($foo = new StdClass);
 } catch (Exception $e) { print "caught Exception 23\n"; }
 
 try {
 	$foo = [new class {
 		function __destruct() { throw new Exception; }
 	}];
-	var_dump($foo[0] = new stdClass);
+	var_dump($foo[0] = new StdClass);
 } catch (Exception $e) { print "caught Exception 24\n"; }
 
 try {
 	$foo = (object) ["foo" => new class {
 		function __destruct() { throw new Exception; }
 	}];
-	var_dump($foo->foo = new stdClass);
+	var_dump($foo->foo = new StdClass);
 } catch (Exception $e) { print "caught Exception 25\n"; }
 
 try {
@@ -217,7 +217,7 @@ try {
 		function __get($x) {}
 		function __set($x, $y) { throw new Exception; }
 	};
-	var_dump($foo->foo = new stdClass);
+	var_dump($foo->foo = new StdClass);
 } catch (Exception $e) { print "caught Exception 26\n"; }
 
 try {
@@ -227,14 +227,14 @@ try {
 		function offsetExists($x) { return true; }
 		function offsetUnset($x) {}
 	};
-	var_dump($foo[0] = new stdClass);
+	var_dump($foo[0] = new StdClass);
 } catch (Exception $e) { print "caught Exception 27\n"; }
 
 try {
 	$foo = new class {
 		function __destruct() { throw new Exception; }
 	};
-	$bar = new stdClass;
+	$bar = new StdClass;
 	var_dump($foo = &$bar);
 } catch (Exception $e) { print "caught Exception 28\n"; }
 

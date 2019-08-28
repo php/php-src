@@ -18,7 +18,7 @@ try {
 }
 
 try {
-    var_dump(min(new stdclass));
+    var_dump(min(new StdClass));
 } catch (\TypeError $e) {
     echo $e->getMessage() . "\n";
 }

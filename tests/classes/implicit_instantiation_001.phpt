@@ -39,7 +39,7 @@ var_dump($c);
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: stdClass::$prop in %s on line 18
+Notice: Undefined property: StdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -49,7 +49,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: stdClass::$prop in %s on line 26
+Notice: Undefined property: StdClass::$prop in %s on line 26
 
 
 ---( $c->emptyString )---
@@ -57,7 +57,7 @@ Notice: Undefined property: stdClass::$prop in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: stdClass::$prop in %s on line 18
+Notice: Undefined property: StdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -67,7 +67,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: stdClass::$prop in %s on line 26
+Notice: Undefined property: StdClass::$prop in %s on line 26
 
 
 ---( $c->null )---
@@ -75,7 +75,7 @@ Notice: Undefined property: stdClass::$prop in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: stdClass::$prop in %s on line 18
+Notice: Undefined property: StdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -85,7 +85,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: stdClass::$prop in %s on line 26
+Notice: Undefined property: StdClass::$prop in %s on line 26
 
 
 ---( $c->boolTrue )---
@@ -133,17 +133,17 @@ Warning: Attempt to assign property 'prop' of non-object in %s on line 26
 
  --> Resulting object:object(C)#%d (6) {
   ["boolFalse"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["prop"]=>
     string(24) " Implicit instantiation!"
   }
   ["emptyString"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["prop"]=>
     string(24) " Implicit instantiation!"
   }
   ["null"]=>
-  object(stdClass)#%d (1) {
+  object(StdClass)#%d (1) {
     ["prop"]=>
     string(24) " Implicit instantiation!"
   }

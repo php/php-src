@@ -11,14 +11,14 @@ session_start();
 
 $_SESSION['boogie'] = 1;
 
-$_SESSION['obj1'] = new stdClass();
+$_SESSION['obj1'] = new StdClass();
 for ( $x=2; $x < 20; $x++) {
 	cyclic_ref($x);
 }
 
 function cyclic_ref($num) {
-	$_SESSION['obj'.$num] = new stdClass();
-	$_SESSION['obj'.$num]->test = new stdClass();//NOTE: No bug if try commenting out this too.
+	$_SESSION['obj'.$num] = new StdClass();
+	$_SESSION['obj'.$num]->test = new StdClass();//NOTE: No bug if try commenting out this too.
 	$_SESSION['obj'.$num]->obj1 = $_SESSION['obj1'];
 }
 

@@ -52,7 +52,7 @@ foreach($storage2 as $object)
 }
 
 var_dump($storage2);
-$storage->attach(new TestClass(3), new stdClass);
+$storage->attach(new TestClass(3), new StdClass);
 $storage->attach(new TestClass(4), new TestClass(5));
 echo "===UNSERIALIZE2===\n";
 var_dump(unserialize(serialize($storage)));
@@ -174,7 +174,7 @@ object(MyStorage)#%d (2) {
         int(3)
       }
       ["inf"]=>
-      object(stdClass)#%d (0) {
+      object(StdClass)#%d (0) {
       }
     }
     ["%s"]=>
@@ -233,7 +233,7 @@ object(MyStorage)#%d (2) {
         int(3)
       }
       ["inf"]=>
-      object(stdClass)#%d (0) {
+      object(StdClass)#%d (0) {
       }
     }
     ["%s"]=>

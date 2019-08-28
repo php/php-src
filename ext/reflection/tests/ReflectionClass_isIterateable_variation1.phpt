@@ -14,10 +14,10 @@ function dump_iterateable($obj)
 }
 
 $basicClass = new BasicClass();
-$stdClass = new StdClass();
+$StdClass = new StdClass();
 
 dump_iterateable($basicClass);
-dump_iterateable($stdClass);
+dump_iterateable($StdClass);
 
 ?>
 --EXPECT--
