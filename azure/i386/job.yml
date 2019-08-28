@@ -73,6 +73,8 @@ jobs:
         sudo chmod 777 /etc/php.d
         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
@@ -86,9 +88,9 @@ jobs:
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'OpCache'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1
+        runTestsParameters: -d zend_extension=opcache.so
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'JIT'
-        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.jit_buffer_size=16M
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.jit_buffer_size=16M
