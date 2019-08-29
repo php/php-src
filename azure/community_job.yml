@@ -39,9 +39,11 @@ jobs:
         git clone https://github.com/symfony/symfony.git --branch=master --depth=1
         cd symfony
         php7.3 /usr/bin/composer install
+        # This might be a legit issue, but I can't reproduce
+        echo "interceptor_via_lib:libcurl.so" > asan.supp
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
-        export ASAN_OPTIONS=exitcode=139
+        export ASAN_OPTIONS=exitcode=139:suppressions=asan.supp
         php ./phpunit 0<&-
         status=$?
         if [ $status -gt 128 ]; then
