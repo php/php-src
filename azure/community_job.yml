@@ -36,11 +36,19 @@ jobs:
         php vendor/bin/phpunit
       displayName: 'Test Laravel'
     - script: |
+        git clone https://github.com/amphp/amp.git --branch=master --depth=1
+        cd amp
+        php7.3 /usr/bin/composer install --no-progress
+        export USE_ZEND_ALLOC=0
+        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
+        php vendor/bin/phpunit
+      displayName: 'Test Amphp'
+    - script: |
         git clone https://github.com/symfony/symfony.git --branch=master --depth=1
         cd symfony
-        php7.3 /usr/bin/composer install
+        php7.3 /usr/bin/composer install --no-progress
         # This might be a legit issue, but I can't reproduce
-        echo "interceptor_via_lib:libcurl.so" > asan.supp
+        echo "interceptor_via_fun:curl_multi_perform" > asan.supp
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139:suppressions=asan.supp
