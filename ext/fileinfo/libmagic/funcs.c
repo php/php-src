@@ -471,11 +471,9 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zend_string *repl;
 	int  rep_cnt = 0;
 
-	(void)setlocale(LC_CTYPE, "C");
-
 	opts |= PCRE_MULTILINE;
 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
-	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(Z_STR(patt), 0)) == NULL) {
 		zval_ptr_dtor(&patt);
 		rep_cnt = -1;
 		goto out;
@@ -497,7 +495,6 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zend_string_release(res);
 
 out:
-	(void)setlocale(LC_CTYPE, "");
 	return rep_cnt;
 }
 

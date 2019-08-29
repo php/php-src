@@ -412,23 +412,20 @@ flush:
 private int
 check_fmt(struct magic_set *ms, struct magic *m)
 {
-	pcre *pce;
-	int re_options, rv = -1;
-	pcre_extra *re_extra;
+	pcre_cache_entry *pce;
+	int rv = -1;
 	zend_string *pattern;
 
 	if (strchr(m->desc, '%') == NULL)
 		return 0;
 
-	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {
-	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+	 	rv = !pcre_exec(pce->re, pce->extra, m->desc, strlen(m->desc), 0, pce->preg_options, NULL, 0);
 	}
 	zend_string_release(pattern);
-	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
 
