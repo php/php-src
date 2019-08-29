@@ -167,8 +167,9 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
  * doesn't work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
 # define SET(n) \
-	(*(uint32_t *)&ptr[(n) * 4])
+	(*(unaligned_uint32_t *)&ptr[(n) * 4])
 # define GET(n) \
 	SET(n)
 #else
