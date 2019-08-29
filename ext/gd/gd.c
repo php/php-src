@@ -828,9 +828,14 @@ PHP_FUNCTION(imagecreatetruecolor)
 		return;
 	}
 
-	if (x_size <= 0 || y_size <= 0 || x_size >= INT_MAX || y_size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Invalid image dimensions");
-		RETURN_FALSE;
+	if (x_size <= 0 || x_size >= INT_MAX) {
+		zend_throw_error(NULL, "Invalid width (x_size)");
+		return;
+	}
+
+	if (y_size <= 0 || y_size >= INT_MAX) {
+		zend_throw_error(NULL, "Invalid height (y_size)");
+		return;
 	}
 
 	im = gdImageCreateTrueColor(x_size, y_size);
