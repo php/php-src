@@ -113,6 +113,7 @@ do {																			\
 #define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    SCNG(scanned_string_len)
 
 #define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x80)
+#define IS_LABEL_SUCCESSOR(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= '0' && (c) <= '9') || (c) == '_' || (c) >= 0x80)
 
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
@@ -1774,7 +1775,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	char *end, *bin = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*bin == '0' || *bin == '_') {
+	while (len > 0 && (*bin == '0' || *bin == '_')) {
 		++bin;
 		--len;
 	}
@@ -1891,7 +1892,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	char *end, *hex = yytext + 2;
 
 	/* Skip any leading 0s */
-	while (*hex == '0' || *hex == '_') {
+	while (len > 0 && (*hex == '0' || *hex == '_')) {
 		++hex;
 		--len;
 	}
@@ -2419,7 +2420,7 @@ skip_escape_conversion:
 
 	/* Check for ending label on the next line */
 	if (heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, heredoc_label->length)) {
-		if (!IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+		if (!IS_LABEL_SUCCESSOR(YYCURSOR[heredoc_label->length])) {
 			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 			}
@@ -2676,7 +2677,7 @@ double_quotes_scan_done:
 
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+					if (IS_LABEL_SUCCESSOR(YYCURSOR[heredoc_label->length])) {
 						continue;
 					}
 
@@ -2797,7 +2798,7 @@ heredoc_scan_done:
 
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+					if (IS_LABEL_SUCCESSOR(YYCURSOR[heredoc_label->length])) {
 						continue;
 					}
 

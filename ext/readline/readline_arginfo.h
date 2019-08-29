@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, prompt, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, prompt, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_info, 0, 0, 0)

@@ -13,23 +13,29 @@ $data = "This is a sample string used to test the hash_hmac function with variou
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac() function with invalid hash algorithm --\n";
-var_dump(hash_hmac('foo', $data, $key));
+try {
+    var_dump(hash_hmac('foo', $data, $key));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing hash_hmac() function with non-cryptographic hash algorithm --\n";
-var_dump(hash_hmac('crc32', $data, $key));
+try { 
+    var_dump(hash_hmac('crc32', $data, $key));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac() : error conditions ***
 
 -- Testing hash_hmac() function with invalid hash algorithm --
-
-Warning: hash_hmac(): Unknown hashing algorithm: foo in %s on line %d
-bool(false)
+Unknown hashing algorithm: foo
 
 -- Testing hash_hmac() function with non-cryptographic hash algorithm --
-
-Warning: hash_hmac(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
-bool(false)
+Non-cryptographic hashing algorithm: crc32
 ===Done===

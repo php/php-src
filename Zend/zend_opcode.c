@@ -104,7 +104,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 void zend_free_internal_arg_info(zend_internal_function *function) {
 	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-		!function->scope && function->arg_info) {
+		function->arg_info) {
 
 		uint32_t i;
 		uint32_t num_args = function->num_args + 1;
@@ -135,7 +135,10 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release_ex(function->common.function_name, 1);
 
-		zend_free_internal_arg_info(&function->internal_function);
+		/* For methods this will be called explicitly. */
+		if (!function->common.scope) {
+			zend_free_internal_arg_info(&function->internal_function);
+		}
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
@@ -352,8 +355,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 				    fn->common.scope == ce) {
-					/* reset function scope to allow arg_info removing */
-					fn->common.scope = NULL;
+					zend_free_internal_arg_info(&fn->internal_function);
 				}
 			} ZEND_HASH_FOREACH_END();
 
@@ -653,6 +655,12 @@ static void emit_live_range(
 		default:
 			start++;
 			kind = ZEND_LIVE_TMPVAR;
+
+			/* Check hook to determine whether a live range is necessary,
+			 * e.g. based on type info. */
+			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
+				return;
+			}
 			break;
 		}
 		case ZEND_COPY_TMP:
@@ -690,11 +698,6 @@ static void emit_live_range(
 			emit_live_range_raw(op_array, var_num, kind, start, end);
 			return;
 		}
-	}
-
-	/* Check hook to determine whether a live range is necessary, e.g. based on type info. */
-	if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
-		return;
 	}
 
 	emit_live_range_raw(op_array, var_num, kind, start, end);

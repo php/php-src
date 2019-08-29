@@ -9,18 +9,20 @@ echo new ReflectionFunction('get_html_translation_table'), "\n";
 Function [ <internal:standard> function htmlspecialchars ] {
 
   - Parameters [4] {
-    Parameter #0 [ <required> $string ]
-    Parameter #1 [ <optional> $quote_style ]
-    Parameter #2 [ <optional> $encoding ]
-    Parameter #3 [ <optional> $double_encode ]
+    Parameter #0 [ <required> string $string ]
+    Parameter #1 [ <optional> int $quote_style ]
+    Parameter #2 [ <optional> string or NULL $encoding ]
+    Parameter #3 [ <optional> bool $double_encode ]
   }
+  - Return [ string ]
 }
 
 Function [ <internal:standard> function get_html_translation_table ] {
 
   - Parameters [3] {
-    Parameter #0 [ <optional> $table ]
-    Parameter #1 [ <optional> $quote_style ]
-    Parameter #2 [ <optional> $encoding ]
+    Parameter #0 [ <optional> int $table ]
+    Parameter #1 [ <optional> int $quote_style ]
+    Parameter #2 [ <optional> string $encoding ]
   }
+  - Return [ array ]
 }

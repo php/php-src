@@ -12,11 +12,17 @@ var_dump(array_pad(array("", -1, 2.0), 5, array()));
 var_dump(array_pad(array("", -1, 2.0), 2, array()));
 var_dump(array_pad(array("", -1, 2.0), -3, array()));
 var_dump(array_pad(array("", -1, 2.0), -4, array()));
-var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
 
-echo "Done\n";
+try {
+    var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 array(1) {
   [0]=>
   int(0)
@@ -80,7 +86,6 @@ array(4) {
   [3]=>
   float(2)
 }
+You may only pad up to 1048576 elements at a time
 
-Warning: array_pad(): You may only pad up to 1048576 elements at a time in %s on line %d
-bool(false)
-Done
+DONE

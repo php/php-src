@@ -2,17 +2,37 @@
 str_word_count()
 --FILE--
 <?php
-error_reporting(E_ALL);
 $str = "Hello friend, you're  
     looking          good today!";
 $b =& $str;
 var_dump(str_word_count($str, 1));
 var_dump(str_word_count($str, 2));
 var_dump(str_word_count($str));
-var_dump(str_word_count($str, 3));
-var_dump(str_word_count($str, 123));
-var_dump(str_word_count($str, -1));
-var_dump(str_word_count($str, 999999999));
+
+try {
+    var_dump(str_word_count($str, 3));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    var_dump(str_word_count($str, 123));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    var_dump(str_word_count($str, -1));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    var_dump(str_word_count($str, 999999999));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
 var_dump($str);
 
 $str2 = "F0o B4r 1s bar foo";
@@ -34,9 +54,10 @@ var_dump(str_word_count("'foo'", 2, "'"));
 var_dump(str_word_count("-foo-", 2));
 var_dump(str_word_count("-foo-", 2, "-"));
 
-echo "Done\n";
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 array(6) {
   [0]=>
   string(5) "Hello"
@@ -66,18 +87,10 @@ array(6) {
   string(5) "today"
 }
 int(6)
-
-Warning: str_word_count(): Invalid format value 3 in %s on line %d
-bool(false)
-
-Warning: str_word_count(): Invalid format value 123 in %s on line %d
-bool(false)
-
-Warning: str_word_count(): Invalid format value -1 in %s on line %d
-bool(false)
-
-Warning: str_word_count(): Invalid format value 999999999 in %s on line %d
-bool(false)
+Invalid format value 3
+Invalid format value 123
+Invalid format value -1
+Invalid format value 999999999
 string(55) "Hello friend, you're  
     looking          good today!"
 int(5)
@@ -214,4 +227,5 @@ array(1) {
   [0]=>
   string(5) "-foo-"
 }
-Done
+
+DONE

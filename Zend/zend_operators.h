@@ -148,9 +148,12 @@ static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
 	const char *p = haystack;
-	const char ne = needle[needle_len-1];
 	ptrdiff_t off_p;
 	size_t off_s;
+
+	if (needle_len == 0) {
+		return p;
+	}
 
 	if (needle_len == 1) {
 		return (const char *)memchr(p, *needle, (end-p));
@@ -164,6 +167,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 	}
 
 	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
+		const char ne = needle[needle_len-1];
 		end -= needle_len;
 
 		while (p <= end) {
@@ -206,9 +210,12 @@ static zend_always_inline const char *
 zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
     const char *p = end;
-    const char ne = needle[needle_len-1];
     ptrdiff_t off_p;
     size_t off_s;
+
+	if (needle_len == 0) {
+		return p;
+	}
 
     if (needle_len == 1) {
         return (const char *)zend_memrchr(haystack, *needle, (p - haystack));
@@ -222,6 +229,7 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const
     }
 
 	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+		const char ne = needle[needle_len-1];
 		p -= needle_len;
 
 		do {

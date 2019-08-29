@@ -865,10 +865,27 @@ static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(zend_uchar type
 		}
 		case IS_LONG: {
 			zend_long dest;
+			if (Z_TYPE_P(arg) == IS_STRING) {
+				/* Handle this case separately to avoid the "non well-formed" warning */
+				double dval;
+				zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, &dval, 1);
+				if (type == IS_LONG) {
+					return 1;
+				}
+				if (type == IS_DOUBLE) {
+					return !zend_isnan(dval) && ZEND_DOUBLE_FITS_LONG(dval);
+
+				}
+				return 0;
+			}
 			return zend_parse_arg_long_weak(arg, &dest);
 		}
 		case IS_DOUBLE: {
 			double dest;
+			if (Z_TYPE_P(arg) == IS_STRING) {
+				/* Handle this case separately to avoid the "non well-formed" warning */
+				return is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 1) != 0;
+			}
 			return zend_parse_arg_double_weak(arg, &dest);
 		}
 		case IS_STRING:

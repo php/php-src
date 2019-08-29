@@ -39,8 +39,8 @@ extern zend_module_entry zip_module_entry;
 
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
-	int index_current;
-	int num_files;
+	zip_uint64_t index_current;
+	zip_int64_t num_files;
 } zip_rsrc;
 
 typedef zip_rsrc * zip_rsrc_ptr;

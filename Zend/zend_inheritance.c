@@ -95,9 +95,17 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 			(*func->op_array.refcount)++;
 		}
 		if (is_interface
-		 || EXPECTED(!func->op_array.static_variables)
-		 || (func->op_array.fn_flags & ZEND_ACC_PRIVATE)) {
+		 || EXPECTED(!func->op_array.static_variables)) {
 			/* reuse the same op_array structure */
+			return func;
+		}
+		if (func->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* For private methods we reuse the same op_array structure even if
+			 * static variables are used, because it will not end up being used
+			 * anyway. However we still need to addref as the dtor will delref. */
+			if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+				GC_ADDREF(func->op_array.static_variables);
+			}
 			return func;
 		}
 		return zend_duplicate_user_function(func);
