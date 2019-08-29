@@ -10,21 +10,14 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 
-try {
-    var_dump(imagecreatetruecolor(-1, 30));
-}
-catch (\Error $ex) {
-    echo '[' . get_class($ex) . '] ' . $ex->getMessage() . "\n";
-}
+require __DIR__ . '/test_helpers.inc';
 
-try {
-    var_dump(imagecreatetruecolor(30, -1));
-}
-catch (\Error $ex) {
-    echo '[' . get_class($ex) . '] ' . $ex->getMessage() . "\n";
-}
+trycatch_dump(
+    fn() => imagecreatetruecolor(-1, 30),
+    fn() => imagecreatetruecolor(30, -1)
+);
 
 ?>
 --EXPECT--
-[Error] Invalid width (x_size)
-[Error] Invalid height (y_size)
+!! [Error] Invalid width (x_size)
+!! [Error] Invalid height (y_size)
