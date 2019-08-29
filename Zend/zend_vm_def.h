@@ -2430,6 +2430,11 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 			zend_clean_and_cache_symbol_table(EX(symbol_table));
 		}
 		EG(current_execute_data) = EX(prev_execute_data);
+
+		/* Free extra args before releasing the closure,
+		 * as that may free the op_array. */
+		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
+
 		if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 			zend_object *object = Z_OBJ(execute_data->This);
 #if 0
@@ -2445,7 +2450,6 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 
-		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 		old_execute_data = execute_data;
 		execute_data = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
