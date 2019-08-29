@@ -10,6 +10,14 @@ jobs:
       vmImage: 'ubuntu-latest'
     steps:
     - template: apt.yml
+    - script: |
+        wget https://curl.haxx.se/download/curl-7.65.3.tar.gz
+        tar xzf curl-7.65.3.tar.gz
+        cd curl-7.65.3/
+        ./configure
+        make -j2
+        sudo make install
+      displayName: 'Build Curl'
     - template: configure.yml
       parameters:
         configurationParameters: ${{ parameters.configurationParameters }}
