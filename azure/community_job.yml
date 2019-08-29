@@ -43,7 +43,7 @@ jobs:
         echo "interceptor_via_fun:curl_multi_perform" > asan.supp
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
-        export ASAN_OPTIONS=exitcode=139:suppressions=asan.supp
+        export ASAN_OPTIONS=exitcode=139:suppressions=$PWD/asan.supp
         php ./phpunit 0<&-
         status=$?
         if [ $status -gt 128 ]; then
