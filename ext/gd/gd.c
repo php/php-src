@@ -3678,23 +3678,23 @@ PHP_FUNCTION(imageconvolution)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
 	if (nelem != 3) {
-		php_error_docref(NULL, E_WARNING, "You must have 3x3 array");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Convolution matrix must be a 3x3 array");
+		return;
 	}
 
 	for (i=0; i<3; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
-				php_error_docref(NULL, E_WARNING, "You must have 3x3 array");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Convolution matrix must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
+				return;
 			}
 
 			for (j=0; j<3; j++) {
 				if ((var2 = zend_hash_index_find(Z_ARRVAL_P(var), j)) != NULL) {
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
-					php_error_docref(NULL, E_WARNING, "You must have a 3x3 matrix");
-					RETURN_FALSE;
+					zend_throw_error(NULL, "Convolution matrix must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
+					return;
 				}
 			}
 		}
