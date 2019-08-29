@@ -42,7 +42,7 @@ jobs:
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
-        php ./phpunit 0<&-
+        php ./phpunit --debug 0<&-
         status=$?
         if [ $status -gt 128 ]; then
           exit 1
