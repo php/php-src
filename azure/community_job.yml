@@ -41,7 +41,7 @@ jobs:
         php7.3 /usr/bin/composer install
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
-        php ./phpunit
+        php ./phpunit 0<&-
         status=$?
         if [ $status -gt 128 ]; then
           exit 1
