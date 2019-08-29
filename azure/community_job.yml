@@ -41,6 +41,7 @@ jobs:
         php7.3 /usr/bin/composer install --no-progress
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
         php ./phpunit 0<&-
         status=$?
         if [ $status -gt 128 ]; then
