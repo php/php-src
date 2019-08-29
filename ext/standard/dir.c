@@ -72,17 +72,17 @@ static zend_class_entry *dir_class_entry_ptr;
 				return; \
 			} \
 			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_FALSE; \
+				return; \
 			} \
 		} else { \
 			if (!DIRG(default_dir) || \
 				(dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_FALSE; \
+				return; \
 			} \
 		} \
 	} else { \
 		if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-			RETURN_FALSE; \
+			return; \
 		} \
 	}
 
