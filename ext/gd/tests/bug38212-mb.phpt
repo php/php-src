@@ -20,5 +20,6 @@ trycatch_dump(
 
 unlink($file);
 ?>
---EXPECTF--
-Warning: imagecreatefromgd2part(): Zero width or height not allowed in %s on line %d
+--EXPECT--
+!! [Error] Width must be at least 1
+!! [Error] Height must be at least 1

@@ -14,11 +14,12 @@ imagefill($im1, 0,0, 0xffffff);
 imagegd2($im1, $file);
 
 trycatch_dump(
-    fn() => imagecreatefromgd2part($file, 0,0, -25, 10)
+    fn() => imagecreatefromgd2part($file, 0,0, -25, 10),
     fn() => imagecreatefromgd2part($file, 0,0, 10, -25)
 );
 
 unlink($file);
 ?>
---EXPECTF--
-Warning: imagecreatefromgd2part(): Zero width or height not allowed in %s on line %d
+--EXPECT--
+!! [Error] Width must be at least 1
+!! [Error] Height must be at least 1
