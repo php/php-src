@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - CURL:
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
 
+- Fileinfo:
+  . Fixed bug #74170 (locale information change after mime_content_type).
+    (Sergei Turchanov)
+
 - GD:
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)

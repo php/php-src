@@ -422,27 +422,25 @@ flush:
 private int
 check_fmt(struct magic_set *ms, const char *fmt)
 {
-	pcre2_code *pce;
-	uint32_t re_options, capture_count;
+	pcre_cache_entry *pce;
 	int rv = -1;
 	zend_string *pattern;
 
 	if (strchr(fmt, '%') == NULL)
 		return 0;
 
-	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9\\.]*s~", sizeof("~%[-0-9\\.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
 		rv = -1;
 	} else {
-		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
+		pcre2_code *re = php_pcre_pce_re(pce);
+		pcre2_match_data *match_data = php_pcre_create_match_data(0, re);
 		if (match_data) {
-			rv = pcre2_match(pce, (PCRE2_SPTR)fmt, strlen(fmt), 0, re_options, match_data, php_pcre_mctx()) > 0;
+			rv = pcre2_match(re, (PCRE2_SPTR)fmt, strlen(fmt), 0, 0, match_data, php_pcre_mctx()) > 0;
 			php_pcre_free_match_data(match_data);
 		}
 	}
-	zend_string_release_ex(pattern, 0);
-	(void)setlocale(LC_CTYPE, "");
+	zend_string_release(pattern);
 	return rv;
 }
 

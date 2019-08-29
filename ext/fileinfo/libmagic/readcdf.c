@@ -116,14 +116,24 @@ cdf_app_to_mime(const char *vbuf, const struct nv *nv)
 {
 	size_t i;
 	const char *rv = NULL;
+	char *vbuf_lower;
 
-	(void)setlocale(LC_CTYPE, "C");
-	for (i = 0; nv[i].pattern != NULL; i++)
-		if (strcasestr(vbuf, nv[i].pattern) != NULL) {
+	vbuf_lower = zend_str_tolower_dup(vbuf, strlen(vbuf));
+	for (i = 0; nv[i].pattern != NULL; i++) {
+		char *pattern_lower;
+		int found;
+
+		pattern_lower = zend_str_tolower_dup(nv[i].pattern, strlen(nv[i].pattern));
+		found = (strstr(vbuf_lower, pattern_lower) != NULL);
+		efree(pattern_lower);
+
+		if (found) {
 			rv = nv[i].mime;
 			break;
 		}
-	(void)setlocale(LC_CTYPE, "");
+	}
+
+	efree(vbuf_lower);
 	return rv;
 }
 
