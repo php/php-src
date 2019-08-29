@@ -3959,8 +3959,8 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
-		php_error_docref(NULL, E_WARNING, "Affine array must have six elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Affine array must have six elements");
+		return;
 	}
 
 	for (i = 0; i < nelems; i++) {
@@ -3976,8 +3976,8 @@ PHP_FUNCTION(imageaffine)
 					affine[i] = zval_get_double(zval_affine_elem);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
-					RETURN_FALSE;
+					zend_type_error("Invalid type for element %i", i);
+					return;
 			}
 		}
 	}
@@ -3986,29 +3986,29 @@ PHP_FUNCTION(imageaffine)
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing x position");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Clip array is missing x position");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing y position");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Clip array is missing y position");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing width");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Clip array is missing width");
+			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Missing height");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Clip array is missing height");
+			return;
 		}
 		pRect = &rect;
 	} else {
@@ -4050,21 +4050,22 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SCALE: {
 			double x, y;
 			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
-				php_error_docref(NULL, E_WARNING, "Array expected as options");
-				RETURN_FALSE;
+				zend_type_error("Array expected as options when using translate or scale");
+				return;
 			}
+
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing x position");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Options array is missing x position");
+				return;
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing y position");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Options array is missing y position");
+				return;
 			}
 
 			if (type == GD_AFFINE_TRANSLATE) {
@@ -4081,8 +4082,8 @@ PHP_FUNCTION(imageaffinematrixget)
 			double angle;
 
 			if (!options) {
-				php_error_docref(NULL, E_WARNING, "Number is expected as option");
-				RETURN_FALSE;
+				zend_type_error("Number is expected as option when using rotate or shear");
+				return;
 			}
 
 			angle = zval_get_double(options);
@@ -4098,8 +4099,8 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Invalid type for element " ZEND_LONG_FMT, type);
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid type for element " ZEND_LONG_FMT, type);
+			return;
 	}
 
 	if (res == GD_FALSE) {
@@ -4130,8 +4131,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
-		php_error_docref(NULL, E_WARNING, "Affine arrays must have six elements");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Affine arrays must have six elements");
+		return;
 	}
 
 	for (i = 0; i < 6; i++) {
@@ -4147,10 +4148,11 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m1[i] = zval_get_double(tmp);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
-					RETURN_FALSE;
+					zend_type_error("Matrix 1 contains invalid type for element %i", i);
+					return;
 			}
 		}
+
 		if ((tmp = zend_hash_index_find(Z_ARRVAL_P(z_m2), i)) != NULL) {
 			switch (Z_TYPE_P(tmp)) {
 				case IS_LONG:
@@ -4163,8 +4165,8 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m2[i] = zval_get_double(tmp);
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid type for element %i", i);
-					RETURN_FALSE;
+					zend_type_error("Matrix 2 contains invalid type for element %i", i);
+					return;
 			}
 		}
 	}
