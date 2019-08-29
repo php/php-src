@@ -1103,8 +1103,8 @@ PHP_FUNCTION(imagelayereffect)
 
 #define CHECK_RGBA_RANGE(component, name) \
 	if (component < 0 || component > gd##name##Max) { \
-		php_error_docref(NULL, E_WARNING, #name " component is out of range"); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, #name " component is out of range, must be between 0 and %d (inclusive)", gd##name##Max); \
+		return; \
 	}
 
 /* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
