@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     (Theodore Brown)
   . Fixed bug #78335 (Static properties/variables containing cycles report as
     leak). (Nikita)
+  . Fixed bug #78460 (PEAR installation failure). (Peter Kokot, L. Declercq)
 
 - FPM:
   . Fixed bug #78334 (fpm log prefix message includes wrong stdout/stderr
