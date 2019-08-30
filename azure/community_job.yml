@@ -44,6 +44,7 @@ jobs:
         echo zend_extension=opcache.so > /etc/php.d/opcache.ini
         echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
         echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+        echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
         git clone https://github.com/laravel/framework.git --branch=master --depth=1
