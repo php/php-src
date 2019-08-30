@@ -552,6 +552,9 @@ PHP 7.4 UPGRADE NOTES
   . The Intl extension now requires at least ICU 50.1.
   . ResourceBundle now implements Countable.
 
+- Ldap:
+  . Support for nsldap has been removed.
+
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.
 
