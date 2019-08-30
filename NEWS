@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #77812 (Interactive mode does not support PHP 7.3-style heredoc).
     (cmb, Nikita)
 
+- FastCGI:
+  . Fixed bug #78469 (FastCGI on_accept hook is not called when using named
+    pipes on Windows). (Sergei Turchanov)
+
 - FPM:
   . Fixed bug #78334 (fpm log prefix message includes wrong stdout/stderr
     notation). (Tsuyoshi Sadakata)
