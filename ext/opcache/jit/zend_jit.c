@@ -92,6 +92,8 @@ static void **dasm_ptr = NULL;
 
 static size_t dasm_size = 0;
 
+static zend_long jit_bisect_pos = 0;
+
 static const void *zend_jit_runtime_jit_handler = NULL;
 static const void *zend_jit_profile_jit_handler = NULL;
 static const void *zend_jit_func_counter_handler = NULL;
@@ -1971,6 +1973,20 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	zend_bitset checked_this = NULL;
 	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
 	zend_bool recv_emitted = 0;   /* emitted at least one RECV opcode */
+
+	if (ZCG(accel_directives).jit_bisect_limit) {
+		jit_bisect_pos++;
+		if (jit_bisect_pos >= ZCG(accel_directives).jit_bisect_limit) {
+			if (jit_bisect_pos == ZCG(accel_directives).jit_bisect_limit) {
+				fprintf(stderr, "Not JITing %s%s%s in %s:%d and after due to jit_bisect_limit\n",
+					op_array->scope ? ZSTR_VAL(op_array->scope->name) : "",
+					op_array->scope ? "::" : "",
+					op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}",
+					ZSTR_VAL(op_array->filename), op_array->line_start);
+			}
+			return FAILURE;
+		}
+	}
 
 	if (zend_jit_reg_alloc) {
 		checkpoint = zend_arena_checkpoint(CG(arena));

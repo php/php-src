@@ -313,6 +313,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.jit,                      zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_buffer_size,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_debug,                     zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_bisect_limit,              zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
 
@@ -780,6 +781,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
 	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
 	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
+	add_assoc_long(&directives,   "opcache.jit_bisect_limit", ZCG(accel_directives).jit_bisect_limit);
 #endif
 
 	add_assoc_zval(return_value, "directives", &directives);
