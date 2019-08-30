@@ -6661,6 +6661,24 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_is_true, r0
 
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+			(op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >3
+			|	GET_ZVAL_PTR FCARG1a, op1_addr
+			|	GC_DELREF FCARG1a
+			|	jnz >3
+			|	mov aword T1, r0 // save
+			|	ZVAL_DTOR_FUNC op1_info, opline
+			|	mov r0, aword T1 // restore
+			|3:
+		}
+		if (zend_may_throw(opline, op_array, ssa)) {
+			|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
+			|	jne ->exception_handler_undef
+		}
+
 		if (set_bool) {
 			if (set_bool_not) {
 				|	neg eax
@@ -6669,12 +6687,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|	add eax, 2
 			}
 			|	SET_ZVAL_TYPE_INFO res_addr, eax
-			|	FREE_OP opline->op1_type, opline->op1, op1_info, !(op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG)), op_array, opline
-			if (zend_may_throw(opline, op_array, ssa)) {
-				if (!zend_jit_check_exception_undef_result(Dst, opline)) {
-					return 0;
-				}
-			}
 			if (true_label != (uint32_t)-1 || false_label != (uint32_t)-1) {
 				|	CMP_ZVAL_TYPE res_addr, IS_FALSE
 				if (true_label != (uint32_t)-1) {
@@ -6693,25 +6705,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, int b, 
 				|.code
 			}
 		} else {
-
-			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
-			    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
-
-				|	IF_NOT_ZVAL_REFCOUNTED op1_addr, >3
-				|	GET_ZVAL_PTR FCARG1a, op1_addr
-				|	GC_DELREF FCARG1a
-				|	jnz >3
-				|	mov aword T1, r0 // save
-				|	ZVAL_DTOR_FUNC op1_info, opline
-				|	mov r0, aword T1 // restore
-				|3:
-			}
-			if (zend_may_throw(opline, op_array, ssa)) {
-				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r1
-				|	jne ->exception_handler_undef
-			}
-
 			|	test r0, r0
 			if (true_label != (uint32_t)-1) {
 				|	jne =>true_label
