@@ -94,7 +94,7 @@ ZEND_API zend_bool zend_rc_debug = 0;
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
+		EG(error_reporting) = E_ALL;
 	} else {
 		EG(error_reporting) = atoi(ZSTR_VAL(new_value));
 	}
