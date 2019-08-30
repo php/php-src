@@ -2012,14 +2012,14 @@ PHP_METHOD(SoapServer, addSoapHeader)
 
 	SOAP_SERVER_BEGIN_CODE();
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &fault, soap_header_class_entry) == FAILURE) {
+		return;
+	}
+
 	FETCH_THIS_SERVICE(service);
 
 	if (!service || !service->soap_headers_ptr) {
 		php_error_docref(NULL, E_WARNING, "The SoapServer::addSoapHeader function may be called only during SOAP request processing");
-		return;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &fault, soap_header_class_entry) == FAILURE) {
 		return;
 	}
 
