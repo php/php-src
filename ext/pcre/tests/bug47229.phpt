@@ -19,7 +19,7 @@ preg_match("/a\-{1,}/", 'a\----a', $m);
 var_dump($m);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(13) "\-oh really\?"
 array(1) {
   [0]=>

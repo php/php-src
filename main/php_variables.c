@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
  */
 
@@ -224,6 +224,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 					if (Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
 						zval_ptr_dtor_nogc(gpc_element_p);
 						array_init(gpc_element_p);
+					} else {
+						SEPARATE_ARRAY(gpc_element_p);
 					}
 				}
 			}
@@ -368,9 +370,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 
 		while (!php_stream_eof(s)) {
 			char buf[SAPI_POST_HANDLER_BUFSIZ] = {0};
-			size_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
+			ssize_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
 
-			if (len && len != (size_t) -1) {
+			if (len > 0) {
 				smart_str_appendl(&post_data.str, buf, len);
 
 				if (SUCCESS != add_post_vars(arr, &post_data, 0)) {
@@ -546,6 +548,8 @@ void _php_import_environment_variables(zval *array_ptr)
 	zval val;
 	zend_ulong idx;
 
+	tsrm_env_lock();
+
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
 		if (!p
@@ -570,6 +574,8 @@ void _php_import_environment_variables(zval *array_ptr)
 			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
 		}
 	}
+	
+	tsrm_env_unlock();
 }
 
 zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
@@ -913,12 +919,3 @@ void php_startup_auto_globals(void)
 	zend_register_auto_global(zend_string_init_interned("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request);
 	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

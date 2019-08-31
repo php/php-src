@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -284,8 +284,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
-	char dentry[sizeof(struct dirent) + MAXPATHLEN];
-	struct dirent *entry = (struct dirent *) &dentry;
+	struct dirent *entry;
 	zend_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
@@ -312,7 +311,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	memcpy(buf, dirname, dirname_len);
 	buf[dirname_len] = PHP_DIR_SEPARATOR;
 
-	while (php_readdir_r(dir, (struct dirent *) dentry, &entry) == 0 && entry) {
+	while ((entry = readdir(dir))) {
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1)) {
 			size_t entry_len = strlen(entry->d_name);
@@ -713,12 +712,3 @@ PS_VALIDATE_SID_FUNC(files)
 
 	return ps_files_key_exists(data, ZSTR_VAL(key));
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

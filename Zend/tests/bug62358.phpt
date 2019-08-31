@@ -1,7 +1,7 @@
 --TEST--
 Bug #62358 (Segfault when using traits a lot)
 --FILE--
-<?php 
+<?php
 
 trait T {
     public function foo() {
@@ -19,8 +19,8 @@ abstract class A implements I{
 
 class B extends A {
    public function foo($var) {
-   } 
+   }
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::foo($var) must be compatible with A::foo() in %sbug62358.php on line 17
+Fatal error: Declaration of B::foo($var) must be compatible with A::foo() in %sbug62358.php on line 18

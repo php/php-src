@@ -6,7 +6,7 @@ SOAP Interop Round3 GroupD Doc Lit Parameters 001 (php/wsdl): echoString
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__)."/round3_groupD_doclitparams.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round3_groupD_doclitparams.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoString(array("param0"=>"Hello World"));
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

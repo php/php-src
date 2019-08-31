@@ -1,18 +1,18 @@
 --TEST--
 Timeout within call_user_func
 --SKIPIF--
-<?php 
+<?php
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
 
-function hello ($t) { 
-	echo "call", PHP_EOL; 
+function hello ($t) {
+	echo "call", PHP_EOL;
 	busy_wait($t*2);
 }
 

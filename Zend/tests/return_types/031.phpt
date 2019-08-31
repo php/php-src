@@ -11,4 +11,4 @@ class B extends A {
 ?>
 DONE
 --EXPECTF--
-Fatal error: Declaration of B::foo(): ?int must be compatible with A::foo(): int in %s031.php on line 7
+Fatal error: Declaration of B::foo(): ?int must be compatible with A::foo(): int in %s031.php on line 6

@@ -1,9 +1,9 @@
-dnl config.m4 for sapi litespeed
-
 AC_MSG_CHECKING(for LiteSpeed support)
 
-PHP_ARG_WITH(litespeed,,
-[  --with-litespeed        Build PHP as litespeed module], no)
+PHP_ARG_ENABLE([litespeed],,
+  [AS_HELP_STRING([--enable-litespeed],
+    [Build PHP as litespeed module])],
+  [no])
 
 if test "$PHP_LITESPEED" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/litespeed/Makefile.frag,$abs_srcdir/sapi/litespeed,sapi/litespeed)

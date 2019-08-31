@@ -5,9 +5,6 @@ gmp_div_qr() tests
 --FILE--
 <?php
 
-var_dump(gmp_div_qr());
-var_dump(gmp_div_qr(""));
-
 var_dump(gmp_div_qr(0,1));
 var_dump(gmp_div_qr(1,0));
 var_dump(gmp_div_qr(gmp_init(1), gmp_init(0)));
@@ -28,12 +25,7 @@ var_dump(gmp_div_qr(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s on line %d
-NULL
+--EXPECTF--
 array(2) {
   [0]=>
   object(GMP)#%d (1) {

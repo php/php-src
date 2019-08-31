@@ -7,7 +7,7 @@ Test strripos() function : usage variations - multi line heredoc string for 'hay
  * Source code: ext/standard/string.c
 */
 
-/* Test strripos() function by passing multi-line heredoc string for haystack and 
+/* Test strripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
 
@@ -54,6 +54,6 @@ bool(false)
 -- Multi line strings with no offset -- 
 int(18)
 int(31)
-bool(false)
+int(63)
 int(55)
 ===DONE===

@@ -38,8 +38,7 @@ echo "After binding, with different instance for the bound one", "\n";
 $d = $nonstaticScoped->bindTo(new B, "static"); $d(); echo "\n";
 
 echo "Done.\n";
-
---EXPECT--
+--EXPECTF--
 Before binding
 bool(false)
 bool(false)
@@ -51,6 +50,8 @@ After binding, no instance
 bool(false)
 bool(false)
 
+
+Deprecated: Unbinding $this of closure is deprecated in %s on line %d
 bool(true)
 bool(false)
 

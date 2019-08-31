@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;

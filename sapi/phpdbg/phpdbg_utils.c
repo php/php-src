@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,7 +154,7 @@ PHPDBG_API char *phpdbg_resolve_path(const char *path) /* {{{ */
 		return NULL;
 	}
 
-	return estrdup(resolved_name);
+	return strdup(resolved_name);
 } /* }}} */
 
 PHPDBG_API const char *phpdbg_current_file(void) /* {{{ */
@@ -430,7 +430,7 @@ PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent,
 PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, phpdbg_parse_var_with_arg_func step_cb, zend_bool silent, void *arg) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
-	char *last_index;
+	char *last_index = NULL;
 	size_t index_len = 0;
 	zval *zv;
 
@@ -660,8 +660,6 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 	int (*element_dump_func)(zval *zv, zend_string *key, zend_ulong num);
 	zend_bool is_ref = 0;
 
-	int is_temp;
-
 	phpdbg_try_access {
 		is_ref = Z_ISREF_P(zv) && GC_REFCOUNT(Z_COUNTED_P(zv)) > 1;
 		ZVAL_DEREF(zv);
@@ -696,10 +694,9 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				}
 				phpdbg_xml("<array refstatus=\"%s\" num=\"%d\">", COMMON, zend_hash_num_elements(myht));
 				element_dump_func = phpdbg_xml_array_element_dump;
-				is_temp = 0;
 				goto head_done;
 			case IS_OBJECT:
-				myht = Z_OBJDEBUG_P(zv, is_temp);
+				myht = zend_get_properties_for(zv, ZEND_PROP_PURPOSE_DEBUG);
 				if (myht && GC_IS_RECURSIVE(myht)) {
 					phpdbg_xml("<recursion />");
 					break;
@@ -717,9 +714,8 @@ head_done:
 					} ZEND_HASH_FOREACH_END();
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
 					GC_UNPROTECT_RECURSION(myht);
-					if (is_temp) {
-						zend_hash_destroy(myht);
-						efree(myht);
+					if (Z_TYPE_P(zv) == IS_OBJECT) {
+						zend_release_properties(myht);
 					}
 				}
 				if (Z_TYPE_P(zv) == IS_ARRAY) {

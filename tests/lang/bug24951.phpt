@@ -31,7 +31,7 @@ function t3()
 }
 
 t1(); echo "\n";
-t2(); echo "\n"; 
+t2(); echo "\n";
 t3(); echo "\n";
 ?>
 --EXPECT--

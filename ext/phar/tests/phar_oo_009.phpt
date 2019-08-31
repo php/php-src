@@ -35,8 +35,8 @@ foreach($f as $k => $v)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_009.phar.php');
+<?php
+unlink(__DIR__ . '/files/phar_oo_009.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

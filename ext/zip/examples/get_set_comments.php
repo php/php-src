@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL|E_STRICT);
 
 copy('test_with_comment.zip', 't.zip');
 $z = new ZipArchive;
@@ -35,4 +34,3 @@ echo $z->getCommentName('foobar/', ZIPARCHIVE::FL_UNCHANGED) . "\n";
 
 echo "Archive comment: " . $z->getArchiveComment() . "\n";
 echo "Archive comment (original): " . $z->getArchiveComment(ZIPARCHIVE::FL_UNCHANGED) . "\n";
-

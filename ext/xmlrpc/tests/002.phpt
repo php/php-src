@@ -21,13 +21,9 @@ $r = xmlrpc_encode_request(-1, "");
 var_dump(xmlrpc_decode_request($r, $method));
 var_dump($method);
 
-$r = xmlrpc_encode_request(array(), 1);
-var_dump(xmlrpc_decode_request($r, $method));
-var_dump($method);
-
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(0) {
 }
 string(6) "method"
@@ -45,9 +41,5 @@ array(1) {
   [0]=>
   string(0) ""
 }
-string(2) "-1"
-
-Warning: xmlrpc_encode_request() expects parameter 1 to be string, array given in %s on line %d
-NULL
 string(2) "-1"
 Done

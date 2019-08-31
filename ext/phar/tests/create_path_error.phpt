@@ -8,7 +8,7 @@ phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 @unlink($fname);
@@ -53,7 +53,7 @@ foreach($checks as $check)
 	{
 		$phar[$check] = 'error';
 	}
-	catch(Exception $e)
+	catch (TypeError $e)
 	{
 		echo 'Exception: ' . $e->getMessage() . "\n";
 	}
@@ -62,7 +62,7 @@ foreach($checks as $check)
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(5) "query"
 string(5) "query"
@@ -79,4 +79,5 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-Error: Phar::offsetSet() expects parameter 1 to be a valid path, string given===DONE===
+Exception: Phar::offsetSet() expects parameter 1 to be a valid path, string given
+===DONE===

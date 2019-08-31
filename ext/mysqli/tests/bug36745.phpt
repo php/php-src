@@ -5,6 +5,8 @@ Bug #36745 (LOAD DATA LOCAL INFILE doesn't return correct error message)
 require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
+--INI--
+mysqli.allow_local_infile=1
 --FILE--
 <?php
 	require_once("connect.inc");

@@ -21,7 +21,7 @@ NULL
 Warning: password_hash(): Time cost is outside of allowed time range in %s on line %d
 NULL
 
-Warning: password_hash(): Invalid number of threads in %s on line %d
+Warning: password_hash(): %sthread%s
 NULL
 
 Warning: password_hash(): Memory cost is outside of allowed memory range in %s on line %d
@@ -30,5 +30,5 @@ NULL
 Warning: password_hash(): Time cost is outside of allowed time range in %s on line %d
 NULL
 
-Warning: password_hash(): Invalid number of threads in %s on line %d
+Warning: password_hash(): %sthread%s
 NULL

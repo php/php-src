@@ -6,7 +6,7 @@ basicqval=FUBAR_QUOTES_VARIABLE
 --FILE--
 <?php
 
-$ini_file = dirname(__FILE__)."/parse_ini_basic.data";
+$ini_file = __DIR__."/parse_ini_basic.data";
 
 define('TEST_CONSTANT', 'this_is_test_constant');
 
@@ -14,7 +14,7 @@ var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(26) {
   ["basic"]=>
   array(15) {

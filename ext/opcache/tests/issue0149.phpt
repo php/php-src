@@ -7,7 +7,8 @@ phar.readonly=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $stub = "<?php header('Content-Type: text/plain;');

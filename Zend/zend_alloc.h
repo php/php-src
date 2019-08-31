@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -27,21 +27,21 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT Z_L(8)
+# define ZEND_MM_ALIGNMENT ((size_t) 8)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(3)
 #elif ZEND_MM_ALIGNMENT < 4
 # undef ZEND_MM_ALIGNMENT
 # undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT Z_L(4)
+# define ZEND_MM_ALIGNMENT ((size_t) 4)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(2)
 #endif
 
-#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - Z_L(1))
+#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
 
-#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - Z_L(1)) & ZEND_MM_ALIGNMENT_MASK)
+#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 
 #define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
-	(((size) + ((alignment) - Z_L(1))) & ~((alignment) - Z_L(1)))
+	(((size) + ((alignment) - 1)) & ~((alignment) - 1))
 
 typedef struct _zend_leak_info {
 	void *addr;
@@ -224,6 +224,7 @@ ZEND_API int zend_set_memory_limit(size_t memory_limit);
 ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown);
 ZEND_API int is_zend_mm(void);
+ZEND_API int is_zend_ptr(const void *ptr);
 
 ZEND_API size_t zend_memory_usage(int real_usage);
 ZEND_API size_t zend_memory_peak_usage(int real_usage);
@@ -397,16 +398,10 @@ static void apc_init_heap(void)
 
 */
 
+#ifdef ZTS
+size_t zend_mm_globals_size(void);
+#endif
+
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

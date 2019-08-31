@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_tokenizer.h"
+#include "tokenizer_arginfo.h"
 
 #include "zend.h"
 #include "zend_exceptions.h"
@@ -41,17 +42,6 @@
 void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
 }
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
-	ZEND_ARG_INFO(0, token)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ tokenizer_functions[]
  *
@@ -299,12 +289,3 @@ PHP_FUNCTION(token_name)
 	RETVAL_STRING(get_token_type_name(type));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

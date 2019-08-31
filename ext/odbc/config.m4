@@ -1,5 +1,3 @@
-dnl config.m4 for extension odbc
-
 AC_DEFUN([PHP_ODBC_CHECK_HEADER],[
 if ! test -f "$ODBC_INCDIR/$1"; then
   AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])
@@ -48,14 +46,10 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
     ac_solid_prefix=scl
   fi
 
-#
-# Check for the library files, and setup the ODBC_LIBS path...
-#
+dnl Check for the library files, and setup the ODBC_LIBS path.
 if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
   ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
-  #
-  # we have an error and should bail out, as we can't find the libs!
-  #
+  dnl we have an error and should bail out, as we can't find the libs!
   echo ""
   echo "*********************************************************************"
   echo "* Unable to locate $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so or $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a"
@@ -98,13 +92,17 @@ dnl
 dnl configure options
 dnl
 
-PHP_ARG_WITH(odbcver,,
-[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0350.
-                          Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
+PHP_ARG_WITH([odbcver],,
+  [AS_HELP_STRING([[--with-odbcver[=HEX]]],
+    [Force support for the passed ODBC version. A hex number is expected,
+    default 0x0350. Use the special value of 0 to prevent an explicit ODBCVER to
+    be defined.])],
+  [0x0350])
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(adabas,,
-[  --with-adabas[=DIR]       Include Adabas D support [/usr/local]])
+PHP_ARG_WITH([adabas],,
+  [AS_HELP_STRING([[--with-adabas[=DIR]]],
+    [Include Adabas D support [/usr/local]])])
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
@@ -132,8 +130,9 @@ PHP_ARG_WITH(adabas,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(sapdb,,
-[  --with-sapdb[=DIR]        Include SAP DB support [/usr/local]])
+PHP_ARG_WITH([sapdb],,
+  [AS_HELP_STRING([[--with-sapdb[=DIR]]],
+    [Include SAP DB support [/usr/local]])])
 
   AC_MSG_CHECKING([for SAP DB support])
   if test "$PHP_SAPDB" != "no"; then
@@ -152,8 +151,9 @@ PHP_ARG_WITH(sapdb,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(solid,,
-[  --with-solid[=DIR]        Include Solid support [/usr/local/solid]])
+PHP_ARG_WITH([solid],,
+  [AS_HELP_STRING([[--with-solid[=DIR]]],
+    [Include Solid support [/usr/local/solid]])])
 
   AC_MSG_CHECKING(for Solid support)
   if test "$PHP_SOLID" != "no"; then
@@ -162,7 +162,7 @@ PHP_ARG_WITH(solid,,
     fi
     ODBC_INCDIR=$PHP_SOLID/include
     ODBC_LIBDIR=$PHP_SOLID/$PHP_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_TYPE=solid
     if test -f $ODBC_LIBDIR/soc*35.a; then
       AC_DEFINE(HAVE_SOLID_35,1,[ ])
@@ -179,8 +179,9 @@ PHP_ARG_WITH(solid,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(ibm-db2,,
-[  --with-ibm-db2[=DIR]      Include IBM DB2 support [/home/db2inst1/sqllib]])
+PHP_ARG_WITH([ibm-db2],,
+  [AS_HELP_STRING([[--with-ibm-db2[=DIR]]],
+    [Include IBM DB2 support [/home/db2inst1/sqllib]])])
 
   AC_MSG_CHECKING(for IBM DB2 support)
   if test "$PHP_IBM_DB2" != "no"; then
@@ -194,7 +195,7 @@ PHP_ARG_WITH(ibm-db2,,
 
     PHP_ODBC_CHECK_HEADER(sqlcli1.h)
 
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=ibm-db2
     ODBC_LIBS=-ldb2
@@ -218,9 +219,10 @@ You need to source your DB2 environment before running PHP configure:
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(empress,,
-[  --with-empress[=DIR]      Include Empress support [\$EMPRESSPATH]
-                          (Empress Version >= 8.60 required)])
+PHP_ARG_WITH([empress],,
+  [AS_HELP_STRING([[--with-empress[=DIR]]],
+    [Include Empress support $EMPRESSPATH (Empress Version >= 8.60
+    required)])])
 
   AC_MSG_CHECKING(for Empress support)
   if test "$PHP_EMPRESS" != "no"; then
@@ -231,7 +233,7 @@ PHP_ARG_WITH(empress,,
       ODBC_INCDIR=$PHP_EMPRESS/include/odbc
       ODBC_LIBDIR=$PHP_EMPRESS/shlib
     fi
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=empress
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
@@ -243,9 +245,10 @@ PHP_ARG_WITH(empress,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(empress-bcs,,
-[  --with-empress-bcs[=DIR]  Include Empress Local Access support [\$EMPRESSPATH]
-                          (Empress Version >= 8.60 required)])
+PHP_ARG_WITH([empress-bcs],,
+  [AS_HELP_STRING([[--with-empress-bcs[=DIR]]],
+    [Include Empress Local Access support $EMPRESSPATH (Empress Version >=
+    8.60 required)])])
 
   AC_MSG_CHECKING(for Empress local access support)
   if test "$PHP_EMPRESS_BCS" != "no"; then
@@ -258,7 +261,7 @@ PHP_ARG_WITH(empress-bcs,,
     fi
     CC="empocc -bcs";export CC;
     LD="empocc -bcs";export LD;
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     LIST=`empocc -listlines -bcs -o a a.c`
 
@@ -284,15 +287,14 @@ PHP_ARG_WITH(empress-bcs,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(custom-odbc,,
-[  --with-custom-odbc[=DIR]  Include user defined ODBC support. DIR is ODBC install base
-                          directory [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and
-                          have some odbc.h in your include dirs. f.e. you should define
-                          following for Sybase SQL Anywhere 5.5.00 on QNX, prior to
-                          running this configure script:
-                            CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
-                            LDFLAGS=-lunix
-                            CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])
+PHP_ARG_WITH([custom-odbc],,
+  [AS_HELP_STRING([[--with-custom-odbc[=DIR]]],
+    [Include user defined ODBC support. DIR is ODBC install base directory
+    [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and have some odbc.h in
+    your include dirs. For example, you should define following for Sybase SQL
+    Anywhere 5.5.00 on QNX, prior to running this configure script:
+    CPPFLAGS="-DODBC_QNX -DSQLANY_BUG" LDFLAGS=-lunix
+    CUSTOM_ODBC_LIBS="-ldblib -lodbc"])])
 
   AC_MSG_CHECKING(for a custom ODBC support)
   if test "$PHP_CUSTOM_ODBC" != "no"; then
@@ -302,7 +304,7 @@ PHP_ARG_WITH(custom-odbc,,
     ODBC_INCDIR=$PHP_CUSTOM_ODBC/include
     ODBC_LIBDIR=$PHP_CUSTOM_ODBC/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom-odbc
     AC_DEFINE(HAVE_CODBC,1,[ ])
@@ -313,46 +315,27 @@ PHP_ARG_WITH(custom-odbc,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(iodbc,,
-[  --with-iodbc[=DIR]        Include iODBC support [/usr/local]])
+PHP_ARG_WITH([iodbc],,
+  [AS_HELP_STRING([--with-iodbc],
+    [Include iODBC support])])
 
-  AC_MSG_CHECKING(for iODBC support)
+  AC_MSG_CHECKING(whether to build with iODBC support)
   if test "$PHP_IODBC" != "no"; then
-    if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-    fi
-    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libiodbc ; then
-      PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
-      ODBC_TYPE=iodbc
-      ODBC_INCLUDE=`$PKG_CONFIG --cflags-only-I libiodbc`
-      ODBC_LFLAGS=`$PKG_CONFIG --libs-only-L libiodbc`
-      ODBC_LIBS=`$PKG_CONFIG --libs-only-l libiodbc`
-      PHP_EVAL_INCLINE($ODBC_INCLUDE)
-      AC_DEFINE(HAVE_IODBC,1,[ ])
-      AC_DEFINE(HAVE_ODBC2,1,[ ])
-      AC_MSG_RESULT([$ext_output])
-    else
-      if test "$PHP_IODBC" = "yes"; then
-        PHP_IODBC=/usr/local
-      fi
-      PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
-      PHP_ADD_INCLUDE($PHP_IODBC/include, 1)
-      ODBC_TYPE=iodbc
-      ODBC_INCLUDE=-I$PHP_IODBC/include
-      ODBC_LFLAGS=-L$PHP_IODBC/$PHP_LIBDIR
-      ODBC_LIBS=-liodbc
-      AC_DEFINE(HAVE_IODBC,1,[ ])
-      AC_DEFINE(HAVE_ODBC2,1,[ ])
-      AC_MSG_RESULT([$ext_output])
-    fi
+    AC_MSG_RESULT(yes)
+    PKG_CHECK_MODULES([ODBC], [libiodbc])
+    PHP_EVAL_INCLINE($ODBC_CFLAGS)
+    ODBC_TYPE=iodbc
+    AC_DEFINE(HAVE_IODBC,1,[ ])
+    AC_DEFINE(HAVE_ODBC2,1,[ ])
   else
     AC_MSG_RESULT(no)
   fi
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(esoob,,
-[  --with-esoob[=DIR]        Include Easysoft OOB support [/usr/local/easysoft/oob/client]])
+PHP_ARG_WITH([esoob],,
+  [AS_HELP_STRING([[--with-esoob[=DIR]]],
+    [Include Easysoft OOB support [/usr/local/easysoft/oob/client]])])
 
   AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
   if test "$PHP_ESOOB" != "no"; then
@@ -362,7 +345,7 @@ PHP_ARG_WITH(esoob,,
     ODBC_INCDIR=$PHP_ESOOB/include
     ODBC_LIBDIR=$PHP_ESOOB/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LIBS=-lesoobclient
     ODBC_TYPE=esoob
     AC_DEFINE(HAVE_ESOOB,1,[ ])
@@ -373,39 +356,45 @@ PHP_ARG_WITH(esoob,,
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(unixODBC,,
-[  --with-unixODBC[=DIR]     Include unixODBC support [/usr/local]])
+PHP_ARG_WITH([unixODBC],,
+  [AS_HELP_STRING([--with-unixODBC],
+    [Include unixODBC support])])
 
-  AC_MSG_CHECKING(for unixODBC support)
+  AC_MSG_CHECKING(whether to build with unixODBC support)
   if test "$PHP_UNIXODBC" != "no"; then
     if test "$PHP_UNIXODBC" = "yes"; then
-      PHP_UNIXODBC=/usr/local
+      AC_MSG_RESULT(yes from pkgconfig)
+      PKG_CHECK_MODULES([ODBC], [odbc])
+      PHP_EVAL_INCLINE($ODBC_CFLAGS)
+    else
+      dnl keep old DIR way for old version without libodbc.pc
+      ODBC_INCDIR=$PHP_UNIXODBC/include
+      ODBC_LIBDIR=$PHP_UNIXODBC/$PHP_LIBDIR
+      ODBC_LFLAGS=-L$ODBC_LIBDIR
+      ODBC_CFLAGS=-I$ODBC_INCDIR
+      ODBC_LIBS=-lodbc
+      PHP_ODBC_CHECK_HEADER(sqlext.h)
+      AC_MSG_RESULT(yes in $PHP_UNIXODBC)
     fi
-    ODBC_INCDIR=$PHP_UNIXODBC/include
-    ODBC_LIBDIR=$PHP_UNIXODBC/$PHP_LIBDIR
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBS=-lodbc
     ODBC_TYPE=unixODBC
-    PHP_ODBC_CHECK_HEADER(sqlext.h)
     AC_DEFINE(HAVE_UNIXODBC,1,[ ])
-    AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT(no)
   fi
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(dbmaker,,
-[  --with-dbmaker[=DIR]      Include DBMaker support])
+PHP_ARG_WITH([dbmaker],,
+  [AS_HELP_STRING([[--with-dbmaker[=DIR]]],
+    [Include DBMaker support])])
 
   AC_MSG_CHECKING(for DBMaker support)
   if test "$PHP_DBMAKER" != "no"; then
     if test "$PHP_DBMAKER" = "yes"; then
-      # find dbmaker's home directory
+      dnl Find dbmaker's home directory
       DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | $AWK -F: '{print $6}'`
 
-      # check DBMaker version (from 5.0 to 2.0)
+      dnl check DBMaker version (from 5.0 to 2.0)
       DBMAKER_VERSION=5.0
 
       while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
@@ -424,9 +413,8 @@ PHP_ARG_WITH(dbmaker,,
 
     ODBC_INCDIR=$PHP_DBMAKER/include
     ODBC_LIBDIR=$PHP_DBMAKER/$PHP_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS="-ldmapic -lc"
     ODBC_TYPE=dbmaker
 
@@ -455,10 +443,7 @@ else
   AC_DEFINE(ODBCVER, 0x0300, [ The highest supported ODBC version ])
 fi
 
-
-dnl
 dnl Extension setup
-dnl
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
@@ -471,12 +456,12 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST(ODBC_SHARED_LIBADD)
   PHP_SUBST(ODBC_INCDIR)
   PHP_SUBST(ODBC_LIBDIR)
-  PHP_SUBST_OLD(ODBC_INCLUDE)
+  PHP_SUBST_OLD(ODBC_CFLAGS)
   PHP_SUBST_OLD(ODBC_LIBS)
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
 
-  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, [$ODBC_INCLUDE -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $ext_shared,, [$ODBC_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 else
   AC_MSG_CHECKING([for any ODBC driver support])
   AC_MSG_RESULT(no)

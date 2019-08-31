@@ -10,10 +10,10 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() function: interface wrong ***\n";
@@ -76,15 +76,15 @@ $ret = session_set_save_handler(array($handler, 'open'), array($handler, 'close'
 	array($handler, 'read'), 'good_write', array($handler, 'destroy'), array($handler, 'gc'));
 
 var_dump($ret);
-$ret = session_set_save_handler($handler);
-var_dump($ret);
+try {
+    $ret = session_set_save_handler($handler);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 session_start();
-
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
-
-Warning: session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given in %s
-bool(false)
+session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given
 good handler writing

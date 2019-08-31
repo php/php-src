@@ -26,6 +26,9 @@ foreach ($locales as $locale) {
 		$lconv['mon_decimal_point'],
 		$lconv['mon_thousands_sep']
 	);
+	if ($locale === 'Swedish_Sweden.1252') {
+		var_dump(in_array($lconv['mon_thousands_sep'], ['.', ' ']));
+	}
 	echo '++++++++++++++++++++++', "\n";
 }
 
@@ -38,7 +41,8 @@ string(1) " "
 string(3) "SEK"
 string(2) "kr"
 string(1) ","
-string(1) "."
+string(1) "%c"
+bool(true)
 ++++++++++++++++++++++
 string(18) "French_France.1252"
 string(1) ","

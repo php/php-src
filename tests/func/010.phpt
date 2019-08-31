@@ -53,8 +53,8 @@ for($i=0; $i< $limit; ++$i) {
 
 $str .= ");\n";
 
-$filename = dirname(__FILE__).'/010-file.php';
-file_put_contents(dirname(__FILE__).'/010-file.php', $str);
+$filename = __DIR__.'/010-file.php';
+file_put_contents(__DIR__.'/010-file.php', $str);
 unset($str);
 
 include($filename);
@@ -64,7 +64,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__).'/010-file.php');
+@unlink(__DIR__.'/010-file.php');
 ?>
 --EXPECT--
 bool(true)

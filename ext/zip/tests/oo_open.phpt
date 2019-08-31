@@ -7,7 +7,7 @@ if(!extension_loaded('zip')) die('skip');
 --FILE--
 <?php
 
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $zip = new ZipArchive;
 $r = $zip->open($dirname . 'nofile');
 if ($r !== TRUE) {

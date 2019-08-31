@@ -40,7 +40,7 @@ if (PHP_XSL != "no") {
 					ADD_FLAG("LDFLAGS_XSL", "/nodefaultlib:msvcrt");
 				}
 			}
-			
+
 		} else {
 			WARNING("xsl not enabled; libraries and headers not found");
 		}

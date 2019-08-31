@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : usage variations - built-in functions as 'callback' argument 
+Test array_filter() function : usage variations - built-in functions as 'callback' argument
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -13,7 +13,7 @@ Test array_filter() function : usage variations - built-in functions as 'callbac
 
 echo "*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***\n";
 
-$input = array(0, 1, -1, 10, 100, 1000, 'Hello', null);
+$input = array(0, 1, -1, 10, 100, 1000, null);
 
 // using built-in function 'is_int' as 'callback'
 var_dump( array_filter($input, 'is_int') );
@@ -22,10 +22,18 @@ var_dump( array_filter($input, 'is_int') );
 var_dump( array_filter($input, 'chr') );
 
 // using language construct 'echo' as 'callback'
-var_dump( array_filter($input, 'echo') );
+try {
+    var_dump( array_filter($input, 'echo') );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
-// using language construct 'exit' as 'callback' 
-var_dump( array_filter($input, 'exit') );
+// using language construct 'exit' as 'callback'
+try {
+    var_dump( array_filter($input, 'exit') );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done"
 ?>
@@ -45,7 +53,7 @@ array(6) {
   [5]=>
   int(1000)
 }
-array(8) {
+array(7) {
   [0]=>
   int(0)
   [1]=>
@@ -59,14 +67,8 @@ array(8) {
   [5]=>
   int(1000)
   [6]=>
-  string(5) "Hello"
-  [7]=>
   NULL
 }
-
-Warning: array_filter() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name in %s on line %d
-NULL
-
-Warning: array_filter() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name in %s on line %d
-NULL
+array_filter() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name
+array_filter() expects parameter 2 to be a valid callback, function 'exit' not found or invalid function name
 Done

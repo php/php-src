@@ -38,10 +38,3 @@ int mbfl_filt_conv_koi8u_wchar(int c, mbfl_convert_filter *filter);
 int mbfl_filt_conv_wchar_koi8u(int c, mbfl_convert_filter *filter);
 
 #endif /* MBFL_MBFILTER_KOI8U_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Removing unused variables                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,15 +92,6 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 		}
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			opline->result.var = NUM_VAR(vars_map[VAR_NUM(opline->result.var)]);
-		}
-	}
-
-	/* Update TMP references in live ranges */
-	if (op_array->live_range) {
-		for (i = 0; i < op_array->last_live_range; i++) {
-			op_array->live_range[i].var =
-				(op_array->live_range[i].var & ZEND_LIVE_MASK) |
-				NUM_VAR(vars_map[VAR_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK)]);
 		}
 	}
 

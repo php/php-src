@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: Bug #44159 (Crash: $pdo->setAttribute(PDO::STATEMENT_ATTR_CLASS, NULL))
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip PDO not available');
 try {
 	$pdo = new PDO("sqlite:".__DIR__."/foo.db");

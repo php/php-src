@@ -6,7 +6,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
   die('skip Not for Windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/dir_root_check.tmp";
+$filename = __DIR__."/dir_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -17,7 +17,7 @@ unlink($filename);
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
@@ -31,7 +31,7 @@ unlink($filename);
 echo "*** Testing dir() : different directory permissions ***";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation3";
 @mkdir($dir_path);
 
@@ -57,8 +57,8 @@ $permission_values = array(
 for($count = 0; $count < count($permission_values); $count++) {
   echo "\n-- Iteration ".($count + 1)." --\n";
 
-  // try to remove the dir if exists  & create 
-  $file_path = dirname(__FILE__);
+  // try to remove the dir if exists  & create
+  $file_path = __DIR__;
   $dir_path = $file_path."/dir_variation3";
   @chmod ($dir_path, 0777); // change dir permission to allow all operation
   @rmdir ($dir_path);  // try n delete the dir
@@ -71,7 +71,7 @@ for($count = 0; $count < count($permission_values); $count++) {
 
   // try to get dir handle
   $d = dir($dir_path);
-  var_dump($d);   // dump the handle 
+  var_dump($d);   // dump the handle
 
   // try read directory, expected : false
   echo "-- reading contents --\n";
@@ -86,7 +86,7 @@ echo "Done";
 --CLEAN--
 <?php
 // deleting temporary directory
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_path = $file_path."/dir_variation3";
 rmdir($dir_path);
 ?>

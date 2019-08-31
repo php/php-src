@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -98,3 +98,11 @@ extern const struct pdo_stmt_methods oci_stmt_methods;
 
 /* Arbitrary assumed row length for prefetch memory limit calcuation */
 #define PDO_OCI_PREFETCH_ROWSIZE 1024
+
+
+enum {
+	PDO_OCI_ATTR_ACTION = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_OCI_ATTR_CLIENT_INFO,
+	PDO_OCI_ATTR_CLIENT_IDENTIFIER,
+	PDO_OCI_ATTR_MODULE
+};

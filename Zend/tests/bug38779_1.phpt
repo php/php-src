@@ -23,14 +23,14 @@ class Loader {
 		var_dump("flush!");
 	}
 	function stream_close() {
-		@unlink(dirname(__FILE__)."/bug38779.txt");
+		@unlink(__DIR__."/bug38779.txt");
 		var_dump("close!");
 	}
 }
 stream_wrapper_register('Loader', 'Loader');
 $fp = fopen ('Loader://qqq.php', 'r');
 
-$filename = dirname(__FILE__)."/bug38779.txt";
+$filename = __DIR__."/bug38779.txt";
 $fp1 = fopen($filename, "w");
 fwrite($fp1, "<"."?php blah blah?".">");
 fclose($fp1);
@@ -42,11 +42,11 @@ echo "Done\n";
 --CLEAN--
 <?php
 
-$filename = dirname(__FILE__)."/bug38779.txt";
+$filename = __DIR__."/bug38779.txt";
 if (file_exists($filename)) {
-	@unlink(dirname(__FILE__)."/bug38779.txt");
+	@unlink(__DIR__."/bug38779.txt");
 }
 ?>
---EXPECTF--	
+--EXPECTF--
 Parse error: %s error%sin %s on line %d
 string(6) "close!"

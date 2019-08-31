@@ -1,7 +1,7 @@
 --TEST--
 Bug #69874: Null addtional_headers does not send mail
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path=tee mailBug69874_2.out >/dev/null
 mail.add_x_header = On
 --SKIPIF--
 <?php
@@ -23,7 +23,7 @@ $to = 'user@company.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 
-$outFile = "mailBasic.out";
+$outFile = "mailBug69874_2.out";
 @unlink($outFile);
 
 var_dump( mail($to, $subject, $message, '') );

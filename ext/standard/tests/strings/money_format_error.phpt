@@ -23,15 +23,6 @@ $extra_arg = 10;
 
 echo "*** Testing money_format() : error conditions ***\n";
 
-echo "\n-- Testing money_format() function with no arguments --\n";
-var_dump( money_format() );
-
-echo "\n-- Testing money_format() function with insufficient arguments --\n";
-var_dump( money_format($string) );
-
-echo "\n-- Testing money_format() function with more than expected no. of arguments --\n";
-var_dump( money_format($string, $value, $extra_arg) );
-
 echo "\n-- Testing money_format() function with more than one token --\n";
 var_dump( money_format($string . $string, $value) );
 ?>
@@ -39,22 +30,9 @@ var_dump( money_format($string . $string, $value) );
 --EXPECTF--
 *** Testing money_format() : error conditions ***
 
--- Testing money_format() function with no arguments --
-
-Warning: money_format() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
--- Testing money_format() function with insufficient arguments --
-
-Warning: money_format() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
--- Testing money_format() function with more than expected no. of arguments --
-
-Warning: money_format() expects exactly 2 parameters, 3 given in %s on line %d
-NULL
-
 -- Testing money_format() function with more than one token --
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 
 Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
 bool(false)

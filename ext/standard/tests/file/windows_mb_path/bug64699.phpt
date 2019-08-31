@@ -2,7 +2,7 @@
 Bug #64699 is_dir() is inaccurate result on Windows with japanese locale.
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -14,12 +14,12 @@ skip_if_no_required_exts();
 
 /* This file is in UTF-8. */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $old_cp = get_active_cp();
 set_active_cp(65001);
 
-$prefix = dirname(__FILE__) . DIRECTORY_SEPARATOR . "testBug64699" . DIRECTORY_SEPARATOR;
+$prefix = __DIR__ . DIRECTORY_SEPARATOR . "testBug64699" . DIRECTORY_SEPARATOR;
 
 $dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語", "表");
 

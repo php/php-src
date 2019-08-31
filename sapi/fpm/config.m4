@@ -1,20 +1,16 @@
-dnl config.m4 for sapi fpm
+PHP_ARG_ENABLE([fpm],,
+  [AS_HELP_STRING([--enable-fpm],
+    [Enable building of the fpm SAPI executable])],
+  [no],
+  [no])
 
-PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
-
-dnl configure checks {{{
+dnl Configure checks.
 AC_DEFUN([AC_FPM_STDLIBS],
 [
-  AC_CHECK_FUNCS(setenv clearenv setproctitle setproctitle_fast)
+  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
 
   AC_SEARCH_LIBS(socket, socket)
   AC_SEARCH_LIBS(inet_addr, nsl)
-
-  AC_CHECK_HEADERS([fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
-  AC_CHECK_HEADERS([sys/select.h sys/socket.h sys/time.h])
-  AC_CHECK_HEADERS([arpa/inet.h netinet/in.h])
-  AC_CHECK_HEADERS([sysexits.h])
 ])
 
 AC_DEFUN([AC_FPM_PRCTL],
@@ -338,7 +334,6 @@ AC_DEFUN([AC_FPM_LQ],
     fi
   fi
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_SYSCONF],
 [
@@ -351,7 +346,6 @@ AC_DEFUN([AC_FPM_SYSCONF],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_TIMES],
 [
@@ -364,7 +358,6 @@ AC_DEFUN([AC_FPM_TIMES],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_KQUEUE],
 [
@@ -387,7 +380,6 @@ AC_DEFUN([AC_FPM_KQUEUE],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_PORT],
 [
@@ -409,7 +401,6 @@ AC_DEFUN([AC_FPM_PORT],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_DEVPOLL],
 [
@@ -433,7 +424,6 @@ AC_DEFUN([AC_FPM_DEVPOLL],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_EPOLL],
 [
@@ -468,32 +458,6 @@ AC_DEFUN([AC_FPM_EPOLL],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
-
-AC_DEFUN([AC_FPM_POLL],
-[
-	AC_MSG_CHECKING([for poll])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <poll.h>
-	]], [[
-		struct pollfd fds[2];
-
-		fds[0].fd = 0;
-		fds[0].events = POLLIN;
-
-		fds[1].fd = 0;
-		fds[1].events = POLLIN;
-
-		 poll(fds, 2, 1);
-	]])], [
-		AC_DEFINE([HAVE_POLL], 1, [do we have poll?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-dnl }}}
 
 AC_DEFUN([AC_FPM_SELECT],
 [
@@ -523,7 +487,6 @@ AC_DEFUN([AC_FPM_SELECT],
 		AC_MSG_RESULT([no])
 	])
 ])
-dnl }}}
 
 AC_DEFUN([AC_FPM_APPARMOR],
 [
@@ -541,7 +504,6 @@ AC_DEFUN([AC_FPM_APPARMOR],
 	])
 ])
 
-
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
@@ -558,59 +520,45 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_PORT
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
-  AC_FPM_POLL
   AC_FPM_SELECT
   AC_FPM_APPARMOR
 
-  PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  PHP_ARG_WITH([fpm-user],,
+    [AS_HELP_STRING([[--with-fpm-user[=USER]]],
+      [Set the user for php-fpm to run as. (default: nobody)])],
+    [nobody],
+    [no])
 
-  PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this
-                          should usually be set to match the fpm username (default: nobody)], nobody, no)
+  PHP_ARG_WITH([fpm-group],,
+    [AS_HELP_STRING([[--with-fpm-group[=GRP]]],
+      [Set the group for php-fpm to run as. For a system user, this should
+      usually be set to match the fpm username (default: nobody)])],
+    [nobody],
+    [no])
 
-  PHP_ARG_WITH(fpm-systemd,,
-  [  --with-fpm-systemd      Activate systemd integration], no, no)
+  PHP_ARG_WITH([fpm-systemd],,
+    [AS_HELP_STRING([--with-fpm-systemd],
+      [Activate systemd integration])],
+    [no],
+    [no])
 
-  PHP_ARG_WITH(fpm-acl,,
-  [  --with-fpm-acl          Use POSIX Access Control Lists], no, no)
+  PHP_ARG_WITH([fpm-acl],,
+    [AS_HELP_STRING([--with-fpm-acl],
+      [Use POSIX Access Control Lists])],
+    [no],
+    [no])
 
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
-    if test -z "$PKG_CONFIG"; then
-      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-    fi
-    unset SYSTEMD_LIBS
-    unset SYSTEMD_INCS
-
-    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
-      dnl systemd version >= 209 provides libsystemd
-      AC_MSG_CHECKING([for libsystemd])
-      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd`
-      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd`
-      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd`
-      AC_MSG_RESULT([version $SYSTEMD_VERS])
-
-    elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd-daemon; then
-      dnl systemd version < 209 provides libsystemd-daemon
-      AC_MSG_CHECKING([for libsystemd-daemon])
-      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd-daemon`
-      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd-daemon`
-      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd-daemon`
-      AC_MSG_RESULT([version $SYSTEMD_VERS])
-
-    else
-      dnl failback when no pkg-config
-      AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
-    fi
+    PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
     AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
-    if test $HAVE_SD_DAEMON_H = "no" || test -z "${SYSTEMD_LIBS}"; then
+    if test $HAVE_SD_DAEMON_H = "no"; then
       AC_MSG_ERROR([Your system does not support systemd.])
     else
       AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
       PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
       PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
-      PHP_EVAL_INCLINE($SYSTEMD_INCS)
+      PHP_EVAL_INCLINE($SYSTEMD_CFLAGS)
       php_fpm_systemd=notify
     fi
   else
@@ -619,7 +567,7 @@ if test "$PHP_FPM" != "no"; then
 
   if test "$PHP_FPM_ACL" != "no" ; then
     AC_CHECK_HEADERS([sys/acl.h])
-    dnl *BSD has acl_* built into libc
+    dnl *BSD has acl_* built into libc.
     AC_CHECK_FUNC(acl_free, [
       AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
     ],[
@@ -670,7 +618,7 @@ if test "$PHP_FPM" != "no"; then
     PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
   fi
 
-  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm"
+  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \

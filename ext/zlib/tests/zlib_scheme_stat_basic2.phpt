@@ -1,14 +1,14 @@
 --TEST--
 Test compress.zlib:// scheme with the unlink function
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
-$inputFileName = dirname(__FILE__)."/004.txt.gz";
+$inputFileName = __DIR__."/004.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 echo "file_exists=";
 var_dump(file_exists($srcFile));

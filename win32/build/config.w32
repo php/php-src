@@ -70,7 +70,7 @@ if (VS_TOOLSET) {
 		if(PHP_DEBUG == 'yes') {
 			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
-			// no from disable-all 
+			// no from disable-all
 			if(PHP_MP == 'auto' || PHP_MP == 'no') {
 				ADD_FLAG('CFLAGS', ' /MP ');
 				PHP_MP_DISABLED = false;
@@ -231,10 +231,10 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
 	zend_hash.c zend_list.c zend_builtin_functions.c \
-	zend_sprintf.c zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c \
+	zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
 	zend_object_handlers.c zend_objects_API.c \
-	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
+	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c");
 
@@ -249,7 +249,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
-	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c \
+	php_open_temporary_file.c output.c internal_functions.c \
 	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
@@ -268,7 +268,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
-	inet.c fnmatch.c sockets.c console.c");
+	inet.c fnmatch.c sockets.c console.c signal.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
@@ -298,9 +298,6 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
  * call to select(), instead of the usual 64 */
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
 ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
-
-AC_DEFINE('HAVE_USLEEP', 1);
-AC_DEFINE('HAVE_STRCOLL', 1);
 
 /* For snapshot builders, where can we find the additional
  * files that make up the snapshot template? */
@@ -363,4 +360,3 @@ ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations
 	might not work properly, if the chosen instruction sets are not available on the target \
 	processor.", "no");
 toolset_setup_intrinsic_cflags();
-

@@ -9,7 +9,7 @@ Testfest 2009 Munich
 class A
 {
 	protected function a() {}
-	
+
 }
 
 class B extends A
@@ -23,10 +23,7 @@ $m = $R->getMethods();
 print_r($m);
 
 ?>
---EXPECTF--
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
-
-Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; B has a deprecated constructor in %s on line %d
+--EXPECT--
 Array
 (
     [0] => ReflectionMethod Object

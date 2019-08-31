@@ -14,7 +14,7 @@ for ($i = 0; $i < $len; $i++) {
 }
 
 $str = '*';
-switch ($str[0]) { 
+switch ($str[0]) {
 	case '*';
 		echo "OK\n";
 		break;

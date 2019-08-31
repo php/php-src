@@ -4,7 +4,7 @@ Test fopen() function : check fopen()ed descriptor is usable after the fs object
 <?php
 
 var_dump(
-	$p = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'tututu',
+	$p = __DIR__ . DIRECTORY_SEPARATOR . 'tututu',
 	$f = fopen($p, 'w+'),
 	unlink($p),
 	file_exists($p),

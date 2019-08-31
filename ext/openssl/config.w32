@@ -9,17 +9,5 @@ if (PHP_OPENSSL != "no") {
 		EXTENSION("openssl", "openssl.c xp_ssl.c");
 		AC_DEFINE("HAVE_OPENSSL_EXT", PHP_OPENSSL_SHARED ? 0 : 1, "Have openssl");
 		AC_DEFINE("HAVE_OPENSSL", 1);
-
-		switch (ret) {
-			/* Openssl 1.0.x and lower */
-			case 1:
-				AC_DEFINE("HAVE_DSA_DEFAULT_METHOD", 1);
-				break;
-			/* Openssl 1.1.x */
-			case 2:
-				break;
-		}
 	}
 }
-
-

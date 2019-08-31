@@ -7,9 +7,9 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -18,13 +18,13 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 * passing different integer values for 'split_length' and heredoc string as 'str' argument to str_split()
 */
 
-echo "*** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***\n";
+echo "*** Testing str_split() : different integer values for 'split_length' with heredoc 'str' ***\n";
 //Initialise variables
 $str = <<<EOT
 string with 123,escape char \t.
 EOT;
 
-//different values for 'split_length' 
+//different values for 'split_length'
 $values = array (
   0,
   1,
@@ -32,23 +32,25 @@ $values = array (
   0234,  //octal number
   0x1A,  //hexadecimal number
   2147483647,  //max positive integer number
-  2147483648,  //max positive integer+1
   -2147483648,  //min negative integer
 );
 
 //loop through each element of $values for 'split_length'
 for($count = 0; $count < count($values); $count++) {
-  echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( str_split($str, $values[$count]) );
+    echo "-- Iteration ".($count + 1)." --\n";
+
+    try {
+	    var_dump( str_split($str, $values[$count]) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 echo "Done"
 ?>
---EXPECTF--
-*** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***
+--EXPECT--
+*** Testing str_split() : different integer values for 'split_length' with heredoc 'str' ***
 -- Iteration 1 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 2 --
 array(30) {
   [0]=>
@@ -113,9 +115,7 @@ array(30) {
   string(1) "."
 }
 -- Iteration 3 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -134,11 +134,5 @@ array(1) {
   string(30) "string with 123,escape char 	."
 }
 -- Iteration 7 --
-
-Warning: str_split() expects parameter 2 to be int, float given in %s on line %d
-NULL
--- Iteration 8 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 Done

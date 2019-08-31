@@ -5,7 +5,7 @@ ocistatementtype()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
 	var_dump($c = ocilogon($user, $password, $dbase));

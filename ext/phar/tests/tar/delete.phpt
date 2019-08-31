@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
 $stub = "<?php
 Phar::mapPhar('hio');
@@ -25,7 +25,7 @@ echo file_get_contents($alias . '/a') . "\n";
 
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 a
 

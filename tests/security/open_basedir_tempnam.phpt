@@ -72,4 +72,3 @@ bool(true)
 string(%d) "%s"
 bool(true)
 *** Finished testing open_basedir configuration [tempnam] ***
-

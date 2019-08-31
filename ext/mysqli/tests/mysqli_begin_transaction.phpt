@@ -17,30 +17,9 @@ if (!have_innodb($link))
 <?php
 	require_once("connect.inc");
 	/* {{{ proto bool mysqli_begin_transaction(object link, [int flags [, string name]]) */
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_begin_transaction()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_begin_transaction($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_begin_transaction($link, $link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[004] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
-
-	if (!is_null($tmp = @mysqli_begin_transaction($link, $link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_begin_transaction($link, 0, $link)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_begin_transaction($link, 0, "mytrx", $link)))
-		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_query($link, 'DROP TABLE IF EXISTS test'))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -97,7 +76,7 @@ if (!have_innodb($link))
 			$res = mysqli_query($link, "SELECT id FROM test WHERE id = 2");
 		}
 	}
-	
+
 	if (!mysqli_begin_transaction($link, -1)) {
 			printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}

@@ -10,7 +10,7 @@ class Test
 		throw new Exception("Damn!");
 		return "Hello\n";
 	}
-	
+
 	function __destruct()
 	{
 		echo $this;
@@ -29,5 +29,6 @@ catch(Exception $e)
 
 ?>
 ====DONE====
---EXPECTF--
-Fatal error: Method Test::__toString() must not throw an exception, caught Exception: Damn! in %stostring_003.php on line %d
+--EXPECT--
+string(5) "Damn!"
+====DONE====

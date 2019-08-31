@@ -16,7 +16,7 @@ echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 
 $context = stream_context_create();
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $counter = 1;
 
 for($mode = 0000; $mode <= 0777; $mode++) {
@@ -49,9 +49,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__)."/mkdir/test/");
-rmdir(dirname(__FILE__)."/mkdir/test1/");
-rmdir(dirname(__FILE__)."/mkdir/");
+rmdir(__DIR__."/mkdir/test/");
+rmdir(__DIR__."/mkdir/test1/");
+rmdir(__DIR__."/mkdir/");
 ?>
 --EXPECTF--
 *** Testing mkdir() and rmdir() for different permissions ***

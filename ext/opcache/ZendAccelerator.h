@@ -1,8 +1,8 @@
-﻿/*
+/*
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -89,36 +89,9 @@
 /*** file locking ***/
 #ifndef ZEND_WIN32
 extern int lock_file;
-
-# if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {start, len, -1, type, whence}
-# elif defined(__svr4__)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {type, whence, start, len}
-# elif defined(__linux__) || defined(__hpux) || defined(__GNU__)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {type, whence, start, len, 0}
-# elif defined(_AIX)
-#  if defined(_LARGE_FILES) || defined(__64BIT__)
-#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {type, whence, 0, 0, 0, start, len }
-#  else
-#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {type, whence, start, len}
-#  endif
-# elif defined(HAVE_FLOCK_BSD)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {start, len, -1, type, whence}
-# elif defined(HAVE_FLOCK_LINUX)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-		struct flock name = {type, whence, start, len}
-# else
-#  error "Don't know how to define struct flock"
-# endif
 #endif
 
-#if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
+#if defined(ZEND_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
 #else
 # define ENABLE_FILE_CACHE_FALLBACK 0
@@ -143,6 +116,7 @@ typedef struct _zend_persistent_script {
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
 	zend_bool      is_phar;
+	zend_bool      empty;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
@@ -201,16 +175,24 @@ typedef struct _zend_accel_directives {
 #ifndef ZEND_WIN32
 	char          *lockfile_path;
 #endif
-#ifdef HAVE_OPCACHE_FILE_CACHE
 	char          *file_cache;
 	zend_bool      file_cache_only;
 	zend_bool      file_cache_consistency_checks;
-#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 	zend_bool      file_cache_fallback;
 #endif
 #ifdef HAVE_HUGE_CODE_PAGES
 	zend_bool      huge_code_pages;
+#endif
+	char *preload;
+#ifdef ZEND_WIN32
+	char *cache_id;
+#endif
+#ifdef HAVE_JIT
+	zend_long      jit;
+	zend_long      jit_buffer_size;
+	zend_long      jit_debug;
+	zend_long      jit_bisect_limit;
 #endif
 } zend_accel_directives;
 
@@ -218,6 +200,8 @@ typedef struct _zend_accel_globals {
 	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */
+	zend_bool               accelerator_enabled; /* accelerator enabled for current request */
+	zend_bool               pcre_reseted;
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	zend_string            *cwd;                  /* current working directory or NULL */
@@ -231,7 +215,6 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
-	char                    system_id[32];
 	HashTable               xlat_table;
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
@@ -240,6 +223,10 @@ typedef struct _zend_accel_globals {
 	void                   *mem;
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
+	zend_bool               is_immutable_class;
+#ifdef HAVE_JIT
+	zend_bool               jit_enabled;
+#endif
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
@@ -267,6 +254,8 @@ typedef struct _zend_accel_shared_globals {
 	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
 
+	size_t map_ptr_last;
+
 	/* Directives & Maintenance */
 	time_t          start_time;
 	time_t          last_restart_time;
@@ -281,6 +270,10 @@ typedef struct _zend_accel_shared_globals {
 #endif
 	zend_bool       restart_in_progress;
 
+	/* Preloading */
+	zend_persistent_script *preload_script;
+	zend_persistent_script **saved_scripts;
+
 	/* uninitialized HashTable Support */
 	uint32_t uninitialized_bucket[-HT_MIN_MASK];
 
@@ -288,10 +281,12 @@ typedef struct _zend_accel_shared_globals {
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
-extern zend_bool accel_startup_ok;
-#ifdef HAVE_OPCACHE_FILE_CACHE
-extern zend_bool file_cache_only;
+extern char accel_system_id[32];
+#ifdef ZEND_WIN32
+extern char accel_uname_id[32];
 #endif
+extern zend_bool accel_startup_ok;
+extern zend_bool file_cache_only;
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
@@ -313,6 +308,7 @@ extern zend_accel_globals accel_globals;
 extern char *zps_api_failure_reason;
 
 void accel_shutdown(void);
+int  accel_activate(INIT_FUNC_ARGS);
 int  accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
@@ -330,5 +326,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
+
+/* memory write protection */
+#define SHM_PROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(1); \
+		} \
+	} while (0)
+
+#define SHM_UNPROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(0); \
+		} \
+	} while (0)
 
 #endif /* ZEND_ACCELERATOR_H */

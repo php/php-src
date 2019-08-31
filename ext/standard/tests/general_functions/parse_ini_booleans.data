@@ -3,8 +3,8 @@ foo = E_ALL E_NOTICE
 error_reporting = E_ALL
 error_reporting1 = E_COMPILE_ERROR|E_RECOVERABLE_ERROR	|E_ERROR|E_CORE_ERROR 	
 error_reporting2 = E_ALL&~E_NOTICE	 	 	
-error_reporting3 =  E_ALL & ~E_NOTICE 	 
-error_reporting4 = E_ALL & ~E_NOTICE | E_STRICT 
+error_reporting3 =  E_ALL & ~E_NOTICE
+error_reporting4 = E_ALL & ~E_NOTICE | E_PARSE
 
 ['true or false']
 bool_true = 	true 

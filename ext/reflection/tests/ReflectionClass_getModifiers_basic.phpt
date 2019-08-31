@@ -29,8 +29,8 @@ dump_modifiers('g');
 ?>
 --EXPECT--
 int(0)
+int(64)
 int(32)
-int(4)
 int(0)
 int(0)
 int(0)

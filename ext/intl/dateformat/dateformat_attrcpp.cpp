@@ -49,8 +49,6 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_get_timezone_"
-				"id: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -75,8 +73,6 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_timezone: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -105,8 +101,6 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 
 	if ( zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Oz", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_set_timezone: "
-				"unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -132,8 +126,6 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_calendar: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -159,9 +151,6 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, IntlDateFormatter_ce_ptr ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"datefmt_get_calendar_object: unable to parse input params",
-				0);
 		RETURN_FALSE;
 	}
 
@@ -196,8 +185,6 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz",
 			&object, IntlDateFormatter_ce_ptr, &calendar_zv) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_set_calendar: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -245,4 +232,3 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	RETURN_TRUE;
 }
 /* }}} */
-

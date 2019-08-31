@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -573,7 +573,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
-	ulong matches = 0L;
+	zend_ulong matches = 0L;
 
 	while (command && command->name && command->handler) {
 		if (name->len == 1 || command->name_len >= name->len) {
@@ -751,20 +751,15 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		}
 
 		if (buffered == NULL) {
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
-#define USE_LIB_STAR 1
-#else
-#define USE_LIB_STAR 0
-#endif
+#ifdef HAVE_PHPDBG_READLINE
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
-#if USE_LIB_STAR
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))
 #endif
 			{
 				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
 				phpdbg_consume_stdin_line(cmd = buf);
 			}
-#if USE_LIB_STAR
+#ifdef HAVE_PHPDBG_READLINE
 			else {
 				cmd = readline(phpdbg_get_prompt());
 				PHPDBG_G(last_was_newline) = 1;
@@ -783,7 +778,7 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 
 		buffer = estrdup(cmd);
 
-#if USE_LIB_STAR
+#ifdef HAVE_PHPDBG_READLINE
 		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
 			free(cmd);
 		}

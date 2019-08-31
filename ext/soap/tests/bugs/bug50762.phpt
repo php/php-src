@@ -32,7 +32,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$cl = new LocalSoapClient(dirname(__FILE__).'/bug50762.wsdl', array('cache_wsdl'=>WSDL_CACHE_NONE, 'trace'=>true));
+$cl = new LocalSoapClient(__DIR__.'/bug50762.wsdl', array('cache_wsdl'=>WSDL_CACHE_NONE, 'trace'=>true));
 
 class authToken{
 	public function __construct($token){

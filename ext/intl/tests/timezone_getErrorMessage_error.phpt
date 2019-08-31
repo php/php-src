@@ -8,19 +8,10 @@ if (!extension_loaded('intl'))
 <?php
 ini_set("intl.error_level", E_WARNING);
 
-$tz = IntlTimeZone::createTimeZone('Europe/Lisbon');
-var_dump($tz->getErrorMessage(array()));
-
 var_dump(intltz_get_error_message(null));
-
+?>
 --EXPECTF--
-
-Warning: IntlTimeZone::getErrorMessage() expects exactly 0 parameters, 1 given in %s on line %d
-
-Warning: IntlTimeZone::getErrorMessage(): intltz_get_error_message: bad arguments in %s on line %d
-bool(false)
-
-Fatal error: Uncaught TypeError: Argument 1 passed to intltz_get_error_message() must be an instance of IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: intltz_get_error_message() expects parameter 1 to be IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_error_message(NULL)
 #1 {main}

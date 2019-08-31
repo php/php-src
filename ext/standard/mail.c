@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,9 +35,7 @@
 #endif
 
 #if PHP_SIGCHILD
-#if HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #endif
 
 #include "php_syslog.h"
@@ -162,12 +160,10 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 
 static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val)
 {
-	zend_ulong idx;
 	zend_string *tmp_key;
 	zval *tmp_val;
 
-	(void)(idx);
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(val), idx, tmp_key, tmp_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
 			php_error_docref(NULL, E_WARNING, "Multiple header key must be numeric index (%s)", ZSTR_VAL(tmp_key));
 			continue;
@@ -190,7 +186,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 
 	ZEND_ASSERT(Z_TYPE_P(headers) == IS_ARRAY);
 
-	ZEND_HASH_FOREACH_KEY_VAL(HASH_OF(headers), idx, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(headers), idx, key, val) {
 		if (!key) {
 			php_error_docref(NULL, E_WARNING, "Found numeric header (" ZEND_LONG_FMT ")", idx);
 			continue;
@@ -279,7 +275,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 }
 
 
-/* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
+/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Send an email message */
 PHP_FUNCTION(mail)
 {
@@ -659,12 +655,3 @@ PHP_MINFO_FUNCTION(mail)
 #endif
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

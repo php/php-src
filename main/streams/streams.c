@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,7 +91,11 @@ fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
 
 PHP_RSHUTDOWN_FUNCTION(streams)
 {
-	zend_hash_apply(&EG(persistent_list), forget_persistent_resource_id_numbers);
+	zval *el;
+
+	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), el) {
+		forget_persistent_resource_id_numbers(el);
+	} ZEND_HASH_FOREACH_END();
 	return SUCCESS;
 }
 
@@ -357,14 +361,21 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 	int ret = 1;
 	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
 	int release_cast = 1;
-	php_stream_context *context = NULL;
+	php_stream_context *context;
 
-	/* on an resource list destruction, the context, another resource, may have
-	 * already been freed (if it was created after the stream resource), so
-	 * don't reference it */
-	if (EG(active)) {
-		context = PHP_STREAM_CONTEXT(stream);
+	/* During shutdown resources may be released before other resources still holding them.
+	 * When only resoruces are referenced this is not a problem, because they are refcounted
+	 * and will only be fully freed once the refcount drops to zero. However, if php_stream*
+	 * is held directly, we don't have this guarantee. To avoid use-after-free we ignore all
+	 * stream free operations in shutdown unless they come from the resource list destruction,
+	 * or by freeing an enclosed stream (in which case resource list destruction will not have
+	 * freed it). */
+	if ((EG(flags) & EG_FLAGS_IN_RESOURCE_SHUTDOWN) &&
+			!(close_options & (PHP_STREAM_FREE_RSRC_DTOR|PHP_STREAM_FREE_IGNORE_ENCLOSING))) {
+		return 1;
 	}
+
+	context = PHP_STREAM_CONTEXT(stream);
 
 	if (stream->flags & PHP_STREAM_FLAG_NO_CLOSE) {
 		preserve_handle = 1;
@@ -514,13 +525,12 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
+PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
 	if (stream->readfilters.head) {
 		char *chunk_buf;
-		int err_flag = 0;
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
 
@@ -531,8 +541,8 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
-			size_t justread = 0;
+		while (!stream->eof && (stream->writepos - stream->readpos < (zend_off_t)size)) {
+			ssize_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
 			php_stream_filter_status_t status = PSFS_ERR_FATAL;
@@ -540,7 +550,10 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 
 			/* read a chunk into a bucket */
 			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size);
-			if (justread && justread != (size_t)-1) {
+			if (justread < 0 && stream->writepos == stream->readpos) {
+				efree(chunk_buf);
+				return FAILURE;
+			} else if (justread > 0) {
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0);
 
 				/* after this call, bucket is owned by the brigade */
@@ -582,7 +595,9 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 							stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
 									stream->is_persistent);
 						}
-						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+						if (bucket->buflen) {
+							memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+						}
 						stream->writepos += bucket->buflen;
 
 						php_stream_bucket_unlink(bucket);
@@ -594,31 +609,28 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* when a filter needs feeding, there is no brig_out to deal with.
 					 * we simply continue the loop; if the caller needs more data,
 					 * we will read again, otherwise out job is done here */
-					if (justread == 0) {
-						/* there is no data */
-						err_flag = 1;
-						break;
-					}
-					continue;
+					break;
 
 				case PSFS_ERR_FATAL:
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
-					err_flag = 1;
-					break;
+					stream->eof = 1;
+					efree(chunk_buf);
+					return FAILURE;
 			}
 
-			if (justread == 0 || justread == (size_t)-1) {
+			if (justread <= 0) {
 				break;
 			}
 		}
 
 		efree(chunk_buf);
+		return SUCCESS;
 
 	} else {
 		/* is there enough data in the buffer ? */
 		if (stream->writepos - stream->readpos < (zend_off_t)size) {
-			size_t justread = 0;
+			ssize_t justread = 0;
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
 			if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
@@ -640,17 +652,18 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 			justread = stream->ops->read(stream, (char*)stream->readbuf + stream->writepos,
 					stream->readbuflen - stream->writepos
 					);
-
-			if (justread != (size_t)-1) {
-				stream->writepos += justread;
+			if (justread < 0) {
+				return FAILURE;
 			}
+			stream->writepos += justread;
 		}
+		return SUCCESS;
 	}
 }
 
-PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
+PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 {
-	size_t toread = 0, didread = 0;
+	ssize_t toread = 0, didread = 0;
 
 	while (size > 0) {
 
@@ -679,15 +692,24 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 
 		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size);
-			if (toread == (size_t) -1) {
-				/* e.g. underlying read(2) returned -1 */
+			if (toread < 0) {
+				/* Report an error if the read failed and we did not read any data
+				 * before that. Otherwise return the data we did read. */
+				if (didread == 0) {
+					return toread;
+				}
 				break;
 			}
 		} else {
-			php_stream_fill_read_buffer(stream, size);
+			if (php_stream_fill_read_buffer(stream, size) != SUCCESS) {
+				if (didread == 0) {
+					return -1;
+				}
+				break;
+			}
 
 			toread = stream->writepos - stream->readpos;
-			if (toread > size) {
+			if ((size_t) toread > size) {
 				toread = size;
 			}
 
@@ -718,6 +740,26 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 	}
 
 	return didread;
+}
+
+/* Like php_stream_read(), but reading into a zend_string buffer. This has some similarity
+ * to the copy_to_mem() operation, but only performs a single direct read. */
+PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
+{
+	zend_string *str = zend_string_alloc(len, 0);
+	ssize_t read = php_stream_read(stream, ZSTR_VAL(str), len);
+	if (read < 0) {
+		zend_string_efree(str);
+		return NULL;
+	}
+
+	ZSTR_LEN(str) = read;
+	ZSTR_VAL(str)[read] = 0;
+
+	if ((size_t) read < len / 2) {
+		return zend_string_truncate(str, read, 0);
+	}
+	return str;
 }
 
 PHPAPI int _php_stream_eof(php_stream *stream)
@@ -763,7 +805,7 @@ PHPAPI int _php_stream_puts(php_stream *stream, const char *buf)
 	char newline[2] = "\n"; /* is this OK for Win? */
 	len = strlen(buf);
 
-	if (len > 0 && php_stream_write(stream, buf, len) && php_stream_write(stream, newline, 1)) {
+	if (len > 0 && php_stream_write(stream, buf, len) > 0 && php_stream_write(stream, newline, 1) > 0) {
 		return 1;
 	}
 	return 0;
@@ -1061,9 +1103,9 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
-static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
+static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count)
 {
-	size_t didwrite = 0, towrite, justwrote;
+	ssize_t didwrite = 0, justwrote;
 
  	/* if we have a seekable stream we need to ensure that data is written at the
  	 * current stream->position. This means invalidating the read buffer and then
@@ -1076,29 +1118,32 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 
 
 	while (count > 0) {
-		towrite = count;
+		size_t towrite = count;
 		if (towrite > stream->chunk_size)
 			towrite = stream->chunk_size;
 
 		justwrote = stream->ops->write(stream, buf, towrite);
-
-		/* convert justwrote to an integer, since normally it is unsigned */
-		if ((int)justwrote > 0) {
-			buf += justwrote;
-			count -= justwrote;
-			didwrite += justwrote;
-
-			/* Only screw with the buffer if we can seek, otherwise we lose data
-			 * buffered from fifos and sockets */
-			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-				stream->position += justwrote;
+		if (justwrote <= 0) {
+			/* If we already successfully wrote some bytes and a write error occurred
+			 * later, report the successfully written bytes. */
+			if (didwrite == 0) {
+				return justwrote;
 			}
-		} else {
-			break;
+			return didwrite;
+		}
+
+		buf += justwrote;
+		count -= justwrote;
+		didwrite += justwrote;
+
+		/* Only screw with the buffer if we can seek, otherwise we lose data
+		 * buffered from fifos and sockets */
+		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+			stream->position += justwrote;
 		}
 	}
-	return didwrite;
 
+	return didwrite;
 }
 
 /* push some data through the write filter chain.
@@ -1106,7 +1151,7 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
  * This may trigger a real write to the stream.
  * Returns the number of bytes consumed from buf by the first filter in the chain.
  * */
-static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
+static ssize_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags)
 {
 	size_t consumed = 0;
 	php_stream_bucket *bucket;
@@ -1144,7 +1189,10 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 			 * underlying stream */
 			while (brig_inp->head) {
 				bucket = brig_inp->head;
-				_php_stream_write_buffer(stream, bucket->buf, bucket->buflen);
+				if (_php_stream_write_buffer(stream, bucket->buf, bucket->buflen) < 0) {
+					consumed = (ssize_t) -1;
+				}
+
 				/* Potential error situation - eg: no space on device. Perhaps we should keep this brigade
 				 * hanging around and try to write it later.
 				 * At the moment, we just drop it on the floor
@@ -1161,7 +1209,7 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 		case PSFS_ERR_FATAL:
 			/* some fatal error.  Theoretically, the stream is borked, so all
 			 * further writes should fail. */
-			break;
+			return (ssize_t) -1;
 	}
 
 	return consumed;
@@ -1184,12 +1232,18 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing)
 	return ret;
 }
 
-PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
+PHPAPI ssize_t _php_stream_write(php_stream *stream, const char *buf, size_t count)
 {
-	size_t bytes;
+	ssize_t bytes;
 
-	if (buf == NULL || count == 0 || stream->ops->write == NULL) {
+	if (count == 0) {
 		return 0;
+	}
+
+	ZEND_ASSERT(buf != NULL);
+	if (stream->ops->write == NULL) {
+		php_error_docref(NULL, E_NOTICE, "Stream is not writable");
+		return (ssize_t) -1;
 	}
 
 	if (stream->writefilters.head) {
@@ -1205,9 +1259,9 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 	return bytes;
 }
 
-PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
+PHPAPI ssize_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 {
-	size_t count;
+	ssize_t count;
 	char *buf;
 	va_list ap;
 
@@ -1216,7 +1270,7 @@ PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...)
 	va_end(ap);
 
 	if (!buf) {
-		return 0; /* error condition */
+		return -1; /* error condition */
 	}
 
 	count = php_stream_write(stream, buf, count);
@@ -1293,9 +1347,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 	/* emulate forward moving seeks with reads */
 	if (whence == SEEK_CUR && offset >= 0) {
 		char tmp[1024];
-		size_t didread;
-		while(offset > 0) {
-			if ((didread = php_stream_read(stream, tmp, MIN(offset, sizeof(tmp)))) == 0) {
+		ssize_t didread;
+		while (offset > 0) {
+			if ((didread = php_stream_read(stream, tmp, MIN(offset, sizeof(tmp)))) <= 0) {
 				return -1;
 			}
 			offset -= didread;
@@ -1348,11 +1402,11 @@ PHPAPI int _php_stream_truncate_set_size(php_stream *stream, size_t newsize)
 	return php_stream_set_option(stream, PHP_STREAM_OPTION_TRUNCATE_API, PHP_STREAM_TRUNCATE_SET_SIZE, &newsize);
 }
 
-PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC)
+PHPAPI ssize_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 {
 	size_t bcount = 0;
 	char buf[8192];
-	size_t b;
+	ssize_t b;
 
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
@@ -1379,13 +1433,17 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC)
 		bcount += b;
 	}
 
+	if (b < 0 && bcount == 0) {
+		return b;
+	}
+
 	return bcount;
 }
 
 
 PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC)
 {
-	size_t ret = 0;
+	ssize_t ret = 0;
 	char *ptr;
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
@@ -1406,15 +1464,21 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		ptr = ZSTR_VAL(result);
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
-			if (!ret) {
+			if (ret <= 0) {
+				// TODO: Propagate error?
 				break;
 			}
 			len += ret;
 			ptr += ret;
 		}
 		if (len) {
-			*ptr = '\0';
 			ZSTR_LEN(result) = len;
+			ZSTR_VAL(result)[len] = '\0';
+
+			/* Only truncate if the savings are large enough */
+			if (len < maxlen / 2) {
+				result = zend_string_truncate(result, len, persistent);
+			}
 		} else {
 			zend_string_free(result);
 			result = NULL;
@@ -1437,7 +1501,8 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	result = zend_string_alloc(max_len, persistent);
 	ptr = ZSTR_VAL(result);
 
-	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
+	// TODO: Propagate error?
+	while ((ret = php_stream_read(src, ptr, max_len - len)) > 0){
 		len += ret;
 		if (len + min_room >= max_len) {
 			result = zend_string_extend(result, max_len + step, persistent);
@@ -1462,9 +1527,8 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
 {
 	char buf[CHUNK_SIZE];
-	size_t readchunk;
 	size_t haveread = 0;
-	size_t didread, didwrite, towrite;
+	size_t towrite;
 	size_t dummy;
 	php_stream_statbuf ssbuf;
 
@@ -1499,7 +1563,11 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 		p = php_stream_mmap_range(src, php_stream_tell(src), maxlen, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			didwrite = php_stream_write(dest, p, mapped);
+			ssize_t didwrite = php_stream_write(dest, p, mapped);
+			if (didwrite < 0) {
+				*len = 0;
+				return FAILURE;
+			}
 
 			php_stream_mmap_unmap_ex(src, mapped);
 
@@ -1516,7 +1584,8 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	}
 
 	while(1) {
-		readchunk = sizeof(buf);
+		size_t readchunk = sizeof(buf);
+		ssize_t didread;
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
@@ -1524,7 +1593,7 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 		didread = php_stream_read(src, buf, readchunk);
 
-		if (didread) {
+		if (didread > 0) {
 			/* extra paranoid */
 			char *writeptr;
 
@@ -1532,9 +1601,9 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 			writeptr = buf;
 			haveread += didread;
 
-			while(towrite) {
-				didwrite = php_stream_write(dest, writeptr, towrite);
-				if (didwrite == 0) {
+			while (towrite) {
+				ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
+				if (didwrite <= 0) {
 					*len = haveread - (didread - towrite);
 					return FAILURE;
 				}
@@ -1883,6 +1952,8 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 	php_stream_wrapper *wrapper = NULL;
 	const char *path_to_open = path;
 	int ret;
+
+	memset(ssb, 0, sizeof(*ssb));
 
 	if (!(flags & PHP_STREAM_URL_STAT_NOCACHE)) {
 		/* Try to hit the cache first */
@@ -2286,12 +2357,3 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 	return nfiles;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

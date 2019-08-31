@@ -7,12 +7,12 @@ $sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);
 var_dump($sun_info);
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(9) {
   ["sunrise"]=>
-  int(1165897761)
+  int(1165897682)
   ["sunset"]=>
-  int(1165934160)
+  int(1165934239)
   ["transit"]=>
   int(1165915961)
   ["civil_twilight_begin"]=>

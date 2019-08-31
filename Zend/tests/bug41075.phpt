@@ -26,6 +26,6 @@ try {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(40) "Creating default object from empty value"
 Done

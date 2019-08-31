@@ -5,7 +5,7 @@ PDO_sqlite: Testing sqliteCreateCollation()
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');

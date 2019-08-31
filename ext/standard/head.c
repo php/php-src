@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include "php_globals.h"
+#include "zend_smart_str.h"
 
 
 /* Implementation of the language Header() function */
@@ -77,12 +78,10 @@ PHPAPI int php_header(void)
 
 PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int httponly, zend_string *samesite, int url_encode)
 {
-	char *cookie;
-	size_t len = sizeof("Set-Cookie: ");
 	zend_string *dt;
 	sapi_header_line ctr = {0};
 	int result;
-	zend_string *encoded_value = NULL;
+	smart_str buf = {0};
 
 	if (!ZSTR_LEN(name)) {
 		zend_error( E_WARNING, "Cookie names must not be empty" );
@@ -108,29 +107,6 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		return FAILURE;
 	}
 
-	len += ZSTR_LEN(name);
-	if (value) {
-		if (url_encode) {
-			encoded_value = php_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
-			len += ZSTR_LEN(encoded_value);
-		} else {
-			encoded_value = zend_string_copy(value);
-			len += ZSTR_LEN(encoded_value);
-		}
-	}
-
-	if (path) {
-		len += ZSTR_LEN(path);
-	}
-	if (domain) {
-		len += ZSTR_LEN(domain);
-	}
-	if (samesite) {
-		len += ZSTR_LEN(samesite);
-	}
-
-	cookie = emalloc(len + 100);
-
 	if (value == NULL || ZSTR_LEN(value) == 0) {
 		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
@@ -138,67 +114,75 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", ZSTR_VAL(name), ZSTR_VAL(dt));
+		smart_str_appends(&buf, "Set-Cookie: ");
+		smart_str_append(&buf, name);
+		smart_str_appends(&buf, "=deleted; expires=");
+		smart_str_append(&buf, dt);
+		smart_str_appends(&buf, "; Max-Age=0");
 		zend_string_free(dt);
 	} else {
-		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", ZSTR_VAL(name), value ? ZSTR_VAL(encoded_value) : "");
+		smart_str_appends(&buf, "Set-Cookie: ");
+		smart_str_append(&buf, name);
+		smart_str_appendc(&buf, '=');
+		if (url_encode) {
+			zend_string *encoded_value = php_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
+			smart_str_append(&buf, encoded_value);
+			zend_string_release_ex(encoded_value, 0);
+		} else {
+			smart_str_append(&buf, value);
+		}
 		if (expires > 0) {
 			const char *p;
-			char tsdelta[13];
 			double diff;
 
-			strlcat(cookie, COOKIE_EXPIRES, len + 100);
+			smart_str_appends(&buf, COOKIE_EXPIRES);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(ZSTR_VAL(dt), '-', ZSTR_LEN(dt));
 			if (!p || *(p + 5) != ' ') {
 				zend_string_free(dt);
-				efree(cookie);
-				zend_string_release_ex(encoded_value, 0);
+				smart_str_free(&buf);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
-			strlcat(cookie, ZSTR_VAL(dt), len + 100);
+
+			smart_str_append(&buf, dt);
 			zend_string_free(dt);
 
-			diff = difftime(expires, time(NULL));
+			diff = difftime(expires, php_time());
 			if (diff < 0) {
 				diff = 0;
 			}
-			snprintf(tsdelta, sizeof(tsdelta), ZEND_LONG_FMT, (zend_long) diff);
-			strlcat(cookie, COOKIE_MAX_AGE, len + 100);
-			strlcat(cookie, tsdelta, len + 100);
+
+			smart_str_appends(&buf, COOKIE_MAX_AGE);
+			smart_str_append_long(&buf, (zend_long) diff);
 		}
 	}
 
-	if (encoded_value) {
-		zend_string_release_ex(encoded_value, 0);
-	}
-
 	if (path && ZSTR_LEN(path)) {
-		strlcat(cookie, COOKIE_PATH, len + 100);
-		strlcat(cookie, ZSTR_VAL(path), len + 100);
+		smart_str_appends(&buf, COOKIE_PATH);
+		smart_str_append(&buf, path);
 	}
 	if (domain && ZSTR_LEN(domain)) {
-		strlcat(cookie, COOKIE_DOMAIN, len + 100);
-		strlcat(cookie, ZSTR_VAL(domain), len + 100);
+		smart_str_appends(&buf, COOKIE_DOMAIN);
+		smart_str_append(&buf, domain);
 	}
 	if (secure) {
-		strlcat(cookie, COOKIE_SECURE, len + 100);
+		smart_str_appends(&buf, COOKIE_SECURE);
 	}
 	if (httponly) {
-		strlcat(cookie, COOKIE_HTTPONLY, len + 100);
+		smart_str_appends(&buf, COOKIE_HTTPONLY);
 	}
 	if (samesite && ZSTR_LEN(samesite)) {
-		strlcat(cookie, COOKIE_SAMESITE, len + 100);
-		strlcat(cookie, ZSTR_VAL(samesite), len + 100);
+		smart_str_appends(&buf, COOKIE_SAMESITE);
+		smart_str_append(&buf, samesite);
 	}
 
-	ctr.line = cookie;
-	ctr.line_len = (uint32_t)strlen(cookie);
+	ctr.line = ZSTR_VAL(buf.s);
+	ctr.line_len = (uint32_t) ZSTR_LEN(buf.s);
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr);
-	efree(cookie);
+	zend_string_release(buf.s);
 	return result;
 }
 
@@ -274,10 +258,12 @@ PHP_FUNCTION(setcookie)
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 1) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
+	if (!EG(exception)) {
+		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 1) == SUCCESS) {
+			RETVAL_TRUE;
+		} else {
+			RETVAL_FALSE;
+		}
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
@@ -327,10 +313,12 @@ PHP_FUNCTION(setrawcookie)
 		}
 	}
 
-	if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 0) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
+	if (!EG(exception)) {
+		if (php_setcookie(name, value, expires, path, domain, secure, httponly, samesite, 0) == SUCCESS) {
+			RETVAL_TRUE;
+		} else {
+			RETVAL_FALSE;
+		}
 	}
 
 	if (expires_or_options && Z_TYPE_P(expires_or_options) == IS_ARRAY) {
@@ -358,8 +346,8 @@ PHP_FUNCTION(headers_sent)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(arg1)
-		Z_PARAM_ZVAL_DEREF(arg2)
+		Z_PARAM_ZVAL(arg1)
+		Z_PARAM_ZVAL(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
@@ -369,14 +357,12 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		zval_ptr_dtor(arg2);
-		ZVAL_LONG(arg2, line);
+		ZEND_TRY_ASSIGN_REF_LONG(arg2, line);
 	case 1:
-		zval_ptr_dtor(arg1);
 		if (file) {
-			ZVAL_STRING(arg1, file);
+			ZEND_TRY_ASSIGN_REF_STRING(arg1, file);
 		} else {
-			ZVAL_EMPTY_STRING(arg1);
+			ZEND_TRY_ASSIGN_REF_EMPTY_STRING(arg1);
 		}
 		break;
 	}
@@ -445,11 +431,3 @@ PHP_FUNCTION(http_response_code)
 	RETURN_LONG(SG(sapi_headers).http_response_code);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4 * End:
- */

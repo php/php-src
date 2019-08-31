@@ -22,4 +22,3 @@ string(10) "/usr/local"
 string(14) "/usr/local/bin"
 bool(false)
 string(14) "/usr/local/bin"
-

@@ -5,7 +5,7 @@ Bug #73725 Unable to retrieve value of varchar(max) type
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/config.inc";
+include __DIR__ . "/config.inc";
 
 $conn = odbc_connect($dsn, $user, $pass);
 

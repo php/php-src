@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,16 @@ PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *
 	}
 }
 
-PHP_HASH_API void PHP_CRC32Final(unsigned char digest[4], PHP_CRC32_CTX *context)
+PHP_HASH_API void PHP_CRC32CUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; ++i) {
+		context->state = (context->state >> 8) ^ crc32c_table[(context->state ^ input[i]) & 0xff];
+	}
+}
+
+PHP_HASH_API void PHP_CRC32LEFinal(unsigned char digest[4], PHP_CRC32_CTX *context)
 {
 	context->state=~context->state;
 	digest[3] = (unsigned char) ((context->state >> 24) & 0xff);
@@ -54,7 +63,7 @@ PHP_HASH_API void PHP_CRC32Final(unsigned char digest[4], PHP_CRC32_CTX *context
 	context->state = 0;
 }
 
-PHP_HASH_API void PHP_CRC32BFinal(unsigned char digest[4], PHP_CRC32_CTX *context)
+PHP_HASH_API void PHP_CRC32BEFinal(unsigned char digest[4], PHP_CRC32_CTX *context)
 {
 	context->state=~context->state;
 	digest[0] = (unsigned char) ((context->state >> 24) & 0xff);
@@ -73,7 +82,7 @@ PHP_HASH_API int PHP_CRC32Copy(const php_hash_ops *ops, PHP_CRC32_CTX *orig_cont
 const php_hash_ops php_hash_crc32_ops = {
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32Update,
-	(php_hash_final_func_t) PHP_CRC32Final,
+	(php_hash_final_func_t) PHP_CRC32LEFinal,
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
@@ -84,7 +93,7 @@ const php_hash_ops php_hash_crc32_ops = {
 const php_hash_ops php_hash_crc32b_ops = {
 	(php_hash_init_func_t) PHP_CRC32Init,
 	(php_hash_update_func_t) PHP_CRC32BUpdate,
-	(php_hash_final_func_t) PHP_CRC32BFinal,
+	(php_hash_final_func_t) PHP_CRC32BEFinal,
 	(php_hash_copy_func_t) PHP_CRC32Copy,
 	4, /* what to say here? */
 	4,
@@ -92,11 +101,13 @@ const php_hash_ops php_hash_crc32b_ops = {
 	0
 };
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+const php_hash_ops php_hash_crc32c_ops = {
+	(php_hash_init_func_t) PHP_CRC32Init,
+	(php_hash_update_func_t) PHP_CRC32CUpdate,
+	(php_hash_final_func_t) PHP_CRC32BEFinal,
+	(php_hash_copy_func_t) PHP_CRC32Copy,
+	4, /* what to say here? */
+	4,
+	sizeof(PHP_CRC32_CTX),
+	0
+};

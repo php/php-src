@@ -1,14 +1,14 @@
---TEST--                                 
+--TEST--
 Function snmp_get_valueretrieval / snmp_set_valueretrieval
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 echo "Checking error handling\n";
 var_dump(snmp_get_valueretrieval('noarg'));

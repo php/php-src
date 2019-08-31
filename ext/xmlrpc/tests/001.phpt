@@ -7,12 +7,11 @@ xmlrpc_encode_request() with wrong arguments
 
 var_dump(xmlrpc_encode_request(-1, 1));
 var_dump(xmlrpc_encode_request("", 1));
-var_dump(xmlrpc_encode_request(array(), 1));
 var_dump(xmlrpc_encode_request(3.4, 1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(174) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodCall>
 <methodName>-1</methodName>
@@ -37,9 +36,6 @@ string(160) "<?xml version="1.0" encoding="iso-8859-1"?>
 </params>
 </methodCall>
 "
-
-Warning: xmlrpc_encode_request() expects parameter 1 to be string, array given in %s on line %d
-NULL
 string(175) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodCall>
 <methodName>3.4</methodName>

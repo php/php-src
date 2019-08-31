@@ -14,7 +14,9 @@ function bar() {
 }
 function foo() {
     try { return bar(); }
-    finally { @fclose(null); }
+    finally {
+        @fopen("non-existent", 'r');
+    }
 }
 
 var_dump(foo());

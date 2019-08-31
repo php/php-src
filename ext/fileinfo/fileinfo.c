@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h" /* needed for context stuff */
 #include "php_fileinfo.h"
+#include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
 
@@ -52,7 +53,7 @@ typedef struct _finfo_object {
 } finfo_object;
 
 #define FILEINFO_DECLARE_INIT_OBJECT(object) \
-	zval *object = ZEND_IS_METHOD_CALL() ? getThis() : NULL;
+	zval *object = getThis();
 
 static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 	return (finfo_object *)((char*)(obj) - XtOffsetOf(finfo_object, zo));
@@ -108,63 +109,13 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_open, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, finfo)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_set_flags, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_set_flags, 0, 0, 1)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_buffer, 0, 0, 2)
-	ZEND_ARG_INFO(0, finfo)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ finfo_class_functions
  */
 static const zend_function_entry finfo_class_functions[] = {
-	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -292,9 +243,8 @@ PHP_FUNCTION(finfo_open)
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
 	zend_error_handling zeh;
-	int flags = object ? ZEND_PARSE_PARAMS_THROW : 0;
 
-	if (zend_parse_parameters_ex(flags, ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lp", &options, &file, &file_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -382,11 +332,11 @@ PHP_FUNCTION(finfo_close)
 	zval *zfinfo;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zfinfo) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(zfinfo));
@@ -406,15 +356,15 @@ PHP_FUNCTION(finfo_set_flags)
 
 	if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &options) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zfinfo, &options) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -471,17 +421,17 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			goto common;
 		}
 	} else if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
-			RETURN_FALSE;
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+			return;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 		magic = finfo->magic;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|lr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
-			RETURN_FALSE;
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|lr!", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+			return;
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 		magic = finfo->magic;
 	}
@@ -618,13 +568,3 @@ PHP_FUNCTION(mime_content_type)
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -255,7 +255,7 @@ static void RIPEMD128Transform(uint32_t state[4], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -353,7 +353,7 @@ static void RIPEMD256Transform(uint32_t state[8], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -452,7 +452,7 @@ static void RIPEMD160Transform(uint32_t state[5], const unsigned char block[64])
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -560,7 +560,7 @@ static void RIPEMD320Transform(uint32_t state[10], const unsigned char block[64]
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -766,12 +766,3 @@ PHP_HASH_API void PHP_RIPEMD320Final(unsigned char digest[40], PHP_RIPEMD320_CTX
 	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

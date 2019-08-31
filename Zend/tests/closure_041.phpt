@@ -63,7 +63,6 @@ $d = $nonstaticUnscoped->bindTo(new B); $d(); echo " (should be scoped to dummy 
 $d = $nonstaticScoped->bindTo(new B); $d(); echo "\n";
 
 echo "Done.\n";
-
 --EXPECTF--
 Before binding
 scoped to A: bool(false)
@@ -81,6 +80,8 @@ scoped to A: bool(false)
 bound: no
 scoped to A: bool(true)
 bound: no
+
+Deprecated: Unbinding $this of closure is deprecated in %s on line %d
 scoped to A: bool(true)
 bound: no
 After binding, with same-class instance for the bound ones

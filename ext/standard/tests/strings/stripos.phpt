@@ -25,10 +25,10 @@ stripos() function test
 	var_dump(stripos("0", false));
 	var_dump(stripos("1", true));
 	var_dump(stripos("\\\\a", "\\a"));
-
-	echo "Done\n";
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 int(0)
 int(5)
 int(5)
@@ -37,31 +37,20 @@ int(10)
 int(2)
 int(0)
 int(0)
-bool(false)
-bool(false)
+int(0)
+int(0)
 bool(false)
 bool(false)
 int(0)
 bool(false)
+int(0)
 bool(false)
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
+int(0)
 bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
-
-Deprecated: stripos(): Non-string needles will be interpreted as strings in the future. Use an explicit chr() call to preserve the current behavior in %s on line %d
-bool(false)
+int(0)
+int(0)
+int(0)
 int(1)
-Done
+
+DONE

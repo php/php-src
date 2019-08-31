@@ -5,7 +5,7 @@ oci_connect()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
 	var_dump(oci_connect($user, $password, $dbase));
@@ -13,7 +13,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(oci_connect($user, $password));
 }
-	
+
 echo "Done\n";
 
 ?>

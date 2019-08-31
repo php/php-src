@@ -1,5 +1,5 @@
 --TEST--
-Bug #64988 (Class loading order affects E_STRICT warning)
+Bug #64988 (Class loading order affects E_WARNING warning)
 --FILE--
 <?php
 abstract class Base1 {
@@ -26,5 +26,4 @@ $o = new Smooth1();
 echo "okey";
 ?>
 --EXPECTF--
-Warning: Declaration of Smooth1::insert(array $data) should be compatible with Noisy1::insert(array $data, $option1 = NULL) in %sbug64988.php on line 20
-okey
+Fatal error: Declaration of Smooth1::insert(array $data) must be compatible with Noisy1::insert(array $data, $option1 = NULL) in %sbug64988.php on line 17

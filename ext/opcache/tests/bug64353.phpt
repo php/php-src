@@ -26,4 +26,5 @@ include "php://filter/read=bug.test/resource=data://text/plain,<?php\n";
 echo "OK\n";
 ?>
 --EXPECT--
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 OK

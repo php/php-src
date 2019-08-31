@@ -1,4 +1,4 @@
-<?php # vim:se ft=php:
+<?php
 if (false !== getenv('PDO_PGSQL_TEST_DSN')) {
 	# user set them from their shell
 	$config['ENV']['PDOTEST_DSN'] = getenv('PDO_PGSQL_TEST_DSN');

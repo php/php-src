@@ -2,10 +2,10 @@
 Test array_splice() function : usage variations - lengths and offsets
 --FILE--
 <?php
-/* 
+/*
  * proto array array_splice(array input, int offset [, int length [, array replacement]])
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 echo "*** array_splice() function : usage variations - lengths and offsets\n";
 
@@ -71,7 +71,6 @@ echo "relative offset - relative length - cut nothing\n";
 test_splice (-4,-7);
 echo "Done\n";
 ?>
-
 --EXPECT--
 *** array_splice() function : usage variations - lengths and offsets
 absolute offset - absolute length - cut from beginning

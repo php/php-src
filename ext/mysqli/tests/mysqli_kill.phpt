@@ -10,15 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_kill()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_kill($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	// Zend will cast the NULL to 0
@@ -43,9 +34,6 @@ require_once('skipifconnectfailure.inc');
 	if ($IS_MYSQLND) {
 		if ($link->info != 'Records: 6  Duplicates: 0  Warnings: 0') {
 			printf("[008] mysqlnd used to be more verbose and used to support SELECT\n");
-		}
-		if ($link->stat != NULL) {
-			printf("[009] NULL expected because of error.\n");
 		}
 	} else {
 		if ($link->info != NULL) {
@@ -123,8 +111,6 @@ object(mysqli)#%d (%d) {
   string(%d) "%s"
   ["server_version"]=>
   int(%d)
-  ["stat"]=>
-  %s
   ["sqlstate"]=>
   string(5) "HY000"
   ["protocol_version"]=>

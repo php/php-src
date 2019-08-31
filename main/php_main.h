@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
  */
 
@@ -27,10 +27,8 @@
 BEGIN_EXTERN_C()
 PHPAPI int php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
-PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules);
 PHPAPI void php_module_shutdown(void);
-PHPAPI void php_module_shutdown_for_exec(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
 PHPAPI int php_register_extensions(zend_module_entry * const * ptr, int count);
@@ -49,14 +47,12 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 /* environment module */
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);
+
+#ifdef ZTS
+PHPAPI void php_reserve_tsrm_memory(void);
+PHPAPI int php_tsrm_startup(void);
+#endif
+
 END_EXTERN_C()
 
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

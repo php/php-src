@@ -4,7 +4,7 @@ Phar: bug #69441: Buffer Overflow when parsing tar/zip/phar in phar_set_inode
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/bug69441.phar';
+$fname = __DIR__ . '/bug69441.phar';
 try {
 $r = new Phar($fname, 0);
 } catch(UnexpectedValueException $e) {

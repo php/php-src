@@ -1,5 +1,7 @@
 --TEST--
 Bug #75255 (Request hangs and not finish)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function generatePlanImage() {

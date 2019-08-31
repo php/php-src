@@ -23,7 +23,7 @@ try
 {
 	$phar->setFileClass('SplFileInfo');
 }
-catch (UnexpectedValueException $e)
+catch (TypeError $e)
 {
 	echo $e->getMessage() . "\n";
 }
@@ -37,7 +37,7 @@ echo $phar['b.php']->getFilename() . "\n";
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/files/phar_oo_006.phar.php');
+unlink(__DIR__ . '/files/phar_oo_006.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--

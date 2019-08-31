@@ -6,7 +6,7 @@ Verbose  tidy_getopt()
 tidy.default_config=
 --FILE--
 <?php
-		$a = new tidy(dirname(__FILE__)."/007.html");
+		$a = new tidy(__DIR__."/007.html");
 		echo "Current Value of 'tidy-mark': ";
 		var_dump($a->getopt("tidy-mark"));
 		echo "Current Value of 'error-file': ";

@@ -1,7 +1,8 @@
-dnl config.m4 for date extension
+dnl Check for headers needed by timelib
+AC_CHECK_HEADERS([io.h])
 
-sinclude(ext/date/lib/timelib.m4)
-sinclude(lib/timelib.m4)
+dnl Check for strtoll, atoll
+AC_CHECK_FUNCS(strtoll atoll)
 
 PHP_DATE_CFLAGS="-I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
 timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c
@@ -23,7 +24,6 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 # include <php_config.h>
 #endif
 #include <php_stdint.h>
-#define TIMELIB_OMIT_STDINT 1
 
 #include "zend.h"
 

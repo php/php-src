@@ -1,9 +1,9 @@
 --TEST--
-Bug #41445 (parse_ini_file() function parses octal numbers in section names) - 2 
+Bug #41445 (parse_ini_file() function parses octal numbers in section names) - 2
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/bug41445_1.ini";
+$file = __DIR__."/bug41445_1.ini";
 
 $data = <<<DATA
 [2454.33]
@@ -25,7 +25,7 @@ var_dump(parse_ini_file($file));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(3) {
   ["2454.33"]=>
   array(1) {

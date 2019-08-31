@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -420,10 +420,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_data_seek,							arginfo_mysqli_data_seek)
 	PHP_FE(mysqli_dump_debug_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_debug,								arginfo_mysqli_debug)
-#if defined(HAVE_EMBEDDED_MYSQLI)
-	PHP_FE(mysqli_embedded_server_end,					NULL)
-	PHP_FE(mysqli_embedded_server_start,				NULL)
-#endif
 	PHP_FE(mysqli_errno,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error,								arginfo_mysqli_only_link)
 	PHP_FE(mysqli_error_list,							arginfo_mysqli_only_link)
@@ -658,12 +654,3 @@ const zend_function_entry mysqli_stmt_methods[] = {
 	PHP_FE_END
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

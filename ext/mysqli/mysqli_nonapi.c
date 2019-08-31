@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -58,6 +58,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	size_t					hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
 	zend_bool			persistent = FALSE;
 	zend_long				port = 0, flags = 0;
+	zend_bool port_is_null = 1;
 	zend_string			*hash_key = NULL;
 	zend_bool			new_connection = FALSE;
 	zend_resource		*le;
@@ -80,8 +81,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	hostname = username = dbname = passwd = socket = NULL;
 
 	if (!is_real_connect) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssssls", &hostname, &hostname_len, &username, &username_len,
-									&passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!s!s!l!s!", &hostname, &hostname_len, &username, &username_len,
+				&passwd, &passwd_len, &dbname, &dbname_len, &port, &port_is_null, &socket, &socket_len) == FAILURE) {
 			return;
 		}
 
@@ -98,9 +99,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		flags |= CLIENT_MULTI_RESULTS; /* needed for mysql_multi_query() */
 	} else {
 		/* We have flags too */
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|sssslsl", &object, mysqli_link_class_entry,
-										&hostname, &hostname_len, &username, &username_len, &passwd, &passwd_len, &dbname, &dbname_len, &port, &socket, &socket_len,
-										&flags) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s!s!s!s!l!s!l", &object, mysqli_link_class_entry,
+				&hostname, &hostname_len, &username, &username_len, &passwd, &passwd_len, &dbname, &dbname_len, &port, &port_is_null, &socket, &socket_len, &flags) == FAILURE) {
 			return;
 		}
 
@@ -121,7 +121,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (!socket_len || !socket) {
 		socket = MyG(default_socket);
 	}
-	if (!port){
+	if (port_is_null || !port) {
 		port = MyG(default_port);
 	}
 	if (!passwd) {
@@ -162,6 +162,12 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 					do {
 						if (zend_ptr_stack_num_elements(&plist->free_links)) {
+							/* If we have an initialized (but unconnected) mysql resource,
+							 * close it before we reuse an existing persistent resource. */
+							if (mysql->mysql) {
+								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
+							}
+
 							mysql->mysql = zend_ptr_stack_pop(&plist->free_links);
 
 							MyG(num_inactive_persistent)--;
@@ -218,15 +224,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		}
 		new_connection = TRUE;
 	}
-
-#ifdef HAVE_EMBEDDED_MYSQLI
-	if (hostname_len) {
-		unsigned int external=1;
-		mysql_options(mysql->mysql, MYSQL_OPT_USE_REMOTE_CONNECTION, (char *)&external);
-	} else {
-		mysql_options(mysql->mysql, MYSQL_OPT_USE_EMBEDDED_CONNECTION, 0);
-	}
-#endif
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	/* BC for prior to bug fix #53425 */
@@ -431,7 +428,7 @@ PHP_FUNCTION(mysqli_error_list)
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #else
 	if (mysql_errno(mysql->mysql)) {
@@ -443,7 +440,7 @@ PHP_FUNCTION(mysqli_error_list)
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
 		add_next_index_zval(return_value, &single_error);
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #endif
 }
@@ -477,7 +474,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #else
 	if (mysql_stmt_errno(stmt->stmt)) {
@@ -489,7 +486,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
 		add_next_index_zval(return_value, &single_error);
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 #endif
 }
@@ -1206,13 +1203,3 @@ PHP_FUNCTION(mysqli_get_links_stats)
 	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

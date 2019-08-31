@@ -14,10 +14,8 @@ if ($contentfile === false) {
 	die("failed to get a temporary filename!");
 }
 
-$pkcsfile = dirname(__FILE__) . "/openssl_pkcs7_verify__pkcsfile.tmp";
-
-$infile = dirname(__FILE__) . "/cert.crt";
-$eml = dirname(__FILE__) . "/signed.eml";
+$pkcsfile = __DIR__ . "/openssl_pkcs7_verify__pkcsfile.tmp";
+$eml = __DIR__ . "/signed.eml";
 $wrong = "wrong";
 $empty = "";
 $cainfo = array();
@@ -43,9 +41,7 @@ if (file_exists($contentfile)) {
 ?>
 --CLEAN--
 <?php
-if (file_exists($pkcsfile)) {
-	unlink($pkcsfile);
-}
+unlink(__DIR__ . DIRECTORY_SEPARATOR . '/openssl_pkcs7_verify__pkcsfile.tmp');
 ?>
 --EXPECTF--
 int(-1)

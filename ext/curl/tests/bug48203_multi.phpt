@@ -8,7 +8,7 @@ include 'skipif.inc';
 <?php
 include 'server.inc';
 function checkForClosedFilePointer($target_url, $curl_option, $description) {
-	$fp = fopen(dirname(__FILE__) . '/bug48203.tmp', 'w');
+	$fp = fopen(__DIR__ . '/bug48203.tmp', 'w');
 
 	$ch1 = curl_init();
 	$ch2 = curl_init();
@@ -65,7 +65,7 @@ foreach($options_to_check as $option) {
 
 ?>
 --CLEAN--
-<?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
+<?php @unlink(__DIR__ . '/bug48203.tmp'); ?>
 --EXPECTF--
 Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 
@@ -81,9 +81,7 @@ Ok for CURLOPT_WRITEHEADER
 Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
 
 Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
-Hello World!
-Hello World!Hello World!
-Hello World!Ok for CURLOPT_FILE
+%AOk for CURLOPT_FILE
 
 Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
 

@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() -- fall type3 type3 
+DateTime::diff() -- fall type3 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --XFAIL--

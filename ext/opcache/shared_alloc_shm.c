@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -60,13 +60,13 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 	int shmget_flags;
 	zend_shared_segment_shm *shared_segments;
 
-    seg_allocate_size = SEG_ALLOC_SIZE_MAX;
-    /* determine segment size we _really_ need:
-     * no more than to include requested_size
-     */
-    while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
-        seg_allocate_size >>= 1;
-    }
+	seg_allocate_size = SEG_ALLOC_SIZE_MAX;
+	/* determine segment size we _really_ need:
+	 * no more than to include requested_size
+	 */
+	while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
+		seg_allocate_size >>= 1;
+	}
 
 	shmget_flags = IPC_CREAT|SHM_R|SHM_W|IPC_EXCL;
 

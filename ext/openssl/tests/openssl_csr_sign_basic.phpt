@@ -4,10 +4,10 @@ openssl_csr_sign() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$cert = "file://" . dirname(__FILE__) . "/cert.crt";
-$priv = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
+$cert = "file://" . __DIR__ . "/cert.crt";
+$priv = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrong = "wrong";
-$pub = "file://" . dirname(__FILE__) . "/public.key";
+$pub = "file://" . __DIR__ . "/public.key";
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $config_arg = array('config' => $config);
 
@@ -35,13 +35,10 @@ var_dump(openssl_csr_sign($csr, $cert, $priv, 365, $config_arg));
 var_dump(openssl_csr_sign($csr, openssl_x509_read($cert), $priv, 365, $config_arg));
 var_dump(openssl_csr_sign($csr, $wrong, $privkey, 365));
 var_dump(openssl_csr_sign($csr, null, $wrong, 365));
-var_dump(openssl_csr_sign($csr, null, $privkey, $wrong));
-var_dump(openssl_csr_sign($csr, null, $privkey, 365, $wrong));
 var_dump(openssl_csr_sign($wrong, null, $privkey, 365));
 var_dump(openssl_csr_sign(array(), null, $privkey, 365));
 var_dump(openssl_csr_sign($csr, array(), $privkey, 365));
 var_dump(openssl_csr_sign($csr, null, array(), 365));
-var_dump(openssl_csr_sign($csr, null, $privkey, array()));
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $config_arg));
 ?>
 --EXPECTF--
@@ -56,12 +53,6 @@ bool(false)
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be int, string given in %s on line %d
-NULL
-
-Warning: openssl_csr_sign() expects parameter 5 to be array, string given in %s on line %d
-NULL
-
 Warning: openssl_csr_sign(): cannot get CSR from parameter 1 in %s on line %d
 bool(false)
 
@@ -75,8 +66,4 @@ Warning: openssl_csr_sign(): key array must be of the form array(0 => key, 1 => 
 
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
-
-Warning: openssl_csr_sign() expects parameter 4 to be int, array given in %s on line %d
-NULL
 resource(%d) of type (OpenSSL X.509)
-

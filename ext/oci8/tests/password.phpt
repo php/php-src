@@ -1,17 +1,17 @@
 --TEST--
 oci_password_change() for non-persistent connections
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-require(dirname(__FILE__)."/details.inc");
+<?php
+if (!extension_loaded('oci8')) die("skip no oci8 extension");
+require(__DIR__."/details.inc");
 if (empty($dbase)) die ("skip requires database connection string be set");
-if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user"); 
+if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
 	"drop user testuser_pw cascade",
@@ -35,7 +35,7 @@ var_dump($c2);
 $rn2 = (int)$c2;
 
 // Despite using the old password this connect should succeed and return the original resource
-$c3 = oci_connect("testuser_pw", "testuserpwd", $dbase);  
+$c3 = oci_connect("testuser_pw", "testuserpwd", $dbase);
 var_dump($c3);
 $rn3 = (int)$c3;
 
@@ -64,7 +64,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
     "drop user testuser_pw cascade"

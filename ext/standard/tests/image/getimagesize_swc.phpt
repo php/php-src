@@ -8,7 +8,7 @@ GetImageSize() for compressed swf files
 ?>
 --FILE--
 <?php
-	var_dump(getimagesize(dirname(__FILE__) . "/test13pix.swf"));
+	var_dump(getimagesize(__DIR__ . "/test13pix.swf"));
 ?>
 --EXPECT--
 array(5) {

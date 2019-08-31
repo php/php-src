@@ -5,6 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
+opcache.preload=
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -32,6 +33,8 @@ L3 (6):     CV1($a) = QM_ASSIGN V2
 L4 (7):     ASSIGN_OBJ CV1($a) string("foo")
 L5 (7):     OP_DATA CV0($x)
 L6 (8):     RETURN null
+LIVE RANGES:
+        2: L2 - L3 (new)
 
 A::__destruct: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)

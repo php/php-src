@@ -3,14 +3,14 @@ PDO PgSQL Bug #33876 (PDO misquotes/miscasts bool(false))
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $db->exec("SET LC_MESSAGES='C'");
@@ -88,10 +88,7 @@ if (!$res->execute(array(false))) {
 } else {
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
 }
-
-
-
---EXPECT--
+--EXPECTF--
 Array
 (
     [0] => Array
@@ -120,7 +117,7 @@ Array
 (
     [0] => 22P02
     [1] => 7
-    [2] => ERROR:  invalid input syntax for type boolean: ""
+    [2] => %s:  %sboolean%s
 )
 EMUL
 Array
@@ -151,5 +148,5 @@ Array
 (
     [0] => 22P02
     [1] => 7
-    [2] => ERROR:  invalid input syntax for type boolean: ""
+    [2] => %s:  %sboolean%s
 )

@@ -3,13 +3,13 @@ ocifetchinto() & wrong number of params
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__."/connect.inc";
+require __DIR__.'/create_table.inc';
 
 $insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value, string) VALUES (1, 1, NULL)";
 
@@ -45,8 +45,8 @@ var_dump($all);
 var_dump(ocifetchinto($s, $all, 1000000));
 var_dump($all);
 
-require dirname(__FILE__).'/drop_table.inc';
-	
+require __DIR__.'/drop_table.inc';
+
 echo "Done\n";
 ?>
 --EXPECTF--

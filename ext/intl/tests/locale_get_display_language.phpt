@@ -80,7 +80,7 @@ function ut_main()
         	$scr = ut_loc_get_display_language( $locale ,$disp_locale );
         	$res_str .= "disp_locale=$disp_locale :  display_language=$scr";
         	$res_str .= "\n";
-		} 
+		}
         $res_str .= "-----------------\n";
     }
 
@@ -99,9 +99,9 @@ disp_locale=fr :  display_language=ukrainien
 disp_locale=de :  display_language=Ukrainisch
 -----------------
 locale='root'
-disp_locale=en :  display_language=Root
-disp_locale=fr :  display_language=racine
-disp_locale=de :  display_language=[rR]oot
+disp_locale=en :  display_language=(Root|Unknown language)
+disp_locale=fr :  display_language=(racine|langue indéterminée)
+disp_locale=de :  display_language=([rR]oot|Unbekannte Sprache)
 -----------------
 locale='uk@currency=EURO'
 disp_locale=en :  display_language=Ukrainian

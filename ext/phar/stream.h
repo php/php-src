@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,19 +28,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 
 /* file/stream handlers */
-static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count);
-static size_t phar_stream_read( php_stream *stream, char *buf, size_t count);
+static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count);
+static ssize_t phar_stream_read( php_stream *stream, char *buf, size_t count);
 static int    phar_stream_close(php_stream *stream, int close_handle);
 static int    phar_stream_flush(php_stream *stream);
 static int    phar_stream_seek( php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset);
 static int    phar_stream_stat( php_stream *stream, php_stream_statbuf *ssb);
 END_EXTERN_C()
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

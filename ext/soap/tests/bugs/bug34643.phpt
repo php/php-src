@@ -32,7 +32,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$cl = new LocalSoapClient(dirname(__FILE__).'/bug34643.wsdl', array("trace"=>1));
+$cl = new LocalSoapClient(__DIR__.'/bug34643.wsdl', array("trace"=>1));
 print_r($cl->__getFunctions());
 echo $cl->get_it("aaa")."\n";
 echo $cl->get_it()."\n";

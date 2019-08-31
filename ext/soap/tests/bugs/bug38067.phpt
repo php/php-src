@@ -28,7 +28,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38067.wsdl',
+$client = new TestSoapClient(__DIR__.'/bug38067.wsdl',
 	array('encoding' => 'ISO-8859-1'));
 $str = 'test: Ä';
 $res = $client->Test(array('str'=>$str));

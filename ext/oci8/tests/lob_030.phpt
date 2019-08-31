@@ -3,13 +3,13 @@ Test piecewise fetch of CLOBs equal to, and larger than PHP_OCI_LOB_BUFFER_SIZE
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 function insert_verify($c, $tn, $id, $length)
 {
@@ -57,7 +57,7 @@ insert_verify($c, $schema.$table_name, 5, 1049028-1);
 echo "Test 6: A CLOB of 1049028+1 bytes\n";
 insert_verify($c, $schema.$table_name, 6, 1049028+1);
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 

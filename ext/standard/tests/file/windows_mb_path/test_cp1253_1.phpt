@@ -1,8 +1,8 @@
 --TEST--
-Test mkdir/rmdir cp1253 path 
+Test mkdir/rmdir cp1253 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -19,7 +19,7 @@ default_charset=cp1253
 #vim: set encoding=cp1253
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "διαδρομή δοκιμής";
 $prefix = create_data("dir_cp1253", "${item}42", 1253);
@@ -40,7 +40,7 @@ remove_data("dir_cp1253");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

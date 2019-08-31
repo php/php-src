@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : usage variations - different 'size' values  
+Test array_chunk() function : usage variations - different 'size' values
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
@@ -26,26 +26,33 @@ $sizes = array(-1, count($input_array) + 1, 0, 1.5);
 
 // loop through the array for size argument
 foreach ($sizes as $size){
-  echo "\n-- Testing array_chunk() when size = $size --\n";
-  var_dump( array_chunk($input_array, $size) );
-  var_dump( array_chunk($input_array, $size, true) );
-  var_dump( array_chunk($input_array, $size, false) );
+    echo "\n-- Testing array_chunk() when size = $size --\n";
+    try {
+        var_dump( array_chunk($input_array, $size) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    try {
+        var_dump( array_chunk($input_array, $size, true) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    try {
+        var_dump( array_chunk($input_array, $size, false) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
-echo "Done";
 ?>
---EXPECTF--
+
+DONE
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
+Size parameter expected to be greater than 0
+Size parameter expected to be greater than 0
+Size parameter expected to be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -83,15 +90,9 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
-
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
+Size parameter expected to be greater than 0
+Size parameter expected to be greater than 0
+Size parameter expected to be greater than 0
 
 -- Testing array_chunk() when size = 1.5 --
 array(3) {
@@ -145,4 +146,5 @@ array(3) {
     int(3)
   }
 }
-Done
+
+DONE

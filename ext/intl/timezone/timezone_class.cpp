@@ -98,7 +98,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
-		zend_call_method_with_1_params(ret, NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
+		zend_call_method_with_1_params(Z_OBJ_P(ret), NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
 				"%s: DateTimeZone constructor threw exception", func);
@@ -179,7 +179,10 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		UnicodeString	id,
 						gottenId;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
-		convert_to_string_ex(zv_timezone);
+		if (!try_convert_to_string(zv_timezone)) {
+			zval_ptr_dtor_str(&local_zv_tz);
+			return NULL;
+		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
 			spprintf(&message, 0, "%s: Time zone identifier given is not a "
@@ -221,17 +224,17 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 /* }}} */
 
 /* {{{ clone handler for TimeZone */
-static zend_object *TimeZone_clone_obj(zval *object)
+static zend_object *TimeZone_clone_obj(zend_object *object)
 {
 	TimeZone_object		*to_orig,
 						*to_new;
 	zend_object			*ret_val;
 	intl_error_reset(NULL);
 
-	to_orig = Z_INTL_TIMEZONE_P(object);
+	to_orig = php_intl_timezone_fetch_object(object);
 	intl_error_reset(TIMEZONE_ERROR_P(to_orig));
 
-	ret_val = TimeZone_ce_ptr->create_object(Z_OBJCE_P(object));
+	ret_val = TimeZone_ce_ptr->create_object(object->ce);
 	to_new  = php_intl_timezone_fetch_object(ret_val);
 
 	zend_objects_clone_members(&to_new->zo, &to_orig->zo);
@@ -285,7 +288,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 /* }}} */
 
 /* {{{ get_debug_info handler for TimeZone */
-static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
+static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 {
 	zval			zv;
 	TimeZone_object	*to;
@@ -299,7 +302,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 
 	debug_info = zend_new_array(8);
 
-	to = Z_INTL_TIMEZONE_P(object);
+	to = php_intl_timezone_fetch_object(object);
 	tz = to->utimezone;
 
 	if (tz == NULL) {
@@ -462,18 +465,12 @@ static const zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createDefault,		intltz_create_default,			ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getGMT,				intltz_get_gmt,					ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_ME_MAPPING(getUnknown,			intltz_get_unknown,				ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
 	PHP_ME_MAPPING(createEnumeration,	intltz_create_enumeration,		ainfo_tz_createEnumeration,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(countEquivalentIDs,	intltz_count_equivalent_ids,	ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_ME_MAPPING(createTimeZoneIDEnumeration, intltz_create_time_zone_id_enumeration, ainfo_tz_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
 	PHP_ME_MAPPING(getCanonicalID,		intltz_get_canonical_id,		ainfo_tz_getCanonicalID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_ME_MAPPING(getRegion,			intltz_get_region,				ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
 	PHP_ME_MAPPING(getTZDataVersion,	intltz_get_tz_data_version,		ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getEquivalentID,		intltz_get_equivalent_id,		ainfo_tz_getEquivalentID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 
@@ -508,7 +505,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_ce_ptr = zend_register_internal_class(&ce);
 	if (!TimeZone_ce_ptr) {
 		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
+		php_error_docref(NULL, E_ERROR,
 			"IntlTimeZone: class registration has failed.");
 		return;
 	}
@@ -531,20 +528,16 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT", TimeZone::SHORT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG", TimeZone::LONG);
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GENERIC", TimeZone::SHORT_GENERIC);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GENERIC", TimeZone::LONG_GENERIC);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GMT", TimeZone::SHORT_GMT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GMT", TimeZone::LONG_GMT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_COMMONLY_USED", TimeZone::SHORT_COMMONLY_USED);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_GENERIC_LOCATION", TimeZone::GENERIC_LOCATION);
-#endif
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	TIMEZONE_DECL_LONG_CONST("TYPE_ANY", UCAL_ZONE_TYPE_ANY);
 	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL", UCAL_ZONE_TYPE_CANONICAL);
 	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL_LOCATION", UCAL_ZONE_TYPE_CANONICAL_LOCATION);
-#endif
 
 	/* Declare 'IntlTimeZone' class properties */
 

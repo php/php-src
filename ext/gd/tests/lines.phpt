@@ -9,10 +9,6 @@ imageline no AA
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
-// Wrong argument count
-imageline($im, 0,0, 5,5);
-
-
 // Horizontal line
 imageline($im, 0,5, 5,5, 0x00ff00);
 
@@ -105,8 +101,6 @@ if ($p3) {
 
 ?>
 --EXPECTF--
-
-Warning: imageline() expects exactly 6 parameters, 5 given in %s on line %d
 Horizontal: ok
 Vertical: ok
 Diagonal: ok

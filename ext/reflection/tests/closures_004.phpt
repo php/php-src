@@ -1,6 +1,6 @@
 --TEST--
 Reflection on closures: Segfault with getClosure() on closure itself
---FILE-- 
+--FILE--
 <?php
 $closure = function() { echo "Invoked!\n"; };
 

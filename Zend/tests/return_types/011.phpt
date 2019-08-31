@@ -1,6 +1,5 @@
 --TEST--
 Function returned callable, expected callable
-
 --FILE--
 <?php
 function foo() : callable {
@@ -8,7 +7,6 @@ function foo() : callable {
 }
 
 var_dump(foo());
-
 --EXPECTF--
 object(Closure)#%d (%d) {
 }

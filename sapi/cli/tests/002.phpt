@@ -13,7 +13,7 @@ var_dump(`$php -n -r "var_dump('hello');"`);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(18) "string(5) "hello"
 "
 Done

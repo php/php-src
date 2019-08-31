@@ -44,7 +44,7 @@ new mysqli()
 --EXPECTF--
 1) bail
 
-Warning: mysqli::mysqli(): (HY000/200%d): %s
+Warning: mysqli::__construct(): (HY000/200%d): %s
 2) be quiet
 %s(%d) "%s"
 int(200%d)

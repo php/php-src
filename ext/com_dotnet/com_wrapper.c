@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -286,7 +286,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				retval = &rv;
-				if (SUCCESS == call_user_function(EG(function_table), &disp->object, name,
+				if (SUCCESS == call_user_function(NULL, &disp->object, name,
 							retval, pdp->cArgs, params)) {
 					ret = S_OK;
 					trace("function called ok\n");
@@ -397,7 +397,7 @@ static HRESULT STDMETHODCALLTYPE disp_getnextdispid(
 	/* [in] */ DISPID id,
 	/* [out] */ DISPID *pid)
 {
-	ulong next = id+1;
+	zend_ulong next = id+1;
 	FETCH_DISP("GetNextDispID");
 
 	while(!zend_hash_index_exists(disp->dispid_to_name, next))
@@ -643,5 +643,3 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val)
 
 	return (IDispatch*)disp;
 }
-
-

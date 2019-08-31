@@ -23,18 +23,18 @@ $arg2 = array(111,222);
 $arg3 = array(111,222,333);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic2.txt';
+$data_file = __DIR__ . '/vfprintf_basic2.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
 vfprintf($fp, $format1, $arg1);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp, $format2, $arg2);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp, $format3, $arg3);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 fclose($fp);
 print_r(file_get_contents($data_file));
@@ -49,5 +49,3 @@ unlink($data_file);
 111 222
 111 222 333
 ===DONE===
-
-

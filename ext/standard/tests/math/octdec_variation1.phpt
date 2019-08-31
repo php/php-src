@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : number octdec  ( string $octal_string  )
- * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument. 
+ * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument.
  * Source code: ext/standard/math.c
  */
 
@@ -28,9 +28,9 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
-       4294967295,  // largest decimal  
-       4294967296, 
+       -2345,
+       4294967295,  // largest decimal
+       4294967296,
 
        // float data
 /*7*/  10.5,
@@ -48,7 +48,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -58,7 +58,7 @@ $inputs = array(
 /*21*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*24*/ @$undefined_var,
 
@@ -73,7 +73,11 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(octdec($input));
+	try {
+		var_dump(octdec($input));
+	} catch (TypeError $e) {
+		echo $e->getMessage(), "\n";
+	}
 	$iterator++;
 };
 fclose($fp);
@@ -92,27 +96,43 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1253)
 
 -- Iteration 5 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134037)
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1134038)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(69)
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(175304192)
 
 -- Iteration 10 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(342391)
 
 -- Iteration 11 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(5)
 
 -- Iteration 12 --
@@ -140,17 +160,21 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-
-Notice: Array to string conversion in %s on line %d
-int(0)
+octdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 22 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 23 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 24 --
@@ -160,5 +184,5 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-int(%d)
+octdec() expects parameter 1 to be string, resource given
 ---Done---

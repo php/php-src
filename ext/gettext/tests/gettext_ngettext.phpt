@@ -1,7 +1,7 @@
 --TEST--
 Test ngettext() functionality
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("SKIP extension gettext not loaded\n");
 	}
@@ -11,7 +11,8 @@ Test ngettext() functionality
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
+putenv('LC_ALL=en_US.UTF-8');
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');
 textdomain('dngettextTest');

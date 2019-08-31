@@ -26,7 +26,7 @@ $list = array (
   19 => '"\\""",aaa',
 );
 
-$file = dirname(__FILE__) . 'fgetcsv.csv';
+$file = __DIR__ . '/fputcsv.csv';
 @unlink($file);
 
 $fp = fopen($file, "w");

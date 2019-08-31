@@ -3,13 +3,13 @@ Test get_class_methods() function : usage variations  - unexpected types
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');
@@ -76,10 +76,9 @@ $values = array(
 // loop through each element of the array for class
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( get_class_methods($value) );
 };
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -163,9 +162,8 @@ NULL
 
 Arg value string 
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
-Arg value  
+Arg value stdClass 
 array(0) {
 }
 

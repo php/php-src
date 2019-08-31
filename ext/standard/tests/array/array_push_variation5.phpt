@@ -3,7 +3,7 @@ Test array_push() function : usage variations - position of internal array point
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -25,7 +25,6 @@ echo key($stack) . " => " . current ($stack) . "\n";
 echo "Done";
 ?>
 --EXPECT--
-
 *** Testing array_push() : usage variations ***
 
 -- Call array_push() --

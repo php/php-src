@@ -7,7 +7,7 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 
 $phar = new Phar($fname);
 $phar['a.php'] = '<php echo "this is a\n"; ?>';
@@ -50,8 +50,8 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECT--
 string(6643) "<?php

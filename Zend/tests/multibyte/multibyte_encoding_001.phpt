@@ -11,7 +11,7 @@ if (!extension_loaded("mbstring")) {
 ?>
 --INI--
 zend.multibyte=1
-mbstring.internal_encoding=SJIS
+internal_encoding=SJIS
 --FILE--
 <?php
 declare(encoding='Shift_JIS');

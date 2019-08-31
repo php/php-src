@@ -1,15 +1,14 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, write_attribute_ns function
---CREDITS-- 
+--CREDITS--
 Mauricio Vieira <mauricio [at] @mauriciovieira [dot] net>
 #testfest PHPSP on 2014-07-05
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
-if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required");
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
+<?php
 
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);

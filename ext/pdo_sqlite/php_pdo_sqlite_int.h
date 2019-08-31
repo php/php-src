@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -76,7 +76,8 @@ extern const struct pdo_stmt_methods sqlite_stmt_methods;
 
 enum {
 	PDO_SQLITE_ATTR_OPEN_FLAGS = PDO_ATTR_DRIVER_SPECIFIC,
-	PDO_SQLITE_ATTR_READONLY_STATEMENT
+	PDO_SQLITE_ATTR_READONLY_STATEMENT,
+	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
 };
 
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
+#include "calendar_arginfo.h"
 #include "php_calendar.h"
 #include "sdncal.h"
 
@@ -35,100 +36,6 @@
    to have GetACP(). */
 #undef CAL_GREGORIAN
 #endif
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
-	ZEND_ARG_INFO(0, timestamp)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jdtounix, 0)
-	ZEND_ARG_INFO(0, jday)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cal_info, 0, 0, 0)
-	ZEND_ARG_INFO(0, calendar)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_cal_days_in_month, 0)
-	ZEND_ARG_INFO(0, calendar)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_cal_to_jd, 0)
-	ZEND_ARG_INFO(0, calendar)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, day)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_cal_from_jd, 0)
-	ZEND_ARG_INFO(0, jd)
-	ZEND_ARG_INFO(0, calendar)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jdtogregorian, 0)
-	ZEND_ARG_INFO(0, juliandaycount)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gregoriantojd, 0)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, day)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jdtojulian, 0)
-	ZEND_ARG_INFO(0, juliandaycount)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_juliantojd, 0)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, day)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_jdtojewish, 0, 0, 1)
-	ZEND_ARG_INFO(0, juliandaycount)
-	ZEND_ARG_INFO(0, hebrew)
-	ZEND_ARG_INFO(0, fl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jewishtojd, 0)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, day)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jdtofrench, 0)
-	ZEND_ARG_INFO(0, juliandaycount)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_frenchtojd, 0)
-	ZEND_ARG_INFO(0, month)
-	ZEND_ARG_INFO(0, day)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_jddayofweek, 0, 0, 1)
-	ZEND_ARG_INFO(0, juliandaycount)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_jdmonthname, 0)
-	ZEND_ARG_INFO(0, juliandaycount)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_date, 0, 0, 0)
-	ZEND_ARG_INFO(0, year)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_easter_days, 0, 0, 0)
-	ZEND_ARG_INFO(0, year)
-	ZEND_ARG_INFO(0, method)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 
 static const zend_function_entry calendar_functions[] = {
 	PHP_FE(jdtogregorian, arginfo_jdtogregorian)
@@ -217,8 +124,9 @@ enum { CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 	CAL_MONTH_FRENCH
 };
 
-/* for heb_number_to_chars */
-static char alef_bet[25] = "0‡·‚„‰ÂÊÁËÈÎÏÓÒÚÙˆ˜¯˘˙";
+/* For heb_number_to_chars escape sequences of ◊ê◊ë◊í◊ì◊î◊ï◊ñ◊ó◊ò◊ô◊õ◊ú◊û◊†◊°◊¢◊§◊¶◊ß◊®◊©◊™
+   ISO-8859-8 Hebrew alphabet */
+static char alef_bet[25] = "0\xE0\xE1\xE2\xE3\xE4\xE5\xE6\xE7\xE8\xE9\xEB\xEC\xEE\xF0\xF1\xF2\xF4\xF6\xF7\xF8\xF9\xFA";
 
 #define CAL_JEWISH_ADD_ALAFIM_GERESH 0x2
 #define CAL_JEWISH_ADD_ALAFIM 0x4
@@ -294,7 +202,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &cal) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (cal == -1) {
@@ -330,7 +238,7 @@ PHP_FUNCTION(cal_days_in_month)
 	zend_long sdn_start, sdn_next;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &cal, &month, &year) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -376,7 +284,7 @@ PHP_FUNCTION(cal_to_jd)
 	zend_long cal, month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llll", &cal, &month, &day, &year) != SUCCESS) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -397,7 +305,7 @@ PHP_FUNCTION(cal_from_jd)
 	const struct cal_entry_t *calendar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -448,7 +356,7 @@ PHP_FUNCTION(jdtogregorian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	SdnToGregorian(julday, &year, &month, &day);
@@ -464,7 +372,7 @@ PHP_FUNCTION(gregoriantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(GregorianToSdn(year, month, day));
@@ -479,7 +387,7 @@ PHP_FUNCTION(jdtojulian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	SdnToJulian(julday, &year, &month, &day);
@@ -495,7 +403,7 @@ PHP_FUNCTION(juliantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(JulianToSdn(year, month, day));
@@ -505,7 +413,7 @@ PHP_FUNCTION(juliantojd)
 /* {{{ heb_number_to_chars*/
 /*
 caution: the Hebrew format produces non unique result.
-for example both: year '5' and year '5000' produce '‰'.
+for example both: year '5' and year '5000' produce '◊î'.
 use the numeric one for calculations.
  */
 static char *heb_number_to_chars(int n, int fl, char **ret)
@@ -532,7 +440,8 @@ static char *heb_number_to_chars(int n, int fl, char **ret)
 			p++;
 		}
 		if (CAL_JEWISH_ADD_ALAFIM & fl) {
-			strcpy(p, " ‡ÏÙÈÌ ");
+			/* Escape sequences of Hebrew characters in ISO-8859-8: ◊ê◊ú◊§◊ô◊ù */
+			strcpy(p, " \xE0\xEC\xF4\xE9\xED ");
 			p += 7;
 		}
 
@@ -607,7 +516,7 @@ PHP_FUNCTION(jdtojewish)
 	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|bl", &julday, &heb, &fl) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	SdnToJewish(julday, &year, &month, &day);
@@ -638,7 +547,7 @@ PHP_FUNCTION(jewishtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(JewishToSdn(year, month, day));
@@ -653,7 +562,7 @@ PHP_FUNCTION(jdtofrench)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	SdnToFrench(julday, &year, &month, &day);
@@ -669,7 +578,7 @@ PHP_FUNCTION(frenchtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(FrenchToSdn(year, month, day));
@@ -685,7 +594,7 @@ PHP_FUNCTION(jddayofweek)
 	const char *daynamel, *daynames;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &julday, &mode) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	day = DayOfWeek(julday);
@@ -716,7 +625,7 @@ PHP_FUNCTION(jdmonthname)
 	int month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &julday, &mode) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (mode) {
@@ -750,12 +659,3 @@ PHP_FUNCTION(jdmonthname)
 	RETURN_STRING(monthname);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

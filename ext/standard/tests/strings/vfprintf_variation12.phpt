@@ -19,7 +19,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing vfprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
-$formats = 
+$formats =
   '%o %+o %-o 
    %lo %Lo %4o %-4o
    %10.4o %-10.4o %.4o 
@@ -64,11 +64,11 @@ $args_array = array(
          true, false, TRUE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation12.txt';
+$data_file = __DIR__ . '/vfprintf_variation12.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -86,7 +86,7 @@ print_r(file_get_contents($data_file));
 echo "\n";
 
 unlink($data_file);
- 
+
 ?>
 ===DONE===
 --EXPECT--

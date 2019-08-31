@@ -1,7 +1,5 @@
 --TEST--
-hash_copy() via clone
---SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+Hash: hash_copy() via clone
 --FILE--
 <?php
 
@@ -127,6 +125,9 @@ string(8) "e5cfc160"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "69147a4e"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "5e405e93"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "98139504"
@@ -283,6 +284,9 @@ string(8) "59f8d3d2"
 string(6) "crc32b"
 string(8) "69147a4e"
 string(8) "3ee63999"
+string(6) "crc32c"
+string(8) "5e405e93"
+string(8) "516ad412"
 string(6) "fnv132"
 string(8) "98139504"
 string(8) "59ad036f"

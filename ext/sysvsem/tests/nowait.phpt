@@ -1,7 +1,7 @@
 --TEST--
 Test sem_acquire with nowait option
 --SKIPIF--
-<?php // vim600: ts=4 sw=4 syn=php fdm=marker
+<?php
 if(!extension_loaded('sysvsem') || !extension_loaded('pcntl')) {
 	die("skip sysvsem and pcntl required");
 }

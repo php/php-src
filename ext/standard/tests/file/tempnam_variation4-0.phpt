@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
 // Skip if being run by root
-$filename = dirname(__FILE__)."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_readable_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -22,12 +22,12 @@ unlink($filename);
 */
 
 /* Trying to create the file in a dir with permissions from 0000 to 0350,
-     Allowable permissions: files are expected to be created in the input dir 
+     Allowable permissions: files are expected to be created in the input dir
      Non-allowable permissions: files are expected to be created in '/tmp' dir
 */
 
 echo "*** Testing tempnam() with dir of permissions from 0000 to 0350 ***\n";
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/tempnam_variation4";
 $prefix = "tempnamVar4.";
 
@@ -44,9 +44,9 @@ for($mode = 0000; $mode <= 0350; $mode++) {
 
       if (realpath(dirname($file_name)) != realpath(sys_get_temp_dir())) {
          echo " created in unexpected dir\n";
-      }   
+      }
     }
-    unlink($file_name);    
+    unlink($file_name);
   }
   else {
     print("FAILED: File is not created\n");

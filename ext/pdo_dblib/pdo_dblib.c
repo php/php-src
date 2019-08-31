@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -71,6 +71,9 @@ zend_module_entry pdo_dblib_module_entry = {
 };
 
 #if defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL)
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 #if PDO_DBLIB_IS_MSSQL
 ZEND_GET_MODULE(pdo_mssql)
 #else
@@ -166,6 +169,9 @@ void pdo_dblib_err_dtor(pdo_dblib_err *err)
 
 static PHP_GINIT_FUNCTION(dblib)
 {
+#if defined(ZTS) && (defined(COMPILE_DL_PDO_DBLIB) || defined(COMPILE_DL_PDO_MSSQL))
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	memset(dblib_globals, 0, sizeof(*dblib_globals));
 	dblib_globals->err.sqlstate = dblib_globals->sqlstate;
 }

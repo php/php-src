@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,17 +31,17 @@
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
-static size_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_output_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	PHPWRITE(buf, count);
 	return count;
 }
 /* }}} */
 
-static size_t php_stream_output_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_output_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	stream->eof = 1;
-	return 0;
+	return -1;
 }
 /* }}} */
 
@@ -69,16 +69,16 @@ typedef struct php_stream_input { /* {{{ */
 } php_stream_input_t;
 /* }}} */
 
-static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_input_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	return -1;
 }
 /* }}} */
 
-static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_stream_input_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	php_stream_input_t *input = stream->abstract;
-	size_t read;
+	ssize_t read;
 
 	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
@@ -128,7 +128,7 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 
 	if (input->body) {
 		int sought = php_stream_seek(input->body, offset, whence);
-		*newoffset = (input->body)->position;
+		*newoffset = input->position = (input->body)->position;
 		return sought;
 	}
 
@@ -181,7 +181,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	int fd = -1;
 	int mode_rw = 0;
 	php_stream * stream = NULL;
-	char *p, *token, *pathdup;
+	char *p, *token = NULL, *pathdup;
 	zend_long max_memory;
 	FILE *file = NULL;
 #ifdef PHP_WIN32
@@ -441,13 +441,3 @@ PHPAPI const php_stream_wrapper php_stream_php_wrapper =	{
 	NULL,
 	0, /* is_url */
 };
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

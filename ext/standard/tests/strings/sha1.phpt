@@ -3,7 +3,7 @@ sha1() with ASCII output
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/sha1.dat";
+$filename = __DIR__."/sha1.dat";
 $a = array(
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",

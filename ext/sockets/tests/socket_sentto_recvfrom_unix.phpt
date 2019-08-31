@@ -26,7 +26,6 @@ if (!extension_loaded('sockets')) {
 
     $msg = "Ping!";
     $len = strlen($msg);
-    $bytes_sent = socket_sendto($socket, $msg, $len, 0); // cause warning
     $bytes_sent = socket_sendto($socket, $msg, $len, 0, $address);
     if ($bytes_sent == -1) {
 		@unlink($address);
@@ -54,8 +53,6 @@ if (!extension_loaded('sockets')) {
 --EXPECTF--
 Warning: socket_create(): Unable to create socket [%d]: Protocol not supported in %s on line %d
 bool(false)
-
-Warning: socket_sendto() expects at least 5 parameters, 4 given in %s on line %d
 bool(false)
 Received Ping!
 --CREDITS--

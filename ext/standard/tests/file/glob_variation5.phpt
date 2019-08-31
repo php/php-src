@@ -4,7 +4,7 @@ Test glob() function: ensure no platform difference, variation 3
 <?php if( substr(PHP_OS, 0, 3) == "WIN" ) {die('skip not valid on Windows');} ?>
 --FILE--
 <?php
-$path = dirname(__FILE__);
+$path = __DIR__;
 
 ini_set('open_basedir', '/tmp');
 

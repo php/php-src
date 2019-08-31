@@ -18,4 +18,3 @@ const mbfl_language mbfl_language_uni = {
 	mbfl_no_encoding_base64,
 	mbfl_no_encoding_base64
 };
-

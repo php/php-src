@@ -1,7 +1,7 @@
 --TEST--
 Streams Based IPv4 TCP Loopback test
 --FILE--
-<?php # vim:ft=php:
+<?php
 
   for ($i=0; $i<100; $i++) {
     $port = rand(10000, 65000);

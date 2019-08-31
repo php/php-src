@@ -5,7 +5,7 @@ Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
 --SKIPIF--
 <?php
-require_once dirname(__FILE__) .'/skipif.inc';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/skipif.inc';
 // reusing existing dtd: http://cvs.php.net/viewvc.cgi/php-src/ext/dom/tests/dom.ent?view=co&content-type=text%2Fplain
 $dom = new DOMDocument('1.0');
 $dom->substituteEntities = true;
-$dom->load(dirname(__FILE__).'/dom.xml');
+$dom->load(__DIR__.'/dom.xml');
 var_dump($dom->validate());
 ?>
 --EXPECT--

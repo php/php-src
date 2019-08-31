@@ -71,7 +71,7 @@ $needle = array(
   42, //needle as int(ASCII value of '*')
   $haystack  //haystack as needle
 );
-  
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
@@ -117,23 +117,15 @@ bool(false)
 string(5) "\101 "
 
 -- Iteration 12 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 
 -- Iteration 13 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 
 -- Iteration 14 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 
 -- Iteration 15 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
 bool(false)
 
 -- Iteration 16 --
@@ -221,9 +213,7 @@ bool(false)
 string(7) "4 \101 "
 
 -- Iteration 44 --
-
-Deprecated: strrchr(): Non-string needles will be interpreted as strings in %s on line %d
-string(37) "*+-./:;<=>?@hello123456he \x234 \101 "
+string(7) "4 \101 "
 
 -- Iteration 45 --
 string(63) "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 "

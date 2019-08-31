@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -613,7 +613,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */
 
-	/* Get the single byte that remains after the file type indentification */
+	/* Get the single byte that remains after the file type identification */
 	first_marker_id = php_stream_getc(stream);
 
 	/* Ensure that this marker is SIZ (as is mandated by the standard) */
@@ -1223,7 +1223,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_extension(int imagetype [, bool include_dot])
+/* {{{ proto string|false image_type_to_extension(int imagetype [, bool include_dot])
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
@@ -1493,12 +1493,14 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(input, input_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(info)
+		Z_PARAM_ZVAL(info)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 2) {
-		zval_ptr_dtor(info);
-		array_init(info);
+		info = zend_try_array_init(info);
+		if (!info) {
+			return;
+		}
 	}
 
 	if (mode == FROM_PATH) {
@@ -1508,7 +1510,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	}
 
 	if (!stream) {
-		   RETURN_FALSE;
+		RETURN_FALSE;
 	}
 
 	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1516,7 +1518,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 }
 /* }}} */
 
-/* {{{ proto array getimagesize(string imagefile [, array info])
+/* {{{ proto array|false getimagesize(string imagefile [, array info])
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
@@ -1524,19 +1526,10 @@ PHP_FUNCTION(getimagesize)
 }
 /* }}} */
 
-/* {{{ proto array getimagesizefromstring(string data [, array info])
+/* {{{ proto array|false getimagesizefromstring(string data [, array info])
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

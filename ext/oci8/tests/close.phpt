@@ -5,13 +5,13 @@ connect/close/connect
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 oci_close($c);
 
 oci_connect($user, $password, $dbase);
-	
+
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Done

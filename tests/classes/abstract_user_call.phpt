@@ -20,12 +20,15 @@ $o = new test;
 
 $o->func();
 
-call_user_func(array($o, 'test_base::func'));
+try {
+    call_user_func(array($o, 'test_base::func'));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 test::func()
-
-Warning: call_user_func() expects parameter 1 to be a valid callback, cannot call abstract method test_base::func() in %s on line %d
+call_user_func() expects parameter 1 to be a valid callback, cannot call abstract method test_base::func()
 ===DONE===

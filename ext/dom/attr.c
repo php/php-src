@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,6 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 /* {{{ proto DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
-	zval *id = getThis();
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
@@ -64,7 +63,7 @@ PHP_METHOD(domattr, __construct)
 		return;
 	}
 
-	intern = Z_DOMOBJ_P(id);
+	intern = Z_DOMOBJ_P(ZEND_THIS);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
@@ -161,11 +160,14 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (attrp->children) {
 		node_list_unlink(attrp->children);
 	}
-
-	str = zval_get_string(newval);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 
@@ -228,7 +230,8 @@ PHP_FUNCTION(dom_attr_is_id)
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -243,12 +246,3 @@ PHP_FUNCTION(dom_attr_is_id)
 /* }}} end dom_attr_is_id */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

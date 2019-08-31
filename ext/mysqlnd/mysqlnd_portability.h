@@ -49,83 +49,18 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define _LONG_LONG 1        /* For AIX string library */
 #endif
 
-
 /* Go around some bugs in different OS and compilers */
-#if defined(_HPUX_SOURCE) && defined(HAVE_SYS_STREAM_H)
-#include <sys/stream.h>        /* HPUX 10.20 defines ulong here. UGLY !!! */
-#define HAVE_ULONG
-#endif
-
 
 #if SIZEOF_LONG_LONG > 4
 #define HAVE_LONG_LONG 1
 #endif
 
 #ifdef PHP_WIN32
-#define MYSQLND_LLU_SPEC "%I64u"
-#define MYSQLND_LL_SPEC "%I64d"
 #define MYSQLND_SZ_T_SPEC "%Id"
 #ifndef L64
 #define L64(x) x##i64
 #endif
 #else
-
-#if __i386__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __ia64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __powerpc64__ || __ppc64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if (__powerpc__ || __ppc__ ) && !(__powerpc64__ || __ppc64__)
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#if __x86_64__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390x__
-#define MYSQLND_LL_SPEC	"%li"
-#define MYSQLND_LLU_SPEC "%lu"
-#endif
-
-#if __s390__ && !__s390x__
-#define MYSQLND_LL_SPEC	"%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifdef _AIX
-#define MYSQLND_LL_SPEC "%lli"
-#define MYSQLND_LLU_SPEC "%llu"
-#endif
-
-#ifndef MYSQLND_LL_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LL_SPEC "%li"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LL_SPEC "%lli"
-  #endif
-#endif
-
-#ifndef MYSQLND_LLU_SPEC
-  #if SIZEOF_LONG == 8
-    #define MYSQLND_LLU_SPEC "%lu"
-  #elif SIZEOF_LONG == 4
-    #define MYSQLND_LLU_SPEC "%llu"
-   #endif
-#endif /* MYSQLND_LLU_SPEC*/
-
 
 #define MYSQLND_SZ_T_SPEC "%zd"
 #ifndef L64
@@ -256,10 +191,10 @@ typedef union {
                   (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
                   (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
                   ((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)  (int32_t) (((int32_t) ((zend_uchar) (A)[0])) +\
-                              (((int32_t) ((zend_uchar) (A)[1]) << 8)) +\
-                              (((int32_t) ((zend_uchar) (A)[2]) << 16)) +\
-                              (((int32_t) ((int16_t) (A)[3]) << 24)))
+#define sint4korr(A)  (int32_t) (((uint32_t) ((A)[0])) +\
+                              (((uint32_t) ((A)[1]) << 8)) +\
+                              (((uint32_t) ((A)[2]) << 16)) +\
+                              (((uint32_t) ((A)[3]) << 24)))
 
 #define sint8korr(A)  (int64_t) uint8korr(A)
 #define uint2korr(A)  (uint16_t) (((uint16_t) ((zend_uchar) (A)[0])) +\
@@ -389,13 +324,3 @@ typedef union {
 #endif /* float8get */
 
 #endif /* MYSQLND_PORTABILITY_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

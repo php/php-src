@@ -2,7 +2,7 @@
 htmlentities() test 16 (mbstring / cp1251)
 --INI--
 output_handler=
-mbstring.internal_encoding=cp1251
+internal_encoding=cp1251
 --SKIPIF--
 <?php
 	extension_loaded("mbstring") or die("skip mbstring not available\n");

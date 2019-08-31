@@ -1,8 +1,8 @@
 --TEST--
-Test 9: Stream Wrapper XPath-Document() 
+Test 9: Stream Wrapper XPath-Document()
 --SKIPIF--
 <?php
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once __DIR__ .'/skipif.inc';
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --FILE--
@@ -11,7 +11,7 @@ echo "Test 9: Stream Wrapper XPath-Document()";
 include("prepare.inc");
 
 $xsl = new domDocument;
-$xsl->load(dirname(__FILE__)."/documentxpath.xsl");
+$xsl->load(__DIR__."/documentxpath.xsl");
 if(!$xsl) {
   echo "Error while parsing the document\n";
   exit;
@@ -20,8 +20,6 @@ if(!$xsl) {
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);
-
-
 --EXPECT--
 Test 9: Stream Wrapper XPath-Document()
 <?xml version="1.0" encoding="iso-8859-1"?>

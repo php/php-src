@@ -13,15 +13,15 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Constants [3] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
-    Constant [ public int IS_EXPLICIT_ABSTRACT ] { 32 }
-    Constant [ public int IS_FINAL ] { 4 }
+    Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
+    Constant [ public int IS_FINAL ] { 32 }
   }
 
   - Static properties [0] {
   }
 
   - Static methods [1] {
-    Method [ <internal:Reflection, prototype Reflector> static public method export ] {
+    Method [ <internal, deprecated:Reflection> static public method export ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $argument ]
@@ -265,7 +265,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $args ]
+        Parameter #0 [ <optional> ...$args ]
       }
     }
 

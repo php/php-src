@@ -8,7 +8,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.1.2.3.phar.tar.gz';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.2.3.phar.tar.gz';
 $decompressed_name = str_replace( ".gz", "",  $fname);
 var_dump(file_exists($fname));
 

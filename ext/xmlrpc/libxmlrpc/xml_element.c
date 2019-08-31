@@ -31,10 +31,6 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id$";
-
-
-
 /****h* ABOUT/xml_element
  * NAME
  *   xml_element
@@ -331,7 +327,7 @@ static char* xml_elem_entity_escape(const char* buf, int old_len, int *newlen, X
     char *NewBuffer;
     int ToBeXmlEscaped=0;
     int iLength;
-    bufcopy = buf;
+    bufcopy = (const unsigned char *) buf;
     iLength= old_len ? old_len : strlen(buf);
     while(*bufcopy) {
       if( should_escape(*bufcopy, flags) ) {
@@ -346,7 +342,7 @@ static char* xml_elem_entity_escape(const char* buf, int old_len, int *newlen, X
 
       NewBuffer= emalloc(iLength+1);
       if(NewBuffer) {
-	bufcopy=buf;
+	bufcopy = (const unsigned char *) buf;
 	while(*bufcopy) {
 	  if(should_escape(*bufcopy, flags)) {
 	    iNewBufLen += create_xml_escape(NewBuffer+iNewBufLen,*bufcopy);
@@ -713,13 +709,16 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
       }
 
       /* parse the XML */
-      if(XML_Parse(parser, in_buf, len, 1) == 0) {
+      if(XML_Parse(parser, (const unsigned char *) in_buf, len, 1) == 0) {
          enum XML_Error err_code = XML_GetErrorCode(parser);
          int line_num = XML_GetCurrentLineNumber(parser);
          int col_num = XML_GetCurrentColumnNumber(parser);
          long byte_idx = XML_GetCurrentByteIndex(parser);
 /*         int byte_total = XML_GetCurrentByteCount(parser); */
-         const char * error_str = XML_ErrorString(err_code);
+         const char * error_str = (const char *) XML_ErrorString(err_code);
+         if(byte_idx > len) {
+             byte_idx = len;
+         }
          if(byte_idx >= 0) {
              snprintf(buf,
                       sizeof(buf),

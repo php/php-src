@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 /* Delete link files - soft and hard links */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 // temp file used
 $filename = "$file_path/unlink_variation3.tmp";
 

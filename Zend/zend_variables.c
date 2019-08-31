@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -26,21 +26,13 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
+#if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str);
+#else
+# define zend_string_destroy _efree
+#endif
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref);
 static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref);
-
-#if ZEND_DEBUG
-static void ZEND_FASTCALL zend_array_destroy_wrapper(zend_array *arr);
-static void ZEND_FASTCALL zend_object_destroy_wrapper(zend_object *obj);
-static void ZEND_FASTCALL zend_resource_destroy_wrapper(zend_resource *res);
-static void ZEND_FASTCALL zend_ast_ref_destroy_wrapper(zend_ast_ref *ast);
-#else
-# define zend_array_destroy_wrapper    zend_array_destroy
-# define zend_object_destroy_wrapper   zend_objects_store_del
-# define zend_resource_destroy_wrapper zend_list_free
-# define zend_ast_ref_destroy_wrapper  zend_ast_ref_destroy
-#endif
 
 typedef void (ZEND_FASTCALL *zend_rc_dtor_func_t)(zend_refcounted *p);
 
@@ -52,11 +44,11 @@ static const zend_rc_dtor_func_t zend_rc_dtor_func[] = {
 	/* IS_LONG         */ (zend_rc_dtor_func_t)zend_empty_destroy,
 	/* IS_DOUBLE       */ (zend_rc_dtor_func_t)zend_empty_destroy,
 	/* IS_STRING       */ (zend_rc_dtor_func_t)zend_string_destroy,
-	/* IS_ARRAY        */ (zend_rc_dtor_func_t)zend_array_destroy_wrapper,
-	/* IS_OBJECT       */ (zend_rc_dtor_func_t)zend_object_destroy_wrapper,
-	/* IS_RESOURCE     */ (zend_rc_dtor_func_t)zend_resource_destroy_wrapper,
+	/* IS_ARRAY        */ (zend_rc_dtor_func_t)zend_array_destroy,
+	/* IS_OBJECT       */ (zend_rc_dtor_func_t)zend_objects_store_del,
+	/* IS_RESOURCE     */ (zend_rc_dtor_func_t)zend_list_free,
 	/* IS_REFERENCE    */ (zend_rc_dtor_func_t)zend_reference_destroy,
-	/* IS_CONSTANT_AST */ (zend_rc_dtor_func_t)zend_ast_ref_destroy_wrapper
+	/* IS_CONSTANT_AST */ (zend_rc_dtor_func_t)zend_ast_ref_destroy
 };
 
 ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
@@ -65,6 +57,7 @@ ZEND_API void ZEND_FASTCALL rc_dtor_func(zend_refcounted *p)
 	zend_rc_dtor_func[GC_TYPE(p)](p);
 }
 
+#if ZEND_DEBUG
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str)
 {
 	CHECK_ZVAL_STRING(str);
@@ -73,10 +66,12 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str)
 	ZEND_ASSERT(!(GC_FLAGS(str) & IS_STR_PERSISTENT));
 	efree(str);
 }
+#endif
 
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref)
 {
-	i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_CC);
+	ZEND_ASSERT(!ZEND_REF_HAS_TYPE_SOURCES(ref));
+	i_zval_ptr_dtor(&ref->val);
 	efree_size(ref, sizeof(zend_reference));
 }
 
@@ -84,31 +79,9 @@ static void ZEND_FASTCALL zend_empty_destroy(zend_reference *ref)
 {
 }
 
-#if ZEND_DEBUG
-static void ZEND_FASTCALL zend_array_destroy_wrapper(zend_array *arr)
-{
-	zend_array_destroy(arr);
-}
-
-static void ZEND_FASTCALL zend_object_destroy_wrapper(zend_object *obj)
-{
-	zend_objects_store_del(obj);
-}
-
-static void ZEND_FASTCALL zend_resource_destroy_wrapper(zend_resource *res)
-{
-	zend_list_free(res);
-}
-
-static void ZEND_FASTCALL zend_ast_ref_destroy_wrapper(zend_ast_ref *ast)
-{
-	zend_ast_ref_destroy(ast);
-}
-#endif
-
 ZEND_API void zval_ptr_dtor(zval *zval_ptr) /* {{{ */
 {
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC);
+	i_zval_ptr_dtor(zval_ptr);
 }
 /* }}} */
 
@@ -158,11 +131,3 @@ ZEND_API void ZEND_FASTCALL zval_copy_ctor_func(zval *zvalue)
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

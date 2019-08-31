@@ -7,9 +7,6 @@ output_handler=
 --FILE--
 <?php
 // TODO: Add more encoding
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 
 // EUC-JP
 $euc_jp = '0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。';
@@ -37,8 +34,7 @@ $str = mb_strimwidth($euc_jp, -10, -12,'...','EUC-JP');
 ($str === FALSE) ? print "13 OK\n" : print "NG: $str\n";
 
 ?>
-
---EXPECT--
+--EXPECTF--
 String width: 68
 1: 0123この文字...
 2: 0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。
@@ -47,11 +43,15 @@ String width: 68
 5: 。
 6: 。
 7: 。
-ERR: Warning
+
+Warning: mb_strimwidth(): Width is out of range in %s on line %d
 10 OK
-ERR: Warning
+
+Warning: mb_strimwidth(): Start position is out of range in %s on line %d
 11 OK
-ERR: Warning
+
+Warning: mb_strimwidth(): Start position is out of range in %s on line %d
 12 OK
-ERR: Warning
+
+Warning: mb_strimwidth(): Width is out of range in %s on line %d
 13 OK

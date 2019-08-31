@@ -14,19 +14,13 @@ $closure = function () {};
 
 foo("strpos");
 foo("foo");
-foo(array("bar", "baz"));
-foo(array("bar", "foo"));
 foo($closure);
+foo(array("bar", "foo"));
+foo(array("bar", "baz"));
 --EXPECTF--
 string(6) "strpos"
 string(3) "foo"
-
-Deprecated: Non-static method bar::baz() should not be called statically in %s on line %d
-array(2) {
-  [0]=>
-  string(3) "bar"
-  [1]=>
-  string(3) "baz"
+object(Closure)#1 (0) {
 }
 array(2) {
   [0]=>
@@ -34,6 +28,9 @@ array(2) {
   [1]=>
   string(3) "foo"
 }
-object(Closure)#%d (0) {
-}
 
+Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be callable, array given, called in %s on line %d and defined in %s:%d
+Stack trace:
+#0 %s(%d): foo(Array)
+#1 {main}
+  thrown in %s on line %d

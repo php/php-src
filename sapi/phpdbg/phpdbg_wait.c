@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -243,7 +243,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		zend_extension *extension;
 		zend_llist_position pos;
 		zval *name = NULL;
-		zend_string *strkey;
+		zend_string *strkey = NULL;
 
 		extension = (zend_extension *) zend_llist_get_first_ex(&zend_extensions, &pos);
 		while (extension) {
@@ -257,6 +257,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 					break;
 				}
 				name = NULL;
+				strkey = NULL;
 			} ZEND_HASH_FOREACH_END();
 
 			if (name) {
@@ -283,6 +284,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 				pefree(elm, zend_extensions.persistent);
 				zend_extensions.count--;
 			} else {
+				ZEND_ASSERT(strkey);
 				zend_hash_del(Z_ARRVAL_P(zvp), strkey);
 			}
 		}
@@ -377,21 +379,25 @@ PHPDBG_COMMAND(wait) /* {{{ */
 		return FAILURE;
 	}
 
-	char msglen[5];
-	int recvd = 4;
+	unsigned char msglen_buf[4];
+	int needed = 4;
 
 	do {
-		recvd -= recv(sr, &(msglen[4 - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &msglen_buf[4 - needed], needed, 0);
+	} while (needed > 0);
 
-	recvd = *(size_t *) msglen;
-	char *data = emalloc(recvd);
+	uint32_t msglen = (msglen_buf[3] << 24)
+					| (msglen_buf[2] << 16)
+					| (msglen_buf[1] <<  8)
+					| (msglen_buf[0] <<  0);
+	char *data = emalloc(msglen);
+	needed = msglen;
 
 	do {
-		recvd -= recv(sr, &(data[(*(int *) msglen) - recvd]), recvd, 0);
-	} while (recvd > 0);
+		needed -= recv(sr, &(data[msglen - needed]), needed, 0);
+	} while (needed > 0);
 
-	phpdbg_webdata_decompress(data, *(int *) msglen);
+	phpdbg_webdata_decompress(data, msglen);
 
 	if (PHPDBG_G(socket_fd) != -1) {
 		close(PHPDBG_G(socket_fd));

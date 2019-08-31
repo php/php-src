@@ -5,7 +5,7 @@ zend multibyte (13)
 --INI--
 zend.multibyte=On
 zend.script_encoding=UTF-8
-mbstring.internal_encoding=ISO-8859-1
+internal_encoding=ISO-8859-1
 --FILE--
 <?php
 var_dump(substr(file_get_contents(__FILE__), __COMPILER_HALT_OFFSET__));

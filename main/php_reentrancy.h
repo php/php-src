@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,13 +48,6 @@
 #endif
 
 BEGIN_EXTERN_C()
-
-#if defined(HAVE_POSIX_READDIR_R)
-#define php_readdir_r readdir_r
-#else
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
-		struct dirent **result);
-#endif
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 #define PHP_NEED_REENTRANCY 1
@@ -129,11 +122,3 @@ void reentrancy_shutdown(void);
 #endif
 
 #endif
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

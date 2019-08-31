@@ -157,7 +157,8 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 	}
 
 	zend_iterator_init(&iterator->intern);
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &resourcebundle_iterator_funcs;
 
 	iterator->subject = rb;
@@ -175,12 +176,3 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 	return (zend_object_iterator *) iterator;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

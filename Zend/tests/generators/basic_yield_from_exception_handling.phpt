@@ -56,4 +56,3 @@ Exception: 4 in %s:%d
 Stack trace:
 #0 {main}
 bool(false)
-

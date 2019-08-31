@@ -282,8 +282,13 @@ if ($pid) {
 			}
 
 		}elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
-			change_dir($m[1]);
-			fputs($s, "250 CWD command successful.\r\n");
+			if (isset($bug77680)) {
+				fputs($s, "550 Directory change to $m[1] failed: file does not exist\r\n");
+				var_dump($buf);
+			} else {
+				change_dir($m[1]);
+				fputs($s, "250 CWD command successful.\r\n");
+			}
 
 		} elseif (preg_match("~^NLST(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
 
@@ -325,6 +330,9 @@ if ($pid) {
 			if (isset($bug7216)) {
 				fputs($s, "257 OK.\r\n");
 			} else {
+				if (isset($bug77680)) {
+					var_dump($buf);
+				}
 				fputs($s, "257 \"/path/to/ftproot$cwd$m[1]\" created.\r\n");
 			}
 
@@ -464,9 +472,12 @@ if ($pid) {
 		} elseif (preg_match('/^SITE CHMOD/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 
-		} elseif (preg_match('/^DELE/', $buf, $matches)) {
-			fputs($s, "250 OK\r\n");
-
+		} elseif (preg_match('/^DELE ([\w\h]+)/', $buf, $matches)) {
+			if (isset($matches[1]) && in_array($matches[1], ['file1', "file\nb0rk"])){
+				fputs($s, "250 Delete successful\r\n");
+			} else {
+				fputs($s, "550 No such file or directory\r\n");
+			}
 		} elseif (preg_match('/^ALLO (\d+)/', $buf, $matches)) {
 			fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 

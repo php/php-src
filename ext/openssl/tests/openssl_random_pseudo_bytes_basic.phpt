@@ -4,13 +4,11 @@ openssl_random_pseudo_bytes() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-for ($i = 0; $i < 10; $i++) {
-    var_dump(bin2hex(openssl_random_pseudo_bytes($i, $strong)));
+for ($i = 1; $i < 10; $i++) {
+    var_dump(bin2hex(openssl_random_pseudo_bytes($i)));
 }
-
 ?>
 --EXPECTF--
-string(0) ""
 string(2) "%s"
 string(4) "%s"
 string(6) "%s"

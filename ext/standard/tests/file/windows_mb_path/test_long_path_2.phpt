@@ -2,7 +2,7 @@
 Basic long path test with file I/O, multibyte path and realpath() check
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -11,7 +11,7 @@ skip_if_no_required_exts("mbstring");
 ?>
 --FILE--
 <?php
-$p = ""; 
+$p = "";
 $s = str_repeat('x', 50) . "ü";
 $how_many = 32;
 
@@ -19,10 +19,10 @@ $how_many = 32;
 for ($i = 0; $i < $how_many; $i++) {
 	$p .= "$s";
 	$p .= DIRECTORY_SEPARATOR;
-} 
+}
 
 /* path doesn't exist at this point! */
-$p = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $p;
+$p = realpath(__DIR__) . DIRECTORY_SEPARATOR . $p;
 
 echo strlen($p), "\n", $p, "\n";
 
@@ -47,7 +47,7 @@ for ($i = 0; $i < $how_many; $i++) {
 	rmdir($p0);
 }
 
-var_dump(file_exists(realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $s));
+var_dump(file_exists(realpath(__DIR__) . DIRECTORY_SEPARATOR . $s));
 
 ?>
 ===DONE===

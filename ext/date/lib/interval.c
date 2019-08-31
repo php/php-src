@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,10 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
-	if (one->sse > two->sse) {
+	if (
+		(one->sse > two->sse) ||
+		(one->sse == two->sse && one->us > two->us)
+	) {
 		swp = two;
 		two = one;
 		one = swp;

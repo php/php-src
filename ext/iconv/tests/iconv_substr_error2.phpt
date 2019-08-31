@@ -8,7 +8,7 @@ function_exists('iconv_substr') or die("skip iconv_substr() is not available in 
 --FILE--
 <?php
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
  */
 
@@ -33,4 +33,3 @@ echo "Done";
 Notice: iconv_substr(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
 bool(false)
 Done
-

@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff_uassoc() function : usage variation 
+Test array_udiff_uassoc() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_udiff_uassoc(array arr1, array arr2 [, array ...], callback data_comp_func, callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys and elements are compared by user supplied functions.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff_uassoc() : usage variation ***\n";
@@ -92,137 +92,91 @@ $inputs = array(
 // loop through each element of the array for arr1
 
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( array_udiff_uassoc($value, $arr2, $data_comp_func, $key_comp_func) );
+    echo "\n--$key--\n";
+    try {
+        var_dump( array_udiff_uassoc($value, $arr2, $data_comp_func, $key_comp_func) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_udiff_uassoc() : usage variation ***
 
 --int 0--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, int given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, int given
 
 --int 1--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, int given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, int given
 
 --int 12345--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, int given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, int given
 
 --int -12345--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, int given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, int given
 
 --float 10.5--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, float given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, float given
 
 --float -10.5--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, float given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, float given
 
 --float 12.3456789000e10--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, float given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, float given
 
 --float -12.3456789000e10--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, float given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, float given
 
 --float .5--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, float given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, float given
 
 --uppercase NULL--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, null given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, null given
 
 --lowercase null--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, null given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, null given
 
 --lowercase true--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, bool given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, bool given
 
 --lowercase false--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, bool given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, bool given
 
 --uppercase TRUE--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, bool given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, bool given
 
 --uppercase FALSE--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, bool given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, bool given
 
 --empty string DQ--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --empty string SQ--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --string DQ--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --string SQ--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --mixed case string--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --heredoc--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, string given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, string given
 
 --instance of classWithToString--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, object given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, object given
 
 --instance of classWithoutToString--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, object given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, object given
 
 --undefined var--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, null given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, null given
 
 --unset var--
-
-Warning: array_udiff_uassoc(): Expected parameter 1 to be an array, null given in %sarray_udiff_uassoc_variation1.php on line %d
-NULL
+Expected parameter 1 to be an array, null given
 ===DONE===

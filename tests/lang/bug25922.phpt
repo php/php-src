@@ -9,7 +9,7 @@ function my_error_handler($error, $errmsg='', $errfile='', $errline=0, $errconte
 	echo "$errmsg\n";
 	$errcontext = '';
 }
-                                                                                        
+
 set_error_handler('my_error_handler');
 
 function test()
@@ -20,4 +20,5 @@ test();
 ?>
 --EXPECT--
 Undefined variable: data
+Trying to access array offset on value of type null
 Undefined index here: ''

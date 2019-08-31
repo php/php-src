@@ -3,7 +3,7 @@ Bug #40752 (parse_ini_file() segfaults when a scalar setting is redeclared as an
 --FILE--
 <?php
 
-$file = dirname(__FILE__)."/bug40752.ini";
+$file = __DIR__."/bug40752.ini";
 file_put_contents($file, '
 foo   = 1;
 foo[] = 1;
@@ -22,7 +22,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   ["foo"]=>
   array(1) {

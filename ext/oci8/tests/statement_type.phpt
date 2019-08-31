@@ -5,7 +5,7 @@ oci_statement_type()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $sqls = Array(
     "SELECT * FROM table",

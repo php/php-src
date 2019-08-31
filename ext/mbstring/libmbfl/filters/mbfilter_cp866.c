@@ -133,9 +133,7 @@ mbfl_filt_conv_wchar_cp866(int c, mbfl_convert_filter *filter)
 	if (s >= 0) {
 		CK((*filter->output_function)(s, filter->data));
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -149,5 +147,3 @@ static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter)
 		filter->flag = 1; /* not it */
 	return c;
 }
-
-

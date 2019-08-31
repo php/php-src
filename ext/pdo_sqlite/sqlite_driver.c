@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -45,33 +45,33 @@ int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int li
 		}
 		einfo->errmsg = pestrdup((char*)sqlite3_errmsg(H->db), dbh->is_persistent);
 	} else { /* no error */
-		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(PDO_ERR_NONE));
+		strncpy(*pdo_err, PDO_ERR_NONE, sizeof(*pdo_err));
 		return 0;
 	}
 	switch (einfo->errcode) {
 		case SQLITE_NOTFOUND:
-			strncpy(*pdo_err, "42S02", sizeof("42S02"));
+			strncpy(*pdo_err, "42S02", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_INTERRUPT:
-			strncpy(*pdo_err, "01002", sizeof("01002"));
+			strncpy(*pdo_err, "01002", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_NOLFS:
-			strncpy(*pdo_err, "HYC00", sizeof("HYC00"));
+			strncpy(*pdo_err, "HYC00", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_TOOBIG:
-			strncpy(*pdo_err, "22001", sizeof("22001"));
+			strncpy(*pdo_err, "22001", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_CONSTRAINT:
-			strncpy(*pdo_err, "23000", sizeof("23000"));
+			strncpy(*pdo_err, "23000", sizeof(*pdo_err));
 			break;
 
 		case SQLITE_ERROR:
 		default:
-			strncpy(*pdo_err, "HY000", sizeof("HY000"));
+			strncpy(*pdo_err, "HY000", sizeof(*pdo_err));
 			break;
 	}
 
@@ -305,9 +305,17 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_ATTR_TIMEOUT:
 			sqlite3_busy_timeout(H->db, zval_get_long(val) * 1000);
 			return 1;
+		case PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES:
+			sqlite3_extended_result_codes(H->db, zval_get_long(val));
+			return 1;
 	}
 	return 0;
 }
+
+typedef struct {
+	zval val;
+	zend_long row;
+} aggregate_context;
 
 static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		int argc, sqlite3_value **argv, sqlite3_context *context,
@@ -318,7 +326,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	int i;
 	int ret;
 	int fake_argc;
-	zend_reference *agg_context = NULL;
+	aggregate_context *agg_context = NULL;
 
 	if (is_agg) {
 		is_agg = 2;
@@ -339,18 +347,16 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	}
 
 	if (is_agg) {
-		agg_context = (zend_reference*)sqlite3_aggregate_context(context, sizeof(zend_reference));
+		agg_context = sqlite3_aggregate_context(context, sizeof(aggregate_context));
 		if (!agg_context) {
-			ZVAL_NULL(&zargs[0]);
-		} else {
-			if (Z_ISUNDEF(agg_context->val)) {
-				GC_SET_REFCOUNT(agg_context, 1);
-				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
-				ZVAL_NULL(&agg_context->val);
-			}
-			ZVAL_REF(&zargs[0], agg_context);
+			efree(zargs);
+			return FAILURE;
 		}
-		ZVAL_LONG(&zargs[1], sqlite3_aggregate_count(context));
+		if (Z_ISUNDEF(agg_context->val)) {
+			ZVAL_NEW_REF(&agg_context->val, &EG(uninitialized_zval));
+		}
+		ZVAL_COPY_VALUE(&zargs[0], &agg_context->val);
+		ZVAL_LONG(&zargs[1], ++agg_context->row);
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -411,7 +417,10 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 					break;
 
 				default:
-					convert_to_string_ex(&retval);
+					if (!try_convert_to_string(&retval)) {
+						ret = FAILURE;
+						break;
+					}
 					sqlite3_result_text(context, Z_STRVAL(retval), Z_STRLEN(retval), SQLITE_TRANSIENT);
 					break;
 			}
@@ -426,13 +435,13 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		/* we're stepping in an aggregate; the return value goes into
 		 * the context */
 		if (agg_context) {
-			zval_ptr_dtor(&agg_context->val);
-		}
-		if (!Z_ISUNDEF(retval)) {
-			ZVAL_COPY_VALUE(&agg_context->val, &retval);
+			if (Z_ISUNDEF(retval)) {
+				zval_ptr_dtor(&agg_context->val);
+				return FAILURE;
+			}
+			zval_ptr_dtor(Z_REFVAL(agg_context->val));
+			ZVAL_COPY_VALUE(Z_REFVAL(agg_context->val), &retval);
 			ZVAL_UNDEF(&retval);
-		} else {
-			ZVAL_UNDEF(&agg_context->val);
 		}
 	}
 
@@ -529,7 +538,7 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {
@@ -601,7 +610,7 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 		Z_PARAM_LONG(argc)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(step_callback, 0, NULL)) {
@@ -661,7 +670,7 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 		Z_PARAM_ZVAL(callback)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
-	dbh = Z_PDO_DBH_P(getThis());
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 
 	if (!zend_is_callable(callback, 0, NULL)) {
@@ -809,11 +818,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 
 	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
-#if SQLITE_VERSION_NUMBER >= 3005000
 	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
-#else
-	i = sqlite3_open(filename, &H->db);
-#endif
 
 	efree(filename);
 
@@ -847,12 +852,3 @@ const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),
 	pdo_sqlite_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

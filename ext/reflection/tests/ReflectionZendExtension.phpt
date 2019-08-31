@@ -16,8 +16,10 @@ var_dump(gettype($reflection->export('Zend OPcache', true)) === 'string');
 ?>
 --EXPECTF--
 string(17) "Zend Technologies"
-string(23) "Copyright (c) 1999-20%d"
+string(13) "Copyright (c)"
 string(12) "Zend OPcache"
 string(20) "http://www.zend.com/"
 bool(true)
+
+Deprecated: Function ReflectionZendExtension::export() is deprecated in %s on line %d
 bool(true)

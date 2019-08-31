@@ -36,20 +36,6 @@ class Magic3 {
 	}
 }
 
-$f = array('Hello','world');
-try {
-	var_dump($f('you'));
-} catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
-}
-try {
-	var_dump(call_user_func($f, 'you'));
-} catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
-}
-
-printf("-----\n");
-
 $h= new Hello;
 $f = array($h,'world');
 var_dump($f('again'));
@@ -107,14 +93,6 @@ var_dump(call_user_func($f, 'you'));
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-Exception: Using $this when not in object context
-
-Deprecated: %son-static method Hello::world() should not be called statically in %s on line %d
-Hello, you
-Exception: Using $this when not in object context
------
 Hello, again
 object(Hello)#%d (0) {
 }

@@ -22,7 +22,7 @@ try {
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "42"

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,24 +27,20 @@ extern zend_module_entry zip_module_entry;
 #include "TSRM.h"
 #endif
 
-#if defined(HAVE_LIBZIP)
 #include <zip.h>
-#else
-#include "lib/zip.h"
-#endif
 
 #ifndef ZIP_OVERWRITE
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.15.3"
+#define PHP_ZIP_VERSION "1.15.4"
 
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
-	int index_current;
-	int num_files;
+	zip_uint64_t index_current;
+	zip_int64_t num_files;
 } zip_rsrc;
 
 typedef zip_rsrc * zip_rsrc_ptr;
@@ -80,12 +76,3 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 extern const php_stream_wrapper php_stream_zip_wrapper;
 
 #endif	/* PHP_ZIP_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

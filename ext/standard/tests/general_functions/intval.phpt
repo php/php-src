@@ -63,7 +63,7 @@ echo "\n*** Testing intval() on non integer types ***\n";
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
 fclose($fp);
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 closedir($dfp);
 
 // unset variable
@@ -145,13 +145,6 @@ $not_int_types = array (
 foreach ($not_int_types as $type ) {
    var_dump( intval($type) );
 }
-
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( intval() );
-
-//arguments more than expected
-var_dump( intval(TRUE, FALSE, TRUE) );
 
 echo "\n--- Done ---\n";
 
@@ -294,13 +287,5 @@ int(1)
 int(0)
 int(0)
 int(0)
-
-*** Testing error conditions ***
-
-Warning: intval() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: intval() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 --- Done ---

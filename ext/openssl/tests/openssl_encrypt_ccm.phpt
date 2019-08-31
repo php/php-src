@@ -24,9 +24,12 @@ foreach ($tests as $idx => $test) {
 // Empty IV error
 var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, $tag, ''));
 
-// Test setting different IV length and unlimeted tag
-var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 10), $tag, '', 1024));
+// Test setting different IV length and tag length
+var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 10), $tag, '', 14));
 var_dump(strlen($tag));
+
+// Test setting invalid tag length
+var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 16), $tag, '', 1024));
 ?>
 --EXPECTF--
 TEST 0
@@ -36,4 +39,7 @@ bool(true)
 Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 string(8) "p/lvgA=="
-int(1024)
+int(14)
+
+Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed in %s on line %d
+bool(false)

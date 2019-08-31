@@ -1,7 +1,7 @@
-dnl config.m4 for extension pdo_dblib
-
-PHP_ARG_WITH(pdo-dblib, for PDO_DBLIB support via FreeTDS,
-[  --with-pdo-dblib[=DIR]    PDO: DBLIB-DB support.  DIR is the FreeTDS home directory])
+PHP_ARG_WITH([pdo-dblib],
+  [for PDO_DBLIB support via FreeTDS],
+  [AS_HELP_STRING([[--with-pdo-dblib[=DIR]]],
+    [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
 
@@ -51,35 +51,15 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   PHP_ADD_INCLUDE($PDO_FREETDS_INCLUDE_DIR)
   PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
 
-  ifdef([PHP_CHECK_PDO_INCLUDES],
-  [
-    PHP_CHECK_PDO_INCLUDES
-  ],[
-    AC_MSG_CHECKING([for PDO includes])
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$phpincludedir/ext
-    else
-      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-    fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
-  ])
+  PHP_CHECK_PDO_INCLUDES
 
   PDO_DBLIB_DEFS="-DPDO_DBLIB_FLAVOUR=\\\"freetds\\\""
-  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS)
-  AC_CHECK_LIB(dnet_stub, dnet_addr,
-     [ PHP_ADD_LIBRARY_WITH_PATH(dnet_stub,,PDO_DBLIB_SHARED_LIBADD)
-        AC_DEFINE(HAVE_LIBDNET_STUB,1,[ ])
-     ])
+  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  AC_CHECK_LIB(dnet_stub, dnet_addr, [
+    PHP_ADD_LIBRARY_WITH_PATH(dnet_stub,,PDO_DBLIB_SHARED_LIBADD)
+  ])
   AC_DEFINE(HAVE_PDO_DBLIB,1,[ ])
-  AC_DEFINE(HAVE_FREETDS,1,[ ])
   PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
 
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)
-  ])
+  PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)
 fi

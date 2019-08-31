@@ -1,5 +1,5 @@
 --TEST--
-ReflectionParameter::export()
+ReflectionParameter::__toString()
 --CREDITS--
 Stefan Koopmanschap <stefan@stefankoopmanschap.nl>
 --FILE--
@@ -9,11 +9,11 @@ function ReflectionParameterTest($test, $test2 = null) {
 }
 $reflect = new ReflectionFunction('ReflectionParameterTest');
 foreach($reflect->getParameters() as $key => $value) {
-	echo ReflectionParameter::export('ReflectionParameterTest', $key);
+	echo new ReflectionParameter('ReflectionParameterTest', $key), "\n";
 }
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 Parameter #0 [ <required> $test ]
 Parameter #1 [ <optional> $test2 = NULL ]
 ==DONE==

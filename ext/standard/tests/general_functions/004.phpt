@@ -1,8 +1,8 @@
 --TEST--
 fgetcsv() with tab delimited fields (BUG #8258)
 --FILE--
-<?php 
-chdir(dirname(__FILE__));
+<?php
+chdir(__DIR__);
 $fp=fopen("004.data","r");
 while($a=fgetcsv($fp,100,"\t")) {
 	echo join(",",$a)."\n";

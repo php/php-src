@@ -46,4 +46,3 @@ Warning: error_log(%s/bad.txt): failed to open stream: %s in %s on line %d
 bool(false)
 bool(true)
 *** Finished testing open_basedir configuration [error_log] ***
-

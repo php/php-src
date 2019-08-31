@@ -364,9 +364,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s1 & 0xff, filter->data));
 			}
 		} else {
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		}
 
 		if (s2 <= 0 || s1 == -1) {
@@ -488,9 +486,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s2, filter->data));
 			}
 		} else {
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		}
 		break;
 
@@ -525,7 +521,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			}
 		}
 
-		if (filter->status == 0 && filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+		if (filter->status == 0) {
 			CK(mbfl_filt_conv_illegal_output(c1, filter));
 			CK(mbfl_filt_conv_illegal_output(c, filter));
 		}
@@ -556,7 +552,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s2, filter->data));
 			}
 
-			if (s1 <= 0 && filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			if (s1 <= 0) {
 				CK(mbfl_filt_conv_illegal_output(0xf860, filter));
 				CK(mbfl_filt_conv_illegal_output(c1, filter));
 				CK(mbfl_filt_conv_illegal_output(c, filter));
@@ -605,7 +601,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s2, filter->data));
 			}
 
-			if (s1 <= 0 && filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			if (s1 <= 0) {
 				CK(mbfl_filt_conv_illegal_output(0xf861, filter));
 				for (i=0; i<3; i++) {
 					if (c1 == code_tbl_m[i+5][3]) {
@@ -651,7 +647,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				CK((*filter->output_function)(s2, filter->data));
 			}
 
-			if (s1 <= 0 && filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			if (s1 <= 0) {
 				CK(mbfl_filt_conv_illegal_output(0xf862, filter));
 				for (i=0; i<4; i++) {
 					if (c1 == code_tbl_m[i+8][4]) {
@@ -699,4 +695,3 @@ mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
 
 	return 0;
 }
-

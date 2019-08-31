@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_UNIX_H
@@ -16,4 +15,3 @@ int fpm_unix_init_main();
 extern size_t fpm_pagesize;
 
 #endif
-

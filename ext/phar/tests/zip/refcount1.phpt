@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -44,7 +44,7 @@ include $alias . '/b/c.php';
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
 ===CLOSE===
 object(PharFileInfo)#%d (2) {

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -234,38 +234,6 @@ MYSQLI_MAP_PROPERTY_FUNC_STRING(link_sqlstate_read, mysql_sqlstate, MYSQLI_GET_M
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_thread_id_read, mysql_thread_id, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), zend_ulong, ZEND_ULONG_FMT)
 
-/* {{{ property link_stat_read */
-static zval *link_stat_read(mysqli_object *obj, zval *retval)
-{
-	MY_MYSQL *mysql;
-
-	ZVAL_NULL(retval);
-
-#if defined(MYSQLI_USE_MYSQLND)
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
-#else
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
-#endif
-
- 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-
-	if (mysql) {
-#if defined(MYSQLI_USE_MYSQLND)
-		zend_string * stat_msg;
-		if (mysqlnd_stat(mysql->mysql, &stat_msg) == PASS) {
-			ZVAL_STR(retval, stat_msg);
-		}
-#else
-		char * stat_msg;
-		if ((stat_msg = (char *)mysql_stat(mysql->mysql))) {
-			ZVAL_STRING(retval, stat_msg);
-		}
-#endif
-	}
-	return retval;
-}
-/* }}} */
-
 /* result properties */
 
 /* {{{ property result_type_read */
@@ -435,7 +403,6 @@ const mysqli_property_entry mysqli_link_property_entries[] = {
 	{"insert_id",		sizeof("insert_id") - 1,		link_insert_id_read, NULL},
 	{"server_info",		sizeof("server_info") - 1,		link_server_info_read, NULL},
 	{"server_version",	sizeof("server_version") - 1,	link_server_version_read, NULL},
-	{"stat",			sizeof("stat") - 1,				link_stat_read, NULL},
 	{"sqlstate",		sizeof("sqlstate") - 1,			link_sqlstate_read, NULL},
 	{"protocol_version",sizeof("protocol_version") - 1,	link_protocol_version_read, NULL},
 	{"thread_id",		sizeof("thread_id") - 1, 		link_thread_id_read, NULL},
@@ -466,12 +433,3 @@ const mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"id",			sizeof("id") - 1,			stmt_id_read, NULL},
 	{NULL, 0, NULL, NULL}
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

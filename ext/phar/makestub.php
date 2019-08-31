@@ -34,7 +34,7 @@ $stub = '/*
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension generated stub         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-' . date('Y') . ' The PHP Group                   |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |

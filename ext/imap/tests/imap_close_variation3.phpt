@@ -7,7 +7,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 --FILE--
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream 
+ * Description: Close an IMAP stream
  * Source code: ext/imap/php_imap.c
  */
 
@@ -23,7 +23,7 @@ var_dump(imap_close($file_handle));
 var_dump($file_handle);
 
 echo "\n-- Directory Resource opened with opendir() --\n";
-var_dump($dir_handle = opendir(dirname(__FILE__)));
+var_dump($dir_handle = opendir(__DIR__));
 var_dump(imap_close($dir_handle));
 var_dump($dir_handle);
 ?>

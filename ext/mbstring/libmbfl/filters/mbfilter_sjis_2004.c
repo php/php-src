@@ -39,8 +39,6 @@
 
 extern const unsigned char mblen_table_sjis[];
 
-static int mbfl_filt_ident_sjis2004(int c, mbfl_identify_filter *filter);
-
 extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern int mbfl_bisec_srch(int w, const unsigned short *tbl, int n);
 extern int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n);
@@ -670,9 +668,7 @@ retry:
 			CK((*filter->output_function)(s2, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

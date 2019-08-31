@@ -1,14 +1,14 @@
 --TEST--
 Check xsltprocessor::getParameter with undefined parameter
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 var_dump($proc->getParameter('', 'doesnotexist'));
 --EXPECT--
 bool(false)

@@ -10,7 +10,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing fileperms() with different notations of file names ***\n";
 $dir_name = $file_path."/fileperms_variation3";
@@ -28,7 +28,7 @@ $files_arr = array(
   "/fileperms_variation3//fileperms_variation3.tmp",
   "//fileperms_variation3//fileperms_variation3.tmp",
   "/fileperms_variation3/*.tmp",
-  "fileperms_variation3/fileperms*.tmp", 
+  "fileperms_variation3/fileperms*.tmp",
 
   /* Testing Binary safe */
   "/fileperms_variation3/fileperms_variation3.tmp".chr(0),
@@ -39,7 +39,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileperms( $file_path."/".$file ) );
+  try {
+    var_dump( fileperms( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -48,7 +52,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/fileperms_variation3";
 unlink($dir_name."/fileperms_variation3.tmp");
 rmdir($dir_name);
@@ -74,12 +78,8 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-
-Warning: fileperms() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileperms() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: fileperms() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileperms() expects parameter 1 to be a valid path, string given
 
 *** Done ***

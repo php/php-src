@@ -19,7 +19,7 @@ class x extends c implements a, b {
 	function foo() { }
 }
 
-ReflectionClass::export('x');
+echo new ReflectionClass('x');
 
 ?>
 --EXPECTF--
@@ -48,4 +48,3 @@ Class [ <user> class x extends c implements a, b ] {
     }
   }
 }
-

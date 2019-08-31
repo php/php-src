@@ -95,6 +95,10 @@ void vsyslog(int priority, const char *message, va_list args)
 	DWORD evid;
 	wchar_t *strsw[2];
 
+	/* default event source */
+	if (INVALID_HANDLE_VALUE == PW32G(log_source))
+		openlog("php", LOG_PID, LOG_SYSLOG);
+
 	switch (priority) {			/* translate UNIX type into NT type */
 		case LOG_ALERT:
 			etype = EVENTLOG_ERROR_TYPE;
@@ -150,11 +154,3 @@ void openlog(const char *ident, int logopt, int facility)
 	PW32G(log_header) = malloc(header_len*sizeof(char));
 	sprintf_s(PW32G(log_header), header_len, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

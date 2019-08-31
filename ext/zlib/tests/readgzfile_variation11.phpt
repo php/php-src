@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 <?php
 
 
-$filename = dirname(__FILE__)."/004.txt.gz";
+$filename = __DIR__."/004.txt.gz";
 
 
 $variation = array(

@@ -27,4 +27,4 @@ for ($i=0; $i<9999; $i++) {
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(20001)
+int(10002)

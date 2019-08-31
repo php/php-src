@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -56,10 +56,10 @@ const php_stream_ops php_stream_unixdg_socket_ops;
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam);
 
 /* {{{ Generic socket stream operations */
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_sockop_write(php_stream *stream, const char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int didwrite;
+	ssize_t didwrite;
 	struct timeval *ptimeout;
 
 	if (!sock || sock->socket == -1) {
@@ -109,10 +109,6 @@ retry:
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), didwrite, 0);
 	}
 
-	if (didwrite < 0) {
-		didwrite = 0;
-	}
-
 	return didwrite;
 }
 
@@ -146,14 +142,14 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	}
 }
 
-static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t nr_bytes = 0;
 	int err;
 
 	if (!sock || sock->socket == -1) {
-		return 0;
+		return -1;
 	}
 
 	if (sock->is_blocked) {
@@ -165,14 +161,18 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 	err = php_socket_errno();
 
-	stream->eof = (nr_bytes == 0 || (nr_bytes == -1 && err != EWOULDBLOCK && err != EAGAIN));
+	if (nr_bytes < 0) {
+		if (err == EAGAIN || err == EWOULDBLOCK) {
+			nr_bytes = 0;
+		} else {
+			stream->eof = 1;
+		}
+	} else if (nr_bytes == 0) {
+		stream->eof = 1;
+	}
 
 	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
-	}
-
-	if (nr_bytes < 0) {
-		nr_bytes = 0;
 	}
 
 	return nr_bytes;
@@ -925,13 +925,3 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 
 	return stream;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

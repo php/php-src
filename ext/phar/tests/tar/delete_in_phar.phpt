@@ -8,7 +8,7 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
 
 $phar = new Phar($fname);
@@ -17,14 +17,6 @@ $phar['b.php'] = '<?php echo "This is b\n"; ?>';
 $phar['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 $phar->setStub('<?php __HALT_COMPILER(); ?>');
 $phar->stopBuffering();
-
-if (function_exists("opcache_get_status")) {
-	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
-		ini_set("opcache.revalidate_freq", "0");
-		sleep(2);
-	}
-}
 
 include $alias . '/a.php';
 include $alias . '/b.php';
@@ -41,7 +33,7 @@ include $alias . '/b/c.php';
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 This is a
 This is b

@@ -13,7 +13,7 @@ $ao = new UsesMagic(array(), ArrayObject::ARRAY_AS_PROPS);
 echo "Doesn't trigger __get.\n";
 echo $ao->prop1;
 
-echo "Doesn't trigger __set.\n";    
+echo "Doesn't trigger __set.\n";
 $ao->prop2 = 'foo';
 
 echo "Doesn't trigger __unset.\n";

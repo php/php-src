@@ -1,86 +1,7 @@
-diff -u Magdir.orig/cafebabe Magdir/cafebabe
---- Magdir.orig/cafebabe	2017-05-25 22:07:23.000000000 +0200
-+++ Magdir/cafebabe	2018-04-28 12:26:00.840857162 +0200
-@@ -15,22 +15,6 @@
- # might add another one or two as time goes by...
- #
- ### JAVA START ###
--0	belong		0xcafebabe
-->4	belong		>30		compiled Java class data,
--!:mime	application/x-java-applet
-->>6	beshort		x	        version %d.
-->>4	beshort		x       	\b%d
--# Which is which?
--#>>4	belong		0x032d		(Java 1.0)
--#>>4	belong		0x032d		(Java 1.1)
-->>4	belong		0x002e		(Java 1.2)
-->>4	belong		0x002f		(Java 1.3)
-->>4	belong		0x0030		(Java 1.4)
-->>4	belong		0x0031		(Java 1.5)
-->>4	belong		0x0032		(Java 1.6)
-->>4	belong		0x0033		(Java 1.7)
-->>4	belong		0x0034		(Java 1.8)
--
- 0	belong		0xcafed00d	JAR compressed with pack200,
- >5	byte		x		version %d.
- >4	byte		x		\b%d
-@@ -52,15 +36,28 @@
- 
- 0	belong		0xcafebabe
- >4	belong		1		Mach-O universal binary with 1 architecture:
--!:mime application/x-mach-binary
- >>8	use		mach-o		\b
-+0	belong		0xcafebabe
-+>4	belong		>30		compiled Java class data,
-+!:mime	application/x-java-applet
-+>>6	beshort		x	        version %d.
-+>>4	beshort		x       	\b%d
-+# Which is which?
-+#>>4	belong		0x032d		(Java 1.0)
-+#>>4	belong		0x032d		(Java 1.1)
-+>>4	belong		0x002e		(Java 1.2)
-+>>4	belong		0x002f		(Java 1.3)
-+>>4	belong		0x0030		(Java 1.4)
-+>>4	belong		0x0031		(Java 1.5)
-+>>4	belong		0x0032		(Java 1.6)
-+>>4	belong		0x0033		(Java 1.7)
-+>>4	belong		0x0034		(Java 1.8)
- >4	belong		>1
- >>4	belong		<20		Mach-O universal binary with %d architectures:
--!:mime application/x-mach-binary
- >>>8	use		mach-o		\b
-->>4	belong		2
-+>>4	belong		>2
- >>>28	use		mach-o		\b
-->>4	belong		3
-+>>4	belong		>3
- >>>48	use		mach-o		\b
- >>4	belong		4
- >>>68	use		mach-o		\b
-diff -u Magdir.orig/filesystems Magdir/filesystems
---- Magdir.orig/filesystems	2018-03-11 01:46:42.000000000 +0100
-+++ Magdir/filesystems	2018-04-28 12:26:11.080817126 +0200
-@@ -254,7 +254,7 @@
- 30		search/481	\x55\xAA
- # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
- # DOS BPB information (70) and after DOS floppy (120) like in previous file version
--!:strength +65
-+!:strength +0
- # for sector sizes < 512 Bytes
- >11		uleshort	<512
- >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
-@@ -266,7 +266,7 @@
- 0x1FE          leshort         0xAA55         	DOS/MBR boot sector
- #
- # to display information (50) before DOS BPB (strength=70) and after DOS floppy (120) like in old file version
--!:strength +65
-+!:strength +0
- >2		string		OSBS		OS/BS MBR
- # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
- # and http://en.wikipedia.org/wiki/Master_Boot_Record
-diff -u Magdir.orig/rpm Magdir/rpm
---- Magdir.orig/rpm	2013-01-11 17:45:23.000000000 +0100
-+++ Magdir/rpm	2018-04-28 12:26:14.072805431 +0200
+diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
+index 9a795f8..31db083 100644
+--- a/magic/Magdir/rpm
++++ b/magic/Magdir/rpm
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -89,51 +10,54 @@ diff -u Magdir.orig/rpm Magdir/rpm
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff -u Magdir.orig/securitycerts Magdir/securitycerts
---- Magdir.orig/securitycerts	2009-09-19 18:28:12.000000000 +0200
-+++ Magdir/securitycerts	2018-04-28 12:26:14.072805431 +0200
+diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
+index 8785dd8..1c340be 100644
+--- a/magic/Magdir/securitycerts
++++ b/magic/Magdir/securitycerts
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-diff -u Magdir.orig/varied.script Magdir/varied.script
---- Magdir.orig/varied.script	2015-03-27 18:59:39.000000000 +0100
-+++ Magdir/varied.script	2018-04-28 12:26:14.072805431 +0200
-@@ -4,27 +4,35 @@
- 
- 0	string/t		#!\ /			a
- >3	string		>\0			%s script text executable
-+!:strength / 10
- 
- 0	string/b		#!\ /			a
- >3	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!\t/			a
- >3	string		>\0			%s script text executable
-+!:strength / 10
- 
- 0	string/b		#!\t/			a
- >3	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!/			a
- >2	string		>\0			%s script text executable
-+!:strength / 10
- 
- 0	string/b		#!/			a
- >2	string		>\0			%s script executable (binary data)
-+!:strength / 10
- 
- 0	string/t		#!\ 			script text executable
- >3	string		>\0			for %s
-+!:strength / 10
- 
- 0	string/b		#!\ 			script executable
- >3	string		>\0			for %s (binary data)
-+!:strength / 10
- 
- # using env
- 0	string/t	#!/usr/bin/env		a
+
+
+--- a/magic.orig.0/Magdir/images	2019-04-19 02:42:27.000000000 +0200
++++ b/magic/Magdir/images	2019-06-29 16:09:31.654107495 +0200
+@@ -30,22 +30,22 @@
+ # Prevent conflicts with CRI ADX.
+ >(2.S-2) belong	!0x28632943
+ # skip more garbage like *.iso by looking for positive image type
+->>2	ubyte			>0
++>2	ubyte			>0
+ # skip some compiled terminfo like xterm+tmux by looking for image type less equal 33
+->>>2	ubyte			<34
++>>2	ubyte			<34
+ # skip arches.3200 , Finder.Root , Slp.1 by looking for low pixel depth 1 8 15 16 24 32
+->>>>16	ubyte			1
+->>>>>0		use		tga-image
+->>>>16	ubyte			8
+->>>>>0		use		tga-image
+->>>>16	ubyte			15
+->>>>>0		use		tga-image
+->>>>16	ubyte			16
+->>>>>0		use		tga-image
+->>>>16	ubyte			24
+->>>>>0		use		tga-image
+->>>>16	ubyte			32
+->>>>>0		use		tga-image
++>>>16	ubyte			1
++>>>>0		use		tga-image
++>>>16	ubyte			8
++>>>>0		use		tga-image
++>>>16	ubyte			15
++>>>>0		use		tga-image
++>>>16	ubyte			16
++>>>>0		use		tga-image
++>>>16	ubyte			24
++>>>>0		use		tga-image
++>>>16	ubyte			32
++>>>>0		use		tga-image
+ #	display tga bitmap image information
+ 0	name				tga-image
+ >2	ubyte		<34		Targa image data

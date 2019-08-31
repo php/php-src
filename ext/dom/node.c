@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -291,7 +291,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	/* Access to Element node is implemented as a convience method */
+	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_TEXT_NODE:
@@ -323,13 +323,19 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 int dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
+	zend_string *str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0);
 		return FAILURE;
 	}
 
-	/* Access to Element node is implemented as a convience method */
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
+	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
@@ -342,16 +348,13 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			{
-				zend_string *str = zval_get_string(newval);
-				xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-				zend_string_release_ex(str, 0);
-				break;
-			}
+			xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+			break;
 		default:
 			break;
 	}
 
+	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 
@@ -721,7 +724,11 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			str = zval_get_string(newval);
+			str = zval_try_get_string(newval);
+			if (UNEXPECTED(!str)) {
+				return FAILURE;
+			}
+
 			prefix = ZSTR_VAL(str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
@@ -854,6 +861,11 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
 		if (nodep->children) {
 			node_list_unlink(nodep->children);
@@ -862,7 +874,6 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 		}
 	}
 
-	str = zval_get_string(newval);
 	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
 	xmlNodeSetContent(nodep, (xmlChar *) "");
 	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
@@ -929,7 +940,8 @@ PHP_FUNCTION(dom_node_insert_before)
 	dom_object *intern, *childobj, *refpobj;
 	int ret, stricterror;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO|O!", &id, dom_node_class_entry, &node, dom_node_class_entry, &ref, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|O!", &node, dom_node_class_entry, &ref, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -1092,7 +1104,8 @@ PHP_FUNCTION(dom_node_replace_child)
 
 	int ret;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OOO", &id, dom_node_class_entry, &newnode, dom_node_class_entry, &oldnode, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO", &newnode, dom_node_class_entry, &oldnode, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -1178,7 +1191,8 @@ PHP_FUNCTION(dom_node_remove_child)
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &id, dom_node_class_entry, &node, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -1214,7 +1228,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	}
 
 	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_FALSE
+	RETURN_FALSE;
 }
 /* }}} end dom_node_remove_child */
 
@@ -1229,7 +1243,8 @@ PHP_FUNCTION(dom_node_append_child)
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &id, dom_node_class_entry, &node, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -1329,7 +1344,8 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1359,7 +1375,8 @@ PHP_FUNCTION(dom_node_clone_node)
 	dom_object *intern;
 	zend_bool recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b", &id, dom_node_class_entry, &recursive) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1418,7 +1435,8 @@ PHP_FUNCTION(dom_node_normalize)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1435,11 +1453,10 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_node_is_supported)
 {
-	zval *id;
 	size_t feature_len, version_len;
 	char *feature, *version;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &id, dom_node_class_entry, &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
 		return;
 	}
 
@@ -1461,7 +1478,8 @@ PHP_FUNCTION(dom_node_has_attributes)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1498,7 +1516,8 @@ PHP_FUNCTION(dom_node_is_same_node)
 	xmlNodePtr nodeotherp, nodep;
 	dom_object *intern, *nodeotherobj;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OO", &id, dom_node_class_entry, &node, dom_node_class_entry) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -1527,7 +1546,8 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1578,7 +1598,8 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1611,7 +1632,8 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	size_t prefix_len;
 	char *prefix;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
@@ -1689,15 +1711,16 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
 
+	id = ZEND_THIS;
 	if (mode == 0) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"O|bba!a!", &id, dom_node_class_entry, &exclusive, &with_comments,
+		if (zend_parse_parameters(ZEND_NUM_ARGS(),
+			"|bba!a!", &exclusive, &with_comments,
 			&xpath_array, &ns_prefixes) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
-			"Os|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive,
+		if (zend_parse_parameters(ZEND_NUM_ARGS(),
+			"s|bba!a!", &file, &file_len, &exclusive,
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			return;
 		}
@@ -1902,12 +1925,3 @@ PHP_METHOD(domnode, getLineNo)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

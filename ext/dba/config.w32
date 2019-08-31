@@ -6,7 +6,7 @@ ARG_WITH("db", "DBA: Berkeley DB support", "no");
 ARG_WITH("lmdb", "DBA: Lightning memory-mapped database support", "no");
 
 if (PHP_DBA != "no") {
-	EXTENSION("dba", "dba.c dba_cdb.c dba_db1.c dba_db2.c dba_db3.c dba_dbm.c dba_flatfile.c dba_gdbm.c dba_ndbm.c dba_inifile.c");
+	EXTENSION("dba", "dba.c dba_cdb.c dba_db1.c dba_db2.c dba_db3.c dba_dbm.c dba_flatfile.c dba_gdbm.c dba_ndbm.c dba_inifile.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	ADD_SOURCES("ext/dba/libcdb", "cdb.c cdb_make.c uint32.c", "dba");
 	ADD_SOURCES("ext/dba/libflatfile", "flatfile.c", "dba");
 	ADD_SOURCES("ext/dba/libinifile", "inifile.c", "dba");

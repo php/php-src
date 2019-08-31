@@ -7,14 +7,12 @@ require_once('skipifemb.inc');
 require_once('connect.inc');
 
 /*
-Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.
+Let's not deal with cross-version issues in the EXPECTF section.
 Most of the things which we test are covered by mysqli_class_*_interface.phpt.
 Those tests go into the details and are aimed to be a development tool, no more.
 */
 if (!$IS_MYSQLND)
-	die("skip Test has been written for the latest version of mysqlnd only");
-if ($MYSQLND_VERSION < 50004)
-	die("skip Test requires mysqlnd Revision 5.0.4 or newer");
+	die("skip Test has been written for mysqlnd only");
 ?>
 --FILE--
 <?php
@@ -90,7 +88,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'message'
 isPublic: yes
@@ -98,7 +96,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 
 Inspecting property 'sqlstate'
 isPublic: yes
@@ -106,7 +104,7 @@ isPrivate: no
 isProtected: no
 isStatic: no
 isDefault: yes
-Modifiers: 256
+Modifiers: 1
 Default property 'errno'
 Default property 'message'
 Default property 'sqlstate'

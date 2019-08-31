@@ -6,8 +6,8 @@ Daniel Convissor <danielc@php.net>
 --INI--
 date.timezone=UTC
 --SKIPIF--
-<?php 
-if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); 
+<?php
+if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist");
 ?>
 --FILE--
 <?php

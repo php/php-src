@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -123,11 +123,11 @@ static inline void SnefruTransform(PHP_SNEFRU_CTX *context, const unsigned char 
 	int i, j;
 
 	for (i = 0, j = 0; i < 32; i += 4, ++j) {
-		context->state[8+j] =	((input[i] & 0xff) << 24) | ((input[i+1] & 0xff) << 16) |
-								((input[i+2] & 0xff) << 8) | (input[i+3] & 0xff);
+		context->state[8+j] =	((unsigned)input[i] << 24) | ((unsigned)input[i+1] << 16) |
+								((unsigned)input[i+2] << 8) | (unsigned)input[i+3];
 	}
 	Snefru(context->state);
-	memset(&context->state[8], 0, sizeof(uint32_t) * 8);
+	ZEND_SECURE_ZERO(&context->state[8], sizeof(uint32_t) * 8);
 }
 
 PHP_HASH_API void PHP_SNEFRUInit(PHP_SNEFRU_CTX *context)
@@ -142,9 +142,9 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 	if ((MAX32 - context->count[1]) < (len * 8)) {
 		context->count[0]++;
 		context->count[1] = MAX32 - context->count[1];
-		context->count[1] = (len * 8) - context->count[1];
+		context->count[1] = ((uint32_t) len * 8) - context->count[1];
 	} else {
-		context->count[1] += len * 8;
+		context->count[1] += (uint32_t) len * 8;
 	}
 
 	if (context->length + len < 32) {
@@ -201,12 +201,3 @@ const php_hash_ops php_hash_snefru_ops = {
 	sizeof(PHP_SNEFRU_CTX),
 	1
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

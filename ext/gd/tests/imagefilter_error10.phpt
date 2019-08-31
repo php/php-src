@@ -4,15 +4,18 @@ Testing wrong parameter resource of EMBOSS in imagefilter() of GD library
 Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
 <?php
 $image = tmpfile();
 
-var_dump(imagefilter($image, IMG_FILTER_EMBOSS));
+try {
+    var_dump(imagefilter($image, IMG_FILTER_EMBOSS));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagefilter(): supplied resource is not a valid Image resource in %s on line %d
-bool(false)
+--EXPECT--
+imagefilter(): supplied resource is not a valid Image resource

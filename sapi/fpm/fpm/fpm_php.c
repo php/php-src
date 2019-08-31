@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -198,6 +197,9 @@ static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 {
 	php_module_shutdown();
 	sapi_shutdown();
+	if (limit_extensions) {
+		fpm_worker_pool_free_limit_extensions(limit_extensions);
+	}
 }
 /* }}} */
 
@@ -224,7 +226,9 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	if (wp->limit_extensions) {
+		/* Take ownership of limit_extensions. */
 		limit_extensions = wp->limit_extensions;
+		wp->limit_extensions = NULL;
 	}
 	return 0;
 }
@@ -285,4 +289,3 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 	return NULL;
 }
 /* }}} */
-

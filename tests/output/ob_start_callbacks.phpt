@@ -1,7 +1,7 @@
 --TEST--
 Test ob_start() with callbacks in variables
 --FILE--
-<?php 
+<?php
 
 // Closure in variable
 $a = function ($s) { return strtoupper($s); };

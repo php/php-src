@@ -17,7 +17,7 @@ var_dump($a->exchangeArray(array('a'=>1,'b'=>1,'c'=>1)));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(3) {
   ["a"]=>
   NULL

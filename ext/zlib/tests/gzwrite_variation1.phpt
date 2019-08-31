@@ -1,15 +1,15 @@
 --TEST--
 Test function gzwrite() by calling it when file is opened for reading
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/004.txt.gz";
+$filename = __DIR__."/004.txt.gz";
 $h = gzopen($filename, 'r');
 $str = "Here is the string to be written. ";
 $length = 10;

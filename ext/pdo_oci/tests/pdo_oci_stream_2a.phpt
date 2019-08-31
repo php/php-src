@@ -4,13 +4,13 @@ PDO OCI: Inserts 10K with 1 number and 2 LOB columns (stress test)
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-require(dirname(__FILE__).'/../../pdo/tests/pdo_test.inc');
+require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
+require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 $db = PDOTest::factory();
 
@@ -24,7 +24,7 @@ $stmt->execute();
 
 function do_insert($db, $id, $data1, $data2)
 {
-    $db->beginTransaction(); 
+    $db->beginTransaction();
     $stmt = $db->prepare("insert into pdo_oci_stream_2 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
@@ -33,7 +33,7 @@ function do_insert($db, $id, $data1, $data2)
     $blob2 = null;
     $stmt->execute();
 
-    fwrite($blob1, $data1);  
+    fwrite($blob1, $data1);
     fclose($blob1);
     fwrite($blob2, $data2);
     fclose($blob2);

@@ -7,7 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
@@ -15,14 +15,6 @@ $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
 $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
-
-if (function_exists("opcache_get_status")) {
-	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
-		ini_set("opcache.revalidate_freq", "0");
-		sleep(2);
-	}
-}
 
 include 'files/phar_test.inc';
 
@@ -37,14 +29,14 @@ if ($md5 == $md52) echo 'file was not modified';
 ?>
 ===AFTER===
 <?php
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b.php';
-include 'phar://' . dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b.php';
+include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
 ?>
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 This is a
 This is b

@@ -123,7 +123,7 @@ function icacls_set($path, $mode, $perm) {
 		exec($cmd);
 
 		$cmd = $icacls . ' ' . $path_escaped . ' /' . $mode . ' ' . $user;
-		$cmd .= ':' . '(' . implode($perm_entry, ',') . ')';
+		$cmd .= ':' . '(' . implode(',', $perm_entry) . ')';
 		exec($cmd);
 	}
 }

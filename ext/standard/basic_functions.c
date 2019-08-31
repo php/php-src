@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
  */
 
@@ -75,15 +75,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <unistd.h>
 #endif
 
-#if HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
-
-#if HAVE_LOCALE_H
-# include <locale.h>
-#endif
+#include <string.h>
+#include <locale.h>
 
 #if HAVE_SYS_MMAN_H
 # include <sys/mman.h>
@@ -127,488 +120,8 @@ typedef struct _user_tick_function_entry {
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
 
-static HashTable basic_submodules;
-
-#undef sprintf
-
 /* {{{ arginfo */
-/* {{{ main/main.c */
-ZEND_BEGIN_ARG_INFO(arginfo_set_time_limit, 0)
-	ZEND_ARG_INFO(0, seconds)
-ZEND_END_ARG_INFO()
-/* }}} */
 
-/* {{{ main/sapi.c */
-ZEND_BEGIN_ARG_INFO(arginfo_header_register_callback, 0)
-	ZEND_ARG_INFO(0, callback)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-/* {{{ main/output.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_start, 0, 0, 0)
-	ZEND_ARG_INFO(0, user_function)
-	ZEND_ARG_INFO(0, chunk_size)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_flush, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_clean, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_end_flush, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_end_clean, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_flush, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_clean, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_contents, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_level, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_get_length, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ob_list_handlers, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_get_status, 0, 0, 0)
-	ZEND_ARG_INFO(0, full_status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_implicit_flush, 0, 0, 0)
-	ZEND_ARG_INFO(0, flag)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_output_reset_rewrite_vars, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_output_add_rewrite_var, 0)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ main/streams/userspace.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_wrapper_register, 0, 0, 2)
-	ZEND_ARG_INFO(0, protocol)
-	ZEND_ARG_INFO(0, classname)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_stream_wrapper_unregister, 0)
-	ZEND_ARG_INFO(0, protocol)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_stream_wrapper_restore, 0)
-	ZEND_ARG_INFO(0, protocol)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ array.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_krsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ksort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_count, 0, 0, 1)
-	ZEND_ARG_INFO(0, var)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natsort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natcasesort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_asort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_usort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_uasort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_uksort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_end, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_prev, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_next, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_reset, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_current, 0)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_key, 0)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_min, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_max, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk, 0, 0, 2)
-	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
-	ZEND_ARG_INFO(0, userdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk_recursive, 0, 0, 2)
-	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
-	ZEND_ARG_INFO(0, userdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_in_array, 0, 0, 2)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_search, 0, 0, 2)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_extract, 0, 0, 1)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, extract_type)
-	ZEND_ARG_INFO(0, prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_compact, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, var_names)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_fill, 0)
-	ZEND_ARG_INFO(0, start_key)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_fill_keys, 0)
-	ZEND_ARG_INFO(0, keys) /* ARRAY_INFO(0, keys, 0) */
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_range, 0, 0, 2)
-	ZEND_ARG_INFO(0, low)
-	ZEND_ARG_INFO(0, high)
-	ZEND_ARG_INFO(0, step)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_shuffle, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_push, 0, 0, 1)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, vars)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_pop, 0)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_shift, 0)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_unshift, 0, 0, 1)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, vars)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_splice, 0, 0, 2)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, replacement) /* ARRAY_INFO(0, arg, 1) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_slice, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace_recursive, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_keys, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, search_value)
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_first, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_last, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_values, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_count_values, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_column, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, column_key)
-	ZEND_ARG_INFO(0, index_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reverse, 0, 0, 1)
-	ZEND_ARG_INFO(0, input) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_pad, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, pad_size)
-	ZEND_ARG_INFO(0, pad_value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_flip, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_change_key_case, 0, 0, 1)
-	ZEND_ARG_INFO(0, input) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, case)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_unique, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_key, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_ukey, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_assoc, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_assoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_key, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_ukey, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff, 0)
-	ZEND_ARG_INFO(0, arr1)
-	ZEND_ARG_INFO(0, arr2)
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_assoc, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_assoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_order)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_flags)
-	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, arr2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, num_req)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_sum, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_product, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reduce, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, initial)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_filter, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
-    ZEND_ARG_INFO(0, use_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_exists, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, search)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_chunk, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, size)
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_combine, 0)
-	ZEND_ARG_INFO(0, keys)   /* ARRAY_INFO(0, keys, 0) */
-	ZEND_ARG_INFO(0, values) /* ARRAY_INFO(0, values, 0) */
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ basic_functions.c */
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_gpc, 0)
 ZEND_END_ARG_INFO()
@@ -619,18 +132,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_constant, 0)
 	ZEND_ARG_INFO(0, const_name)
 ZEND_END_ARG_INFO()
-
-#ifdef HAVE_INET_NTOP
-ZEND_BEGIN_ARG_INFO(arginfo_inet_ntop, 0)
-	ZEND_ARG_INFO(0, in_addr)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_INET_PTON
-ZEND_BEGIN_ARG_INFO(arginfo_inet_pton, 0)
-	ZEND_ARG_INFO(0, ip_address)
-ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_ip2long, 0)
 	ZEND_ARG_INFO(0, ip_address)
@@ -816,7 +317,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_unregister_tick_function, 0)
 	ZEND_ARG_INFO(0, function_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_uploaded_file, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_uploaded_file, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
@@ -847,44 +348,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
-/* {{{ assert.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert, 0, 0, 1)
-	ZEND_ARG_INFO(0, assertion)
-	ZEND_ARG_INFO(0, description)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
-	ZEND_ARG_INFO(0, what)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ base64.c */
-ZEND_BEGIN_ARG_INFO(arginfo_base64_encode, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_base64_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 /* {{{ browscap.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
 	ZEND_ARG_INFO(0, browser_name)
 	ZEND_ARG_INFO(0, return_array)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ crc32.c */
-ZEND_BEGIN_ARG_INFO(arginfo_crc32, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-/* {{{ crypt.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_crypt, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, salt)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ cyr_convert.c */
@@ -1107,12 +574,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_fgetc, 0)
 	ZEND_ARG_INFO(0, fp)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetss, 0, 0, 1)
-	ZEND_ARG_INFO(0, fp)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, allowable_tags)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fscanf, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, format)
@@ -1323,27 +784,27 @@ ZEND_BEGIN_ARG_INFO(arginfo_filetype, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_writable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_writable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_readable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_readable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_executable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_executable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_file, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_file, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_dir, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_dir, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_link, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_link, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
@@ -1409,95 +870,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ ftok.c */
-#if HAVE_FTOK
-ZEND_BEGIN_ARG_INFO(arginfo_ftok, 0)
-	ZEND_ARG_INFO(0, pathname)
-	ZEND_ARG_INFO(0, proj)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
-/* {{{ head.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header, 0, 0, 1)
-	ZEND_ARG_INFO(0, header)
-	ZEND_ARG_INFO(0, replace)
-	ZEND_ARG_INFO(0, http_response_code)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header_remove, 0, 0, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_headers_sent, 0, 0, 0)
-	ZEND_ARG_INFO(1, file)
-	ZEND_ARG_INFO(1, line)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_headers_list, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
-	ZEND_ARG_INFO(0, response_code)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ hrtime.c */
-ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
-	ZEND_ARG_INFO(0, get_as_number)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ html.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_html_entity_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlentities, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_html_translation_table, 0, 0, 0)
-	ZEND_ARG_INFO(0, table)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 /* {{{ http.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_build_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, formdata)
@@ -1558,12 +930,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_iptcparse, 0)
 	ZEND_ARG_INFO(0, iptcdata)
 ZEND_END_ARG_INFO()
 /* }}} */
-
-/* {{{ lcg.c */
-ZEND_BEGIN_ARG_INFO(arginfo_lcg_value, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ levenshtein.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_levenshtein, 0, 0, 2)
 	ZEND_ARG_INFO(0, str1)
@@ -1626,71 +992,71 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_round, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_sin, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_sin, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_cos, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_cos, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tan, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_tan, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_asin, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_asin, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_acos, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_acos, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_atan, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_atan, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_atan2, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_atan2, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, y)
 	ZEND_ARG_INFO(0, x)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_sinh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_sinh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_cosh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_cosh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tanh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_tanh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_asinh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_asinh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_acosh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_acosh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_atanh, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_atanh, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_pi, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_pi, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_finite, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_finite, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_infinite, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_infinite, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_nan, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_nan, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, val)
 ZEND_END_ARG_INFO()
 
@@ -1784,23 +1150,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
 	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ md5.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ metaphone.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, phones)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ microtime.c */
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_microtime, 0, 0, 0)
@@ -1830,22 +1180,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_unpack, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ pageinfo.c */
-ZEND_BEGIN_ARG_INFO(arginfo_getmyuid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmygid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmypid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmyinode, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ password.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, password)
@@ -1864,6 +1198,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_password_verify, 0, 0, 2)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, hash)
 ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO(arginfo_password_algos, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 /* {{{ proc_open.c */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
@@ -1922,17 +1258,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 2)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ sha1.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ soundex.c */
@@ -2173,24 +1498,22 @@ ZEND_BEGIN_ARG_INFO(arginfo_nl_langinfo, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_STRCOLL
-ZEND_BEGIN_ARG_INFO(arginfo_strcoll, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_strcoll, IS_LONG, 0)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 ZEND_END_ARG_INFO()
-#endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_trim, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, character_mask)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rtrim, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rtrim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, character_mask)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ltrim, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ltrim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, character_mask)
 ZEND_END_ARG_INFO()
@@ -2218,15 +1541,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strtok, 0, 0, 1)
 	ZEND_ARG_INFO(0, token)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strtoupper, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_strtoupper, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strtolower, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_strtolower, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_basename, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_basename, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, suffix)
 ZEND_END_ARG_INFO()
@@ -2301,27 +1624,27 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_quotemeta, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_quotemeta, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ord, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ord, IS_LONG, 0)
 	ZEND_ARG_INFO(0, character)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_chr, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_chr, IS_STRING, 0)
 	ZEND_ARG_INFO(0, codepoint)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ucfirst, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_ucfirst, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_lcfirst, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ucwords, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ucwords, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, delimiters)
 ZEND_END_ARG_INFO()
@@ -2336,26 +1659,26 @@ ZEND_BEGIN_ARG_INFO(arginfo_strrev, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_similar_text, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_similar_text, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 	ZEND_ARG_INFO(1, percent)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_addcslashes, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_addcslashes, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, charlist)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_addslashes, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_addslashes, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_stripcslashes, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_stripcslashes, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_stripslashes, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_stripslashes, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
@@ -2373,22 +1696,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_str_ireplace, 0, 0, 3)
 	ZEND_ARG_INFO(1, replace_count)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hebrev, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hebrev, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, max_chars_per_line)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hebrevc, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hebrevc, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, max_chars_per_line)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_nl2br, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_nl2br, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, is_xhtml)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strip_tags, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strip_tags, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, allowable_tags)
 ZEND_END_ARG_INFO()
@@ -2398,7 +1721,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setlocale, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(0, locales)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_str, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_parse_str, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, encoded_string)
 	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()
@@ -2420,7 +1743,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_count_chars, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strnatcmp, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_strnatcmp, IS_LONG, 0)
 	ZEND_ARG_INFO(0, s1)
 	ZEND_ARG_INFO(0, s2)
 ZEND_END_ARG_INFO()
@@ -2428,7 +1751,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_localeconv, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strnatcasecmp, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_strnatcasecmp, IS_LONG, 0)
 	ZEND_ARG_INFO(0, s1)
 	ZEND_ARG_INFO(0, s2)
 ZEND_END_ARG_INFO()
@@ -2453,11 +1776,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sscanf, 0, 0, 2)
 	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_str_rot13, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_str_rot13, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_str_shuffle, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_str_shuffle, IS_STRING, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 
@@ -2492,30 +1815,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_compare, 0, 0, 3)
 	ZEND_ARG_INFO(0, case_sensitivity)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_encode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_utf8_encode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_utf8_decode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_utf8_decode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ syslog.c */
-#ifdef HAVE_SYSLOG_H
-ZEND_BEGIN_ARG_INFO(arginfo_openlog, 0)
-	ZEND_ARG_INFO(0, ident)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, facility)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_closelog, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_syslog, 0)
-	ZEND_ARG_INFO(0, priority)
-	ZEND_ARG_INFO(0, message)
-ZEND_END_ARG_INFO()
-#endif
 /* }}} */
 /* {{{ type.c */
 ZEND_BEGIN_ARG_INFO(arginfo_gettype, 0)
@@ -2544,57 +1850,57 @@ ZEND_BEGIN_ARG_INFO(arginfo_boolval, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_null, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_null, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_resource, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_resource, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_bool, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_bool, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_int, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_int, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_float, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_float, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_string, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_string, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_array, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_array, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_object, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_object, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_numeric, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_numeric, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_scalar, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_scalar, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_callable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_INFO(0, syntax_only)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_iterable, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_iterable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_is_countable, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_countable, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -2726,9 +2032,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
 	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_set_ctrl_handler, 0, 0, 1)
+	ZEND_ARG_INFO(0, callable)
+	ZEND_ARG_INFO(0, add)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_generate_ctrl_event, 0, 0, 1)
+	ZEND_ARG_INFO(0, event)
+	ZEND_ARG_INFO(0, pid)
+ZEND_END_ARG_INFO()
 #endif
 /* }}} */
 /* }}} */
+
+#include "basic_functions_arginfo.h"
 
 static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
@@ -2787,7 +2105,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strripos,														arginfo_strripos)
 	PHP_FE(strrev,															arginfo_strrev)
 	PHP_FE(hebrev,															arginfo_hebrev)
-	PHP_FE(hebrevc,															arginfo_hebrevc)
+	PHP_DEP_FE(hebrevc,														arginfo_hebrevc)
 	PHP_FE(nl2br,															arginfo_nl2br)
 	PHP_FE(basename,														arginfo_basename)
 	PHP_FE(dirname,															arginfo_dirname)
@@ -2804,13 +2122,10 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(substr_compare,													arginfo_substr_compare)
 	PHP_FE(utf8_encode, 													arginfo_utf8_encode)
 	PHP_FE(utf8_decode, 													arginfo_utf8_decode)
-
-#ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															arginfo_strcoll)
-#endif
 
 #ifdef HAVE_STRFMON
-	PHP_FE(money_format,													arginfo_money_format)
+	PHP_DEP_FE(money_format,												arginfo_money_format)
 #endif
 
 	PHP_FE(substr,															arginfo_substr)
@@ -2930,6 +2245,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(password_get_info,												arginfo_password_get_info)
 	PHP_FE(password_needs_rehash,											arginfo_password_needs_rehash)
 	PHP_FE(password_verify,													arginfo_password_verify)
+	PHP_FE(password_algos,													arginfo_password_algos)
 	PHP_FE(convert_uuencode,												arginfo_convert_uuencode)
 	PHP_FE(convert_uudecode,												arginfo_convert_uudecode)
 
@@ -3010,14 +2326,14 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(quoted_printable_decode,											arginfo_quoted_printable_decode)
 	PHP_FE(quoted_printable_encode,											arginfo_quoted_printable_encode)
-	PHP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
+	PHP_DEP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
-	PHP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
+	PHP_DEP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
+	PHP_DEP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
@@ -3052,7 +2368,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(ini_restore,														arginfo_ini_restore)
 	PHP_FE(get_include_path,												arginfo_get_include_path)
 	PHP_FE(set_include_path,												arginfo_set_include_path)
-	PHP_FE(restore_include_path,											arginfo_restore_include_path)
+	PHP_DEP_FE(restore_include_path,											arginfo_restore_include_path)
 
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
@@ -3114,7 +2430,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(is_integer,			is_int,									arginfo_is_int)
 	PHP_FALIAS(is_long,				is_int,									arginfo_is_int)
 	PHP_FALIAS(is_double,			is_float,								arginfo_is_float)
-	PHP_FALIAS(is_real,				is_float,								arginfo_is_float)
+	PHP_DEP_FALIAS(is_real,			is_float,								arginfo_is_float)
 	PHP_FE(is_numeric,														arginfo_is_numeric)
 	PHP_FE(is_string,														arginfo_is_string)
 	PHP_FE(is_array,														arginfo_is_array)
@@ -3135,7 +2451,6 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(feof,															arginfo_feof)
 	PHP_FE(fgetc,															arginfo_fgetc)
 	PHP_FE(fgets,															arginfo_fgets)
-	PHP_DEP_FE(fgetss,														arginfo_fgetss)
 	PHP_FE(fread,															arginfo_fread)
 	PHP_NAMED_FE(fopen,				php_if_fopen,							arginfo_fopen)
 	PHP_FE(fpassthru,														arginfo_fpassthru)
@@ -3296,7 +2611,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	/* functions from mail.c */
 	PHP_FE(mail,															arginfo_mail)
-	PHP_FE(ezmlm_hash,														arginfo_ezmlm_hash)
+	PHP_DEP_FE(ezmlm_hash,													arginfo_ezmlm_hash)
 
 	/* functions from syslog.c */
 #ifdef HAVE_SYSLOG_H
@@ -3440,6 +2755,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
 	PHP_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
 	PHP_FE(sapi_windows_cp_conv, arginfo_sapi_windows_cp_conv)
+	PHP_FE(sapi_windows_set_ctrl_handler, arginfo_sapi_windows_set_ctrl_handler)
+	PHP_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
 	PHP_FE_END
 };
@@ -3580,32 +2897,21 @@ PHPAPI double php_get_inf(void) /* {{{ */
 /* }}} */
 
 #define BASIC_MINIT_SUBMODULE(module) \
-	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) == SUCCESS) {\
-		BASIC_ADD_SUBMODULE(module); \
+	if (PHP_MINIT(module)(INIT_FUNC_ARGS_PASSTHRU) != SUCCESS) {\
+		return FAILURE; \
 	}
-
-#define BASIC_ADD_SUBMODULE(module) \
-	zend_hash_str_add_empty_element(&basic_submodules, #module, strlen(#module));
 
 #define BASIC_RINIT_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_MINFO_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_RSHUTDOWN_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 #define BASIC_MSHUTDOWN_SUBMODULE(module) \
-	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
-		PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU); \
-	}
+	PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
@@ -3620,8 +2926,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_win32_core_globals_ctor(&the_php_win32_core_globals);
 #endif
 #endif
-
-	zend_hash_init(&basic_submodules, 0, NULL, NULL, 1);
 
 	BG(incomplete_class) = incomplete_class_entry = php_create_incomplete_class();
 
@@ -3683,9 +2987,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-	BASIC_ADD_SUBMODULE(dl)
-	BASIC_ADD_SUBMODULE(mail)
-	BASIC_ADD_SUBMODULE(streams)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
 	BASIC_MINIT_SUBMODULE(browscap)
@@ -3694,7 +2995,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(mt_rand)
 
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#if defined(ZTS)
 	BASIC_MINIT_SUBMODULE(localeconv)
 #endif
 
@@ -3778,13 +3079,13 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_MSHUTDOWN_SUBMODULE(file)
 	BASIC_MSHUTDOWN_SUBMODULE(standard_filters)
-#if defined(HAVE_LOCALECONV) && defined(ZTS)
+#if defined(ZTS)
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 	BASIC_MSHUTDOWN_SUBMODULE(random)
+	BASIC_MSHUTDOWN_SUBMODULE(password)
 
-	zend_hash_destroy(&basic_submodules);
 	return SUCCESS;
 }
 /* }}} */
@@ -3841,7 +3142,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_string) = NULL;
 #ifdef HAVE_PUTENV
+	tsrm_env_lock();
 	zend_hash_destroy(&BG(putenv_ht));
+	tsrm_env_unlock();
 #endif
 
 	BG(mt_rand_is_seeded) = 0;
@@ -3934,7 +3237,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 #ifdef HAVE_INET_NTOP
-/* {{{ proto string inet_ntop(string in_addr)
+/* {{{ proto string|false inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
 PHP_NAMED_FUNCTION(zif_inet_ntop)
 {
@@ -3966,7 +3269,7 @@ PHP_NAMED_FUNCTION(zif_inet_ntop)
 #endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
-/* {{{ proto string inet_pton(string ip_address)
+/* {{{ proto string|false inet_pton(string ip_address)
    Converts a human readable IP address to a packed binary string */
 PHP_NAMED_FUNCTION(php_inet_pton)
 {
@@ -4001,7 +3304,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 /* }}} */
 #endif /* HAVE_INET_PTON */
 
-/* {{{ proto int ip2long(string ip_address)
+/* {{{ proto int|false ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
@@ -4039,7 +3342,7 @@ PHP_FUNCTION(ip2long)
 }
 /* }}} */
 
-/* {{{ proto string long2ip(int proper_address)
+/* {{{ proto string|false long2ip(int proper_address)
    Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
@@ -4074,7 +3377,7 @@ PHP_FUNCTION(long2ip)
  * System Functions *
  ********************/
 
-/* {{{ proto string getenv(string varname[, bool local_only]
+/* {{{ proto string|array|false getenv([ string varname[, bool local_only]])
    Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
@@ -4150,11 +3453,22 @@ PHP_FUNCTION(getenv)
 		}
 	}
 #else
+
+    tsrm_env_lock();
+
 	/* system method returns a const */
 	ptr = getenv(str);
+
 	if (ptr) {
-		RETURN_STRING(ptr);
+		RETVAL_STRING(ptr);
 	}
+
+    tsrm_env_unlock();
+
+    if (ptr) {
+        return;
+    }
+
 #endif
 	RETURN_FALSE;
 }
@@ -4205,6 +3519,7 @@ PHP_FUNCTION(putenv)
 	}
 #endif
 
+	tsrm_env_lock();
 	zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
 
 	/* find previous value */
@@ -4265,6 +3580,7 @@ PHP_FUNCTION(putenv)
 			tzset();
 		}
 #endif
+		tsrm_env_unlock();
 #if defined(PHP_WIN32)
 		free(keyw);
 		free(valw);
@@ -4341,7 +3657,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 			(*opts >= 97 && *opts <= 122)   /* a - z */
 	) {
 		paras->opt_char = *opts;
-		paras->need_param = (*(++opts) == ':') ? 1 : 0;
+		paras->need_param = *(++opts) == ':';
 		paras->opt_name = NULL;
 		if (paras->need_param == 1) {
 			opts++;
@@ -4356,7 +3672,7 @@ static int parse_opts(char * opts, opt_struct ** result)
 }
 /* }}} */
 
-/* {{{ proto array getopt(string options [, array longopts [, int &optind]])
+/* {{{ proto array|false getopt(string options [, array longopts [, int &optind]])
    Get options from the command line argument list */
 PHP_FUNCTION(getopt)
 {
@@ -4376,13 +3692,12 @@ PHP_FUNCTION(getopt)
 		Z_PARAM_STRING(options, options_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(p_longopts)
-		Z_PARAM_ZVAL_DEREF(zoptind)
+		Z_PARAM_ZVAL(zoptind)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
-		zval_ptr_dtor(zoptind);
-		ZVAL_LONG(zoptind, 1);
+		ZEND_TRY_ASSIGN_REF_LONG(zoptind, 1);
 	}
 
 	/* Get argv from the global symbol table. We calculate argc ourselves
@@ -4530,7 +3845,7 @@ PHP_FUNCTION(getopt)
 
 	/* Set zoptind to php_optind */
 	if (zoptind) {
-		ZVAL_LONG(zoptind, php_optind);
+		ZEND_TRY_ASSIGN_REF_LONG(zoptind, php_optind);
 	}
 
 	free_longopts(orig_opts);
@@ -4633,34 +3948,34 @@ PHP_FUNCTION(time_nanosleep)
 }
 /* }}} */
 
-/* {{{ proto mixed time_sleep_until(float timestamp)
+/* {{{ proto bool time_sleep_until(float timestamp)
    Make the script sleep until the specified time */
 PHP_FUNCTION(time_sleep_until)
 {
-	double d_ts, c_ts;
+	double target_secs;
 	struct timeval tm;
 	struct timespec php_req, php_rem;
+	uint64_t current_ns, target_ns, diff_ns;
+	const uint64_t ns_per_sec = 1000000000;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(d_ts)
+		Z_PARAM_DOUBLE(target_secs)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
 	}
 
-	c_ts = (double)(d_ts - tm.tv_sec - tm.tv_usec / 1000000.00);
-	if (c_ts < 0) {
+	target_ns = (uint64_t) (target_secs * ns_per_sec);
+	current_ns = ((uint64_t) tm.tv_sec) * ns_per_sec + ((uint64_t) tm.tv_usec) * 1000;
+	if (target_ns < current_ns) {
 		php_error_docref(NULL, E_WARNING, "Sleep until to time is less than current time");
 		RETURN_FALSE;
 	}
 
-	php_req.tv_sec = (time_t) c_ts;
-	if (php_req.tv_sec > c_ts) { /* rounding up occurred */
-		php_req.tv_sec--;
-	}
-	/* 1sec = 1000000000 nanoseconds */
-	php_req.tv_nsec = (long) ((c_ts - php_req.tv_sec) * 1000000000.00);
+	diff_ns = target_ns - current_ns;
+	php_req.tv_sec = (time_t) (diff_ns / ns_per_sec);
+	php_req.tv_nsec = (long) (diff_ns % ns_per_sec);
 
 	while (nanosleep(&php_req, &php_rem)) {
 		if (errno == EINTR) {
@@ -4688,29 +4003,51 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
-/* {{{ add_config_entry_cb
- */
-static int add_config_entry_cb(zval *entry, int num_args, va_list args, zend_hash_key *hash_key)
-{
-	zval *retval = (zval *)va_arg(args, zval*);
-	zval tmp;
+static void add_config_entries(HashTable *hash, zval *return_value);
 
+/* {{{ add_config_entry
+ */
+static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
+{
 	if (Z_TYPE_P(entry) == IS_STRING) {
-		if (hash_key->key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key), zend_string_copy(Z_STR_P(entry)));
+		zend_string *str = Z_STR_P(entry);
+		if (!ZSTR_IS_INTERNED(str)) {
+			if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
+				zend_string_addref(str);
+			} else {
+				str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+			}
+		}
+
+		if (key) {
+			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), str);
 		} else {
-			add_index_str(retval, hash_key->h, zend_string_copy(Z_STR_P(entry)));
+			add_index_str(retval, h, str);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zval tmp;
 		array_init(&tmp);
-		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry), add_config_entry_cb, 1, tmp);
-		zend_hash_update(Z_ARRVAL_P(retval), hash_key->key, &tmp);
+		add_config_entries(Z_ARRVAL_P(entry), &tmp);
+		zend_hash_update(Z_ARRVAL_P(retval), key, &tmp);
 	}
-	return 0;
 }
 /* }}} */
 
-/* {{{ proto mixed get_cfg_var(string option_name)
+/* {{{ add_config_entries
+ */
+static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
+{
+	zend_ulong h;
+	zend_string *key;
+	zval *zv;
+
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
+		add_config_entry(h, key, zv, return_value);
+	ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+/* {{{ proto string|array|false get_cfg_var(string option_name)
    Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
@@ -4727,7 +4064,7 @@ PHP_FUNCTION(get_cfg_var)
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
 			array_init(return_value);
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(retval), add_config_entry_cb, 1, return_value);
+			add_config_entries(Z_ARRVAL_P(retval), return_value);
 			return;
 		} else {
 			RETURN_STRING(Z_STRVAL_P(retval));
@@ -4738,7 +4075,7 @@ PHP_FUNCTION(get_cfg_var)
 }
 /* }}} */
 
-/* {{{ proto int get_magic_quotes_runtime(void)
+/* {{{ proto false get_magic_quotes_runtime(void)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
@@ -4749,7 +4086,7 @@ PHP_FUNCTION(get_magic_quotes_runtime)
 }
 /* }}} */
 
-/* {{{ proto int get_magic_quotes_gpc(void)
+/* {{{ proto false get_magic_quotes_gpc(void)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
@@ -4897,7 +4234,7 @@ PHP_FUNCTION(error_clear_last)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func(mixed function_name [, mixed parmeter] [, mixed ...])
+/* {{{ proto mixed call_user_func(mixed function_name [, mixed parameter] [, mixed ...])
    Call a user function which is the first parameter
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func)
@@ -4950,7 +4287,7 @@ PHP_FUNCTION(call_user_func_array)
 }
 /* }}} */
 
-/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parmeter] [, mixed ...]) U
+/* {{{ proto mixed forward_static_call(mixed function_name [, mixed parameter] [, mixed ...]) U
    Call a user function which is the first parameter */
 PHP_FUNCTION(forward_static_call)
 {
@@ -5057,7 +4394,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 		return 0;
 	}
 
-	if (call_user_function(EG(function_table), NULL,
+	if (call_user_function(NULL, NULL,
 				&shutdown_function_entry->arguments[0],
 				&retval,
 				shutdown_function_entry->arg_count - 1,
@@ -5078,7 +4415,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 	if (! tick_fe->calling) {
 		tick_fe->calling = 1;
 
-		if (call_user_function(	EG(function_table), NULL,
+		if (call_user_function(NULL, NULL,
 								function,
 								&retval,
 								tick_fe->arg_count - 1,
@@ -5163,7 +4500,7 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void register_shutdown_function(callback function) U
+/* {{{ proto false|null register_shutdown_function(callback function) U
    Register a user-level function to be called on request termination */
 PHP_FUNCTION(register_shutdown_function)
 {
@@ -5307,11 +4644,7 @@ PHP_FUNCTION(php_strip_whitespace)
 
 	php_output_start_default();
 
-	memset(&file_handle, 0, sizeof(file_handle));
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
+	zend_stream_init_filename(&file_handle, filename);
 	zend_save_lexical_state(&original_lex_state);
 	if (open_file_for_scanning(&file_handle) == FAILURE) {
 		zend_restore_lexical_state(&original_lex_state);
@@ -5344,7 +4677,10 @@ PHP_FUNCTION(highlight_string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
-	convert_to_string_ex(expr);
+
+	if (!try_convert_to_string(expr)) {
+		return;
+	}
 
 	if (i) {
 		php_output_start_default();
@@ -5377,7 +4713,7 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-/* {{{ proto string ini_get(string varname)
+/* {{{ proto string|false ini_get(string varname)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -5407,64 +4743,17 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-static int php_ini_get_option(zval *zv, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
-{
-	zend_ini_entry *ini_entry = Z_PTR_P(zv);
-	zval *ini_array = va_arg(args, zval *);
-	int module_number = va_arg(args, int);
-	int details = va_arg(args, int);
-	zval option;
-
-	if (module_number != 0 && ini_entry->module_number != module_number) {
-		return 0;
-	}
-
-	if (hash_key->key == NULL ||
-		ZSTR_VAL(hash_key->key)[0] != 0
-	) {
-		if (details) {
-			array_init(&option);
-
-			if (ini_entry->orig_value) {
-				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->orig_value));
-			} else if (ini_entry->value) {
-				add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->value));
-			} else {
-				add_assoc_null(&option, "global_value");
-			}
-
-			if (ini_entry->value) {
-				add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
-			} else {
-				add_assoc_null(&option, "local_value");
-			}
-
-			add_assoc_long(&option, "access", ini_entry->modifiable);
-
-			zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &option);
-		} else {
-			if (ini_entry->value) {
-				zval zv;
-
-				ZVAL_STR_COPY(&zv, ini_entry->value);
-				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &zv);
-			} else {
-				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &EG(uninitialized_zval));
-			}
-		}
-	}
-	return 0;
-}
-/* }}} */
-
-/* {{{ proto array ini_get_all([string extension[, bool details = true]])
+/* {{{ proto array|false ini_get_all([string extension[, bool details = true]])
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
 	char *extname = NULL;
-	size_t extname_len = 0, extnumber = 0;
+	size_t extname_len = 0, module_number = 0;
 	zend_module_entry *module;
 	zend_bool details = 1;
+	zend_string *key;
+	zend_ini_entry *ini_entry;
+
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -5479,11 +4768,50 @@ PHP_FUNCTION(ini_get_all)
 			php_error_docref(NULL, E_WARNING, "Unable to find extension '%s'", extname);
 			RETURN_FALSE;
 		}
-		extnumber = module->module_number;
+		module_number = module->module_number;
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives), php_ini_get_option, 2, return_value, extnumber, details);
+	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
+		zval option;
+
+		if (module_number != 0 && ini_entry->module_number != module_number) {
+			continue;
+		}
+
+		if (key == NULL || ZSTR_VAL(key)[0] != 0) {
+			if (details) {
+				array_init(&option);
+
+				if (ini_entry->orig_value) {
+					add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->orig_value));
+				} else if (ini_entry->value) {
+					add_assoc_str(&option, "global_value", zend_string_copy(ini_entry->value));
+				} else {
+					add_assoc_null(&option, "global_value");
+				}
+
+				if (ini_entry->value) {
+					add_assoc_str(&option, "local_value", zend_string_copy(ini_entry->value));
+				} else {
+					add_assoc_null(&option, "local_value");
+				}
+
+				add_assoc_long(&option, "access", ini_entry->modifiable);
+
+				zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &option);
+			} else {
+				if (ini_entry->value) {
+					zval zv;
+
+					ZVAL_STR_COPY(&zv, ini_entry->value);
+					zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &zv);
+				} else {
+					zend_symtable_update(Z_ARRVAL_P(return_value), ini_entry->name, &EG(uninitialized_zval));
+				}
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -5497,7 +4825,7 @@ static int php_ini_check_path(char *option_name, size_t option_len, char *new_op
 }
 /* }}} */
 
-/* {{{ proto string ini_set(string varname, string newvalue)
+/* {{{ proto string|false ini_set(string varname, string newvalue)
    Set a configuration option, returns false on error and the old value of the configuration option on success */
 PHP_FUNCTION(ini_set)
 {
@@ -5567,7 +4895,7 @@ PHP_FUNCTION(ini_restore)
 }
 /* }}} */
 
-/* {{{ proto string set_include_path(string new_include_path)
+/* {{{ proto string|false set_include_path(string new_include_path)
    Sets the include_path configuration option */
 PHP_FUNCTION(set_include_path)
 {
@@ -5597,7 +4925,7 @@ PHP_FUNCTION(set_include_path)
 }
 /* }}} */
 
-/* {{{ proto string get_include_path()
+/* {{{ proto string|false get_include_path()
    Get the current include_path configuration option */
 PHP_FUNCTION(get_include_path)
 {
@@ -5695,7 +5023,7 @@ PHP_FUNCTION(ignore_user_abort)
 /* }}} */
 
 #if HAVE_GETSERVBYNAME
-/* {{{ proto int getservbyname(string service, string protocol)
+/* {{{ proto int|false getservbyname(string service, string protocol)
    Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
@@ -5738,7 +5066,7 @@ PHP_FUNCTION(getservbyname)
 #endif
 
 #if HAVE_GETSERVBYPORT
-/* {{{ proto string getservbyport(int port, string protocol)
+/* {{{ proto string|false getservbyport(int port, string protocol)
    Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
@@ -5764,7 +5092,7 @@ PHP_FUNCTION(getservbyport)
 #endif
 
 #if HAVE_GETPROTOBYNAME
-/* {{{ proto int getprotobyname(string name)
+/* {{{ proto int|false getprotobyname(string name)
    Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
@@ -5788,7 +5116,7 @@ PHP_FUNCTION(getprotobyname)
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
-/* {{{ proto string getprotobynumber(int proto)
+/* {{{ proto string|false getprotobynumber(int proto)
    Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {
@@ -6047,7 +5375,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, 
 }
 /* }}} */
 
-/* {{{ proto array parse_ini_file(string filename [, bool process_sections [, int scanner_mode]])
+/* {{{ proto array|false parse_ini_file(string filename [, bool process_sections [, int scanner_mode]])
    Parse configuration file */
 PHP_FUNCTION(parse_ini_file)
 {
@@ -6079,9 +5407,7 @@ PHP_FUNCTION(parse_ini_file)
 	}
 
 	/* Setup filehandle */
-	memset(&fh, 0, sizeof(fh));
-	fh.filename = filename;
-	fh.type = ZEND_HANDLE_FILENAME;
+	zend_stream_init_filename(&fh, filename);
 
 	array_init(return_value);
 	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value) == FAILURE) {
@@ -6091,7 +5417,7 @@ PHP_FUNCTION(parse_ini_file)
 }
 /* }}} */
 
-/* {{{ proto array parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]])
+/* {{{ proto array|false parse_ini_string(string ini_string [, bool process_sections [, int scanner_mode]])
    Parse configuration string */
 PHP_FUNCTION(parse_ini_string)
 {
@@ -6142,13 +5468,13 @@ PHP_FUNCTION(config_get_hash) /* {{{ */
 	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(hash, add_config_entry_cb, 1, return_value);
+	add_config_entries(hash, return_value);
 }
 /* }}} */
 #endif
 
 #ifdef HAVE_GETLOADAVG
-/* {{{ proto array sys_getloadavg()
+/* {{{ proto array|false sys_getloadavg()
 */
 PHP_FUNCTION(sys_getloadavg)
 {
@@ -6169,12 +5495,3 @@ PHP_FUNCTION(sys_getloadavg)
 }
 /* }}} */
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

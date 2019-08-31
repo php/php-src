@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -101,6 +101,7 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   rscale = MAX(scale, power->n_scale);
   if ( !bc_compare(modulus, BCG(_one_)) )
     {
+      bc_free_num (&temp);
       temp = bc_new_num (1, scale);
     }
   else

@@ -4,12 +4,12 @@ Test return type and value for expected input cosh()
 precision = 14
 --FILE--
 <?php
-/* 
+/*
  * proto float cosh(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/allowed_rounding_error.inc");
 
 echo "cosh .5  = ";

@@ -139,7 +139,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	unsigned char   ColorMap[3][MAXCOLORMAPSIZE];
 	unsigned char   localColorMap[3][MAXCOLORMAPSIZE];
 	int             imw, imh, screen_width, screen_height;
-	int             gif87a, useGlobalColormap;
+	int             useGlobalColormap;
 	int             bitPixel;
 	int	       i;
 	/*1.4//int             imageCount = 0; */
@@ -160,9 +160,9 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 	}
 
 	if (memcmp((char *)buf+3, "87a", 3) == 0) {
-		gif87a = 1;
+		/* GIF87a */
 	} else if (memcmp((char *)buf+3, "89a", 3) == 0) {
-		gif87a = 0;
+		/* GIF89a */
 	} else {
 		return 0;
 	}
@@ -381,7 +381,7 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
 	if (flag) {
 		scd->curbit = 0;
 		scd->lastbit = 0;
-		scd->last_byte = 0;
+		scd->last_byte = 2;
 		scd->done = FALSE;
 		return 0;
 	}
@@ -467,7 +467,7 @@ LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, i
 	if (sd->sp > sd->stack)
 		return *--sd->sp;
 
-		while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
+	while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
 		if (code == sd->clear_code) {
 			for (i = 0; i < sd->clear_code; ++i) {
 				sd->table[0][i] = 0;

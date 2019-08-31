@@ -3,7 +3,7 @@ Test array_key_exists() function : object functionality - different visibilities
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -18,7 +18,7 @@ class myClass {
 	public $var1;
 	protected $var2;
 	private $var3;
-	
+
 	function __construct($a, $b, $c = null) {
 		$this->var1 = $a;
 		$this->var2 = $b;
@@ -48,16 +48,21 @@ var_dump($class2);
 
 echo "Done";
 ?>
-
---EXPECT--
+--EXPECTF--
 *** Testing array_key_exists() : object functionality ***
 
 -- Do not assign a value to $class1->var3 --
 $key = var1:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(true)
 $key = var2:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(false)
 $key = var3:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(false)
 $class1:
 object(myClass)#1 (3) {
@@ -71,6 +76,8 @@ object(myClass)#1 (3) {
 
 -- Assign a value to $class2->var3 --
 $key = var3:
+
+Deprecated: array_key_exists(): Using array_key_exists() on objects is deprecated. Use isset() or property_exists() instead in %s on line %d
 bool(false)
 $class2:
 object(myClass)#2 (3) {

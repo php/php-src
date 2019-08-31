@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -36,9 +36,6 @@ zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
-
-ZEND_DECLARE_MODULE_GLOBALS(pdo)
-static PHP_GINIT_FUNCTION(pdo);
 
 /* True global resources - no need for thread safety here */
 
@@ -132,11 +129,7 @@ zend_module_entry pdo_module_entry = {
 	NULL,
 	PHP_MINFO(pdo),
 	PHP_PDO_VERSION,
-	PHP_MODULE_GLOBALS(pdo),
-	PHP_GINIT(pdo),
-	NULL,
-	NULL,
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -146,13 +139,6 @@ zend_module_entry pdo_module_entry = {
 #ifdef COMPILE_DL_PDO
 ZEND_GET_MODULE(pdo)
 #endif
-
-/* {{{ PHP_GINIT_FUNCTION */
-static PHP_GINIT_FUNCTION(pdo)
-{
-	pdo_globals->global_value = 0;
-}
-/* }}} */
 
 PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
@@ -392,12 +378,3 @@ PHP_MINFO_FUNCTION(pdo)
 
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

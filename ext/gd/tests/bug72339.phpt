@@ -1,5 +1,5 @@
 --TEST--
-Bug #72339 Integer Overflow in _gd2GetHeader() resulting in heap overflow 
+Bug #72339 Integer Overflow in _gd2GetHeader() resulting in heap overflow
 --SKIPIF--
 <?php
 if (!function_exists("imagecreatefromgd2")) print "skip";
@@ -9,7 +9,7 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
 ?>
 --FILE--
 <?php
-$fname = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug72339.gd";
+$fname = __DIR__ . DIRECTORY_SEPARATOR . "bug72339.gd";
 
 $fh = fopen($fname, "w");
 fwrite($fh, "gd2\x00");
@@ -31,7 +31,7 @@ if ($im) {
 unlink($fname);
 
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: imagecreatefromgd2(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %sbug72339.php on line %d
 

@@ -25,12 +25,8 @@
 
 #if !HAVE_ALLOCA
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifdef emacs
 #include "blockinput.h"
@@ -488,12 +484,3 @@ i00afunc (long address)
 #endif /* no alloca */
 #endif /* not GCC version 2 */
 #endif /* HAVE_ALLOCA */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

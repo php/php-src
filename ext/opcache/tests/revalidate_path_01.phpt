@@ -6,10 +6,11 @@ opcache.enable_cli=1
 opcache.revalidate_path=1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $dir1 = "$dir/test1";
 $dir2 = "$dir/test2";
 $link = "$dir/test";
@@ -54,7 +55,7 @@ echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/main.php');
 ?>
 --CLEAN--
 <?php
-$dir = dirname(__FILE__);
+$dir = __DIR__;
 $dir1 = "$dir/test1";
 $dir2 = "$dir/test2";
 $link = "$dir/test";

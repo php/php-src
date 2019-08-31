@@ -1,14 +1,9 @@
 --TEST--
 Test rsort() function : usage variations - String values
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-  die("skip Output tested contains chars that are not shown the same on windows concole (ESC and co)");
-}
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
- * Description: Sort an array in reverse order 
+ * Description: Sort an array in reverse order
  * Source code: ext/standard/array.c
  */
 
@@ -41,7 +36,7 @@ foreach ($various_arrays as $array) {
 	// loop through $flags array and setting all possible flag values
 	foreach($flags as $key => $flag){
 		echo "- Sort flag = $key -\n";
-		
+
 		$temp_array = $array;
 		var_dump(rsort($temp_array, $flag) );
 		var_dump($temp_array);
@@ -51,7 +46,6 @@ foreach ($various_arrays as $array) {
 
 echo "Done";
 ?>
-
 --EXPECT--
 *** Testing rsort() : variation ***
 

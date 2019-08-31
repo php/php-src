@@ -8,16 +8,20 @@ if(!extension_loaded('zip')) die('skip');
 <?php
 
 echo "Procedural\n";
-$zip = zip_open(dirname(__FILE__) . '/test.zip');
+$zip = zip_open(__DIR__ . '/test.zip');
 if (!is_resource($zip)) {
 	die("Failure");
-	}
+}
 var_dump(zip_close($zip));
-var_dump(zip_close($zip));
+try {
+    var_dump(zip_close($zip));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Object\n";
 $zip = new ZipArchive();
-if (!$zip->open(dirname(__FILE__) . '/test.zip')) {
+if (!$zip->open(__DIR__ . '/test.zip')) {
 	die('Failure');
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
@@ -32,12 +36,10 @@ Done
 --EXPECTF--
 Procedural
 NULL
-
-Warning: zip_close(): supplied resource is not a valid Zip Directory resource in %s
-bool(false)
+zip_close(): supplied resource is not a valid Zip Directory resource
 Object
 bool(true)
 
-Warning: ZipArchive::close(): Invalid or uninitialized Zip object in %s
+Warning: ZipArchive::close(): Invalid or uninitialized Zip object in %s on line %d
 bool(false)
 Done

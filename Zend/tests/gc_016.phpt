@@ -23,6 +23,6 @@ echo "ok\n"
 ?>
 --EXPECT--
 -> int(0)
-int(1)
-int(1)
+int(0)
+int(2)
 ok

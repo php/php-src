@@ -3,15 +3,15 @@ Test array_multisort() function : usage variation - test sort order of all types
 --FILE--
 <?php
 /* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
- * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL 
+ * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	// We're testing sort order not errors so ignore.
 }
 set_error_handler('test_error_handler');
@@ -34,7 +34,6 @@ $inputs = array(
       'empty string DQ' => "",
       'string DQ' => "string",
       'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
       'undefined var' => @$undefined_var,
 );
 
@@ -46,14 +45,11 @@ var_dump($inputs);
 --EXPECT--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
-array(10) {
+array(9) {
   ["uppercase NULL"]=>
   NULL
   ["empty string DQ"]=>
   string(0) ""
-  ["instance of classWithoutToString"]=>
-  object(classWithoutToString)#2 (0) {
-  }
   ["undefined var"]=>
   NULL
   ["float -10.5"]=>

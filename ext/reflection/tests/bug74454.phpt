@@ -14,6 +14,6 @@ function load_file() {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ParseError: syntax error, unexpected 'if' (T_IF), expecting function (T_FUNCTION) or const (T_CONST)
 ===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 General semaphore and shared memory test
 --SKIPIF--
-<?php // vim600: ts=4 sw=4 syn=php fdm=marker
+<?php
 if(!extension_loaded('sysvsem') || !extension_loaded('sysvshm')) {
 	die("skip Both sysvsem and sysvshm required");
 }

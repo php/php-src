@@ -5,7 +5,7 @@ Bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variab
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $query = "begin if false then :bv := 1; end if; end;";
 $stid = oci_parse($c, $query);
@@ -24,7 +24,7 @@ var_dump($bv);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 NULL
 int(0)
 Done

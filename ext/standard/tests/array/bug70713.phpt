@@ -8,19 +8,24 @@ class obj
 	function __tostring()
 	{
 		global $arr;
-		
+
 		$arr = 1;
 		for ($i = 0; $i < 5; $i++) {
 			$v[$i] = 'hi'.$i;
 		}
-		
+
 		return 'hi';
 	}
 }
 
 $arr = array('string' => new obj);
-array_walk_recursive($arr, 'settype');
+
+try {
+    array_walk_recursive($arr, 'settype');
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Warning: array_walk_recursive(): Iterated value is no longer an array or object in %s on line %d
+--EXPECT--
+Iterated value is no longer an array or object

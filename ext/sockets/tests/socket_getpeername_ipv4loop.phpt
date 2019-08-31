@@ -4,13 +4,13 @@ ext/sockets - socket_getpeername_ipv4loop - basic test
 Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
 --SKIPIF--
-<?php   
+<?php
         if (!extension_loaded('sockets')) {
                 die('skip sockets extension not available.');
         }
 ?>
 --FILE--
-<?php   
+<?php
 	/* Bind and connect sockets to localhost */
 	$localhost = '127.0.0.1';
 
@@ -24,7 +24,7 @@ Tatjana Andersen tatjana.andersen@redpill-linpro.com
 	$maxport = 31356;
 	$bound = false;
 	for($port = $minport; $port <= $maxport; ++$port) {
-        	if (socket_bind($server, $localhost, $port)) {
+		if (@socket_bind($server, $localhost, $port)) {
 			$bound = true;
 			break;
 		}

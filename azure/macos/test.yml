@@ -1,0 +1,28 @@
+parameters:
+  runTestsName: ''
+  runTestsParameters: ''
+
+steps:
+  - script: |
+      export TEST_PHP_JUNIT=junit.xml
+      export REPORT_EXIT_STATUS=no
+      export SKIP_IO_CAPTURE_TESTS=1
+      export CI_NO_IPV6=1
+      rm -rf junit.xml | true
+      /usr/local/bin/php run-tests.php -P -q \
+          -j$(sysctl -n hw.ncpu) \
+          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          --offline \
+          --show-slow 1000 \
+          --set-timeout 120 \
+          ${{ parameters.runTestsParameters }}
+    displayName: 'Test ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+    condition: or(succeeded(), failed())
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: junit.xml
+      testRunTitle: '${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+      failTaskOnFailedTests: true
+    displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'
+    condition: or(succeeded(), failed())

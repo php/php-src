@@ -27,11 +27,17 @@ $tests = <<<TESTS
 
 "123|==1234567890|==123" === wordwrap("123 1234567890 123", 10, "|==", 1)
 
-FALSE === @wordwrap(chr(0), 0, "")
-
 TESTS;
 
-include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+include(__DIR__ . '/../../../../tests/quicktester.inc');
 
+echo "\n";
+
+try {
+    wordwrap(chr(0), 0, "");
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 --EXPECT--
 OK
+Break string cannot be empty

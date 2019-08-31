@@ -1,20 +1,20 @@
 --TEST--
-Test gzuncompress() function : basic functionality 
+Test gzuncompress() function : basic functionality
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string gzuncompress(string data [, int length])
- * Description: Unzip a gzip-compressed string 
+ * Description: Unzip a gzip-compressed string
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-include(dirname(__FILE__) . '/data.inc');
+include(__DIR__ . '/data.inc');
 
 echo "*** Testing gzuncompress() : basic functionality ***\n";
 

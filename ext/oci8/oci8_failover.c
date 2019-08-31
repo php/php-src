@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
    | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
    |                                                                      |
    | Redesigned by: Antony Dovgal <antony@zend.com>                       |
-   |                Andi Gutmans <andi@zend.com>                          |
+   |                Andi Gutmans <andi@php.net>                           |
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
@@ -62,7 +62,7 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 	ZVAL_LONG(&params[2], fo_type);
 
 	/* Call user function (if possible) */
-	if (call_user_function(EG(function_table), NULL, &connection->taf_callback, &retval, 3, params) == FAILURE) {
+	if (call_user_function(NULL, NULL, &connection->taf_callback, &retval, 3, params) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to call Oracle TAF callback function");
 	}
 
@@ -152,12 +152,3 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 /* }}} */
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

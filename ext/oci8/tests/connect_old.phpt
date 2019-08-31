@@ -5,7 +5,7 @@ ocilogon()
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
 	var_dump(ocilogon($user, $password, $dbase));
@@ -13,7 +13,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(ocilogon($user, $password));
 }
-	
+
 echo "Done\n";
 
 ?>

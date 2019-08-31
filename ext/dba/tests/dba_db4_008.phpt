@@ -1,16 +1,16 @@
 --TEST--
 DBA DB4 Truncate Existing File popen("n")
 --SKIPIF--
-<?php 
+<?php
 $handler = "db4";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
 --FILE--
 <?php
 
 $handler = "db4";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 var_dump(file_put_contents($db_filename, "Dummy contents"));
@@ -30,8 +30,8 @@ if (($db_file = dba_popen($db_filename, "n", $handler)) !== FALSE) {
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECT--
 database handler: db4

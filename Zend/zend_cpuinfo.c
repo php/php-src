@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2018-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,18 +29,30 @@ typedef struct _zend_cpu_info {
 static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-# ifdef HAVE_CPUID_H
+# if defined(HAVE_CPUID_H) && defined(HAVE_CPUID_COUNT)
 # include <cpuid.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__cpuid_count(func, subfunc, cpuinfo->eax, cpuinfo->ebx, cpuinfo->ecx, cpuinfo->edx);
 }
 # else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+#if defined(__i386__) && (defined(__pic__) || defined(__PIC__))
+	/* PIC on i386 uses %ebx, so preserve it. */
+	__asm__ __volatile__ (
+		"pushl  %%ebx\n"
+		"cpuid\n"
+		"mov    %%ebx,%1\n"
+		"popl   %%ebx"
+		: "=a"(cpuinfo->eax), "=r"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
+		: "a"(func), "c"(subfunc)
+	);
+#else
 	__asm__ __volatile__ (
 		"cpuid"
 		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
 		: "a"(func), "c"(subfunc)
 	);
+#endif
 }
 # endif
 #elif defined(ZEND_WIN32) && !defined(__clang__)
@@ -65,16 +77,24 @@ void zend_cpu_startup(void)
 {
 	if (!cpuinfo.initialized) {
 		zend_cpu_info ebx;
+		int max_feature;
 
 		cpuinfo.initialized = 1;
 		__zend_cpuid(0, 0, &cpuinfo);
-		if (cpuinfo.eax == 0) {
+		max_feature = cpuinfo.eax;
+		if (max_feature == 0) {
 			return;
 		}
+
 		__zend_cpuid(1, 0, &cpuinfo);
+
 		/* for avx2 */
-		__zend_cpuid(7, 0, &ebx);
-		cpuinfo.ebx = ebx.ebx;
+		if (max_feature >= 7) {
+			__zend_cpuid(7, 0, &ebx);
+			cpuinfo.ebx = ebx.ebx;
+		} else {
+			cpuinfo.ebx = 0;
+		}
 	}
 }
 
@@ -87,11 +107,3 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
 		return (cpuinfo.ecx & feature);
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

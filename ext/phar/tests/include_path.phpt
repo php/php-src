@@ -2,11 +2,13 @@
 Phar: include_path with phar:// wrapper
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--CONFLICTS--
+tempmanifest1.phar.php
 --INI--
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/tempmanifest1.phar.php';
+$fname = __DIR__ . '/tempmanifest1.phar.php';
 $a = new Phar($fname);
 $a['file1.php'] = 'file1.php
 ';
@@ -22,7 +24,7 @@ include 'file2.php';
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tempmanifest1.phar.php');
+@unlink(__DIR__ . '/tempmanifest1.phar.php');
 ?>
 --EXPECTF--
 file1.php

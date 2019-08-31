@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -526,7 +526,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees )
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees )
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -553,7 +553,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 				break;
 
 			case PDO_PARAM_BOOL:
-				S->cols[colno].boolval = **ptr == 't' ? 1: 0;
+				S->cols[colno].boolval = **ptr == 't';
 				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;
@@ -727,12 +727,3 @@ const struct pdo_stmt_methods pgsql_stmt_methods = {
 	NULL,  /* next_rowset */
 	pdo_pgsql_stmt_cursor_closer
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

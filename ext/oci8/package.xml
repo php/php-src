@@ -52,12 +52,12 @@ Interoperability Support" (ID 207303.1) for details.
   <active>no</active>
  </lead>
 
- <date>2017-08-15</date>
+ <date>2018-12-11</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.8</release>
-   <api>2.1.8</api>
+   <release>2.2.0</release>
+   <api>2.2.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -66,7 +66,11 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Fixed reference counting and memory issues. (Dmitry, Tianfang)
+Added oci_set_call_timeout() for call timeouts. (Requires Oracle client libraries 18c or later)
+Added oci_set_db_operation() for the Oracle Database 'DBOP' end-to-end-tracing attribute. (Requires Oracle 12.2 or later)
+Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
+Fixed installation on PHP 7.3.
+Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
   </notes>
  <contents>
   <dir name="/">
@@ -167,10 +171,13 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="bug51291_1.phpt" role="test" />
     <file name="bug51291_2.phpt" role="test" />
     <file name="bug68298.phpt" role="test" />
+    <file name="bug70700.phpt" role="test" />
+    <file name="bug71148.phpt" role="test" />
     <file name="bug71422.phpt" role="test" />
     <file name="bug71600.phpt" role="test" />
     <file name="bug72524.phpt" role="test" />
     <file name="bug74625.phpt" role="test" />
+    <file name="calltimeout1.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -242,7 +249,6 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="db_op_2.phpt" role="test" />
     <file name="dbmsoutput.phpt" role="test" />
     <file name="debug.phpt" role="test" />
-    <file name="default_prefetch.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
@@ -297,7 +303,6 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="extauth_03.phpt" role="test" />
     <file name="extauth_04.phpt" role="test" />
     <file name="fetch.phpt" role="test" />
-    <file name="fetch_all.phpt" role="test" />
     <file name="fetch_all1.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
@@ -313,7 +318,6 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
     <file name="fetch_object_2.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
     <file name="field_funcs.phpt" role="test" />
-    <file name="field_funcs0.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
     <file name="field_funcs2.phpt" role="test" />
     <file name="field_funcs3.phpt" role="test" />
@@ -457,7 +461,7 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
    <file name="oci8_failover.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
-   <file name="README" role="doc" />
+   <file name="README.md" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -475,6 +479,22 @@ Fixed reference counting and memory issues. (Dmitry, Tianfang)
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.8</release>
+   <api>2.1.8</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Fixed reference counting and memory issues. (Dmitry, Tianfang)
+  </notes>
+</release>
 
 <release>
   <version>
@@ -508,7 +528,7 @@ Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   </notes>
 </release>
 
-<release>   
+<release>
  <version>
    <release>2.1.5</release>
    <api>2.1.5</api>
@@ -520,9 +540,9 @@ Fixed bug #74625 (Integer overflow in oci_bind_array_by_name). (Ingmar Runge)
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Added TAF callback support (PR #2459, KoenigsKind) 
+Added TAF callback support (PR #2459, KoenigsKind)
   </notes>
-</release>   
+</release>
 
 <release>
   <version>
@@ -555,7 +575,7 @@ This version is for PHP 7 only.
 Fixed bug #71148 (Bind reference overwritten on PHP 7)
   </notes>
 </release>
-   
+
 <release>
   <version>
    <release>2.1.2</release>
@@ -588,7 +608,7 @@ This version is for PHP 7 only.
 Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   </notes>
 </release>
-   
+
 <release>
   <version>
    <release>2.1.0</release>
@@ -601,7 +621,7 @@ Fixed bug #71600 (oci_fetch_all segfaults when selecting more than 8 columns)
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Updated driver name format.    
+Updated driver name format.
   </notes>
 </release>
 
@@ -661,7 +681,7 @@ Enhancement - Improve performance of multi-row OCI_RETURN_LOB queries (Bug #6687
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
+Added oci_bind_by_name() support for PL/SQL BOOLEAN type
 Build change: Fix source variable definition for C89 compatibility
   </notes>
 </release>
@@ -763,7 +783,7 @@ Add the connection handle to several DTrace probes.
    <api>devel</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes> 
+  <notes>
 Fixed --enable-maintainer-zts mode.
 Allow Implicit Result Set statement resources to inherit the parent's current prefetch count.
 Allow OCI8 to be DTrace-enabled independently from core PHP.
@@ -781,7 +801,7 @@ Require OCI8 to be configured 'shared' when enabling DTrace support.
    <api>devel</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes> 
+  <notes>
 - NEW FUNCTIONALITY:
 
   - Added Implicit Result Set support for Oracle Database 12c.
@@ -844,7 +864,7 @@ Require OCI8 to be configured 'shared' when enabling DTrace support.
   - Regularized code prototypes and fixed some in-line documentation
     prototypes.
 
-  - Fixed code folding. 
+  - Fixed code folding.
   </notes>
 </release>
 

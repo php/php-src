@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -123,7 +122,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	struct fpm_event_s *event;
 	int fifo_in = 1, fifo_out = 1;
 	int in_buf = 0;
-	int read_fail = 0, finish_log_stream = 0;
+	int read_fail = 0, finish_log_stream = 0, create_log_stream;
 	int res;
 	struct zlog_stream *log_stream;
 
@@ -139,16 +138,28 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 		event = &child->ev_stderr;
 	}
 
-	if (!child->log_stream) {
+	create_log_stream = !child->log_stream;
+	if (create_log_stream) {
 		log_stream = child->log_stream = malloc(sizeof(struct zlog_stream));
 		zlog_stream_init_ex(log_stream, ZLOG_WARNING, STDERR_FILENO);
 		zlog_stream_set_decorating(log_stream, child->wp->config->decorate_workers_output);
 		zlog_stream_set_wrapping(log_stream, ZLOG_TRUE);
-		zlog_stream_set_msg_prefix(log_stream, "[pool %s] child %d said into %s: ",
+		zlog_stream_set_msg_prefix(log_stream, STREAM_SET_MSG_PREFIX_FMT,
 				child->wp->config->name, (int) child->pid, is_stdout ? "stdout" : "stderr");
 		zlog_stream_set_msg_quoting(log_stream, ZLOG_TRUE);
+		zlog_stream_set_is_stdout(log_stream, is_stdout);
+		zlog_stream_set_child_pid(log_stream, (int)child->pid);
 	} else {
 		log_stream = child->log_stream;
+		// if fd type (stdout/stderr) or child's pid is changed,
+		// then the stream will be finished and msg's prefix will be reinitialized
+		if (log_stream->is_stdout != (unsigned int)is_stdout || log_stream->child_pid != (int)child->pid) {
+			zlog_stream_finish(log_stream);
+			zlog_stream_set_msg_prefix(log_stream, STREAM_SET_MSG_PREFIX_FMT,
+					child->wp->config->name, (int) child->pid, is_stdout ? "stdout" : "stderr");
+			zlog_stream_set_is_stdout(log_stream, is_stdout);
+			zlog_stream_set_child_pid(log_stream, (int)child->pid);
+		}
 	}
 
 	while (fifo_in || fifo_out) {
@@ -197,8 +208,10 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	}
 
 	if (read_fail) {
-		zlog_stream_set_msg_suffix(log_stream, NULL, ", pipe is closed");
-		zlog_stream_finish(log_stream);
+		if (create_log_stream) {
+			zlog_stream_set_msg_suffix(log_stream, NULL, ", pipe is closed");
+			zlog_stream_finish(log_stream);
+		}
 		if (read_fail < 0) {
 			zlog(ZLOG_SYSERROR, "unable to read what child say");
 		}
@@ -339,4 +352,3 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	return 0;
 }
 /* }}} */
-

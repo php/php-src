@@ -1,7 +1,5 @@
 --TEST--
-Test hash_pbkdf2() function : error functionality
---SKIPIF--
-<?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
+Hash: Test hash_pbkdf2() function : error functionality
 --FILE--
 <?php
 
@@ -14,72 +12,61 @@ echo "*** Testing hash_pbkdf2() : error conditions ***\n";
 $password = 'password';
 $salt = 'salt';
 
-echo "\n-- Testing hash_pbkdf2() function with less than expected no. of arguments --\n";
-var_dump(hash_pbkdf2());
-var_dump(hash_pbkdf2('md5'));
-var_dump(hash_pbkdf2('md5', $password));
-var_dump(hash_pbkdf2('md5', $password, $salt));
-
-echo "\n-- Testing hash_pbkdf2() function with more than expected no. of arguments --\n";
-var_dump(hash_pbkdf2('md5', $password, $salt, 10, 10, true, 'extra arg'));
-
 echo "\n-- Testing hash_pbkdf2() function with invalid hash algorithm --\n";
-var_dump(hash_pbkdf2('foo', $password, $salt, 1));
+try { 
+    var_dump(hash_pbkdf2('foo', $password, $salt, 1));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
 
 echo "\n-- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --\n";
-var_dump(hash_pbkdf2('crc32', $password, $salt, 1));
+try { 
+    var_dump(hash_pbkdf2('crc32', $password, $salt, 1));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing hash_pbkdf2() function with invalid iterations --\n";
-var_dump(hash_pbkdf2('md5', $password, $salt, 0));
-var_dump(hash_pbkdf2('md5', $password, $salt, -1));
+try { 
+    var_dump(hash_pbkdf2('md5', $password, $salt, 0));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try { 
+    var_dump(hash_pbkdf2('md5', $password, $salt, -1));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing hash_pbkdf2() function with invalid length --\n";
-var_dump(hash_pbkdf2('md5', $password, $salt, 1, -1));
+try { 
+    var_dump(hash_pbkdf2('md5', $password, $salt, 1, -1));
+}
+catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_pbkdf2() : error conditions ***
 
--- Testing hash_pbkdf2() function with less than expected no. of arguments --
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 0 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 1 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 2 given in %s on line %d
-NULL
-
-Warning: hash_pbkdf2() expects at least 4 parameters, 3 given in %s on line %d
-NULL
-
--- Testing hash_pbkdf2() function with more than expected no. of arguments --
-
-Warning: hash_pbkdf2() expects at most 6 parameters, 7 given in %s on line %d
-NULL
-
 -- Testing hash_pbkdf2() function with invalid hash algorithm --
-
-Warning: hash_pbkdf2(): Unknown hashing algorithm: foo in %s on line %d
-bool(false)
+Unknown hashing algorithm: foo
 
 -- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --
-
-Warning: hash_pbkdf2(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
-bool(false)
+Non-cryptographic hashing algorithm: crc32
 
 -- Testing hash_pbkdf2() function with invalid iterations --
-
-Warning: hash_pbkdf2(): Iterations must be a positive integer: 0 in %s on line %d
-bool(false)
-
-Warning: hash_pbkdf2(): Iterations must be a positive integer: -1 in %s on line %d
-bool(false)
+Iterations must be a positive integer: 0
+Iterations must be a positive integer: -1
 
 -- Testing hash_pbkdf2() function with invalid length --
-
-Warning: hash_pbkdf2(): Length must be greater than or equal to 0: -1 in %s on line %d
-bool(false)
+Length must be greater than or equal to 0: -1
 ===Done===

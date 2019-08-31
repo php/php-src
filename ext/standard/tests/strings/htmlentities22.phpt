@@ -35,18 +35,16 @@ $tests = array(
 function test($flag, $flag2=ENT_DISALLOWED, $charset="UTF-8") {
     global $tests;
     $i = -1;
-    error_reporting(-1 & ~E_STRICT);
     foreach ($tests as $test) {
         $i++;
         $a = htmlentities($test, $flag | $flag2, $charset, FALSE);
         $b = htmlspecialchars($test, $flag | $flag2, $charset, FALSE);
-        
+
         if ($a == $b)
             echo sprintf("%s\t%s", $test, $a==$test?"NOT CHANGED":"CHANGED"), "\n";
         else
             echo sprintf("%s\tCHANGED (%s, %s)", $test, $a, $b), "\n";
     }
-    error_reporting(-1);
 }
 
 echo "*** Testing HTML 4.01 ***\n";
@@ -78,7 +76,7 @@ echo "\n*** Testing HTML 5 with another multibyte-byte encoding ***\n";
 test(ENT_HTML5, ENT_DISALLOWED, "SJIS");
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing HTML 4.01 ***
 &#0;	NOT CHANGED
 &#1;	NOT CHANGED
@@ -254,30 +252,84 @@ test(ENT_HTML5, ENT_DISALLOWED, "SJIS");
 &#x110000;	CHANGED (&amp;&num;x110000&semi;, &amp;#x110000;)
 
 *** Testing HTML 5 with another multibyte-byte encoding ***
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#0;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#1;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x09;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x0A;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x0B;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x0C;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x0D;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x0E;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x1F;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x20;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x7F;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x80;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x9F;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xA0;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xD7FF;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xD800;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xDFFF;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xE000;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFFFE;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFFFF;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFDCF;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFDD0;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFDEF;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#xFDF0;	NOT CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x2FFFE;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x2FFFF;	CHANGED
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 &#x110000;	CHANGED

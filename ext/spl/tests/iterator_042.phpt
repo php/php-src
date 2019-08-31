@@ -41,7 +41,7 @@ foreach($it as $k => $v)
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Error Argument 1 passed to AppendIterator::append() must implement interface Iterator, array given in %siterator_042.php on line %d
+Error AppendIterator::append() expects parameter 1 to be Iterator, array given in %s on line %d
 object(ArrayIterator)#%d (1) {
   %s"storage"%s"ArrayIterator":private]=>
   array(2) {

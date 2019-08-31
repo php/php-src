@@ -11,7 +11,7 @@ assert.bail=true
 --FILE--
 <?php
 $doc = new DOMDocument();
-$result = $doc->loadHTMLFile(dirname(__FILE__) . "/ffff/test.html");
+$result = $doc->loadHTMLFile(__DIR__ . "/ffff/test.html");
 assert($result === false);
 ?>
 --EXPECTF--

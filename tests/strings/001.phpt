@@ -1,9 +1,7 @@
 --TEST--
 String functions
 --FILE--
-<?php 
-
-error_reporting(0);
+<?php
 
 echo "Testing strtok: ";
 
@@ -26,7 +24,7 @@ if ($tok1 != "testing") {
 
 echo "Testing strstr: ";
 $test = "This is a test";
-$found1 = strstr($test, 32);
+$found1 = strstr($test, chr(32));
 $found2 = strstr($test, "a ");
 if ($found1 != " is a test") {
 	echo("failed 1\n");
@@ -39,7 +37,7 @@ if ($found1 != " is a test") {
 echo "Testing strrchr: ";
 $test = "fola fola blakken";
 $found1 = strrchr($test, "b");
-$found2 = strrchr($test, 102);
+$found2 = strrchr($test, chr(102));
 if ($found1 != "blakken") {
 	echo("failed 1\n");
 } elseif ($found2 != "fola blakken") {

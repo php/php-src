@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -369,23 +369,23 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 /* {{{ php_filter_add_slashes */
 void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 {
-	/* This filter is used by both 'add_slashes' & 'magic_quotes' (legacy) */
-
-	zend_string *buf;
-
-	/* just call php_addslashes quotes */
-	buf = php_addslashes(Z_STR_P(value));
+	zend_string *buf = php_addslashes(Z_STR_P(value));
 
 	zval_ptr_dtor(value);
 	ZVAL_STR(value, buf);
 }
 /* }}} */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+/* {{{ php_filter_magic_quotes */
+void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
+{
+	zend_string *buf;
+	php_error_docref(NULL, E_DEPRECATED,
+		"FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead");
+
+	buf = php_addslashes(Z_STR_P(value));
+
+	zval_ptr_dtor(value);
+	ZVAL_STR(value, buf);
+}
+/* }}} */

@@ -10,15 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_result_metadata()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_result_metadata($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))
@@ -85,11 +76,6 @@ require_once('skipifconnectfailure.inc');
 	if (false !== ($tmp = mysqli_stmt_result_metadata($stmt)))
 		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	/* Check that the function alias exists. It's a deprecated function,
-	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_stmt_result_metadata()))
-		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	mysqli_close($link);
 	print "done!";
 ?>
@@ -98,7 +84,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-
 Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
  in %s on line %d
 object(stdClass)#5 (13) {

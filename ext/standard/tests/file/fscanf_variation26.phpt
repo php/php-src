@@ -1,5 +1,5 @@
 --TEST--
-Test fscanf() function: usage variations - char formats with chars 
+Test fscanf() function: usage variations - char formats with chars
 --FILE--
 <?php
 
@@ -10,9 +10,9 @@ Test fscanf() function: usage variations - char formats with chars
 
 /* Test fscanf() to scan different chars using different char format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different char format types with chars ***\n"; 
+echo "*** Test fscanf(): different char format types with chars ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation26.tmp";
@@ -61,7 +61,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation26.tmp";
 unlink($filename);
 ?>
@@ -353,4 +353,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

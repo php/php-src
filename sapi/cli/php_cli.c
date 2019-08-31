@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,12 +46,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_SIGNAL_H
+
 #include <signal.h>
-#endif
-#if HAVE_SETLOCALE
 #include <locale.h>
-#endif
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_ini.h"
@@ -64,10 +61,6 @@
 #include <io.h>
 #include <fcntl.h>
 #include "win32/php_registry.h"
-#endif
-
-#if HAVE_SIGNAL_H
-#include <signal.h>
 #endif
 
 #ifdef __riscos__
@@ -182,14 +175,6 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int print_module_info(zval *element) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(element);
-	php_printf("%s\n", module->name);
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
 static int module_name_cmp(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f = (Bucket *) a;
@@ -203,11 +188,14 @@ static int module_name_cmp(const void *a, const void *b) /* {{{ */
 static void print_modules(void) /* {{{ */
 {
 	HashTable sorted_registry;
+	zend_module_entry *module;
 
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 0);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
-	zend_hash_apply(&sorted_registry, print_module_info);
+	ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+		php_printf("%s\n", module->name);
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
 }
 /* }}} */
@@ -248,19 +236,18 @@ static void print_extensions(void) /* {{{ */
 
 static inline int sapi_cli_select(php_socket_t fd)
 {
-	fd_set wfd, dfd;
+	fd_set wfd;
 	struct timeval tv;
 	int ret;
 
 	FD_ZERO(&wfd);
-	FD_ZERO(&dfd);
 
 	PHP_SAFE_FD_SET(fd, &wfd);
 
 	tv.tv_sec = (long)FG(default_socket_timeout);
 	tv.tv_usec = 0;
 
-	ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
+	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
 
 	return ret != -1;
 }
@@ -599,45 +586,21 @@ static const char *param_mode_conflict = "Either execute direct code, process st
 
 /* {{{ cli_seek_file_begin
  */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno)
+static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
-	int c;
-
-	*lineno = 1;
-
-	file_handle->type = ZEND_HANDLE_FP;
-	file_handle->opened_path = NULL;
-	file_handle->free_filename = 0;
-	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
+	FILE *fp = VCWD_FOPEN(script_file, "rb");
+	if (!fp) {
 		php_printf("Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
-	file_handle->filename = script_file;
 
-	/* #!php support */
-	c = fgetc(file_handle->handle.fp);
-	if (c == '#' && (c = fgetc(file_handle->handle.fp)) == '!') {
-		while (c != '\n' && c != '\r' && c != EOF) {
-			c = fgetc(file_handle->handle.fp);	/* skip to end of line */
-		}
-		/* handle situations where line is terminated by \r\n */
-		if (c == '\r') {
-			if (fgetc(file_handle->handle.fp) != '\n') {
-				zend_long pos = zend_ftell(file_handle->handle.fp);
-				zend_fseek(file_handle->handle.fp, pos - 1, SEEK_SET);
-			}
-		}
-		*lineno = 2;
-	} else {
-		rewind(file_handle->handle.fp);
-	}
-
+	zend_stream_init_fp(file_handle, fp, script_file);
 	return SUCCESS;
 }
 /* }}} */
 
 /*{{{ php_cli_win32_ctrl_handler */
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 BOOL WINAPI php_cli_win32_ctrl_handler(DWORD sig)
 {
 	(void)php_win32_cp_cli_do_restore(orig_cp);
@@ -661,7 +624,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
 	int interactive=0;
-	int lineno = 0;
 	const char *param_error=NULL;
 	int hide_argv = 0;
 
@@ -683,7 +645,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2018 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZTS
 					"ZTS "
@@ -934,7 +896,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			php_optind++;
 		}
 		if (script_file) {
-			if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
+			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
 				goto err;
 			} else {
 				char real_path[MAXPATHLEN];
@@ -948,12 +910,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			/* here but this would make things only more complicated. And it */
 			/* is consitent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
-			file_handle.filename = "Standard input code";
-			file_handle.handle.fp = stdin;
+			zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 		}
-		file_handle.type = ZEND_HANDLE_FP;
-		file_handle.opened_path = NULL;
-		file_handle.free_filename = 0;
 		php_self = (char*)file_handle.filename;
 
 		/* before registering argv to module exchange the *new* argv[0] */
@@ -972,7 +930,13 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			goto err;
 		}
 		request_started = 1;
-		CG(start_lineno) = lineno;
+		CG(skip_shebang) = 1;
+
+		zend_register_bool_constant(
+			ZEND_STRL("PHP_CLI_PROCESS_TITLE"),
+			is_ps_title_available() == PS_TITLE_SUCCESS,
+			CONST_CS, 0);
+
 		*arg_excp = arg_free; /* reconstuct argv */
 
 		if (hide_argv) {
@@ -1056,10 +1020,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						}
 					} else {
 						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file, &lineno) != SUCCESS) {
+							if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
 								exit_status = 1;
 							} else {
-								CG(start_lineno) = lineno;
+								CG(skip_shebang) = 1;
 								php_execute_script(&file_handle);
 								exit_status = EG(exit_status);
 							}
@@ -1109,7 +1073,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
-					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
+					zend_call_method_with_1_params(Z_OBJ(ref), pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {
 						zval tmp, *msg, rv;
@@ -1120,7 +1084,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;
 					} else {
-						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, &ref);
+						zend_print_zval(&ref, 0);
+						zend_write("\n", 1);
 					}
 					zval_ptr_dtor(&ref);
 					zval_ptr_dtor(&arg);
@@ -1190,12 +1155,11 @@ int main(int argc, char *argv[])
 # ifdef PHP_CLI_WIN32_NO_CONSOLE
 	int argc = __argc;
 	char **argv = __argv;
-# else
+# endif
 	int num_args;
 	wchar_t **argv_wide;
 	char **argv_save = argv;
 	BOOL using_wide_argv = 0;
-# endif
 #endif
 
 	int c;
@@ -1239,7 +1203,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1248,13 +1211,12 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 #endif
-#endif
-
 
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	(void)ts_resource(0);
+	php_tsrm_startup();
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 	zend_signal_startup();
@@ -1365,7 +1327,7 @@ exit_loop:
 	}
 	module_started = 1;
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 	php_win32_cp_cli_setup();
 	orig_cp = (php_win32_cp_get_orig())->id;
 	/* Ignore the delivered argv and argc, read from W API. This place
@@ -1411,7 +1373,7 @@ out:
 	tsrm_shutdown();
 #endif
 
-#if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
+#if defined(PHP_WIN32)
 	(void)php_win32_cp_cli_restore();
 
 	if (using_wide_argv) {
@@ -1428,12 +1390,3 @@ out:
 	exit(exit_status);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

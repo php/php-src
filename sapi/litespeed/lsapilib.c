@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fcntl.h>
 #include <limits.h>
 #include <sys/stat.h>
+#include <sched.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -92,6 +93,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define uint32 uint32_t
 #endif
 
+#include <Zend/zend_portability.h>
+
 struct lsapi_MD5Context {
     uint32 buf[4];
     uint32 bits[2];
@@ -113,9 +116,17 @@ typedef struct lsapi_MD5Context lsapi_MD5_CTX;
 #define LSAPI_ST_REQ_BODY       2
 #define LSAPI_ST_RESP_HEADER    4
 #define LSAPI_ST_RESP_BODY      8
+#define LSAPI_ST_BACKGROUND     16
 
 #define LSAPI_RESP_BUF_SIZE     8192
 #define LSAPI_INIT_RESP_HEADER_LEN 4096
+
+enum
+{
+    LSAPI_STATE_IDLE,
+    LSAPI_STATE_CONNECTED,
+    LSAPI_STATE_ACCEPTING,
+};
 
 typedef struct _lsapi_child_status
 {
@@ -124,7 +135,7 @@ typedef struct _lsapi_child_status
 
     volatile short   m_iKillSent;
     volatile char    m_inProcess;
-    volatile char    m_connected;
+    volatile char    m_state;
     volatile int     m_iReqCounter;
 
     volatile long    m_tmWaitBegin;
@@ -145,15 +156,22 @@ static int s_keepListener = 0;
 static int s_dump_debug_info = 0;
 static int s_pid_dump_debug_info = 0;
 static int s_req_processed = 0;
+static int s_skip_write = 0;
+static int (*pthread_atfork_func)(void (*prepare)(void), void (*parent)(void),
+                                  void (*child)(void)) = NULL;
 
 static int *s_busy_workers = NULL;
 static int *s_accepting_workers = NULL;
 static int *s_global_counter = &s_req_processed;
 static int s_max_busy_workers = -1;
 static char *s_stderr_log_path = NULL;
+static int s_stderr_is_pipe = 0;
 static int s_ignore_pid = -1;
+static size_t s_total_pages = 1;
+static size_t s_min_avail_pages = 256 * 1024;
+static size_t *s_avail_pages = &s_total_pages;
 
-LSAPI_Request g_req = 
+LSAPI_Request g_req =
 { .m_fdListen = -1, .m_fd = -1 };
 
 static char         s_secret[24];
@@ -216,7 +234,7 @@ static int HTTP_HEADER_LEN[H_TRANSFER_ENCODING+1] =
 };
 
 
-static const char *s_log_level_names[8] = 
+static const char *s_log_level_names[8] =
 {
     "", "DEBUG","INFO", "NOTICE", "WARN", "ERROR", "CRIT", "FATAL"
 };
@@ -226,10 +244,11 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 {
     char buf[1024];
     char *p = buf;
-    if (flag & LSAPI_LOG_TIMESTAMP_BITS)
+    if ((flag & LSAPI_LOG_TIMESTAMP_BITS) &&
+        !((flag & LSAPI_LOG_TIMESTAMP_STDERR) && s_stderr_is_pipe))
     {
         struct timeval  tv;
-        struct tm       tm; 
+        struct tm       tm;
         gettimeofday(&tv, NULL);
         localtime_r(&tv.tv_sec, &tm);
         if (flag & LSAPI_LOG_TIMESTAMP_FULL)
@@ -244,20 +263,20 @@ void LSAPI_Log(int flag, const char * fmt, ...)
                 tm.tm_hour, tm.tm_min, tm.tm_sec);
         }
     }
-    
+
     int level = flag & LSAPI_LOG_LEVEL_BITS;
     if (level && level <= LSAPI_LOG_FLAG_FATAL)
     {
         p += snprintf(p, 100, "[%s] ", s_log_level_names[level]);
     }
-    
+
     if (flag & LSAPI_LOG_PID)
     {
         p += snprintf(p, 100, "[%d] ", s_pid);
     }
-        
+
     if (p > buf)
-        fprintf(stderr, "%.*s", (int)(p - buf), buf); 
+        fprintf(stderr, "%.*s", (int)(p - buf), buf);
     va_list ap;
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
@@ -275,8 +294,10 @@ void LSAPI_Log(int flag, const char * fmt, ...)
 
 #endif
 
+#define lsapi_log(...)  LSAPI_Log(LSAPI_LOG_TIMESTAMP_FULL|LSAPI_LOG_TIMESTAMP_STDERR|LSAPI_LOG_PID, __VA_ARGS__)
 
-static int lsapi_parent_dead() 
+
+static int lsapi_parent_dead()
 {
     // Return non-zero if the parent is dead.  0 if still alive.
     if (!s_ppid) {
@@ -408,8 +429,8 @@ static void lsapi_close_connection(LSAPI_Request *pReq)
     if (s_busy_workers)
         __sync_fetch_and_sub(s_busy_workers, 1);
     if (s_worker_status)
-        s_worker_status->m_connected = 0;
-}        
+        __sync_lock_test_and_set(&s_worker_status->m_state, LSAPI_STATE_IDLE);
+}
 
 
 static inline ssize_t lsapi_read( int fd, void * pBuf, size_t len )
@@ -453,6 +474,10 @@ static int lsapi_writev( int fd, struct iovec ** pVec, int count, int totalLen )
     int ret;
     int left = totalLen;
     int n = count;
+
+    if (s_skip_write)
+        return totalLen;
+
     while(( left > 0 )&&g_running )
     {
         ret = writev( fd, *pVec, n );
@@ -756,7 +781,7 @@ static int (*fp_lve_leave)(struct liblve *, uint32_t *) = NULL;
 static int (*fp_lve_jail)( struct passwd *, char *) = NULL;
 static int lsapi_load_lve_lib(void)
 {
-    s_liblve = dlopen("liblve.so.0", RTLD_LAZY);
+    s_liblve = DL_LOAD("liblve.so.0");
     if (s_liblve)
     {
         fp_lve_is_available = dlsym(s_liblve, "lve_is_available");
@@ -822,32 +847,32 @@ static int readSecret( const char * pSecretFile )
     int fd = open( pSecretFile, O_RDONLY , 0600 );
     if ( fd == -1 )
     {
-        fprintf( stderr, "LSAPI: failed to open secret file: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: failed to open secret file: %s!\n", pSecretFile );
         return -1;
     }
     if ( fstat( fd, &st ) == -1 )
     {
-        fprintf( stderr, "LSAPI: failed to check state of file: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: failed to check state of file: %s!\n", pSecretFile );
         close( fd );
         return -1;
     }
 /*
     if ( st.st_uid != s_uid )
     {
-        fprintf( stderr, "LSAPI: file owner check failure: %s!\n", pSecretFile );
+        lsapi_log("LSAPI: file owner check failure: %s!\n", pSecretFile );
         close( fd );
         return -1;
     }
 */
     if ( st.st_mode & 0077 )
     {
-        fprintf( stderr, "LSAPI: file permission check failure: %s\n", pSecretFile );
+        lsapi_log("LSAPI: file permission check failure: %s\n", pSecretFile );
         close( fd );
         return -1;
     }
     if ( read( fd, s_secret, 16 ) < 16 )
     {
-        fprintf( stderr, "LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
+        lsapi_log("LSAPI: failed to read secret from secret file: %s\n", pSecretFile );
         close( fd );
         return -1;
     }
@@ -868,7 +893,7 @@ int LSAPI_is_suEXEC_Daemon(void)
 static int LSAPI_perror_r( LSAPI_Request * pReq, const char * pErr1, const char *pErr2 )
 {
     char achError[4096];
-    int n = snprintf(achError, sizeof(achError), "[%d] %s:%s: %s\n", getpid(), 
+    int n = snprintf(achError, sizeof(achError), "[%d] %s:%s: %s\n", getpid(),
                      pErr1, (pErr2)?pErr2:"", strerror(errno));
     if (n > (int)sizeof(achError))
         n = sizeof(achError);
@@ -914,7 +939,7 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
         ret = (*fp_lve_enter)(s_lve, uid, -1, -1, &cookie);
         if ( ret < 0 )
         {
-            fprintf( stderr, "Pid (%d): enter LVE (%d) : ressult: %d !\n", getpid(), uid, ret );
+            lsapi_log("enter LVE (%d) : ressult: %d !\n", uid, ret );
             LSAPI_perror_r(pReq, "LSAPI: lve_enter() failure, reached resource limit.", NULL );
             lsapi_lve_error( pReq );
             return -1;
@@ -934,8 +959,8 @@ static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
     ret = (*fp_lve_jail)( pw, error_msg );
     if ( ret < 0 )
     {
-        fprintf( stderr, "LSAPI (%d): LVE jail(%d) ressult: %d, error: %s !\n",
-                        getpid(), uid, ret, error_msg );
+        lsapi_log("LSAPI: LVE jail(%d) ressult: %d, error: %s !\n",
+                  uid, ret, error_msg );
         LSAPI_perror_r( pReq, "LSAPI: jail() failure.", NULL );
         return -1;
     }
@@ -1102,11 +1127,11 @@ static int lsapi_changeUGid( LSAPI_Request * pReq )
                 --pReq->m_pHeader->m_cntSpecialEnv;
                 uid = *(uint32_t *)pEnv->pValue;
                 gid = *(((uint32_t *)pEnv->pValue) + 1 );
-                //fprintf( stderr, "LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
+                //lsapi_log("LSAPI: SUEXEC_UGID set UID: %d, GID: %d\n", uid, gid );
             }
             else
             {
-                fprintf( stderr, "LSAPI: missing SUEXEC_UGID env, use default user!\n" );
+                lsapi_log("LSAPI: missing SUEXEC_UGID env, use default user!\n" );
                 pEnv = NULL;
             }
             if ( pEnv&& lsapi_suexec_auth( pReq, pAuth->pValue, pAuth->valLen, pEnv->pValue, pEnv->valLen ) == 0 )
@@ -1117,13 +1142,13 @@ static int lsapi_changeUGid( LSAPI_Request * pReq )
             else
             {
                 //authentication error
-                fprintf( stderr, "LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
+                lsapi_log("LSAPI: SUEXEC_AUTH authentication failed, use default user!\n" );
                 uid = 0;
             }
         }
         else
         {
-            //fprintf( stderr, "LSAPI: no SUEXEC_AUTH env, use default user!\n" );
+            //lsapi_log("LSAPI: no SUEXEC_AUTH env, use default user!\n" );
         }
     }
 
@@ -1203,7 +1228,7 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
         || pReq->m_pHeader->m_requestMethodOff < 0
         || pReq->m_pHeader->m_requestMethodOff >= totalLen)
     {
-        fprintf(stderr, "%d: bad request header - ERROR#1\n", getpid());
+        lsapi_log("Bad request header - ERROR#1\n");
         return -1;
     }
     pReq->m_pScriptFile     = pReq->m_pReqBuf + pReq->m_pHeader->m_scriptFileOff;
@@ -1223,8 +1248,8 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     pBegin += pReq->m_pHeader->m_httpHeaderLen;
     if ( pBegin != pEnd )
     {
-        fprintf( stderr, "%d: request header does match total size, total: %d, "
-                 "real: %ld\n", getpid(), totalLen, pBegin - pReq->m_pReqBuf );
+        lsapi_log("Request header does match total size, total: %d, "
+                 "real: %ld\n", totalLen, pBegin - pReq->m_pReqBuf );
         return -1;
     }
     if ( shouldFixEndian )
@@ -1234,7 +1259,7 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
 
     if (validateHeaders(pReq) == -1)
     {
-        fprintf(stderr, "%d: bad request header - ERROR#2\n", getpid());
+        lsapi_log("Bad request header - ERROR#2\n");
         return -1;
     }
 
@@ -1258,7 +1283,7 @@ static struct lsapi_packet_header s_ack = {'L', 'S',
                 LSAPI_REQ_RECEIVED, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} };
 static struct lsapi_packet_header s_conn_close_pkt = {'L', 'S',
                 LSAPI_CONN_CLOSE, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} };
-                
+
 
 static inline int send_notification_pkt( int fd, struct lsapi_packet_header *pkt )
 {
@@ -1372,12 +1397,12 @@ static int readReq( LSAPI_Request * pReq )
     packetLen = verifyHeader( &pReq->m_pHeader->m_pktHeader, LSAPI_BEGIN_REQUEST );
     if ( packetLen < 0 )
     {
-        fprintf( stderr, "%d: packetLen < 0\n", getpid() );
+        lsapi_log("packetLen < 0\n");
         return -1;
     }
     if ( packetLen > LSAPI_MAX_HEADER_LEN )
     {
-        fprintf( stderr, "%d: packetLen > %d\n", getpid(), LSAPI_MAX_HEADER_LEN );
+        lsapi_log("packetLen > %d\n", LSAPI_MAX_HEADER_LEN );
         return -1;
     }
 
@@ -1395,7 +1420,7 @@ static int readReq( LSAPI_Request * pReq )
     }
     if ( parseRequest( pReq, packetLen ) < 0 )
     {
-        fprintf( stderr, "%d: parseRequest error\n", getpid() );
+        lsapi_log("ParseRequest error\n");
         return -1;
     }
 
@@ -1439,6 +1464,10 @@ int LSAPI_Init(void)
             return -1;
         g_inited = 1;
         s_ppid = getppid();
+        void *pthread_lib = dlopen("libpthread.so", RTLD_LAZY);
+        if (pthread_lib)
+            pthread_atfork_func = dlsym(pthread_lib, "pthread_atfork");
+
     }
     return 0;
 }
@@ -1543,7 +1572,8 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
                 else
                 {
                     if (s_worker_status)
-                        s_worker_status->m_connected = 1;
+                        __sync_lock_test_and_set(&s_worker_status->m_state,
+                                                 LSAPI_STATE_CONNECTED);
                     if (s_busy_workers)
                         __sync_fetch_and_add(s_busy_workers, 1);
                     lsapi_set_nblock( pReq->m_fd , 0 );
@@ -1572,10 +1602,13 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
 }
 
 
-static struct lsapi_packet_header   finish = {'L', 'S',
-                LSAPI_RESP_END, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} };
+static struct lsapi_packet_header   finish_close[2] =
+{
+    {'L', 'S', LSAPI_RESP_END, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} },
+    {'L', 'S', LSAPI_CONN_CLOSE, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} }
+};
 
-                
+
 int LSAPI_Finish_r( LSAPI_Request * pReq )
 {
     /* finish req body */
@@ -1594,13 +1627,48 @@ int LSAPI_Finish_r( LSAPI_Request * pReq )
                 Flush_RespBuf_r( pReq );
             }
 
-            pReq->m_pIovecCur->iov_base = (void *)&finish;
+            pReq->m_pIovecCur->iov_base = (void *)finish_close;
             pReq->m_pIovecCur->iov_len  = LSAPI_PACKET_HEADER_LEN;
             pReq->m_totalLen += LSAPI_PACKET_HEADER_LEN;
             ++pReq->m_pIovecCur;
             LSAPI_Flush_r( pReq );
         }
         LSAPI_Reset_r( pReq );
+    }
+    return 0;
+}
+
+
+int LSAPI_End_Response_r(LSAPI_Request * pReq)
+{
+    if (!pReq)
+        return -1;
+    if (pReq->m_reqState & LSAPI_ST_BACKGROUND)
+        return 0;
+    if (pReq->m_reqState)
+    {
+        if ( pReq->m_fd != -1 )
+        {
+            if ( pReq->m_reqState & LSAPI_ST_RESP_HEADER )
+            {
+                if ( pReq->m_pRespHeaderBufPos <= pReq->m_pRespHeaderBuf )
+                    return 0;
+
+                LSAPI_FinalizeRespHeaders_r( pReq );
+            }
+            if ( pReq->m_pRespBufPos != pReq->m_pRespBuf )
+            {
+                Flush_RespBuf_r( pReq );
+            }
+
+            pReq->m_pIovecCur->iov_base = (void *)finish_close;
+            pReq->m_pIovecCur->iov_len  = LSAPI_PACKET_HEADER_LEN << 1;
+            pReq->m_totalLen += LSAPI_PACKET_HEADER_LEN << 1;
+            ++pReq->m_pIovecCur;
+            LSAPI_Flush_r( pReq );
+            lsapi_close_connection(pReq);
+        }
+        pReq->m_reqState |= LSAPI_ST_BACKGROUND;
     }
     return 0;
 }
@@ -1791,7 +1859,11 @@ ssize_t LSAPI_Write_r( LSAPI_Request * pReq, const char * pBuf, size_t len )
     ssize_t packetLen;
     int skip = 0;
 
-    if ( !pReq || !pBuf || (pReq->m_fd == -1) )
+    if (!pReq || !pBuf)
+        return -1;
+    if (pReq->m_reqState & LSAPI_ST_BACKGROUND)
+        return len;
+    if (pReq->m_fd == -1)
         return -1;
     if ( pReq->m_reqState & LSAPI_ST_RESP_HEADER )
     {
@@ -2693,6 +2765,9 @@ int LSAPI_Init_Prefork_Server( int max_children, fn_select_t fp, int avoidFork )
     s_ppid = getppid();
     s_pid = getpid();
     setpgid( s_pid, s_pid );
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    s_total_pages = sysconf(_SC_PHYS_PAGES);
+#endif
     g_prefork_server->m_iAvoidFork = avoidFork;
     g_prefork_server->m_iMaxChildren = max_children;
 
@@ -2792,7 +2867,7 @@ static void lsapi_sigchild( int signal )
 {
     int status, pid;
     lsapi_child_status * child_status;
-    if (g_prefork_server == NULL) 
+    if (g_prefork_server == NULL)
         return;
     while( 1 )
     {
@@ -2804,9 +2879,14 @@ static void lsapi_sigchild( int signal )
         if ( WIFSIGNALED( status ))
         {
             int sig_num = WTERMSIG( status );
-            int dump = WCOREDUMP( status );
-            fprintf( stderr, "Child process with pid: %d was killed by signal: "
-                     "%d, core dump: %d\n", pid, sig_num, dump );
+
+#ifdef WCOREDUMP
+            const char * dump = WCOREDUMP( status ) ? "yes" : "no";
+#else
+            const char * dump = "unknown";
+#endif
+            lsapi_log("Child process with pid: %d was killed by signal: "
+                     "%d, core dumped: %s\n", pid, sig_num, dump );
         }
         if ( pid == s_pid_dump_debug_info )
         {
@@ -2822,11 +2902,19 @@ static void lsapi_sigchild( int signal )
         child_status = find_child_status( pid );
         if ( child_status )
         {
-            if (child_status->m_connected)
+            if (__sync_bool_compare_and_swap(&child_status->m_state,
+                                             LSAPI_STATE_CONNECTED,
+                                             LSAPI_STATE_IDLE))
             {
                 if (s_busy_workers)
                     __sync_fetch_and_sub(s_busy_workers, 1);
-                child_status->m_connected = 0;
+            }
+            else if (__sync_bool_compare_and_swap(&child_status->m_state,
+                                                  LSAPI_STATE_ACCEPTING,
+                                                  LSAPI_STATE_IDLE))
+            {
+                if (s_accepting_workers)
+                    __sync_fetch_and_sub(s_accepting_workers, 1);
             }
             child_status->m_pid = 0;
             --g_prefork_server->m_iCurChildren;
@@ -2842,9 +2930,9 @@ static void lsapi_sigchild( int signal )
 static int lsapi_init_children_status(void)
 {
     int size = 4096;
-    int max_children = g_prefork_server->m_iMaxChildren 
+    int max_children = g_prefork_server->m_iMaxChildren
                         + g_prefork_server->m_iExtraChildren;
-    
+
     char * pBuf;
     size = max_children * sizeof( lsapi_child_status ) * 2 + 3 * sizeof(int);
     size = (size + 4095) / 4096 * 4096;
@@ -2862,6 +2950,7 @@ static int lsapi_init_children_status(void)
     s_busy_workers = (int *)g_prefork_server->m_pChildrenStatusEnd;
     s_accepting_workers = s_busy_workers + 1;
     s_global_counter = s_accepting_workers + 1;
+    s_avail_pages = (size_t *)(s_global_counter + 1);
     return 0;
 }
 
@@ -2874,19 +2963,23 @@ static void dump_debug_info( lsapi_child_status * pStatus, long tmCur )
         if ( kill( s_pid_dump_debug_info, 0 ) == 0 )
             return;
     }
-    s_pid_dump_debug_info = fork();
 
-    fprintf( stderr, "[%s] Possible runaway process, PPID: %d, PID: %d, "
+    lsapi_log("Possible runaway process, PPID: %d, PID: %d, "
              "reqCount: %d, process time: %ld, checkpoint time: %ld, start "
-             "time: %ld\n", ctime(&tmCur), getpid(), pStatus->m_pid, 
-             pStatus->m_iReqCounter, tmCur - pStatus->m_tmReqBegin, 
+             "time: %ld\n", getpid(), pStatus->m_pid,
+             pStatus->m_iReqCounter, tmCur - pStatus->m_tmReqBegin,
              tmCur - pStatus->m_tmLastCheckPoint, tmCur - pStatus->m_tmStart );
-    snprintf( achCmd, 1024, "gdb --batch -ex \"attach %d\" -ex \"set height 0\" "
-              "-ex \"bt\" >&2;PATH=$PATH:/usr/sbin lsof -p %d >&2", 
-              pStatus->m_pid, pStatus->m_pid );
-    if ( system( achCmd ) == -1 )
-        perror( "system()" );
-    exit( 0 );
+
+    s_pid_dump_debug_info = fork();
+    if (s_pid_dump_debug_info == 0)
+    {
+        snprintf( achCmd, 1024, "gdb --batch -ex \"attach %d\" -ex \"set height 0\" "
+                "-ex \"bt\" >&2;PATH=$PATH:/usr/sbin lsof -p %d >&2",
+                pStatus->m_pid, pStatus->m_pid );
+        if ( system( achCmd ) == -1 )
+            perror( "system()" );
+        exit( 0 );
+    }
 }
 
 
@@ -2907,8 +3000,8 @@ static void lsapi_check_child_status( long tmCur )
             if ( !pStatus->m_inProcess )
             {
 
-                if (g_prefork_server->m_iCurChildren - dying 
-                        > g_prefork_server->m_iMaxChildren 
+                if (g_prefork_server->m_iCurChildren - dying
+                        > g_prefork_server->m_iMaxChildren
                     || idle > g_prefork_server->m_iMaxIdleChildren)
                 {
                     ++pStatus->m_iKillSent;
@@ -2916,7 +3009,7 @@ static void lsapi_check_child_status( long tmCur )
                 }
                 else
                 {
-                    if (s_max_idle_secs> 0 
+                    if (s_max_idle_secs> 0
                         && tmCur - pStatus->m_tmWaitBegin > s_max_idle_secs + 5)
                     {
                         ++pStatus->m_iKillSent;
@@ -2936,20 +3029,20 @@ static void lsapi_check_child_status( long tmCur )
                     if ( pStatus->m_iKillSent > 5 )
                     {
                         tobekilled = SIGKILL;
-                        fprintf( stderr, "Force killing runaway process PID: %d"
+                        lsapi_log("Force killing runaway process PID: %d"
                                  " with SIGKILL\n", pStatus->m_pid );
                     }
                     else
                     {
                         tobekilled = SIGTERM;
-                        fprintf( stderr, "Killing runaway process PID: %d with "
+                        lsapi_log("Killing runaway process PID: %d with "
                                  "SIGTERM\n", pStatus->m_pid );
                     }
                 }
             }
             if ( tobekilled )
             {
-                if (( kill( pStatus->m_pid, tobekilled ) == -1 ) && 
+                if (( kill( pStatus->m_pid, tobekilled ) == -1 ) &&
                     ( errno == ESRCH ))
                 {
                     pStatus->m_pid = 0;
@@ -2966,9 +3059,9 @@ static void lsapi_check_child_status( long tmCur )
     }
     if ( abs( g_prefork_server->m_iCurChildren - count ) > 1 )
     {
-        fprintf( stderr, "Children tracking is wrong: PID: %d, Cur Children: %d,"
-                 " count: %d, idle: %d, dying: %d\n", getpid(), 
-                 g_prefork_server->m_iCurChildren, count, idle, dying );
+        lsapi_log("Children tracking is wrong: Cur Children: %d,"
+                  " count: %d, idle: %d, dying: %d\n",
+                  g_prefork_server->m_iCurChildren, count, idle, dying );
     }
 }
 
@@ -2993,7 +3086,22 @@ static void lsapi_check_child_status( long tmCur )
 //}
 
 
-static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer, 
+void set_skip_write()
+{   s_skip_write = 1;   }
+
+
+int is_enough_free_mem()
+{
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+    //minimum 1GB or 10% available free memory
+    return (*s_avail_pages > s_min_avail_pages
+            || (*s_avail_pages * 10) / s_total_pages > 0);
+#endif
+    return 1;
+}
+
+
+static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                                         LSAPI_Request * pReq )
 {
     struct sigaction act, old_term, old_quit, old_int,
@@ -3016,6 +3124,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 
     act.sa_flags = 0;
     act.sa_handler = lsapi_sigchild;
+    sigemptyset(&(act.sa_mask));
     if( sigaction( SIGCHLD, &act, &old_child ) )
     {
         perror( "Can't set signal handler for SIGCHILD" );
@@ -3025,6 +3134,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
     /* Set up handler to kill children upon exit */
     act.sa_flags = 0;
     act.sa_handler = lsapi_cleanup;
+    sigemptyset(&(act.sa_mask));
     if( sigaction( SIGTERM, &act, &old_term ) ||
         sigaction( SIGINT,  &act, &old_int  ) ||
         sigaction( SIGUSR1, &act, &old_usr1 ) ||
@@ -3060,18 +3170,25 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
             }
         }
 
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
+        *s_avail_pages = sysconf(_SC_AVPHYS_PAGES);
+#endif
         FD_ZERO( &readfds );
         FD_SET( pServer->m_fd, &readfds );
-        timeout.tv_sec = 1; 
+        timeout.tv_sec = 1;
         timeout.tv_usec = 0;
         ret = (*g_fnSelect)(pServer->m_fd+1, &readfds, NULL, NULL, &timeout);
         if (ret == 1 )
         {
-            if (pServer->m_iCurChildren >= pServer->m_iMaxChildren 
-                && s_accepting_workers 
-                && (ret = __sync_add_and_fetch(s_accepting_workers, 0)) > 0)
+            int accepting = 0;
+            if (s_accepting_workers)
+                accepting = __sync_add_and_fetch(s_accepting_workers, 0);
+
+            if (pServer->m_iCurChildren > 0 && accepting > 0)
             {
-                usleep( 200 );
+                usleep(400);
+                while(accepting-- > 0)
+                    sched_yield();
                 continue;
             }
         }
@@ -3087,13 +3204,13 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
             continue;
         }
 
-        if (pServer->m_iCurChildren >= 
+        if (pServer->m_iCurChildren >=
             pServer->m_iMaxChildren + pServer->m_iExtraChildren)
         {
-            fprintf( stderr, "Reached max children process limit: %d, extra: %d,"
+            lsapi_log("Reached max children process limit: %d, extra: %d,"
                      " current: %d, busy: %d, please increase LSAPI_CHILDREN.\n",
-                     pServer->m_iMaxChildren, pServer->m_iExtraChildren, 
-                     pServer->m_iCurChildren, 
+                     pServer->m_iMaxChildren, pServer->m_iExtraChildren,
+                     pServer->m_iCurChildren,
                      s_busy_workers ? *s_busy_workers : -1 );
             usleep( 100000 );
             continue;
@@ -3102,6 +3219,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
         pReq->m_fd = lsapi_accept( pServer->m_fd );
         if ( pReq->m_fd != -1 )
         {
+            wait_secs = 0;
             child_status = find_child_status( 0 );
             if ( child_status )
                 memset( child_status, 0, sizeof( *child_status ) );
@@ -3128,14 +3246,20 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                 s_proc_group_timer_cb = NULL;
                 s_worker_status = child_status;
 
-                s_worker_status->m_connected = 1;
+                if (pthread_atfork_func)
+                    (*pthread_atfork_func)(NULL, NULL, set_skip_write);
+
+                __sync_lock_test_and_set(&s_worker_status->m_state,
+                                         LSAPI_STATE_CONNECTED);
                 if (s_busy_workers)
                     __sync_add_and_fetch(s_busy_workers, 1);
                 lsapi_set_nblock( pReq->m_fd, 0 );
                 //keep it open if busy_count is used.
-                if (s_busy_workers && s_uid != 0)
+                if (s_busy_workers
+                    && *s_busy_workers > (pServer->m_iMaxChildren >> 1))
                     s_keepListener = 1;
-                else if ( pReq->m_fdListen != -1 )
+                if ((s_uid == 0 || !s_keepListener || !is_enough_free_mem())
+                    && pReq->m_fdListen != -1 )
                 {
                     close( pReq->m_fdListen );
                     pReq->m_fdListen = -1;
@@ -3190,10 +3314,10 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
 }
 
 
-void lsapi_error( const char * pMessage, int err_no )
+void lsapi_perror( const char * pMessage, int err_no )
 {
-    fprintf( stderr, "%d: %s, errno: %d (%s)\n", getpid(), pMessage, err_no, 
-             strerror( err_no ) );
+    lsapi_log("%s, errno: %d (%s)\n", pMessage, err_no,
+              strerror( err_no ) );
 }
 
 
@@ -3204,6 +3328,9 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
     int             wait_secs;
     fd_set          readfds;
     struct timeval  timeout;
+
+    if (s_skip_write)
+        return -1;
 
     LSAPI_Finish_r( pReq );
 
@@ -3222,7 +3349,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             lsapi_close_connection(pReq);
         }
     }
-    
+
     if ( (unsigned int)s_req_processed > s_max_reqs )
         return -1;
 
@@ -3249,7 +3376,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
         {
             if ( !g_running )
                 return -1;
-            if (s_req_processed && s_worker_status 
+            if (s_req_processed && s_worker_status
                 && s_worker_status->m_iKillSent)
                 return -1;
             FD_ZERO( &readfds );
@@ -3258,6 +3385,9 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             timeout.tv_usec = 0;
             if (fd == pReq->m_fdListen)
             {
+                if (s_worker_status)
+                    __sync_lock_test_and_set(&s_worker_status->m_state,
+                                             LSAPI_STATE_ACCEPTING);
                 if (s_accepting_workers)
                     __sync_fetch_and_add(s_accepting_workers, 1);
             }
@@ -3266,14 +3396,18 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             {
                 if (s_accepting_workers)
                     __sync_fetch_and_sub(s_accepting_workers, 1);
+                if (s_worker_status)
+                    __sync_lock_test_and_set(&s_worker_status->m_state,
+                                             LSAPI_STATE_IDLE);
             }
-            
+
             if ( ret == 0 )
             {
                 if ( s_worker_status )
                 {
                     s_worker_status->m_inProcess = 0;
-                    if (fd == pReq->m_fdListen)
+                    if (fd == pReq->m_fdListen
+                        && (s_keepListener != 2 || !is_enough_free_mem()))
                         return -1;
                 }
                 ++wait_secs;
@@ -3291,7 +3425,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
             }
             else if ( ret >= 1 )
             {
-                if (s_req_processed && s_worker_status 
+                if (s_req_processed && s_worker_status
                     && s_worker_status->m_iKillSent)
                     return -1;
                 if ( fd == pReq->m_fdListen )
@@ -3300,15 +3434,16 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                     if ( pReq->m_fd != -1 )
                     {
                         if (s_worker_status)
-                            s_worker_status->m_connected = 1;
+                            __sync_lock_test_and_set(&s_worker_status->m_state,
+                                                     LSAPI_STATE_CONNECTED);
                         if (s_busy_workers)
                             __sync_fetch_and_add(s_busy_workers, 1);
 
                         fd = pReq->m_fd;
-                        
+
                         lsapi_set_nblock( fd, 0 );
                         //init_conn_key( pReq->m_fd );
-                        if ( !s_keepListener )
+                        if (!s_keepListener)
                         {
                             close( pReq->m_fdListen );
                             pReq->m_fdListen = -1;
@@ -3321,7 +3456,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                     {
                         if (( errno == EINTR )||( errno == EAGAIN))
                             continue;
-                        lsapi_error( "lsapi_accept() error", errno );
+                        lsapi_perror( "lsapi_accept() error", errno );
                         return -1;
                     }
                 }
@@ -3337,7 +3472,7 @@ int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq )
                 s_worker_status->m_iKillSent = 0;
                 s_worker_status->m_inProcess = 1;
                 ++s_worker_status->m_iReqCounter;
-                s_worker_status->m_tmReqBegin = 
+                s_worker_status->m_tmReqBegin =
                 s_worker_status->m_tmLastCheckPoint = time(NULL);
             }
             ++s_req_processed;
@@ -3411,7 +3546,7 @@ void LSAPI_No_Check_ppid(void)
 }
 
 
-int LSAPI_Get_ppid() 
+int LSAPI_Get_ppid()
 {
     return(s_ppid);
 }
@@ -3521,7 +3656,7 @@ static int lsapi_check_path(const char *p, char *final, int max_len)
         return -1;
     }
     p = final;
-    if (realpath(p, resolved_path) == NULL 
+    if (realpath(p, resolved_path) == NULL
         && errno != ENOENT && errno != EACCES)
         return -1;
     if (strncmp(resolved_path, "/etc/", 5) == 0)
@@ -3538,7 +3673,7 @@ static int lsapi_reopen_stderr2(const char *full_path)
     int newfd = open(full_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (newfd == -1)
     {
-        LSAPI_perror_r(NULL, "failed to open custom stderr log", full_path);
+        LSAPI_perror_r(NULL, "Failed to open custom stderr log", full_path);
         return -1;
     }
     if (newfd != 2)
@@ -3564,7 +3699,7 @@ static int lsapi_reopen_stderr(const char *p)
         return -1;
     if (lsapi_check_path(p, full_path, PATH_MAX) == -1)
     {
-        LSAPI_perror_r(NULL, "invalid custom stderr log path", p);
+        LSAPI_perror_r(NULL, "Invalid custom stderr log path", p);
         return -1;
     }
     return lsapi_reopen_stderr2(full_path);
@@ -3574,15 +3709,18 @@ static int lsapi_reopen_stderr(const char *p)
 int LSAPI_Init_Env_Parameters( fn_select_t fp )
 {
     const char *p;
+    char ch;
     int n;
     int avoidFork = 0;
-    
+
     p = getenv("LSAPI_STDERR_LOG");
     if (p)
     {
         lsapi_reopen_stderr(p);
     }
-    
+    if (!s_stderr_log_path)
+        s_stderr_is_pipe = isPipe(STDERR_FILENO);
+
     p = getenv( "PHP_LSAPI_MAX_REQUESTS" );
     if ( !p )
         p = getenv( "LSAPI_MAX_REQS" );
@@ -3593,10 +3731,28 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
             LSAPI_Set_Max_Reqs( n );
     }
 
+    p = getenv( "LSAPI_KEEP_LISTEN" );
+    if ( p )
+    {
+        n = atoi( p );
+        s_keepListener = n;
+    }
+
     p = getenv( "LSAPI_AVOID_FORK" );
     if ( p )
     {
         avoidFork = atoi( p );
+        if (avoidFork)
+        {
+            s_keepListener = 2;
+            ch = *(p + strlen(p) - 1);
+            if (  ch == 'G' || ch == 'g' )
+                avoidFork *= 1024 * 1024 * 1024;
+            else if (  ch == 'M' || ch == 'm' )
+                avoidFork *= 1024 * 1024;
+            if (avoidFork >= 1024 * 10240)
+                s_min_avail_pages = avoidFork / 4096;
+        }
     }
 
     p = getenv( "LSAPI_ACCEPT_NOTIFY" );
@@ -3631,14 +3787,6 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
         LSAPI_Set_Max_Idle( n );
     }
 
-    p = getenv( "LSAPI_KEEP_LISTEN" );
-    if ( p )
-    {
-        n = atoi( p );
-        s_keepListener = n;
-    }
-
-
     if ( LSAPI_Is_Listen() )
     {
         n = 0;
@@ -3649,7 +3797,7 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
             n = atoi( p );
         if ( n > 1 )
         {
-            LSAPI_Init_Prefork_Server( n, fp, avoidFork );
+            LSAPI_Init_Prefork_Server( n, fp, avoidFork != 0 );
             LSAPI_Set_Server_fd( g_req.m_fdListen );
         }
 
@@ -3675,7 +3823,7 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
         {
             LSAPI_No_Check_ppid();
         }
-        
+
         p = getenv("LSAPI_MAX_BUSY_WORKER");
         if (p)
         {
@@ -3684,7 +3832,7 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp )
             if (n >= 0)
                 LSAPI_No_Check_ppid();
         }
-            
+
 
         p = getenv( "LSAPI_DUMP_DEBUG_INFO" );
         if ( p )
@@ -3950,7 +4098,7 @@ static void lsapi_MD5Transform(uint32 buf[4], uint32 const in[16])
 }
 
 
-int LSAPI_Set_Restored_Parent_Pid(int pid) 
+int LSAPI_Set_Restored_Parent_Pid(int pid)
 {
     int old_ppid = s_ppid;
     s_restored_ppid = pid;
@@ -3962,5 +4110,3 @@ int LSAPI_Inc_Req_Processed(int cnt)
 {
     return __sync_add_and_fetch(s_global_counter, cnt);
 }
-
-

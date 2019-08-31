@@ -15,6 +15,6 @@ $st = $db->prepare('CREATE TABLE test (a TEXT);');
 
 var_dump($st->getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

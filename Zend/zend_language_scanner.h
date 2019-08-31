@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -66,7 +66,7 @@ typedef struct _zend_heredoc_label {
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
-ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename);
+ZEND_API int zend_prepare_string_for_scanning(zval *str, const char *filename);
 ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding);
 ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding);
 ZEND_API void zend_lex_tstring(zval *zv);
@@ -74,13 +74,3 @@ ZEND_API void zend_lex_tstring(zval *zv);
 END_EXTERN_C()
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

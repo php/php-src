@@ -36,9 +36,6 @@ PHP_FUNCTION( collator_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_error_code: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -67,9 +64,6 @@ PHP_FUNCTION( collator_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_error_message: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -83,12 +77,3 @@ PHP_FUNCTION( collator_get_error_message )
 	RETURN_STR(message);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

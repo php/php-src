@@ -3,12 +3,12 @@ Unsupported type: oci_bind_array_by_name() and SQLT_UIN
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 $statement = oci_parse($c, "BEGIN array_bind_uin_pkg.iobind(:c1); END;");
 $array = Array(1.243,2.5658,3.4234,4.2123,5.9999);

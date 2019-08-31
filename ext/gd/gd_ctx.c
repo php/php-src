@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,8 +93,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	php_stream *stream;
 	int close_stream = 1;
 
-	/* The third (quality) parameter for Wbmp stands for the foreground when called from image2wbmp().
-	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
+	/* The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
 	 * from imagey<type>().
 	 */
 	switch (image_type) {
@@ -121,7 +120,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (image_type != PHP_GDIMG_TYPE_BMP && argc >= 3) {
@@ -140,8 +139,8 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
-				php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, filename must not contain null bytes");
-				RETURN_FALSE;
+				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
+				return;
 			}
 
 			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
@@ -177,10 +176,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	switch(image_type) {
-		case PHP_GDIMG_CONVERT_WBM:
-			if(q<0||q>255) {
-				php_error_docref(NULL, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
-			}
 		case PHP_GDIMG_TYPE_JPG:
 			(*func_p)(im, ctx, q);
 			break;
@@ -220,12 +215,3 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	RETURN_TRUE;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

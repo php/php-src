@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "wt" mode 
+Test fopen and fclose() functions - usage variations - "wt" mode
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == "WIN" )
@@ -25,7 +25,7 @@ if( substr(PHP_OS, 0, 3) == "WIN" )
    checking for the file truncation when trying to open an existing file in "wt" mode,
    and fclose function
 */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require($file_path."/file.inc");
 
 create_files($file_path, 1, "text_with_new_line", 0755, 20, "wt", "007_variation", 11, "bytes");
@@ -40,7 +40,7 @@ var_dump( ftell($file_handle) );  //Initial file pointer position, expected at t
 var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes; expected:size of the $string
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 rewind($file_handle);
-var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: empty string
+var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: false
 var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the beginning of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
@@ -54,10 +54,10 @@ clearstatcache();
 unlink($file);  //Deleting the file
 fclose( fopen($file, "wt") );  //Opening the non-existing file in "wt" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
-unlink(dirname(__FILE__)."/007_variation11.tmp");
+unlink(__DIR__."/007_variation11.tmp");
 ?>
 --EXPECTF--
 *** Test fopen() & fclose() functions:  with 'wt' mode ***
@@ -66,7 +66,9 @@ string(6) "stream"
 int(0)
 int(37)
 int(37)
-string(0) ""
+
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+bool(false)
 int(0)
 bool(true)
 string(7) "Unknown"

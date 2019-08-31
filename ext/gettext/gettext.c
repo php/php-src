@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,66 +27,7 @@
 #include <stdio.h>
 #include "ext/standard/info.h"
 #include "php_gettext.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_textdomain, 0)
-	ZEND_ARG_INFO(0, domain)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_gettext, 0)
-	ZEND_ARG_INFO(0, msgid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dgettext, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, msgid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dcgettext, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, msgid)
-	ZEND_ARG_INFO(0, category)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bindtextdomain, 0)
-	ZEND_ARG_INFO(0, domain_name)
-	ZEND_ARG_INFO(0, dir)
-ZEND_END_ARG_INFO()
-
-#if HAVE_NGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_ngettext, 0)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_DNGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_dngettext, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_DCNGETTEXT
-ZEND_BEGIN_ARG_INFO(arginfo_dcngettext, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, msgid1)
-	ZEND_ARG_INFO(0, msgid2)
-	ZEND_ARG_INFO(0, count)
-	ZEND_ARG_INFO(0, category)
-ZEND_END_ARG_INFO()
-#endif
-
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-ZEND_BEGIN_ARG_INFO(arginfo_bind_textdomain_codeset, 0)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, codeset)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
+#include "gettext_arginfo.h"
 
 /* {{{ php_gettext_functions[]
  */
@@ -389,12 +330,3 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 
 
 #endif /* HAVE_LIBINTL */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

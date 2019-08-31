@@ -7,15 +7,19 @@ openssl_pkcs7_decrypt() and invalid parameters
 
 function myErrorHandler($errno, $errstr, $errfile, $errline) {
     var_dump($errstr);
-} 
-set_error_handler("myErrorHandler"); 
+}
+set_error_handler("myErrorHandler");
 
-$a = 1; 
-$b = 1; 
-$c = new stdclass; 
-$d = new stdclass; 
+$a = 1;
+$b = 1;
+$c = new stdclass;
+$d = new stdclass;
 
-var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
+try {
+    var_dump(openssl_pkcs7_decrypt($a, $b, $c, $d));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($c);
 
 var_dump(openssl_pkcs7_decrypt($b, $b, $b, $b));
@@ -25,10 +29,8 @@ var_dump(openssl_pkcs7_decrypt($a, $b, 0, 0));
 
 echo "Done\n";
 ?>
---EXPECT--	
-string(57) "Object of class stdClass could not be converted to string"
-string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"
-bool(false)
+--EXPECT--
+Object of class stdClass could not be converted to string
 object(stdClass)#1 (0) {
 }
 string(66) "openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert"

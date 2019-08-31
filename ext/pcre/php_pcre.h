@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,20 +19,16 @@
 #ifndef PHP_PCRE_H
 #define PHP_PCRE_H
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 #if HAVE_BUNDLED_PCRE
 #include "pcre2lib/pcre2.h"
 #else
 #include "pcre2.h"
 #endif
 
-#if HAVE_LOCALE_H
 #include <locale.h>
-#endif
 
 PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
-PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count, uint32_t *options);
+PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count);
 PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *coptions);
 
 extern zend_module_entry pcre_module_entry;
@@ -45,7 +41,7 @@ typedef struct _pcre_cache_entry pcre_cache_entry;
 
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
 
-PHPAPI void  php_pcre_match_impl(  pcre_cache_entry *pce, char *subject, size_t subject_len, zval *return_value,
+PHPAPI void  php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset);
 
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str,
@@ -74,17 +70,15 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	zend_bool jit;
 #endif
+	zend_bool per_request_cache;
 	int  error_code;
+	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
+	zval unmatched_null_pair;
+	zval unmatched_empty_pair;
 ZEND_END_MODULE_GLOBALS(pcre)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(pcre)
 #define PCRE_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(pcre, v)
-
-#else
-
-#define pcre_module_ptr NULL
-
-#endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */
 
 #define phpext_pcre_ptr pcre_module_ptr
 

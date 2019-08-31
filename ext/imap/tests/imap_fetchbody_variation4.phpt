@@ -2,12 +2,12 @@
 Test imap_fetchbody() function : usage variations - FT_UID option
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 /* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
- * Description: Get a specific body section 
+ * Description: Get a specific body section
  * Source code: ext/imap/php_imap.c
  */
 
@@ -18,7 +18,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
  */
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Initialise required variables
 $stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one simple message
@@ -27,8 +27,8 @@ $msg_uid = imap_uid($stream_id, $msg_no);
 $section = 1;
 
 //Note: the first four values are valid as they will all be cast to 1L.
-$options = array ('1', true, 
-                  1.000000000000001, 0.00001e5, 
+$options = array ('1', true,
+                  1.000000000000001, 0.00001e5,
                   PHP_INT_MAX, -PHP_INT_MAX);
 
 // iterate over each element of $options array to test whether FT_UID is set
@@ -48,7 +48,7 @@ foreach($options as $option) {
 ===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : usage variations ***

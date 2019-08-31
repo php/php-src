@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Original design:  Shane Caraveo <shane@caraveo.com>                  |
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
@@ -27,9 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/pageinfo.h"
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
-#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -45,6 +43,7 @@
 
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
+SAPI_API size_t sapi_globals_offset;
 #else
 sapi_globals_struct sapi_globals;
 #endif
@@ -56,9 +55,6 @@ static void _type_dtor(zval *zv)
 
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 {
-#ifdef ZTS
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
 	zend_hash_init_ex(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1, 0);
 	php_setup_sapi_content_types();
@@ -79,7 +75,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 
 #ifdef ZTS
-	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
+	ts_allocate_fast_id(&sapi_globals_id, &sapi_globals_offset, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 # ifdef PHP_WIN32
 	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 # endif
@@ -1156,12 +1152,3 @@ SAPI_API void sapi_add_request_header(char *var, unsigned int var_len, char *val
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

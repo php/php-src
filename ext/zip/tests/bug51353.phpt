@@ -10,7 +10,7 @@ die('skip the test might get very long, activate it manually');
 adding an explicit skip, remove it to run this test. */
 set_time_limit(0);
 
-$base_path = dirname(__FILE__);
+$base_path = __DIR__;
 
 /* Either we ship a file with 100000 entries which would be >12M big,
 	or create it dynamically. */
@@ -40,7 +40,7 @@ if ($r) {
 echo "OK";
 --CLEAN--
 <?php
-$base_path = dirname(__FILE__);
+$base_path = __DIR__;
 
 unlink("$base_path/51353.zip");
 

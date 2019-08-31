@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Colin Viebrock <colin@viebrock.ca>                          |
    +----------------------------------------------------------------------+
 */
@@ -54,7 +54,7 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
+static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 {
 	size_t written;
 	zend_string *new_str;
@@ -66,7 +66,7 @@ static int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 }
 /* }}} */
 
-static int php_info_printf(const char *fmt, ...) /* {{{ */
+static ZEND_COLD int php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
 	size_t len, written;
@@ -82,13 +82,13 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static int php_info_print(const char *str) /* {{{ */
+static zend_always_inline int php_info_print(const char *str) /* {{{ */
 {
 	return php_output_write(str, strlen(str));
 }
 /* }}} */
 
-static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ */
+static ZEND_COLD void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ */
 {
 	zend_string *key;
 
@@ -131,7 +131,7 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 }
 /* }}} */
 
-PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 {
 	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
@@ -164,29 +164,9 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 }
 /* }}} */
 
-static int _display_module_info_func(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (module->info_func || module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
-static int _display_module_info_def(zval *el) /* {{{ */
-{
-	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
-	if (!module->info_func && !module->version) {
-		php_info_print_module(module);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-}
-/* }}} */
-
 /* {{{ php_print_gpcse_array
  */
-static void php_print_gpcse_array(char *name, uint32_t name_length)
+static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 {
 	zval *data, *tmp;
 	zend_string *string_key;
@@ -261,7 +241,7 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 
 /* {{{ php_info_print_style
  */
-void php_info_print_style(void)
+PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 {
 	php_info_printf("<style type=\"text/css\">\n");
 	php_info_print_css();
@@ -271,7 +251,7 @@ void php_info_print_style(void)
 
 /* {{{ php_info_html_esc
  */
-PHPAPI zend_string *php_info_html_esc(char *string)
+PHPAPI ZEND_COLD zend_string *php_info_html_esc(char *string)
 {
 	return php_escape_html_entities((unsigned char *) string, strlen(string), 0, ENT_QUOTES, NULL);
 }
@@ -752,7 +732,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 
 /* {{{ php_print_info_htmlhead
  */
-PHPAPI void php_print_info_htmlhead(void)
+PHPAPI ZEND_COLD void php_print_info_htmlhead(void)
 {
 	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
@@ -778,7 +758,7 @@ static int module_name_cmp(const void *a, const void *b)
 
 /* {{{ php_print_info
  */
-PHPAPI void php_print_info(int flag)
+PHPAPI ZEND_COLD void php_print_info(int flag)
 {
 	char **env, *tmp1, *tmp2;
 	zend_string *php_uname;
@@ -790,7 +770,7 @@ PHPAPI void php_print_info(int flag)
 	}
 
 	if (flag & PHP_INFO_GENERAL) {
-		char *zend_version = get_zend_version();
+		const char *zend_version = get_zend_version();
 		char temp_api[10];
 
 		php_uname = php_get_uname('a');
@@ -945,17 +925,26 @@ PHPAPI void php_print_info(int flag)
 
 	if (flag & PHP_INFO_MODULES) {
 		HashTable sorted_registry;
+		zend_module_entry *module;
 
 		zend_hash_init(&sorted_registry, zend_hash_num_elements(&module_registry), NULL, NULL, 1);
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
 		zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 
-		zend_hash_apply(&sorted_registry, _display_module_info_func);
+		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+			if (module->info_func || module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		zend_hash_apply(&sorted_registry, _display_module_info_def);
+		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+			if (!module->info_func && !module->version) {
+				php_info_print_module(module);
+			}
+		} ZEND_HASH_FOREACH_END();
 		php_info_print_table_end();
 
 		zend_hash_destroy(&sorted_registry);
@@ -965,6 +954,7 @@ PHPAPI void php_print_info(int flag)
 		SECTION("Environment");
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
+		tsrm_env_lock();
 		for (env=environ; env!=NULL && *env !=NULL; env++) {
 			tmp1 = estrdup(*env);
 			if (!(tmp2=strchr(tmp1,'='))) { /* malformed entry? */
@@ -976,6 +966,7 @@ PHPAPI void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
+        tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 
@@ -1054,7 +1045,7 @@ PHPAPI void php_print_info(int flag)
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_start(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_start(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<table>\n");
@@ -1064,7 +1055,7 @@ PHPAPI void php_info_print_table_start(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_end(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_end(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</table>\n");
@@ -1073,7 +1064,7 @@ PHPAPI void php_info_print_table_end(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_box_start(int flag) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_box_start(int flag) /* {{{ */
 {
 	php_info_print_table_start();
 	if (flag) {
@@ -1090,7 +1081,7 @@ PHPAPI void php_info_print_box_start(int flag) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_box_end(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_box_end(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</td></tr>\n");
@@ -1099,7 +1090,7 @@ PHPAPI void php_info_print_box_end(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_hr(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_hr(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("<hr />\n");
@@ -1109,7 +1100,7 @@ PHPAPI void php_info_print_hr(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
 {
 	int spaces;
 
@@ -1124,7 +1115,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {
 
 /* {{{ php_info_print_table_header
  */
-PHPAPI void php_info_print_table_header(int num_cols, ...)
+PHPAPI ZEND_COLD void php_info_print_table_header(int num_cols, ...)
 {
 	int i;
 	va_list row_elements;
@@ -1162,7 +1153,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 /* {{{ php_info_print_table_row_internal
  */
-static void php_info_print_table_row_internal(int num_cols,
+static ZEND_COLD void php_info_print_table_row_internal(int num_cols,
 		const char *value_class, va_list row_elements)
 {
 	int i;
@@ -1208,7 +1199,7 @@ static void php_info_print_table_row_internal(int num_cols,
 
 /* {{{ php_info_print_table_row
  */
-PHPAPI void php_info_print_table_row(int num_cols, ...)
+PHPAPI ZEND_COLD void php_info_print_table_row(int num_cols, ...)
 {
 	va_list row_elements;
 
@@ -1220,7 +1211,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 
 /* {{{ php_info_print_table_row_ex
  */
-PHPAPI void php_info_print_table_row_ex(int num_cols, const char *value_class,
+PHPAPI ZEND_COLD void php_info_print_table_row_ex(int num_cols, const char *value_class,
 		...)
 {
 	va_list row_elements;
@@ -1254,7 +1245,7 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 }
 /* }}} */
 
-/* {{{ proto void phpinfo([int what])
+/* {{{ proto bool phpinfo([int what])
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
@@ -1275,7 +1266,7 @@ PHP_FUNCTION(phpinfo)
 
 /* }}} */
 
-/* {{{ proto string phpversion([string extension])
+/* {{{ proto string|false phpversion([string extension])
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
@@ -1300,7 +1291,7 @@ PHP_FUNCTION(phpversion)
 }
 /* }}} */
 
-/* {{{ proto void phpcredits([int flag])
+/* {{{ proto bool phpcredits([int flag])
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
@@ -1316,7 +1307,7 @@ PHP_FUNCTION(phpcredits)
 }
 /* }}} */
 
-/* {{{ proto string php_sapi_name(void)
+/* {{{ proto string|false php_sapi_name(void)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
@@ -1350,7 +1341,7 @@ PHP_FUNCTION(php_uname)
 
 /* }}} */
 
-/* {{{ proto string php_ini_scanned_files(void)
+/* {{{ proto string|false php_ini_scanned_files(void)
    Return comma-separated string of .ini files parsed from the additional ini dir */
 PHP_FUNCTION(php_ini_scanned_files)
 {
@@ -1366,7 +1357,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 }
 /* }}} */
 
-/* {{{ proto string php_ini_loaded_file(void)
+/* {{{ proto string|false php_ini_loaded_file(void)
    Return the actual loaded ini filename */
 PHP_FUNCTION(php_ini_loaded_file)
 {
@@ -1381,12 +1372,3 @@ PHP_FUNCTION(php_ini_loaded_file)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

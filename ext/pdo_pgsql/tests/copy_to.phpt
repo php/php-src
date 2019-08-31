@@ -1,16 +1,16 @@
 --TEST--
 PDO PgSQL pgsqlCopyToArray and pgsqlCopyToFile
 --SKIPIF--
-<?php # vim:se ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
@@ -116,7 +116,7 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() with default parameters
 bool(true)
 0	test insert 0	\N
@@ -133,7 +133,6 @@ bool(true)
 1;NULL
 2;NULL
 Testing pgsqlCopyToFile() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyToFile() to unwritable file
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file for writing
-

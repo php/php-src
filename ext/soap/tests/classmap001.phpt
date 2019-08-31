@@ -22,26 +22,26 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 class test{
 	function dotest(book $book){
 		$classname=get_class($book);
 		return "Classname: ".$classname;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 $options=Array(
 		'actor' =>'http://schema.nothing.com',
 		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
 		);
 
-$server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
+$server = new SoapServer(__DIR__."/classmap.wsdl",$options);
 $server->setClass("test");
 $server->handle($GLOBALS['HTTP_RAW_POST_DATA']);
 echo "ok\n";

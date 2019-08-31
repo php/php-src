@@ -7,17 +7,17 @@ output_handler=
 
 	$php = getenv('TEST_PHP_EXECUTABLE');
 	$tmpfile = tempnam(__DIR__, 'phpt');
-	$args = ' -n -dsafe_mode=off ';
-	
+	$args = ' -n ';
+
 	/* Regular Data Test */
 	passthru($php . $args . ' -r " echo \"HELLO\"; "');
 
 	echo "\n";
 
 	/* Binary Data Test */
-	
+
 	if (substr(PHP_OS, 0, 3) != 'WIN') {
-		$cmd = $php . $args . ' -r \"readfile(@getenv(\'TEST_PHP_EXECUTABLE\')); \"';
+		$cmd = $php . $args . ' -r \"readfile(@getenv(\'\\\'\'TEST_PHP_EXECUTABLE\'\\\'\')); \"';
 		$cmd = $php . $args . ' -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
 	} else {
 		$cmd = $php . $args . ' -r \"readfile(@getenv(\\\\\\"TEST_PHP_EXECUTABLE\\\\\\")); \"';
@@ -30,7 +30,7 @@ output_handler=
 	} else {
 		echo "Does not work\n";
 	}
-	
+
 	@unlink($tmpfile);
 ?>
 --EXPECT--

@@ -9,7 +9,7 @@ if (PHP_INT_SIZE < 8) {
 --FILE--
 <?php
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test76422";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "test76422";
 
 $file_handle = fopen($fn,'cb');
 
@@ -29,7 +29,7 @@ var_dump(filesize($fn) >= $truncate_offset);
 ?>
 --CLEAN--
 <?php
-$fn = dirname(__FILE__) . "/test76422";
+$fn = __DIR__ . "/test76422";
 unlink($fn);
 ?>
 --EXPECT--

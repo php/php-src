@@ -8,7 +8,7 @@ phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://'.$fname;
 
 $phar = new Phar($fname);
@@ -64,7 +64,7 @@ var_dump($phar->getAlias());
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 Entry .phar/stub.php does not exist
 Entry .phar/alias.txt does not exist

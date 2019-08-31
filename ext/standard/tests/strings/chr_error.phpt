@@ -11,11 +11,19 @@ Test chr() function : error conditions
 echo "*** Testing chr() : error conditions ***\n";
 
 echo "\n-- Testing chr() function with no arguments --\n";
-var_dump( chr() );
+try {
+    var_dump( chr() );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n-- Testing chr() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( chr(72, $extra_arg) );
+try {
+    var_dump( chr(72, $extra_arg) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -23,12 +31,8 @@ var_dump( chr(72, $extra_arg) );
 *** Testing chr() : error conditions ***
 
 -- Testing chr() function with no arguments --
-
-Warning: Wrong parameter count for chr() in %s on line %d
-NULL
+chr() expects exactly 1 parameter, 0 given
 
 -- Testing chr() function with more than expected no. of arguments --
-
-Warning: Wrong parameter count for chr() in %s on line %d
-NULL
+chr() expects exactly 1 parameter, 2 given
 ===DONE===

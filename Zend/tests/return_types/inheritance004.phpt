@@ -1,6 +1,5 @@
 --TEST--
 Internal covariant return type of self
-
 --FILE--
 <?php
 class Foo {
@@ -17,7 +16,6 @@ class Bar extends Foo {
 
 var_dump(Bar::test());
 var_dump(Foo::test());
-
 --EXPECTF--
 object(Bar)#%d (0) {
 }

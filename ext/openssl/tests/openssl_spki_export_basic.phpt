@@ -12,7 +12,7 @@ if (!@openssl_pkey_new()) die("skip cannot create private key");
 $key_sizes = array(1024, 2048, 4096);
 $pkeys = array();
 foreach ($key_sizes as $key_size) {
-    $key_file = "file://" . dirname(__FILE__) . "/private_rsa_" . $key_size . ".key";
+    $key_file = "file://" . __DIR__ . "/private_rsa_" . $key_size . ".key";
     $pkeys[] = openssl_pkey_get_private($key_file);
 }
 

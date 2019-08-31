@@ -3,7 +3,7 @@ SELECT oci_bind_by_name with SQLT_AFC aka CHAR and dates
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {
@@ -15,7 +15,7 @@ NLS_LANG=.AL32UTF8
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
@@ -25,7 +25,7 @@ $stmtarray = array(
 	"create table bind_char_tab (id number, c1 date)",
 	"insert into bind_char_tab values (1, '2008-04-20')",
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
@@ -85,7 +85,7 @@ function do_e_q($s)
 $stmtarray = array(
 	"drop table bind_char_tab"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";

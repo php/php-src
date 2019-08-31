@@ -10,9 +10,9 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.zip';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '3.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.phar.zip';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '3.phar.zip';
 
 $phar = new Phar($fname);
 $phar->setStub('<?php echo "first stub\n"; __HALT_COMPILER(); ?>');
@@ -49,9 +49,9 @@ echo $p3->getAlias(), "\n";
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '3.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '3.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECT--

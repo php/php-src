@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,6 +66,14 @@ extern zend_module_entry openssl_module_entry;
 
 #include <openssl/err.h>
 
+#ifdef PHP_WIN32
+#	define PHP_OPENSSL_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#	define PHP_OPENSSL_API __attribute__((visibility("default")))
+#else
+#	define PHP_OPENSSL_API
+#endif
+
 struct php_openssl_errors {
 	int buffer[ERR_NUM_ERRORS];
 	int top;
@@ -85,6 +93,17 @@ ZEND_TSRMLS_CACHE_EXTERN();
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 void php_openssl_store_errors();
+
+PHP_OPENSSL_API zend_long php_openssl_cipher_iv_length(char *method);
+PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long length);
+PHP_OPENSSL_API zend_string* php_openssl_encrypt(char *data, size_t data_len,
+		char *method, size_t method_len, char *password,
+		size_t password_len, zend_long options, char *iv, size_t iv_len,
+		zval *tag, zend_long tag_len, char *aad, size_t add_len);
+PHP_OPENSSL_API zend_string* php_openssl_decrypt(char *data, size_t data_len,
+		char *method, size_t method_len, char *password,
+		size_t password_len, zend_long options, char *iv, size_t iv_len,
+		char *tag, zend_long tag_len, char *aad, size_t add_len);
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
@@ -127,6 +146,7 @@ PHP_FUNCTION(openssl_x509_export);
 PHP_FUNCTION(openssl_x509_fingerprint);
 PHP_FUNCTION(openssl_x509_export_to_file);
 PHP_FUNCTION(openssl_x509_check_private_key);
+PHP_FUNCTION(openssl_x509_verify);
 
 PHP_FUNCTION(openssl_pkcs12_export);
 PHP_FUNCTION(openssl_pkcs12_export_to_file);
@@ -162,10 +182,3 @@ PHP_FUNCTION(openssl_get_cert_locations);
 
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -16,7 +16,7 @@ internal_encoding=utf-8
 */
 
 $item = "bug74589_新建文件夹"; // utf-8 string
-$dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . $item;
+$dir = __DIR__ . DIRECTORY_SEPARATOR . $item;
 $test_file = $dir . DIRECTORY_SEPARATOR . "test.php";
 
 mkdir($dir);
@@ -25,7 +25,7 @@ file_put_contents($test_file,
 "<?php
 	var_dump(__DIR__);
 	var_dump(__FILE__);
-	var_dump(__DIR__ === dirname(__FILE__));");
+	var_dump(__DIR__ === __DIR__);");
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 
@@ -33,7 +33,7 @@ echo shell_exec("$php -n $test_file");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%sbug74589_新建文件夹"
 string(%d) "%sbug74589_新建文件夹%etest.php"
 bool(true)
@@ -41,9 +41,8 @@ bool(true)
 --CLEAN--
 <?php
 	$item = "bug74589_新建文件夹"; // utf-8 string
-	$dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . $item;
+	$dir = __DIR__ . DIRECTORY_SEPARATOR . $item;
 	$test_file = $dir . DIRECTORY_SEPARATOR . "test.php";
 	unlink($test_file);
 	rmdir($dir);
 ?>
-

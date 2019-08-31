@@ -8,8 +8,8 @@ if (PHP_READLINE != "no") {
 		EXTENSION("readline", "readline.c readline_cli.c");
 		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_LIBEDIT");
 		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_RL_COMPLETION_MATCHES");
+		ADD_FLAG("CFLAGS_READLINE", "/D HAVE_HISTORY_LIST");
 	} else {
 		WARNING("readline not enabled; libraries and headers not found");
 	}
 }
-

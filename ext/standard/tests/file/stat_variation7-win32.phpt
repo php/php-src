@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 
 /* test the stats of dir/file when their names are stored in objects */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 require "$file_path/file.inc";
 
 
@@ -61,10 +61,9 @@ var_dump( stat($obj2->var_name) );
 
 echo "\n*** Done ***";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink("$file_path/stat_variation7.tmp");
 unlink("$file_path/stat_variation7a.tmp");
 rmdir("$file_path/stat_variation7");
@@ -295,4 +294,3 @@ array(26) {
 }
 
 *** Done ***
-

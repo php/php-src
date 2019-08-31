@@ -8,7 +8,7 @@ Test array_unshift() function : usage variations - assoc. array with diff. keys 
 */
 
 /*
- * Testing the functionality of array_unshift() by passing different 
+ * Testing the functionality of array_unshift() by passing different
  * associative arrays having different possible keys to $array argument.
  * The $var argument passed is a fixed value
 */
@@ -52,13 +52,13 @@ $arrays = array (
        // arrays with float keys
 /*5*/  array(2.3333 => "float"),
        array(1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3", 
+             4.89999922839999 => "f3",
              33333333.333333 => "f4"),
 
        // arrays with string keys
 /*7*/  array('\tHello' => 111, 're\td' => "color",
              '\v\fworld' => 2.2, 'pen\n' => 33),
-       array("\tHello" => 111, "re\td" => "color", 
+       array("\tHello" => 111, "re\td" => "color",
              "\v\fworld" => 2.2, "pen\n" => 33),
        array("hello", $heredoc => "string"), // heredoc
 

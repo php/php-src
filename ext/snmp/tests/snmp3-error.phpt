@@ -1,19 +1,19 @@
---TEST--                                 
+--TEST--
 SNMPv3 Support (errors)
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 echo "Checking error handling\n";
 
-//int snmp3_get(string host, string sec_name, string sec_level, string auth_protocol, 
-//              string auth_passphrase, string priv_protocol, string priv_passphrase, 
+//int snmp3_get(string host, string sec_name, string sec_level, string auth_protocol,
+//              string auth_passphrase, string priv_protocol, string priv_passphrase,
 //              string object_id [, int timeout [, int retries]]);
 
 var_dump(snmp3_get($hostname, $community, '', '', '', '', ''));

@@ -1,5 +1,5 @@
 --TEST--
-Bug #37138 (__autoload tries to load callback'ed self and parent)
+Bug #37138 (autoloader tries to load callback'ed self and parent)
 --FILE--
 <?php
 spl_autoload_register(function ($CN) { var_dump ($CN); });
@@ -18,4 +18,3 @@ stch::g ();
 EHLO
 EHLO
 EHLO
-

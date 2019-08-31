@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -208,7 +207,11 @@ void fpm_children_bury() /* {{{ */
 
 		} else if (WIFSIGNALED(status)) {
 			const char *signame = fpm_signal_names[WTERMSIG(status)];
+#ifdef WCOREDUMP
 			const char *have_core = WCOREDUMP(status) ? " - core dumped" : "";
+#else
+			const char* have_core = "";
+#endif
 
 			if (signame == NULL) {
 				signame = "";
@@ -481,4 +484,3 @@ int fpm_children_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

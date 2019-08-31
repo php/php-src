@@ -373,9 +373,7 @@ mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s1 & 0xff) | 0x80, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -432,5 +430,3 @@ static int mbfl_filt_ident_eucjp_win(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-

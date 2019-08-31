@@ -7,7 +7,7 @@ XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX p
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 
 $xml_parser = xml_parser_create();
 xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 1);
@@ -16,7 +16,7 @@ xml_set_character_data_handler($xml_parser, "characterData");
 xml_set_processing_instruction_handler($xml_parser, "PIHandler");
 xml_set_default_handler($xml_parser, "defaultHandler");
 xml_set_external_entity_ref_handler($xml_parser, "externalEntityRefHandler");
-    
+
 if (!($fp = @fopen("xmltest.xml", "r"))) {
     die("could not open XML input");
 }

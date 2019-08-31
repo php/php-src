@@ -30,7 +30,7 @@ class handlerClass {
     }
 }
 
-$server = new SoapServer(dirname(__FILE__)."/server030.wsdl");
+$server = new SoapServer(__DIR__."/server030.wsdl");
 $server->setClass('handlerClass');
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -114,7 +114,9 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -176,7 +178,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float disk_total_space(string path)
+/* {{{ proto float|false disk_total_space(string path)
    Get total disk space for filesystem that path is on */
 PHP_FUNCTION(disk_total_space)
 {
@@ -208,7 +210,9 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	PHP_WIN32_IOUTIL_INIT_W(path)
 
 	if (GetDiskFreeSpaceExW(pathw, &FreeBytesAvailableToCaller, &TotalNumberOfBytes, &TotalNumberOfFreeBytes) == 0) {
-		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
+		char *err = php_win_err();
+		php_error_docref(NULL, E_WARNING, "%s", err);
+		php_win_err_free(err);
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
@@ -269,7 +273,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 /* }}} */
 /* }}} */
 
-/* {{{ proto float disk_free_space(string path)
+/* {{{ proto float|false disk_free_space(string path)
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
 {
@@ -1130,12 +1134,3 @@ PHP_FUNCTION(realpath_cache_get)
 		buckets++;
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

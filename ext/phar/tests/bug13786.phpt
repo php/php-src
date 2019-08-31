@@ -11,7 +11,7 @@ phar.readonly=0
 try {
 for ($i = 0; $i < 2; $i++) {
 	$fname = "DataArchive.phar";
-	$path = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fname;
+	$path = __DIR__ . DIRECTORY_SEPARATOR . $fname;
 	$phar = new Phar($path);
 	$phar->addFromString($i, "file $i in $fname");
 	var_dump(file_get_contents($phar[$i]));

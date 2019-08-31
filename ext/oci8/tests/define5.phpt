@@ -5,7 +5,7 @@ oci_define_by_name() for statement re-execution
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -69,4 +69,3 @@ Test 3 - no new define done
 string(4) "some"
 string(5) "thing"
 Done
-

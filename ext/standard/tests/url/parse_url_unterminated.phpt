@@ -11,7 +11,7 @@ if (!function_exists('zend_create_unterminated_string')) die('skip ext/test requ
  * This is the same as the basic001 test, but with unterminated strings.
  */
 
-include_once(dirname(__FILE__) . '/urls.inc');
+include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
 	echo "\n--> $url: ";
@@ -23,7 +23,6 @@ foreach ($urls as $url) {
 echo "Done";
 ?>
 --EXPECT--
-
 --> 64.246.30.37: array(1) {
   ["path"]=>
   string(12) "64.246.30.37"

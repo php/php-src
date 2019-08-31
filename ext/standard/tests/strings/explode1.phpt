@@ -6,9 +6,9 @@ precision=14
 --FILE--
 <?php
 /* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
-   Description: Returns an array of strings, each of which is a substring of string 
+   Description: Returns an array of strings, each of which is a substring of string
                 formed by splitting it on boundaries formed by the string delimiter.
-                If limit is set, the returned array will contain a maximum of limit 
+                If limit is set, the returned array will contain a maximum of limit
                 elements with the last element containing the rest of string.
 */
 
@@ -28,16 +28,33 @@ $delimiters = array (
 );
 $string = "1234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND";
 /* loop prints an array of strings, each of which is a substring of $string
-   formed by splitting it on boundaries formed by the string $delimiter. 
+   formed by splitting it on boundaries formed by the string $delimiter.
  */
 $counter = 1;
 foreach($delimiters as $delimiter) {
-  echo "-- Iteration $counter --\n";
-  var_dump( explode($delimiter, $string, -1) );
-  var_dump( explode($delimiter, $string, 0) );
-  var_dump( explode($delimiter, $string, 1) );
-  var_dump( explode($delimiter, $string, 2) );
-  $counter++;
+    echo "-- Iteration $counter --\n";
+
+    try {
+        var_dump( explode($delimiter, $string, -1) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    try {
+	    var_dump( explode($delimiter, $string, 0) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    try {
+	    var_dump( explode($delimiter, $string, 1) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    try {
+	    var_dump( explode($delimiter, $string, 2) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
+    $counter++;
 }
 
 echo "\n*** Testing explode() with miscelleneous input arguments ***\n";
@@ -51,7 +68,7 @@ echo "\n-- Passing limit values 0 and 1 to explode() --\n";
 var_dump( explode(":", "Name:Phone:Address:City:State", 0) );
 var_dump( explode(":", "Name:Phone:Address:City:State", 1) );
 
-/* to check the maximum limit of string that can be given with limit<=0, 
+/* to check the maximum limit of string that can be given with limit<=0,
    default size is 50 but increases dynamically */
 echo "\n*** Testing explode() for maximum limit of string with Limit = -1 ***\n";
 var_dump( explode(":", "1:2:3:4:5:6:7:7:5:6:7:3:4:5:2:8:9:0:5:5:5:5:5:5:5:5:5:5:5:5:55:5:5:5%:%:%:%:5:5:5:%:%:5:5:5:5:5%:%:%:55:1:1", -1) );
@@ -77,41 +94,20 @@ class string1 {
 $obj = new string1;
 var_dump( explode("b", $obj) );
 
-echo "\n*** Testing error conditions ***\n";
-/* checking for arguments <2 and >3 */
-var_dump( explode(":", "array1:array2:array3", -1, -33) );
-var_dump( explode(":") );
-
 echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+Empty delimiter
+Empty delimiter
+Empty delimiter
+Empty delimiter
 -- Iteration 2 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+Empty delimiter
+Empty delimiter
+Empty delimiter
+Empty delimiter
 -- Iteration 3 --
 array(1) {
   [0]=>
@@ -213,18 +209,10 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
-
-Warning: explode(): Empty delimiter in %s on line %d
-bool(false)
+Empty delimiter
+Empty delimiter
+Empty delimiter
+Empty delimiter
 -- Iteration 8 --
 array(2) {
   [0]=>
@@ -498,12 +486,4 @@ array(2) {
   [1]=>
   string(4) "ject"
 }
-
-*** Testing error conditions ***
-
-Warning: explode() expects at most 3 parameters, 4 given in %s on line %d
-NULL
-
-Warning: explode() expects at least 2 parameters, 1 given in %s on line %d
-NULL
 Done

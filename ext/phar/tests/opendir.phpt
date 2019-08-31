@@ -7,7 +7,7 @@ phar.require_hash=1
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = opendir("dir");
@@ -32,7 +32,7 @@ opendir('phar://hi.phar');
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 file1.txtfile2.txtfile3.txt
 

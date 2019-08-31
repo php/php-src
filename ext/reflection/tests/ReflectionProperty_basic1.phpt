@@ -47,7 +47,7 @@ reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
 
 ?>
---EXPECT--
+--EXPECTF--
 **********************************
 Reflecting on property TestClass::pub
 
@@ -55,9 +55,13 @@ __toString():
 string(35) "Property [ <default> public $pub ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 string(35) "Property [ <default> public $pub ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 Property [ <default> public $pub ]
 
 NULL
@@ -84,9 +88,13 @@ __toString():
 string(33) "Property [ public static $stat ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 string(33) "Property [ public static $stat ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 Property [ public static $stat ]
 
 NULL
@@ -113,9 +121,13 @@ __toString():
 string(39) "Property [ <default> protected $prot ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 string(39) "Property [ <default> protected $prot ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 Property [ <default> protected $prot ]
 
 NULL
@@ -138,9 +150,13 @@ __toString():
 string(37) "Property [ <default> private $priv ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 string(37) "Property [ <default> private $priv ]
 "
 export():
+
+Deprecated: Function ReflectionProperty::export() is deprecated in %s on line %d
 Property [ <default> private $priv ]
 
 NULL
@@ -156,5 +172,3 @@ isStatic():
 bool(false)
 
 **********************************
-
-

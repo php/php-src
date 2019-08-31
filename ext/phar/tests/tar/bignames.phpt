@@ -6,10 +6,10 @@ Phar: tar with huge filenames
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.tar';
-$fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.3.tar';
-$fname4 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.4.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.tar';
+$fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.tar';
+$fname4 = __DIR__ . '/' . basename(__FILE__, '.php') . '.4.tar';
 $pname = 'phar://' . $fname;
 
 $p1 = new PharData($fname);
@@ -43,10 +43,10 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
-@unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.3.tar');
-@unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.4.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.tar');
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.4.tar');
 ?>
 --EXPECTF--
 hi

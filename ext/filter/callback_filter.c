@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	}
 
 	ZVAL_COPY(&args[0], value);
-	status = call_user_function_ex(EG(function_table), NULL, option_array, &retval, 1, args, 0, NULL);
+	status = call_user_function_ex(NULL, NULL, option_array, &retval, 1, args, 0, NULL);
 
 	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(value);
@@ -44,12 +44,3 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 
 	zval_ptr_dtor(&args[0]);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

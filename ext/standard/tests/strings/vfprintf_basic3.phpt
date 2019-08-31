@@ -24,27 +24,27 @@ $arg2 = array(11.11,22.22);
 $arg3 = array(11.11,22.22,33.33);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic3.txt';
+$data_file = __DIR__ . '/vfprintf_basic3.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
 vfprintf($fp, $format1,$arg1);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp,$format11,$arg1);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp,$format2,$arg2);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp,$format22,$arg2);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp,$format3,$arg3);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 vfprintf($fp, $format33,$arg3);
-fprintf($fp, "\n"); 
+fprintf($fp, "\n");
 
 fclose($fp);
 print_r(file_get_contents($data_file));
@@ -61,4 +61,3 @@ unlink($data_file);
 11.110000 22.220000 33.330000
 11.110000 22.220000 33.330000
 ===DONE===
-

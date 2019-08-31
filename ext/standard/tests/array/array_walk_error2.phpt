@@ -3,7 +3,7 @@ Test array_walk() function : error conditions - callback parameters
 --FILE--
 <?php
 /* Prototype  : bool array_walk(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -35,12 +35,12 @@ try {
 
 // expected: Warning is suppressed
 try {
-	var_dump( @array_walk($input, "callback1") );  
+	var_dump( @array_walk($input, "callback1") );
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( @array_walk($input, "callback2", 4) );  
+	var_dump( @array_walk($input, "callback2", 4) );
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
@@ -61,7 +61,5 @@ Exception: Too few arguments to function callback2(), 3 passed and exactly 4 exp
 Exception: Too few arguments to function callback1(), 2 passed and exactly 3 expected
 Exception: Too few arguments to function callback2(), 3 passed and exactly 4 expected
 -- Testing array_walk() function with too many callback parameters --
-
-Warning: array_walk() expects at most 3 parameters, 4 given in %s on line %d
-NULL
+Exception: array_walk() expects at most 3 parameters, 4 given
 Done

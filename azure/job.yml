@@ -1,0 +1,51 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: apt.yml
+    - template: configure.yml
+      parameters:
+        configurationParameters: ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+      displayName: 'Install Build'
+    - script: |
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres psql -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsParameters: ${{ parameters.runTestsParameters }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'JIT'
+        runTestsParameters: >-
+          ${{ parameters.runTestsParameters }}
+          -d zend_extension=opcache.so
+          -d opcache.jit_buffer_size=16M

@@ -1,11 +1,11 @@
 #!/bin/bash
-if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
-	TS="--enable-maintainer-zts";
+if [[ "$ENABLE_ZTS" == 1 ]]; then
+	TS="--enable-zts";
 else
 	TS="";
 fi
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
-	DEBUG="--enable-debug --without-pcre-valgrind";
+	DEBUG="--enable-debug";
 else
 	DEBUG="";
 fi
@@ -27,6 +27,7 @@ MAKE_JOBS=${MAKE_JOBS:-2}
 
 ./buildconf --force
 ./configure \
+--enable-option-checking=fatal \
 --prefix="$HOME"/php-install \
 $CONFIG_QUIET \
 $DEBUG \
@@ -40,18 +41,18 @@ $TS \
 --with-pdo-sqlite \
 --enable-intl \
 --without-pear \
---with-gd \
---with-jpeg-dir=/usr \
---with-png-dir=/usr \
+--enable-gd \
+--with-jpeg \
+--with-webp \
+--with-freetype \
+--with-xpm \
 --enable-exif \
---enable-zip \
---without-libzip \
+--with-zip \
 --with-zlib \
 --with-zlib-dir=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
---with-curl=/usr \
 --with-tidy \
 --with-xmlrpc \
 --enable-sysvsem \
@@ -71,12 +72,12 @@ $TS \
 --enable-ftp \
 --with-pspell=/usr \
 --with-enchant=/usr \
---enable-wddx \
---with-freetype-dir=/usr \
---with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg \
---enable-zend-test \
+--with-ffi \
+--enable-zend-test=shared \
+--enable-werror \
+--with-pear \
 > "$CONFIG_LOG_FILE"
 
 make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"

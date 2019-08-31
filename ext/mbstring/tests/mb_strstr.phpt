@@ -1,9 +1,7 @@
 --TEST--
-mb_strstr() 
+mb_strstr()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
---INI--
-mbstring.internal_encoding=UTF-8
 --FILE--
 <?php
 function EUC_JP($utf8str) {

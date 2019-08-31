@@ -1,13 +1,13 @@
 --TEST--
 DBA File Creation Test
 --SKIPIF--
-<?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+<?php
+	require_once(__DIR__ .'/skipif.inc');
 	die("info $HND handler used");
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) .'/test.inc');
+	require_once(__DIR__ .'/test.inc');
 	echo "database handler: $handler\n";
 	if (($db_file=dba_open($db_file, "n", $handler))!==FALSE) {
     	echo "database file created\n";
@@ -17,8 +17,8 @@ DBA File Creation Test
     }
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

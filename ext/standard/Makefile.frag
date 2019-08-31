@@ -1,4 +1,3 @@
-
 $(srcdir)/var_unserializer.c: $(srcdir)/var_unserializer.re
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -b -o ext/standard/var_unserializer.c ext/standard/var_unserializer.re)
 

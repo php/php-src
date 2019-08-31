@@ -1,13 +1,13 @@
 --TEST--
 strip comments and whitespace with -w
 --SKIPIF--
-<?php 
+<?php
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
 
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -17,7 +17,7 @@ include "include.inc";
 $php = get_cgi_path();
 reset_env_vars();
 
-$filename = dirname(__FILE__).'/003.test.php';
+$filename = __DIR__.'/003.test.php';
 $code ='
 <?php
 /* some test script */
@@ -45,7 +45,7 @@ var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() 
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 

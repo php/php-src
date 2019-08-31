@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
    | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
    |                                                                      |
    | Redesigned by: Antony Dovgal <antony@zend.com>                       |
-   |                Andi Gutmans <andi@zend.com>                          |
+   |                Andi Gutmans <andi@php.net>                           |
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
@@ -262,7 +262,11 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 		zend_hash_apply(statement->columns, php_oci_cleanup_pre_fetch);
     }
 
+#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
+	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));
+#else
 	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
+#endif
 
 	if (errstatus == OCI_NO_DATA || nrows == 0) {
 		if (statement->last_query == NULL) {
@@ -338,7 +342,11 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 			}
 		}
 
+#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
+		PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));
+#else
 		PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
+#endif
 
 		if (piecewisecols) {
 			for (i = 0; i < statement->ncolumns; i++) {
@@ -989,7 +997,12 @@ int php_oci_bind_post_exec(zval *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
+#if PHP_VERSION_ID < 70300
+		SEPARATE_STRING(zv);
+		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0);
+#else
 		ZVAL_NEW_STR(zv, zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0));
+#endif
 		Z_STRVAL_P(zv)[ Z_STRLEN_P(zv) ] = '\0';
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		int i;
@@ -997,7 +1010,7 @@ int php_oci_bind_post_exec(zval *data)
 		HashTable *hash;
 
 		SEPARATE_ARRAY(zv);
-		hash = HASH_OF(zv);
+		hash = Z_ARRVAL_P(zv);
 		zend_hash_internal_pointer_reset(hash);
 
 		switch (bind->array.type) {
@@ -1176,7 +1189,9 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 			if (Z_TYPE_P(param) != IS_NULL) {
-				convert_to_string(param);
+				if (!try_convert_to_string(param)) {
+					return 1;
+				}
 			}
 			if ((maxlength == -1) || (maxlength == 0)) {
 				if (type == SQLT_LNG) {
@@ -1252,7 +1267,11 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		zvtmp = zend_string_init(name, name_len, 0);
 		bindp = (php_oci_bind *) ecalloc(1, sizeof(php_oci_bind));
 		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
+#if PHP_VERSION_ID < 70300
+		zend_string_release(zvtmp);
+#else
 		zend_string_release_ex(zvtmp, 0);
+#endif
 	}
 
 	/* Make sure the minimum of value_sz is 1 to avoid ORA-3149
@@ -1373,8 +1392,10 @@ sb4 php_oci_bind_in_callback(
 		*alenp = -1;
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
-		/* "normal string bind */
-		convert_to_string(val);
+		/* "normal" string bind */
+		if (!try_convert_to_string(val)) {
+			return OCI_ERROR;
+		}
 
 		*bufpp = Z_STRVAL_P(val);
 		*alenp = (ub4) Z_STRLEN_P(val);
@@ -1466,7 +1487,6 @@ sb4 php_oci_bind_out_callback(
 		*indpp = &phpbind->indicator;
 		retval = OCI_CONTINUE;
 	} else {
-		convert_to_string(val);
 		zval_ptr_dtor(val);
 
 		{
@@ -1502,9 +1522,10 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 	php_oci_statement *statement;
 	php_oci_out_column *column;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &z_statement, &column_index) == FAILURE) {
-		return NULL;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_ZVAL(column_index)
+	ZEND_PARSE_PARAMETERS_END_EX(return NULL);
 
 	statement = (php_oci_statement *) zend_fetch_resource_ex(z_statement, "oci8 statement", le_statement);
 
@@ -1524,7 +1545,6 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		}
 	} else {
 		zend_long tmp;
-		/* NB: for PHP4 compat only, it should be using 'Z' instead */
 
 		tmp = zval_get_long(column_index);
 		column = php_oci_statement_get_column(statement, tmp, NULL, 0);
@@ -1698,7 +1718,11 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	zvtmp = zend_string_init(name, name_len, 0);
 	zend_hash_update_ptr(statement->binds, zvtmp, bind);
+#if PHP_VERSION_ID < 70300
+	zend_string_release(zvtmp);
+#else
 	zend_string_release_ex(zvtmp, 0);
+#endif
 
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
@@ -1715,12 +1739,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	if (maxlength == -1) {
 		zend_hash_internal_pointer_reset(hash);
 		while ((entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_string_ex(entry);
+			if (!try_convert_to_string(entry)) {
+				return NULL;
+			}
 
 			if (maxlength == -1 || Z_STRLEN_P(entry) > (size_t) maxlength) {
 				maxlength = Z_STRLEN_P(entry) + 1;
@@ -1746,7 +1772,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 
 	for (i = 0; i < bind->array.current_length; i++) {
 		if ((entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_string_ex(entry);
+			if (!try_convert_to_string(entry)) {
+				efree(bind->array.elements);
+				efree(bind->array.element_lengths);
+				efree(bind->array.indicators);
+				efree(bind);
+				return NULL;
+			}
+
 			bind->array.element_lengths[i] = (ub2) Z_STRLEN_P(entry);
 			if (Z_STRLEN_P(entry) == 0) {
 				bind->array.indicators[i] = -1;
@@ -1761,8 +1794,14 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, zend_long max_table_le
 	for (i = 0; i < max_table_length; i++) {
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
 			int element_length;
+			if (!try_convert_to_string(entry)) {
+				efree(bind->array.elements);
+				efree(bind->array.element_lengths);
+				efree(bind->array.indicators);
+				efree(bind);
+				return NULL;
+			}
 
-			convert_to_string_ex(entry);
 			element_length = ((size_t) maxlength > Z_STRLEN_P(entry)) ? (int) Z_STRLEN_P(entry) : (int) maxlength;
 
 			memcpy((text *)bind->array.elements + i*maxlength, Z_STRVAL_P(entry), element_length);
@@ -1789,7 +1828,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
@@ -1830,7 +1869,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 	zval *entry;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
@@ -1872,7 +1911,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 	sword errstatus;
 
 	SEPARATE_ARRAY(var); /* TODO: may be use new HashTable iteration and prevent inplace modification */
-	hash = HASH_OF(var);
+	hash = Z_ARRVAL_P(var);
 
 	bind = emalloc(sizeof(php_oci_bind));
 	ZVAL_UNDEF(&bind->val);
@@ -1891,9 +1930,16 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 			bind->array.element_lengths[i] = sizeof(OCIDate);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
+			zend_string *entry_str = zval_try_get_string(entry);
+			if (UNEXPECTED(!entry_str)) {
+				efree(bind->array.element_lengths);
+				efree(bind->array.elements);
+				efree(bind);
+				return NULL;
+			}
 
-			convert_to_string_ex(entry);
-			PHP_OCI_CALL_RETURN(errstatus, OCIDateFromText, (connection->err, (CONST text *)Z_STRVAL_P(entry), (ub4) Z_STRLEN_P(entry), NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(errstatus, OCIDateFromText, (connection->err, (CONST text *)ZSTR_VAL(entry_str), (ub4) ZSTR_LEN(entry_str), NULL, 0, NULL, 0, &oci_date));
+			zend_string_release(entry_str);
 
 			if (errstatus != OCI_SUCCESS) {
 				/* failed to convert string to date */
@@ -1931,12 +1977,3 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 /* }}} */
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

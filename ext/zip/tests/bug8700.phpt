@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$thisdir = dirname(__FILE__);
+$thisdir = __DIR__;
 $filename = $thisdir . "/bug8009.zip";
 
 $zip = new ZipArchive();
@@ -24,6 +24,5 @@ if ($contents_from_idx != $contents_from_name) {
 $zip->close();
 echo "status: " . $zip->status . "\n";
 echo "\n";
-
 --EXPECT--
 status: 0

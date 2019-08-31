@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
    | ZTS per process OCIPLogon by Harald Radi <harald.radi@nme.at>        |
    |                                                                      |
    | Redesigned by: Antony Dovgal <antony@zend.com>                       |
-   |                Andi Gutmans <andi@zend.com>                          |
+   |                Andi Gutmans <andi@php.net>                           |
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
@@ -52,7 +52,11 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
+#if PHP_VERSION_ID < 70300
+	++GC_REFCOUNT(collection->connection->id);
+#else
 	GC_ADDREF(collection->connection->id);
+#endif
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,
@@ -806,12 +810,3 @@ void php_oci_collection_close(php_oci_collection *collection)
 /* }}} */
 
 #endif /* HAVE_OCI8 */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

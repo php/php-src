@@ -1,15 +1,15 @@
 --TEST--
-oci_lob_free()/close() 
+oci_lob_free()/close()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
-	
-require dirname(__FILE__).'/connect.inc';
-require dirname(__FILE__).'/create_table.inc';
+
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $ora_sql = "INSERT INTO
                        ".$schema.$table_name." (blob)
@@ -44,7 +44,7 @@ oci_execute($s);
 
 var_dump(oci_fetch_array($s, OCI_NUM + OCI_RETURN_LOBS));
 
-require dirname(__FILE__).'/drop_table.inc';
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -458,7 +458,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	process_pair *proc;
 	char *cmd = NULL;
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
-	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
@@ -468,17 +467,17 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	/*The following two checks can be removed once we drop XP support */
 	type_len = (int)strlen(type);
-	if (type_len <1 || type_len > 2) {
+	if (type_len < 1 || type_len > 2) {
 		return NULL;
 	}
 
-	for (i=0; i < type_len; i++) {
-		if (!(*ptype == 'r' || *ptype == 'w' || *ptype == 'b' || *ptype == 't')) {
-			return NULL;
-		}
-		ptype++;
+	if (ptype[0] != 'r' && ptype[0] != 'w') {
+		return NULL;
+	}
+
+	if (type_len > 1 && (ptype[1] != 'b' && ptype[1] != 't')) {
+		return NULL;
 	}
 
 	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
@@ -770,7 +769,7 @@ static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {
 	// Note that LONGLONG is a 64-bit value
 	LONGLONG ll;
 
-	ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	ll = t * 10000000LL + 116444736000000000LL;
 	pft->dwLowDateTime = (DWORD)ll;
 	pft->dwHighDateTime = ll >> 32;
 }
@@ -820,12 +819,3 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 /* }}} */
 #endif
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

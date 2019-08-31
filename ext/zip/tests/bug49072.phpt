@@ -6,7 +6,7 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$f = dirname(__FILE__)  . '/bug49072.zip';
+$f = __DIR__  . '/bug49072.zip';
 $o = new ZipArchive();
 if (! $o->open($f, ZipArchive::CHECKCONS)) {
 	exit ('error can\'t open');
@@ -19,5 +19,4 @@ while (! feof($r)) {
 }
 ?>
 --EXPECTF--
-
 Warning: fread(): Zip stream error: CRC error in %s on line %d

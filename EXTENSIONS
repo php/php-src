@@ -36,7 +36,8 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cli
-MAINTENANCE:         Marcus Börger <helly@php.net>, Edin Kadribasic <edink@php.net>
+PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>, Edin Kadribasic <edink@php.net>
+MAINTENANCE:         Unknown
 STATUS:              Working
 SINCE:               4.3.0
 -------------------------------------------------------------------------------
@@ -58,7 +59,8 @@ STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           phpdbg
-MAINTENANCE:         Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
+PRIMARY MAINTAINER:  Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
+MAINTENANCE:         Unkown
 STATUS:              5.6
 -------------------------------------------------------------------------------
 
@@ -73,11 +75,6 @@ PRIMARY MAINTAINER:  Marcus Börger <helly@php.net> (2002 - 2007)
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
--------------------------------------------------------------------------------
-EXTENSION:           interbase
-PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu> (2003 - 2005)
-MAINTENANCE:         Odd fixes
-STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mysqli
 PRIMARY MAINTAINER:  Georg Richter <georg@php.net> (2003 - 2006)
@@ -169,6 +166,7 @@ COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less hav
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite3
 PRIMARY MAINTAINER:  Scott MacVicar <scottmac@php.net> (2008 - 2011)
+                     Christoph M. Becker <cmb@php.net> (2016 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -194,13 +192,8 @@ STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           soap
-PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com> (2004 - 2018)
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2004 - 2018)
 MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           wddx
-PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (1999 - 2003)
-MAINTENANCE:         Orphaned
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xml
@@ -216,7 +209,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
-PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
+PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net> (2004 - 2010)
+                     Christian Stocker <chregu@php.net> (2004 - 2004)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -244,7 +238,8 @@ SINCE:               5.0
 
 -------------------------------------------------------------------------------
 EXTENSION:           bcmath
-MAINTENANCE:         Andi Gutmans <andi@zend.com> (2000 - 2004)
+PRIMARY MAINTAINER:  Andi Gutmans <andi@php.net> (2000 - 2004)
+MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           bz2
@@ -260,6 +255,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           com_dotnet
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2003 - 2005)
+                     Christoph M. Becker <cmb@php.net> (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Windows
 SINCE:               5.0
@@ -294,9 +290,15 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.2
 -------------------------------------------------------------------------------
+EXTENSION:           ffi
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2018 - 2019)
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+SINCE:               7.4.0
+-------------------------------------------------------------------------------
 EXTENSION:           fileinfo
 PRIMARY MAINTAINER:  Derick Rethans <derick@php.net> (2004 - 2008)
-                     Anatol Belski <ab@php.net> (2012 - 2018)
+                     Anatol Belski <ab@php.net> (2012 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -316,17 +318,19 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2002 - 2016)
-                     Christoph M. Becker <cmb@php.net> (2015 - 2018)
+                     Christoph M. Becker <cmb@php.net> (2015 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gettext
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gmp
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2000 - 2019)
                      Antony Dovgal <tony2001@php.net> (2005 - 2010)
+                     Nikita Popov <nikic@php.net> (2013 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
@@ -345,7 +349,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           intl
-PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2018)
+PRIMARY MAINTAINER:  Stanislav Malyshev <stas@php.net> (2008 - 2019)
                      Anatol Belski <ab@php.net> (2017 - 2018)
 MAINTENANCE:         Maintained
 STATUS:              Working
@@ -355,6 +359,7 @@ EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org> (1999 - 2004)
                      Ilia Alshanetsky <iliaa@php.net> (2002 - 2010)
                      Pierre-Alain Joye <pajoye@php.net> (2008 - 2010)
+                     Bishop Bettini (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -374,12 +379,14 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
+                     Nikita Popov <nikic@php.net> (2017 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           opcache
-PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com> (2013 - 2018)
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2013 - 2018)
                      Xinchen Hui <laruence@php.net> (2013 - 2018)
+                     Nikita Popov <nikic@php.net> (2016 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.5.0
@@ -387,6 +394,7 @@ SINCE:               5.5.0
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2001 - 2006)
                      Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
+                     Jakub Zelenka <bukka@php.net> (2015 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
@@ -406,6 +414,7 @@ EXTENSION:           phar
 PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net> (2008 - 2009)
                      Marcus Börger <helly@php.net> (2008 - 2008)
                      Steph Fox <sfox@php.net> (2008 - 2008)
+                     Bishop Bettini (2018 - 2019)
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -422,12 +431,8 @@ STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           readline
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           recode
-PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de> (2000 - 2000)
-MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           reflection
@@ -475,14 +480,17 @@ STATUS:              Working
 SINCE:               5.0.0
 -------------------------------------------------------------------------------
 EXTENSION:           sysvmsg
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvshm
+PRIMARY MAINTAINER:  Unkown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -495,7 +503,8 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           tokenizer
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (2002 - 2002)
-MAINTENANCE:         Unknown
+                     Nikita Popov <nikic@php.net> (2013 - 2019)
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           zip

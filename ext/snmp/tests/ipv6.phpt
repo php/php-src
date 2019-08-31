@@ -1,10 +1,10 @@
---TEST--                                 
+--TEST--
 IPv6 support
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
@@ -13,7 +13,7 @@ if (@inet_ntop($packed) === false) {
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);

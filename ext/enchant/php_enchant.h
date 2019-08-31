@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -61,20 +61,4 @@ PHP_FUNCTION(enchant_dict_get_error);
 PHP_FUNCTION(enchant_dict_describe);
 PHP_FUNCTION(enchant_dict_quick_check);
 
-#ifdef ZTS
-#define ENCHANT_G(v) TSRMG(enchant_globals_id, zend_enchant_globals *, v)
-#else
-#define ENCHANT_G(v) (enchant_globals.v)
-#endif
-
 #endif	/* PHP_ENCHANT_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
-

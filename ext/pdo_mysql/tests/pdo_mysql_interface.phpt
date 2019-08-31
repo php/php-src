@@ -2,8 +2,8 @@
 MySQL PDO class interface
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
@@ -11,7 +11,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 
 	$expected = array(
@@ -29,8 +29,6 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 		'getAttribute'							=> true,
 		'quote'								=> true,
 		'inTransaction'							=> true,
-		'__wakeup'							=> true,
-		'__sleep'							=> true,
 		'getAvailableDrivers'	=> true,
 	);
 	$classname = get_class($db);

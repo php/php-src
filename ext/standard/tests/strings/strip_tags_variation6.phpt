@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : usage variations - binary safe checking
---INI--
-short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])

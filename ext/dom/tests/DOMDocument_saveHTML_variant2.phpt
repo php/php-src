@@ -1,8 +1,8 @@
 --TEST--
-DOMDocument::saveHTML() vs DOMDocumet::saveXML() 
+DOMDocument::saveHTML() vs DOMDocumet::saveXML()
 --SKIPIF--
 <?php
-require_once dirname(__FILE__) .'/skipif.inc';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

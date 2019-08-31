@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_share_close)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(z_sh));
@@ -86,11 +86,8 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 	}
 
 	SAVE_CURLSH_ERROR(sh, error);
-	if (error != CURLSHE_OK) {
-		return 1;
-	} else {
-		return 0;
-	}
+
+	return error != CURLSHE_OK;
 }
 /* }}} */
 
@@ -109,7 +106,7 @@ PHP_FUNCTION(curl_share_setopt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(zid), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
@@ -143,7 +140,7 @@ PHP_FUNCTION(curl_share_errno)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(sh->err.no);
@@ -172,12 +169,3 @@ PHP_FUNCTION(curl_share_strerror)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

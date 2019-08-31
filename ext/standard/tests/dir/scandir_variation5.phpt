@@ -6,7 +6,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
 	die('skip Not for Windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/dir_root_check.tmp";
+$filename = __DIR__."/dir_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -30,14 +30,14 @@ unlink($filename);
 
 echo "*** Testing scandir() : usage variations ***\n";
 
-/* 
+/*
  * create the temporary directory :
  * scandir_variation5  ( parent )
  *  |-> sub_dir     ( sub parent )
  *      |-> child_dir  ( child dir)
  */
 
-$parent_dir_path = dirname(__FILE__) . "/scandir_variation5";
+$parent_dir_path = __DIR__ . "/scandir_variation5";
 mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 
@@ -66,7 +66,7 @@ var_dump(scandir($child_dir_path));
 ===DONE===
 --CLEAN--
 <?php
-$parent_dir_path = dirname(__FILE__) . "/scandir_variation5";
+$parent_dir_path = __DIR__ . "/scandir_variation5";
 $sub_dir_path = $parent_dir_path."/sub_dir";
 $child_dir_path = $sub_dir_path."/child_dir";
 

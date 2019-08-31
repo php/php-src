@@ -1,8 +1,7 @@
 --TEST--
 proc_open without bypass_shell subprocess parameter passing
 --SKIPIF--
-<?php # vim:syn=php
-if (php_sapi_name() != "cli") die('skip CLI only test');
+<?php
 if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 ?>
 --FILE--
@@ -10,7 +9,7 @@ if (!function_exists("proc_open")) echo "skip proc_open() is not available";
 
 $php = PHP_BINARY;
 
-$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . "proc_only_mb1.php";
+$f = __DIR__ . DIRECTORY_SEPARATOR . "proc_only_mb1.php";
 file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(

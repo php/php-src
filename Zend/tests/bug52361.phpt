@@ -32,4 +32,3 @@ Stack trace:
 Stack trace:
 #0 %sbug52361.php(16): bbb()
 #1 {main}
-

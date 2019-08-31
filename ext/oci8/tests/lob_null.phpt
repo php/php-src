@@ -3,12 +3,12 @@ Test null data for CLOBs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 // Initialization
 
@@ -18,14 +18,14 @@ $s = oci_parse($c, 'drop table lob_null_tab');
 $s = oci_parse($c, 'create table lob_null_tab (id number, data clob)');
 oci_execute($s);
 
-$s = oci_parse($c, 
+$s = oci_parse($c,
 'create or replace procedure lob_null_proc_in (pid in number, pdata in CLOB)
  as begin
    insert into lob_null_tab (id, data) values (pid, pdata);
  end;');
 oci_execute($s);
 
-$s = oci_parse($c, 
+$s = oci_parse($c,
 'create or replace procedure lob_null_proc_out (pid in number, pdata out clob)
    as begin
      select data into pdata from lob_null_tab where id = pid;
@@ -43,7 +43,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -57,7 +57,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -71,7 +71,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -87,7 +87,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -101,7 +101,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -115,7 +115,7 @@ $r = @oci_execute($s);
 if (!$r) {
     $m = oci_error($s);
     echo $m['message'], "\n";
-}   
+}
 else {
     $lob->close();
 }
@@ -188,7 +188,7 @@ $s = oci_parse($c, 'drop table lob_null_tab');
 echo "Done\n";
 
 ?>
---EXPECT-- 
+--EXPECT--
 Temporary CLOB: NULL
 Temporary CLOB: ''
 Temporary CLOB: text

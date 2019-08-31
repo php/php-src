@@ -2,8 +2,8 @@
 Bug #45705 test #1 (imap rfc822_parse_adrlist() modifies passed address parameter)
 --SKIPIF--
 <?php
-	if (!extension_loaded("imap")) { 
-		die("skip imap extension not available");  
+	if (!extension_loaded("imap")) {
+		die("skip imap extension not available");
 	}
 ?>
 --FILE--

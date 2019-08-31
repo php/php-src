@@ -1,7 +1,7 @@
 --TEST--
 COM: General variant tests
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
 if (8 != PHP_INT_SIZE) print "skip x64 only";
 if ((string) variant_cat(new VARIANT(false), new VARIANT(0.5)) != 'False0.5')

@@ -12,6 +12,7 @@ if(substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
+$certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit.pem.tmp';
 
 /**
  * This test uses the openssl binary directly to initiate renegotiation. At this time it's not
@@ -26,7 +27,9 @@ $serverCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create(['ssl' => [
-        'local_cert' => __DIR__ . '/bug54992.pem',
+        'local_cert' => '%s',
+        // TLS 1.3 does not support renegotiation.
+        'max_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_2,
         'reneg_limit' => 0,
         'reneg_window' => 30,
         'reneg_limit_callback' => function($stream) use (&$printed) {
@@ -64,6 +67,7 @@ $serverCode = <<<'CODE'
         }
     }
 CODE;
+$serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
     $cmd = 'openssl s_client -connect 127.0.0.1:64321';
@@ -87,8 +91,16 @@ $clientCode = <<<'CODE'
     proc_terminate($process);
 CODE;
 
+include 'CertificateGenerator.inc';
+$certificateGenerator = new CertificateGenerator();
+$certificateGenerator->saveNewCertAsFileWithKey('stream_security_level', $certFile);
+
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . DIRECTORY_SEPARATOR . 'stream_server_reneg_limit.pem.tmp');
 ?>
 --EXPECTF--
 resource(%d) of type (stream)

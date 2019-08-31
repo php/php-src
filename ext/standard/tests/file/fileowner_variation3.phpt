@@ -11,7 +11,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing fileowner() with different notations of file names ***\n";
 $dir_name = $file_path."/fileowner_variation3";
@@ -29,7 +29,7 @@ $files_arr = array(
   "/fileowner_variation3//fileowner_variation3.tmp",
   "//fileowner_variation3//fileowner_variation3.tmp",
   "/fileowner_variation3/*.tmp",
-  "fileowner_variation3/fileowner*.tmp", 
+  "fileowner_variation3/fileowner*.tmp",
 
   /* Testing Binary safe */
   "/fileowner_variation3/fileowner_variation3.tmp".chr(0),
@@ -40,7 +40,11 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileowner( $file_path."/".$file ) );
+  try {
+    var_dump( fileowner( $file_path."/".$file ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   clearstatcache();
   $count++;
 }
@@ -49,7 +53,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/fileowner_variation3";
 unlink($dir_name."/fileowner_variation3.tmp");
 rmdir($dir_name);
@@ -75,12 +79,8 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-
-Warning: fileowner() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileowner() expects parameter 1 to be a valid path, string given
 - Iteration 8 -
-
-Warning: fileowner() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+fileowner() expects parameter 1 to be a valid path, string given
 
 *** Done ***

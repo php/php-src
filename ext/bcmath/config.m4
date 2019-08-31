@@ -1,7 +1,7 @@
-dnl config.m4 for extension bcmath
-
-PHP_ARG_ENABLE(bcmath, whether to enable bc style precision math functions,
-[  --enable-bcmath         Enable bc style precision math functions])
+PHP_ARG_ENABLE([bcmath],
+  [whether to enable bc style precision math functions],
+  [AS_HELP_STRING([--enable-bcmath],
+    [Enable bc style precision math functions])])
 
 if test "$PHP_BCMATH" != "no"; then
   PHP_NEW_EXTENSION(bcmath, bcmath.c \

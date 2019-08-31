@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -53,12 +53,19 @@ bc_num2long (num)
   /* Extract the int value, ignore the fraction. */
   val = 0;
   nptr = num->n_value;
-  for (index=num->n_len; (index>0) && (val<=(LONG_MAX/BASE)); index--)
-    val = val*BASE + *nptr++;
+  for (index = num->n_len; index > 0; index--) {
+    char n = *nptr++;
 
-  /* Check for overflow.  If overflow, return zero. */
-  if (index>0) val = 0;
-  if (val < 0) val = 0;
+    if (val > LONG_MAX/BASE) {
+      return 0;
+    }
+    val *= BASE;
+
+    if (val > LONG_MAX - n) {
+      return 0;
+    }
+    val += n;
+  }
 
   /* Return the value. */
   if (num->n_sign == PLUS)
@@ -66,4 +73,3 @@ bc_num2long (num)
   else
     return (-val);
 }
-

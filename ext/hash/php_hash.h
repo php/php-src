@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 #define L64 INT64_C
 
 typedef void (*php_hash_init_func_t)(void *context);
-typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, size_t count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
 
@@ -40,9 +40,9 @@ typedef struct _php_hash_ops {
 	php_hash_final_func_t hash_final;
 	php_hash_copy_func_t hash_copy;
 
-	int digest_size;
-	int block_size;
-	int context_size;
+	size_t digest_size;
+	size_t block_size;
+	size_t context_size;
 	unsigned is_crypto: 1;
 } php_hash_ops;
 
@@ -91,6 +91,7 @@ extern const php_hash_ops php_hash_gost_crypto_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
+extern const php_hash_ops php_hash_crc32c_ops;
 extern const php_hash_ops php_hash_fnv132_ops;
 extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
@@ -128,10 +129,6 @@ extern zend_module_entry hash_module_entry;
 #	define PHP_HASH_API
 #endif
 
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-
 PHP_FUNCTION(hash);
 PHP_FUNCTION(hash_file);
 PHP_FUNCTION(hash_hkdf);
@@ -151,10 +148,10 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t alg
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 
-static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
+static inline void php_hash_bin2hex(char *out, const unsigned char *in, size_t in_len)
 {
 	static const char hexits[17] = "0123456789abcdef";
-	int i;
+	size_t i;
 
 	for(i = 0; i < in_len; i++) {
 		out[i * 2]       = hexits[in[i] >> 4];
@@ -163,13 +160,3 @@ static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_l
 }
 
 #endif	/* PHP_HASH_H */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

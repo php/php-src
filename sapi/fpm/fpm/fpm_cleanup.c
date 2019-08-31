@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -48,4 +47,3 @@ void fpm_cleanups_run(int type) /* {{{ */
 	fpm_array_free(&cleanups);
 }
 /* }}} */
-

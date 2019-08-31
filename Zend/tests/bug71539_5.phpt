@@ -7,7 +7,8 @@ $array['']->prop =& $array[0];
 $array[0] = 42;
 var_dump($array);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Creating default object from empty value in %sbug71539_5.php on line 3
 array(2) {
   [0]=>
   &int(42)

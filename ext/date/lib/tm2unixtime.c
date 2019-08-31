@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ static void do_range_limit_fraction(timelib_sll *fraction, timelib_sll *seconds)
 		*fraction += 1000000;
 		*seconds -= 1;
 	}
-	if (*fraction > 1000000) {
+	if (*fraction >= 1000000) {
 		*fraction -= 1000000;
 		*seconds += 1;
 	}
@@ -194,6 +194,7 @@ static void do_adjust_for_weekday(timelib_time* time)
 
 void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 {
+	do_range_limit_fraction(&rt->us, &rt->s);
 	do_range_limit(0, 60, 60, &rt->s, &rt->i);
 	do_range_limit(0, 60, 60, &rt->i, &rt->h);
 	do_range_limit(0, 24, 24, &rt->h, &rt->d);

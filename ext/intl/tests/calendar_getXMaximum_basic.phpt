@@ -17,7 +17,7 @@ var_dump(
 		$intlcal->getLeastMaximum(IntlCalendar::FIELD_DAY_OF_MONTH),
 		intlcal_get_least_maximum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH),
 		$intlcal->getActualMaximum(IntlCalendar::FIELD_DAY_OF_MONTH),
-		intlcal_get_actual_maximum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH), 
+		intlcal_get_actual_maximum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH),
 		$intlcal->getMaximum(IntlCalendar::FIELD_DAY_OF_MONTH),
 		intlcal_get_maximum($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH)
 );

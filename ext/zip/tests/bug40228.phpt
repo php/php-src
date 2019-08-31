@@ -4,7 +4,7 @@ Bug #40228 (extractTo does not create recursive empty path)
 <?php if (!extension_loaded("zip")) print "skip"; ?>
 --FILE--
 <?php
-$dest = dirname(__FILE__);
+$dest = __DIR__;
 $arc_name = $dest . "/bug40228.zip";
 $zip = new ZipArchive;
 $zip->open($arc_name, ZIPARCHIVE::CREATE);

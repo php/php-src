@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2008-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|z/", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
 		return;
 	}
 
@@ -60,12 +60,16 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(mx_list);
-	array_init(mx_list);
+	mx_list = zend_try_array_init(mx_list);
+	if (!mx_list) {
+		goto cleanup;
+	}
 
 	if (weight_list) {
-		zval_ptr_dtor(weight_list);
-		array_init(weight_list);
+		weight_list = zend_try_array_init(weight_list);
+		if (!weight_list) {
+			goto cleanup;
+		}
 	}
 
 	for (pRec = pResult; pRec; pRec = pRec->pNext) {
@@ -81,6 +85,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 		}
 	}
 
+cleanup:
 	/* Free memory allocated for DNS records. */
 	DnsRecordListFree(pResult, DnsFreeRecordListDeep);
 
@@ -352,18 +357,22 @@ PHP_FUNCTION(dns_get_record)
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/!z/!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}
 
 	if (authns) {
-		zval_ptr_dtor(authns);
-		array_init(authns);
+		authns = zend_try_array_init(authns);
+		if (!authns) {
+			return;
+		}
 	}
 	if (addtl) {
-		zval_ptr_dtor(addtl);
-		array_init(addtl);
+		addtl = zend_try_array_init(addtl);
+		if (!addtl) {
+			return;
+		}
 	}
 
 	if (!raw) {

@@ -1,5 +1,7 @@
 --TEST--
 Incorrect CFG/SSA construction for SWITCH with few identical successors
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function render($properties) {
@@ -20,4 +22,3 @@ function render($properties) {
 OK
 --EXPECT--
 OK
-

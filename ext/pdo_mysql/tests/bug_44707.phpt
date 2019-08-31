@@ -3,8 +3,8 @@ Bug #44707 (The MySQL PDO driver resets variable content after bindParam on tiny
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 MySQLPDOTest::skip();
 
@@ -22,9 +22,9 @@ if ($version < 41000)
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 function bug_44707($db) {
 
@@ -37,8 +37,6 @@ function bug_44707($db) {
 
 	$stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
 	$stmt->bindParam(1, $id);
-	// From MySQL 4.1 on boolean and TINYINT don't match! INSERT will fail.
-	// Versions prior to 4.1 have a weak test and will accept this.
 	$stmt->bindParam(2, $mybool, PDO::PARAM_BOOL);
 	var_dump($mybool);
 
@@ -78,10 +76,24 @@ Native Prepared Statements
 bool(false)
 bool(false)
 bool(false)
-array(0) {
-}
 array(1) {
   [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["mybool"]=>
+    string(1) "0"
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id"]=>
+    string(1) "1"
+    ["mybool"]=>
+    string(1) "0"
+  }
+  [1]=>
   array(2) {
     ["id"]=>
     string(1) "1"

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -49,7 +49,7 @@ extern zend_object *pdo_row_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_row_functions[];
 extern zend_class_entry *pdo_row_ce;
 void pdo_row_free_storage(zend_object *std);
-extern const zend_object_handlers pdo_row_object_handlers;
+extern zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object);
 
@@ -59,13 +59,3 @@ int pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);
 const char *pdo_sqlstate_state_to_description(char *state);
 int pdo_hash_methods(pdo_dbh_object_t *dbh, int kind);
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

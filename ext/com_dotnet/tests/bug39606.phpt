@@ -1,7 +1,7 @@
 --TEST--
 COM: Loading typelib corrupts memory
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
 --FILE--
 <?php

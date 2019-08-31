@@ -1,8 +1,8 @@
 --TEST--
-Test mkdir/rmdir cp1254 to UTF-8 path 
+Test mkdir/rmdir cp1254 to UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,7 +16,7 @@ skip_if_no_required_exts();
 #vim: set encoding=cp1254
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "çokbaytlı işleri";
 $prefix = create_data("dir_cp1254", "${item}42");
@@ -37,7 +37,7 @@ remove_data("dir_cp1254");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

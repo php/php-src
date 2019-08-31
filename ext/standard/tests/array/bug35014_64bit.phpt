@@ -7,7 +7,6 @@ precision=14
 --FILE--
 <?php
 $tests = array(
-	'foo',
 	array(),
 	array(0),
 	array(3),
@@ -22,9 +21,7 @@ foreach ($tests as $v) {
 	var_dump(array_product($v));
 }
 ?>
---EXPECTF--	
-Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
-NULL
+--EXPECT--
 int(1)
 int(0)
 int(3)

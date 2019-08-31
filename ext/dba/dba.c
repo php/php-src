@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -160,11 +160,7 @@ ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
 
-#ifdef ZTS
-#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
-#else
-#define DBA_G(v) (dba_globals.v)
-#endif
+#define DBA_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dba, v)
 
 static PHP_GINIT_FUNCTION(dba);
 
@@ -186,6 +182,9 @@ zend_module_entry dba_module_entry = {
 };
 
 #ifdef COMPILE_DL_DBA
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(dba)
 #endif
 
@@ -278,13 +277,13 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
-		RETURN_FALSE; \
+		return; \
 	}
 
 #define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
 		DBA_ID_DONE; \
-		RETURN_FALSE; \
+		return; \
 	}
 
 #define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
@@ -515,6 +514,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(dba)
 {
+#if defined(COMPILE_DL_DBA) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	dba_globals->default_handler = "";
 	dba_globals->default_hptr    = NULL;
 }
@@ -668,6 +670,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	for (i = 0; i < ac; i++) {
 		ZVAL_STR(&args[i], zval_get_string(&args[i]));
 		keylen += Z_STRLEN(args[i]);
+	}
+
+	/* Exception during string conversion */
+	if (EG(exception)) {
+		FREENOW;
+		return;
 	}
 
 	if (persistent) {
@@ -889,7 +897,7 @@ restart:
 			spprintf(&lock_name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
 				/* when in read only mode try to use existing .lck file first */
-				/* do not log errors for .lck file while in read ony mode on .lck file */
+				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
 				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
 			}
@@ -1319,12 +1327,3 @@ PHP_FUNCTION(dba_list)
 /* }}} */
 
 #endif /* HAVE_DBA */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

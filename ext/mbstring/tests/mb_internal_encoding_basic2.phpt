@@ -13,8 +13,8 @@ function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is n
 --FILE--
 <?php
 /* Prototype  : string mb_internal_encoding([string $encoding])
- * Description: Sets the current internal encoding or Returns 
- * the current internal encoding as a string 
+ * Description: Sets the current internal encoding or Returns
+ * the current internal encoding as a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -47,7 +47,7 @@ string(10) "ISO-8859-1"
 string(0) ""
 string(0) ""
 string(0) ""
-string(5) "UTF-8"
+string(10) "ISO-8859-1"
 bool(true)
 string(5) "UTF-8"
 Done

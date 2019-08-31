@@ -5,7 +5,7 @@ MD5 / Base64
 function test($str) {
 	$res = md5(base64_decode(base64_encode($str)))."\n";
 	return $res;
-} 
+}
 echo test("");
 echo test("a");
 echo test("abc");

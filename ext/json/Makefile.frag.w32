@@ -1,4 +1,3 @@
-
 ext\json\json_scanner.c: ext\json\json_scanner.re
 	$(RE2C) $(RE2C_FLAGS) -t ext/json/php_json_scanner_defs.h --no-generation-date -bci -o ext/json/json_scanner.c ext/json/json_scanner.re
 

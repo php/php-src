@@ -1,6 +1,6 @@
 --TEST--
 Reflection on invokable objects
---FILE-- 
+--FILE--
 <?php
 
 class Test {

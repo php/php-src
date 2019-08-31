@@ -1,16 +1,13 @@
 --TEST--
 Bug #62024 Cannot insert second row with null using parametrized query (Firebird PDO)
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-$value = '2';
 @$dbh->exec('DROP TABLE test_insert');
 $dbh->exec("CREATE TABLE test_insert (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
 
@@ -48,4 +45,3 @@ unset($dbh);
 --EXPECT--
 bool(true)
 bool(true)
-

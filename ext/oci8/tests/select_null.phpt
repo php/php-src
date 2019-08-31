@@ -5,7 +5,7 @@ SELECTing NULL values
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $pc = oci_pconnect($user, $password, $dbase);
 
@@ -15,7 +15,7 @@ var_dump(oci_fetch_array($stmt, OCI_RETURN_NULLS));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(2) {
   [0]=>
   NULL

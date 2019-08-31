@@ -7,10 +7,10 @@ phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/tar_004.phar.tar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/tar_nostub.phar.tar';
 $alias = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/tar_004.tar';
+$fname2 = __DIR__ . '/tar_nostub.tar';
 
 $tar = new tarmaker($fname, 'none');
 $tar->init();
@@ -38,11 +38,11 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_004.phar.tar');
-@unlink(dirname(__FILE__) . '/tar_004.tar');
+@unlink(__DIR__ . '/tar_nostub.phar.tar');
+@unlink(__DIR__ . '/tar_nostub.tar');
 ?>
 --EXPECTF--
-RecursiveDirectoryIterator::__construct(phar://%star_004.phar.tar/): failed to open dir: '%star_004.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
-phar url "phar://%star_004.phar.tar/" is unknown
+RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): failed to open dir: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
+phar url "phar://%star_nostub.phar.tar/" is unknown
 string(0) ""
 ===DONE===

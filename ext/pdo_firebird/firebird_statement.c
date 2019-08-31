@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -104,6 +104,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			unsigned int i;
 			for (i = 0; i < S->out_sqlda.sqld; i++) {
 				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
+				if (var->sqlind) {
+					efree(var->sqlind);
+				}
 				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
@@ -725,7 +728,9 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
-			convert_to_string(val);
+			if (!try_convert_to_string(val)) {
+				return 0;
+			}
 
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
 				RECORD_ERROR(stmt);
@@ -787,12 +792,3 @@ const struct pdo_stmt_methods firebird_stmt_methods = { /* {{{ */
 	firebird_stmt_cursor_closer
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

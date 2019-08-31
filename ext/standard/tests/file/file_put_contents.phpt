@@ -7,26 +7,31 @@ class foo {
         return __METHOD__;
     }
 }
-$file = dirname(__FILE__)."/file_put_contents.txt";
+$file = __DIR__."/file_put_contents.txt";
 
 $context = stream_context_create();
 
-var_dump(file_put_contents($file, $context));
+try {
+    var_dump(file_put_contents($file, $context));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(file_put_contents($file, new stdClass));
 var_dump(file_put_contents($file, new foo));
 $fp = fopen($file, "r");
-var_dump(file_put_contents($file, "string", 0, $fp));
+try {
+    var_dump(file_put_contents($file, "string", 0, $fp));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 @unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: file_put_contents(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+--EXPECT--
+file_put_contents(): supplied resource is not a valid stream resource
 bool(false)
 int(15)
-
-Warning: file_put_contents(): supplied resource is not a valid Stream-Context resource in %s on line %d
-int(6)
+file_put_contents(): supplied resource is not a valid Stream-Context resource
 Done

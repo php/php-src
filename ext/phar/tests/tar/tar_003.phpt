@@ -7,9 +7,9 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
+include __DIR__ . '/files/tarmaker.php.inc';
 
-$fname = dirname(__FILE__) . '/tar_003.phar.tar';
+$fname = __DIR__ . '/tar_003.phar.tar';
 $alias = 'phar://' . $fname;
 
 $tar = new tarmaker($fname, 'none');
@@ -50,7 +50,7 @@ closedir($tar);
 ===DONE===
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . '/tar_003.phar.tar');
+@unlink(__DIR__ . '/tar_003.phar.tar');
 ?>
 --EXPECT--
 hi there!

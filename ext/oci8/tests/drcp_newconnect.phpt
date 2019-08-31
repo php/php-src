@@ -8,7 +8,7 @@ oci8.old_oci_close_semantics=0
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 // Open two connections with oci_new_connect
 // Verify they are different by comparing the resource ids
@@ -40,4 +40,3 @@ resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
 First and second connections are different  OK
 Done
-

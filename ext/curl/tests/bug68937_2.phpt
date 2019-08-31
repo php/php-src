@@ -1,7 +1,7 @@
 --TEST--
 Bug # #68937 (Segfault in curl_multi_exec)
 --SKIPIF--
-<?php 
+<?php
 include 'skipif.inc';
 ?>
 --FILE--
@@ -9,7 +9,7 @@ include 'skipif.inc';
 include 'server.inc';
 $host = curl_cli_server_start();
 
-$url = "{$host}/get.php";
+$url = "{$host}/get.inc";
 
 $ch = curl_init($url);
 curl_setopt_array($ch, array(

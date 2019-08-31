@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -215,8 +215,8 @@ static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
 static zval * tidy_instanciate(zend_class_entry *, zval *);
-static int tidy_doc_cast_handler(zval *, zval *, int);
-static int tidy_node_cast_handler(zval *, zval *, int);
+static int tidy_doc_cast_handler(zend_object *, zval *, int);
+static int tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
 static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
@@ -329,6 +329,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_diagnose, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_no_args, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_release, 0)
 ZEND_END_ARG_INFO()
 
@@ -379,17 +382,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_config_count, 0, 0, 1)
     ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt_method, 0, 0, 1)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_root, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 2)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_root, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_head, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_html, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_head, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
@@ -435,41 +446,41 @@ static const zend_function_entry tidy_functions[] = {
 };
 
 static const zend_function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_tidy_getopt)
-	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, NULL)
+	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_tidy_getopt_method)
+	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, arginfo_tidy_no_args)
 	TIDY_DOC_ME(parseFile, arginfo_tidy_parse_file)
 	TIDY_DOC_ME(parseString, arginfo_tidy_parse_string)
 	TIDY_METHOD_MAP(repairString, tidy_repair_string, arginfo_tidy_repair_string)
 	TIDY_METHOD_MAP(repairFile, tidy_repair_file, arginfo_tidy_repair_file)
-	TIDY_METHOD_MAP(diagnose, tidy_diagnose, NULL)
-	TIDY_METHOD_MAP(getRelease, tidy_get_release, NULL)
-	TIDY_METHOD_MAP(getConfig, tidy_get_config, NULL)
-	TIDY_METHOD_MAP(getStatus, tidy_get_status, NULL)
-	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, NULL)
+	TIDY_METHOD_MAP(diagnose, tidy_diagnose, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(getRelease, tidy_get_release, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(getConfig, tidy_get_config, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(getStatus, tidy_get_status, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, arginfo_tidy_no_args)
 #if HAVE_TIDYOPTGETDOC
 	TIDY_METHOD_MAP(getOptDoc, tidy_get_opt_doc, arginfo_tidy_get_opt_doc_method)
 #endif
-	TIDY_METHOD_MAP(isXhtml, tidy_is_xhtml, NULL)
-	TIDY_METHOD_MAP(isXml, tidy_is_xml, NULL)
-	TIDY_METHOD_MAP(root, tidy_get_root, NULL)
-	TIDY_METHOD_MAP(head, tidy_get_head, NULL)
-	TIDY_METHOD_MAP(html, tidy_get_html, NULL)
-	TIDY_METHOD_MAP(body, tidy_get_body, NULL)
+	TIDY_METHOD_MAP(isXhtml, tidy_is_xhtml, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(isXml, tidy_is_xml, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(root, tidy_get_root, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(head, tidy_get_head, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(html, tidy_get_html, arginfo_tidy_no_args)
+	TIDY_METHOD_MAP(body, tidy_get_body, arginfo_tidy_no_args)
 	TIDY_DOC_ME(__construct, arginfo_tidy_construct)
 	PHP_FE_END
 };
 
 static const zend_function_entry tidy_funcs_node[] = {
-	TIDY_NODE_ME(hasChildren, NULL)
-	TIDY_NODE_ME(hasSiblings, NULL)
-	TIDY_NODE_ME(isComment, NULL)
-	TIDY_NODE_ME(isHtml, NULL)
-	TIDY_NODE_ME(isText, NULL)
-	TIDY_NODE_ME(isJste, NULL)
-	TIDY_NODE_ME(isAsp, NULL)
-	TIDY_NODE_ME(isPhp, NULL)
-	TIDY_NODE_ME(getParent, NULL)
-	TIDY_NODE_PRIVATE_ME(__construct, NULL)
+	TIDY_NODE_ME(hasChildren, arginfo_tidy_no_args)
+	TIDY_NODE_ME(hasSiblings, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isComment, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isHtml, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isText, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isJste, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isAsp, arginfo_tidy_no_args)
+	TIDY_NODE_ME(isPhp, arginfo_tidy_no_args)
+	TIDY_NODE_ME(getParent, arginfo_tidy_no_args)
+	TIDY_NODE_PRIVATE_ME(__construct, arginfo_tidy_no_args)
 	PHP_FE_END
 };
 
@@ -752,7 +763,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object)
 	return object;
 }
 
-static int tidy_doc_cast_handler(zval *in, zval *out, int type)
+static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer output;
 	PHPTidyObj *obj;
@@ -772,10 +783,14 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&output);
 			tidySaveBuffer (obj->ptdoc->doc, &output);
-			ZVAL_STRINGL(out, (char *) output.bp, output.size ? output.size-1 : 0);
+			if (output.size) {
+				ZVAL_STRINGL(out, (char *) output.bp, output.size-1);
+			} else {
+				ZVAL_EMPTY_STRING(out);
+			}
 			tidyBufFree(&output);
 			break;
 
@@ -786,7 +801,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zval *in, zval *out, int type)
+static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer buf;
 	PHPTidyObj *obj;
@@ -806,7 +821,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case IS_STRING:
-			obj = Z_TIDY_P(in);
+			obj = php_tidy_fetch_object(in);
 			tidyBufInit(&buf);
 			if (obj->ptdoc) {
 				tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
@@ -2021,15 +2036,36 @@ static void _php_tidy_register_tags(INIT_FUNC_ARGS)
 	TIDY_TAG_CONST(VAR);
 	TIDY_TAG_CONST(WBR);
 	TIDY_TAG_CONST(XMP);
+# if HAVE_TIDYBUFFIO_H
+	TIDY_TAG_CONST(ARTICLE);
+	TIDY_TAG_CONST(ASIDE);
+	TIDY_TAG_CONST(AUDIO);
+	TIDY_TAG_CONST(BDI);
+	TIDY_TAG_CONST(CANVAS);
+	TIDY_TAG_CONST(COMMAND);
+	TIDY_TAG_CONST(DATALIST);
+	TIDY_TAG_CONST(DETAILS);
+	TIDY_TAG_CONST(DIALOG);
+	TIDY_TAG_CONST(FIGCAPTION);
+	TIDY_TAG_CONST(FIGURE);
+	TIDY_TAG_CONST(FOOTER);
+	TIDY_TAG_CONST(HEADER);
+	TIDY_TAG_CONST(HGROUP);
+	TIDY_TAG_CONST(MAIN);
+	TIDY_TAG_CONST(MARK);
+	TIDY_TAG_CONST(MENUITEM);
+	TIDY_TAG_CONST(METER);
+	TIDY_TAG_CONST(NAV);
+	TIDY_TAG_CONST(OUTPUT);
+	TIDY_TAG_CONST(PROGRESS);
+	TIDY_TAG_CONST(SECTION);
+	TIDY_TAG_CONST(SOURCE);
+	TIDY_TAG_CONST(SUMMARY);
+	TIDY_TAG_CONST(TEMPLATE);
+	TIDY_TAG_CONST(TIME);
+	TIDY_TAG_CONST(TRACK);
+	TIDY_TAG_CONST(VIDEO);
+# endif
 }
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

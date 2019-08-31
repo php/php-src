@@ -7,7 +7,7 @@ Test stripos() function : usage variations - empty heredoc string for 'haystack'
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function by passing empty heredoc string for haystack 
+/* Test stripos() function by passing empty heredoc string for haystack
  *  and with various needles & offsets
 */
 
@@ -25,10 +25,10 @@ echo "*** Done ***";
 --EXPECTF--
 *** Testing stripos() function: with heredoc strings ***
 -- With empty heredoc string --
-bool(false)
+int(0)
 
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
-bool(false)
-bool(false)
+int(0)
+int(0)
 *** Done ***

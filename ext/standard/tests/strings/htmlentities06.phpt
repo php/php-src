@@ -2,7 +2,7 @@
 htmlentities() test 6 (mbstring / ISO-8859-15)
 --INI--
 output_handler=
-mbstring.internal_encoding=ISO-8859-15
+internal_encoding=ISO-8859-15
 --SKIPIF--
 <?php
 	extension_loaded("mbstring") or die("skip mbstring not available\n");

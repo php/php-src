@@ -47,14 +47,18 @@ foreach ($array as $var) {
 
 foreach ($types as $type) {
 	foreach ($array as $var) {
-		var_dump(settype($var, $type));
+		try {
+			var_dump(settype($var, $type));
+		} catch (Error $e) {
+			echo "Error: ", $e->getMessage(), "\n";
+		}
 		var_dump($var);
 	}
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 string(6) "string"
 string(5) "array"
@@ -344,7 +348,6 @@ bool(true)
 string(14) "Resource id #%d"
 bool(true)
 string(14) "Resource id #%d"
-string(57) "Object of class stdClass could not be converted to string"
-bool(true)
-string(6) "Object"
+Error: Object of class stdClass could not be converted to string
+string(0) ""
 Done

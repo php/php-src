@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = dirname(__FILE__)."/is_executable_root_check.tmp";
+$filename = __DIR__."/is_executable_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
@@ -38,10 +38,9 @@ $invalid_files = array(
   FALSE,
   NULL,
   " ",
-  @array(),
   @$file_handle
 );
-/* loop through to test each element in the above array 
+/* loop through to test each element in the above array
    is an executable file */
 foreach( $invalid_files as $invalid_file ) {
   var_dump( is_executable($invalid_file) );
@@ -61,9 +60,5 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-
-Warning: is_executable() expects parameter 1 to be a valid path, array given in %s on line %d
-NULL
 bool(false)
 Done
-

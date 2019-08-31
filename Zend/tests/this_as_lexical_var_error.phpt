@@ -4,7 +4,7 @@ Cannot use $this as lexical variable
 <?php
 
 class Foo {
-    public function fn() {
+    public function f() {
         return function() use ($this) {};
     }
 }

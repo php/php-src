@@ -4,19 +4,19 @@ Test disk_free_space and its alias diskfreespace() functions : Usage Variations
 <?php
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function 
+ *  Description: Given a string containing a directory, this function
  *               will return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing with a directory ***\n";
-var_dump( disk_free_space($file_path."/..") ); 
-var_dump( diskfreespace($file_path."/..") ); 
+var_dump( disk_free_space($file_path."/..") );
+var_dump( diskfreespace($file_path."/..") );
 
 echo "\nTesting for the return type ***\n";
-$return_value = disk_free_space($file_path); 
+$return_value = disk_free_space($file_path);
 var_dump( is_float($return_value) );
 
 echo "\n*** Testing with different directory combinations ***";
@@ -48,21 +48,26 @@ $count = 1;
 /* loop through to test each element the above array */
 foreach($dirs_arr as $dir1) {
   echo "\n-- Iteration $count --\n";
-  var_dump( disk_free_space( $dir1 ) );
-  var_dump( diskfreespace( $dir1 ) );
+  try {
+    var_dump( disk_free_space( $dir1 ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
+  try {
+    var_dump( diskfreespace( $dir1 ) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $count++;
 }
 
 echo"\n--- Done ---";
 ?>
-
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir($file_path."/disk_free_space");
 ?>
-
-
 --EXPECTF--
 *** Testing with a directory ***
 float(%d)
@@ -105,35 +110,19 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-
-Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+disk_free_space() expects parameter 1 to be a valid path, string given
+diskfreespace() expects parameter 1 to be a valid path, string given
 
 -- Iteration 10 --
-
-Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+disk_free_space() expects parameter 1 to be a valid path, string given
+diskfreespace() expects parameter 1 to be a valid path, string given
 
 -- Iteration 11 --
-
-Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+disk_free_space() expects parameter 1 to be a valid path, string given
+diskfreespace() expects parameter 1 to be a valid path, string given
 
 -- Iteration 12 --
-
-Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
-
-Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
-NULL
+disk_free_space() expects parameter 1 to be a valid path, string given
+diskfreespace() expects parameter 1 to be a valid path, string given
 
 --- Done ---

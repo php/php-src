@@ -3,7 +3,7 @@ SPL: SplFileObject::seek'ing
 --FILE--
 <?php
 
-$o = new SplFileObject(dirname(__FILE__) . '/fileobject_001a.txt');
+$o = new SplFileObject(__DIR__ . '/fileobject_001a.txt');
 
 var_dump($o->key());
 var_dump($o->current());
@@ -31,7 +31,7 @@ foreach($o as $n => $l)
 }
 
 echo "===B===\n";
-$o = new SplFileObject(dirname(__FILE__) . '/fileobject_001b.txt');
+$o = new SplFileObject(__DIR__ . '/fileobject_001b.txt');
 $o->setFlags(SplFileObject::DROP_NEW_LINE);
 foreach($o as $n => $l)
 {
@@ -40,12 +40,12 @@ foreach($o as $n => $l)
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 int(0)
-string(2) "0
+string(%d) "0
 "
 int(0)
-string(2) "0
+string(%d) "0
 "
 int(0)
 int(1)

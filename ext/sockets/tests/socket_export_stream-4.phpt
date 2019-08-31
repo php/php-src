@@ -14,15 +14,27 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 function test($stream, $sock) {
 	if ($stream !== null) {
 		echo "stream_set_blocking ";
-		print_r(stream_set_blocking($stream, 0));
+		try {
+			print_r(stream_set_blocking($stream, 0));
+		} catch (TypeError $e) {
+			echo $e->getMessage(), "\n";
+		}
 		echo "\n";
 	}
 	if ($sock !== null) {
 		echo "socket_set_block ";
-		print_r(socket_set_block($sock));
+		try {
+            print_r(socket_set_block($sock));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
 		echo "\n";
 		echo "socket_get_option ";
-		print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+		try {
+            print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
 		echo "\n";
 	}
 	echo "\n";
@@ -80,8 +92,7 @@ stream_set_blocking 1
 
 
 close stream
-stream_set_blocking 
-Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
+stream_set_blocking stream_set_blocking(): supplied resource is not a valid stream resource
 
 socket_set_block 
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
@@ -92,14 +103,11 @@ Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on
 
 
 close socket
-stream_set_blocking 
-Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
+stream_set_blocking stream_set_blocking(): supplied resource is not a valid stream resource
 
-socket_set_block 
-Warning: socket_set_block(): supplied resource is not a valid Socket resource in %s on line %d
+socket_set_block socket_set_block(): supplied resource is not a valid Socket resource
 
-socket_get_option 
-Warning: socket_get_option(): supplied resource is not a valid Socket resource in %s on line %d
+socket_get_option socket_get_option(): supplied resource is not a valid Socket resource
 
 
 Done.

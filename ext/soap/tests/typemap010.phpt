@@ -19,7 +19,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </ns1:dotest2>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 function book_to_xml($book) {
 	throw new SoapFault("Server", "Conversion Fault");
@@ -31,13 +31,13 @@ class test{
 		$book->a = "foo";
 		$book->b = "bar";
 		return $book;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 $options=Array(
@@ -47,7 +47,7 @@ $options=Array(
 		                         "to_xml"    => "book_to_xml"))
 		);
 
-$server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
+$server = new SoapServer(__DIR__."/classmap.wsdl",$options);
 $server->setClass("test");
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";

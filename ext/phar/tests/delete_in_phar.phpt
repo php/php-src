@@ -7,7 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
@@ -15,14 +15,6 @@ $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
 $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
-
-if (function_exists("opcache_get_status")) {
-	$status = opcache_get_status();
-	if ($status["opcache_enabled"]) {
-		ini_set("opcache.revalidate_freq", "0");
-		sleep(2);
-	}
-}
 
 include 'files/phar_test.inc';
 
@@ -40,7 +32,7 @@ include $pname . '/b/c.php';
 
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 This is a
 This is b
@@ -54,4 +46,3 @@ Warning: include(%sdelete_in_phar.phar.php/b/c.php): failed to open stream: phar
 Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.php/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar.php on line %d
 
 ===DONE===
-		

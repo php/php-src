@@ -21,7 +21,7 @@ var_dump( \$argv );
 
 SCRIPT;
 
-$script = dirname(__FILE__) . DIRECTORY_SEPARATOR . "arginfo.php";
+$script = __DIR__ . DIRECTORY_SEPARATOR . "arginfo.php";
 file_put_contents($script, $helper_script);
 
 $cmd =  PHP_BINARY . " " . $script . " "  . escapeshellarg($a) . " " . escapeshellarg($b);
@@ -44,4 +44,3 @@ array(3) {
   [2]=>
   string(7) "b -c d\"
 }
-

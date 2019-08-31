@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 $dest_dir = "$file_path/rename_variation2_dir";
 // create the $dest_dir
@@ -29,7 +29,7 @@ var_dump(symlink($filename, $linkname));
 //rename the link to a new name in the same dir
 $dest_linkname = $file_path."/rename_variation2_soft_link2.tmp";
 var_dump( rename( $linkname, $dest_linkname) );
-//ensure that link was renamed 
+//ensure that link was renamed
 clearstatcache();
 var_dump( file_exists($linkname) );  // expecting false
 var_dump( file_exists($dest_linkname) );  // expecting true
@@ -41,14 +41,14 @@ clearstatcache();
 var_dump( file_exists($dest_linkname) );  // expecting false
 var_dump( file_exists($dest_dir."/rename_variation2_soft_link2.tmp") ); // expecting true
 
-// delete the link file now 
+// delete the link file now
 unlink($dest_dir."/rename_variation2_soft_link2.tmp");
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 unlink($file_path."/rename_variation2.tmp");
 rmdir($file_path."/rename_variation2_dir");
 ?>

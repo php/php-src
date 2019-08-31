@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: David Wang <planetbeing@gmail.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -51,6 +51,10 @@ void gc_globals_ctor(void);
 void gc_globals_dtor(void);
 void gc_reset(void);
 
+#ifdef ZTS
+size_t zend_gc_globals_size(void);
+#endif
+
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
@@ -67,10 +71,10 @@ END_EXTERN_C()
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	if (GC_TYPE_INFO(ref) == IS_REFERENCE) {
+	if (EXPECTED(GC_TYPE_INFO(ref) == IS_REFERENCE)) {
 		zval *zv = &((zend_reference*)ref)->val;
 
-		if (!Z_REFCOUNTED_P(zv)) {
+		if (!Z_COLLECTABLE_P(zv)) {
 			return;
 		}
 		ref = Z_COUNTED_P(zv);
@@ -81,13 +85,3 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 }
 
 #endif /* ZEND_GC_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

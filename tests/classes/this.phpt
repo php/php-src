@@ -3,7 +3,7 @@ ZE2 $this cannot be exchanged
 --FILE--
 <?php
 
-/* please don't shorten this test. It shows what would happen if 
+/* please don't shorten this test. It shows what would happen if
  * the fatal error would have been a warning.
  */
 class Foo

@@ -381,9 +381,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -464,9 +462,7 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -663,5 +659,3 @@ retry:
 
 	return c;
 }
-
-

@@ -1,10 +1,14 @@
-dnl config.m4 for extension ftp
+PHP_ARG_ENABLE([ftp],
+  [whether to enable FTP support],
+  [AS_HELP_STRING([--enable-ftp],
+    [Enable FTP support])])
 
-PHP_ARG_ENABLE(ftp,whether to enable FTP support,
-[  --enable-ftp            Enable FTP support])
-
-PHP_ARG_WITH(openssl-dir,OpenSSL dir for FTP,
-[  --with-openssl-dir[=DIR]  FTP: openssl install prefix], no, no)
+PHP_ARG_WITH([openssl-dir],
+  [OpenSSL dir for FTP],
+  [AS_HELP_STRING([[--with-openssl-dir[=DIR]]],
+    [FTP: openssl install prefix])],
+  [no],
+  [no])
 
 if test "$PHP_FTP" = "yes"; then
   AC_DEFINE(HAVE_FTP,1,[Whether you want FTP support])

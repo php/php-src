@@ -7,9 +7,9 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -22,7 +22,7 @@ echo "*** Testing str_split() : different intger values for 'split_length' ***\n
 //Initialise variables
 $str = 'This is a string with 123 & escape char \t';
 
-//different values for 'split_length' 
+//different values for 'split_length'
 $values = array (
   0,
   1,
@@ -36,17 +36,19 @@ $values = array (
 
 //loop through each element of $values for 'split_length'
 for($count = 0; $count < count($values); $count++) {
-  echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( str_split($str, $values[$count]) );
+    echo "-- Iteration ".($count + 1)." --\n";
+    try {
+        var_dump( str_split($str, $values[$count]) );
+    } catch (\Error $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_split() : different intger values for 'split_length' ***
 -- Iteration 1 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 2 --
 array(42) {
   [0]=>
@@ -135,9 +137,7 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -161,7 +161,5 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 8 --
-
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+The length of each segment must be greater than zero
 Done

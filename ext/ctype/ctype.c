@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_ctype.h"
+#include "ctype_arginfo.h"
 #include "SAPI.h"
 #include "ext/standard/info.h"
 
@@ -43,52 +44,6 @@ static PHP_FUNCTION(ctype_punct);
 static PHP_FUNCTION(ctype_space);
 static PHP_FUNCTION(ctype_upper);
 static PHP_FUNCTION(ctype_xdigit);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_alnum, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_alpha, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_cntrl, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_digit, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_lower, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_graph, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_print, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_punct, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_space, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_upper, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_ctype_xdigit, 0)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ ctype_functions[]
@@ -263,12 +218,3 @@ static PHP_FUNCTION(ctype_xdigit)
 /* }}} */
 
 #endif	/* HAVE_CTYPE */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

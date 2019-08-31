@@ -10,7 +10,7 @@ if (PHP_APACHE2HANDLER != "no") {
 			CHECK_LIB("libapr.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2") &&
 			CHECK_LIB("libaprutil.lib", "apache2handler", PHP_PHP_BUILD + "\\lib\\apache2")
 			) {
-		SAPI('apache2handler', 'mod_php7.c sapi_apache2.c apache_config.c php_functions.c',
+		SAPI('apache2handler', 'mod_php.c sapi_apache2.c apache_config.c php_functions.c',
 				'php' + PHP_VERSION + 'apache2.dll',
 				'/D PHP_APACHE2_EXPORTS /I win32 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	} else {
@@ -28,7 +28,7 @@ if (PHP_APACHE2_2HANDLER != "no") {
 			CHECK_LIB("libapr-1.lib", "apache2_2handler", PHP_PHP_BUILD + "\\lib\\apache2_2") &&
 			CHECK_LIB("libaprutil-1.lib", "apache2_2handler", PHP_PHP_BUILD + "\\lib\\apache2_2")
 			) {
-		SAPI('apache2_2handler', 'mod_php7.c sapi_apache2.c apache_config.c php_functions.c',
+		SAPI('apache2_2handler', 'mod_php.c sapi_apache2.c apache_config.c php_functions.c',
 				'php' + PHP_VERSION + 'apache2_2.dll',
 				'/D PHP_APACHE2_EXPORTS /I win32 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
 				'sapi\\apache2_2handler');
@@ -46,7 +46,7 @@ if (PHP_APACHE2_4HANDLER != "no") {
 			CHECK_LIB("libapr-1.lib", "apache2_4handler", PHP_PHP_BUILD + "\\lib\\apache2_4") &&
 			CHECK_LIB("libaprutil-1.lib", "apache2_4handler", PHP_PHP_BUILD + "\\lib\\apache2_4")
 			) {
-		SAPI('apache2_4handler', 'mod_php7.c sapi_apache2.c apache_config.c php_functions.c',
+		SAPI('apache2_4handler', 'mod_php.c sapi_apache2.c apache_config.c php_functions.c',
 				'php' + PHP_VERSION + 'apache2_4.dll',
 				'/D PHP_APACHE2_EXPORTS /I win32 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
 				'sapi\\apache2handler');
@@ -54,4 +54,3 @@ if (PHP_APACHE2_4HANDLER != "no") {
 		WARNING("Could not find apache 2.4 libraries/headers");
 	}
 }
-

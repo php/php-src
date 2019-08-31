@@ -8,7 +8,7 @@ Bug #36697 (TrueColor transparency with GIF palette output).
 ?>
 --FILE--
 <?php
-$dest = dirname(__FILE__) . "/36697私はガラスを食べられます.gif";
+$dest = __DIR__ . "/36697私はガラスを食べられます.gif";
 
 $im = imagecreatetruecolor(192, 36);
 $trans_color = imagecolorallocate($im, 255, 0, 0);

@@ -3,21 +3,29 @@ basic array_chunk test
 --FILE--
 <?php
 $input_array = array('a', 'b', 'c', 'd', 'e');
-var_dump(array_chunk($input_array, 0));
-var_dump(array_chunk($input_array, 0, true));
-var_dump(array_chunk($input_array, 1));
-var_dump(array_chunk($input_array, 1, true));	
-var_dump(array_chunk($input_array, 2));
-var_dump(array_chunk($input_array, 2, true));	
-var_dump(array_chunk($input_array, 10));
-var_dump(array_chunk($input_array, 10, true));	
-?>
---EXPECTF--
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
 
-Warning: array_chunk(): Size parameter expected to be greater than 0 in %s on line %d
-NULL
+try {
+    var_dump(array_chunk($input_array, 0));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    var_dump(array_chunk($input_array, 0, true));
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
+var_dump(array_chunk($input_array, 1));
+var_dump(array_chunk($input_array, 1, true));
+var_dump(array_chunk($input_array, 2));
+var_dump(array_chunk($input_array, 2, true));
+var_dump(array_chunk($input_array, 10));
+var_dump(array_chunk($input_array, 10, true));
+?>
+--EXPECT--
+Size parameter expected to be greater than 0
+Size parameter expected to be greater than 0
 array(5) {
   [0]=>
   array(1) {

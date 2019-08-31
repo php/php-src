@@ -1,4 +1,4 @@
-.TH @program_prefix@phpize 1 "2018" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpize 1 "2019" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpize \- prepare a PHP extension for compiling
 .SH SYNOPSIS
@@ -32,7 +32,7 @@ Prints API version information
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT
-Copyright \(co 1997\-2018 The PHP Group
+Copyright \(co The PHP Group
 .LP
 This source file is subject to version 3.01 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
@@ -44,5 +44,5 @@ available through the world-wide-web at the following url:
 .P
 If you did not receive a copy of the PHP license and are unable to
 obtain it through the world-wide-web, please send a note to
-.B license@php.net 
+.B license@php.net
 so we can mail you a copy immediately.

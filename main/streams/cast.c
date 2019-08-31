@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,7 +84,8 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
+	return php_stream_free(stream,
+		PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_RSRC_DTOR);
 }
 #elif defined(HAVE_FOPENCOOKIE)
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
@@ -126,7 +127,8 @@ static int stream_cookie_closer(void *cookie)
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
-	return php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC);
+	return php_stream_free(stream,
+		PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_KEEP_RSRC | PHP_STREAM_FREE_RSRC_DTOR);
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 
@@ -404,12 +406,3 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	return PHP_STREAM_RELEASED;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

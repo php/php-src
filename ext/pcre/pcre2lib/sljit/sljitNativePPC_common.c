@@ -42,7 +42,7 @@ typedef sljit_u32 sljit_ins;
 #include <sys/cache.h>
 #endif
 
-#if (defined SLJIT_LITTLE_ENDIAN && SLJIT_LITTLE_ENDIAN)
+#if (defined _CALL_ELF && _CALL_ELF == 2)
 #define SLJIT_PASS_ENTRY_ADDR_TO_CALL 1
 #endif
 
@@ -2122,7 +2122,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
 
-	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);
+	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);;
 }
 
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_mem(struct sljit_compiler *compiler, sljit_s32 type,

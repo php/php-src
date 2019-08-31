@@ -10,15 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
-
-	if (!is_null($tmp = @mysqli_stmt_param_count()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @mysqli_stmt_param_count($link)))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	require('table.inc');
 
 	if (!$stmt = mysqli_stmt_init($link))
@@ -52,11 +43,6 @@ require_once('skipifconnectfailure.inc');
 		printf("[40] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
-
-	/* Check that the function alias exists. It's a deprecated function,
-	but we have not announce the removal so far, therefore we need to check for it */
-	if (!is_null($tmp = @mysqli_stmt_param_count()))
-		printf("[041] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

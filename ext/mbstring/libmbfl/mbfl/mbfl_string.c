@@ -74,5 +74,3 @@ mbfl_string_clear(mbfl_string *string)
 		string->len = 0;
 	}
 }
-
-

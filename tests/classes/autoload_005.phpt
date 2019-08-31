@@ -1,7 +1,7 @@
 --TEST--
 ZE2 Autoload from destructor
 --SKIPIF--
-<?php 
+<?php
 	if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
 ?>
 --FILE--
@@ -9,7 +9,7 @@ ZE2 Autoload from destructor
 
 spl_autoload_register(function ($class_name) {
 	var_dump(class_exists($class_name, false));
-	require_once(dirname(__FILE__) . '/' . $class_name . '.p5c');
+	require_once(__DIR__ . '/' . $class_name . '.inc');
 	echo 'autoload(' . $class_name . ")\n";
 });
 

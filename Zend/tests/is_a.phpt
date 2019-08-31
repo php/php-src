@@ -1,5 +1,5 @@
 --TEST--
-is_a() and is_subclass_of() shouldn't call __autoload
+is_a() and is_subclass_of() shouldn't call autoloader
 --INI--
 error_reporting=14335
 --FILE--

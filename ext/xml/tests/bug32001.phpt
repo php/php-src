@@ -122,7 +122,7 @@ HERE;
 		echo "Chunk size: ".($this->chunk_size ? "$this->chunk_size byte(s)\n": "all data at once\n");
 		echo "BOM: ".($this->bom ? 'prepended': 'not prepended'), "\n";
 
-		if ($success) { 
+		if ($success) {
 			var_dump($this->tags);
 		} else {
 			echo "[Error] ", xml_error_string(xml_get_error_code($parser)), "\n";
@@ -155,14 +155,13 @@ $suite = array(
 if (XML_SAX_IMPL == 'libxml') {
   echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
 } else {
-  echo "libxml2 Version => NONE\n";  
+  echo "libxml2 Version => NONE\n";
 }
 
 foreach ($suite as $testcase) {
 	$testcase->run();
 }
 
-// vim600: sts=4 sw=4 ts=4 encoding=UTF-8
 ?>
 --EXPECTF--
 libxml2 Version => %s

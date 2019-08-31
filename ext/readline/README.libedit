@@ -1,4 +1,0 @@
-This library can be built with libedit - non-GPL drop-in readline replacement.
-Libedit can be obtained from http://sourceforge.net/projects/libedit/
-It is taken from NetBSD (http://www.netbsd.org/) CVS repository and modified
-to work as stand-alone library.

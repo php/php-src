@@ -15,7 +15,7 @@ xmlwriter_end_document($xw);
 $output_bytes = xmlwriter_flush($xw, true);
 echo file_get_contents($doc_dest);
 unset($xw);
-unlink('001.xml');
+unlink($doc_dest);
 ?>
 ===DONE===
 --EXPECT--

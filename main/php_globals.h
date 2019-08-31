@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
@@ -24,8 +24,9 @@
 typedef struct _php_core_globals php_core_globals;
 
 #ifdef ZTS
-# define PG(v) ZEND_TSRMG(core_globals_id, php_core_globals *, v)
+# define PG(v) ZEND_TSRMG_FAST(core_globals_offset, php_core_globals *, v)
 extern PHPAPI int core_globals_id;
+extern PHPAPI size_t core_globals_offset;
 #else
 # define PG(v) (core_globals.v)
 extern ZEND_API struct _php_core_globals core_globals;
@@ -66,7 +67,6 @@ struct _php_core_globals {
 	zend_long memory_limit;
 	zend_long max_input_time;
 
-	zend_bool track_errors;
 	zend_bool display_errors;
 	zend_bool display_startup_errors;
 	zend_bool log_errors;
@@ -173,12 +173,3 @@ struct _php_core_globals {
 
 
 #endif /* PHP_GLOBALS_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

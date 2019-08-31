@@ -9,10 +9,10 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 --FILE--
 <?php
 
-$d0 = dirname(__FILE__) . DIRECTORY_SEPARATOR . "á";
-$d1 = dirname(__FILE__) . DIRECTORY_SEPARATOR . "a";
+$d0 = __DIR__ . DIRECTORY_SEPARATOR . "á";
+$d1 = __DIR__ . DIRECTORY_SEPARATOR . "a";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "file";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "file";
 
 $l0 = $d0 . DIRECTORY_SEPARATOR . "b";
 $l1 = $d1 . DIRECTORY_SEPARATOR . "b";
@@ -32,10 +32,10 @@ var_dump(link($d1 . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "file", $
 --CLEAN--
 <?php
 
-$d0 = dirname(__FILE__) . DIRECTORY_SEPARATOR . "á";
-$d1 = dirname(__FILE__) . DIRECTORY_SEPARATOR . "a";
+$d0 = __DIR__ . DIRECTORY_SEPARATOR . "á";
+$d1 = __DIR__ . DIRECTORY_SEPARATOR . "a";
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "file";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "file";
 
 $l0 = $d0 . DIRECTORY_SEPARATOR . "b";
 $l1 = $d1 . DIRECTORY_SEPARATOR . "b";
@@ -49,4 +49,3 @@ rmdir($d1);
 --EXPECT--
 bool(true)
 bool(true)
-

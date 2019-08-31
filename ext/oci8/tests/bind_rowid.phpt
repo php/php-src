@@ -5,7 +5,7 @@ Test ROWID bind
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 function do_query($c)
 {

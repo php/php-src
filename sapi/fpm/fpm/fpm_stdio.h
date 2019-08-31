@@ -1,10 +1,11 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_STDIO_H
 #define FPM_STDIO_H 1
 
 #include "fpm_worker_pool.h"
+
+#define STREAM_SET_MSG_PREFIX_FMT "[pool %s] child %d said into %s: "
 
 int fpm_stdio_init_main();
 int fpm_stdio_init_final();
@@ -17,4 +18,3 @@ int fpm_stdio_discard_pipes(struct fpm_child_s *child);
 int fpm_stdio_open_error_log(int reopen);
 
 #endif
-

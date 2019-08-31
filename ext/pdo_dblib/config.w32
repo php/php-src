@@ -10,7 +10,7 @@ if (PHP_PDO_DBLIB != "no") {
 			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_PDO_DBLIB",
 				PHP_PDO_DBLIB, null, null, true))
 	{
-		EXTENSION("pdo_dblib", "pdo_dblib.c dblib_driver.c dblib_stmt.c");
+		EXTENSION("pdo_dblib", "pdo_dblib.c dblib_driver.c dblib_stmt.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		ADD_FLAG('CFLAGS_PDO_DBLIB', "/D PDO_DBLIB_FLAVOUR=\\\"freetds\\\"");
 		ADD_EXTENSION_DEP('pdo_dblib', 'pdo');
 	} else {
@@ -38,4 +38,3 @@ if (PHP_PDO_MSSQL != "no") {
 		WARNING("pdo_mssql not enabled, libraries or headers not found")
 	}
 }
-

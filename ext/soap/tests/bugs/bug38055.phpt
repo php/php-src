@@ -29,7 +29,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38055.wsdl');
+$client = new TestSoapClient(__DIR__.'/bug38055.wsdl');
 $boolA = 1;
 $boolB = '1';
 $res = $client->Test(array('boolA'=>$boolA, 'boolB'=>$boolB));

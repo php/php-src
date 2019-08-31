@@ -6,9 +6,9 @@ Phar: test for the odd case where we intend to remove an archive from memory
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.2.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $pname2 = 'phar://' . $fname2;
 
 $phar = new Phar($fname);
@@ -35,8 +35,8 @@ $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
 Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
 string(5) "first"

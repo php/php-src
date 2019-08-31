@@ -1,5 +1,5 @@
 --TEST--
-Implicit initialisation when passing by reference 
+Implicit initialisation when passing by reference
 --FILE--
 <?php
 function passbyVal($val) {
@@ -23,17 +23,18 @@ echo "\nAfter call\n";
 var_dump($undef2)
 ?>
 --EXPECTF--
-
 Passing undefined by value
 
-Notice: Undefined variable: undef1 in %s on line 13
+Notice: Undefined variable: undef1 in %s on line %d
+
+Notice: Trying to access array offset on value of type null in %s on line %d
 
 Inside passbyVal call:
 NULL
 
 After call
 
-Notice: Undefined variable: undef1 in %s on line 15
+Notice: Undefined variable: undef1 in %s on line %d
 NULL
 
 Passing undefined by reference

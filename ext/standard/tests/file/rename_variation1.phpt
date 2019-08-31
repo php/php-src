@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 <?php
 
 /* creating directory */
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
@@ -38,7 +38,7 @@ foreach($src_dirs as $src_dir) {
   mkdir("$file_path/rename_variation1/");
   // rename the src dir to a new dir in dest dir
   var_dump( rename($src_dir, $dest_dir."/new_dir") );
-  // ensure that dir was renamed 
+  // ensure that dir was renamed
   var_dump( file_exists($src_dir) );  // expecting false
   var_dump( file_exists($dest_dir."/new_dir") ); // expecting true
 
@@ -51,7 +51,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 rmdir($file_path."/rename_variation1_dir");
 ?>
 --EXPECT--

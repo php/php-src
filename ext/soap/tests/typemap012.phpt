@@ -10,13 +10,13 @@ class TestSoapClient extends SoapClient{
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
   		echo $request;
   		exit;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 function book_to_xml($book) {
@@ -30,7 +30,7 @@ $options=Array(
 		                         "to_xml"  => "book_to_xml"))
 		);
 
-$client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
+$client = new TestSoapClient(__DIR__."/classmap.wsdl",$options);
 $book = new book();
 $book->a = "foo";
 $book->b = "bar";

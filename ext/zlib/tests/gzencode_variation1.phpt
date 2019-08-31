@@ -1,25 +1,29 @@
 --TEST--
 Test gzencode() function : variation
 --SKIPIF--
-<?php 
+<?php
 
 if( substr(PHP_OS, 0, 3) == "WIN" ) {
    die("skip.. Do not run on Windows");
 }
 
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
-?> 
+	print "skip - ZLIB extension not loaded";
+}
+
+if (PHP_OS == "Darwin") {
+    print "skip - OS is encoded in headers, tested header is non Darwin";
+}
+?>
 --FILE--
 <?php
 /* Prototype  : string gzencode  ( string $data  [, int $level  [, int $encoding_mode  ]] )
- * Description: Gzip-compress a string 
+ * Description: Gzip-compress a string
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-include(dirname(__FILE__) . '/data.inc');
+include(__DIR__ . '/data.inc');
 
 echo "*** Testing gzencode() : variation ***\n";
 

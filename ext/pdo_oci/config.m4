@@ -1,6 +1,3 @@
-dnl config.m4 for extension pdo_oci
-dnl vim:et:sw=2:ts=2:
-
 if test -z "$SED"; then
   PHP_PDO_OCI_SED="sed";
 else
@@ -17,12 +14,15 @@ fi
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   PDO_OCI_LCS_BASE=$PDO_OCI_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME
-  PDO_OCI_LCS=`ls $PDO_OCI_LCS_BASE.*.1 2> /dev/null | $PHP_PDO_OCI_TAIL1`  # Oracle 10g, 11g, 12c etc
+  dnl Oracle 10g, 11g, 12c etc
+  PDO_OCI_LCS=`ls $PDO_OCI_LCS_BASE.*.1 2> /dev/null | $PHP_PDO_OCI_TAIL1`
   if test -f "$PDO_OCI_LCS"; then
-    dnl Oracle 10g, 11g 12c etc.  The x.2 version libraries are named x.1 for drop in compatibility
+    dnl Oracle 10g, 11g 12c etc. The x.2 version libraries are named x.1 for
+    dnl drop in compatibility
     PDO_OCI_VERSION=`echo $PDO_OCI_LCS | $PHP_PDO_OCI_SED -e 's/.*\.\(.*\)\.1$/\1.1/'`
   elif test -f $PDO_OCI_LCS_BASE.9.0; then
-    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix for drop-in compatibility with Oracle 9.0
+    dnl There is no case for Oracle 9.2. Oracle 9.2 libraries have a 9.0 suffix
+    dnl for drop-in compatibility with Oracle 9.0
     PDO_OCI_VERSION=9.0
   else
     AC_MSG_ERROR(Oracle libclntsh.$SHLIB_SUFFIX_NAME client library not found or its version is lower than 9)
@@ -31,15 +31,15 @@ AC_DEFUN([AC_PDO_OCI_VERSION],[
 ])
 
 AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
-  AC_CHECK_SIZEOF(long int, 4)
-  AC_MSG_CHECKING([if we're on a 64-bit platform])
-  if test "$ac_cv_sizeof_long_int" = "4" ; then
+  AC_CHECK_SIZEOF([long])
+  AC_MSG_CHECKING([if we're at 64-bit platform])
+  AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
     AC_MSG_RESULT([no])
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib32"
-  else
+  ],[
     AC_MSG_RESULT([yes])
     TMP_PDO_OCI_LIB_DIR="$PDO_OCI_DIR/lib"
-  fi
+  ])
 
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$PDO_OCI_DIR/lib" && test ! -d "$PDO_OCI_DIR/lib32"; then
@@ -54,10 +54,12 @@ AC_DEFUN([AC_PDO_OCI_CHECK_LIB_DIR],[
   AC_MSG_RESULT($PDO_OCI_LIB_DIR)
 ])
 
-PHP_ARG_WITH(pdo-oci, Oracle OCI support for PDO,
-[  --with-pdo-oci[=DIR]      PDO: Oracle OCI support. DIR defaults to [$]ORACLE_HOME.
-                          Use --with-pdo-oci=instantclient,/path/to/instant/client/lib
-                          for an Oracle Instant Client installation.])
+PHP_ARG_WITH([pdo-oci],
+  [Oracle OCI support for PDO],
+  [AS_HELP_STRING([[--with-pdo-oci[=DIR]]],
+    [PDO: Oracle OCI support. DIR defaults to $ORACLE_HOME. Use
+    --with-pdo-oci=instantclient,/path/to/instant/client/lib for an Oracle
+    Instant Client installation.])])
 
 if test "$PHP_PDO_OCI" != "no"; then
 
@@ -81,12 +83,16 @@ if test "$PHP_PDO_OCI" != "no"; then
   fi
 
   if test "instantclient" = "`echo $PDO_OCI_DIR | cut -d, -f1`" ; then
-    AC_CHECK_SIZEOF(long int, 4)
-    if test "$ac_cv_sizeof_long_int" = "4" ; then
+    AC_CHECK_SIZEOF([long])
+    AC_MSG_CHECKING([if we're at 64-bit platform])
+    AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
+      AC_MSG_RESULT([no])
       PDO_OCI_CLIENT_DIR="client"
-    else
+    ],[
+      AC_MSG_RESULT([yes])
       PDO_OCI_CLIENT_DIR="client64"
-    fi
+    ])
+
     PDO_OCI_LIB_DIR="`echo $PDO_OCI_DIR | cut -d, -f2`"
     AC_PDO_OCI_VERSION($PDO_OCI_LIB_DIR)
 
@@ -168,34 +174,6 @@ if test "$PHP_PDO_OCI" != "no"; then
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
-  dnl
-  dnl Check if we need to add -locijdbc8
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
-  [
-    AC_DEFINE(HAVE_OCILOBISTEMPORARY,1,[ ])
-  ], [
-    PHP_CHECK_LIBRARY(ocijdbc8, OCILobIsTemporary,
-    [
-      PHP_ADD_LIBRARY(ocijdbc8, 1, PDO_OCI_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCILOBISTEMPORARY,1,[ ])
-    ], [], [
-      -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-    ])
-  ], [
-    -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-  ])
-
-  dnl
-  dnl Check if we have collections
-  dnl
-  PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
-  [
-    AC_DEFINE(HAVE_OCICOLLASSIGN,1,[ ])
-  ], [], [
-    -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
-  ])
-
   dnl Scrollable cursors?
   PHP_CHECK_LIBRARY(clntsh, OCIStmtFetch2,
   [
@@ -204,22 +182,7 @@ if test "$PHP_PDO_OCI" != "no"; then
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
-  ifdef([PHP_CHECK_PDO_INCLUDES],
-  [
-    PHP_CHECK_PDO_INCLUDES
-  ],[
-    AC_MSG_CHECKING([for PDO includes])
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$phpincludedir/ext
-    else
-      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-    fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
-  ])
+  PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I$pdo_cv_inc_path)
 
@@ -227,11 +190,7 @@ if test "$PHP_PDO_OCI" != "no"; then
   PHP_SUBST_OLD(PDO_OCI_DIR)
   PHP_SUBST_OLD(PDO_OCI_VERSION)
 
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
-  ])
+  PHP_ADD_EXTENSION_DEP(pdo_oci, pdo)
 
   AC_DEFINE_UNQUOTED(PHP_PDO_OCI_CLIENT_VERSION, "$PDO_OCI_VERSION", [ ])
 fi
-

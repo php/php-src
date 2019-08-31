@@ -2,7 +2,7 @@
 Bug #35916 (Duplicate calls to stream_bucket_append() lead to a crash)
 --FILE--
 <?php
-$file = dirname(__FILE__) . "/bug35916.txt";
+$file = __DIR__ . "/bug35916.txt";
 @unlink($file);
 
 class strtoupper_filter extends php_user_filter
@@ -36,7 +36,9 @@ fclose($fp);
 readfile($file);
 unlink($file);
 ?>
---EXPECT--
+--EXPECTF--
 fffffffffff
+
+Notice: fread(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 hello
 THANK YOU

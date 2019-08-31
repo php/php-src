@@ -1,7 +1,7 @@
 --TEST--
 openssl_csr_get_subject() tests
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
@@ -32,14 +32,14 @@ $args = array(
     "config" => $config,
 );
 
-$privkey_file = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
+$privkey_file = 'file://' . __DIR__ . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
-$csr_file = file_get_contents(dirname(__FILE__) . '/cert.csr');
+$csr_file = file_get_contents(__DIR__ . '/cert.csr');
 
 var_dump(openssl_csr_get_subject($csr_file));
 var_dump(openssl_csr_get_subject($csr, false));
 ?>
---EXPECT--	
+--EXPECT--
 array(6) {
   ["C"]=>
   string(2) "NL"

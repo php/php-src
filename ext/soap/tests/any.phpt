@@ -44,7 +44,7 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__)."/interop/Round4/GroupI/round4_groupI_xsd.wsdl",
+$client = new TestSoapClient(__DIR__."/interop/Round4/GroupI/round4_groupI_xsd.wsdl",
                              array("trace"=>1,"exceptions"=>0,
                              'classmap' => array('SOAPComplexType'=>'SOAPComplexType')));
 $ret = $client->echoAnyElement(

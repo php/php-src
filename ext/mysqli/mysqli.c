@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -200,7 +200,9 @@ static void mysqli_objects_free_storage(zend_object	*object)
 	mysqli_object 	*intern = php_mysqli_fetch_object(object);
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
 
-	my_efree(my_res);
+	if (my_res) {
+		efree(my_res);
+	}
 	zend_object_std_dtor(&intern->zo);
 }
 /* }}} */
@@ -295,22 +297,16 @@ static int mysqli_write_na(mysqli_object *obj, zval *newval)
 /* }}} */
 
 /* {{{ mysqli_read_property */
-zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv)
+zval *mysqli_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	zval tmp_member;
 	zval *retval;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd = NULL;
 
-	obj = Z_MYSQLI_P(object);
-
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
+	obj = php_mysqli_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd) {
@@ -319,11 +315,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		retval = zend_std_read_property(object, member, type, cache_slot, rv);
-	}
-
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 	}
 
 	return retval;
@@ -331,32 +323,24 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 /* }}} */
 
 /* {{{ mysqli_write_property */
-void mysqli_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+zval *mysqli_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	zval tmp_member;
 	mysqli_object *obj;
 	mysqli_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_STR(&tmp_member, zval_get_string_func(member));
-		member = &tmp_member;
-	}
-
-	obj = Z_MYSQLI_P(object);
+	obj = php_mysqli_fetch_object(object);
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, name);
 	}
 
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_std_write_property(object, member, value, cache_slot);
+		value = zend_std_write_property(object, name, value, cache_slot);
 	}
 
-	if (member == &tmp_member) {
-		zval_ptr_dtor_str(&tmp_member);
-	}
+	return value;
 }
 /* }}} */
 
@@ -372,20 +356,20 @@ void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysq
 }
 /* }}} */
 
-static int mysqli_object_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+static int mysqli_object_has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	mysqli_object *obj = Z_MYSQLI_P(object);
+	mysqli_object *obj = php_mysqli_fetch_object(object);
 	mysqli_prop_handler	*p;
 	int ret = 0;
 
-	if ((p = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member))) != NULL) {
+	if ((p = zend_hash_find_ptr(obj->prop_handler, name)) != NULL) {
 		switch (has_set_exists) {
 			case ZEND_PROPERTY_EXISTS:
 				ret = 1;
 				break;
 			case ZEND_PROPERTY_NOT_EMPTY: {
 				zval rv;
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					convert_to_boolean(value);
 					ret = Z_TYPE_P(value) == IS_TRUE ? 1 : 0;
@@ -394,7 +378,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 			}
 			case ZEND_PROPERTY_ISSET: {
 				zval rv;
-				zval *value = mysqli_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
+				zval *value = mysqli_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
 				if (value != &EG(uninitialized_zval)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1 : 0;
 					zval_ptr_dtor(value);
@@ -405,27 +389,26 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
 		}
 	} else {
-		ret = zend_std_has_property(object, member, has_set_exists, cache_slot);
+		ret = zend_std_has_property(object, name, has_set_exists, cache_slot);
 	}
 
 	return ret;
 } /* }}} */
 
-HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
+HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 {
-	mysqli_object *obj = Z_MYSQLI_P(object);
+	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
-		zval rv, member;
+		zval rv;
 		zval *value;
-		ZVAL_STR(&member, entry->name);
-		value = mysqli_read_property(object, &member, BP_VAR_IS, 0, &rv);
+		value = mysqli_read_property(object, entry->name, BP_VAR_IS, 0, &rv);
 		if (value != &EG(uninitialized_zval)) {
-			zend_hash_add(retval, Z_STR(member), value);
+			zend_hash_add(retval, entry->name, value);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -516,7 +499,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
-	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -541,12 +524,8 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->reconnect = 0;
 	mysqli_globals->report_mode = 0;
 	mysqli_globals->report_ht = 0;
-	mysqli_globals->allow_local_infile = 1;
-#ifdef HAVE_EMBEDDED_MYSQLI
-	mysqli_globals->embedded = 1;
-#else
+	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->embedded = 0;
-#endif
 	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
 /* }}} */
@@ -626,7 +605,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "insert_id",			sizeof("insert_id") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_info", 		sizeof("server_info") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_version", 	sizeof("server_version") - 1, ZEND_ACC_PUBLIC);
-	zend_declare_property_null(ce, "stat", 				sizeof("stat") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "sqlstate", 			sizeof("sqlstate") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "protocol_version", 	sizeof("protocol_version") - 1,  ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "thread_id",			sizeof("thread_id") - 1, ZEND_ACC_PUBLIC);
@@ -1219,7 +1197,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	if (into_object) {
 		zend_string *class_name = NULL;
 
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sz", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sa", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
 			return;
 		}
 		if (class_name == NULL) {
@@ -1265,7 +1243,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
-		object_and_properties_init(return_value, ce, NULL);
+		object_init_ex(return_value, ce);
 		if (!ce->default_properties_count && !ce->__set) {
 			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
 		} else {
@@ -1311,12 +1289,3 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

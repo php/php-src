@@ -14,7 +14,7 @@ include('config.inc');
 $db = pg_connect($conn_str);
 @pg_query($db, "SET bytea_output = 'hex'");
 
-$image = file_get_contents(dirname(__FILE__) . '/php.gif');
+$image = file_get_contents(__DIR__ . '/php.gif');
 $esc_image = pg_escape_bytea($image);
 
 pg_query($db, 'INSERT INTO '.$table_name.' (num, bin) VALUES (9876, \''.$esc_image.'\');');

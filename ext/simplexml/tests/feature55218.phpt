@@ -6,7 +6,7 @@ if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $x = new SimpleXMLElement(
 '<?xml version="1.0" standalone="yes"?>

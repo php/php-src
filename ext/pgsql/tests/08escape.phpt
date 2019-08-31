@@ -6,7 +6,7 @@ PostgreSQL escape functions
 <?php
 
 include 'config.inc';
-define('FILE_NAME', dirname(__FILE__) . '/php.gif');
+define('FILE_NAME', __DIR__ . '/php.gif');
 
 // pg_escape_string() test
 $before = "ABC\\ABC\'";
@@ -43,13 +43,13 @@ $db   = pg_connect($conn_str);
 
 // Insert binary to DB
 $escaped_data = pg_escape_bytea($data);
-pg_query("DELETE FROM ".$table_name." WHERE num = -9999;");
-$sql = "INSERT INTO ".$table_name." (num, bin) VALUES (-9999, CAST ('".$escaped_data."' AS BYTEA));";
+pg_query("DELETE FROM ".$table_name." WHERE num = 10000;");
+$sql = "INSERT INTO ".$table_name." (num, bin) VALUES (10000, CAST ('".$escaped_data."' AS BYTEA));";
 pg_query($db, $sql);
 
 // Retrieve binary from DB
 for ($i = 0; $i < 2; $i++) {
-	$sql = "SELECT bin::bytea FROM ".$table_name." WHERE num = -9999";
+	$sql = "SELECT bin::bytea FROM ".$table_name." WHERE num = 10000";
 	$result = pg_query($db, $sql);
 	$row = pg_fetch_array($result, 0, PGSQL_ASSOC);
 

@@ -2,7 +2,7 @@
 Bug #67647: Bundled libmagic 5.17 does not detect quicktime files correctly
 --SKIPIF--
 <?php
-	require_once(dirname(__FILE__) . '/skipif.inc');
+	require_once(__DIR__ . '/skipif.inc');
 
 	if (ini_get("default_charset") != "UTF-8") {
 		die("skip require default_charset == UTF-8");
@@ -11,10 +11,10 @@ Bug #67647: Bundled libmagic 5.17 does not detect quicktime files correctly
 --FILE--
 <?php
 
-$src = dirname(__FILE__) . DIRECTORY_SEPARATOR . "67647.mov";
+$src = __DIR__ . DIRECTORY_SEPARATOR . "67647.mov";
 
 $f_base = "67647私はガラスを食べられます.mov";
-$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . $f_base;
+$f = __DIR__ . DIRECTORY_SEPARATOR . $f_base;
 
 /* Streams mb path support is tested a lot elsewhere. Copy the existing file
 	therefore, avoid duplication in the repo. */
@@ -30,10 +30,9 @@ var_dump($fi->file($f));
 --CLEAN--
 <?php
 	$f_base = "67647私はガラスを食べられます.mov";
-	$f = dirname(__FILE__) . DIRECTORY_SEPARATOR . $f_base;
+	$f = __DIR__ . DIRECTORY_SEPARATOR . $f_base;
 	unlink($f);
 ?>
 --EXPECT--
 string(15) "video/quicktime"
 +++DONE+++
-

@@ -47,12 +47,3 @@ static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 #endif							/* sendmail_h */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

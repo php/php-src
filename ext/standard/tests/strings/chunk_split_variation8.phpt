@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
@@ -31,8 +31,8 @@ $ending = ':::';
 
 // different values for 'chunklen'
 $values = array (
-  0,  
-  1,  
+  0,
+  1,
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
@@ -46,7 +46,13 @@ $values = array (
 // loop through each element of values for 'chunklen'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1). " --\n";
-  var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
+  try {
+    var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  } catch (\Error $e) {
+      echo $e->getMessage() . "\n";
+  }
 }
 
 echo "Done"
@@ -54,18 +60,14 @@ echo "Done"
 --EXPECTF--
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+Chunk length should be greater than zero
 -- Iteration 2 --
 string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t:::r:::i:::n:::g::: :::w:::i:::t:::h::: :::	::: :::a:::n:::d::: :::
 ::: :::w:::h:::i:::t:::e::: :::s:::p:::a:::c:::e::: :::c:::h:::a:::r:::.:::
 :::I:::t::: :::h:::a:::s::: :::_:::s:::p:::e:::c:::i:::@:::l::: :::c:::h:::@:::r:::$::: :::2:::2:::2:::2::: :::!:::!:::!:::N:::o:::w::: :::\:::k::: :::a:::s::: :::e:::s:::c:::a:::p:::e::: :::c:::h:::a:::r::: :::t:::o::: :::t:::e:::s:::t:::
 :::c:::h:::u:::n:::k:::_:::s:::p:::l:::i:::t:::(:::):::"
 -- Iteration 3 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+Chunk length should be greater than zero
 -- Iteration 4 --
 string(129) "This's heredoc string with 	 and 
  white space char.
@@ -82,11 +84,7 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-
-Warning: chunk_split() expects parameter 2 to be int, float given in %s on line %d
-NULL
+chunk_split() expects parameter 2 to be int, float given
 -- Iteration 8 --
-
-Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
-bool(false)
+Chunk length should be greater than zero
 Done

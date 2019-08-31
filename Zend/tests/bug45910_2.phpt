@@ -14,7 +14,7 @@ class foo {
 		self::CCC	=> 'b',
 		self::DDD	=>  11
 	);
-	
+
 	public static function test() {
 		self::$foo;
 	}

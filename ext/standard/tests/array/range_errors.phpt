@@ -7,34 +7,84 @@ precision=14
 
 echo "\n*** Testing error conditions ***\n";
 
-echo "\n-- Testing ( (low < high) && (step = 0) ) --"; 
-var_dump( range(1, 2, 0) );
-var_dump( range("a", "b", 0) );
+echo "\n-- Testing ( (low < high) && (step = 0) ) --\n";
+try {
+    var_dump( range(1, 2, 0) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n\n-- Testing ( (low > high) && (step = 0) ) --";
-var_dump( range(2, 1, 0) );
-var_dump( range("b", "a", 0) );
+try {
+    var_dump( range("a", "b", 0) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n\n-- Testing ( (low < high) && (high-low < step) ) --";
-var_dump( range(1.0, 7.0, 6.5) );
+echo "\n\n-- Testing ( (low > high) && (step = 0) ) --\n";
+try {
+    var_dump( range(2, 1, 0) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n\n-- Testing ( (low > high) && (low-high < step) ) --";
-var_dump( range(7.0, 1.0, 6.5) );
+try {
+    var_dump( range("b", "a", 0) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n-- Testing Invalid number of arguments --";        
-var_dump( range() );  // No.of args = 0
-var_dump( range(1) );  // No.of args < expected
-var_dump( range(1,2,3,4) );  // No.of args > expected
-var_dump( range(-1, -2, 2) );  
-var_dump( range("a", "j", "z") );
-var_dump( range(0, 1, "140962482048819216326.24") );
-var_dump( range(0, 1, "140962482048819216326.24.") );
+echo "\n\n-- Testing ( (low < high) && (high-low < step) ) --\n";
+try {
+    var_dump( range(1.0, 7.0, 6.5) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-echo "\n-- Testing Invalid steps --";
+echo "\n\n-- Testing ( (low > high) && (low-high < step) ) --\n";
+try {
+    var_dump( range(7.0, 1.0, 6.5) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+echo "\n-- Testing other conditions --\n";
+try {
+    var_dump( range(-1, -2, 2) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump( range("a", "j", "z") );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump( range(0, 1, "140962482048819216326.24") );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    var_dump( range(0, 1, "140962482048819216326.24.") );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
+echo "\n-- Testing Invalid steps --\n";
 $step_arr = array( "string", NULL, FALSE, "", "\0" );
 
 foreach( $step_arr as $step ) {
-  var_dump( range( 1, 5, $step ) );
+    try {
+        var_dump( range( 1, 5, $step ) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage(), "\n";
+    } catch (\Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 echo "Done\n";
@@ -43,65 +93,34 @@ echo "Done\n";
 *** Testing error conditions ***
 
 -- Testing ( (low < high) && (step = 0) ) --
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
+step exceeds the specified range
+step exceeds the specified range
 
 
 -- Testing ( (low > high) && (step = 0) ) --
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
+step exceeds the specified range
+step exceeds the specified range
 
 
 -- Testing ( (low < high) && (high-low < step) ) --
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
+step exceeds the specified range
 
 
 -- Testing ( (low > high) && (low-high < step) ) --
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
+step exceeds the specified range
 
--- Testing Invalid number of arguments --
-Warning: range() expects at least 2 parameters, 0 given in %s on line %d
-bool(false)
+-- Testing other conditions --
+step exceeds the specified range
+range() expects parameter 3 to be int or float, string given
+step exceeds the specified range
 
-Warning: range() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
-
-Warning: range() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
+Notice: A non well formed numeric value encountered in %s on line %d
+step exceeds the specified range
 
 -- Testing Invalid steps --
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): step exceeds the specified range in %s on line %d
-bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
-
-Warning: range(): Invalid range string - must be numeric in %s on line %d
-bool(false)
+range() expects parameter 3 to be int or float, string given
+step exceeds the specified range
+step exceeds the specified range
+range() expects parameter 3 to be int or float, string given
+range() expects parameter 3 to be int or float, string given
 Done

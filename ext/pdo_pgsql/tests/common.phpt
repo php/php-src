@@ -1,7 +1,7 @@
 --TEST--
 Postgres
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_pgsql')) print 'skip'; ?>
 --REDIRECTTEST--
 # magic auto-configuration

@@ -16,9 +16,9 @@ if (PHP_INT_SIZE != 4) {
 
 /* Test fscanf() to scan float values using different integer format types */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
-echo "*** Test fscanf(): different integer format types with float values ***\n"; 
+echo "*** Test fscanf(): different integer format types with float values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation3.tmp";
@@ -29,8 +29,8 @@ if($file_handle == false)
 // array of float type values
 
 $float_values = array (
-  -2147483649, 
-  2147483648,  
+  -2147483649,
+  2147483648,
   -0x80000001, // float value, beyond max negative int
   0x800000001, // float value, beyond max positive int
   020000000001, // float value, beyond max positive int
@@ -80,7 +80,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/fscanf_variation3.tmp";
 unlink($filename);
 ?>
@@ -862,4 +862,3 @@ array(0) {
 bool(false)
 
 *** Done ***
-

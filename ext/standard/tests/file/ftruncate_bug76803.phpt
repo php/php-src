@@ -3,7 +3,7 @@ Bug #76803 ftruncate changes file pointer
 --FILE--
 <?php
 
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test76803";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "test76803";
 
 $f = fopen($fn, "w");
 fwrite($f, "Hello");
@@ -29,7 +29,7 @@ fclose($f);
 ?>
 --CLEAN--
 <?php
-$fn = dirname(__FILE__) . DIRECTORY_SEPARATOR . "test76803";
+$fn = __DIR__ . DIRECTORY_SEPARATOR . "test76803";
 unlink($fn);
 ?>
 --EXPECT--

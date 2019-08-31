@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stig Bakken <ssb@php.net>                                   |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    | FastCGI: Ben Mansell <php@slimyhorror.com>                           |
    |          Shane Caraveo <shane@caraveo.com>                           |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -45,13 +45,9 @@
 # include <unistd.h>
 #endif
 
-#if HAVE_SIGNAL_H
-# include <signal.h>
-#endif
+#include <signal.h>
 
-#if HAVE_SETLOCALE
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -228,9 +224,10 @@ static php_cgi_globals_struct php_cgi_globals;
 #ifdef PHP_WIN32
 #define WIN32_MAX_SPAWN_CHILDREN 64
 HANDLE kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
-int kids;
+int kids, cleaning_up = 0;
 HANDLE job = NULL;
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION job_info = { 0 };
+CRITICAL_SECTION cleanup_lock;
 #endif
 
 #ifndef HAVE_ATTRIBUTE_WEAK
@@ -242,13 +239,6 @@ static void fcgi_log(int type, const char *format, ...) {
 	va_end(ap);
 }
 #endif
-
-static int print_module_info(zval *element)
-{
-	zend_module_entry *module = Z_PTR_P(element);
-	php_printf("%s\n", module->name);
-	return ZEND_HASH_APPLY_KEEP;
-}
 
 static int module_name_cmp(const void *a, const void *b)
 {
@@ -262,11 +252,14 @@ static int module_name_cmp(const void *a, const void *b)
 static void print_modules(void)
 {
 	HashTable sorted_registry;
+	zend_module_entry *module;
 
 	zend_hash_init(&sorted_registry, 64, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
-	zend_hash_apply(&sorted_registry, print_module_info);
+	ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+		php_printf("%s\n", module->name);
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
 }
 
@@ -1493,6 +1486,10 @@ BOOL WINAPI fastcgi_cleanup(DWORD sig)
 {
 	int i = kids;
 
+	EnterCriticalSection(&cleanup_lock);
+	cleaning_up = 1;
+	LeaveCriticalSection(&cleanup_lock);
+
 	while (0 < i--) {
 		if (NULL == kid_cgi_ps[i]) {
 				continue;
@@ -1531,7 +1528,7 @@ PHP_INI_END()
  */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
-#ifdef ZTS
+#if defined(ZTS) && defined(PHP_WIN32)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	php_cgi_globals->rfc2616_headers = 0;
@@ -1684,9 +1681,9 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 			len = p - h->header;
 		}
 		if (len > 0) {
-			do {
+			while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
 				len--;
-			} while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t'));
+			}
 			if (len) {
 				s = do_alloca(len + 1, use_heap);
 				memcpy(s, h->header, len);
@@ -1733,7 +1730,7 @@ static zend_module_entry cgi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(cgi),
-	NO_VERSION_YET,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -1778,7 +1775,6 @@ int main(int argc, char *argv[])
 	char *decoded_query_string;
 	int skip_getopt = 0;
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1787,12 +1783,12 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 #endif
-#endif
 
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	(void)ts_resource(0);
+	php_tsrm_startup();
+# ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
 #endif
 
 	zend_signal_startup();
@@ -1921,6 +1917,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
+		free(bindpath);
 		return FAILURE;
 	}
 
@@ -1960,6 +1957,7 @@ consult the installation file that came with this distribution, or visit \n\
 			 */
 			tsrm_shutdown();
 #endif
+			free(bindpath);
 			return FAILURE;
 		}
 	}
@@ -2131,6 +2129,7 @@ consult the installation file that came with this distribution, or visit \n\
 			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
 			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN;
 
+			InitializeCriticalSection(&cleanup_lock);
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
 			/* kids will inherit the env, don't let them spawn */
@@ -2149,6 +2148,7 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to get current command line: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 
 				goto parent_out;
 			}
@@ -2167,6 +2167,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 				fprintf(stderr, "unable to create job object: [0x%08lx]: %s\n", err, err_text);
 
+				php_win32_error_msg_free(err_text);
+
 				goto parent_out;
 			}
 
@@ -2176,9 +2178,16 @@ consult the installation file that came with this distribution, or visit \n\
 				char *err_text = php_win32_error_to_msg(err);
 
 				fprintf(stderr, "unable to configure job object: [0x%08lx]: %s\n", err, err_text);
+				php_win32_error_msg_free(err_text);
 			}
 
 			while (parent) {
+				EnterCriticalSection(&cleanup_lock);
+				if (cleaning_up) {
+					goto parent_loop_end;
+				}
+				LeaveCriticalSection(&cleanup_lock);
+
 				i = kids;
 				while (0 < i--) {
 					DWORD status;
@@ -2216,6 +2225,7 @@ consult the installation file that came with this distribution, or visit \n\
 							char *err_text = php_win32_error_to_msg(err);
 
 							fprintf(stderr, "unable to assign child process to job object: [0x%08lx]: %s\n", err, err_text);
+							php_win32_error_msg_free(err_text);
 						}
 						CloseHandle(pi.hThread);
 					} else {
@@ -2225,14 +2235,18 @@ consult the installation file that came with this distribution, or visit \n\
 						kid_cgi_ps[i] = NULL;
 
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+						php_win32_error_msg_free(err_text);
 					}
 				}
 
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
 
+parent_loop_end:
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
+
+			DeleteCriticalSection(&cleanup_lock);
 
 			goto parent_out;
 		} else {
@@ -2327,6 +2341,7 @@ consult the installation file that came with this distribution, or visit \n\
 							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
 								php_module_shutdown();
+								free(bindpath);
 								return FAILURE;
 							}
 							if (no_headers) {
@@ -2371,14 +2386,15 @@ consult the installation file that came with this distribution, or visit \n\
 							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
 								php_module_shutdown();
+								free(bindpath);
 								return FAILURE;
 							}
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
 #if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
@@ -2461,17 +2477,10 @@ consult the installation file that came with this distribution, or visit \n\
 				we need in the environment.
 			*/
 			if (SG(request_info).path_translated || cgi || fastcgi) {
-				file_handle.type = ZEND_HANDLE_FILENAME;
-				file_handle.filename = SG(request_info).path_translated;
-				file_handle.handle.fp = NULL;
+				zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
 			} else {
-				file_handle.filename = "Standard input code";
-				file_handle.type = ZEND_HANDLE_FP;
-				file_handle.handle.fp = stdin;
+				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 			}
-
-			file_handle.opened_path = NULL;
-			file_handle.free_filename = 0;
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2529,83 +2538,13 @@ consult the installation file that came with this distribution, or visit \n\
 #ifdef ZTS
 					tsrm_shutdown();
 #endif
+					free(bindpath);
 					return FAILURE;
 				}
 			}
 
 			if (CGIG(check_shebang_line)) {
-				/* #!php support */
-				switch (file_handle.type) {
-					case ZEND_HANDLE_FD:
-						if (file_handle.handle.fd < 0) {
-							break;
-						}
-						file_handle.type = ZEND_HANDLE_FP;
-						file_handle.handle.fp = fdopen(file_handle.handle.fd, "rb");
-						/* break missing intentionally */
-					case ZEND_HANDLE_FP:
-						if (!file_handle.handle.fp ||
-						    (file_handle.handle.fp == stdin)) {
-							break;
-						}
-						c = fgetc(file_handle.handle.fp);
-						if (c == '#') {
-							while (c != '\n' && c != '\r' && c != EOF) {
-								c = fgetc(file_handle.handle.fp);	/* skip to end of line */
-							}
-							/* handle situations where line is terminated by \r\n */
-							if (c == '\r') {
-								if (fgetc(file_handle.handle.fp) != '\n') {
-									zend_long pos = zend_ftell(file_handle.handle.fp);
-									zend_fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
-								}
-							}
-							CG(start_lineno) = 2;
-						} else {
-							rewind(file_handle.handle.fp);
-						}
-						break;
-					case ZEND_HANDLE_STREAM:
-						c = php_stream_getc((php_stream*)file_handle.handle.stream.handle);
-						if (c == '#') {
-							while (c != '\n' && c != '\r' && c != EOF) {
-								c = php_stream_getc((php_stream*)file_handle.handle.stream.handle);	/* skip to end of line */
-							}
-							/* handle situations where line is terminated by \r\n */
-							if (c == '\r') {
-								if (php_stream_getc((php_stream*)file_handle.handle.stream.handle) != '\n') {
-									zend_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
-									php_stream_seek((php_stream*)file_handle.handle.stream.handle, pos - 1, SEEK_SET);
-								}
-							}
-							CG(start_lineno) = 2;
-						} else {
-							php_stream_rewind((php_stream*)file_handle.handle.stream.handle);
-						}
-						break;
-					case ZEND_HANDLE_MAPPED:
-						if (file_handle.handle.stream.mmap.buf[0] == '#') {
-						    size_t i = 1;
-
-						    c = file_handle.handle.stream.mmap.buf[i++];
-							while (c != '\n' && c != '\r' && i < file_handle.handle.stream.mmap.len) {
-								c = file_handle.handle.stream.mmap.buf[i++];
-							}
-							if (c == '\r') {
-								if (i < file_handle.handle.stream.mmap.len && file_handle.handle.stream.mmap.buf[i] == '\n') {
-									i++;
-								}
-							}
-							if(i > file_handle.handle.stream.mmap.len) {
-								i = file_handle.handle.stream.mmap.len;
-							}
-							file_handle.handle.stream.mmap.buf += i;
-							file_handle.handle.stream.mmap.len -= i;
-						}
-						break;
-					default:
-						break;
-				}
+				CG(skip_shebang) = 1;
 			}
 
 			switch (behavior) {
@@ -2698,9 +2637,7 @@ fastcgi_request_done:
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(request, 1);
-				if (bindpath) {
-					free(bindpath);
-				}
+				free(bindpath);
 				if (max_requests != 1) {
 					/* no need to return exit_status of the last request */
 					exit_status = 0;
@@ -2764,12 +2701,3 @@ parent_out:
 	return exit_status;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

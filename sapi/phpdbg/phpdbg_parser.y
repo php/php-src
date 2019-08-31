@@ -28,8 +28,8 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 %}
 
-%pure-parser
-%error-verbose
+%define api.pure full
+%define parse.error verbose
 
 %code requires {
 #include "phpdbg.h"
@@ -38,9 +38,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 typedef void* yyscan_t;
 #endif
 }
-
-%output  "sapi/phpdbg/phpdbg_parser.c"
-%defines "sapi/phpdbg/phpdbg_parser.h"
 
 %token T_EVAL       "eval"
 %token T_RUN        "run"
@@ -68,7 +65,7 @@ typedef void* yyscan_t;
 input
 	: command { $$ = $1; }
 	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
-	| /* nothing */
+	| /* empty */
 	;
 
 command
@@ -79,7 +76,7 @@ command
 parameters
 	: parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); $$.top = PHPDBG_G(parser_stack)->top; }
 	| parameters parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$2); $$.top = PHPDBG_G(parser_stack)->top; }
-	| parameters req_id { $$ = $1; }
+	| parameters T_REQ_ID { $$ = $1; PHPDBG_G(req_id) = $2.num; }
 	;
 
 parameter

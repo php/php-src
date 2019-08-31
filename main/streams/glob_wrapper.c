@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ typedef struct {
 	size_t   pattern_len;
 } glob_s_t;
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -53,11 +53,7 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *ple
 		if (plen) {
 			*plen = pglob->path_len;
 		}
-		if (copy) {
-			return estrndup(pglob->path, pglob->path_len);
-		} else {
-			return pglob->path;
-		}
+		return pglob->path;
 	} else {
 		if (plen) {
 			*plen = 0;
@@ -67,7 +63,7 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *ple
 }
 /* }}} */
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC) /* {{{ */
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
@@ -75,11 +71,7 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *
 		if (plen) {
 			*plen = pglob->pattern_len;
 		}
-		if (copy) {
-			return estrndup(pglob->pattern, pglob->pattern_len);
-		} else {
-			return pglob->pattern;
-		}
+		return pglob->pattern;
 	} else {
 		if (plen) {
 			*plen = 0;
@@ -126,7 +118,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 		if (pglob->path) {
 			efree(pglob->path);
 		}
-		if (path != gpath) {
+		if ((path - gpath) > 1) {
 			path--;
 		}
 		pglob->path_len = path - gpath;
@@ -135,7 +127,7 @@ static void php_glob_stream_path_split(glob_s_t *pglob, const char *path, int ge
 }
 /* }}} */
 
-static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
@@ -155,7 +147,7 @@ static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count) 
 		}
 	}
 
-	return 0;
+	return -1;
 }
 /* }}} */
 
@@ -279,12 +271,3 @@ const php_stream_wrapper  php_glob_stream_wrapper = {
 	0
 };
 #endif /* HAVE_GLOB */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

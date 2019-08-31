@@ -5,7 +5,7 @@ Bug #47803 Executing prepared statements is successful only for the first two st
 --FILE--
 <?php
 
-include dirname(__FILE__) . "/config.inc";
+include __DIR__ . "/config.inc";
 
 $create_table = "CREATE TABLE FOO(
 		[PAR_ID] [int] NOT NULL,
@@ -73,7 +73,7 @@ if (!$result) {
 	print ('[sql] prep: '.$sql);
 	goto out;
 }
-foreach ($upd_params as $k) { 
+foreach ($upd_params as $k) {
 	if(!odbc_execute($result, array($k['id']))) {
 		print ('[sql] exec: '."array({$k['id']})");
 		goto out;

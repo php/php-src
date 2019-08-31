@@ -13,54 +13,54 @@ echo "*** Testing strripos() function: with single quoted strings ***\n";
 $haystack = 'Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ';
 $needles = array(
 		  //regular strings
-/*1*/	  'l',  
+/*1*/	  'l',
 		  'L',
 		  'HELLO',
 		  'hEllo',
-		
+
 		  //escape characters
-/*5*/	  '\t',  
+/*5*/	  '\t',
 		  '\T',
 		  '     ',
 		  '\n',
 		  '\N',
 		  '
 		',  //new line
-		
+
 		  //nulls
-/*11*/	  '\0',  
+/*11*/	  '\0',
 		  NULL,
 		  null,
-		
+
 		  //boolean false
-/*14*/	  FALSE,  
+/*14*/	  FALSE,
 		  false,
-		
+
 		  //empty string
 /*16*/	  '',
-		
+
 		  //special chars
-/*17*/	  ' ',  
+/*17*/	  ' ',
 		  '$',
 		  ' $',
 		  '&',
 		  '!#',
 		  '()',
-		  '<=>',  
+		  '<=>',
 		  '>',
 		  '=>',
 		  '?',
 		  '@',
 		  '@hEllo',
-		
-/*29*/	  '12345', 	//decimal numeric string  
+
+/*29*/	  '12345', 	//decimal numeric string
 		  '\x23',	//hexadecimal numeric string
 		  '#',  	//respective ASCII char of \x23
 		  '\101',  	//octal numeric string
 		  'A', 		// respective ASCII char for \101
 		  '456HEE', //numerics + chars
 		  42, 		//needle as int(ASCII value of '*')
-		  $haystack  //haystack as needle  
+		  $haystack  //haystack as needle
 );
 
 /* loop through to get the position of the needle in haystack string */
@@ -75,7 +75,7 @@ foreach ($needles as $needle) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(32)
@@ -133,62 +133,30 @@ int(10)
 bool(false)
 int(10)
 -- Iteration 12 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(54)
+int(54)
+int(54)
+int(53)
 -- Iteration 13 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(54)
+int(54)
+int(54)
+int(53)
 -- Iteration 14 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(54)
+int(54)
+int(54)
+int(53)
 -- Iteration 15 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-bool(false)
+int(54)
+int(54)
+int(54)
+int(53)
 -- Iteration 16 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+int(54)
+int(54)
+int(54)
+int(53)
 -- Iteration 17 --
 int(53)
 int(53)
@@ -280,18 +248,10 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 35 --
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(23)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(23)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(23)
-
-Deprecated: strripos(): Non-string needles will be interpreted as strings in %s on line %d
-int(23)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 -- Iteration 36 --
 int(0)
 bool(false)

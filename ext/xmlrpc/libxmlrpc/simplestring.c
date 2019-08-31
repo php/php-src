@@ -32,8 +32,6 @@
 
 #include <php.h>
 
-static const char rcsid[] = "#(@) $Id$";
-
 
 #define SIMPLESTRING_INCR 32
 

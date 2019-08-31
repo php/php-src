@@ -4,14 +4,18 @@ Testing imagelayereffect() with invalid resource of GD library
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 	if (!GD_BUNDLED) die('skip function only available in bundled, external GD detected');
 ?>
 --FILE--
 <?php
 $resource = tmpfile();
-$layer = imagelayereffect($resource, IMG_EFFECT_REPLACE);
+try {
+    $layer = imagelayereffect($resource, IMG_EFFECT_REPLACE);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagelayereffect(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagelayereffect(): supplied resource is not a valid Image resource

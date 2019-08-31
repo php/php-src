@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -388,7 +388,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			PDO_DBG_RETURN(1);
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
-			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL ? 1 : 0;
+			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL;
 			PDO_DBG_RETURN(1);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
@@ -484,6 +484,12 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
+#else
+		case PDO_MYSQL_ATTR_LOCAL_INFILE:
+			ZVAL_BOOL(
+				return_value,
+				(H->server->data->options->flags & CLIENT_LOCAL_FILES) == CLIENT_LOCAL_FILES);
+			break;
 #endif
 
 		default:
@@ -509,6 +515,21 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 }
 /* }}} */
 
+/* {{{ pdo_mysql_request_shutdown */
+static void pdo_mysql_request_shutdown(pdo_dbh_t *dbh)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+
+	PDO_DBG_ENTER("pdo_mysql_request_shutdown");
+	PDO_DBG_INF_FMT("dbh=%p", dbh);
+#ifdef PDO_USE_MYSQLND
+	if (H->server) {
+		mysqlnd_end_psession(H->server);
+	}
+#endif
+}
+/* }}} */
+
 /* {{{ mysql_methods */
 static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
@@ -524,7 +545,7 @@ static const struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_get_attribute,
 	pdo_mysql_check_liveness,
 	NULL,
-	NULL,
+	pdo_mysql_request_shutdown,
 	NULL
 };
 /* }}} */
@@ -547,9 +568,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",  NULL,	0 },
 		{ "dbname",   "",	0 },
-		{ "host",   "localhost",	0 },
-		{ "port",   "3306",	0 },
+		{ "host",     "localhost",	0 },
+		{ "port",     "3306",	0 },
 		{ "unix_socket",  PDO_DEFAULT_MYSQL_UNIX_ADDR,	0 },
+		{ "user",     NULL,	0 },
+		{ "password", NULL,	0 },
 	};
 	int connect_opts = 0
 #ifdef CLIENT_MULTI_RESULTS
@@ -575,7 +598,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	PDO_DBG_INF("multi results");
 #endif
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 7);
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 
@@ -589,6 +612,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
+#if defined(PDO_USE_MYSQLND)
+	if (dbh->is_persistent) {
+		mysqlnd_restart_psession(H->server);
+	}
+#endif
 
 	dbh->driver_data = H;
 
@@ -617,7 +645,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare);
 
 		H->assume_national_character_set_strings = pdo_attr_lval(driver_options,
-			PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
+			PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL;
 
 #ifndef PDO_USE_MYSQLND
 		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size);
@@ -750,6 +778,15 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			}
 		}
 #endif
+	} else {
+#if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
+		// in case there are no driver options disable 'local infile' explicitly
+		zend_long local_infile = 0;
+		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
+			pdo_mysql_error(dbh);
+			goto cleanup;
+		}
+#endif
 	}
 
 #ifdef PDO_MYSQL_HAS_CHARSET
@@ -771,6 +808,14 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
 #endif
 		unix_socket = vars[4].optval;
+	}
+
+	if (!dbh->username && vars[5].optval) {
+		dbh->username = vars[5].optval;
+	}
+
+	if (!dbh->password && vars[6].optval) {
+		dbh->password = vars[6].optval;
 	}
 
 	/* TODO: - Check zval cache + ZTS */
@@ -821,12 +866,3 @@ const pdo_driver_t pdo_mysql_driver = {
 	PDO_DRIVER_HEADER(mysql),
 	pdo_mysql_handle_factory
 };
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

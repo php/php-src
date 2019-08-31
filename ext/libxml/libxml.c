@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-#define IS_EXT_MODULE
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -26,7 +24,6 @@
 #include "php.h"
 #include "SAPI.h"
 
-#define PHP_XML_INTERNAL
 #include "zend_variables.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
@@ -665,8 +662,9 @@ is_string:
 			}
 		} else if (Z_TYPE(retval) != IS_NULL) {
 			/* retval not string nor resource nor null; convert to string */
-			convert_to_string(&retval);
-			goto is_string;
+			if (try_convert_to_string(&retval)) {
+				goto is_string;
+			}
 		} /* else is null; don't try anything */
 	}
 
@@ -808,20 +806,16 @@ static PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_NOCDATA",	XML_PARSE_NOCDATA,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NONET",		XML_PARSE_NONET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_PEDANTIC",	XML_PARSE_PEDANTIC,		CONST_CS | CONST_PERSISTENT);
-#if LIBXML_VERSION >= 20621
 	REGISTER_LONG_CONSTANT("LIBXML_COMPACT",	XML_PARSE_COMPACT,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOXMLDECL",	XML_SAVE_NO_DECL,		CONST_CS | CONST_PERSISTENT);
-#endif
-#if LIBXML_VERSION >= 20703
 	REGISTER_LONG_CONSTANT("LIBXML_PARSEHUGE",	XML_PARSE_HUGE,			CONST_CS | CONST_PERSISTENT);
-#endif
 #if LIBXML_VERSION >= 20900
 	REGISTER_LONG_CONSTANT("LIBXML_BIGLINES",	XML_PARSE_BIG_LINES,	CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
 
 	/* Schema validation options */
-#if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION >= 20614
+#if defined(LIBXML_SCHEMAS_ENABLED)
 	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -877,13 +871,14 @@ static PHP_RINIT_FUNCTION(libxml)
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
-
-		/* Enable the entity loader by default. This ensures that
-		 * other threads/requests that might have disabled the loader
-		 * do not affect the current request.
-		 */
-		LIBXML(entity_loader_disabled) = 0;
 	}
+
+	/* Enable the entity loader by default. This ensures that
+	 * other threads/requests that might have disabled the loader
+	 * do not affect the current request.
+	 */
+	LIBXML(entity_loader_disabled) = 0;
+
 	return SUCCESS;
 }
 
@@ -1067,7 +1062,7 @@ static PHP_FUNCTION(libxml_get_errors)
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
 	} else {
-		ZVAL_EMPTY_ARRAY(return_value);
+		RETURN_EMPTY_ARRAY();
 	}
 }
 /* }}} */
@@ -1353,12 +1348,3 @@ PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID l
 #endif
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_CLEANUP_H
@@ -17,4 +16,3 @@ enum {
 };
 
 #endif
-

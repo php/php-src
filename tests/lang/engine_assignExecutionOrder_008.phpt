@@ -70,9 +70,15 @@ Warning: Creating default object from empty value in %s on line %d
 good
 $i->p->q=f(): 
 Warning: Creating default object from empty value in %s on line %d
+
+Warning: Creating default object from empty value in %s on line %d
 good
-$i->p[0]=f(): good
+$i->p[0]=f(): 
+Warning: Creating default object from empty value in %s on line %d
+good
 $i->p[0]->p=f(): 
+Warning: Creating default object from empty value in %s on line %d
+
 Warning: Creating default object from empty value in %s on line %d
 good
 C::$p=f(): good

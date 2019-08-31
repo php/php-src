@@ -5,7 +5,7 @@ Reflection Bug #37964 (Reflection shows private methods of parent class)
 
 abstract class foobar {
 	private function test2() {
-	}	
+	}
 }
 class foo extends foobar {
 	private $foo = 1;
@@ -19,7 +19,7 @@ class bar extends foo {
 	}
 }
 
-Reflection::export(new ReflectionClass(new bar));
+echo new ReflectionClass(new bar);
 
 ?>
 --EXPECTF--

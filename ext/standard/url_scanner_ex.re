@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,10 +22,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -695,7 +693,7 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 
 	if (ZSTR_LEN(url_state->url_app.s) != 0) {
 		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0), url_state);
-		if (sizeof(uint) < sizeof(size_t)) {
+		if (sizeof(unsigned int) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
 		}

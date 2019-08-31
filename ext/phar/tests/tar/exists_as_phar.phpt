@@ -8,8 +8,8 @@ phar.require_hash=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar';
-$tname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
+$tname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://hio';
 
 $phar = new Phar($fname);
@@ -30,8 +30,8 @@ try {
 ===DONE===
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
 phar tar error: "%sexists_as_phar.phar.tar" already exists as a regular phar and must be deleted from disk prior to creating as a tar-based phar

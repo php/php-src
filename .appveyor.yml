@@ -1,4 +1,3 @@
-
 version: "{branch}.build.{build}"
 
 image: Visual Studio 2017
@@ -10,14 +9,21 @@ branches:
 
 clone_depth: 64
 
+skip_commits:
+  files:
+    - docs/*
+    - NEWS
+    - UPGRADING
+    - UPGRADING.INTERNALS
+
 cache:
         - c:\build-cache
 
 environment:
-        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
+        PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.1.8
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
         PHP_BUILD_CRT: vc15
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
@@ -31,8 +37,10 @@ environment:
         matrix:
                 - THREAD_SAFE: 0
                   OPCACHE: 0
+                  PARALLEL: -j2
                 - THREAD_SAFE: 1
                   OPCACHE: 1
+                  PARALLEL: -j2
                   INTRINSICS: AVX
 
 services:
@@ -50,4 +58,3 @@ build_script:
 
 test_script:
         - appveyor\test.bat
-

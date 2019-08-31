@@ -2,22 +2,19 @@
 PDO::ATTR_STATEMENT_CLASS
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db);
 
 	$default =  $db->getAttribute(PDO::ATTR_STATEMENT_CLASS);
 	var_dump($default);
-
-	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS)))
-		printf("[001] Expecting boolean/false got %s\n", var_export($tmp, true));
 
 	if (false !== ($tmp = @$db->setAttribute(PDO::ATTR_STATEMENT_CLASS, 'foo')))
 		printf("[002] Expecting boolean/false got %s\n", var_export($tmp, true));

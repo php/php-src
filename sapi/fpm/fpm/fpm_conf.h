@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_CONF_H
@@ -121,4 +120,3 @@ int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();
 
 #endif
-

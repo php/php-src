@@ -29,7 +29,7 @@ class ParentClass
   }
 }
 
-class ChildClass extends ParentClass 
+class ChildClass extends ParentClass
 {
   var $parent_obj;
   public function __construct ( ) {
@@ -51,13 +51,21 @@ echo "-- accessing parent method from child class --\n";
 var_dump( array_map(array('ChildClass', 'staticParent1'), $arr1) );
 
 echo "-- accessing child method from parent class --\n";
-var_dump( array_map(array('ParentClass', 'staticChild'), $arr1) );
+try {
+    var_dump( array_map(array('ParentClass', 'staticChild'), $arr1) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "-- accessing parent method using child class object --\n";
 var_dump( array_map(array($childobj, 'staticParent1'), $arr1) );
 
 echo "-- accessing child method using parent class object --\n";
-var_dump( array_map(array($parentobj, 'staticChild'), $arr1) );
+try {
+    var_dump( array_map(array($parentobj, 'staticChild'), $arr1) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
@@ -73,9 +81,7 @@ array(3) {
   int(7)
 }
 -- accessing child method from parent class --
-
-Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticChild' in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticChild'
 -- accessing parent method using child class object --
 array(3) {
   [0]=>
@@ -86,7 +92,5 @@ array(3) {
   int(7)
 }
 -- accessing child method using parent class object --
-
-Warning: array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticChild' in %s on line %d
-NULL
+array_map() expects parameter 1 to be a valid callback, class 'ParentClass' does not have a method 'staticChild'
 Done

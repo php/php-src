@@ -6,9 +6,9 @@ if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_rename.zip';
+$file = $dirname . 'oo_rename.zip';
 
 @unlink($file);
 
@@ -23,17 +23,24 @@ $zip->addFromString('dir/entry2.txt', 'entry #2');
 
 if (!$zip->status == ZIPARCHIVE::ER_OK) {
 	var_dump($zip);
-	echo "failed\n";
+	echo "failed2\n";
 }
 
 $zip->close();
 
 if (!$zip->open($file)) {
-	exit('failed');
+	exit('failed3');
 }
 
-dump_entries_name($zip);
-echo "\n";
+if (!verify_entries($zip, [
+	"entry1.txt",
+    "entry2.txt",
+    "dir/entry2.txt"
+])) {
+	exit("failed4");
+} else {
+	echo "OK\n";
+}
 
 if (!$zip->renameIndex(0, 'ren_entry1.txt')) {
 	echo "failed index 0\n";
@@ -42,16 +49,20 @@ if (!$zip->renameIndex(0, 'ren_entry1.txt')) {
 if (!$zip->renameName('dir/entry2.txt', 'dir3/ren_entry2.txt')) {
 	echo "failed name dir/entry2.txt\n";
 }
-dump_entries_name($zip);
+
+if (!verify_entries($zip, [
+	"ren_entry1.txt",
+    "entry2.txt",
+    "dir3/ren_entry2.txt"
+])) {
+	exit("failed5");
+} else {
+	echo "OK\n";
+}
 $zip->close();
 
 @unlink($file);
 ?>
 --EXPECT--
-0 entry1.txt
-1 entry2.txt
-2 dir/entry2.txt
-
-0 ren_entry1.txt
-1 entry2.txt
-2 dir3/ren_entry2.txt
+OK
+OK

@@ -11,7 +11,7 @@ Vincent Tsao <notes4vincent@gmail.com>
 
 echo "Load document\n";
 $doc = new DOMDocument;
-$doc->load(dirname(__FILE__)."/book.xml");
+$doc->load(__DIR__."/book.xml");
 
 echo "See if strictErrorChecking is on\n";
 var_dump($doc->strictErrorChecking);

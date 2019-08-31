@@ -4,7 +4,7 @@ openssl_x509_export() tests
 <?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
-$cert_file = dirname(__FILE__) . "/cert.crt";
+$cert_file = __DIR__ . "/cert.crt";
 
 $a = file_get_contents($cert_file);
 $b = "file://" . $cert_file;

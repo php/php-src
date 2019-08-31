@@ -21,7 +21,7 @@ for ($z = "", $i = 0; $i < 1024; $i++) {
     usleep($i);
 }
 
-$conf = array('config' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'openssl.cnf');
+$conf = array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf');
 $privkey = openssl_pkey_new($conf);
 
 if ($privkey === false)

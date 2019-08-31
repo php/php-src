@@ -1,16 +1,16 @@
 --TEST--
 DBA CDB handler test
 --SKIPIF--
-<?php 
+<?php
 $handler = 'cdb';
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die('info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
 
 $handler = 'cdb';
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 
 echo "Test 0\n";
 
@@ -63,8 +63,8 @@ else {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 Test 0

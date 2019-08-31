@@ -1,8 +1,8 @@
 --TEST--
 ocilogon() without ORACLE_HOME set (OCIServerAttach() segfaults)
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+<?php
+if (!extension_loaded('oci8')) die("skip no oci8 extension");
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
@@ -16,7 +16,7 @@ ORACLE_HOME=""
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 if (!empty($dbase)) {
 	var_dump(ocilogon($user, $password, $dbase));
@@ -24,7 +24,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(ocilogon($user, $password));
 }
-	
+
 ?>
 ===DONE===
 <?php exit(0); ?>

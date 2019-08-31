@@ -1,7 +1,7 @@
 --TEST--
 tlsv1.0 stream wrapper
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
@@ -16,7 +16,7 @@ $serverCode = <<<'CODE'
     $server = stream_socket_server('tlsv1.0://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
     phpt_notify();
 
-    for ($i=0; $i < 3; $i++) {
+    for ($i = 0; $i < (phpt_has_sslv3() ? 3 : 2); $i++) {
         @stream_socket_accept($server, 3);
     }
 CODE;

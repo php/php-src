@@ -1,8 +1,8 @@
 --TEST--
-Test fopen() for write cp936 to UTF-8 path 
+Test fopen() for write cp936 to UTF-8 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -16,7 +16,7 @@ skip_if_no_required_exts();
 #vim: set encoding=cp936
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('cp936', 'utf-8', "œyÔ‡¶à×Ö¹Â·½"); // cp936 string
 $prefix = create_data("file_cp936", $item . "25");
@@ -40,7 +40,7 @@ remove_data("file_cp936");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 int(25)
 bool(true)

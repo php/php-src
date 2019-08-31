@@ -7,10 +7,10 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 
-class hello_world {   
+class hello_world {
   public function hello($to) {
     return 'Hello ' . $to;
-  }    
+  }
 }
 
 class LocalSoapClient extends SoapClient {
@@ -31,7 +31,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug29844.wsdl", array("trace"=>1)); 
+$client = new LocalSoapClient(__DIR__."/bug29844.wsdl", array("trace"=>1));
 var_dump($client->hello('davey'));
 ?>
 --EXPECT--

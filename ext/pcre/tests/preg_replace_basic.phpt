@@ -1,5 +1,5 @@
 --TEST--
-Test preg_replace() function : basic functionality 
+Test preg_replace() function : basic functionality
 --FILE--
 <?php
 /*
@@ -16,7 +16,6 @@ var_dump(preg_replace('<(^[a-z]\w+)@(\w+)\.(\w+)\.([a-z]{2,}$)>', '\\1 at \\2 do
 
 ?>
 --EXPECT--
-
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "444444444 - Hello, world -           This is a string."

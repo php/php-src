@@ -61,13 +61,13 @@ zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 /* }}} */
 
 /* {{{ MessageFormatter_object_clone */
-zend_object *MessageFormatter_object_clone(zval *object)
+zend_object *MessageFormatter_object_clone(zend_object *object)
 {
 	MessageFormatter_object *mfo, *new_mfo;
 	zend_object *new_obj;
 
-	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj = MessageFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
+	mfo = php_intl_messageformatter_fetch_object(object);
+	new_obj = MessageFormatter_ce_ptr->create_object(object->ce);
 	new_mfo = php_intl_messageformatter_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_mfo->zo, &mfo->zo);
@@ -159,12 +159,3 @@ void msgformat_register_class( void )
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

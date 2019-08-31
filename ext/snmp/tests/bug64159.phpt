@@ -1,16 +1,16 @@
---TEST--                                 
+--TEST--
 Bug #64159: Truncated snmpget
 --CREDITS--
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --ENV--
 MIBS=noneXistent
 --FILE--
 <?php
-require_once(dirname(__FILE__).'/snmp_include.inc');
+require_once(__DIR__.'/snmp_include.inc');
 
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_LIBRARY);

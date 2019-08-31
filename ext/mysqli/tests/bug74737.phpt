@@ -12,7 +12,6 @@ echo $rf->getNumberOfParameters();
 echo PHP_EOL;
 echo $rf->getNumberOfRequiredParameters();
 ?>
-
 --EXPECT--
 0
 0

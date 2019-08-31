@@ -13,11 +13,10 @@ if (PHP_IMAP == "yes") {
 		CHECK_LIB("ws2_32.lib", "imap");
 		CHECK_LIB("Secur32.lib", "imap");
 		CHECK_LIB("crypt32.lib", "imap");
-		EXTENSION("imap", "php_imap.c", true);
+		EXTENSION("imap", "php_imap.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1 /D HAVE_IMAP2004=1 /D HAVE_IMAP2007a=1 /D HAVE_IMAP2007b=1 /D HAVE_IMAP_SSL=1");
 		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
-		AC_DEFINE('HAVE_NEW_MIME2TEXT', 1, 'Have utf8_mime2text', true);
 		AC_DEFINE('HAVE_RFC822_OUTPUT_ADDRESS_LIST', 1, 'Have rfc822_output_address_list', true);
 		AC_DEFINE('HAVE_IMAP_MUTF7', 1, 'Have modified utf7 support', true);
 		AC_DEFINE('HAVE_NEW_MIME2TEXT', 1, 'Whether utf8_mime2text() has new signature');

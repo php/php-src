@@ -18,7 +18,6 @@ class Foo
 Foo::try();
 
 echo PHP_EOL, "Done", PHP_EOL;
-
 --EXPECT--
 TraitA::as
 

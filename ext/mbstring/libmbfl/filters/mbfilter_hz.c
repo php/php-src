@@ -211,9 +211,7 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -276,11 +274,3 @@ static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter)
 
 	return c;
 }
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

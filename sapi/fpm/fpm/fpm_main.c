@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Stig Bakken <ssb@php.net>                                   |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Zeev Suraski <zeev@php.net>                                 |
    | FastCGI: Ben Mansell <php@slimyhorror.com>                           |
    |          Shane Caraveo <shane@caraveo.com>                           |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -43,13 +43,9 @@
 # include <unistd.h>
 #endif
 
-#if HAVE_SIGNAL_H
-# include <signal.h>
-#endif
+#include <signal.h>
 
-#if HAVE_SETLOCALE
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -182,19 +178,11 @@ static void user_config_cache_entry_dtor(zval *el)
 
 #ifdef ZTS
 static int php_cgi_globals_id;
-#define CGIG(v) TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#define CGIG(v) ZEND_TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
 #endif
-
-static int print_module_info(zval *zv) /* {{{ */
-{
-	zend_module_entry *module = Z_PTR_P(zv);
-	php_printf("%s\n", module->name);
-	return 0;
-}
-/* }}} */
 
 static int module_name_cmp(const void *a, const void *b) /* {{{ */
 {
@@ -209,11 +197,14 @@ static int module_name_cmp(const void *a, const void *b) /* {{{ */
 static void print_modules(void) /* {{{ */
 {
 	HashTable sorted_registry;
+	zend_module_entry *module;
 
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
-	zend_hash_apply(&sorted_registry, print_module_info);
+	ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+		php_printf("%s\n", module->name);
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
 }
 /* }}} */
@@ -253,7 +244,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_leng
 {
 	ssize_t ret;
 
-	/* sapi has started which means everyhting must be send through fcgi */
+	/* sapi has started which means everything must be send through fcgi */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
@@ -1467,6 +1458,9 @@ static PHP_MINFO_FUNCTION(cgi)
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
 PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
@@ -1489,9 +1483,6 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
-ZEND_END_ARG_INFO()
-
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	fcgi_request *request;
@@ -1510,8 +1501,11 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
  * Returns the status of the fastcgi process manager */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
-	int error = fpm_status_export_to_zval(return_value);
-	if(error){
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (fpm_status_export_to_zval(return_value)) {
 		RETURN_FALSE;
 	}
 }
@@ -1519,7 +1513,7 @@ PHP_FUNCTION(fpm_get_status) /* {{{ */
 
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
 	PHP_FE(fastcgi_finish_request,                    cgi_fcgi_sapi_no_arginfo)
-	PHP_FE(fpm_get_status,                            NULL)
+	PHP_FE(fpm_get_status,                            cgi_fcgi_sapi_no_arginfo)
 	PHP_FE(apache_request_headers,                    cgi_fcgi_sapi_no_arginfo)
 	PHP_FALIAS(getallheaders, apache_request_headers, cgi_fcgi_sapi_no_arginfo)
 	PHP_FE_END
@@ -1534,7 +1528,7 @@ static zend_module_entry cgi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(cgi),
-	NO_VERSION_YET,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -1551,10 +1545,6 @@ int main(int argc, char *argv[])
 	char *orig_optarg = php_optarg;
 	int ini_entries_len = 0;
 	/* end of temporary locals */
-
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
 
 	int max_requests = 0;
 	int requests = 0;
@@ -1573,7 +1563,6 @@ int main(int argc, char *argv[])
 	zend_bool old_rc_debug;
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1582,11 +1571,9 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 #endif
-#endif
 
 #ifdef ZTS
-	tsrm_startup(1, 1, 0, NULL);
-	tsrm_ls = ts_resource(0);
+	php_tsrm_startup();
 #endif
 
 	zend_signal_startup();
@@ -1725,9 +1712,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
@@ -2011,12 +1998,3 @@ out:
 	return exit_status;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

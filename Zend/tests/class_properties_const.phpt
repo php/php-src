@@ -22,4 +22,7 @@ NULL
 Notice: Undefined property: A::$1 in %sclass_properties_const.php on line %d
 NULL
 
-Recoverable fatal error: Object of class Closure could not be converted to string in %sclass_properties_const.php on line %d
+Fatal error: Uncaught Error: Object of class Closure could not be converted to string in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

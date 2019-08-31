@@ -563,9 +563,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -776,9 +774,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) != 0x400) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -789,9 +785,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -928,9 +922,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)((s >> 8) & 0x7f, filter->data));
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x10000) { /* X0212 */
-			if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-				CK(mbfl_filt_conv_illegal_output(c, filter));
-			}
+			CK(mbfl_filt_conv_illegal_output(c, filter));
 		} else { /* X 0201 latin */
 			if ((filter->status & 0xff00) == 0x500) {
 				CK((*filter->output_function)(0x0f, filter->data));		/* SO */
@@ -945,9 +937,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0x7f, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;
@@ -1301,6 +1291,3 @@ retry:
 
 	return c;
 }
-
-
-

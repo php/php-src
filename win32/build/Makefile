@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2018 The PHP Group                                |
+#  | Copyright (c) The PHP Group                                          |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -87,14 +87,14 @@ Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_pars
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
 	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d -p phpdbg_ sapi/phpdbg/phpdbg_parser.y
-	
+
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
 Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
-	
+
 sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo sapi/phpdbg/phpdbg_lexer.c sapi/phpdbg/phpdbg_lexer.l
 !endif
@@ -147,7 +147,7 @@ $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV):
 	@for %D in ($(BUILD_DIRS_SUB)) do @if not exist %D @mkdir %D > NUL
 	@if not exist $(BUILD_DIR_DEV) @mkdir $(BUILD_DIR_DEV) > NUL
 	@cd "$(PHP_SRC_DIR)"
-	
+
 
 clean-sapi:
 	@echo Cleaning SAPI
@@ -193,7 +193,7 @@ run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" $(ARGS)
 !else
 test: set-tmp-env
-	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
 
 run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(BUILD_DIR)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
@@ -229,7 +229,6 @@ snap: build-snap build-devel build-dist
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
-# need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
 
 build-lib: build-ext-libs
@@ -265,4 +264,4 @@ really-install:
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:
 	-$(PHP_PREFIX)\php.exe -n -dextension_dir=$(PHP_PREFIX) win32/build/registersyslog.php $(PHP_PREFIX)\$(PHPDLL)
-
+	-regedit /s win32\syslog.reg

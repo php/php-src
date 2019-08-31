@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -14,7 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Brad Lafountain <rodif_bl@yahoo.com>                        |
   |          Shane Caraveo <shane@caraveo.com>                           |
-  |          Dmitry Stogov <dmitry@zend.com>                             |
+  |          Dmitry Stogov <dmitry@php.net>                              |
   +----------------------------------------------------------------------+
 */
 
@@ -116,7 +116,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	int len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
-	memcpy(nscat, ns, ns_len);
+	if (ns) {
+		memcpy(nscat, ns, ns_len);
+	}
 	nscat[ns_len] = ':';
 	memcpy(nscat+ns_len+1, type, type_len);
 	nscat[len] = '\0';
@@ -737,7 +739,9 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(this_ptr, struri,&ctx, 0);
+	load_wsdl_ex(this_ptr, struri, &ctx, 0);
+	zend_try {
+
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
@@ -1164,6 +1168,12 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 		soap_error0(E_ERROR, "Parsing WSDL: Could not find any usable binding services in WSDL.");
 	}
 
+	} zend_catch {
+		/* Avoid persistent memory leak. */
+		zend_hash_destroy(&ctx.docs);
+		zend_bailout();
+	} zend_end_try();
+
 	zend_hash_destroy(&ctx.messages);
 	zend_hash_destroy(&ctx.bindings);
 	zend_hash_destroy(&ctx.portTypes);
@@ -1173,20 +1183,22 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0f
+#define WSDL_CACHE_VERSION 0x10
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
-#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
+#define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((unsigned)(*buf)[3]<<24); *buf += 4;
 #define WSDL_CACHE_GET_1(ret,type,buf) ret = (type)(**buf); (*buf)++;
 #define WSDL_CACHE_GET_N(ret,n,buf)    memcpy(ret,*buf,n); *buf += n;
 #define WSDL_CACHE_SKIP(n,buf)         *buf += n;
 
-#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,val & 0xff); \
-                                       smart_str_appendc(buf,(val >> 8) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 16) & 0xff); \
-                                       smart_str_appendc(buf,(val >> 24) & 0xff);
+#define WSDL_CACHE_PUT_INT(val,buf)    smart_str_appendc(buf,(char)(val & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 8) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 16) & 0xff)); \
+                                       smart_str_appendc(buf,(char)((val >> 24) & 0xff));
 #define WSDL_CACHE_PUT_1(val,buf)      smart_str_appendc(buf,val);
 #define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,(char*)val,n);
+
+#define WSDL_NO_STRING_MARKER 0x7fffffff
 
 static char* sdl_deserialize_string(char **in)
 {
@@ -1194,7 +1206,7 @@ static char* sdl_deserialize_string(char **in)
 	int len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (len == 0x7fffffff) {
+	if (len == WSDL_NO_STRING_MARKER) {
 		return NULL;
 	} else {
 		s = emalloc(len+1);
@@ -1209,7 +1221,7 @@ static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 	int len;
 
 	WSDL_CACHE_GET_INT(len, in);
-	if (len == 0) {
+	if (len == WSDL_NO_STRING_MARKER) {
 		zend_hash_next_index_insert_ptr(ht, data);
 	} else {
 		zend_hash_str_add_ptr(ht, *in, len, data);
@@ -1777,16 +1789,14 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 
 static void sdl_serialize_string(const char *str, smart_str *out)
 {
-	int i;
-
 	if (str) {
-		i = strlen(str);
+		int i = strlen(str);
 		WSDL_CACHE_PUT_INT(i, out);
 		if (i > 0) {
 			WSDL_CACHE_PUT_N(str, i, out);
 		}
 	} else {
-		WSDL_CACHE_PUT_INT(0x7fffffff, out);
+		WSDL_CACHE_PUT_INT(WSDL_NO_STRING_MARKER, out);
 	}
 }
 
@@ -1797,7 +1807,7 @@ static void sdl_serialize_key(zend_string *key, smart_str *out)
 		WSDL_CACHE_PUT_INT(ZSTR_LEN(key), out);
 		WSDL_CACHE_PUT_N(ZSTR_VAL(key), ZSTR_LEN(key), out);
 	} else {
-		WSDL_CACHE_PUT_INT(0, out);
+		WSDL_CACHE_PUT_INT(WSDL_NO_STRING_MARKER, out);
 	}
 }
 
@@ -2448,7 +2458,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 			pheader->ns = strdup(pheader->ns);
 		}
 
-		if (pheader->encode->details.sdl_type) {
+		if (pheader->encode && pheader->encode->details.sdl_type) {
 			if ((penc = zend_hash_str_find_ptr(ptr_map, (char*)&pheader->encode, sizeof(encodePtr))) == NULL) {
 				assert(0);
 			}
@@ -3660,4 +3670,3 @@ static void delete_document(zval *zv)
 	xmlDocPtr doc = Z_PTR_P(zv);
 	xmlFreeDoc(doc);
 }
-

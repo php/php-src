@@ -18,7 +18,6 @@ if (!$php) {
 }
 $cmd = 'php -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
-$stdin = str_repeat('*', 1024 * 16) . '!';
 $stdin = str_repeat('*', 2049 );
 
 $options = array_merge(array('suppress_errors' => true, 'bypass_shell' => false));

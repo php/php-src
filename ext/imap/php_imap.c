@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
    |          Hartmut Holzgraefe  <hholzgra@php.net>                      |
    |          Jani Taskinen       <jani.taskinen@iki.fi>                  |
    |          Daniel R. Kalowsky  <kalowsky@php.net>                      |
-   | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
+   | PHP 4.0 updates:  Zeev Suraski <zeev@php.net>                        |
    +----------------------------------------------------------------------+
  */
 
@@ -561,6 +561,15 @@ static const zend_module_dep imap_deps[] = {
 };
 /* }}} */
 
+
+/* {{{ PHP_INI
+ */
+PHP_INI_BEGIN()
+STD_PHP_INI_BOOLEAN("imap.enable_insecure_rsh", "0", PHP_INI_SYSTEM, OnUpdateBool, enable_rsh, zend_imap_globals, imap_globals)
+PHP_INI_END()
+/* }}} */
+
+
 /* {{{ imap_module_entry
  */
 zend_module_entry imap_module_entry = {
@@ -583,6 +592,9 @@ zend_module_entry imap_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_IMAP
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
 ZEND_GET_MODULE(imap)
 #endif
 
@@ -799,6 +811,9 @@ void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
  */
 static PHP_GINIT_FUNCTION(imap)
 {
+#if defined(COMPILE_DL_IMAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	imap_globals->imap_user = NIL;
 	imap_globals->imap_password = NIL;
 
@@ -830,6 +845,8 @@ static PHP_GINIT_FUNCTION(imap)
 PHP_MINIT_FUNCTION(imap)
 {
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
+
+	REGISTER_INI_ENTRIES();
 
 #ifndef PHP_WIN32
 	mail_link(&unixdriver);		/* link in the unix driver */
@@ -1048,6 +1065,12 @@ PHP_MINIT_FUNCTION(imap)
 	GC_TEXTS               texts
 	*/
 
+	if (!IMAPG(enable_rsh)) {
+		/* disable SSH and RSH, see https://bugs.php.net/bug.php?id=77153 */
+		mail_parameters (NIL, SET_RSHTIMEOUT, 0);
+		mail_parameters (NIL, SET_SSHTIMEOUT, 0);
+	}
+
 	le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 	return SUCCESS;
 }
@@ -1135,6 +1158,8 @@ PHP_MINFO_FUNCTION(imap)
 	php_info_print_table_row(2, "Kerberos Support", "enabled");
 #endif
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
 
@@ -1326,12 +1351,12 @@ PHP_FUNCTION(imap_append)
 
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex))== NULL) {
-			zend_string_free(regex);
+			zend_string_release(regex);
 			RETURN_FALSE;
 		}
 
-		zend_string_free(regex);
-		php_pcre_match_impl(pce, ZSTR_VAL(internal_date), ZSTR_LEN(internal_date), return_value, subpats, global,
+		zend_string_release(regex);
+		php_pcre_match_impl(pce, internal_date, return_value, subpats, global,
 			0, Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
@@ -2035,7 +2060,9 @@ PHP_FUNCTION(imap_delete)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(sequence);
+	if (!try_convert_to_string(sequence)) {
+		return;
+	}
 
 	mail_setflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
 	RETVAL_TRUE;
@@ -2059,7 +2086,9 @@ PHP_FUNCTION(imap_undelete)
 		RETURN_FALSE;
 	}
 
-	convert_to_string_ex(sequence);
+	if (!try_convert_to_string(sequence)) {
+		return;
+	}
 
 	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
 	RETVAL_TRUE;
@@ -2478,7 +2507,9 @@ PHP_FUNCTION(imap_savebody)
 		break;
 
 		default:
-			convert_to_string_ex(out);
+			if (!try_convert_to_string(out)) {
+				return;
+			}
 			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS, NULL);
 		break;
 	}
@@ -3334,13 +3365,13 @@ PHP_FUNCTION(imap_bodystruct)
 		RETURN_FALSE;
 	}
 
-	object_init(return_value);
 
 	body=mail_body(imap_le_struct->imap_stream, msg, (unsigned char*)ZSTR_VAL(section));
 	if (body == NULL) {
-		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
+
+	object_init(return_value);
 	if (body->type <= TYPEMAX) {
 		add_property_long(return_value, "type", body->type);
 	}
@@ -4055,11 +4086,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
-		if (ret == -1) {
-			return 0;
-		} else {
-			return 1;
-		}
+
+		return ret != -1;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program");
 		return 0;
@@ -4097,7 +4125,6 @@ PHP_FUNCTION(imap_mail)
 	if (!ZSTR_LEN(message)) {
 		/* this is not really an error, so it is allowed. */
 		php_error_docref(NULL, E_WARNING, "No message string in mail command");
-		message = NULL;
 	}
 
 	if (_php_imap_mail(ZSTR_VAL(to), ZSTR_VAL(subject), ZSTR_VAL(message), headers?ZSTR_VAL(headers):NULL, cc?ZSTR_VAL(cc):NULL,
@@ -5082,12 +5109,3 @@ PHP_IMAP_EXPORT void mm_fatal(char *str)
 {
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

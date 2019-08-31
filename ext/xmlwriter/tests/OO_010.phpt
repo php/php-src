@@ -1,15 +1,14 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, writeAttributeNS method
---CREDITS-- 
+--CREDITS--
 Mauricio Vieira <mauricio [at] @mauriciovieira [dot] net>
 #testfest PHPSP on 2014-07-05
 --SKIPIF--
-<?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
-if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required");
+<?php
+if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
-<?php 
+<?php
 
 $xw = new XMLWriter();
 $xw->openMemory();
@@ -18,7 +17,7 @@ $xw->setIndentString('   ');
 $xw->startDocument('1.0', "UTF-8");
 $xw->startElement('root');
 $xw->startElementNS('ns1', 'child1', 'urn:ns1');
-$xw->writeAttributeNS('ns1', 'att1', 'urn:ns1', '<>"\'&'); 
+$xw->writeAttributeNS('ns1', 'att1', 'urn:ns1', '<>"\'&');
 $xw->writeElement('chars', "special characters: <>\"'&");
 $xw->endElement();
 $xw->endDocument();

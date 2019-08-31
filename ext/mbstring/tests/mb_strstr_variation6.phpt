@@ -8,9 +8,9 @@ function_exists('mb_strstr') or die("skip mb_strstr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds first occurrence of a string within another 
+ * Description: Finds first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strstr() : variation ***\n";

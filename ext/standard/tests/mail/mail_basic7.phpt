@@ -1,7 +1,7 @@
 --TEST--
 Test mail() function : array extra header basic functionality
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path=tee mailBasic7.out >/dev/null
 mail.add_x_header = Off
 --SKIPIF--
 <?php
@@ -35,7 +35,7 @@ $additional_headers = array(
 		"bar\r\n\t fuga",
 	),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -62,7 +62,7 @@ $additional_headers = array(
 	'message-id' => array('foo7'),
 	'in-reply-to'=> array('foo8'),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -87,7 +87,7 @@ $additional_headers = array(
 	'foo6' => array(NULL),
 	'foo7' => array(new StdClass),
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";
@@ -115,7 +115,7 @@ $additional_headers = array(
 	"foo9" => '%&$#!',
 	"foo10" => "abc\0\tdef",
 );
-$outFile = "mailBasic.out";
+$outFile = "mailBasic7.out";
 @unlink($outFile);
 
 echo "-- All Mail Content Parameters --\n";

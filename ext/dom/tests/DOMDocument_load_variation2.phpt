@@ -17,6 +17,6 @@ XML_FILE=/wrong_book_with_dtd.xml
 LOAD_OPTIONS=LIBXML_DTDVALID
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
-domdocumentload_test_method.php
+domdocumentload_test_method.inc
 --EXPECTF--
 Warning: DOMDocument::load%r(XML){0,1}%r(): Element book content does not follow the DTD, expecting (title , author), got (title author author ) %s

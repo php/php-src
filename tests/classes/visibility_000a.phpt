@@ -28,4 +28,4 @@ class fail extends same {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Access level to fail::f0() must be public (as in class same) in %s on line %d
+Fatal error: Access level to fail::f0() must be public (as in class same) in %s on line 22

@@ -31,9 +31,9 @@ EOF;
 }
 
 ini_set("soap.wsdl_cache_enabled", 1);
-$client = new TestSoapClient(dirname(__FILE__).'/bug32941.wsdl', array("trace" => 1, 'exceptions' => 0));
+$client = new TestSoapClient(__DIR__.'/bug32941.wsdl', array("trace" => 1, 'exceptions' => 0));
 $ahoj = $client->echoString('exception');
-$client = new TestSoapClient(dirname(__FILE__).'/bug32941.wsdl', array("trace" => 1, 'exceptions' => 0));
+$client = new TestSoapClient(__DIR__.'/bug32941.wsdl', array("trace" => 1, 'exceptions' => 0));
 $ahoj = $client->echoString('exception');
 echo "ok\n";
 ?>

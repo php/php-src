@@ -40,7 +40,9 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE,
+	&vtbl_utf7imap_wchar,
+	&vtbl_wchar_utf7imap
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
@@ -249,9 +251,7 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 		CK((*filter->filter_function)(s, filter));
 		return c;
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 		return c;
 	}
 
@@ -368,5 +368,3 @@ int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 	}
 	return 0;
 }
-
-

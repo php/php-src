@@ -1,9 +1,9 @@
 --TEST--
 Test deflate_init() error
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded"; 
+    print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -15,7 +15,6 @@ var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 0]));
 var_dump(deflate_init(ZLIB_ENCODING_DEFLATE, ['memory' => 10]));
 ?>
 --EXPECTF--
-
 Warning: deflate_init(): encoding mode must be ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
 

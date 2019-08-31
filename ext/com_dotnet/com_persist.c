@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,13 +118,13 @@ static HRESULT STDMETHODCALLTYPE stm_read(IStream *This, void *pv, ULONG cb, ULO
 
 static HRESULT STDMETHODCALLTYPE stm_write(IStream *This, void const *pv, ULONG cb, ULONG *pcbWritten)
 {
-	ULONG nwrote;
+	ssize_t nwrote;
 	FETCH_STM();
 
-	nwrote = (ULONG)php_stream_write(stm->stream, pv, cb);
+	nwrote = php_stream_write(stm->stream, pv, cb);
 
 	if (pcbWritten) {
-		*pcbWritten = nwrote > 0 ? nwrote : 0;
+		*pcbWritten = nwrote > 0 ? (ULONG)nwrote : 0;
 	}
 	if (nwrote > 0) {
 		return S_OK;
@@ -287,7 +287,6 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 }
 
 #define CPH_ME(fname, arginfo)	PHP_ME(com_persist, fname, arginfo, ZEND_ACC_PUBLIC)
-#define CPH_SME(fname, arginfo)	PHP_ME(com_persist, fname, arginfo, ZEND_ACC_ALLOW_STATIC|ZEND_ACC_PUBLIC)
 #define CPH_METHOD(fname)		static PHP_METHOD(com_persist, fname)
 
 #define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
@@ -383,7 +382,6 @@ CPH_METHOD(SaveToFile)
 	if (helper->ipf) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p!|b",
 					&filename, &filename_len, &remember)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
 			return;
 		}
 
@@ -447,7 +445,6 @@ CPH_METHOD(LoadFromFile)
 
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|l",
 					&filename, &filename_len, &flags)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
 			return;
 		}
 
@@ -543,7 +540,6 @@ CPH_METHOD(LoadFromStream)
 	CPH_FETCH();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 
@@ -605,7 +601,6 @@ CPH_METHOD(SaveToStream)
 	CPH_NO_OBJ();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 
@@ -653,7 +648,6 @@ CPH_METHOD(__construct)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|O!",
 				&zobj, php_com_variant_class_entry)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 
@@ -710,9 +704,9 @@ static void helper_free_storage(zend_object *obj)
 }
 
 
-static zend_object* helper_clone(zval *obj)
+static zend_object* helper_clone(zend_object *obj)
 {
-	php_com_persist_helper *clone, *object = (php_com_persist_helper*)Z_OBJ_P(obj);
+	php_com_persist_helper *clone, *object = (php_com_persist_helper*) obj;
 
 	clone = emalloc(sizeof(*object));
 	memcpy(clone, object, sizeof(*object));
@@ -765,12 +759,3 @@ int php_com_persist_minit(INIT_FUNC_ARGS)
 
 	return SUCCESS;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

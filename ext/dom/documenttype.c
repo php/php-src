@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ int dom_documenttype_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	ZVAL_STRING(retval, (char *) (dtdptr->name));
+	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
 
 	return SUCCESS;
 }
@@ -216,12 +216,3 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

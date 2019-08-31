@@ -7,7 +7,7 @@ oci8.old_oci_close_semantics=1
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 var_dump($c);
 var_dump(oci_close($c));

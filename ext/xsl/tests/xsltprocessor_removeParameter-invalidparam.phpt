@@ -1,14 +1,14 @@
 --TEST--
 Check xsltprocessor::removeParameter with invalid parameter
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }
 ?>
 --FILE--
 <?php
-include dirname(__FILE__) .'/prepare.inc';
+include __DIR__ .'/prepare.inc';
 $proc->importStylesheet($xsl);
 var_dump($proc->removeParameter('', 'doesnotexist'));
 --EXPECT--

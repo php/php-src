@@ -9,7 +9,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
-chdir(dirname(__FILE__));
+chdir(__DIR__);
 @unlink('test.file');
 @unlink('test.link');
 if (file_exists('test.file')) {

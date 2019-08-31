@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2018 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -465,7 +465,10 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
+					return 0;
+				}
 				if (H->date_format) {
 					efree(H->date_format);
 				}
@@ -476,7 +479,10 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
+					return 0;
+				}
 				if (H->time_format) {
 					efree(H->time_format);
 				}
@@ -487,7 +493,10 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			{
-				zend_string *str = zval_get_string(val);
+				zend_string *str = zval_try_get_string(val);
+				if (UNEXPECTED(!str)) {
+					return 0;
+				}
 				if (H->timestamp_format) {
 					efree(H->timestamp_format);
 				}
@@ -614,14 +623,24 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	struct pdo_data_src_parser vars[] = {
 		{ "dbname", NULL, 0 },
 		{ "charset",  NULL,	0 },
-		{ "role", NULL,	0 }
+		{ "role", NULL,	0 },
+		{ "user", NULL, 0 },
+		{ "password", NULL, 0 }
 	};
 	int i, ret = 0;
 	short buf_len = 256, dpb_len;
 
 	pdo_firebird_db_handle *H = dbh->driver_data = pecalloc(1,sizeof(*H),dbh->is_persistent);
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 3);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+
+	if (!dbh->username && vars[3].optval) {
+		dbh->username = vars[3].optval;
+	}
+
+	if (!dbh->password && vars[4].optval) {
+		dbh->password = vars[4].optval;
+	}
 
 	do {
 		static char const dpb_flags[] = {
@@ -682,12 +701,3 @@ const pdo_driver_t pdo_firebird_driver = { /* {{{ */
 	pdo_firebird_handle_factory
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

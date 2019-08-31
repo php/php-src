@@ -21,4 +21,4 @@ var_dump(gc_collect_cycles());
 
 ?>
 --EXPECT--
-int(4)
+int(2)

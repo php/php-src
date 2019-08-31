@@ -51,13 +51,15 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse: unable to parse input params", 0 );
-
 		RETURN_FALSE;
+	}
+
+	if(zposition) {
+		position = (int32_t) zval_get_long(zposition);
+		position_p = &position;
 	}
 
 	/* Fetch the object. */
@@ -66,12 +68,6 @@ PHP_FUNCTION( numfmt_parse )
 	/* Convert given string to UTF-16. */
 	intl_convert_utf8_to_utf16(&sstr, &sstr_len, str, str_len, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
-
-	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
-		position_p = &position;
-	}
 
 #if ICU_LOCALE_BUG && defined(LC_NUMERIC)
 	/* need to copy here since setlocale may change it later */
@@ -106,8 +102,7 @@ PHP_FUNCTION( numfmt_parse )
 	efree(oldlocale);
 #endif
 	if(zposition) {
-		zval_ptr_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
 
 	if (sstr) {
@@ -138,12 +133,9 @@ PHP_FUNCTION( numfmt_parse_currency )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"number_parse_currency: unable to parse input params", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -155,15 +147,13 @@ PHP_FUNCTION( numfmt_parse_currency )
 	INTL_METHOD_CHECK_STATUS( nfo, "String conversion to UTF-16 failed" );
 
 	if(zposition) {
-		ZVAL_DEREF(zposition);
-		position = (int32_t)zval_get_long( zposition );
+		position = (int32_t) zval_get_long(zposition);
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
-		zval_ptr_dtor(zposition);
-		ZVAL_LONG(zposition, position);
+		ZEND_TRY_ASSIGN_REF_LONG(zposition, position);
 	}
 	if (sstr) {
 		efree(sstr);
@@ -179,12 +169,3 @@ PHP_FUNCTION( numfmt_parse_currency )
 	RETVAL_DOUBLE( number );
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

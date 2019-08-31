@@ -1,4 +1,4 @@
-﻿/*
+/*
  *    PHP Sendmail for Windows.
  *
  *  This file is rewritten specificly for PHPFI.  Some functionality
@@ -26,7 +26,6 @@
 #include <string.h>
 #include <math.h>
 #include <malloc.h>
-#include <memory.h>
 #include <winbase.h>
 #include "sendmail.h"
 #include "php_ini.h"
@@ -252,8 +251,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		}
 
 		if (!found) {
-			if (headers_lc) {
-				zend_string_free(headers_lc);
+			if (headers) {
+				zend_string_release(headers_trim);
+				zend_string_release(headers_lc);
 			}
 			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 			return FAILURE;
@@ -267,8 +267,8 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_trim);
-			zend_string_free(headers_lc);
+			zend_string_release(headers_trim);
+			zend_string_release(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
@@ -284,8 +284,8 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			zend_string_free(headers_trim);
-			zend_string_free(headers_lc);
+			zend_string_release(headers_trim);
+			zend_string_release(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
@@ -982,12 +982,3 @@ static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString)
 	}
 	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

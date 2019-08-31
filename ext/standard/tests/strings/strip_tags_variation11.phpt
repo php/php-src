@@ -1,21 +1,19 @@
 --TEST--
 Test strip_tags() function : obscure values within attributes
---INI--
-short_open_tag = on
 --FILE--
 <?php
 
 echo "*** Testing strip_tags() : obscure functionality ***\n";
 
-// array of arguments 
+// array of arguments
 $string_array = array (
   'hello <img title="<"> world',
   'hello <img title=">"> world',
   'hello <img title=">_<"> world',
   "hello <img title='>_<'> world"
 );
-  
-  		
+
+
 // Calling strip_tags() with default arguments
 // loop through the $string_array to test strip_tags on various inputs
 $iteration = 1;

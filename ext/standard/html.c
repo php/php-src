@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,9 +45,7 @@
 #include "php_standard.h"
 #include "php_string.h"
 #include "SAPI.h"
-#if HAVE_LOCALE_H
 #include <locale.h>
-#endif
 #if HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
@@ -408,14 +406,13 @@ static enum entity_charset determine_charset(char *charset_hint)
 	}
 
 	/* try to detect the charset for the locale */
-#if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
+#if HAVE_NL_LANGINFO && defined(CODESET)
 	charset_hint = nl_langinfo(CODESET);
 	if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
 		goto det_charset;
 	}
 #endif
 
-#if HAVE_LOCALE_H
 	/* try to figure out the charset from the locale */
 	{
 		char *localename;
@@ -441,7 +438,6 @@ static enum entity_charset determine_charset(char *charset_hint)
 			len = strlen(charset_hint);
 		}
 	}
-#endif
 
 det_charset:
 
@@ -497,47 +493,6 @@ static inline size_t php_utf32_utf8(unsigned char *buf, unsigned k)
 	return retval;
 }
 /* }}} */
-
-/* {{{ php_mb2_int_to_char
- * Convert back big endian int representation of sequence of one or two 8-bit code units. */
-static inline size_t php_mb2_int_to_char(unsigned char *buf, unsigned k)
-{
-	assert(k <= 0xFFFFU);
-	/* one or two bytes */
-	if (k <= 0xFFU) { /* 1 */
-		buf[0] = k;
-		return 1U;
-	} else { /* 2 */
-		buf[0] = k >> 8;
-		buf[1] = k & 0xFFU;
-		return 2U;
-	}
-}
-/* }}} */
-
-/* {{{ php_mb3_int_to_char
- * Convert back big endian int representation of sequence of one to three 8-bit code units.
- * For EUC-JP. */
-static inline size_t php_mb3_int_to_char(unsigned char *buf, unsigned k)
-{
-	assert(k <= 0xFFFFFFU);
-	/* one to three bytes */
-	if (k <= 0xFFU) { /* 1 */
-		buf[0] = k;
-		return 1U;
-	} else if (k <= 0xFFFFU) { /* 2 */
-		buf[0] = k >> 8;
-		buf[1] = k & 0xFFU;
-		return 2U;
-	} else {
-		buf[0] = k >> 16;
-		buf[1] = (k >> 8) & 0xFFU;
-		buf[2] = k & 0xFFU;
-		return 3U;
-	}
-}
-/* }}} */
-
 
 /* {{{ unimap_bsearc_cmp
  * Binary search of unicode code points in unicode <--> charset mapping.
@@ -1232,7 +1187,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 
 	if (all) { /* replace with all named entities */
 		if (CHARSET_PARTIAL_SUPPORT(charset)) {
-			php_error_docref0(NULL, E_STRICT, "Only basic entities "
+			php_error_docref(NULL, E_NOTICE, "Only basic entities "
 				"substitution is supported for multi-byte encodings other than UTF-8; "
 				"functionality is equivalent to htmlspecialchars");
 		}
@@ -1710,12 +1665,3 @@ PHP_FUNCTION(get_html_translation_table)
 	}
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

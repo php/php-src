@@ -3,16 +3,16 @@ Test is_subclass_of() function : usage variations  - unexpected type for arg 1 w
 --FILE--
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
 spl_autoload_register(function ($className) {
 	echo "In autoload($className)\n";
 });
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
 set_error_handler('test_error_handler');

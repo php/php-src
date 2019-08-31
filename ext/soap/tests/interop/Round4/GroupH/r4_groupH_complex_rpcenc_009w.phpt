@@ -30,7 +30,7 @@ class MoreExtendedStruct extends ExtendedStruct {
 $s1 = new BaseStruct(12.345,1);
 $s2 = new ExtendedStruct(12.345,2,"arg",-3,5);
 $s3 = new MoreExtendedStruct(12.345,3,"arg",-3,5,true);
-$client = new SoapClient(dirname(__FILE__)."/round4_groupH_complex_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
+$client = new SoapClient(__DIR__."/round4_groupH_complex_rpcenc.wsdl",array("trace"=>1,"exceptions"=>0));
 $client->echoMultipleFaults2(3,$s1,$s2,$s3);
 echo $client->__getlastrequest();
 $HTTP_RAW_POST_DATA = $client->__getlastrequest();

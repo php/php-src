@@ -1,4 +1,3 @@
-
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -200,9 +199,6 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_env_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
-	int i;
-	char *first = NULL;
-	char *last = NULL;
 	char *title;
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
@@ -212,6 +208,9 @@ int fpm_env_init_main() /* {{{ */
 	}
 #ifndef HAVE_SETPROCTITLE
 #ifdef __linux__
+	int i;
+	char *first = NULL;
+	char *last = NULL;
 	/*
 	 * This piece of code has been inspirated from nginx and pureftpd code, which
 	 * are under BSD licence.
@@ -276,4 +275,3 @@ int fpm_env_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

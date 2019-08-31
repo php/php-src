@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -20,9 +20,9 @@ echo "*** Testing vprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
 $formats = array(
-  '%u %+u %-u', 
+  '%u %+u %-u',
   '%lu %Lu %4u %-4u',
-  '%10.4u %-10.4u %.4u', 
+  '%10.4u %-10.4u %.4u',
   '%\'#2u %\'2u %\'$2u %\'_2u',
   '%3$u %4$u %1$u %2$u'
 );
@@ -36,7 +36,7 @@ $args_array = array(
   array(1, 0, 00, "10_"),
   array(3, 4, 1, 2)
 );
- 
+
 // looping to test vprintf() with different unsigned formats from the above $format array
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;
@@ -44,7 +44,7 @@ foreach($formats as $format) {
   echo "\n-- Iteration $counter --\n";
   $result = vprintf($format, $args_array[$counter-1]);
   echo "\n";
-  var_dump($result); 
+  var_dump($result);
   $counter++;
 }
 

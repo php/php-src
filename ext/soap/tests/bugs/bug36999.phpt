@@ -1,7 +1,7 @@
 --TEST--
 Bug #36999 (xsd:long values clamped to LONG_MAX instead of using double)
 --SKIPIF--
-<?php 
+<?php
   if (!extension_loaded('soap')) die('skip soap extension not available');
 ?>
 --INI--
@@ -31,7 +31,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
+$soap = new LocalSoapClient(__DIR__."/bug36999.wsdl");
 
 function test($num) {
   global $soap;

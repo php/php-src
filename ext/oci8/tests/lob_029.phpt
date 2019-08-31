@@ -3,7 +3,7 @@ reading/writing BFILE LOBs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
@@ -16,7 +16,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip Test script not ported to Windows")
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 $realdirname = "/tmp";  // Use /tmp because a local dir can give ORA-22288 depending on perms
 $realfilename1 = "oci8bfiletest1.txt";
@@ -89,7 +89,7 @@ oci_execute($s);
 
 echo "Done\n";
 ?>
---EXPECT-- 
+--EXPECT--
 Test 1. Check how many rows in the table
 array(1) {
   ["NUMROWS"]=>

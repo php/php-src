@@ -1,14 +1,14 @@
 --TEST--
-Bind with various bind types not supported by TimesTen 
+Bind with various bind types not supported by TimesTen
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 $types = array(
     "SQLT_CLOB" => SQLT_CLOB,
@@ -23,7 +23,7 @@ foreach ($types as $t => $v) {
 
     $s = oci_parse($c, "select * from dual where dummy = :c1");
     $c1 = "Doug";
-    oci_bind_by_name($s, ":c1", $c1, -1, $v);    
+    oci_bind_by_name($s, ":c1", $c1, -1, $v);
 }
 
 ?>

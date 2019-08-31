@@ -11,7 +11,7 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory2.phar');
+	$phar = new Phar(__DIR__ . '/buildfromdirectory2.phar');
 	$phar->buildFromDirectory(1);
 } catch (Exception $e) {
 	var_dump(get_class($e));
@@ -20,11 +20,11 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromdirectory2.phar');
+<?php
+unlink(__DIR__ . '/buildfromdirectory2.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
-RecursiveDirectoryIterator::__construct(1,1): The system cannot find the file specified. (code: 2)
+RecursiveDirectoryIterator::__construct(1,1): %s (code: 2)
 ===DONE===
