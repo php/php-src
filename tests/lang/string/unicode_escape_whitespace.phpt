@@ -1,5 +1,5 @@
 --TEST--
-Invalid Unicode escape sequence: Whitespace
+Invalid Unicode escape sequence: Blackspace
 --FILE--
 <?php
 
