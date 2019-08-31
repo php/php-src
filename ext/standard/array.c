@@ -4106,7 +4106,7 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_P(tmp)++;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only count STRING and INTEGER values!");
+			php_error_docref(NULL, E_WARNING, "Can only count string and integer values, entry skipped");
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4449,7 +4449,7 @@ PHP_FUNCTION(array_flip)
 			}
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only flip STRING and INTEGER values!");
+			php_error_docref(NULL, E_WARNING, "Can only flip string and integer values, entry skipped");
 		}
 	} ZEND_HASH_FOREACH_END();
 }
