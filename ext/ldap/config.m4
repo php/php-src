@@ -80,7 +80,7 @@ if test "$PHP_LDAP" != "no"; then
   fi
 
   dnl -pc removal is a hack for clang
-  MACHINE_INCLUDES=$($CC -dumpmachine | sed 's/-pc//')
+  MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
 
   if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
     PHP_ADD_LIBRARY_WITH_PATH(lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
