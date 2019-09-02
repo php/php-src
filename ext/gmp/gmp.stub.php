@@ -101,7 +101,7 @@ function gmp_abs($a) {}
 
 /**
  * @param GMP|int $a
- * @return GMP|fals
+ * @return GMP|false
  */
 function gmp_fact($a) {}
 
