@@ -336,7 +336,7 @@ static const func_info_t func_infos[] = {
 	F0("is_finite",                    MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_nan",                       MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_infinite",                  MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
+	F1("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
 	F0("exp",                          MAY_BE_DOUBLE),
 	F0("log",                          MAY_BE_FALSE | MAY_BE_DOUBLE),
 	F0("log10",                        MAY_BE_DOUBLE),
