@@ -57,6 +57,9 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated to LiteSpeed SAPI V7.5 (Fixed clean shutdown). (George Wang)
 
+- MBString:
+  . Fixed bug #78380 (Oniguruma 6.9.3 fixes CVEs). (CVE-2019-13224) (Stas)
+
 - MySQLnd:
   . Fixed bug #78179 (MariaDB server version incorrectly detected). (cmb)
   . Fixed bug #78213 (Empty row pocket). (cmb)
