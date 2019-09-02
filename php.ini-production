@@ -99,7 +99,7 @@
 ;   Production Value: Off
 
 ; display_startup_errors
-;   Default Value: Off
+;   Default Value: On
 ;   Development Value: On
 ;   Production Value: Off
 
@@ -475,11 +475,9 @@ error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 display_errors = Off
 
 ; The display of errors which occur during PHP's startup sequence are handled
-; separately from display_errors. PHP's default behavior is to suppress those
-; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. We strongly recommend you
-; set this to 'off' for production servers.
-; Default Value: Off
+; separately from display_errors. We strongly recommend you set this to 'off'
+; for production servers to avoid leaking configuration details.
+; Default Value: On
 ; Development Value: On
 ; Production Value: Off
 ; http://php.net/display-startup-errors
