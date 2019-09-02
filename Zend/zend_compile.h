@@ -229,7 +229,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 16...)                            |     |     |     */
+/* Class Flags (unused: 22...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -278,7 +278,7 @@ typedef struct _zend_oparray_context {
 /* Class has unresolved variance obligations.             |     |     |     */
 #define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 28...30)                       |     |     |     */
+/* Function Flags                                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
