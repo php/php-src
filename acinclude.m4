@@ -2179,7 +2179,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
 
   dnl If pkg-config is found try using it
   if test "$PHP_ICU_DIR" = "DEFAULT" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists icu-uc icu-io icu-i18n; then
-    if $PKG_CONFIG --atleast-version=40 icu-uc; then
+    if $PKG_CONFIG --atleast-version=4.0 icu-uc; then
       found_icu=yes
       icu_version_full=`$PKG_CONFIG --modversion icu-uc`
       ac_IFS=$IFS
