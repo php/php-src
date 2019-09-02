@@ -4010,6 +4010,15 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
+#if ZEND_DEBUG
+	/* Type checks for internal functions are usually only performed by zpp.
+	 * In debug mode we additionally run arginfo checks to detect cases where
+	 * arginfo and zpp went out of sync. */
+	zend_bool wrong_arg_types =
+		(fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+		!zend_verify_internal_arg_types(fbc, call);
+#endif
+
 	ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
 	ZVAL_NULL(ret);
 
@@ -4017,6 +4026,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 
 #if ZEND_DEBUG
 	if (!EG(exception) && call->func) {
+		ZEND_ASSERT(!wrong_arg_types && "Arginfo / zpp type mismatch?");
 		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
 			zend_verify_internal_return_type(call->func, ret));
 		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
@@ -4100,7 +4110,6 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
-
 
 #if ZEND_DEBUG
 		/* Type checks for internal functions are usually only performed by zpp.
