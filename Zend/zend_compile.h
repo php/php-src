@@ -460,7 +460,7 @@ typedef struct _zend_internal_function {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
-	zend_internal_arg_info *arg_info; /* index -1 —if set— represents the returned value info */
+	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
 	zif_handler handler;
@@ -483,7 +483,7 @@ union _zend_function {
 		zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
-		zend_arg_info *arg_info;  /* index -1 —if set— represents the returned value info */
+		zend_arg_info *arg_info;  /* index -1 represents the returned value info if any */
 	} common;
 
 	zend_op_array op_array;
