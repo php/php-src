@@ -278,7 +278,7 @@ typedef struct _zend_oparray_context {
 /* Class has unresolved variance obligations.             |     |     |     */
 #define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags                                         |     |     |     */
+/* Function Flags (unused: 17, 23, 26)                    |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -314,15 +314,16 @@ typedef struct _zend_oparray_context {
 /* run_time_cache allocated on heap (user only)           |     |     |     */
 #define ZEND_ACC_HEAP_RT_CACHE           (1 << 22) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* method flag used by Closure::__invoke()                |     |     |     */
-#define ZEND_ACC_USER_ARG_INFO           (1 << 23) /*     |  X  |     |     */
+/* method flag used by Closure::__invoke() (int only)     |     |     |     */
+#define ZEND_ACC_USER_ARG_INFO           (1 << 22) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 #define ZEND_ACC_GENERATOR               (1 << 24) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* function was processed by pass two (user only)         |     |     |     */
 #define ZEND_ACC_DONE_PASS_TWO           (1 << 25) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* internal function is allocated at arena (int only)     |     |     |     */
-#define ZEND_ACC_ARENA_ALLOCATED         (1 << 26) /*     |  X  |     |     */
+#define ZEND_ACC_ARENA_ALLOCATED         (1 << 25) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array is a clone of trait method                    |     |     |     */
 #define ZEND_ACC_TRAIT_CLONE             (1 << 27) /*     |  X  |     |     */
