@@ -483,7 +483,7 @@ union _zend_function {
 		zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
-		zend_arg_info *arg_info;
+		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 	} common;
 
 	zend_op_array op_array;
