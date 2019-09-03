@@ -6,7 +6,7 @@ imagefilledpolygon() with a negative num of points
 ?>
 --FILE--
 <?php
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $im = imagecreate(100, 100);
 $black = imagecolorallocate($im, 0, 0, 0);
