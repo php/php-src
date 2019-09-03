@@ -7,7 +7,7 @@ Bug #67248 (imageaffinematrixget missing check of parameters)
 ?>
 --FILE--
 <?php
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 for($i=0;$i<7;$i++) {
 	trycatch_dump(
