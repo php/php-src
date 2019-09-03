@@ -1044,7 +1044,7 @@ static zend_always_inline zend_bool zend_check_type(
 		zend_type type,
 		zval *arg, zend_class_entry **ce, void **cache_slot,
 		zval *default_value, zend_class_entry *scope,
-		zend_bool is_return_type, zend_bool is_internal_arg)
+		zend_bool is_return_type, zend_bool is_internal)
 {
 	zend_reference *ref = NULL;
 
@@ -1089,10 +1089,15 @@ static zend_always_inline zend_bool zend_check_type(
 		return 1;
 	} else if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
 		return 0; /* we cannot have conversions for typed refs */
+	} else if (is_internal && is_return_type) {
+		/* For internal returns, the type has to match exactly, because we're not
+		 * going to check it for non-debug builds, and there will be no chance to
+		 * apply coercions. */
+		return 0;
 	} else {
 		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(type), arg,
 			is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES(),
-			is_internal_arg);
+			is_internal);
 	}
 
 	/* Special handling for IS_VOID is not necessary (for return types),
@@ -1153,7 +1158,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 			break;
 		}
 
-		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, NULL, fbc->common.scope, 0, /* is_internal_arg */ 1))) {
+		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, NULL, fbc->common.scope, 0, /* is_internal */ 1))) {
 			return 0;
 		}
 		arg++;
@@ -1249,7 +1254,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 		return 1;
 	}
 
-	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, &dummy_cache_slot, NULL, NULL, 1, 0))) {
+	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, &dummy_cache_slot, NULL, NULL, 1, /* is_internal */ 1))) {
 		zend_verify_internal_return_error(zf, ce, ret);
 		return 0;
 	}

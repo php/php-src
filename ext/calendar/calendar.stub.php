@@ -12,7 +12,8 @@ function cal_info(?int $calendar = UNKNOWN) {}
 /** @return int|false */
 function cal_to_jd(int $calendar, int $month, int $day, int $year) {}
 
-function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
+/** @return int|false */
+function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT) {}
 
 function easter_days(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
 
