@@ -2445,8 +2445,8 @@ PHP_FUNCTION(imagegammacorrect)
 	}
 
 	if ( input <= 0.0 || output <= 0.0 ) {
-		php_error_docref(NULL, E_WARNING, "Gamma values should be positive");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Gamma values must be positive");
+		return;
 	}
 
 	gamma = input / output;
