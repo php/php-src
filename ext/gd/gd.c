@@ -2786,16 +2786,18 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (nelem < 6) {
-		php_error_docref(NULL, E_WARNING, "You must have at least 3 points in your array");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "You must have at least 3 points in your array");
+		return;
 	}
+
 	if (npoints <= 0) {
-		php_error_docref(NULL, E_WARNING, "You must give a positive number of points");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "You must give a positive number of points");
+		return;
 	}
+
 	if (nelem < npoints * 2) {
-		php_error_docref(NULL, E_WARNING, "Trying to use %d points in array with only %d points", npoints, nelem/2);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Trying to use %d points in array with only %d points", npoints, nelem/2);
+		return;
 	}
 
 	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
