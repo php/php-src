@@ -3814,29 +3814,29 @@ PHP_FUNCTION(imagecrop)
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing x position");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cropping rectangle is missing x position");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing y position");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cropping rectangle is missing y position");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing width");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cropping rectangle is missing width");
+		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Missing height");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Cropping rectangle is missing height");
+		return;
 	}
 
 	im_crop = gdImageCrop(im, &rect);
@@ -3879,16 +3879,17 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				php_error_docref(NULL, E_WARNING, "Color argument missing with threshold mode");
-				RETURN_FALSE;
+				zend_throw_error(NULL, "Color argument missing with threshold mode");
+				return;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown crop mode");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Unknown crop mode");
+			return;
 	}
+
 	if (im_crop == NULL) {
 		RETURN_FALSE;
 	} else {
