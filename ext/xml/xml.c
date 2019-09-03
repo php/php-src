@@ -1065,7 +1065,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	XML_Char *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|ss": "|s"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (encoding_param != NULL) {
