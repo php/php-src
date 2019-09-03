@@ -6,7 +6,7 @@ Bug #38212 (Seg Fault on invalid imagecreatefromgd2part() parameters)
 ?>
 --FILE--
 <?php
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $file = __DIR__ . '/bug38212.gd2';
 $im1 = imagecreatetruecolor(10,100);
