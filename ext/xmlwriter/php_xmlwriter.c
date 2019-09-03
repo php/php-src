@@ -382,7 +382,7 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 		}
 
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -420,7 +420,7 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -458,7 +458,7 @@ static PHP_FUNCTION(xmlwriter_set_indent)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -523,7 +523,7 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -566,7 +566,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -610,7 +610,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -661,7 +661,7 @@ static PHP_FUNCTION(xmlwriter_start_element_ns)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -721,7 +721,7 @@ static PHP_FUNCTION(xmlwriter_write_element)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -775,7 +775,7 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -846,7 +846,7 @@ static PHP_FUNCTION(xmlwriter_write_pi)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -882,7 +882,7 @@ static PHP_FUNCTION(xmlwriter_start_cdata)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -948,7 +948,7 @@ static PHP_FUNCTION(xmlwriter_start_comment)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1004,7 +1004,7 @@ static PHP_FUNCTION(xmlwriter_start_document)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1052,7 +1052,7 @@ static PHP_FUNCTION(xmlwriter_start_dtd)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 	ptr = intern->ptr;
@@ -1100,7 +1100,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd)
 		}
 
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1156,7 +1156,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_element)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1215,7 +1215,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1257,7 +1257,7 @@ static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1314,7 +1314,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 			return;
 		}
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 
@@ -1456,7 +1456,7 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 		}
 
 		if ((intern = (xmlwriter_object *)zend_fetch_resource(Z_RES_P(pind), "XMLWriter", le_xmlwriter)) == NULL) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 	ptr = intern->ptr;
