@@ -73,7 +73,10 @@ typedef int gid_t;
 
 #ifndef ZEND_WIN32
 # include <sys/types.h>
+# include <sys/wait.h>
 # include <sys/ipc.h>
+# include <pwd.h>
+# include <grp.h>
 #endif
 
 #include <sys/stat.h>
@@ -4478,6 +4481,9 @@ static int accel_finish_startup(void)
 	}
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
+#ifndef ZEND_WIN32
+		int in_child = 0;
+#endif
 		int ret = SUCCESS;
 		int rc;
 		int orig_error_reporting;
@@ -4509,6 +4515,67 @@ static int accel_finish_startup(void)
 			zend_shared_alloc_unlock();
 			return SUCCESS;
 		}
+
+#ifndef ZEND_WIN32
+		if (geteuid() == 0) {
+			pid_t pid;
+			struct passwd *pw;
+
+			if (!ZCG(accel_directives).preload_user
+			 || !*ZCG(accel_directives).preload_user) {
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
+				return FAILURE;
+			}
+
+			pw = getpwnam(ZCG(accel_directives).preload_user);
+			if (pw == NULL) {
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
+				return FAILURE;
+			}
+
+			pid = fork();
+			if (pid == -1) {
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to fork()");
+				return FAILURE;
+			} else if (pid == 0) { /* children */
+				if (setgid(pw->pw_gid) < 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
+					exit(1);
+				}
+				if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
+					exit(1);
+				}
+				if (setuid(pw->pw_uid) < 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
+					exit(1);
+				}
+				in_child = 1;
+			} else { /* parent */
+				int status;
+
+				if (waitpid(pid, &status, 0) < 0) {
+					zend_shared_alloc_unlock();
+					zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+					return FAILURE;
+				}
+				zend_shared_alloc_unlock();
+				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+					return SUCCESS;
+				} else {
+					return FAILURE;
+				}
+			}
+		} else {
+			if (ZCG(accel_directives).preload_user
+			 && *ZCG(accel_directives).preload_user) {
+				zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored");
+			}
+		}
+#endif
 
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
@@ -4584,6 +4651,16 @@ static int accel_finish_startup(void)
 		sapi_module.flush = orig_flush;
 
 		sapi_activate();
+
+#ifndef ZEND_WIN32
+		if (in_child) {
+			if (ret == SUCCESS) {
+				exit(0);
+			} else {
+				exit(2);
+			}
+		}
+#endif
 
 		return ret;
 	}
