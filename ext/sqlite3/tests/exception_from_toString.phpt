@@ -1,5 +1,7 @@
 --TEST--
 Check that exceptions from __toString() are handled correctly
+--SKIPIF--
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
