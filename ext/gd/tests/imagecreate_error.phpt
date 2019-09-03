@@ -8,7 +8,7 @@ Testing imagecreate(): error on out of bound parameters
 --FILE--
 <?php
 
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 trycatch_dump(
     fn() => imagecreate(-1, 30),
