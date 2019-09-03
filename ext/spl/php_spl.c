@@ -983,11 +983,9 @@ static const zend_function_entry spl_functions[] = {
 	PHP_FE(class_uses,              arginfo_class_uses)
 	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
 	PHP_FE(spl_object_id,           arginfo_spl_object_id)
-#ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)
 	PHP_FE(iterator_count,          arginfo_iterator)
 	PHP_FE(iterator_apply,          arginfo_iterator_apply)
-#endif /* SPL_ITERATORS_H */
 	PHP_FE_END
 };
 /* }}} */
