@@ -1179,6 +1179,9 @@ static PHP_FUNCTION(xmlwriter_start_cdata)
 	zval *self = getThis();
 
 	if (self) {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
 		XMLWRITER_FROM_OBJECT(intern, self);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pind) == FAILURE) {
@@ -1245,6 +1248,9 @@ static PHP_FUNCTION(xmlwriter_start_comment)
 	zval *self = getThis();
 
 	if (self) {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
 		XMLWRITER_FROM_OBJECT(intern, self);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pind) == FAILURE) {
