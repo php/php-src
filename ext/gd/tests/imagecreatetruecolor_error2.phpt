@@ -9,10 +9,15 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
-$image = imagecreatetruecolor(-1, 30);
-$image = imagecreatetruecolor(30, -1);
-?>
---EXPECTF--
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
 
-Warning: imagecreatetruecolor(): Invalid image dimensions in %s on line %d
+require __DIR__ . '/func.inc';
+
+trycatch_dump(
+    fn() => imagecreatetruecolor(-1, 30),
+    fn() => imagecreatetruecolor(30, -1)
+);
+
+?>
+--EXPECT--
+!! [Error] Invalid width (x_size)
+!! [Error] Invalid height (y_size)
