@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC1
+05 Sep 2019, PHP 7.4.0RC1
 
 - Core:
   . Fixed bug #77812 (Interactive mode does not support PHP 7.3-style heredoc).
