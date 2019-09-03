@@ -9,7 +9,7 @@ if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
 <?php
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $image = imagecreatetruecolor(180, 30);
 
