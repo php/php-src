@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #78473 (odbc_close() closes arbitrary resources). (cmb)
 
+- PDO_MySQL:
+  . Fixed bug #41997 (SP call yields additional empty result set). (cmb)
+
 29 Aug 2019, PHP 7.3.9
 
 - Core:
