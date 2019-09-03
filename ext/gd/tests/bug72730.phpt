@@ -7,7 +7,7 @@ if (!function_exists("imagecreatetruecolor")) die("skip");
 --FILE--
 <?php
 
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $img =  imagecreatetruecolor(1, 1);
 
