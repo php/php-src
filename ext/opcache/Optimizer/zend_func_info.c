@@ -1192,7 +1192,7 @@ static const func_info_t func_infos[] = {
 	F1("hash_hmac_file",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_init",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("hash_update",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("hash_update_stream",                    MAY_BE_NULL | MAY_BE_LONG),
+	F0("hash_update_stream",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("hash_update_file",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("hash_final",                            MAY_BE_NULL | MAY_BE_STRING),
 	F1("hash_copy",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
