@@ -1,5 +1,7 @@
 --TEST--
 Bug #78391: Assertion failure in openssl_random_pseudo_bytes
+--SKIPIF--
+<?php if (!extension_loaded("openssl")) print "skip"; ?>
 --FILE--
 <?php
 
