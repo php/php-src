@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC2
 
+- Opcache:
+  . Add opcache.preload_user INI directive. (Dmitry)
+
 - PDO_MySQL:
   . Fixed bug #41997 (SP call yields additional empty result set). (cmb)
 

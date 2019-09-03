@@ -652,6 +652,11 @@ PHP 7.4 UPGRADE NOTES
   . New INI directive to include or exclude arguments from stack traces
     generated for exceptions.
 
+- opcache.preload_user
+  . New INI directive to specifiy the user account under which preloading code
+    is executed, if it was to be run as root otherwise (which is not allowed
+    for security reasons).
+
 ========================================
 12. Windows Support
 ========================================

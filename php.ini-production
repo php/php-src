@@ -1893,6 +1893,11 @@ ldap.max_links = -1
 ; http://php.net/opcache.preload
 ;opcache.preload=
 
+; Preloading code as root is not allowed for security reasons. This directive
+; facilitates to let the preloading to be run as another user.
+; http://php.net/opcache.preload_user
+;opcache.preload_user=
+
 ; Prevents caching files that are less than this number of seconds old. It
 ; protects from caching of incompletely updated files. In case all file updates
 ; on your site are atomic, you may increase performance by setting it to "0".
