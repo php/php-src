@@ -6,7 +6,7 @@ if (!extension_loaded('gd')) die('skip gd extension not available');
 ?>
 --FILE--
 <?php
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $im = imagecreate(10,10);
 
