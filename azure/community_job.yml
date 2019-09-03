@@ -60,11 +60,11 @@ jobs:
         git clone https://github.com/symfony/symfony.git --branch=master --depth=1
         cd symfony
         php7.3 /usr/bin/composer install --no-progress
+        php7.3 ./phpunit install
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
         export ASAN_OPTIONS=exitcode=139
-        # Close stdin because we hang on some kind of tty test otherwise.
-        php ./phpunit 0<&-
+        php ./phpunit --exclude-group tty,benchmark,intl-data,transient
         if [ $? -gt 128 ]; then
           exit 1
         fi
