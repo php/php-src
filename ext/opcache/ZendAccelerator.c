@@ -4523,31 +4523,34 @@ static int accel_finish_startup(void)
 
 			if (!ZCG(accel_directives).preload_user
 			 || !*ZCG(accel_directives).preload_user) {
-				zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" has not been defined");
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "\"opcache.preload_user\" has not been defined");
 				return FAILURE;
 			}
 
 			pw = getpwnam(ZCG(accel_directives).preload_user);
 			if (pw == NULL) {
-				zend_accel_error(ACCEL_LOG_WARNING, "Failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
 				return FAILURE;
 			}
 
 			pid = fork();
 			if (pid == -1) {
-				zend_accel_error(ACCEL_LOG_WARNING, "Failed to fork()");
+				zend_shared_alloc_unlock();
+				zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to fork()");
 				return FAILURE;
 			} else if (pid == 0) { /* children */
 				if (setgid(pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Failed to setgid(%d)", pw->pw_gid);
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
 					exit(1);
 				}
 				if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
 					exit(1);
 				}
 				if (setuid(pw->pw_uid) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Failed to setuid(%d)", pw->pw_uid);
+					zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
 					exit(1);
 				}
 				in_child = 1;
@@ -4555,9 +4558,11 @@ static int accel_finish_startup(void)
 				int status;
 
 				if (waitpid(pid, &status, 0) < 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Failed to waitpid(%d)", pid);
-					exit(1);
+					zend_shared_alloc_unlock();
+					zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
+					return FAILURE;
 				}
+				zend_shared_alloc_unlock();
 				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
 					return SUCCESS;
 				} else {
