@@ -8,7 +8,7 @@ if (PHP_INT_MAX !== 9223372036854775807) die("skip for 64-bit long systems only"
 --FILE--
 <?php
 
-require __DIR__ . '/test_helpers.inc';
+require __DIR__ . '/func.inc';
 
 $img=imagecreatetruecolor(10, 10);
 

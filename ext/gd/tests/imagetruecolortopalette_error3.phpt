@@ -9,7 +9,7 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
-require __DIR__  . '/test_helpers.inc';
+require __DIR__  . '/func.inc';
 
 $image = imagecreatetruecolor(50, 50);
 
