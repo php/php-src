@@ -1473,11 +1473,11 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		zval *zv;
-		func_info_t *info;
+		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants));
 
-		zv = zend_hash_find_ex(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants)), 1);
+		zv = zend_hash_find_ex(&func_info, lcname, 1);
 		if (zv) {
-			info = Z_PTR_P(zv);
+			func_info_t *info = Z_PTR_P(zv);
 			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
@@ -1485,10 +1485,21 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 			} else {
 				ret = info->info;
 			}
-#if 0
+			return ret;
+		}
+
+		if (callee_func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_class_entry *ce; // TODO: Use the CE.
+			ret = zend_fetch_arg_info_type(NULL, callee_func->common.arg_info - 1, &ce);
 		} else {
+#if 0
 			fprintf(stderr, "Unknown internal function '%s'\n", func->common.function_name);
 #endif
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+		}
+		if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			ret |= MAY_BE_REF;
 		}
 	} else {
 		// FIXME: the order of functions matters!!!
@@ -1496,15 +1507,14 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		if (info) {
 			ret = info->return_info.type;
 		}
-	}
-	if (!ret) {
-		ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		if (callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
-			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-		} else  if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret |= MAY_BE_REF;
-		} else {
-			ret |= MAY_BE_RC1 | MAY_BE_RCN;
+		if (!ret) {
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+			/* For generators RETURN_REFERENCE refers to the yielded values. */
+			if ((callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+					&& !(callee_func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				ret |= MAY_BE_REF;
+			}
 		}
 	}
 	return ret;

@@ -2250,7 +2250,7 @@ static uint32_t zend_convert_type_code_to_may_be(zend_uchar type_code) {
 	}
 }
 
-static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
+uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
 {
 	uint32_t tmp = 0;
 
@@ -2268,6 +2268,9 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 	}
 	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 		tmp |= MAY_BE_NULL;
+	}
+	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	return tmp;
 }
@@ -3100,7 +3103,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 
 			ce = NULL;
 			if (arg_info) {
-				tmp = zend_fetch_arg_info(script, arg_info, &ce);
+				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 				if (opline->opcode == ZEND_RECV_INIT &&
 				           Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)) == IS_CONSTANT_AST) {
 					/* The constant may resolve to NULL */
@@ -3108,8 +3111,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				}
 				if (arg_info->pass_by_reference) {
 					tmp |= MAY_BE_REF;
-				} else if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-					tmp |= MAY_BE_RC1|MAY_BE_RCN;
 				}
 			} else {
 				tmp = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
@@ -3613,11 +3614,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				ce = NULL;
 			} else {
 				zend_arg_info *ret_info = op_array->arg_info - 1;
-
-				tmp = zend_fetch_arg_info(script, ret_info, &ce);
-				if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-				}
+				tmp = zend_fetch_arg_info_type(script, ret_info, &ce);
 			}
 			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
@@ -4044,11 +4041,9 @@ void zend_init_func_return_info(const zend_op_array   *op_array,
 		zend_arg_info *ret_info = op_array->arg_info - 1;
 		zend_ssa_range tmp_range = {0, 0, 0, 0};
 
-		ret->type = zend_fetch_arg_info(script, ret_info, &ret->ce);
+		ret->type = zend_fetch_arg_info_type(script, ret_info, &ret->ce);
 		if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			ret->type |= MAY_BE_REF;
-		} else if (ret->type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-			ret->type |= MAY_BE_RC1|MAY_BE_RCN;
 		}
 		ret->is_instanceof = (ret->ce) ? 1 : 0;
 		ret->range = tmp_range;
