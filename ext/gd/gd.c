@@ -798,8 +798,8 @@ PHP_FUNCTION(imagesetstyle)
 
     num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
     if (num_styles == 0) {
-        php_error_docref(NULL, E_WARNING, "styles array must not be empty");
-        RETURN_FALSE;
+        zend_throw_error(NULL, "Styles array must not be empty");
+        return;
     }
 
 	/* copy the style values in the stylearr */
