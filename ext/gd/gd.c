@@ -1710,10 +1710,17 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "pllll", &file, &file_len, &srcx, &srcy, &width, &height) == FAILURE) {
 			return;
 		}
-		if (width < 1 || height < 1) {
-			php_error_docref(NULL, E_WARNING, "Zero width or height not allowed");
-			RETURN_FALSE;
+
+		if (width < 1) {
+			zend_throw_error(NULL, "Width must be at least 1");
+			return;
 		}
+
+		if (height < 1) {
+			zend_throw_error(NULL, "Height must be at least 1");
+			return;
+		}
+
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &file, &file_len) == FAILURE) {
 			return;
