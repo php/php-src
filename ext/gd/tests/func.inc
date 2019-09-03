@@ -146,3 +146,21 @@ function save_actual_image($image)
 	$filename = "{$pathinfo['dirname']}/{$pathinfo['filename']}.out.png";
 	imagepng($image, $filename);
 }
+
+/**
+ * Replicates write errors to the output log, but by catching
+ * and formatting exceptions instead so they have a consistent
+ * output
+ */
+
+function trycatch_dump(...$tests) {
+    foreach ($tests as $test) {
+        try {
+            var_dump($test());
+        }
+        catch (\Error $e) {
+            echo '!! [' . get_class($e) . '] ' . $e->getMessage() . "\n";
+        }
+    }
+}
+
