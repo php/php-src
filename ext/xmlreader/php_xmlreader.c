@@ -833,15 +833,9 @@ PHP_METHOD(xmlreader, open)
 		return;
 	}
 
-	id = getThis();
-	if (id != NULL) {
-		if (! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry)) {
-			id = NULL;
-		} else {
-			intern = Z_XMLREADER_P(id);
-			xmlreader_free_resources(intern);
-		}
-	}
+	id = ZEND_THIS;
+	intern = Z_XMLREADER_P(id);
+	xmlreader_free_resources(intern);
 
 	if (!source_len) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
@@ -857,13 +851,6 @@ PHP_METHOD(xmlreader, open)
 	if (reader == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to open source data");
 		RETURN_FALSE;
-	}
-
-	if (id == NULL) {
-		object_init_ex(return_value, xmlreader_class_entry);
-		intern = Z_XMLREADER_P(return_value);
-		intern->ptr = reader;
-		return;
 	}
 
 	intern->ptr = reader;
@@ -1016,14 +1003,9 @@ PHP_METHOD(xmlreader, XML)
 		return;
 	}
 
-	id = getThis();
-	if (id != NULL && ! instanceof_function(Z_OBJCE_P(id), xmlreader_class_entry)) {
-		id = NULL;
-	}
-	if (id != NULL) {
-		intern = Z_XMLREADER_P(id);
-		xmlreader_free_resources(intern);
-	}
+	id = ZEND_THIS;
+	intern = Z_XMLREADER_P(id);
+	xmlreader_free_resources(intern);
 
 	if (!source_len) {
 		php_error_docref(NULL, E_WARNING, "Empty string supplied as input");
@@ -1052,12 +1034,7 @@ PHP_METHOD(xmlreader, XML)
 		if (reader != NULL) {
 			ret = xmlTextReaderSetup(reader, NULL, uri, encoding, options);
 			if (ret == 0) {
-				if (id == NULL) {
-					object_init_ex(return_value, xmlreader_class_entry);
-					intern = Z_XMLREADER_P(return_value);
-				} else {
-					RETVAL_TRUE;
-				}
+				RETVAL_TRUE;
 				intern->input = inputbfr;
 				intern->ptr = reader;
 
