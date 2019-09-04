@@ -1132,7 +1132,6 @@ static zend_never_inline int zend_verify_internal_arg_types(zend_function *fbc, 
 		dummy_cache_slot = NULL;
 		if (UNEXPECTED(!zend_verify_arg_type(fbc, i + 1, p, NULL, &dummy_cache_slot))) {
 			EG(current_execute_data) = call->prev_execute_data;
-			zend_vm_stack_free_args(call);
 			return 0;
 		}
 		p++;
