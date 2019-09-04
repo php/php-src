@@ -781,16 +781,6 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_th
 	HANDLE_EXCEPTION();
 }
 
-static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_abstract_method_helper_SPEC(zend_function *func ZEND_OPCODE_HANDLER_ARGS_DC)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
-	UNDEF_RESULT();
-	HANDLE_EXCEPTION();
-}
-
 static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -1557,12 +1547,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			ZEND_VM_TAIL_CALL(zend_abstract_method_helper_SPEC(fbc ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+			zend_abstract_method(fbc);
+fcall_except:
+			UNDEF_RESULT();
+			zend_vm_stack_free_args(call);
+			goto fcall_end;
 		} else {
 			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
+				goto fcall_except;
 			}
 		}
 	}
@@ -1668,12 +1661,15 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			ZEND_VM_TAIL_CALL(zend_abstract_method_helper_SPEC(fbc ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+			zend_abstract_method(fbc);
+fcall_except:
+			UNDEF_RESULT();
+			zend_vm_stack_free_args(call);
+			goto fcall_end;
 		} else {
 			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				HANDLE_EXCEPTION();
+				goto fcall_except;
 			}
 		}
 	}
