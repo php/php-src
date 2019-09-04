@@ -36,6 +36,7 @@ ZEND_API zend_class_entry *zend_ce_compile_error;
 ZEND_API zend_class_entry *zend_ce_parse_error;
 ZEND_API zend_class_entry *zend_ce_type_error;
 ZEND_API zend_class_entry *zend_ce_argument_count_error;
+ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 
@@ -871,6 +872,10 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ArgumentCountError", NULL);
 	zend_ce_argument_count_error = zend_register_internal_class_ex(&ce, zend_ce_type_error);
 	zend_ce_argument_count_error->create_object = zend_default_exception_new;
+
+	INIT_CLASS_ENTRY(ce, "ValueError", NULL);
+	zend_ce_value_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_value_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(ce, "ArithmeticError", NULL);
 	zend_ce_arithmetic_error = zend_register_internal_class_ex(&ce, zend_ce_error);
