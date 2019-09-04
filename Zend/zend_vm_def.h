@@ -4093,8 +4093,12 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-			    UNDEF_RESULT();
-				HANDLE_EXCEPTION();
+				UNDEF_RESULT();
+				if (!RETURN_VALUE_USED(opline)) {
+					ret = &retval;
+					ZVAL_UNDEF(ret);
+				}
+				ZEND_VM_C_GOTO(fcall_end);
 			}
 		}
 
@@ -4126,6 +4130,8 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 #endif
 
 		EG(current_execute_data) = execute_data;
+
+ZEND_VM_C_LABEL(fcall_end):
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
@@ -4148,6 +4154,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zval *ret;
+	zval retval;
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
@@ -4156,7 +4163,10 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 			zend_abstract_method(fbc);
 ZEND_VM_C_LABEL(fcall_except):
 			UNDEF_RESULT();
-			zend_vm_stack_free_args(call);
+			if (!RETURN_VALUE_USED(opline)) {
+				ret = &retval;
+				ZVAL_UNDEF(ret);
+			}
 			ZEND_VM_C_GOTO(fcall_end);
 		} else {
 			zend_deprecated_function(fbc);
@@ -4187,8 +4197,6 @@ ZEND_VM_C_LABEL(fcall_except):
 			zend_execute_ex(call);
 		}
 	} else {
-		zval retval;
-
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		call->prev_execute_data = execute_data;
 		EG(current_execute_data) = call;
@@ -4223,14 +4231,14 @@ ZEND_VM_C_LABEL(fcall_except):
 #endif
 
 		EG(current_execute_data) = execute_data;
-		zend_vm_stack_free_args(call);
 
+ZEND_VM_C_LABEL(fcall_end):
+		zend_vm_stack_free_args(call);
 		if (!RETURN_VALUE_USED(opline)) {
 			i_zval_ptr_dtor(ret);
 		}
 	}
 
-ZEND_VM_C_LABEL(fcall_end):
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
 		OBJ_RELEASE(Z_OBJ(call->This));
 	}
@@ -8294,7 +8302,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		EG(current_execute_data) = call->prev_execute_data;
 
 		zend_vm_stack_free_args(call);
-
 		if (ret == &retval) {
 			zval_ptr_dtor(ret);
 		}
