@@ -41,7 +41,7 @@ $dests = array(
   "$sub_dir/../copy_copy_variation16.tmp",
   "$sub_dir/../copy_variation16_sub/copy_copy_variation16.tmp",
   "$sub_dir/..///../copy_copy_variation16.tmp",
-  "$sub_dir/..///../*",
+  "$sub_dir///../*",
   "$dirname_with_blank/copy_copy_variation16.tmp"
 );
 
@@ -130,7 +130,7 @@ Size of destination file => int(3500)
 Size of source file => int(3500)
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name is => %s/copy_variation16/copy_variation16_sub/..///../*
+Destination file name is => %s/copy_variation16/copy_variation16_sub///../*
 Size of destination file => int(3500)
 
 -- Iteration 8 --

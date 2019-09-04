@@ -263,6 +263,8 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
+uint32_t zend_fetch_arg_info_type(
+	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
 void zend_init_func_return_info(const zend_op_array   *op_array,
                                 const zend_script     *script,
                                 zend_ssa_var_info     *ret);

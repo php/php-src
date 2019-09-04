@@ -15,14 +15,16 @@ echo "*** Testing readdir() : usage variations ***\n";
 
 // get a resource variable
 var_dump($fp = fopen(__FILE__, "r"));
-var_dump( readdir($fp) );
+try {
+    var_dump( readdir($fp) );
+} catch (\TypeError $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing readdir() : usage variations ***
 resource(%d) of type (stream)
-
-Warning: readdir(): %d is not a valid Directory resource in %s on line %d
-bool(false)
+%d is not a valid Directory resource
 ===DONE===

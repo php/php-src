@@ -185,6 +185,9 @@ typedef struct _zend_accel_directives {
 	zend_bool      huge_code_pages;
 #endif
 	char *preload;
+#ifndef ZEND_WIN32
+	char *preload_user;
+#endif
 #ifdef ZEND_WIN32
 	char *cache_id;
 #endif
@@ -192,6 +195,7 @@ typedef struct _zend_accel_directives {
 	zend_long      jit;
 	zend_long      jit_buffer_size;
 	zend_long      jit_debug;
+	zend_long      jit_bisect_limit;
 #endif
 } zend_accel_directives;
 

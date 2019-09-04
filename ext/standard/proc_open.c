@@ -828,7 +828,6 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].childend = CreateFileA(
 					"nul", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 					NULL, OPEN_EXISTING, 0, NULL);
-				descriptors[ndesc].childend = VCWD_OPEN("nul", O_RDWR);
 				if (descriptors[ndesc].childend == NULL) {
 					php_error_docref(NULL, E_WARNING, "Failed to open nul");
 					goto exit_fail;

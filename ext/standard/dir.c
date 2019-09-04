@@ -68,21 +68,21 @@ static zend_class_entry *dir_class_entry_ptr;
 		myself = getThis(); \
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
-				php_error_docref(NULL, E_WARNING, "Unable to find my handle property"); \
-				RETURN_FALSE; \
+				zend_throw_error(NULL, "Unable to find my handle property"); \
+				return; \
 			} \
 			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_FALSE; \
+				return; \
 			} \
 		} else { \
 			if (!DIRG(default_dir) || \
 				(dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				RETURN_FALSE; \
+				return; \
 			} \
 		} \
 	} else { \
 		if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-			RETURN_FALSE; \
+			return; \
 		} \
 	}
 
@@ -266,8 +266,8 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
-		RETURN_FALSE;
+		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		return;
 	}
 
 	res = dirp->res;
@@ -382,8 +382,8 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
-		RETURN_FALSE;
+		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		return;
 	}
 
 	php_stream_rewinddir(dirp);
@@ -401,8 +401,8 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid Directory resource", dirp->res->handle);
-		RETURN_FALSE;
+		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		return;
 	}
 
 	if (php_stream_readdir(dirp, &entry)) {
@@ -566,8 +566,8 @@ PHP_FUNCTION(scandir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
-		php_error_docref(NULL, E_WARNING, "Directory name cannot be empty");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Directory name cannot be empty");
+		return;
 	}
 
 	if (zcontext) {

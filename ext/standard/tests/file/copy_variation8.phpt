@@ -42,7 +42,7 @@ $dests = array(
   "$sub_dir/../copy_copy_variation8.tmp",
   "$sub_dir/../copy_variation8_sub/copy_copy_variation8.tmp",
   "$sub_dir/..///../copy_copy_variation8.tmp",
-  "$sub_dir/..///../*",
+  "$sub_dir///../*",
   "$dirname_with_blank/copy_copy_variation8.tmp"
 );
 

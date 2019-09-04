@@ -2817,22 +2817,6 @@ ZEND_METHOD(reflection_type, allowsNull)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionType::isBuiltin()
-  Returns whether parameter is a builtin type */
-ZEND_METHOD(reflection_type, isBuiltin)
-{
-	reflection_object *intern;
-	type_reference *param;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	GET_REFLECTION_OBJECT_PTR(param);
-
-	RETVAL_BOOL(ZEND_TYPE_IS_CODE(param->type));
-}
-/* }}} */
-
 /* {{{ reflection_type_name */
 static zend_string *reflection_type_name(type_reference *param) {
 	if (ZEND_TYPE_IS_NAME(param->type)) {
@@ -2863,7 +2847,7 @@ ZEND_METHOD(reflection_type, __toString)
 /* }}} */
 
 /* {{{ proto public string ReflectionNamedType::getName()
- Return the text of the type hint */
+ Return the name of the type */
 ZEND_METHOD(reflection_named_type, getName)
 {
 	reflection_object *intern;
@@ -2875,6 +2859,22 @@ ZEND_METHOD(reflection_named_type, getName)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETURN_STR(reflection_type_name(param));
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionNamedType::isBuiltin()
+  Returns whether type is a builtin type */
+ZEND_METHOD(reflection_named_type, isBuiltin)
+{
+	reflection_object *intern;
+	type_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(ZEND_TYPE_IS_CODE(param->type));
 }
 /* }}} */
 
@@ -6645,13 +6645,13 @@ static const zend_function_entry reflection_parameter_functions[] = {
 static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_type, isBuiltin, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, ZEND_ACC_DEPRECATED)
 	PHP_FE_END
 };
 
 static const zend_function_entry reflection_named_type_functions[] = {
 	ZEND_ME(reflection_named_type, getName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_named_type, isBuiltin, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 
@@ -6790,6 +6790,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", reflection_type_functions);
 	reflection_init_class_handlers(&_reflection_entry);
 	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
+	reflection_type_ptr->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", reflection_named_type_functions);
 	reflection_init_class_handlers(&_reflection_entry);

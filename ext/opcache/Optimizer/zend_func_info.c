@@ -146,7 +146,7 @@ static const func_info_t func_infos[] = {
 	F0("sleep",                        MAY_BE_FALSE | MAY_BE_LONG),
 	F0("usleep",                       MAY_BE_NULL | MAY_BE_FALSE),
 #if HAVE_NANOSLEEP
-	F0("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F1("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 	F0("time_sleep_until",             MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #if HAVE_STRPTIME
@@ -220,6 +220,7 @@ static const func_info_t func_infos[] = {
 	FN("addslashes",                   MAY_BE_STRING),
 	F1("addcslashes",                  MAY_BE_STRING),
 	FN("rtrim",                        MAY_BE_STRING),
+	FN("chop",                         MAY_BE_STRING),
 	FN("str_replace",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	FN("str_ireplace",                 MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	F1("str_repeat",                   MAY_BE_NULL | MAY_BE_STRING),
@@ -244,7 +245,6 @@ static const func_info_t func_infos[] = {
 	F0("parse_str",                    MAY_BE_NULL),
 	F1("str_getcsv",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("str_pad",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("chop",                         MAY_BE_STRING),
 	F1("strchr",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("sprintf",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("printf",                       MAY_BE_FALSE | MAY_BE_LONG),
@@ -283,6 +283,7 @@ static const func_info_t func_infos[] = {
 	F0("proc_nice",                    MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 	F0("rand",                         MAY_BE_NULL | MAY_BE_LONG),
+	F1("random_bytes",                 MAY_BE_STRING),
 	F0("srand",                        MAY_BE_NULL),
 	F0("getrandmax",                   MAY_BE_NULL | MAY_BE_LONG),
 	F0("mt_rand",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
@@ -336,7 +337,7 @@ static const func_info_t func_infos[] = {
 	F0("is_finite",                    MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_nan",                       MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_infinite",                  MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
+	F1("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
 	F0("exp",                          MAY_BE_DOUBLE),
 	F0("log",                          MAY_BE_FALSE | MAY_BE_DOUBLE),
 	F0("log10",                        MAY_BE_DOUBLE),
@@ -686,8 +687,6 @@ static const func_info_t func_infos[] = {
 	F1("array_replace_recursive",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FN("array_keys",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("array_values",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	FN("array_key_first",              MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
-	FN("array_key_last",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	F1("array_count_values",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
 	F1("array_column",                 MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_reverse",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -720,6 +719,8 @@ static const func_info_t func_infos[] = {
 	F1("array_chunk",                  MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_combine",                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F0("array_key_exists",             MAY_BE_FALSE | MAY_BE_TRUE),
+	FN("array_key_first",              MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
+	FN("array_key_last",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	F1("pos",                          UNKNOWN_INFO),
 	F0("sizeof",                       MAY_BE_LONG),
 	F0("key_exists",                   MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1063,9 +1064,12 @@ static const func_info_t func_infos[] = {
 
 	/* ext/hash */
 	F1("hash",                                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F0("hash_equals",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("hash_file",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_hmac",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hmac_algos",                       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("hash_hmac_file",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hkdf",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_init",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("hash_update",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("hash_update_stream",                    MAY_BE_NULL | MAY_BE_LONG),
@@ -1469,11 +1473,11 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		zval *zv;
-		func_info_t *info;
+		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants));
 
-		zv = zend_hash_find_ex(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants)), 1);
+		zv = zend_hash_find_ex(&func_info, lcname, 1);
 		if (zv) {
-			info = Z_PTR_P(zv);
+			func_info_t *info = Z_PTR_P(zv);
 			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
@@ -1481,10 +1485,21 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 			} else {
 				ret = info->info;
 			}
-#if 0
+			return ret;
+		}
+
+		if (callee_func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_class_entry *ce; // TODO: Use the CE.
+			ret = zend_fetch_arg_info_type(NULL, callee_func->common.arg_info - 1, &ce);
 		} else {
+#if 0
 			fprintf(stderr, "Unknown internal function '%s'\n", func->common.function_name);
 #endif
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+		}
+		if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			ret |= MAY_BE_REF;
 		}
 	} else {
 		// FIXME: the order of functions matters!!!
@@ -1492,15 +1507,14 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		if (info) {
 			ret = info->return_info.type;
 		}
-	}
-	if (!ret) {
-		ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		if (callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
-			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-		} else  if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret |= MAY_BE_REF;
-		} else {
-			ret |= MAY_BE_RC1 | MAY_BE_RCN;
+		if (!ret) {
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+			/* For generators RETURN_REFERENCE refers to the yielded values. */
+			if ((callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+					&& !(callee_func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				ret |= MAY_BE_REF;
+			}
 		}
 	}
 	return ret;
