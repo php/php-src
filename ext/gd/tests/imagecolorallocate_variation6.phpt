@@ -11,7 +11,7 @@ if(!function_exists('imagecreatetruecolor')) {
 ?>
 --FILE--
 <?php
-require  __DIR__ . '/test_helpers.inc';
+require  __DIR__ . '/func.inc';
 
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
  * Description:  Allocate a color for an image
