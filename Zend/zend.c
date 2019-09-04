@@ -1560,6 +1560,18 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 	va_end(va);
 } /* }}} */
 
+ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	zend_throw_exception(zend_ce_value_error, message, 0);
+	efree(message);
+	va_end(va);
+} /* }}} */
+
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
