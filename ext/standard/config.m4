@@ -280,6 +280,20 @@ else
 fi
 
 dnl
+dnl Check for -lz
+dnl
+PHP_ARG_WITH([zlib],
+  [for ZLIB support],
+  [AS_HELP_STRING([--with-zlib],
+    [Include ZLIB support (requires zlib >= 1.2.0.4)])])
+
+if test "$PHP_ZLIB" != "no"; then
+  PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.0.4])
+  LIBS="-lz $LIBS"
+  AC_DEFINE(HAVE_ZLIB,1,[ ])
+fi
+
+dnl
 dnl Check for __attribute__ ((__aligned__)) support in the compiler
 dnl
 AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
