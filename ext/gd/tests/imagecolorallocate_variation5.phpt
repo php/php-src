@@ -11,6 +11,8 @@ if(!function_exists('imagecreatetruecolor')) {
 ?>
 --FILE--
 <?php
+require __DIR__ . '/func.inc';
+
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
  * Description:  Allocate a color for an image
  * Source code: ext/gd/gd.c
@@ -38,14 +40,17 @@ $values = array(
 
 // loop through each element of the array for blue
 foreach($values as $key => $value) {
-      echo "\n--$key--\n";
-      var_dump( imagecolorallocate($im, $value, $green, $blue) );
-      var_dump( imagecolorallocate($im, $red, $value, $blue) );
-      var_dump( imagecolorallocate($im, $red, $green, $value) );
+    echo "\n--$key--\n";
+
+    trycatch_dump(
+        fn() => imagecolorallocate($im, $value, $green, $blue),
+        fn() => imagecolorallocate($im, $red, $value, $blue),
+        fn() => imagecolorallocate($im, $red, $green, $value)
+    );
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Octal 000--
@@ -59,15 +64,9 @@ int(657930)
 int(657930)
 
 --Octal -012--
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
+!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Octal 0377--
 int(16714250)
@@ -85,15 +84,9 @@ int(657930)
 int(657930)
 
 --Hexa-decimal -0xA--
-
-Warning: imagecolorallocate(): Red component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Green component is out of range in %s on line %d
-bool(false)
-
-Warning: imagecolorallocate(): Blue component is out of range in %s on line %d
-bool(false)
+!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0xFF--
 int(16714250)
