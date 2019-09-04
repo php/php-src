@@ -829,12 +829,12 @@ PHP_FUNCTION(imagecreatetruecolor)
 	}
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_throw_error(NULL, "Invalid width (x_size)");
+		zend_value_error("Invalid width (x_size)");
 		return;
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_throw_error(NULL, "Invalid height (y_size)");
+		zend_value_error("Invalid height (y_size)");
 		return;
 	}
 
@@ -1473,12 +1473,12 @@ PHP_FUNCTION(imagecreate)
 	}
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_throw_error(NULL, "Invalid width (x_size)");
+		zend_value_error("Invalid width (x_size)");
 		return;
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_throw_error(NULL, "Invalid height (y_size)");
+		zend_value_error("Invalid height (y_size)");
 		return;
 	}
 

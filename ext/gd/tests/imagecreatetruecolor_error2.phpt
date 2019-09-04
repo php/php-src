@@ -19,5 +19,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Invalid width (x_size)
-!! [Error] Invalid height (y_size)
+!! [ValueError] Invalid width (x_size)
+!! [ValueError] Invalid height (y_size)
