@@ -146,7 +146,8 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 
 void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D)
 {
-	zend_function *fbc = ((zend_execute_data*)(opline))->func;
+	zend_execute_data *call = (zend_execute_data *) opline;
+	zend_function *fbc = call->func;
 
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 		zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
@@ -155,6 +156,23 @@ void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D)
 			fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 			fbc->common.scope ? "::" : "",
 			ZSTR_VAL(fbc->common.function_name));
+	} else {
+		return;
+	}
+
+	if (EG(exception)) {
+		const zend_op *opline = EG(opline_before_exception);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+		}
+
+		zend_vm_stack_free_args(call);
+
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
+
+		zend_vm_stack_free_call_frame(call);
 	}
 }
 
