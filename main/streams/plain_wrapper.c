@@ -251,7 +251,9 @@ static void detect_is_pipe(php_stdio_stream_data *self) {
 	zend_uintptr_t handle = _get_osfhandle(self->fd);
 
 	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
-		self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
+		DWORD file_type = GetFileType((HANDLE)handle);
+
+		self->is_pipe = file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR;
 	}
 #endif
 }
