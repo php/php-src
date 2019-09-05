@@ -1290,10 +1290,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1345,10 +1344,9 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1476,9 +1474,9 @@ fcall_end:
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1560,9 +1558,9 @@ fcall_end:
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1664,10 +1662,9 @@ fcall_end:
 	zend_vm_stack_free_call_frame(call);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1769,10 +1766,9 @@ fcall_end:
 	zend_vm_stack_free_call_frame(call);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);
-		HANDLE_EXCEPTION();
+	} else {
+		ZEND_VM_SET_OPCODE(opline + 1);
 	}
-
-	ZEND_VM_SET_OPCODE(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
