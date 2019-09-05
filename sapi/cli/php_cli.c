@@ -539,15 +539,64 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
+static zend_bool cli_is_valid_fd(int fd) {
+	int dup_fd = dup(fd);
+	if (dup_fd < 0) {
+		return 0;
+	}
+	close(dup_fd);
+	return 1;
+}
+
+static zend_bool cli_stdin_valid, cli_stdout_valid, cli_stderr_valid;
+static void cli_check_std_stream_validity() {
+	cli_stdin_valid = cli_is_valid_fd(0);
+	cli_stdout_valid = cli_is_valid_fd(1);
+	cli_stderr_valid = cli_is_valid_fd(2);
+}
+
+static ssize_t php_invalid_stream_read(php_stream *stream, char *buf, size_t count) {
+	zend_error(E_WARNING, "Trying to read from closed stdio stream");
+	return (ssize_t) -1;
+}
+
+static ssize_t php_invalid_stream_write(php_stream *stream, const char *buf, size_t count) {
+	zend_error(E_WARNING, "Trying to write to closed stdio stream");
+	return (ssize_t) -1;
+}
+
+static int php_invalid_stream_close(php_stream *stream, int close_handle) {
+	return 0;
+}
+
+const php_stream_ops php_invalid_stream_ops = {
+	php_invalid_stream_write, php_invalid_stream_read,
+	php_invalid_stream_close, NULL,
+	"closed stdio stream",
+	NULL, NULL,
+	NULL, NULL
+};
+
+static php_stream *cli_open_invalid_stream(const char *mode) {
+	php_stream *stream = php_stream_alloc(&php_invalid_stream_ops, NULL, NULL, mode);
+	stream->position = -1;
+	return stream;
+}
+
 static void cli_register_file_handles(void) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
-	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
 	zend_constant ic, oc, ec;
 
-	s_in  = php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, sc_in);
-	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
-	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
+	s_in = cli_stdin_valid
+		? php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, NULL)
+		: cli_open_invalid_stream("rb");
+	s_out = cli_stdout_valid
+		? php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, NULL)
+		: cli_open_invalid_stream("wb");
+	s_err = cli_stderr_valid
+		? php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, NULL)
+		: cli_open_invalid_stream("wb");
 
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
@@ -884,6 +933,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 			fflush(stdout);
 		}
+
+		/* Check std stream validity before opening the script,
+		 * otherwise an std file descriptor may be overwritten. */
+		cli_check_std_stream_validity();
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind
