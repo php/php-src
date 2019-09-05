@@ -161,6 +161,9 @@ void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D)
 	}
 
 	if (EG(exception)) {
+#ifndef HAVE_GCC_GLOBAL_REGS
+		zend_execute_data *execute_data = EG(current_execute_data);
+#endif
 		const zend_op *opline = EG(opline_before_exception);
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
