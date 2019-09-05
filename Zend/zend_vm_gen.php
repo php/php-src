@@ -987,6 +987,9 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 }
 
 function is_hot_handler($hot, $op1, $op2, $extra_spec) {
+	if (isset($extra_spec["SMART_BRANCH"]) && $extra_spec["SMART_BRANCH"] == 0) {
+		return false;
+	}
 	if ($hot === 'HOT_' || $hot === 'INLINE_') {
 		return true;
 	} else if ($hot === 'HOT_NOCONST_') {
