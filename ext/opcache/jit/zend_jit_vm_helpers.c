@@ -144,22 +144,14 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 	}
 }
 
-void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D)
+void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
-
-	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-		zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-	} else if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-		zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-			fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-			fbc->common.scope ? "::" : "",
-			ZSTR_VAL(fbc->common.function_name));
-	} else {
-		return;
-	}
-
+	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+		fbc->common.scope ? "::" : "",
+		ZSTR_VAL(fbc->common.function_name));
 	if (EG(exception)) {
 #ifndef HAVE_GCC_GLOBAL_REGS
 		zend_execute_data *execute_data = EG(current_execute_data);
