@@ -69,16 +69,6 @@ if test "$PHP_LDAP" != "no"; then
     AC_MSG_ERROR(Cannot find ldap.h)
   fi
 
-  dnl The Linux version of the SDK needs -lpthread. Solaris tested, and it
-  dnl doesn't, but others may. Add these here if necessary. -RL
-  dnl Is this really necessary? -Troels Arvin
-
-  if test `uname` = "Linux"; then
-    LDAP_PTHREAD=pthread
-  else
-    LDAP_PTHREAD=
-  fi
-
   dnl -pc removal is a hack for clang
   MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
 
@@ -88,43 +78,6 @@ if test "$PHP_LDAP" != "no"; then
 
   elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
     PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-
-  elif test -f $LDAP_LIBDIR/libssldap50.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libssldap50.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(nspr4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plc4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plds4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ssldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(prldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ssl3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldapssl41.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldapssl41.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(nspr3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plc3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plds3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ldapssl41, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldapssl30.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldapssl30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(ldapssl30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldap30.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(ldap30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libumich_ldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libumich_ldap.$SHLIB_SUFFIX_NAME; then
     PHP_ADD_LIBRARY_WITH_PATH(umich_lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
