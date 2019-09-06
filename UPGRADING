@@ -554,6 +554,7 @@ PHP 7.4 UPGRADE NOTES
 
 - Ldap:
   . Support for nsldap has been removed.
+  . Support for umich_ldap has been removed.
 
 - Libxml:
   . All libxml based extensions now require libxml 2.7.6 or newer.

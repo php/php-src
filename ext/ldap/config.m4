@@ -3,10 +3,6 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
     LDAP_DIR=$1
     LDAP_INCDIR=$1/include
     LDAP_LIBDIR=$1/$PHP_LIBDIR
-  elif test -f $1/include/umich-ldap/ldap.h; then
-    LDAP_DIR=$1
-    LDAP_INCDIR=$1/include/umich-ldap
-    LDAP_LIBDIR=$1/$PHP_LIBDIR
   elif test -f $1/ldap/public/ldap.h; then
     LDAP_DIR=$1
     LDAP_INCDIR=$1/ldap/public
@@ -78,10 +74,6 @@ if test "$PHP_LDAP" != "no"; then
 
   elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
     PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-
-  elif test -f $LDAP_LIBDIR/libumich_ldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libumich_ldap.$SHLIB_SUFFIX_NAME; then
-    PHP_ADD_LIBRARY_WITH_PATH(umich_lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(umich_ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
