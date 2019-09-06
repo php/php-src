@@ -549,7 +549,7 @@ static zend_bool cli_is_valid_fd(int fd) {
 }
 
 static zend_bool cli_stdin_valid, cli_stdout_valid, cli_stderr_valid;
-static void cli_check_std_stream_validity() {
+static void cli_check_stdio_stream_validity() {
 	cli_stdin_valid = cli_is_valid_fd(0);
 	cli_stdout_valid = cli_is_valid_fd(1);
 	cli_stderr_valid = cli_is_valid_fd(2);
@@ -933,10 +933,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 			fflush(stdout);
 		}
-
-		/* Check std stream validity before opening the script,
-		 * otherwise an std file descriptor may be overwritten. */
-		cli_check_std_stream_validity();
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind
@@ -1367,6 +1363,10 @@ exit_loop:
 	}
 
 	sapi_module->ini_entries = ini_entries;
+
+	/* Check std stream validity prior to module startup, in case MINIT opens file
+	 * descriptors and overrides the stdio file descriptors. */
+	cli_check_stdio_stream_validity();
 
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
