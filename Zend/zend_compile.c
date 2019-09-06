@@ -3289,6 +3289,12 @@ int zend_compile_func_ord(znode *result, zend_ast_list *args) /* {{{ */
 }
 /* }}} */
 
+/* We can only calculate the stack size for functions that have been fully compiled, otherwise
+ * additional CV or TMP slots may still be added. This prevents the use of INIT_FCALL for
+ * directly or indirectly recursive function calls. */
+static zend_bool fbc_is_finalized(zend_function *fbc) {
+	return !ZEND_USER_CODE(fbc->type) || (fbc->common.fn_flags & ZEND_ACC_DONE_PASS_TWO);
+}
 
 static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t num_args) /* {{{ */
 {
@@ -3304,9 +3310,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	lcname = zend_string_tolower(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
-	if (!fbc
-		/* Don't use INIT_FCALL for recursive calls */
-	 || (fbc == (zend_function*)CG(active_op_array))
+	if (!fbc || !fbc_is_finalized(fbc)
 	 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
@@ -3429,8 +3433,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
-		/* Don't use INIT_FCALL for recursive calls */
-		if (fbc && fbc != (zend_function*)CG(active_op_array)) {
+		if (fbc && fbc_is_finalized(fbc)) {
 			name_node.op_type = IS_CONST;
 			ZVAL_STR_COPY(&name_node.u.constant, name);
 
@@ -3806,9 +3809,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			return;
 		}
 
-		if (!fbc
-			/* Don't use INIT_FCALL for recursive calls */
-		 || (fbc == (zend_function*)CG(active_op_array))
+		if (!fbc || !fbc_is_finalized(fbc)
 		 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
