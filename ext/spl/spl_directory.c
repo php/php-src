@@ -3157,6 +3157,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 
 	memcpy(&spl_filesystem_object_check_handlers, &spl_filesystem_object_handlers, sizeof(zend_object_handlers));
+	spl_filesystem_object_check_handlers.clone_obj = 0;
 	spl_filesystem_object_check_handlers.get_method = spl_filesystem_object_get_method_check;
 
 #ifdef HAVE_GLOB
