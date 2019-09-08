@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Add opcache.preload_user INI directive. (Dmitry)
 
+- PCRE:
+  . Fixed bug #78349 (Bundled pcre2 library missing LICENCE file). (Peter Kokot)
+
 - PDO_MySQL:
   . Fixed bug #41997 (SP call yields additional empty result set). (cmb)
 
