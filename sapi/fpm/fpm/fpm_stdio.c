@@ -177,6 +177,8 @@ stdio_read:
 			if 	(!memcmp(buf, &FPM_STDIO_CMD_FLUSH[cmd_pos], sizeof(FPM_STDIO_CMD_FLUSH) - cmd_pos)) {
 				zlog_stream_finish(log_stream);
 				start = cmd_pos;
+			} else {
+				zlog_stream_str(log_stream, &FPM_STDIO_CMD_FLUSH[0], cmd_pos);
 			}
 			cmd_pos = 0;
 		}
