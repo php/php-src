@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #78510 (Partially uninitialized buffer returned by
     sodium_crypto_generichash_init()). (Frank Denis, cmb)
 
+- SPL:
+  . Fixed bug #72884 (SplObject isCloneable() returns true but errs on clone).
+    (Chu Zhaowei)
+
 29 Aug 2019, PHP 7.2.22
 
 - Core:
