@@ -500,8 +500,8 @@ static const func_info_t func_infos[] = {
 	F1("sys_getloadavg",               MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
 #endif
 #ifdef HAVE_GETTIMEOFDAY
-	F1("microtime",                    MAY_BE_NULL | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_STRING),
-	F1("gettimeofday",                 MAY_BE_NULL | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_STRING),
+	F1("microtime",                    MAY_BE_NULL | MAY_BE_DOUBLE | MAY_BE_STRING),
+	F1("gettimeofday",                 MAY_BE_NULL | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 #endif
 #ifdef HAVE_GETRUSAGE
 	F1("getrusage",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
