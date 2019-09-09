@@ -284,6 +284,7 @@ static const func_info_t func_infos[] = {
 #endif
 	F0("rand",                         MAY_BE_NULL | MAY_BE_LONG),
 	F1("random_bytes",                 MAY_BE_STRING),
+	F1("random_int",                   MAY_BE_LONG),
 	F0("srand",                        MAY_BE_NULL),
 	F0("getrandmax",                   MAY_BE_NULL | MAY_BE_LONG),
 	F0("mt_rand",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
