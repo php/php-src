@@ -2176,68 +2176,27 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 {
 	|->hybrid_func_counter:
 	|	mov r0, EX->func
-	|	mov r1, aword [r0 + offsetof(zend_op_array, function_name)]
-	|	test r1, r1
-	|	jne	>1
-	|	mov r0, aword [r0 + offsetof(zend_op_array, filename)]
-	|1:
-	|	shr r0, 3
-	|	mov r1, r0
-	|	.if X64
-	|		shr r0, 30
-	|		xor r0, r1
-	|		mov64 r1, 0xbf58476d1ce4e5b9
-	|		imul r0, r1
-	|		mov r1, r0
-	|		shr r0, 27
-	|		xor r0, r1
-	|		mov64 r1, 0x94d049bb133111eb
-	|		imul r0, r1
-	|		mov r1, r0
-	|		shr r0, 31
-	|		xor r1, r0
-	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
-	|		LOAD_ADDR r0, &zend_jit_hot_counters
-	|		sub word [r0+r1*2], ZEND_JIT_HOT_FUNC_COST
-	|	.else
-	|		shr r0, 16
-	|		xor r0, r1
-	|		imul r0, 0x45d9f3b
-	|		mov r1, r0
-	|		shr r0, 16
-	|		xor r0, r1
-	|		imul r0, 0x45d9f3b
-	|		mov r1, r0
-	|		shr r0, 16
-	|		xor r1, r0
-	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
-	|		sub word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_FUNC_COST
-	|	.endif
+	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	mov r2, aword [r1]
+	|	sub word [r2], ZEND_JIT_HOT_FUNC_COST
 	|	jle >1
-	|	mov r1, EX->func
-	|	GET_IP r0
-	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
+	|	GET_IP r2
+	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
 	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r0, 5
+	|		sar r2, 5
 	|	.else
 	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r0, 2
-	|		imul r0, 0xb6db6db7
+	|		sar r2, 2
+	|		imul r2, 0xb6db6db7
 	|	.endif
-	|	mov r1, aword [r1 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	.if X64
-	|		jmp aword [r1+r0*8]
+	|		jmp aword [r1+r2*8+8]
 	|	.else
-	|		jmp aword [r1+r0*4]
+	|		jmp aword [r1+r2*4+4]
 	|	.endif
 	|1:
-	|	.if X64
-	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
-	|	.else
-	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
-	|	.endif
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
 	|	EXT_CALL zend_jit_hot_func, r0
@@ -2249,68 +2208,27 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 {
 	|->hybrid_loop_counter:
 	|	mov r0, EX->func
-	|	mov r1, aword [r0 + offsetof(zend_op_array, function_name)]
-	|	test r1, r1
-	|	jne	>1
-	|	mov r0, aword [r0 + offsetof(zend_op_array, filename)]
-	|1:
-	|	shr r0, 3
-	|	mov r1, r0
-	|	.if X64
-	|		shr r0, 30
-	|		xor r0, r1
-	|		mov64 r1, 0xbf58476d1ce4e5b9
-	|		imul r0, r1
-	|		mov r1, r0
-	|		shr r0, 27
-	|		xor r0, r1
-	|		mov64 r1, 0x94d049bb133111eb
-	|		imul r0, r1
-	|		mov r1, r0
-	|		shr r0, 31
-	|		xor r1, r0
-	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
-	|		LOAD_ADDR r0, &zend_jit_hot_counters
-	|		sub word [r0+r1*2], ZEND_JIT_HOT_LOOP_COST
-	|	.else
-	|		shr r0, 16
-	|		xor r0, r1
-	|		imul r0, 0x45d9f3b
-	|		mov r1, r0
-	|		shr r0, 16
-	|		xor r0, r1
-	|		imul r0, 0x45d9f3b
-	|		mov r1, r0
-	|		shr r0, 16
-	|		xor r1, r0
-	|		and r1, ZEND_HOT_COUNTERS_COUNT-1
-	|		sub word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_LOOP_COST
-	|	.endif
+	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
+	|	mov r2, aword [r1]
+	|	sub word [r2], ZEND_JIT_HOT_LOOP_COST
 	|	jle >1
-	|	mov r1, EX->func
-	|	GET_IP r0
-	|	sub r0, aword [r1 + offsetof(zend_op_array, opcodes)]
+	|	GET_IP r2
+	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
 	|	// divide by sizeof(zend_op)
 	|	.if X64
 	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r0, 5
+	|		sar r2, 5
 	|	.else
 	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r0, 2
-	|		imul r0, 0xb6db6db7
+	|		sar r2, 2
+	|		imul r2, 0xb6db6db7
 	|	.endif
-	|	mov r1, aword [r1 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	.if X64
-	|		jmp aword [r1+r0*8]
+	|		jmp aword [r1+r2*8+8]
 	|	.else
-	|		jmp aword [r1+r0*4]
+	|		jmp aword [r1+r2*4+4]
 	|	.endif
 	|1:
-	|	.if X64
-	|		mov word [r0+r1*2], ZEND_JIT_HOT_COUNTER_INIT
-	|	.else
-	|		mov word [r1*2+&zend_jit_hot_counters], ZEND_JIT_HOT_COUNTER_INIT
-	|	.endif
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
 	|	EXT_CALL zend_jit_hot_func, r0

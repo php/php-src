@@ -182,67 +182,40 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLE
 	ZEND_OPCODE_TAIL_CALL(handler);
 }
 
-static zend_always_inline zend_long _op_array_hash(const zend_op_array *op_array)
-{
-	uintptr_t x;
-
-	if (op_array->function_name) {
-		x = (uintptr_t)op_array >> 3;
-	} else {
-		x = (uintptr_t)op_array->filename >> 3;
-	}
-#if SIZEOF_SIZE_T == 4
-	x = ((x >> 16) ^ x) * 0x45d9f3b;
-	x = ((x >> 16) ^ x) * 0x45d9f3b;
-	x = (x >> 16) ^ x;
-#elif SIZEOF_SIZE_T == 8
-	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-	x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-	x = x ^ (x >> 31);
-#endif
-	return x;
-}
-
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zend_jit_op_array_extension *jit_extension =
+		(zend_jit_op_array_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);
 #ifndef HAVE_GCC_GLOBAL_REGS
 	const zend_op *opline = EX(opline);
 #endif
-	unsigned int n = _op_array_hash(&EX(func)->op_array)  %
-		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
 
-	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_FUNC_COST;
+	*(jit_extension->counter) -= ZEND_JIT_HOT_FUNC_COST;
 
-	if (UNEXPECTED(zend_jit_hot_counters[n] <= 0)) {
-		zend_jit_hot_counters[n] = ZEND_JIT_HOT_COUNTER_INIT;
+	if (UNEXPECTED(*(jit_extension->counter) <= 0)) {
 		zend_jit_hot_func(execute_data, opline);
 		ZEND_OPCODE_RETURN();
 	} else {
-		zend_vm_opcode_handler_t *handlers =
-			(zend_vm_opcode_handler_t*)ZEND_FUNC_INFO(&EX(func)->op_array);
-		zend_vm_opcode_handler_t handler = handlers[opline - EX(func)->op_array.opcodes];
+		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)jit_extension->orig_handlers[opline - EX(func)->op_array.opcodes];
 		ZEND_OPCODE_TAIL_CALL(handler);
 	}
 }
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zend_jit_op_array_extension *jit_extension =
+		(zend_jit_op_array_extension*)ZEND_FUNC_INFO(&EX(func)->op_array);
 #ifndef HAVE_GCC_GLOBAL_REGS
 	const zend_op *opline = EX(opline);
 #endif
-	unsigned int n = _op_array_hash(&EX(func)->op_array)  %
-		(sizeof(zend_jit_hot_counters) / sizeof(zend_jit_hot_counters[0]));
 
-	zend_jit_hot_counters[n] -= ZEND_JIT_HOT_LOOP_COST;
+	*(jit_extension->counter) -= ZEND_JIT_HOT_LOOP_COST;
 
-	if (UNEXPECTED(zend_jit_hot_counters[n] <= 0)) {
-		zend_jit_hot_counters[n] = ZEND_JIT_HOT_COUNTER_INIT;
+	if (UNEXPECTED(*(jit_extension->counter) <= 0)) {
 		zend_jit_hot_func(execute_data, opline);
 		ZEND_OPCODE_RETURN();
 	} else {
-		zend_vm_opcode_handler_t *handlers =
-			(zend_vm_opcode_handler_t*)ZEND_FUNC_INFO(&EX(func)->op_array);
-		zend_vm_opcode_handler_t handler = handlers[opline - EX(func)->op_array.opcodes];
+		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)jit_extension->orig_handlers[opline - EX(func)->op_array.opcodes];
 		ZEND_OPCODE_TAIL_CALL(handler);
 	}
 }
