@@ -4675,7 +4675,7 @@ PHP_METHOD(DatePeriod, __construct)
 			dpobj->end = clone;
 		}
 	}
-
+	
 	if (dpobj->end == NULL && recurrences < 1) {
 		php_error_docref(NULL, E_WARNING, "The recurrence count '%d' is invalid. Needs to be > 0", (int) recurrences);
 	}
