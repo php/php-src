@@ -821,7 +821,7 @@ static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, z
 static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, zval *rv) /* {{{ */
 {
 	const char *retchar = NULL;
-	int retint = 0;
+	zend_long retint = 0;
 	int len = 0;
 
 	if (obj && obj->za != NULL) {
@@ -853,10 +853,10 @@ static zval *php_zip_property_reader(ze_zip_object *obj, zip_prop_handler *hnd, 
 			break;
 		/* case IS_TRUE */
 		case IS_FALSE:
-			ZVAL_BOOL(rv, (long)retint);
+			ZVAL_BOOL(rv, retint);
 			break;
 		case IS_LONG:
-			ZVAL_LONG(rv, (long)retint);
+			ZVAL_LONG(rv, retint);
 			break;
 		default:
 			ZVAL_NULL(rv);
