@@ -619,13 +619,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						*(FB_BOOLEAN*)var->sqldata = zend_is_true(parameter) ? FB_TRUE : FB_FALSE;
 						break;
 					case IS_STRING:
+						zend_long lval;
+						double dval;
+					
 						if ((Z_STRLEN_P(parameter) == 0)) {
 							*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 							break;
 						}
-
-						long lval;
-						double dval;
 
 						switch (is_numeric_string(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), &lval, &dval, 0)) {
 							case IS_LONG:
@@ -637,11 +637,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							default:
 								if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "true", 4, 4)) {
 									*(FB_BOOLEAN*)var->sqldata = FB_TRUE;
-								}
-								else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
+								} else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
 									*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
-								}
-								else {
+								} else {
 									strcpy(stmt->error_code, "HY105");
 									S->H->last_app_error = "Cannot convert string to boolean";
 									return 0;
@@ -691,7 +689,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
-                            force_null = (Z_STRLEN_P(parameter) == 0);
+							force_null = (Z_STRLEN_P(parameter) == 0);
 					}
 					if (!force_null) {
 						/* keep the allow-NULL flag */
@@ -747,13 +745,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							break;
 						}
 					case PDO_PARAM_EVT_NORMALIZE:
-							 if (!param->is_param) {
-								  char *s = ZSTR_VAL(param->name);
-								  while (*s != '\0') {
-									   *s = toupper(*s);
-										s++;
-								  }
-							 }
+						if (!param->is_param) {
+							char *s = ZSTR_VAL(param->name);
+							while (*s != '\0') {
+								*s = toupper(*s);
+								s++;
+							}
+						}
 						break;
 					default:
 						ZVAL_NULL(parameter);

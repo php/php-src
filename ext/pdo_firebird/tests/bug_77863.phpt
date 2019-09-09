@@ -19,10 +19,9 @@ select trim(s) as s from t where b is not distinct from :p
 SQL;
 
 try { 
-  // PDO::PARAM_BOOL
-
   $query = $dbh->prepare($sql);
   
+  // PDO::PARAM_BOOL  
   $query->bindValue('p', 0, PDO::PARAM_BOOL);
   $query->execute();
   var_dump($query->fetchColumn(0));  
@@ -51,8 +50,7 @@ try {
   $query->execute();
   var_dump($query->fetchColumn(0));     
 
-  // PDO::PARAM_STR  
-  
+  // PDO::PARAM_STR    
   $query->bindValue('p', false, PDO::PARAM_STR);
   $query->execute();
   var_dump($query->fetchColumn(0));    
@@ -82,7 +80,6 @@ try {
   var_dump($query->fetchColumn(0));       
   
   // PDO::PARAM_INT  
- 
   $query->bindValue('p', false, PDO::PARAM_INT);
   $query->execute();
   var_dump($query->fetchColumn(0));   
