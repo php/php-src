@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - PDO_MySQL:
   . Fixed bug #41997 (SP call yields additional empty result set). (cmb)
 
+- sodium:
+  . Fixed bug #78510 (Partially uninitialized buffer returned by
+    sodium_crypto_generichash_init()). (Frank Denis, cmb)
+
 05 Sep 2019, PHP 7.4.0RC1
 
 - Core:
