@@ -931,8 +931,9 @@ static void zend_update_parent_ce(zend_class_entry *ce)
 				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
 				if (ce->type == ZEND_USER_CLASS) {
 					ce = zend_shared_alloc_get_xlat_entry(ce);
-					ZEND_ASSERT(ce);
-					prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+					if (ce) {
+						prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+					}
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
