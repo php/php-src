@@ -23,6 +23,7 @@ var_dump(new $weird[0]->foo::$className);
 
 ?>
 --EXPECTF--
+Deprecated: Array and string offset access syntax with curly braces is deprecated in %s on line %d
 object(stdClass)#%d (0) {
 }
 object(stdClass)#%d (0) {
