@@ -1118,7 +1118,7 @@ AC_CACHE_CHECK(for type of reentrant time-related functions, ac_cv_time_r_type,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
 
-main() {
+int main() {
 char buf[27];
 struct tm t;
 time_t old = 0;
@@ -1134,7 +1134,7 @@ return (1);
 ],[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
-main() {
+int main() {
   struct tm t, *s;
   time_t old = 0;
   char buf[27], *p;
@@ -1173,8 +1173,9 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 $1
-    main() {
+    int main() {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
 
     if (fd < 0) exit(1);
@@ -1206,8 +1207,9 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 $1
-    main() {
+    int main() {
     char buf[3];
     int fd = open("conftest_in", O_RDONLY);
     if (fd < 0) exit(1);
@@ -1460,6 +1462,7 @@ dnl Even newer glibcs have a different seeker definition.
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 
 struct cookiedata {
   __off64_t pos;
@@ -1476,7 +1479,7 @@ int seeker(void *cookie, __off64_t *position, int whence)
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
 
-main() {
+int main() {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
 
@@ -1595,7 +1598,7 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[main() { return (0); }]])],[found=yes],[found=no],[found=no])
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[found=no])
     LIBS=$ac_libs
   fi
 
@@ -2281,7 +2284,7 @@ AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
 
 #define TEXT "This is the test message -- "
 
-main()
+int main()
 {
   int n;
 

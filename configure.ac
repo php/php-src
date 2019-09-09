@@ -662,6 +662,8 @@ AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <netdb.h>
 #include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
 #ifndef AF_INET
 # include <sys/socket.h>
 #endif
