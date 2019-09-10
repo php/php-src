@@ -4364,8 +4364,8 @@ ZEND_METHOD(FFI, string) /* {{{ */
 ZEND_METHOD(FFI, isNull) /* {{{ */
 {
 	zval *zv;
+	zend_ffi_cdata *cdata;
 	zend_ffi_type *type;
-	void *ptr = NULL;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -4373,20 +4373,20 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_DEREF(zv);
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == zend_ffi_cdata_ce) {
-		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-		type = ZEND_FFI_TYPE(cdata->type);
-		ptr = cdata->ptr;
-	} else {
+	if (Z_TYPE_P(zv) != IS_OBJECT || Z_OBJCE_P(zv) != zend_ffi_cdata_ce) {
 		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
 		return;
 	}
 
+	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+	type = ZEND_FFI_TYPE(cdata->type);
+
 	if (type->kind != ZEND_FFI_TYPE_POINTER){
 		zend_throw_error(zend_ffi_exception_ce, "FFI\\Cdata is not a pointer");
+		return;
 	}
 
-	RETURN_BOOL(*(void**)ptr == NULL);
+	RETURN_BOOL(*(void**)cdata->ptr == NULL);
 }
 /* }}} */
 

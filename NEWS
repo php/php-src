@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.0RC2
 
 - FFI:
+  . Added missing FFI::isNull(). (Philip Hofstetter)
   . Fixed bug #78488 (OOB in ZEND_FUNCTION(ffi_trampoline)). (Dmitry)
 
 - Opcache:
