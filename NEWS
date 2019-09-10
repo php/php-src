@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #78349 (Bundled pcre2 library missing LICENCE file). (Peter Kokot)
 
+- PDO_Firebird:
+  . Implemented FR #77863 (PDO firebird support type Boolean in input
+    parameters). (Simonov Denis)
+
 - PDO_MySQL:
   . Fixed bug #41997 (SP call yields additional empty result set). (cmb)
 
