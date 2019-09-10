@@ -42,7 +42,7 @@
 
 static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_array *options, int alg) {
 	size_t opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
-	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT;
+	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
 	zend_string *ret;
 
 	if ((ZSTR_LEN(password) >= 0xffffffff)) {
@@ -53,11 +53,13 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 	if (options) {
 		zval *opt;
 		if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
-			memlimit = zval_get_long(opt);
-			if ((memlimit < crypto_pwhash_MEMLIMIT_MIN) || (memlimit > crypto_pwhash_MEMLIMIT_MAX)) {
+			zend_long smemlimit = zval_get_long(opt);
+
+			if ((smemlimit < 0) || (smemlimit < (crypto_pwhash_MEMLIMIT_MIN >> 10)) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
 				php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
 				return NULL;
 			}
+			memlimit = smemlimit << 10;
 		}
 		if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
 			opslimit = zval_get_long(opt);
@@ -73,7 +75,7 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 	}
 
 	ret = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
-	if (crypto_pwhash_str_alg(ZSTR_VAL(ret), ZSTR_VAL(password), ZSTR_LEN(password), opslimit, memlimit << 10, alg)) {
+	if (crypto_pwhash_str_alg(ZSTR_VAL(ret), ZSTR_VAL(password), ZSTR_LEN(password), opslimit, memlimit, alg)) {
 		php_error_docref(NULL, E_WARNING, "Unexpected failure hashing password");
 		zend_string_release(ret);
 		return NULL;
@@ -94,16 +96,18 @@ static zend_bool php_sodium_argon2_verify(const zend_string *password, const zen
 
 static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
 	size_t opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
-	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT;
+	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
 
 	if (options) {
 		zval *opt;
 		if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
-			memlimit = zval_get_long(opt);
-			if ((memlimit < crypto_pwhash_MEMLIMIT_MIN) || (memlimit > crypto_pwhash_MEMLIMIT_MAX)) {
+			zend_long smemlimit = zval_get_long(opt);
+
+			if ((smemlimit < 0) || (smemlimit < crypto_pwhash_MEMLIMIT_MIN >> 10) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
 				php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
 				return 1;
 			}
+			memlimit = smemlimit << 10;
 		}
 		if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
 			opslimit = zval_get_long(opt);
@@ -118,13 +122,13 @@ static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_ar
 		}
 	}
 
-	return crypto_pwhash_str_needs_rehash(ZSTR_VAL(hash), opslimit, memlimit << 10);
+	return crypto_pwhash_str_needs_rehash(ZSTR_VAL(hash), opslimit, memlimit);
 }
 
 static int php_sodium_argon2_get_info(zval *return_value, const zend_string *hash) {
 	const char* p = NULL;
 	zend_long v = 0, threads = 1;
-	zend_long memory_cost = PHP_SODIUM_PWHASH_MEMLIMIT;
+	zend_long memory_cost = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
 	zend_long time_cost = PHP_SODIUM_PWHASH_OPSLIMIT;
 
 	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
