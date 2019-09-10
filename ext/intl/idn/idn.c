@@ -206,7 +206,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 #if defined(__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif ZEND_GCC_VERSION >= 4002
+#elif ZEND_GCC_VERSION >= 4008
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -217,7 +217,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		}
 #if defined(__clang__)
 # pragma clang diagnostic pop
-#elif ZEND_GCC_VERSION >= 4002
+#elif ZEND_GCC_VERSION >= 4008
 # pragma GCC diagnostic pop
 #endif
 		efree(ustring);
