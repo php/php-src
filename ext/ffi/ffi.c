@@ -4329,6 +4329,35 @@ ZEND_METHOD(FFI, string) /* {{{ */
 }
 /* }}} */
 
+ZEND_METHOD(FFI, isNull) /* {{{ */
+{
+	zval *zv;
+	zend_ffi_cdata *cdata;
+	zend_ffi_type *type;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(zv);
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_DEREF(zv);
+	if (Z_TYPE_P(zv) != IS_OBJECT || Z_OBJCE_P(zv) != zend_ffi_cdata_ce) {
+		zend_wrong_parameter_class_error(1, "FFI\\CData", zv);
+		return;
+	}
+
+	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
+	type = ZEND_FFI_TYPE(cdata->type);
+
+	if (type->kind != ZEND_FFI_TYPE_POINTER){
+		zend_throw_error(zend_ffi_exception_ce, "FFI\\Cdata is not a pointer");
+		return;
+	}
+
+	RETURN_BOOL(*(void**)cdata->ptr == NULL);
+}
+/* }}} */
+
 static const zend_function_entry zend_ffi_functions[] = {
 	ZEND_ME(FFI, cdef,        arginfo_class_FFI_cdef,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, load,        arginfo_class_FFI_load,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -4346,6 +4375,7 @@ static const zend_function_entry zend_ffi_functions[] = {
 	ZEND_ME(FFI, memcmp,      arginfo_class_FFI_memcmp,    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, memset,      arginfo_class_FFI_memset,    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, string,      arginfo_class_FFI_string,    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(FFI, isNull,      arginfo_class_FFI_isNull,    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 

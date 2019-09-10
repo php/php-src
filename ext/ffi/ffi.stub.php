@@ -88,4 +88,9 @@ class FFI
      * @return ?string
      */
     static function string(FFI\CData $ptr, int $size = UNKNOWN) {}
+
+    /**
+     * @prefer-ref $ptr
+     */
+    static function isNull(FFI\CData $ptr) {}
 }
