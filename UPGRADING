@@ -226,6 +226,9 @@ PHP 8.0 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added ValueError class.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
