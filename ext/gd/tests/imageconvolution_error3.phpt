@@ -35,5 +35,5 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Convolution matrix must be a 3x3 array, matrix[2] only has 2 elements
-!! [Error] Convolution matrix must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)
+!! [ValueError] Convolution matrix must be a 3x3 array, matrix[2] only has 2 elements
+!! [ValueError] Convolution matrix must be a 3x3 array, matrix[2][2] cannot be found (missing integer key)

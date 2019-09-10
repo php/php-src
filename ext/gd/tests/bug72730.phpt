@@ -17,4 +17,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Gamma values must be positive
+!! [ValueError] Gamma values must be positive

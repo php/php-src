@@ -27,4 +27,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Convolution matrix must be a 3x3 array
+!! [ValueError] Convolution matrix must be a 3x3 array

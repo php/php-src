@@ -18,4 +18,4 @@ trycatch_dump(
 imagedestroy($im);
 ?>
 --EXPECT--
-!! [Error] You must give a positive number of points
+!! [ValueError] You must give a positive number of points

@@ -21,5 +21,5 @@ for($i=0;$i<7;$i++) {
 !! [TypeError] Number is expected as option when using rotate or shear
 !! [TypeError] Number is expected as option when using rotate or shear
 !! [TypeError] Number is expected as option when using rotate or shear
-!! [Error] Invalid type for element 5
-!! [Error] Invalid type for element 6
+!! [ValueError] Invalid type for element 5
+!! [ValueError] Invalid type for element 6

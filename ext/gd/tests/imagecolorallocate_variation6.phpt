@@ -52,26 +52,26 @@ foreach($values as $key => $value) {
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Octal 0400--
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0x100--
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [Error] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 ===DONE===

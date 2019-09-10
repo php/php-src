@@ -16,4 +16,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Color argument missing with threshold mode
+!! [ValueError] Color argument missing with threshold mode

@@ -19,4 +19,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [Error] Number of colors has to be greater than zero and no more than 2147483647
+!! [ValueError] Number of colors has to be greater than zero and no more than 2147483647

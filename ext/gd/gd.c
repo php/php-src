@@ -798,7 +798,7 @@ PHP_FUNCTION(imagesetstyle)
 
     num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
     if (num_styles == 0) {
-        zend_throw_error(NULL, "Styles array must not be empty");
+        zend_value_error("Styles array must not be empty");
         return;
     }
 
@@ -885,7 +885,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 	}
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
-		zend_throw_error(NULL, "Number of colors has to be greater than zero and no more than %d", INT_MAX);
+		zend_value_error("Number of colors has to be greater than zero and no more than %d", INT_MAX);
 		return;
 	}
 
@@ -1109,7 +1109,7 @@ PHP_FUNCTION(imagelayereffect)
 
 #define CHECK_RGBA_RANGE(component, name) \
 	if (component < 0 || component > gd##name##Max) { \
-		zend_throw_error(NULL, #name " component is out of range, must be between 0 and %d (inclusive)", gd##name##Max); \
+		zend_value_error(#name " component is out of range, must be between 0 and %d (inclusive)", gd##name##Max); \
 		return; \
 	}
 
@@ -1712,12 +1712,12 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		if (width < 1) {
-			zend_throw_error(NULL, "Width must be at least 1");
+			zend_value_error("Width must be at least 1");
 			return;
 		}
 
 		if (height < 1) {
-			zend_throw_error(NULL, "Height must be at least 1");
+			zend_value_error("Height must be at least 1");
 			return;
 		}
 
@@ -2445,7 +2445,7 @@ PHP_FUNCTION(imagegammacorrect)
 	}
 
 	if ( input <= 0.0 || output <= 0.0 ) {
-		zend_throw_error(NULL, "Gamma values must be positive");
+		zend_value_error("Gamma values must be positive");
 		return;
 	}
 
@@ -2786,17 +2786,17 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (nelem < 6) {
-		zend_throw_error(NULL, "You must have at least 3 points in your array");
+		zend_value_error("You must have at least 3 points in your array");
 		return;
 	}
 
 	if (npoints <= 0) {
-		zend_throw_error(NULL, "You must give a positive number of points");
+		zend_value_error("You must give a positive number of points");
 		return;
 	}
 
 	if (nelem < npoints * 2) {
-		zend_throw_error(NULL, "Trying to use %d points in array with only %d points", npoints, nelem/2);
+		zend_value_error("Trying to use %d points in array with only %d points", npoints, nelem/2);
 		return;
 	}
 
@@ -3698,14 +3698,14 @@ PHP_FUNCTION(imageconvolution)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
 	if (nelem != 3) {
-		zend_throw_error(NULL, "Convolution matrix must be a 3x3 array");
+		zend_value_error("Convolution matrix must be a 3x3 array");
 		return;
 	}
 
 	for (i=0; i<3; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
-				zend_throw_error(NULL, "Convolution matrix must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
+				zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
 				return;
 			}
 
@@ -3713,7 +3713,7 @@ PHP_FUNCTION(imageconvolution)
 				if ((var2 = zend_hash_index_find(Z_ARRVAL_P(var), j)) != NULL) {
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
-					zend_throw_error(NULL, "Convolution matrix must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
+					zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
 					return;
 				}
 			}
@@ -3814,28 +3814,28 @@ PHP_FUNCTION(imagecrop)
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
-		zend_throw_error(NULL, "Cropping rectangle is missing x position");
+		zend_value_error("Cropping rectangle is missing x position");
 		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
-		zend_throw_error(NULL, "Cropping rectangle is missing y position");
+		zend_value_error("Cropping rectangle is missing y position");
 		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
-		zend_throw_error(NULL, "Cropping rectangle is missing width");
+		zend_value_error("Cropping rectangle is missing width");
 		return;
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
-		zend_throw_error(NULL, "Cropping rectangle is missing height");
+		zend_value_error("Cropping rectangle is missing height");
 		return;
 	}
 
@@ -3879,14 +3879,14 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				zend_throw_error(NULL, "Color argument missing with threshold mode");
+				zend_value_error("Color argument missing with threshold mode");
 				return;
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
 
 		default:
-			zend_throw_error(NULL, "Unknown crop mode");
+			zend_value_error("Unknown crop mode");
 			return;
 	}
 
@@ -3980,7 +3980,7 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
-		zend_throw_error(NULL, "Affine array must have six elements");
+		zend_value_error("Affine array must have six elements");
 		return;
 	}
 
@@ -4007,28 +4007,28 @@ PHP_FUNCTION(imageaffine)
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
-			zend_throw_error(NULL, "Clip array is missing x position");
+			zend_value_error("Clip array is missing x position");
 			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
-			zend_throw_error(NULL, "Clip array is missing y position");
+			zend_value_error("Clip array is missing y position");
 			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
-			zend_throw_error(NULL, "Clip array is missing width");
+			zend_value_error("Clip array is missing width");
 			return;
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
-			zend_throw_error(NULL, "Clip array is missing height");
+			zend_value_error("Clip array is missing height");
 			return;
 		}
 		pRect = &rect;
@@ -4078,14 +4078,14 @@ PHP_FUNCTION(imageaffinematrixget)
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
-				zend_throw_error(NULL, "Options array is missing x position");
+				zend_value_error("Options array is missing x position");
 				return;
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
-				zend_throw_error(NULL, "Options array is missing y position");
+				zend_value_error("Options array is missing y position");
 				return;
 			}
 
@@ -4120,7 +4120,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			zend_throw_error(NULL, "Invalid type for element " ZEND_LONG_FMT, type);
+			zend_value_error("Invalid type for element " ZEND_LONG_FMT, type);
 			return;
 	}
 
@@ -4152,7 +4152,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	}
 
 	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
-		zend_throw_error(NULL, "Affine arrays must have six elements");
+		zend_value_error("Affine arrays must have six elements");
 		return;
 	}
 

@@ -21,5 +21,5 @@ trycatch_dump(
 unlink($file);
 ?>
 --EXPECT--
-!! [Error] Width must be at least 1
-!! [Error] Height must be at least 1
+!! [ValueError] Width must be at least 1
+!! [ValueError] Height must be at least 1
