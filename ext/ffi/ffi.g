@@ -221,7 +221,7 @@ type_specifier(zend_ffi_dcl *dcl):
 	|	{if (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) yy_error_sym("unexpected", sym);}
 		"_Bool"
 		{dcl->flags |= ZEND_FFI_DCL_BOOL;}
-	|	{if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("Unexpected '%s'", sym);}
+	|	{if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("unexpected", sym);}
 		("_Complex"|"complex"|"__complex"|"__complex__")
 		{dcl->flags |= ZEND_FFI_DCL_COMPLEX;}
 //	|	"_Atomic" "(" type_name ")" // TODO: not-implemented ???
