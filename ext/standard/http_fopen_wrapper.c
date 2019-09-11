@@ -91,9 +91,9 @@ static inline void strip_header(char *header_bag, char *lc_header_bag,
 	) {
 		char *header_start = header_bag + (lc_header_start - lc_header_bag);
 		char *lc_eol = strchr(lc_header_start, '\n');
-		char *eol = header_start + (lc_eol - lc_header_start);
 
 		if (lc_eol) {
+			char *eol = header_start + (lc_eol - lc_header_start);
 			size_t eollen = strlen(lc_eol);
 
 			memmove(lc_header_start, lc_eol+1, eollen);
