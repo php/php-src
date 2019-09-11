@@ -4344,8 +4344,9 @@ static int accel_preload(const char *config)
 						if (op_array->static_variables) {
 							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
 							if (ht) {
-								ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-								zend_array_destroy(ht);
+								if (GC_DELREF(ht) == 0) {
+									zend_array_destroy(ht);
+								}
 								ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
 							}
 						}
