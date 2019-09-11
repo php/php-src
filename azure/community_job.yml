@@ -61,10 +61,13 @@ jobs:
         cd symfony
         php7.3 /usr/bin/composer install --no-progress
         php7.3 ./phpunit install
-        sed -i 's/$exit = true/$exit = false/g' .phpunit/*/src/TextUI/Command.php
         export USE_ZEND_ALLOC=0
         export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
         php ./phpunit --exclude-group tty,benchmark,intl-data,transient
+        if [ $? -gt 128 ]; then
+          exit 1
+        fi
       displayName: 'Test Symfony'
       condition: or(succeeded(), failed())
     - script: |
