@@ -7,9 +7,13 @@ spl_autoload_register(function($class) {
     class X implements B {}
 });
 
-interface B extends A {
+try {
+    interface B extends A {
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECTF--
-Fatal error: Interface 'B' not found in %s on line %d
+--EXPECT--
+Interface 'B' not found

@@ -68,4 +68,15 @@ foreach (new \RecursiveIteratorIterator (new fooIterator ($foo)) as $bar) ;
 
 ?>
 --EXPECTF--
-Fatal error: Class 'NotExists' not found in %s(%d) : eval()'d code on line 1
+Fatal error: Uncaught Error: Class 'NotExists' not found in %s:%d
+Stack trace:
+#0 %s(%d): eval()
+#1 %s(%d): fooIterator->__destruct()
+#2 {main}
+
+Next Error: Class 'NotExists' not found in %s:%d
+Stack trace:
+#0 %s(%d): eval()
+#1 %s(%d): fooIterator->__destruct()
+#2 {main}
+  thrown in %s on line %d
