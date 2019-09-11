@@ -285,7 +285,7 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 
 	if (ce1->num_interfaces) {
 		uint32_t i;
-		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
+		ZEND_ASSERT(!(ce1->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
 		for (i = 0; i < ce1->num_interfaces; i++) {
 			ce = zend_lookup_class_ex(
 				ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
