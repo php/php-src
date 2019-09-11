@@ -67,6 +67,5 @@ __isset publicProperty
 __isset protectedProperty
 __isset privateProperty
 __set nonExisting
-__set publicProperty
 __set protectedProperty
 __set privateProperty

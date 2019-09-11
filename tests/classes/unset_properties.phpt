@@ -132,22 +132,22 @@ true
 __isset "publicProperty"
 __get "publicProperty"
 __get "publicProperty"
-__set "publicProperty" to "new publicProperty value via setter"
+
 new publicProperty value via setter
-__set "publicProperty" to "new publicProperty value via public access"
+
 true
 new publicProperty value via public access
 
 protectedProperty set
 __isset "protectedProperty"false
 __get "protectedProperty"
-__set "protectedProperty" to "new protectedProperty value via setter"
+
 __isset "protectedProperty"true
 new protectedProperty value via setter
 
 privateProperty set
 __isset "privateProperty"false
 __get "privateProperty"
-__set "privateProperty" to "new privateProperty value via setter"
+
 __isset "privateProperty"true
 new privateProperty value via setter

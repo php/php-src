@@ -819,23 +819,21 @@ ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, 
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
-		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-			Z_TRY_ADDREF_P(value);
+		Z_TRY_ADDREF_P(value);
 
-			if (UNEXPECTED(prop_info)) {
-				ZVAL_COPY_VALUE(&tmp, value);
-				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-					Z_TRY_DELREF_P(value);
-					variable_ptr = &EG(error_zval);
-					goto exit;
-				}
-				value = &tmp;
+		if (UNEXPECTED(prop_info)) {
+			ZVAL_COPY_VALUE(&tmp, value);
+			if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+				Z_TRY_DELREF_P(value);
+				variable_ptr = &EG(error_zval);
+				goto exit;
 			}
+			value = &tmp;
+		}
 
 found:
-			zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
-			goto exit;
-		}
+		zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
+		goto exit;
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
