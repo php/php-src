@@ -917,8 +917,12 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			zend_string_release_ex(lc_name, 0);
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED)) &&
-				!(flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED)) {
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
+				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
+					(ce->ce_flags & ZEND_ACC_NEARLY_LINKED))) {
+				return ce;
+			}
 			return NULL;
 		}
 		return ce;

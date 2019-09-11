@@ -229,7 +229,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 22...)                            |     |     |     */
+/* Class Flags (unused: 23...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -277,6 +277,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has unresolved variance obligations.             |     |     |     */
 #define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class is linked apart from variance obligations.       |     |     |     */
+#define ZEND_ACC_NEARLY_LINKED           (1 << 22) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 23, 26)                        |     |     |     */
 /* ==============                                         |     |     |     */
@@ -864,6 +867,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 #define ZEND_FETCH_CLASS_ALLOW_UNLINKED 0x0400
+#define ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED 0x0800
 
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
