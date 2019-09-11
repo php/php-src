@@ -30,6 +30,8 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 #define zend_do_inheritance(ce, parent_ce) \
 	zend_do_inheritance_ex(ce, parent_ce, 0)
 
+/* TODO: Merge these in master -- only here to prevent ABI change. */
+ZEND_API int zend_do_link_class_ex(zend_class_entry *ce, zend_string *lc_parent_name);
 ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name);
 
 void zend_verify_abstract_class(zend_class_entry *ce);

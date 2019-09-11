@@ -25,6 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
+#include "zend_exceptions.h"
 
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
@@ -1454,6 +1455,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 	}
 
 	for (i = 0; i < ce->num_interfaces; i++) {
+		// TODO: Allow graceful failure -- interface loading must be moved earlier for that.
 		iface = zend_fetch_class_by_name(
 			ce->interface_names[i].name, ce->interface_names[i].lc_name,
 			ZEND_FETCH_CLASS_INTERFACE|ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
@@ -2399,11 +2401,35 @@ static void report_variance_errors(zend_class_entry *ce) {
 	zend_hash_index_del(all_obligations, num_key);
 }
 
-ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
+static void check_unrecoverable_load_failure(zend_class_entry *ce) {
+	/* If this class has been used while unlinked through a variance obligation, it is not legal
+	 * to remove the class from the class table and throw an exception, because there is already
+	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
+	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
+	if (ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES) {
+		zend_string *exception_str;
+		zval exception_zv;
+		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
+		ZVAL_OBJ(&exception_zv, EG(exception));
+		Z_ADDREF(exception_zv);
+		zend_clear_exception();
+		exception_str = zval_get_string(&exception_zv);
+		zend_error_noreturn(E_ERROR,
+			"During inheritance of %s: Uncaught %s", ZSTR_VAL(ce->name), ZSTR_VAL(exception_str));
+	}
+}
+
+ZEND_API int zend_do_link_class_ex(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
 {
 	if (ce->parent_name) {
 		zend_class_entry *parent = zend_fetch_class_by_name(
-			ce->parent_name, lc_parent_name, ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
+			ce->parent_name, lc_parent_name,
+			ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED|ZEND_FETCH_CLASS_EXCEPTION);
+		if (!parent) {
+			check_unrecoverable_load_failure(ce);
+			return FAILURE;
+		}
+
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);
 		}
@@ -2423,7 +2449,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
-		return;
+		return SUCCESS;
 	}
 
 	ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
@@ -2434,8 +2460,14 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 			report_variance_errors(ce);
 		}
 	}
+
+	return SUCCESS;
 }
 /* }}} */
+
+ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) {
+	zend_do_link_class_ex(ce, lc_parent_name);
+}
 
 /* Check whether early binding is prevented due to unresolved types in inheritance checks. */
 static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */

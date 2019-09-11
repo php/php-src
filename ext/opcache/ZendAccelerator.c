@@ -3731,7 +3731,9 @@ static void preload_link(void)
 					} else {
 						CG(zend_lineno) = ce->info.user.line_start;
 					}
-					zend_do_link_class(ce, NULL);
+					if (zend_do_link_class_ex(ce, NULL) == FAILURE) {
+						ZEND_ASSERT(0 && "Class linking failed?");
+					}
 					CG(in_compilation) = 0;
 					CG(compiled_filename) = NULL;
 
