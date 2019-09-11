@@ -441,6 +441,7 @@ PHP_FUNCTION(readline_list_history)
 				}
 			}
 		}
+		free(hs);
     }
 
 #else /* readline */
