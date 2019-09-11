@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #78510 (Partially uninitialized buffer returned by
     sodium_crypto_generichash_init()). (Frank Denis, cmb)
 
+- Standard:
+  . Fixed bug #78506 (Error in a php_user_filter::filter() is not reported).
+    (Nikita)
+
 05 Sep 2019, PHP 7.4.0RC1
 
 - Core:
