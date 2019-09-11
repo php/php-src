@@ -975,9 +975,8 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
 		zend_error_noreturn(E_CORE_ERROR, "Class %s could not implement interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 	}
-	if (UNEXPECTED(ce == iface)) {
-		zend_error_noreturn(E_ERROR, "Interface %s cannot implement itself", ZSTR_VAL(ce->name));
-	}
+	/* This should be prevented by the class lookup logic. */
+	ZEND_ASSERT(ce != iface);
 }
 /* }}} */
 
@@ -1427,7 +1426,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 	for (i = 0; i < ce->num_interfaces; i++) {
 		iface = zend_fetch_class_by_name(
 			ce->interface_names[i].name, ce->interface_names[i].lc_name,
-			ZEND_FETCH_CLASS_INTERFACE|ZEND_FETCH_CLASS_ALLOW_UNLINKED);
+			ZEND_FETCH_CLASS_INTERFACE|ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
 		if (!(iface->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, iface);
 		}
@@ -2324,7 +2323,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 {
 	if (ce->parent_name) {
 		zend_class_entry *parent = zend_fetch_class_by_name(
-			ce->parent_name, lc_parent_name, ZEND_FETCH_CLASS_ALLOW_UNLINKED);
+			ce->parent_name, lc_parent_name, ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);
 		}
@@ -2347,6 +2346,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 		return;
 	}
 
+	ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
 	load_delayed_classes();
 	if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 		resolve_delayed_variance_obligations(ce);
