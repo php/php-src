@@ -47,7 +47,7 @@ Warning: exif_read_data(bug72094_3.jpg): Process tag(x3030=UndefinedTa): Illegal
 
 Warning: exif_read_data(bug72094_3.jpg): Process tag(x3030=UndefinedTa): Illegal format code 0x3030, suppose BYTE in %s%ebug72094.php on line %d
 
-Warning: exif_read_data(bug72094_3.jpg): Process tag(x3030=UndefinedTa): Illegal components(%d) in %s%ebug72094.php on line %d
+Warning: exif_read_data(bug72094_3.jpg): Illegal IFD size in %s%ebug72094.php on line %d
 
 Warning: exif_read_data(bug72094_3.jpg): File structure corrupted in %s%ebug72094.php on line %d
 
