@@ -14,4 +14,7 @@ class C extends UndefBase
 --EXPECTF--
 In autoload: string(9) "UndefBase"
 
-Fatal error: Class 'UndefBase' not found in %s on line %d
+Fatal error: Uncaught Error: Class 'UndefBase' not found in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
