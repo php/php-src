@@ -2292,8 +2292,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP
 		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			varname = ZVAL_UNDEFINED_OP1();
 		}
-		name = zval_get_tmp_string(varname, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(varname, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			FREE_OP(opline->op1_type, opline->op1.var);
 			HANDLE_EXCEPTION();
 		}
@@ -5342,8 +5342,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -5458,8 +5458,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -6271,8 +6271,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -7584,8 +7584,8 @@ fetch_obj_r_fast_copy:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -7700,8 +7700,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -8443,8 +8443,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -10005,8 +10005,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -10121,8 +10121,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -10863,8 +10863,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -14295,8 +14295,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -14411,8 +14411,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -14873,8 +14873,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -15728,8 +15728,8 @@ fetch_obj_r_fast_copy:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -15844,8 +15844,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -16306,8 +16306,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -17031,8 +17031,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -17147,8 +17147,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -17609,8 +17609,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -21880,8 +21880,8 @@ assign_op_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -22101,8 +22101,8 @@ pre_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -22175,8 +22175,8 @@ post_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -22496,8 +22496,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -22642,8 +22642,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -22788,8 +22788,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -22934,8 +22934,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -23999,8 +23999,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -24236,8 +24236,8 @@ assign_op_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -24459,8 +24459,8 @@ pre_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -24534,8 +24534,8 @@ post_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -24857,8 +24857,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -25003,8 +25003,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -25149,8 +25149,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -25295,8 +25295,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -26236,8 +26236,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -27953,8 +27953,8 @@ assign_op_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -28174,8 +28174,8 @@ pre_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -28248,8 +28248,8 @@ post_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -28569,8 +28569,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -28715,8 +28715,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -28861,8 +28861,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -29007,8 +29007,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -30039,8 +30039,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -30491,8 +30491,8 @@ assign_op_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -30592,8 +30592,8 @@ pre_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -30666,8 +30666,8 @@ post_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -30796,8 +30796,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -30963,8 +30963,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -31148,8 +31148,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -31294,8 +31294,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -31440,8 +31440,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -31586,8 +31586,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -32191,8 +32191,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -32240,8 +32240,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -32445,8 +32445,8 @@ assign_op_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -32546,8 +32546,8 @@ pre_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -32621,8 +32621,8 @@ post_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -32752,8 +32752,8 @@ fetch_obj_r_fast_copy:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -32914,8 +32914,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -33099,8 +33099,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -33245,8 +33245,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -33391,8 +33391,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -33537,8 +33537,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -34056,8 +34056,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -34106,8 +34106,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -35067,8 +35067,8 @@ assign_op_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -35168,8 +35168,8 @@ pre_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -35242,8 +35242,8 @@ post_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -35372,8 +35372,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -35534,8 +35534,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -35719,8 +35719,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -35865,8 +35865,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -36011,8 +36011,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -36157,8 +36157,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -36675,8 +36675,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -36724,8 +36724,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -39254,8 +39254,8 @@ assign_op_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -39475,8 +39475,8 @@ pre_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -39549,8 +39549,8 @@ post_incdec_object:
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -39791,8 +39791,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -39958,8 +39958,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -40143,8 +40143,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -40289,8 +40289,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -40435,8 +40435,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -40581,8 +40581,8 @@ fast_assign_obj:
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -41706,8 +41706,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -41834,8 +41834,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -42845,8 +42845,8 @@ assign_op_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -43068,8 +43068,8 @@ pre_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -43143,8 +43143,8 @@ post_incdec_object:
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -43386,8 +43386,8 @@ fetch_obj_r_fast_copy:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -43548,8 +43548,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -43733,8 +43733,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -43879,8 +43879,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -44025,8 +44025,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -44171,8 +44171,8 @@ fast_assign_obj:
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -45243,8 +45243,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -45372,8 +45372,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}
@@ -47991,8 +47991,8 @@ assign_op_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -48212,8 +48212,8 @@ pre_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -48286,8 +48286,8 @@ post_incdec_object:
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -48528,8 +48528,8 @@ fetch_obj_r_fast_copy:
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -48690,8 +48690,8 @@ fetch_obj_is_fast_copy:
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -48875,8 +48875,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -49021,8 +49021,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -49167,8 +49167,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -49313,8 +49313,8 @@ fast_assign_obj:
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 
 			UNDEF_RESULT();
 			goto exit_assign_obj;
@@ -50476,8 +50476,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -50604,8 +50604,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			goto isset_object_finish;
 		}

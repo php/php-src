@@ -1081,8 +1081,8 @@ ZEND_VM_C_LABEL(assign_op_object):
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -1351,8 +1351,8 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				UNDEF_RESULT();
 				break;
 			}
@@ -1431,8 +1431,8 @@ ZEND_VM_C_LABEL(post_incdec_object):
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
 		} else {
-			name = zval_get_tmp_string(property, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -2188,8 +2188,8 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(offset) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 			}
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -2350,8 +2350,8 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 				}
 			}
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				break;
 			}
@@ -2570,8 +2570,8 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	if (OP2_TYPE == IS_CONST) {
 		name = Z_STR_P(property);
 	} else {
-		name = zval_get_tmp_string(property, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(property, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			FREE_OP_DATA();
 			UNDEF_RESULT();
 			ZEND_VM_C_GOTO(exit_assign_obj);
@@ -6108,8 +6108,8 @@ ZEND_VM_COLD_HANDLER(179, ZEND_UNSET_STATIC_PROP, ANY, ANY, CACHE_SLOT)
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			varname = ZVAL_UNDEFINED_OP1();
 		}
-		name = zval_get_tmp_string(varname, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(varname, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
@@ -6244,8 +6244,8 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_S
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(offset);
 		} else {
-			name = zval_get_tmp_string(offset, &tmp_name);
-			if (UNEXPECTED(EG(exception))) {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
 				break;
 			}
 		}
@@ -6963,8 +6963,8 @@ ZEND_VM_COLD_CONST_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED
 	if (OP2_TYPE == IS_CONST) {
 		name = Z_STR_P(offset);
 	} else {
-		name = zval_get_tmp_string(offset, &tmp_name);
-		if (UNEXPECTED(EG(exception))) {
+		name = zval_try_get_tmp_string(offset, &tmp_name);
+		if (UNEXPECTED(!name)) {
 			result = 0;
 			ZEND_VM_C_GOTO(isset_object_finish);
 		}
