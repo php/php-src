@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.24
 
+- Exif:
+  . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
+	(Kalle)
 
 26 Sep 2019, PHP 7.2.23
 
