@@ -3,8 +3,12 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.11
 
 - Exif :
-	.Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
+  . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
+
+- Mysqlnd:
+  . Fixed bug #78525 (Memory leak in pdo when reusing native prepared
+    statements). (Nikita)
 
 12 Sep 2019, PHP 7.3.10RC1
 
