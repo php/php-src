@@ -190,8 +190,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 		result->row_packet = NULL;
 	}
 
-	mysqlnd_mempool_restore_state(result->result_set_memory_pool);
-
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -261,8 +259,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		set->row_buffers = NULL;
 	}
 
-	mysqlnd_mempool_restore_state(set->result_set_memory_pool);
-
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -275,6 +271,12 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 	DBG_ENTER("mysqlnd_res::free_result_buffers");
 	DBG_INF_FMT("%s", result->unbuf? "unbuffered":(result->stored_data? "buffered":"unknown"));
 
+	if (result->meta) {
+		ZEND_ASSERT(zend_arena_contains(result->memory_pool->arena, result->meta));
+		result->meta->m->free_metadata(result->meta);
+		result->meta = NULL;
+	}
+
 	if (result->unbuf) {
 		result->unbuf->m.free_result(result->unbuf, result->conn? result->conn->stats : NULL);
 		result->unbuf = NULL;
@@ -282,6 +284,9 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 		result->stored_data->m.free_result(result->stored_data);
 		result->stored_data = NULL;
 	}
+
+	mysqlnd_mempool_restore_state(result->memory_pool);
+	mysqlnd_mempool_save_state(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -293,12 +298,6 @@ static
 void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * result)
 {
 	DBG_ENTER("mysqlnd_res::free_result_contents_internal");
-
-	if (result->meta) {
-		ZEND_ASSERT(zend_arena_contains(result->memory_pool->arena, result->meta));
-		result->meta->m->free_metadata(result->meta);
-		result->meta = NULL;
-	}
 
 	result->m.free_result_buffers(result);
 
@@ -1926,6 +1925,8 @@ mysqlnd_result_init(const unsigned int field_count)
 	ret->field_count	= field_count;
 	ret->m = *mysqlnd_result_get_methods();
 
+	mysqlnd_mempool_save_state(pool);
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1941,7 +1942,6 @@ mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_cou
 
 	DBG_ENTER("mysqlnd_result_unbuffered_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
@@ -1976,12 +1976,10 @@ mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field
 
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 
@@ -2019,12 +2017,10 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 

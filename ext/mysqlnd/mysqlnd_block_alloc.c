@@ -200,6 +200,9 @@ PHPAPI void
 mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
 {
 	DBG_ENTER("mysqlnd_mempool_restore_state");
+#if ZEND_DEBUG
+	ZEND_ASSERT(pool->checkpoint);
+#endif
 	if (pool->checkpoint) {
 		mysqlnd_arena_release(&pool->arena, pool->checkpoint);
 		pool->last = NULL;
