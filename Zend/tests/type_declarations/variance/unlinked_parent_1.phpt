@@ -7,9 +7,13 @@ spl_autoload_register(function($class) {
     class X extends B {}
 });
 
-class B extends A {
+try {
+    class B extends A {
+    }
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECTF--
-Fatal error: Class 'B' not found in %s on line %d
+--EXPECT--
+Class 'B' not found

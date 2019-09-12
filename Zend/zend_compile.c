@@ -1071,7 +1071,11 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 		return FAILURE;
 	}
 
-	zend_do_link_class(ce, lc_parent_name);
+	if (zend_do_link_class(ce, lc_parent_name) == FAILURE) {
+		zend_hash_set_bucket_key(EG(class_table), (Bucket *) zv, Z_STR_P(rtd_key));
+		return FAILURE;
+	}
+
 	return SUCCESS;
 }
 /* }}} */

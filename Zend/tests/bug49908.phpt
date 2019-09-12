@@ -24,11 +24,14 @@ var_dump(new Foo());
 --EXPECTF--
 string(3) "Foo"
 string(3) "Bar"
+string(3) "Foo"
+string(3) "Bar"
 
-Fatal error: During class fetch: Uncaught Exception: Bar in %s:%d
+Fatal error: Uncaught Exception: Bar in %s:%d
 Stack trace:
 #0 [internal function]: {closure}('Bar')
 #1 %s(%d): spl_autoload_call('Bar')
 #2 [internal function]: {closure}('Foo')
 #3 %s(%d): spl_autoload_call('Foo')
-#4 {main} in %s on line %d
+#4 {main}
+  thrown in %s on line %d

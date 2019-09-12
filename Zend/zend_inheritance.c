@@ -25,6 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
+#include "zend_exceptions.h"
 
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
@@ -1407,26 +1408,17 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
+static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry **interfaces) /* {{{ */
 {
-	zend_class_entry **interfaces, *iface;
-	uint32_t num_interfaces = 0;
+	zend_class_entry *iface;
+	uint32_t num_parent_interfaces = ce->parent ? ce->parent->num_interfaces : 0;
+	uint32_t num_interfaces = num_parent_interfaces;
 	zend_string *key;
 	zend_class_constant *c;
 	uint32_t i, j;
 
-	if (ce->parent && ce->parent->num_interfaces) {
-		interfaces = emalloc(sizeof(zend_class_entry*) * (ce->parent->num_interfaces + ce->num_interfaces));
-		memcpy(interfaces, ce->parent->interfaces, sizeof(zend_class_entry*) * ce->parent->num_interfaces);
-		num_interfaces = ce->parent->num_interfaces;
-	} else {
-		interfaces = emalloc(sizeof(zend_class_entry*) * ce->num_interfaces);
-	}
-
 	for (i = 0; i < ce->num_interfaces; i++) {
-		iface = zend_fetch_class_by_name(
-			ce->interface_names[i].name, ce->interface_names[i].lc_name,
-			ZEND_FETCH_CLASS_INTERFACE|ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
+		iface = interfaces[num_parent_interfaces + i];
 		if (!(iface->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, iface);
 		}
@@ -1437,7 +1429,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 		}
 		for (j = 0; j < num_interfaces; j++) {
 			if (interfaces[j] == iface) {
-				if (!ce->parent || j >= ce->parent->num_interfaces) {
+				if (j >= num_parent_interfaces) {
 					efree(interfaces);
 					zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 					return;
@@ -1467,7 +1459,7 @@ static void zend_do_implement_interfaces(zend_class_entry *ce) /* {{{ */
 	ce->interfaces = interfaces;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
 
-	i = ce->parent ? ce->parent->num_interfaces : 0;
+	i = num_parent_interfaces;
 	for (; i < ce->num_interfaces; i++) {
 		do_interface_implementation(ce, ce->interfaces[i]);
 	}
@@ -2319,11 +2311,66 @@ static void report_variance_errors(zend_class_entry *ce) {
 	zend_hash_index_del(all_obligations, num_key);
 }
 
-ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
+static void check_unrecoverable_load_failure(zend_class_entry *ce) {
+	/* If this class has been used while unlinked through a variance obligation, it is not legal
+	 * to remove the class from the class table and throw an exception, because there is already
+	 * a dependence on the inheritance hierarchy of this specific class. Instead we fall back to
+	 * a fatal error, as would happen if we did not allow exceptions in the first place. */
+	if (ce->ce_flags & ZEND_ACC_HAS_UNLINKED_USES) {
+		zend_string *exception_str;
+		zval exception_zv;
+		ZEND_ASSERT(EG(exception) && "Exception must have been thrown");
+		ZVAL_OBJ(&exception_zv, EG(exception));
+		Z_ADDREF(exception_zv);
+		zend_clear_exception();
+		exception_str = zval_get_string(&exception_zv);
+		zend_error_noreturn(E_ERROR,
+			"During inheritance of %s with variance dependencies: Uncaught %s", ZSTR_VAL(ce->name), ZSTR_VAL(exception_str));
+	}
+}
+
+ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_name) /* {{{ */
 {
+	/* Load parent/interface dependencies first, so we can still gracefully abort linking
+	 * with an exception and remove the class from the class table. This is only possible
+	 * if no variance obligations on the current class have been added during autoloading. */
+	zend_class_entry *parent = NULL;
+	zend_class_entry **interfaces = NULL;
+
 	if (ce->parent_name) {
-		zend_class_entry *parent = zend_fetch_class_by_name(
-			ce->parent_name, lc_parent_name, ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED);
+		parent = zend_fetch_class_by_name(
+			ce->parent_name, lc_parent_name,
+			ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
+		if (!parent) {
+			check_unrecoverable_load_failure(ce);
+			return FAILURE;
+		}
+	}
+
+	if (ce->num_interfaces) {
+		/* Also copy the parent interfaces here, so we don't need to reallocate later. */
+		uint32_t i, num_parent_interfaces = parent ? parent->num_interfaces : 0;
+		interfaces = emalloc(
+			sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
+		if (num_parent_interfaces) {
+			memcpy(interfaces, parent->interfaces,
+				sizeof(zend_class_entry *) * num_parent_interfaces);
+		}
+		for (i = 0; i < ce->num_interfaces; i++) {
+			zend_class_entry *iface = zend_fetch_class_by_name(
+				ce->interface_names[i].name, ce->interface_names[i].lc_name,
+				ZEND_FETCH_CLASS_INTERFACE |
+				ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED | ZEND_FETCH_CLASS_EXCEPTION);
+			if (!iface) {
+				check_unrecoverable_load_failure(ce);
+				efree(interfaces);
+				return FAILURE;
+			}
+			interfaces[num_parent_interfaces + i] = iface;
+		}
+	}
+
+	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);
 		}
@@ -2333,7 +2380,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 		zend_do_bind_traits(ce);
 	}
 	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
-		zend_do_implement_interfaces(ce);
+		zend_do_implement_interfaces(ce, interfaces);
 	}
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
@@ -2343,7 +2390,7 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
 		ce->ce_flags |= ZEND_ACC_LINKED;
-		return;
+		return SUCCESS;
 	}
 
 	ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
@@ -2354,6 +2401,8 @@ ZEND_API void zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_na
 			report_variance_errors(ce);
 		}
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 

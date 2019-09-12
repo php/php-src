@@ -867,6 +867,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
 				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
 					(ce->ce_flags & ZEND_ACC_NEARLY_LINKED))) {
+				ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
 				return ce;
 			}
 			return NULL;
