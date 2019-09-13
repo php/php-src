@@ -206,10 +206,11 @@ int fuzzer_do_request_f(char *filename)
 	return fuzzer_do_request(&file_handle, filename);
 }
 
-int fuzzer_do_request_d(char *filename, char *data, size_t data_len)
+int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len)
 {
 	zend_file_handle file_handle;
 	file_handle.filename = filename;
+	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 	file_handle.handle.stream.handle = NULL;
 	file_handle.handle.stream.reader = (zend_stream_reader_t)_php_stream_read;

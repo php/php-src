@@ -57,17 +57,15 @@ int fuzzer_do_parse(zend_file_handle *file_handle, char *filename)
 	return (retval == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-int fuzzer_do_request_d(char *filename, char *data, size_t data_len);
-
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	char *s = malloc(Size+1);
 	memcpy(s, Data, Size);
 	s[Size] = '\0';
 
-	fuzzer_do_request_d("fuzzer.php", s, Size);
+	fuzzer_do_request_from_buffer("fuzzer.php", s, Size);
 	//fuzzer_do_parse(&file_handle, "fuzzer.php");
 
-	free(s);
+	/* Do not free s: fuzzer_do_request_from_buffer() takes ownership of the allocation. */
 	return 0;
 }
 
