@@ -32,6 +32,7 @@
 #include "ext/standard/php_var.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+	int ret;
  	unsigned char *data = malloc(Size+1);
 
 	memcpy(data, Data, Size);
@@ -45,10 +46,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 	php_unserialize_data_t var_hash;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	php_var_unserialize(&result, (const unsigned char **) &data, data + Size, &var_hash);
+	ret = php_var_unserialize(&result, (const unsigned char **) &data, data + Size, &var_hash);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
-	zval_ptr_dtor(&result);
+	if (ret) {
+		zval_ptr_dtor(&result);
+	}
 
 	php_request_shutdown(NULL);
 
