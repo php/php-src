@@ -65,7 +65,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	memcpy(s, Data, Size);
 	s[Size] = '\0';
 
-	fuzzer_do_request_d("fuzzer.php", Data, Size);
+	fuzzer_do_request_d("fuzzer.php", s, Size);
 	//fuzzer_do_parse(&file_handle, "fuzzer.php");
 
 	free(s);
