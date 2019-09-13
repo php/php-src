@@ -685,7 +685,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_get_transports",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("stream_resolve_include_path",  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("stream_is_local",              MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("get_headers",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("get_headers",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	F0("stream_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("socket_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
