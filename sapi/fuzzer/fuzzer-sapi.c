@@ -41,7 +41,7 @@ static int startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-static size_t ub_write(const char *str, size_t str_length TSRMLS_DC)
+static size_t ub_write(const char *str, size_t str_length)
 {
 	/* quiet */
 	return str_length;
@@ -52,22 +52,22 @@ static void fuzzer_flush(void *server_context)
 	/* quiet */
 }
 
-static void send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static void send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
 
-static char* read_cookies(TSRMLS_D)
+static char* read_cookies()
 {
 	/* TODO: fuzz these! */
 	return NULL;
 }
 
-static void register_variables(zval *track_vars_array TSRMLS_DC)
+static void register_variables(zval *track_vars_array)
 {
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	php_import_environment_variables(track_vars_array);
 }
 
-static void log_message(char *message, int level TSRMLS_DC)
+static void log_message(char *message, int level)
 {
 }
 
@@ -141,9 +141,7 @@ void fuzzer_set_ini_file(const char *file)
 
 int fuzzer_shutdown_php()
 {
-	TSRMLS_FETCH();
-
-	php_module_shutdown(TSRMLS_C);
+	php_module_shutdown();
 	sapi_shutdown();
 
 	free(fuzzer_module.ini_entries);
@@ -158,18 +156,18 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 	SG(request_info).argc=0;
 	SG(request_info).argv=NULL;
 
-	if (php_request_startup(TSRMLS_C)==FAILURE) {
-		php_module_shutdown(TSRMLS_C);
+	if (php_request_startup() == FAILURE) {
+		php_module_shutdown();
 		return FAILURE;
 	}
 
 	SG(headers_sent) = 1;
 	SG(request_info).no_headers = 1;
-	php_register_variable("PHP_SELF", filename, NULL TSRMLS_CC);
+	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
 		zend_compile_file(file_handle, ZEND_REQUIRE);
-		/*retval = php_execute_script(file_handle TSRMLS_CC);*/
+		/*retval = php_execute_script(file_handle);*/
 	} zend_end_try();
 
 	php_request_shutdown((void *) 0);

@@ -39,18 +39,18 @@ int fuzzer_do_parse(zend_file_handle *file_handle, char *filename)
 	SG(request_info).argc=0;
 	SG(request_info).argv=NULL;
 
-	if (php_request_startup(TSRMLS_C)==FAILURE) {
-		php_module_shutdown(TSRMLS_C);
+	if (php_request_startup() == FAILURE) {
+		php_module_shutdown();
 		return FAILURE;
 	}
 
 	SG(headers_sent) = 1;
 	SG(request_info).no_headers = 1;
-	php_register_variable("PHP_SELF", filename, NULL TSRMLS_CC);
+	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
 		zend_compile_file(file_handle, ZEND_REQUIRE);
-		//retval = php_execute_script(file_handle TSRMLS_CC);
+		//retval = php_execute_script(file_handle);
 	} zend_end_try();
 
 	php_request_shutdown((void *) 0);
