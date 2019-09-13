@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.0RC2
 
 - Core:
+  . Fixed incorrect usage of QM_ASSIGN instruction. It must not return IS_VAR.
+    As a side effect this allowed passign left hean list() "by reference",
+    instead of compile-time error. (Dmitry)
   . Fixed bug #78531 (Crash when using undefined variable as object). (Dmitry)
 
 - FFI:

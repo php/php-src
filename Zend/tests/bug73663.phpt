@@ -20,12 +20,8 @@ var_dump($array);
 $array = [1];
 $func(list(&$val) = $array);
 var_dump($array);
-
-$array = [1];
-change(list($val) = $array);
-var_dump($array);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   int(1)
@@ -73,10 +69,4 @@ array(10) {
   int(9)
   [9]=>
   int(10)
-}
-
-Notice: Only variables should be passed by reference in %s on line %d
-array(1) {
-  [0]=>
-  int(1)
 }
