@@ -181,7 +181,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 	end = opline + block->len;
 	while (opline < end) {
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
-		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR)) &&
+		if (opline->op1_type == IS_TMP_VAR &&
 		    opline->opcode != ZEND_FREE) {
 			src = VAR_SOURCE(opline->op1);
 			if (src &&
@@ -257,7 +257,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 		}
 
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
-		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+		if (opline->op2_type == IS_TMP_VAR) {
 			src = VAR_SOURCE(opline->op2);
 			if (src &&
 			    src->opcode == ZEND_QM_ASSIGN &&
@@ -860,7 +860,7 @@ optimize_const_unary_op:
 
 			case ZEND_RETURN:
 			case ZEND_EXIT:
-				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src && src->opcode == ZEND_QM_ASSIGN) {
 						zend_op *op = src + 1;
