@@ -30,9 +30,10 @@ if test "$PHP_FUZZER" != "no"; then
     dnl Don't include -fundefined in CXXFLAGS, because that would also require linking
     dnl with a C++ compiler.
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
-      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address,undefined"
+      dnl Disable object-size sanitizer, because it is incompatible with out zend_function
+      dnl union, and this can't be easily fixed.
+      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address,undefined -fno-sanitize=object-size"
       CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link,address"
-      LDFLAGS="$LDFLAGS -fsanitize=fuzzer-no-link,address,undefined"
     ],[
       AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
     ])
