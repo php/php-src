@@ -24,6 +24,10 @@
 #include <ext/standard/php_var.h>
 #include <main/php_variables.h>
 
+#ifdef __SANITIZE_ADDRESS__
+# include "sanitizer/lsan_interface.h"
+#endif
+
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
