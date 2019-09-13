@@ -134,6 +134,22 @@ int fuzzer_init_php()
 	return SUCCESS;
 }
 
+int fuzzer_request_startup()
+{
+	if (php_request_startup() == FAILURE) {
+		php_module_shutdown();
+		return FAILURE;
+	}
+
+#ifdef ZEND_SIGNALS
+	/* Some signal handlers will be overriden,
+	 * don't complain about them during shutdown. */
+	SIGG(check) = 0;
+#endif
+
+	return SUCCESS;
+}
+
 void fuzzer_set_ini_file(const char *file)
 {
 	if (fuzzer_module.php_ini_path_override) {
@@ -160,8 +176,7 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 	SG(request_info).argc=0;
 	SG(request_info).argv=NULL;
 
-	if (php_request_startup() == FAILURE) {
-		php_module_shutdown();
+	if (fuzzer_request_startup() == FAILURE) {
 		return FAILURE;
 	}
 

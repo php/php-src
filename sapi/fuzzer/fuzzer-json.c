@@ -41,8 +41,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	memcpy(data, Data, Size);
 	data[Size] = '\0';
 
-	if (php_request_startup()==FAILURE) {
-		php_module_shutdown();
+	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
 	}
 

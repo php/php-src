@@ -39,8 +39,7 @@ int fuzzer_do_parse(zend_file_handle *file_handle, char *filename)
 	SG(request_info).argc=0;
 	SG(request_info).argv=NULL;
 
-	if (php_request_startup() == FAILURE) {
-		php_module_shutdown();
+	if (fuzzer_request_startup() == FAILURE) {
 		return FAILURE;
 	}
 
