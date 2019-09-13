@@ -2822,7 +2822,7 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	znode target_node, source_node;
 	zend_op *opline;
-	uint32_t offset;
+	uint32_t offset, flags;
 
 	if (is_this_fetch(target_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
@@ -2851,9 +2851,12 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use result of built-in function in write context");
 	}
 
+	flags = zend_is_call(source_ast) ? ZEND_RETURNS_FUNCTION : 0;
+
 	if (opline && opline->opcode == ZEND_FETCH_OBJ_W) {
 		opline->opcode = ZEND_ASSIGN_OBJ_REF;
 		opline->extended_value &= ~ZEND_FETCH_REF;
+		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
 		if (result != NULL) {
 			*result = target_node;
@@ -2861,17 +2864,14 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 	} else if (opline && opline->opcode == ZEND_FETCH_STATIC_PROP_W) {
 		opline->opcode = ZEND_ASSIGN_STATIC_PROP_REF;
 		opline->extended_value &= ~ZEND_FETCH_REF;
+		opline->extended_value |= flags;
 		zend_emit_op_data(&source_node);
 		if (result != NULL) {
 			*result = target_node;
 		}
 	} else {
 		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
-		opline->extended_value = 0;
-	}
-
-	if (zend_is_call(source_ast)) {
-		opline->extended_value |= ZEND_RETURNS_FUNCTION;
+		opline->extended_value = flags;
 	}
 }
 /* }}} */
