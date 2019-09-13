@@ -14,7 +14,8 @@ dnl
 AC_DEFUN([PHP_FUZZER_TARGET], [
   PHP_FUZZER_BINARIES="$PHP_FUZZER_BINARIES $SAPI_FUZZER_PATH/php-fuzz-$1"
   PHP_SUBST($2)
-  PHP_ADD_SOURCES_X([sapi/fuzzer],[fuzzer-$1.c fuzzer-sapi.c],[],$2)
+  PHP_ADD_SOURCES_X([sapi/fuzzer],[fuzzer-$1.c],[],$2)
+  $2="[$]$2 $FUZZER_COMMON_OBJS"
 ])
 
 if test "$PHP_FUZZER" != "no"; then
@@ -46,6 +47,8 @@ if test "$PHP_FUZZER" != "no"; then
   PHP_FUZZER_BINARIES=""
   PHP_BINARIES="$PHP_BINARIES fuzzer"
   PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS fuzzer"
+
+  PHP_ADD_SOURCES_X([sapi/fuzzer], [fuzzer-sapi.c], [], FUZZER_COMMON_OBJS)
 
   PHP_FUZZER_TARGET([parser], PHP_FUZZER_PARSER_OBJS)
   PHP_FUZZER_TARGET([unserialize], PHP_FUZZER_UNSERIALIZE_OBJS)
