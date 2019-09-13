@@ -27,12 +27,14 @@ if test "$PHP_FUZZER" != "no"; then
   if test -z "$LIB_FUZZING_ENGINE"; then
     FUZZING_LIB="-fsanitize=fuzzer"
     FUZZING_CC="$CC"
-    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link,address], [
-      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address"
+    dnl Don't include -fundefined in CXXFLAGS, because that would also require linking
+    dnl with a C++ compiler.
+    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
+      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address,undefined"
       CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link,address"
-      LDFLAGS="$LDFLAGS -fsanitize=fuzzer-no-link,address"
+      LDFLAGS="$LDFLAGS -fsanitize=fuzzer-no-link,address,undefined"
     ],[
-      AC_MSG_ERROR(compiler doesn't support -fsanitize flags)
+      AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
     ])
   else
     FUZZING_LIB="-lFuzzingEngine"
