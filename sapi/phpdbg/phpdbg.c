@@ -272,7 +272,7 @@ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	/* deactivate symbol table caching to have these properly destroyed upon stack leaving (especially important for watchpoints) */
-	EG(symtable_cache_limit) = EG(symtable_cache) - 1;
+	EG(symtable_cache_limit) = EG(symtable_cache);
 
 	return SUCCESS;
 } /* }}} */
