@@ -24,12 +24,12 @@ if test "$PHP_FUZZER" != "no"; then
   SAPI_FUZZER_PATH=sapi/fuzzer
   PHP_SUBST(SAPI_FUZZER_PATH)
   if test -z "$LIB_FUZZING_ENGINE"; then
-    FUZZING_LIB="-lFuzzer"
+    FUZZING_LIB="-fsanitize=fuzzer"
     FUZZING_CC="$CC"
-    AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-      CFLAGS="$CFLAGS -fsanitize=address"
-      CXXFLAGS="$CXXFLAGS -fsanitize=address"
-      LDFLAGS="$LDFLAGS -fsanitize=address"
+    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link,address], [
+      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address"
+      CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link,address"
+      LDFLAGS="$LDFLAGS -fsanitize=fuzzer-no-link,address"
     ],[
       AC_MSG_ERROR(compiler doesn't support -fsanitize flags)
     ])
