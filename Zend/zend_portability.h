@@ -55,6 +55,7 @@
 #endif
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #ifdef HAVE_DLFCN_H
 # include <dlfcn.h>
@@ -327,24 +328,19 @@ char *alloca();
 
 #ifndef XtOffsetOf
 # if defined(CRAY) || (defined(__ARMCC_VERSION) && !defined(LINUX))
-# ifdef __STDC__
-# define XtOffset(p_type, field) _Offsetof(p_type, field)
-# else
-# ifdef CRAY2
-# define XtOffset(p_type, field) \
-    (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
-
-# else /* !CRAY2 */
-
-# define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
-
-# endif /* !CRAY2 */
-# endif /* __STDC__ */
+#  ifdef __STDC__
+#   define XtOffset(p_type, field) _Offsetof(p_type, field)
+#  else
+#   ifdef CRAY2
+#    define XtOffset(p_type, field) \
+       (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
+#   else /* !CRAY2 */
+#    define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
+#   endif /* !CRAY2 */
+#  endif /* __STDC__ */
 # else /* ! (CRAY || __arm) */
-
-# define XtOffset(p_type, field) \
-    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
-
+#  define XtOffset(p_type, field) \
+     ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 # endif /* !CRAY */
 
 # ifdef offsetof
