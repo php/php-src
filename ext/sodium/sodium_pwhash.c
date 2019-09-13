@@ -40,6 +40,32 @@
 #define PHP_SODIUM_PWHASH_OPSLIMIT 4
 #define PHP_SODIUM_PWHASH_THREADS 1
 
+static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
+	zval *opt;
+
+	if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
+		zend_long smemlimit = zval_get_long(opt);
+
+		if ((smemlimit < 0) || (smemlimit < crypto_pwhash_MEMLIMIT_MIN >> 10) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
+			php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
+			return FAILURE;
+		}
+		*memlimit = smemlimit << 10;
+	}
+	if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
+		*opslimit = zval_get_long(opt);
+		if ((*opslimit < crypto_pwhash_OPSLIMIT_MIN) || (*opslimit > crypto_pwhash_OPSLIMIT_MAX)) {
+			php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
+			return FAILURE;
+		}
+	}
+	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
+		php_error_docref(NULL, E_WARNING, "A thread value other than 1 is not supported by this implementation");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_array *options, int alg) {
 	size_t opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
 	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
@@ -51,25 +77,7 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 	}
 
 	if (options) {
-		zval *opt;
-		if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
-			zend_long smemlimit = zval_get_long(opt);
-
-			if ((smemlimit < 0) || (smemlimit < (crypto_pwhash_MEMLIMIT_MIN >> 10)) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
-				php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
-				return NULL;
-			}
-			memlimit = smemlimit << 10;
-		}
-		if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
-			opslimit = zval_get_long(opt);
-			if ((opslimit < crypto_pwhash_OPSLIMIT_MIN) || (opslimit > crypto_pwhash_OPSLIMIT_MAX)) {
-				php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
-				return NULL;
-			}
-		}
-		if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-			php_error_docref(NULL, E_WARNING, "A thread value other than 1 is not supported by this implementation");
+		if (get_options(options, &memlimit, &opslimit) == FAILURE) {
 			return NULL;
 		}
 	}
@@ -99,25 +107,7 @@ static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_ar
 	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
 
 	if (options) {
-		zval *opt;
-		if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
-			zend_long smemlimit = zval_get_long(opt);
-
-			if ((smemlimit < 0) || (smemlimit < crypto_pwhash_MEMLIMIT_MIN >> 10) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
-				php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
-				return 1;
-			}
-			memlimit = smemlimit << 10;
-		}
-		if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
-			opslimit = zval_get_long(opt);
-			if ((opslimit < crypto_pwhash_OPSLIMIT_MIN) || (opslimit > crypto_pwhash_OPSLIMIT_MAX)) {
-				php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
-				return 1;
-			}
-		}
-		if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-			php_error_docref(NULL, E_WARNING, "A thread value other than 1 is not supported by this implementation");
+		if (get_options(options, &memlimit, &opslimit) == FAILURE) {
 			return 1;
 		}
 	}
