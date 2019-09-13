@@ -207,11 +207,10 @@ int fuzzer_do_request_d(char *filename, char *data, size_t data_len)
 // Call named PHP function with N zval arguments
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
 	zval retval, func;
-	int result;
 
 	ZVAL_STRING(&func, func_name);
 	ZVAL_UNDEF(&retval);
-	result = call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
+	call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
 
 	// TODO: check result?
 	/* to ensure retval is not broken */
