@@ -373,7 +373,7 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_NUM(obj, num) \
 	(&(obj)->properties_table[(num)])
 #define OBJ_PROP_TO_OFFSET(num) \
-	((uint32_t)(zend_uintptr_t)OBJ_PROP_NUM(((zend_object*)NULL), num))
+	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
