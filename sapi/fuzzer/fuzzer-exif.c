@@ -33,11 +33,11 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+#if HAVE_EXIF
 	char *filename;
 	int filedes;
 
-	if (php_request_startup()==FAILURE) {
-		php_module_shutdown();
+	if (fuzzer_request_startup() == FAILURE) {
 		return 0;
 	}
 
@@ -54,6 +54,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	php_request_shutdown(NULL);
 
 	return 0;
+#else
+	fprintf(stderr, "\n\nERROR:\nPHP built without EXIF, recompile with --enable-exif to use this fuzzer\n");
+	exit(1);
+#endif
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {

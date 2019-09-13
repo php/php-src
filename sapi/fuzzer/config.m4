@@ -14,7 +14,8 @@ dnl
 AC_DEFUN([PHP_FUZZER_TARGET], [
   PHP_FUZZER_BINARIES="$PHP_FUZZER_BINARIES $SAPI_FUZZER_PATH/php-fuzz-$1"
   PHP_SUBST($2)
-  PHP_ADD_SOURCES_X([sapi/fuzzer],[fuzzer-$1.c fuzzer-sapi.c],[],$2)
+  PHP_ADD_SOURCES_X([sapi/fuzzer],[fuzzer-$1.c],[],$2)
+  $2="[$]$2 $FUZZER_COMMON_OBJS"
 ])
 
 if test "$PHP_FUZZER" != "no"; then
@@ -24,14 +25,20 @@ if test "$PHP_FUZZER" != "no"; then
   SAPI_FUZZER_PATH=sapi/fuzzer
   PHP_SUBST(SAPI_FUZZER_PATH)
   if test -z "$LIB_FUZZING_ENGINE"; then
-    FUZZING_LIB="-lFuzzer"
+    FUZZING_LIB="-fsanitize=fuzzer"
     FUZZING_CC="$CC"
-    AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
-      CFLAGS="$CFLAGS -fsanitize=address"
-      CXXFLAGS="$CXXFLAGS -fsanitize=address"
-      LDFLAGS="$LDFLAGS -fsanitize=address"
+    dnl Don't include -fundefined in CXXFLAGS, because that would also require linking
+    dnl with a C++ compiler.
+    AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
+      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address"
+      dnl Disable object-size sanitizer, because it is incompatible with our zend_function
+      dnl union, and this can't be easily fixed.
+      dnl We need to specify -fno-sanitize-recover=undefined here, otherwise ubsan warnings
+      dnl will not be considered failures by the fuzzer.
+      CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize=object-size -fno-sanitize-recover=undefined"
+      CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link,address"
     ],[
-      AC_MSG_ERROR(compiler doesn't support -fsanitize flags)
+      AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
     ])
   else
     FUZZING_LIB="-lFuzzingEngine"
@@ -44,14 +51,20 @@ if test "$PHP_FUZZER" != "no"; then
 
   PHP_ADD_BUILD_DIR([sapi/fuzzer])
   PHP_FUZZER_BINARIES=""
+  PHP_BINARIES="$PHP_BINARIES fuzzer"
   PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS fuzzer"
+
+  PHP_ADD_SOURCES_X([sapi/fuzzer], [fuzzer-sapi.c], [], FUZZER_COMMON_OBJS)
 
   PHP_FUZZER_TARGET([parser], PHP_FUZZER_PARSER_OBJS)
   PHP_FUZZER_TARGET([unserialize], PHP_FUZZER_UNSERIALIZE_OBJS)
-  PHP_FUZZER_TARGET([exif], PHP_FUZZER_EXIF_OBJS)
 
-  if test -n "$enable_json" && test "$enable_json" != "no"; then
+  dnl json extension is enabled by default
+  if (test -n "$enable_json" && test "$enable_json" != "no") || test -z "$PHP_ENABLE_ALL"; then
     PHP_FUZZER_TARGET([json], PHP_FUZZER_JSON_OBJS)
+  fi
+  if test -n "$enable_exif" && test "$enable_exif" != "no"; then
+    PHP_FUZZER_TARGET([exif], PHP_FUZZER_EXIF_OBJS)
   fi
   if test -n "$enable_mbstring" && test "$enable_mbstring" != "no"; then
     PHP_FUZZER_TARGET([mbstring], PHP_FUZZER_MBSTRING_OBJS)

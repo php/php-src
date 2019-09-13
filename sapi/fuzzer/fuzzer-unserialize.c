@@ -32,28 +32,54 @@
 #include "ext/standard/php_var.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
- 	unsigned char *data = malloc(Size+1);
+	unsigned char *orig_data = malloc(Size+1);
+	zend_execute_data execute_data;
+	zend_function func;
 
-	memcpy(data, Data, Size);
-	data[Size] = '\0';
+	memcpy(orig_data, Data, Size);
+	orig_data[Size] = '\0';
 
-	if (php_request_startup()==FAILURE) {
-		php_module_shutdown();
+	if (fuzzer_request_startup()==FAILURE) {
 		return 0;
 	}
 
-	zval result;
+	/* Set up a dummy stack frame so that exceptions may be thrown. */
+	{
+		memset(&execute_data, 0, sizeof(zend_execute_data));
+		memset(&func, 0, sizeof(zend_function));
 
-	php_unserialize_data_t var_hash;
-	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	php_var_unserialize(&result, &data, data + Size, &var_hash);
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+		func.type = ZEND_INTERNAL_FUNCTION;
+		func.common.function_name = ZSTR_EMPTY_ALLOC();
+		execute_data.func = &func;
+		EG(current_execute_data) = &execute_data;
+	}
 
-	zval_ptr_dtor(&result);
+	{
+		const unsigned char *data = orig_data;
+		zval result;
+		ZVAL_UNDEF(&result);
 
+		php_unserialize_data_t var_hash;
+		PHP_VAR_UNSERIALIZE_INIT(var_hash);
+		php_var_unserialize(&result, (const unsigned char **) &data, data + Size, &var_hash);
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+		zval_ptr_dtor(&result);
+
+		/* Destroy any thrown exception. */
+		if (EG(exception)) {
+			zend_object_release(EG(exception));
+			EG(exception) = NULL;
+		}
+	}
+
+	/* Unserialize may create circular structure. Make sure we free them.
+	 * Two calls are performed to handle objects with destructors. */
+	zend_gc_collect_cycles();
+	zend_gc_collect_cycles();
 	php_request_shutdown(NULL);
 
-	free(data);
+	free(orig_data);
 
 	return 0;
 }

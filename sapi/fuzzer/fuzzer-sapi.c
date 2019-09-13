@@ -24,6 +24,10 @@
 #include <ext/standard/php_var.h>
 #include <main/php_variables.h>
 
+#ifdef __SANITIZE_ADDRESS__
+# include "sanitizer/lsan_interface.h"
+#endif
+
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
 
@@ -31,7 +35,8 @@ const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
 	"max_execution_time=20\n"
-	"output_buffering=0\n";
+	"output_buffering=0\n"
+	"error_reporting=0";
 
 static int startup(sapi_module_struct *sapi_module)
 {
@@ -41,7 +46,7 @@ static int startup(sapi_module_struct *sapi_module)
 	return SUCCESS;
 }
 
-static size_t ub_write(const char *str, size_t str_length TSRMLS_DC)
+static size_t ub_write(const char *str, size_t str_length)
 {
 	/* quiet */
 	return str_length;
@@ -52,22 +57,22 @@ static void fuzzer_flush(void *server_context)
 	/* quiet */
 }
 
-static void send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static void send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
 
-static char* read_cookies(TSRMLS_D)
+static char* read_cookies()
 {
 	/* TODO: fuzz these! */
 	return NULL;
 }
 
-static void register_variables(zval *track_vars_array TSRMLS_DC)
+static void register_variables(zval *track_vars_array)
 {
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	php_import_environment_variables(track_vars_array);
 }
 
-static void log_message(char *message, int level TSRMLS_DC)
+static void log_message(char *message, int level)
 {
 }
 
@@ -106,6 +111,12 @@ static sapi_module_struct fuzzer_module = {
 
 int fuzzer_init_php()
 {
+#ifdef __SANITIZE_ADDRESS__
+	/* We're going to leak all the memory allocated during startup,
+	 * so disable lsan temporarily. */
+	__lsan_disable();
+#endif
+
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
@@ -118,14 +129,29 @@ int fuzzer_init_php()
 	 */
 	putenv("USE_ZEND_ALLOC=0");
 
-#ifdef __SANITIZE_ADDRESS__
-	/* Not very interested in memory leak detection, since Zend MM does that */
-	__lsan_disable();
-#endif
-
 	if (fuzzer_module.startup(&fuzzer_module)==FAILURE) {
 		return FAILURE;
 	}
+
+#ifdef __SANITIZE_ADDRESS__
+	__lsan_enable();
+#endif
+
+	return SUCCESS;
+}
+
+int fuzzer_request_startup()
+{
+	if (php_request_startup() == FAILURE) {
+		php_module_shutdown();
+		return FAILURE;
+	}
+
+#ifdef ZEND_SIGNALS
+	/* Some signal handlers will be overriden,
+	 * don't complain about them during shutdown. */
+	SIGG(check) = 0;
+#endif
 
 	return SUCCESS;
 }
@@ -141,9 +167,7 @@ void fuzzer_set_ini_file(const char *file)
 
 int fuzzer_shutdown_php()
 {
-	TSRMLS_FETCH();
-
-	php_module_shutdown(TSRMLS_C);
+	php_module_shutdown();
 	sapi_shutdown();
 
 	free(fuzzer_module.ini_entries);
@@ -158,18 +182,25 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 	SG(request_info).argc=0;
 	SG(request_info).argv=NULL;
 
-	if (php_request_startup(TSRMLS_C)==FAILURE) {
-		php_module_shutdown(TSRMLS_C);
+	if (fuzzer_request_startup() == FAILURE) {
 		return FAILURE;
 	}
 
 	SG(headers_sent) = 1;
 	SG(request_info).no_headers = 1;
-	php_register_variable("PHP_SELF", filename, NULL TSRMLS_CC);
+	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
-		zend_compile_file(file_handle, ZEND_REQUIRE);
-		/*retval = php_execute_script(file_handle TSRMLS_CC);*/
+		zend_op_array *op_array = zend_compile_file(file_handle, ZEND_REQUIRE);
+		if (op_array) {
+			destroy_op_array(op_array);
+			efree(op_array);
+		}
+		if (EG(exception)) {
+			zend_object_release(EG(exception));
+			EG(exception) = NULL;
+		}
+		/*retval = php_execute_script(file_handle);*/
 	} zend_end_try();
 
 	php_request_shutdown((void *) 0);
@@ -189,10 +220,11 @@ int fuzzer_do_request_f(char *filename)
 	return fuzzer_do_request(&file_handle, filename);
 }
 
-int fuzzer_do_request_d(char *filename, char *data, size_t data_len)
+int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len)
 {
 	zend_file_handle file_handle;
 	file_handle.filename = filename;
+	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 	file_handle.handle.stream.handle = NULL;
 	file_handle.handle.stream.reader = (zend_stream_reader_t)_php_stream_read;
@@ -209,11 +241,10 @@ int fuzzer_do_request_d(char *filename, char *data, size_t data_len)
 // Call named PHP function with N zval arguments
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args) {
 	zval retval, func;
-	int result;
 
 	ZVAL_STRING(&func, func_name);
 	ZVAL_UNDEF(&retval);
-	result = call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
+	call_user_function(CG(function_table), NULL, &func, &retval, nargs, args);
 
 	// TODO: check result?
 	/* to ensure retval is not broken */

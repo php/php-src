@@ -897,6 +897,18 @@ else
   ZEND_DEBUG=no
 fi
 
+PHP_ARG_ENABLE([debug-assertions],
+  [whether to enable debug assertions in release mode],
+  [AS_HELP_STRING([--enable-debug-assertions],
+    [Compile with debug assertions even in release mode])],
+  [no],
+  [no])
+
+if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+  PHP_DEBUG=1
+  ZEND_DEBUG=yes
+fi
+
 PHP_ARG_ENABLE([rtld-now],
   [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
   [AS_HELP_STRING([--enable-rtld-now],

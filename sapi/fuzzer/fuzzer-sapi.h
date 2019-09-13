@@ -18,5 +18,7 @@
  */
 
 int fuzzer_init_php();
+int fuzzer_request_startup();
 void fuzzer_call_php_func(const char *func_name, int nargs, char **params);
 void fuzzer_call_php_func_zval(const char *func_name, int nargs, zval *args);
+int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len);
