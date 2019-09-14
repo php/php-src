@@ -120,7 +120,7 @@ do {																			\
 
 BEGIN_EXTERN_C()
 
-static void strip_underscores(char *str, int *len)
+static void strip_underscores(char *str, size_t *len)
 {
 	char *src = str, *dest = str;
 	while (*src != '\0') {
@@ -1771,8 +1771,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{BNUM} {
 	/* The +/- 2 skips "0b" */
-	int len = yyleng - 2, contains_underscores;
+	size_t len = yyleng - 2;
 	char *end, *bin = yytext + 2;
+	zend_bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*bin == '0' || *bin == '_')) {
@@ -1811,10 +1812,25 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
-	int len = yyleng, contains_underscores;
+	size_t len = yyleng;
 	char *end, *lnum = yytext;
+	zend_bool is_octal = lnum[0] == '0';
+	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
-	contains_underscores = (memchr(lnum, '_', len) != NULL);
+	/* Digits 8 and 9 are illegal in octal literals. */
+	if (is_octal) {
+		size_t i;
+		for (i = 0; i < len; i++) {
+			if (lnum[i] == '8' || lnum[i] == '9') {
+				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
+				ZVAL_UNDEF(zendlval);
+				if (PARSER_MODE()) {
+					RETURN_TOKEN(T_ERROR);
+				}
+				RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+			}
+		}
+	}
 
 	if (contains_underscores) {
 		lnum = estrndup(lnum, len);
@@ -1824,21 +1840,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (len < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
 		/* base must be passed explicitly for correct parse error on Windows */
-		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, lnum[0] == '0' ? 8 : 10));
-		/* This isn't an assert, we need to ensure 019 isn't valid octal
-		 * Because the lexing itself doesn't do that for us
-		 */
-		if (end != lnum + len) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
-			ZVAL_UNDEF(zendlval);
-			if (contains_underscores) {
-				efree(lnum);
-			}
-			if (PARSER_MODE()) {
-				RETURN_TOKEN(T_ERROR);
-			}
-			RETURN_TOKEN_WITH_VAL(T_LNUMBER);
-		}
+		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, is_octal ? 8 : 10));
+		ZEND_ASSERT(end == lnum + len);
 	} else {
 		errno = 0;
 		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
@@ -1849,35 +1852,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
 			}
-			/* Also not an assert for the same reason */
-			if (end != lnum + len) {
-				zend_throw_exception(zend_ce_parse_error,
-					"Invalid numeric literal", 0);
-				ZVAL_UNDEF(zendlval);
-				if (contains_underscores) {
-					efree(lnum);
-				}
-				if (PARSER_MODE()) {
-					RETURN_TOKEN(T_ERROR);
-				}
-			}
+			ZEND_ASSERT(end == lnum + len);
 			if (contains_underscores) {
 				efree(lnum);
 			}
 			RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 		}
-		/* Also not an assert for the same reason */
-		if (end != lnum + len) {
-			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
-			ZVAL_UNDEF(zendlval);
-			if (contains_underscores) {
-				efree(lnum);
-			}
-			if (PARSER_MODE()) {
-				RETURN_TOKEN(T_ERROR);
-			}
-			RETURN_TOKEN_WITH_VAL(T_DNUMBER);
-		}
+		ZEND_ASSERT(end == lnum + len);
 	}
 	ZEND_ASSERT(!errno);
 	if (contains_underscores) {
@@ -1888,8 +1869,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{HNUM} {
 	/* The +/- 2 skips "0x" */
-	int len = yyleng - 2, contains_underscores;
+	size_t len = yyleng - 2;
 	char *end, *hex = yytext + 2;
+	zend_bool contains_underscores;
 
 	/* Skip any leading 0s */
 	while (len > 0 && (*hex == '0' || *hex == '_')) {
@@ -1954,10 +1936,9 @@ string:
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
 	const char *end;
-	int len = yyleng, contains_underscores;
+	size_t len = yyleng;
 	char *dnum = yytext;
-
-	contains_underscores = (memchr(dnum, '_', len) != NULL);
+	zend_bool contains_underscores = (memchr(dnum, '_', len) != NULL);
 
 	if (contains_underscores) {
 		dnum = estrndup(dnum, len);
