@@ -190,6 +190,10 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
+		if (EG(exception)) {
+			zend_object_release(EG(exception));
+			EG(exception) = NULL;
+		}
 		/*retval = php_execute_script(file_handle);*/
 	} zend_end_try();
 
