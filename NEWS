@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.11
 
+- Core:
+  . Fixed bug #78535 (auto_detect_line_endings value not parsed as bool).
+    (bugreportuser)
+
 - Exif :
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
