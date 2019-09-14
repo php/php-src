@@ -110,6 +110,12 @@ static sapi_module_struct fuzzer_module = {
 
 int fuzzer_init_php()
 {
+#ifdef __SANITIZE_ADDRESS__
+	/* We're going to leak all the memory allocated during startup,
+	 * so disable lsan temporarily. */
+	__lsan_disable();
+#endif
+
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
@@ -122,14 +128,13 @@ int fuzzer_init_php()
 	 */
 	putenv("USE_ZEND_ALLOC=0");
 
-#ifdef __SANITIZE_ADDRESS__
-	/* Not very interested in memory leak detection, since Zend MM does that */
-	__lsan_disable();
-#endif
-
 	if (fuzzer_module.startup(&fuzzer_module)==FAILURE) {
 		return FAILURE;
 	}
+
+#ifdef __SANITIZE_ADDRESS__
+	__lsan_enable();
+#endif
 
 	return SUCCESS;
 }
