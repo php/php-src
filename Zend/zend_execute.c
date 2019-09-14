@@ -2060,13 +2060,13 @@ num_undef:
 		}
 	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
 		offset_key = Z_STR_P(dim);
-		if (dim_type != IS_CONST) {
+		if (ZEND_CONST_COND(dim_type != IS_CONST, 1)) {
 			if (ZEND_HANDLE_NUMERIC(offset_key, hval)) {
 				goto num_index;
 			}
 		}
 str_index:
-		retval = zend_hash_find_ex(ht, offset_key, dim_type == IS_CONST);
+		retval = zend_hash_find_ex(ht, offset_key, ZEND_CONST_COND(dim_type == IS_CONST, 0));
 		if (retval) {
 			/* support for $GLOBALS[...] */
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
@@ -2201,7 +2201,7 @@ fetch_from_array:
 		}
 		ZVAL_ERROR(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		if (ZEND_CONST_COND(dim_type == IS_CV, dim != NULL) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			dim = ZVAL_UNDEFINED_OP2();
 		}
 		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
@@ -2244,7 +2244,7 @@ fetch_from_array:
 			} else {
 return_null:
 				/* for read-mode only */
-				if (/*dim_type == IS_CV &&*/ dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+				if (ZEND_CONST_COND(dim_type == IS_CV, dim != NULL) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 					ZVAL_UNDEFINED_OP2();
 				}
 				ZVAL_NULL(result);
@@ -2356,7 +2356,7 @@ try_string_offset:
 			ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			dim = ZVAL_UNDEFINED_OP2();
 		}
 		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
@@ -2378,7 +2378,7 @@ try_string_offset:
 		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
 			container = ZVAL_UNDEFINED_OP1();
 		}
-		if (/*dim_type == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP2();
 		}
 		if (!is_list && type != BP_VAR_IS) {
@@ -2734,7 +2734,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (container_op_type == IS_CV
 			 && type != BP_VAR_W
 			 && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-				container = ZVAL_UNDEFINED_OP1();
+				ZVAL_UNDEFINED_OP1();
 			}
 
 			/* this should modify object only if it's empty */

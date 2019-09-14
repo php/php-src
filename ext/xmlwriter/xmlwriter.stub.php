@@ -28,10 +28,10 @@ function xmlwriter_end_attribute($xmlwriter): bool {}
 function xmlwriter_write_attribute($xmlwriter, string $name, string $value): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_start_attribute_ns($xmlwriter, string $prefix, string $name, string $uri): bool {}
+function xmlwriter_start_attribute_ns($xmlwriter, string $prefix, string $name, ?string $uri): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_write_attribute_ns($xmlwriter, string $prefix, string $name, string $uri, string $content): bool {}
+function xmlwriter_write_attribute_ns($xmlwriter, string $prefix, string $name, ?string $uri, string $content): bool {}
 
 /** @param resource $xmlwriter */
 function xmlwriter_start_element($xmlwriter, string $name): bool {}
@@ -43,13 +43,13 @@ function xmlwriter_end_element($xmlwriter): bool {}
 function xmlwriter_full_end_element($xmlwriter): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_start_element_ns($xmlwriter, string $prefix, string $name, string $uri): bool {}
+function xmlwriter_start_element_ns($xmlwriter, ?string $prefix, string $name, ?string $uri): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_write_element($xmlwriter, string $name, string $content = UNKNOWN): bool {}
+function xmlwriter_write_element($xmlwriter, string $name, ?string $content = null): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_write_element_ns($xmlwriter, string $prefix, string $name, string $uri, string $content = UNKNOWN): bool {}
+function xmlwriter_write_element_ns($xmlwriter, ?string $prefix, string $name, ?string $uri, ?string $content = null): bool {}
 
 /** @param resource $xmlwriter */
 function xmlwriter_start_pi($xmlwriter, string $target): bool {}
@@ -76,7 +76,7 @@ function xmlwriter_text($xmlwriter, string $content): bool {}
 function xmlwriter_write_raw($xmlwriter, string $content): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_start_document($xmlwriter, string $version = '1.0', $encoding = UNKNOWN, $standalone = UNKNOWN) {}
+function xmlwriter_start_document($xmlwriter, ?string $version = '1.0', ?string $encoding = null, ?string $standalone = null) {}
 
 /** @param resource $xmlwriter */
 function xmlwriter_end_document($xmlwriter): bool {}
@@ -85,13 +85,13 @@ function xmlwriter_end_document($xmlwriter): bool {}
 function xmlwriter_write_comment($xmlwriter, string $content): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_start_dtd($xmlwriter, string $qualifiedName, string $publicId = UNKNOWN, string $systemId = UNKNOWN): bool {}
+function xmlwriter_start_dtd($xmlwriter, string $qualifiedName, ?string $publicId = null, ?string $systemId = null): bool {}
 
 /** @param resource $xmlwriter */
 function xmlwriter_end_dtd($xmlwriter): bool {}
 
 /** @param resource $xmlwriter */
-function xmlwriter_write_dtd($xmlwriter, string $name, $publicId = UNKNOWN, $systemId = UNKNOWN, $subset = UNKNOWN): bool {}
+function xmlwriter_write_dtd($xmlwriter, string $name, ?string $publicId = null, ?string $systemId = null, ?string $subset = null): bool {}
 
 /** @param resource $xmlwriter */
 function xmlwriter_start_dtd_element($xmlwriter, string $qualifiedName): bool {}
@@ -149,9 +149,9 @@ class XMLWriter
 
     function writeAttribute(string $name, string $value): bool {}
 
-    function startAttributeNs(string $prefix, string $name, string $uri): bool {}
+    function startAttributeNs(string $prefix, string $name, ?string $uri): bool {}
 
-    function writeAttributeNs(string $prefix, string $name, string $uri, string $content): bool {}
+    function writeAttributeNs(string $prefix, string $name, ?string $uri, string $content): bool {}
 
     function startElement(string $name): bool {}
 
@@ -159,11 +159,11 @@ class XMLWriter
 
     function fullEndElement(): bool {}
 
-    function startElementNs(string $prefix, string $name, string $uri): bool {}
+    function startElementNs(?string $prefix, string $name, ?string $uri): bool {}
 
-    function writeElement(string $name, string $content = UNKNOWN): bool {}
+    function writeElement(string $name, ?string $content = null): bool {}
 
-    function writeElementNs(string $prefix, string $name, string $uri, string $content = UNKNOWN): bool {}
+    function writeElementNs(?string $prefix, string $name, ?string $uri, ?string $content = null): bool {}
 
     function startPi(string $target): bool {}
 
@@ -181,17 +181,17 @@ class XMLWriter
 
     function writeRaw(string $content): bool {}
 
-    function startDocument(string $version = '1.0', string $encoding = UNKNOWN, string $standalone = UNKNOWN): bool {}
+    function startDocument(?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
 
     function endDocument(): bool {}
 
     function writeComment(string $content): bool {}
 
-    function startDtd(string $qualifiedName, string $publicId = UNKNOWN, string $systemId = UNKNOWN): bool {}
+    function startDtd(string $qualifiedName, ?string $publicId = null, ?string $systemId = null): bool {}
 
     function endDtd(): bool {}
 
-    function writeDtd(string $name, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $subset = UNKNOWN): bool {}
+    function writeDtd(string $name, ?string $publicId = null, ?string $systemId = null, ?string $subset = null): bool {}
 
     function startDtdElement(string $qualifiedName): bool {}
 

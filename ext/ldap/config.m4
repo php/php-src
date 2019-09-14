@@ -3,10 +3,6 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
     LDAP_DIR=$1
     LDAP_INCDIR=$1/include
     LDAP_LIBDIR=$1/$PHP_LIBDIR
-  elif test -f $1/include/umich-ldap/ldap.h; then
-    LDAP_DIR=$1
-    LDAP_INCDIR=$1/include/umich-ldap
-    LDAP_LIBDIR=$1/$PHP_LIBDIR
   elif test -f $1/ldap/public/ldap.h; then
     LDAP_DIR=$1
     LDAP_INCDIR=$1/ldap/public
@@ -69,17 +65,8 @@ if test "$PHP_LDAP" != "no"; then
     AC_MSG_ERROR(Cannot find ldap.h)
   fi
 
-  dnl The Linux version of the SDK needs -lpthread. Solaris tested, and it
-  dnl doesn't, but others may. Add these here if necessary. -RL
-  dnl Is this really necessary? -Troels Arvin
-
-  if test `uname` = "Linux"; then
-    LDAP_PTHREAD=pthread
-  else
-    LDAP_PTHREAD=
-  fi
-
-  MACHINE_INCLUDES=$($CC -dumpmachine)
+  dnl -pc removal is a hack for clang
+  MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
 
   if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
     PHP_ADD_LIBRARY_WITH_PATH(lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
@@ -88,61 +75,17 @@ if test "$PHP_LDAP" != "no"; then
   elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
     PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
 
-  elif test -f $LDAP_LIBDIR/libssldap50.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libssldap50.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(nspr4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plc4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plds4, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ssldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(prldap50, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ssl3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldapssl41.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldapssl41.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(nspr3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plc3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(plds3, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ldapssl41, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldapssl30.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldapssl30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(ldapssl30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libldap30.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap30.$SHLIB_SUFFIX_NAME; then
-    if test -n "$LDAP_PTHREAD"; then
-      PHP_ADD_LIBRARY($LDAP_PTHREAD)
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(ldap30, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    AC_DEFINE(HAVE_NSLDAP,1,[ ])
-
-  elif test -f $LDAP_LIBDIR/libumich_ldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libumich_ldap.$SHLIB_SUFFIX_NAME; then
-    PHP_ADD_LIBRARY_WITH_PATH(umich_lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(umich_ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
-    AC_DEFINE(HAVE_ORALDAP_12,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
-    AC_DEFINE(HAVE_ORALDAP_11,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME; then
      PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
      AC_DEFINE(HAVE_ORALDAP,1,[ ])
-     AC_DEFINE(HAVE_ORALDAP_10,1,[ ])
 
   else
     AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)

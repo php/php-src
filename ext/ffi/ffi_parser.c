@@ -2277,7 +2277,7 @@ static int parse_type_specifier(int sym, zend_ffi_dcl *dcl) {
 		case YY_COMPLEX:
 		case YY___COMPLEX:
 		case YY___COMPLEX__:
-			if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("Unexpected '%s'", sym);
+			if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("unexpected", sym);
 			sym = get_sym();
 			dcl->flags |= ZEND_FFI_DCL_COMPLEX;
 			break;

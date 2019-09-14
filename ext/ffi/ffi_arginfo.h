@@ -69,3 +69,5 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FFI_string, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_FFI_isNull arginfo_class_FFI_free

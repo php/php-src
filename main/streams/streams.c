@@ -1586,33 +1586,31 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	while(1) {
 		size_t readchunk = sizeof(buf);
 		ssize_t didread;
+		char *writeptr;
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
 		}
 
 		didread = php_stream_read(src, buf, readchunk);
+		if (didread <= 0) {
+			*len = haveread;
+			return didread < 0 ? FAILURE : SUCCESS;
+		}
 
-		if (didread > 0) {
-			/* extra paranoid */
-			char *writeptr;
+		towrite = didread;
+		writeptr = buf;
+		haveread += didread;
 
-			towrite = didread;
-			writeptr = buf;
-			haveread += didread;
-
-			while (towrite) {
-				ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
-				if (didwrite <= 0) {
-					*len = haveread - (didread - towrite);
-					return FAILURE;
-				}
-
-				towrite -= didwrite;
-				writeptr += didwrite;
+		while (towrite) {
+			ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
+			if (didwrite <= 0) {
+				*len = haveread - (didread - towrite);
+				return FAILURE;
 			}
-		} else {
-			break;
+
+			towrite -= didwrite;
+			writeptr += didwrite;
 		}
 
 		if (maxlen - haveread == 0) {

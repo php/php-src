@@ -6,10 +6,16 @@ imagepolygon() with a negative num of points
 ?>
 --FILE--
 <?php
+require __DIR__ . '/func.inc';
+
 $im = imagecreate(100, 100);
 $black = imagecolorallocate($im, 0, 0, 0);
-if (imagepolygon($im, array(0, 0, 0, 0, 0, 0), -1, $black)) echo "should be false";
+
+trycatch_dump(
+    fn() => imagepolygon($im, array(0, 0, 0, 0, 0, 0), -1, $black)
+);
+
 imagedestroy($im);
 ?>
---EXPECTF--
-Warning: imagepolygon(): You must give a positive number of points in %s on line %d
+--EXPECT--
+!! [ValueError] You must give a positive number of points

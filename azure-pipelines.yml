@@ -80,5 +80,5 @@ jobs:
         configurationName: COMMUNITY
         configurationParameters: >-
             --enable-debug --enable-zts
-            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'

@@ -229,7 +229,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 22...)                            |     |     |     */
+/* Class Flags (unused: 24...)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -277,6 +277,12 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class has unresolved variance obligations.             |     |     |     */
 #define ZEND_ACC_UNRESOLVED_VARIANCE     (1 << 21) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Class is linked apart from variance obligations.       |     |     |     */
+#define ZEND_ACC_NEARLY_LINKED           (1 << 22) /*  X  |     |     |     */
+/*                                                        |     |     |     */
+/* Whether this class was used in its unlinked state.     |     |     |     */
+#define ZEND_ACC_HAS_UNLINKED_USES       (1 << 23) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 17, 23, 26)                    |     |     |     */
 /* ==============                                         |     |     |     */
@@ -363,7 +369,7 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_NUM(obj, num) \
 	(&(obj)->properties_table[(num)])
 #define OBJ_PROP_TO_OFFSET(num) \
-	((uint32_t)(zend_uintptr_t)OBJ_PROP_NUM(((zend_object*)NULL), num))
+	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
@@ -483,7 +489,7 @@ union _zend_function {
 		zend_function *prototype;
 		uint32_t num_args;
 		uint32_t required_num_args;
-		zend_arg_info *arg_info;
+		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 	} common;
 
 	zend_op_array op_array;
@@ -860,6 +866,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_CLASS_SILENT      0x0100
 #define ZEND_FETCH_CLASS_EXCEPTION   0x0200
 #define ZEND_FETCH_CLASS_ALLOW_UNLINKED 0x0400
+#define ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED 0x0800
 
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)

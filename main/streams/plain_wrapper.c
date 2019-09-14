@@ -242,6 +242,22 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC)
 	return php_stream_fopen_temporary_file(NULL, "php", NULL);
 }
 
+static void detect_is_pipe(php_stdio_stream_data *self) {
+#if defined(S_ISFIFO) && defined(S_ISCHR)
+	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
+		self->is_pipe = S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode);
+	}
+#elif defined(PHP_WIN32)
+	zend_uintptr_t handle = _get_osfhandle(self->fd);
+
+	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
+		DWORD file_type = GetFileType((HANDLE)handle);
+
+		self->is_pipe = file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR;
+	}
+#endif
+}
+
 PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC)
 {
 	php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
@@ -249,28 +265,15 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-#ifdef S_ISFIFO
-		/* detect if this is a pipe */
-		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-		}
-#elif defined(PHP_WIN32)
-		{
-			zend_uintptr_t handle = _get_osfhandle(self->fd);
-
-			if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
-				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-			}
-		}
-#endif
-
+		detect_is_pipe(self);
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->position = -1;
 		} else {
 			stream->position = zend_lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
+			/* FIXME: Is this code still needed? */
 			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
-				stream->position = 0;
 				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 				self->is_pipe = 1;
 			}
@@ -288,23 +291,10 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-#ifdef S_ISFIFO
-		/* detect if this is a pipe */
-		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
-		}
-#elif defined(PHP_WIN32)
-		{
-			zend_uintptr_t handle = _get_osfhandle(self->fd);
-
-			if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
-				self->is_pipe = GetFileType((HANDLE)handle) == FILE_TYPE_PIPE;
-			}
-		}
-#endif
-
+		detect_is_pipe(self);
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+			stream->position = -1;
 		} else {
 			stream->position = zend_ftell(file);
 		}

@@ -2693,18 +2693,19 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
-	const void **orig_handlers;
+	zend_jit_op_array_extension *jit_extension;
 	uint32_t i;
 
 	zend_shared_alloc_lock();
-	orig_handlers = (const void**)ZEND_FUNC_INFO(op_array);
+	jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 
-	if (orig_handlers) {
+	if (jit_extension) {
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
+		*(jit_extension->counter) = ZEND_JIT_HOT_COUNTER_INIT;
 		for (i = 0; i < op_array->last; i++) {
-			op_array->opcodes[i].handler = orig_handlers[i];
+			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 		}
 		ZEND_SET_FUNC_INFO(op_array, NULL);
 
@@ -2723,7 +2724,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes;
-	const void **orig_handlers;
+	zend_jit_op_array_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
 
@@ -2731,11 +2732,12 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 		return FAILURE;
 	}
 
-	orig_handlers = (const void**)zend_shared_alloc(op_array->last * sizeof(void*));
+	jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension) + (op_array->last - 1) * sizeof(void*));
+	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
 	for (i = 0; i < op_array->last; i++) {
-		orig_handlers[i] = op_array->opcodes[i].handler;
+		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
 	}
-	ZEND_SET_FUNC_INFO(op_array, (void*)orig_handlers);
+	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 
 	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 		opline++;

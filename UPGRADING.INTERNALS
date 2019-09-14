@@ -8,6 +8,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   e. zend_parse_parameters 'L' specifier
   f. Arginfo argument types
   g. zend_free_op type and should_free argument of zend_get_zval_ptr()
+  h. zend_value_error()
 
 2. Build system changes
   a. Abstract
@@ -65,6 +66,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      zval *ret = zend_get_zval_ptr(opline, opline->op1_type, &opline->op1,
          execute_data, BP_VAR_R);
      zval *should_free = (op_type & (IS_TMP_VAR|IS_VAR)) ? ret : NULL;
+
+  h. Added the zend_value_error() function, which is intended to be used
+     to raise ValueError when inappropriate argument values are passed
+     to functions.
 
 ========================
 2. Build system changes

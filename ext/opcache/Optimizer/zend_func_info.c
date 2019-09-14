@@ -284,6 +284,7 @@ static const func_info_t func_infos[] = {
 #endif
 	F0("rand",                         MAY_BE_NULL | MAY_BE_LONG),
 	F1("random_bytes",                 MAY_BE_STRING),
+	F1("random_int",                   MAY_BE_LONG),
 	F0("srand",                        MAY_BE_NULL),
 	F0("getrandmax",                   MAY_BE_NULL | MAY_BE_LONG),
 	F0("mt_rand",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
@@ -1460,6 +1461,17 @@ static const func_info_t func_infos[] = {
 	F1("imageaffinematrixconcat",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
 	F0("imagesetinterpolation",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("imageresolution",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+
+	/* ext/spl */
+	F1("class_implements",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("class_parents",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("class_uses",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F0("iterator_apply",						MAY_BE_NULL | MAY_BE_LONG),
+	F0("iterator_count",						MAY_BE_FALSE | MAY_BE_LONG),
+	F1("iterator_to_array",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
+	F1("spl_classes",							MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("spl_object_hash",						MAY_BE_NULL | MAY_BE_STRING),
+	F0("spl_object_id",							MAY_BE_NULL | MAY_BE_LONG),
 
 };
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #71263: fread() does not detects decoding errors from filter bzip2.decompress
+--SKIPIF--
+<?php if (!extension_loaded("bz2")) print "skip bz2 extension not loaded"; ?>
 --FILE--
 <?php
 

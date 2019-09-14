@@ -475,7 +475,7 @@ $op2_free_op_if_var = array(
 $op1_free_op_var_ptr = array(
 	"ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));}",
 	"TMP"      => "",
-	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",
@@ -486,7 +486,7 @@ $op1_free_op_var_ptr = array(
 $op2_free_op_var_ptr = array(
 	"ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));}",
 	"TMP"      => "",
-	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",
@@ -987,6 +987,9 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 }
 
 function is_hot_handler($hot, $op1, $op2, $extra_spec) {
+	if (isset($extra_spec["SMART_BRANCH"]) && $extra_spec["SMART_BRANCH"] == 0) {
+		return false;
+	}
 	if ($hot === 'HOT_' || $hot === 'INLINE_') {
 		return true;
 	} else if ($hot === 'HOT_NOCONST_') {

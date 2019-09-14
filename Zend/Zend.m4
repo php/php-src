@@ -157,6 +157,7 @@ AC_MSG_CHECKING(whether double cast to long preserves least significant bits)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <limits.h>
+#include <stdlib.h>
 
 int main()
 {
@@ -256,6 +257,7 @@ AC_MSG_CHECKING(for MM alignment and log values)
 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef union _mm_align_test {
   void *ptr;

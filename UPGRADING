@@ -44,6 +44,7 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/negative_array_index
   . The default error_reporting level is now E_ALL. Previously it excluded
     E_NOTICE and E_DEPRECATED.
+  . display_startup_errors is now enabled by default.
   . The @ operator will no longer silence fatal errors (E_ERROR, E_CORE_ERROR,
     E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR, E_PARSE). Error handlers
     that expect error_reporting to be 0 when @ is used, should be adjusted to
@@ -224,6 +225,9 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Added ValueError class.
 
 ========================================
 3. Changes in SAPI modules

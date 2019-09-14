@@ -149,7 +149,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 
 		if (S->is_prepared) {
 			spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-			S->result = PQexec(H->server, q);
+			PQclear(PQexec(H->server, q));
 			efree(q);
 		}
 
