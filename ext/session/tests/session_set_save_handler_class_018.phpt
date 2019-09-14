@@ -34,7 +34,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function read($id) {
-		return @file_get_contents($this->path . $id);
+		return (string)@file_get_contents($this->path . $id);
 	}
 
 	public function write($id, $data) {
@@ -55,11 +55,11 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return 'session_set_save_handler_class_018';
 	}
 
 	public function validate_sid($id) {
-		return 'my_sid'===$id;
+		return 'session_set_save_handler_class_018'===$id;
 	}
 }
 
@@ -79,9 +79,12 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
---EXPECTF--
+--CLEAN--
+<?php
+@unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_018');
+--EXPECT--
 *** Testing session_set_save_handler() function: class with validate_sid ***
-string(%d) "my_sid"
+string(34) "session_set_save_handler_class_018"
 string(4) "user"
 array(1) {
   ["foo"]=>

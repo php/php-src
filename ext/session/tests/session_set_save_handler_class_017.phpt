@@ -55,7 +55,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return 'session_set_save_handler_class_017';
 	}
 }
 
@@ -75,9 +75,12 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
---EXPECTF--
+--CLEAN--
+<?php
+@unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_017');
+--EXPECT--
 *** Testing session_set_save_handler() function: class with create_sid ***
-string(%d) "my_sid"
+string(34) "session_set_save_handler_class_017"
 string(4) "user"
 array(1) {
   ["foo"]=>
