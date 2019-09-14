@@ -28,34 +28,7 @@
 #endif
 
 #include "fuzzer.h"
-
 #include "fuzzer-sapi.h"
-
-int fuzzer_do_parse(zend_file_handle *file_handle, char *filename)
-{
-	int retval = FAILURE; /* failure by default */
-
-	SG(options) |= SAPI_OPTION_NO_CHDIR;
-	SG(request_info).argc=0;
-	SG(request_info).argv=NULL;
-
-	if (fuzzer_request_startup() == FAILURE) {
-		return FAILURE;
-	}
-
-	SG(headers_sent) = 1;
-	SG(request_info).no_headers = 1;
-	php_register_variable("PHP_SELF", filename, NULL);
-
-	zend_first_try {
-		zend_compile_file(file_handle, ZEND_REQUIRE);
-		//retval = php_execute_script(file_handle);
-	} zend_end_try();
-
-	php_request_shutdown((void *) 0);
-
-	return (retval == SUCCESS) ? SUCCESS : FAILURE;
-}
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	char *s = malloc(Size+1);
@@ -63,7 +36,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	s[Size] = '\0';
 
 	fuzzer_do_request_from_buffer("fuzzer.php", s, Size);
-	//fuzzer_do_parse(&file_handle, "fuzzer.php");
 
 	/* Do not free s: fuzzer_do_request_from_buffer() takes ownership of the allocation. */
 	return 0;
