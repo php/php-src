@@ -234,6 +234,10 @@ PHP 8.0 UPGRADE NOTES
     instead the XmlParser instance is automatically destroyed if it is no longer
     referenced.
 
+- XMLWriter:
+  . The XMLWriter functions now accept and return, respectively, XMLWriter
+    objects instead of resources.
+
 - Zlib:
   . gzgetss() has been removed.
 
