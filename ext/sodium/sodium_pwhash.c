@@ -43,6 +43,11 @@
 static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
 	zval *opt;
 
+	*opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
+	*memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
+	if (!options) {
+		return SUCCESS;
+	}
 	if ((opt = zend_hash_str_find(options, "memory_cost", strlen("memory_cost")))) {
 		zend_long smemlimit = zval_get_long(opt);
 
@@ -67,8 +72,7 @@ static inline int get_options(zend_array *options, size_t *memlimit, size_t *ops
 }
 
 static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_array *options, int alg) {
-	size_t opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
-	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
+	size_t opslimit, memlimit;
 	zend_string *ret;
 
 	if ((ZSTR_LEN(password) >= 0xffffffff)) {
@@ -76,10 +80,8 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 		return NULL;
 	}
 
-	if (options) {
-		if (get_options(options, &memlimit, &opslimit) == FAILURE) {
-			return NULL;
-		}
+	if (get_options(options, &memlimit, &opslimit) == FAILURE) {
+		return NULL;
 	}
 
 	ret = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
@@ -103,15 +105,11 @@ static zend_bool php_sodium_argon2_verify(const zend_string *password, const zen
 }
 
 static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
-	size_t opslimit = PHP_SODIUM_PWHASH_OPSLIMIT;
-	size_t memlimit = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
+	size_t opslimit, memlimit;
 
-	if (options) {
-		if (get_options(options, &memlimit, &opslimit) == FAILURE) {
-			return 1;
-		}
+	if (get_options(options, &memlimit, &opslimit) == FAILURE) {
+		return 1;
 	}
-
 	return crypto_pwhash_str_needs_rehash(ZSTR_VAL(hash), opslimit, memlimit);
 }
 
