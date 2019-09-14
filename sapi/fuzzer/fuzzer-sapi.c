@@ -185,7 +185,11 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
-		zend_compile_file(file_handle, ZEND_REQUIRE);
+		zend_op_array *op_array = zend_compile_file(file_handle, ZEND_REQUIRE);
+		if (op_array) {
+			destroy_op_array(op_array);
+			efree(op_array);
+		}
 		/*retval = php_execute_script(file_handle);*/
 	} zend_end_try();
 
