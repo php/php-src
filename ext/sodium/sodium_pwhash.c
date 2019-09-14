@@ -116,7 +116,7 @@ static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_ar
 static int php_sodium_argon2_get_info(zval *return_value, const zend_string *hash) {
 	const char* p = NULL;
 	zend_long v = 0, threads = 1;
-	zend_long memory_cost = PHP_SODIUM_PWHASH_MEMLIMIT << 10;
+	zend_long memory_cost = PHP_SODIUM_PWHASH_MEMLIMIT;
 	zend_long time_cost = PHP_SODIUM_PWHASH_OPSLIMIT;
 
 	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
