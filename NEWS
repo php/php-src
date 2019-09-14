@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #78510 (Partially uninitialized buffer returned by
     sodium_crypto_generichash_init()). (Frank Denis, cmb)
+  . Fixed bug #78516 (password_hash(): Memory cost is not in allowed range).
+    (cmb, Nikita)
 
 - Standard:
   . Fixed bug #78506 (Error in a php_user_filter::filter() is not reported).
