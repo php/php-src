@@ -17,6 +17,7 @@ steps:
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
+          --show-diff \
           --show-slow 1000 \
           --set-timeout 120 \
           ${{ parameters.runTestsParameters }}
