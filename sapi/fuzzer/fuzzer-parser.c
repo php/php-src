@@ -70,6 +70,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
+	/* Compilation will often trigger fatal errors.
+	 * Use tracked allocation mode to avoid leaks in that case. */
+	putenv("USE_TRACKED_ALLOC=1");
+
 	fuzzer_init_php();
 
 	/* fuzzer_shutdown_php(); */
