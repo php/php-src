@@ -176,6 +176,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
+					zend_type_error("Node passed that cannot be added: %s", ZSTR_VAL(ce->name));
 					return NULL;
 				}
 

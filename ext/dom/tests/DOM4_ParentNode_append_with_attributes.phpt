@@ -19,9 +19,11 @@ $addition = $dom->createAttribute('attr-two');
 $addition->value = '23';
 
 $element = $dom->documentElement;
-$element->append(
-  $replacement, $addition
-);
-echo $dom->saveXML($dom->documentElement);
+
+try {
+    $element->append($replacement, $addition);
+} catch (TypeError $e) {
+    echo $e->getMessage();
+}
 --EXPECT--
-<test attr-one="42" attr-two="23"/>
+Node passed that cannot be added: DOMAttr
