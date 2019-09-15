@@ -39,7 +39,6 @@ extern const zend_function_entry php_dom_userdatahandler_class_functions[];
 extern const zend_function_entry php_dom_domerror_class_functions[];
 extern const zend_function_entry php_dom_domerrorhandler_class_functions[];
 extern const zend_function_entry php_dom_domlocator_class_functions[];
-extern const zend_function_entry php_dom_domconfiguration_class_functions[];
 extern const zend_function_entry php_dom_cdatasection_class_functions[];
 extern const zend_function_entry php_dom_documenttype_class_functions[];
 extern const zend_function_entry php_dom_notation_class_functions[];
@@ -226,11 +225,6 @@ PHP_FUNCTION(dom_userdatahandler_handle);
 PHP_FUNCTION(dom_domerrorhandler_handle_error);
 
 /* domlocator methods */
-
-/* domconfiguration methods */
-PHP_FUNCTION(dom_domconfiguration_set_parameter);
-PHP_FUNCTION(dom_domconfiguration_get_parameter);
-PHP_FUNCTION(dom_domconfiguration_can_set_parameter);
 
 /* domcdatasection methods */
 PHP_METHOD(domcdatasection, __construct);

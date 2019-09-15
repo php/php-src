@@ -18,7 +18,7 @@ if test "$PHP_DOM" != "no"; then
                             documentfragment.c domimplementation.c \
                             element.c node.c string_extend.c characterdata.c \
                             documenttype.c entity.c \
-                            nodelist.c text.c comment.c domconfiguration.c \
+                            nodelist.c text.c comment.c \
                             domimplementationsource.c entityreference.c \
                             notation.c xpath.c dom_iterators.c \
                             typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c],

@@ -53,7 +53,6 @@ PHP_DOM_EXPORT zend_class_entry *dom_userdatahandler_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domerror_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domerrorhandler_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domlocator_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domconfiguration_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_cdatasection_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documenttype_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
@@ -763,7 +762,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_domlocator_prop_handlers, "uri", sizeof("uri")-1, dom_domlocator_uri_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_domlocator_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMConfiguration", NULL, php_dom_domconfiguration_class_functions, dom_domconfiguration_class_entry);
 	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
