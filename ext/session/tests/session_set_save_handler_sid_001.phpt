@@ -68,9 +68,6 @@ session_unset();
 
 session_start();
 var_dump($_SESSION);
-
-session_write_close();
-session_unset();
 --CLEAN--
 <?php
 @unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_sid_001');
