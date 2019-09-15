@@ -180,19 +180,19 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				}
 
 				continue;
+			} else {
+				zend_type_error("Invalid argument type must be either DOMNode or string");
 			}
-		}
+		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
+			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
 
-		if (Z_TYPE(nodes[i]) != IS_STRING) {
-			convert_to_string_ex(&nodes[i]);
-		}
+			xmlSetTreeDoc(newNode, documentNode);
 
-		newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
-
-		xmlSetTreeDoc(newNode, documentNode);
-
-		if (!xmlAddChild(fragment, newNode)) {
-			return NULL;
+			if (!xmlAddChild(fragment, newNode)) {
+				return NULL;
+			}
+		} else {
+			zend_type_error("Invalid argument type must be either DOMNode or string");
 		}
 	}
 
@@ -204,6 +204,10 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 	xmlNode *contextNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib;
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+
+	if (fragment == NULL) {
+		return;
+	}
 
 	newchild = fragment->children;
 	prevsib = contextNode->last;
@@ -240,6 +244,10 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 	xmlNode *contextNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib, nextsib;
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+
+	if (fragment == NULL) {
+		return;
+	}
 
 	newchild = fragment->children;
 	prevsib = NULL;
