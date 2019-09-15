@@ -598,6 +598,10 @@ PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
 		add_next_index_str(return_value, zend_string_copy(str));
