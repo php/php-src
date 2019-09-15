@@ -33,7 +33,6 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_attr_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_element_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_text_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_comment_class_entry;
-extern PHP_DOM_EXPORT zend_class_entry *dom_typeinfo_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_cdatasection_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_documenttype_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;

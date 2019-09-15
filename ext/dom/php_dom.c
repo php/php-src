@@ -47,7 +47,6 @@ PHP_DOM_EXPORT zend_class_entry *dom_attr_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_element_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_text_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_comment_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_typeinfo_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_cdatasection_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documenttype_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
@@ -78,7 +77,6 @@ static HashTable dom_characterdata_prop_handlers;
 static HashTable dom_attr_prop_handlers;
 static HashTable dom_element_prop_handlers;
 static HashTable dom_text_prop_handlers;
-static HashTable dom_typeinfo_prop_handlers;
 static HashTable dom_documenttype_prop_handlers;
 static HashTable dom_notation_prop_handlers;
 static HashTable dom_entity_prop_handlers;
@@ -724,13 +722,6 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_DOM_CLASS(ce, "DOMComment", dom_characterdata_class_entry, php_dom_comment_class_functions, dom_comment_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_characterdata_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMTypeinfo", NULL, php_dom_typeinfo_class_functions, dom_typeinfo_class_entry);
-
-	zend_hash_init(&dom_typeinfo_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_typeinfo_prop_handlers, "typeName", sizeof("typeName")-1, dom_typeinfo_type_name_read, NULL);
-	dom_register_prop_handler(&dom_typeinfo_prop_handlers, "typeNamespace", sizeof("typeNamespace")-1, dom_typeinfo_type_namespace_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_typeinfo_prop_handlers);
-
 	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
@@ -886,7 +877,6 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_attr_prop_handlers);
 	zend_hash_destroy(&dom_element_prop_handlers);
 	zend_hash_destroy(&dom_text_prop_handlers);
-	zend_hash_destroy(&dom_typeinfo_prop_handlers);
 	zend_hash_destroy(&dom_documenttype_prop_handlers);
 	zend_hash_destroy(&dom_notation_prop_handlers);
 	zend_hash_destroy(&dom_entity_prop_handlers);
