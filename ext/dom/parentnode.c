@@ -147,6 +147,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 	xmlNode *newNode;
 	zend_class_entry *ce;
 	dom_object *newNodeObj;
+	int stricterror;
 
 	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
 		documentNode = (xmlDoc *) contextNode;
@@ -159,6 +160,8 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 	if (!fragment) {
 		return NULL;
 	}
+
+	stricterror = dom_get_strict_error(document);
 
 	for (i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
@@ -176,7 +179,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
-					zend_type_error("Node passed that cannot be added: %s", ZSTR_VAL(ce->name));
+					php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 					return NULL;
 				}
 
@@ -292,6 +295,11 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 	contextNode = prevsib->parent;
 	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+
+	if (fragment == NULL) {
+		return;
+	}
+
 	newchild = fragment->children;
 
 	if (newchild) {
@@ -325,6 +333,11 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	prevsib = NULL;
 	contextNode = nextsib->parent;
 	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+
+	if (fragment == NULL) {
+		return;
+	}
+
 	newchild = fragment->children;
 
 	if (newchild) {

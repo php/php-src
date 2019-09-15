@@ -22,8 +22,8 @@ $element = $dom->documentElement;
 
 try {
     $element->append($replacement, $addition);
-} catch (TypeError $e) {
+} catch (DOMException $e) {
     echo $e->getMessage();
 }
 --EXPECT--
-Node passed that cannot be added: DOMAttr
+Hierarchy Request Error
