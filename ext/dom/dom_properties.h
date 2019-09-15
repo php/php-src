@@ -79,9 +79,6 @@ int dom_domerror_related_exception_read(dom_object *obj, zval *retval);
 int dom_domerror_related_data_read(dom_object *obj, zval *retval);
 int dom_domerror_location_read(dom_object *obj, zval *retval);
 
-/* domimplementationlist properties */
-int dom_domimplementationlist_length_read(dom_object *obj, zval *retval);
-
 /* domlocator properties */
 int dom_domlocator_line_number_read(dom_object *obj, zval *retval);
 int dom_domlocator_column_number_read(dom_object *obj, zval *retval);
@@ -109,9 +106,6 @@ int dom_entity_version_write(dom_object *obj, zval *newval);
 
 /* namednodemap properties */
 int dom_namednodemap_length_read(dom_object *obj, zval *retval);
-
-/* namelist properties */
-int dom_namelist_length_read(dom_object *obj, zval *retval);
 
 /* node properties */
 int dom_node_node_name_read(dom_object *obj, zval *retval);

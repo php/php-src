@@ -23,7 +23,6 @@
 extern PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
-extern PHP_DOM_EXPORT zend_class_entry *dom_namelist_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domimplementationlist_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domimplementationsource_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
