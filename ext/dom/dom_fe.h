@@ -35,7 +35,6 @@ extern const zend_function_entry php_dom_text_class_functions[];
 extern const zend_function_entry php_dom_comment_class_functions[];
 extern const zend_function_entry php_dom_typeinfo_class_functions[];
 extern const zend_function_entry php_dom_userdatahandler_class_functions[];
-extern const zend_function_entry php_dom_domlocator_class_functions[];
 extern const zend_function_entry php_dom_cdatasection_class_functions[];
 extern const zend_function_entry php_dom_documenttype_class_functions[];
 extern const zend_function_entry php_dom_notation_class_functions[];
@@ -211,8 +210,6 @@ PHP_METHOD(domcomment, __construct);
 
 /* domuserdatahandler methods */
 PHP_FUNCTION(dom_userdatahandler_handle);
-
-/* domlocator methods */
 
 /* domcdatasection methods */
 PHP_METHOD(domcdatasection, __construct);
