@@ -22,7 +22,6 @@
 
 extern const zend_function_entry php_dom_domexception_class_functions[];
 extern const zend_function_entry php_dom_domstringlist_class_functions[];
-extern const zend_function_entry php_dom_domimplementationsource_class_functions[];
 extern const zend_function_entry php_dom_domimplementation_class_functions[];
 extern const zend_function_entry php_dom_documentfragment_class_functions[];
 extern const zend_function_entry php_dom_document_class_functions[];
@@ -76,10 +75,6 @@ typedef enum {
 
 /* domstringlist methods */
 PHP_FUNCTION(dom_domstringlist_item);
-
-/* domimplementationsource methods */
-PHP_FUNCTION(dom_domimplementationsource_get_domimplementation);
-PHP_FUNCTION(dom_domimplementationsource_get_domimplementations);
 
 /* domimplementation methods */
 PHP_METHOD(domimplementation, hasFeature);

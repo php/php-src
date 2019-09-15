@@ -19,7 +19,7 @@ if test "$PHP_DOM" != "no"; then
                             element.c node.c string_extend.c characterdata.c \
                             documenttype.c entity.c \
                             nodelist.c text.c comment.c \
-                            domimplementationsource.c entityreference.c \
+                            entityreference.c \
                             notation.c xpath.c dom_iterators.c \
                             typeinfo.c domlocator.c namednodemap.c userdatahandler.c],
                             $ext_shared)

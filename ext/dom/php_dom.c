@@ -37,7 +37,6 @@
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domimplementationsource_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
@@ -607,7 +606,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_domstringlist_prop_handlers, "length", sizeof("length")-1, dom_domstringlist_length_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_domstringlist_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMImplementationSource", NULL, php_dom_domimplementationsource_class_functions, dom_domimplementationsource_class_entry);
 	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, php_dom_domimplementation_class_functions, dom_domimplementation_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, php_dom_node_class_functions, dom_node_class_entry);
