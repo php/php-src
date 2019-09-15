@@ -37,9 +37,6 @@
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_namelist_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domimplementationlist_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domimplementationsource_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
@@ -50,12 +47,6 @@ PHP_DOM_EXPORT zend_class_entry *dom_attr_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_element_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_text_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_comment_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_typeinfo_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_userdatahandler_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domerror_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domerrorhandler_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domlocator_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domconfiguration_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_cdatasection_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documenttype_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
@@ -78,8 +69,6 @@ zend_object_handlers dom_xpath_object_handlers;
 static HashTable classes;
 /* {{{ prop handler tables */
 static HashTable dom_domstringlist_prop_handlers;
-static HashTable dom_namelist_prop_handlers;
-static HashTable dom_domimplementationlist_prop_handlers;
 static HashTable dom_document_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
@@ -88,9 +77,6 @@ static HashTable dom_characterdata_prop_handlers;
 static HashTable dom_attr_prop_handlers;
 static HashTable dom_element_prop_handlers;
 static HashTable dom_text_prop_handlers;
-static HashTable dom_typeinfo_prop_handlers;
-static HashTable dom_domerror_prop_handlers;
-static HashTable dom_domlocator_prop_handlers;
 static HashTable dom_documenttype_prop_handlers;
 static HashTable dom_notation_prop_handlers;
 static HashTable dom_entity_prop_handlers;
@@ -615,19 +601,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_domstringlist_prop_handlers, "length", sizeof("length")-1, dom_domstringlist_length_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_domstringlist_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMNameList", NULL, php_dom_namelist_class_functions, dom_namelist_class_entry);
-
-	zend_hash_init(&dom_namelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_namelist_prop_handlers, "length", sizeof("length")-1, dom_namelist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_namelist_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMImplementationList", NULL, php_dom_domimplementationlist_class_functions, dom_domimplementationlist_class_entry);
-
-	zend_hash_init(&dom_domimplementationlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domimplementationlist_prop_handlers, "length", sizeof("length")-1, dom_domimplementationlist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domimplementationlist_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMImplementationSource", NULL, php_dom_domimplementationsource_class_functions, dom_domimplementationsource_class_entry);
 	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, php_dom_domimplementation_class_functions, dom_domimplementation_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, php_dom_node_class_functions, dom_node_class_entry);
@@ -749,37 +722,6 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_DOM_CLASS(ce, "DOMComment", dom_characterdata_class_entry, php_dom_comment_class_functions, dom_comment_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_characterdata_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMTypeinfo", NULL, php_dom_typeinfo_class_functions, dom_typeinfo_class_entry);
-
-	zend_hash_init(&dom_typeinfo_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_typeinfo_prop_handlers, "typeName", sizeof("typeName")-1, dom_typeinfo_type_name_read, NULL);
-	dom_register_prop_handler(&dom_typeinfo_prop_handlers, "typeNamespace", sizeof("typeNamespace")-1, dom_typeinfo_type_namespace_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_typeinfo_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMUserDataHandler", NULL, php_dom_userdatahandler_class_functions, dom_userdatahandler_class_entry);
-	REGISTER_DOM_CLASS(ce, "DOMDomError", NULL, php_dom_domerror_class_functions, dom_domerror_class_entry);
-
-	zend_hash_init(&dom_domerror_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "severity", sizeof("severity")-1, dom_domerror_severity_read, NULL);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "message", sizeof("message")-1, dom_domerror_message_read, NULL);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "type", sizeof("type")-1, dom_domerror_type_read, NULL);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "relatedException", sizeof("relatedException")-1, dom_domerror_related_exception_read, NULL);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "related_data", sizeof("related_data")-1, dom_domerror_related_data_read, NULL);
-	dom_register_prop_handler(&dom_domerror_prop_handlers, "location", sizeof("location")-1, dom_domerror_location_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domerror_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMErrorHandler", NULL, php_dom_domerrorhandler_class_functions, dom_domerrorhandler_class_entry);
-	REGISTER_DOM_CLASS(ce, "DOMLocator", NULL, php_dom_domlocator_class_functions, dom_domlocator_class_entry);
-
-	zend_hash_init(&dom_domlocator_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domlocator_prop_handlers, "lineNumber", sizeof("lineNumber")-1, dom_domlocator_line_number_read, NULL);
-	dom_register_prop_handler(&dom_domlocator_prop_handlers, "columnNumber", sizeof("columnNumber")-1, dom_domlocator_column_number_read, NULL);
-	dom_register_prop_handler(&dom_domlocator_prop_handlers, "offset", sizeof("offset")-1, dom_domlocator_offset_read, NULL);
-	dom_register_prop_handler(&dom_domlocator_prop_handlers, "relatedNode", sizeof("relatedNode")-1, dom_domlocator_related_node_read, NULL);
-	dom_register_prop_handler(&dom_domlocator_prop_handlers, "uri", sizeof("uri")-1, dom_domlocator_uri_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domlocator_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMConfiguration", NULL, php_dom_domconfiguration_class_functions, dom_domconfiguration_class_entry);
 	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
@@ -926,8 +868,6 @@ PHP_MINFO_FUNCTION(dom)
 PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 {
 	zend_hash_destroy(&dom_domstringlist_prop_handlers);
-	zend_hash_destroy(&dom_namelist_prop_handlers);
-	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
 	zend_hash_destroy(&dom_document_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);
@@ -937,9 +877,6 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_attr_prop_handlers);
 	zend_hash_destroy(&dom_element_prop_handlers);
 	zend_hash_destroy(&dom_text_prop_handlers);
-	zend_hash_destroy(&dom_typeinfo_prop_handlers);
-	zend_hash_destroy(&dom_domerror_prop_handlers);
-	zend_hash_destroy(&dom_domlocator_prop_handlers);
 	zend_hash_destroy(&dom_documenttype_prop_handlers);
 	zend_hash_destroy(&dom_notation_prop_handlers);
 	zend_hash_destroy(&dom_entity_prop_handlers);

@@ -22,9 +22,6 @@
 
 extern const zend_function_entry php_dom_domexception_class_functions[];
 extern const zend_function_entry php_dom_domstringlist_class_functions[];
-extern const zend_function_entry php_dom_namelist_class_functions[];
-extern const zend_function_entry php_dom_domimplementationlist_class_functions[];
-extern const zend_function_entry php_dom_domimplementationsource_class_functions[];
 extern const zend_function_entry php_dom_domimplementation_class_functions[];
 extern const zend_function_entry php_dom_documentfragment_class_functions[];
 extern const zend_function_entry php_dom_document_class_functions[];
@@ -36,12 +33,6 @@ extern const zend_function_entry php_dom_attr_class_functions[];
 extern const zend_function_entry php_dom_element_class_functions[];
 extern const zend_function_entry php_dom_text_class_functions[];
 extern const zend_function_entry php_dom_comment_class_functions[];
-extern const zend_function_entry php_dom_typeinfo_class_functions[];
-extern const zend_function_entry php_dom_userdatahandler_class_functions[];
-extern const zend_function_entry php_dom_domerror_class_functions[];
-extern const zend_function_entry php_dom_domerrorhandler_class_functions[];
-extern const zend_function_entry php_dom_domlocator_class_functions[];
-extern const zend_function_entry php_dom_domconfiguration_class_functions[];
 extern const zend_function_entry php_dom_cdatasection_class_functions[];
 extern const zend_function_entry php_dom_documenttype_class_functions[];
 extern const zend_function_entry php_dom_notation_class_functions[];
@@ -81,17 +72,6 @@ typedef enum {
 
 /* domstringlist methods */
 PHP_FUNCTION(dom_domstringlist_item);
-
-/* domnamelist methods */
-PHP_FUNCTION(dom_namelist_get_name);
-PHP_FUNCTION(dom_namelist_get_namespace_uri);
-
-/* domimplementationlist methods */
-PHP_FUNCTION(dom_domimplementationlist_item);
-
-/* domimplementationsource methods */
-PHP_FUNCTION(dom_domimplementationsource_get_domimplementation);
-PHP_FUNCTION(dom_domimplementationsource_get_domimplementations);
 
 /* domimplementation methods */
 PHP_METHOD(domimplementation, hasFeature);
@@ -223,23 +203,6 @@ PHP_METHOD(domtext, __construct);
 
 /* domcomment methods */
 PHP_METHOD(domcomment, __construct);
-
-/* domtypeinfo methods */
-
-/* domuserdatahandler methods */
-PHP_FUNCTION(dom_userdatahandler_handle);
-
-/* domdomerror methods */
-
-/* domerrorhandler methods */
-PHP_FUNCTION(dom_domerrorhandler_handle_error);
-
-/* domlocator methods */
-
-/* domconfiguration methods */
-PHP_FUNCTION(dom_domconfiguration_set_parameter);
-PHP_FUNCTION(dom_domconfiguration_get_parameter);
-PHP_FUNCTION(dom_domconfiguration_can_set_parameter);
 
 /* domcdatasection methods */
 PHP_METHOD(domcdatasection, __construct);
