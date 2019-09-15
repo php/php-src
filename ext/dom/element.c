@@ -1309,48 +1309,15 @@ PHP_METHOD(domelement, remove)
 	zval *id;
 	xmlNodePtr children, child;
 	dom_object *intern;
-	int stricterror;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
+	id = ZEND_THIS;
 	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
 
-	if (dom_node_children_valid(child) == FAILURE) {
-		RETURN_NULL();
-	}
-
-	stricterror = dom_get_strict_error(intern->document);
-
-	if (dom_node_is_read_only(child) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_NULL();
-	}
-
-	while (children) {
-		if (children == child) {
-			xmlUnlinkNode(child);
-			RETURN_NULL();
-		}
-		children = children->next;
-	}
-
-	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_NULL();
+	dom_child_node_remove(intern);
 }
 /* }}} end DOMElement::remove */
 

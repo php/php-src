@@ -363,4 +363,44 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	}
 }
 
+void dom_child_node_remove(dom_object *context)
+{
+	xmlNode *child = dom_object_get_node(context);
+	xmlNodePtr children;
+	int stricterror;
+
+	if (dom_node_children_valid(child) == FAILURE) {
+		return;
+	}
+
+	stricterror = dom_get_strict_error(context->document);
+
+	if (dom_node_is_read_only(child) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		return;
+	}
+
+	if (!child->parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return;
+	}
+
+	children = child->parent->children;
+	if (!children) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return;
+	}
+
+	while (children) {
+		if (children == child) {
+			xmlUnlinkNode(child);
+			return;
+		}
+		children = children->next;
+	}
+
+	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+}
+
 #endif
