@@ -198,6 +198,7 @@ PHP_FUNCTION(dom_characterdata_replace_data);
 PHP_METHOD(domcharacterdata, remove);
 PHP_METHOD(domcharacterdata, after);
 PHP_METHOD(domcharacterdata, before);
+PHP_METHOD(domcharacterdata, replaceWith);
 
 /* domattr methods */
 PHP_FUNCTION(dom_attr_is_id);
@@ -228,6 +229,7 @@ PHP_METHOD(domelement, after);
 PHP_METHOD(domelement, before);
 PHP_METHOD(domelement, append);
 PHP_METHOD(domelement, prepend);
+PHP_METHOD(domelement, replaceWith);
 
 /* domtext methods */
 PHP_FUNCTION(dom_text_split_text);

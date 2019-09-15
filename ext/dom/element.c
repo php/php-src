@@ -130,6 +130,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_prepend, 0, 0, 0)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_element_replace_with, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -164,6 +167,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_ME(domelement, before, arginfo_dom_element_before, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, append, arginfo_dom_element_append, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, prepend, arginfo_dom_element_prepend, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, replaceWith, arginfo_dom_element_replace_with, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1429,6 +1433,16 @@ PHP_METHOD(domelement, prepend)
 	} else {
 		dom_parent_node_prepend(intern, args, argc);
 	}
+}
+/* }}} end DOMElement::prepend */
+
+/* {{{ proto void domelement::replaceWith(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(domelement, replaceWith)
+{
+	DOM_NOT_IMPLEMENTED();
 }
 /* }}} end DOMElement::prepend */
 

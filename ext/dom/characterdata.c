@@ -60,6 +60,9 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_before, 0, 0, 0)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_with, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -78,6 +81,7 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_ME(domcharacterdata, remove, arginfo_dom_characterdata_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, after, arginfo_dom_characterdata_after, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, before, arginfo_dom_characterdata_before, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, replaceWith, arginfo_dom_characterdata_replace_with, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -483,6 +487,11 @@ PHP_METHOD(domcharacterdata, before)
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
 	dom_parent_node_before(intern, args, argc);
+}
+
+PHP_METHOD(domcharacterdata, replaceWith)
+{
+	DOM_NOT_IMPLEMENTED();
 }
 
 #endif
