@@ -71,14 +71,6 @@ int dom_documenttype_public_id_read(dom_object *obj, zval *retval);
 int dom_documenttype_system_id_read(dom_object *obj, zval *retval);
 int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval);
 
-/* domerror properties */
-int dom_domerror_severity_read(dom_object *obj, zval *retval);
-int dom_domerror_message_read(dom_object *obj, zval *retval);
-int dom_domerror_type_read(dom_object *obj, zval *retval);
-int dom_domerror_related_exception_read(dom_object *obj, zval *retval);
-int dom_domerror_related_data_read(dom_object *obj, zval *retval);
-int dom_domerror_location_read(dom_object *obj, zval *retval);
-
 /* domlocator properties */
 int dom_domlocator_line_number_read(dom_object *obj, zval *retval);
 int dom_domlocator_column_number_read(dom_object *obj, zval *retval);
