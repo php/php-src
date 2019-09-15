@@ -40,6 +40,10 @@ object(DOMText)#%d (21) {
   "
   ["length"]=>
   int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -58,10 +62,6 @@ object(DOMText)#%d (21) {
   ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
-  NULL
-  ["previousElementSibling"]=>
-  NULL
-  ["nextElementSibling"]=>
   NULL
   ["attributes"]=>
   NULL
@@ -90,6 +90,10 @@ object(DOMElement)#%d (23) {
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(3)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "form1"
   ["nodeValue"]=>
@@ -111,10 +115,6 @@ object(DOMElement)#%d (23) {
   ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
-  NULL
-  ["previousElementSibling"]=>
-  NULL
-  ["nextElementSibling"]=>
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
@@ -144,6 +144,10 @@ object(DOMText)#%d (21) {
 "
   ["length"]=>
   int(1)
+  ["previousElementSibling"]=>
+  NULL
+  ["nextElementSibling"]=>
+  NULL
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
@@ -162,10 +166,6 @@ object(DOMText)#%d (21) {
   ["previousSibling"]=>
   NULL
   ["nextSibling"]=>
-  NULL
-  ["previousElementSibling"]=>
-  NULL
-  ["nextElementSibling"]=>
   NULL
   ["attributes"]=>
   NULL
