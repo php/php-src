@@ -1307,7 +1307,7 @@ Since:
 PHP_METHOD(domelement, remove)
 {
 	zval *id;
-	xmlNodePtr children, child;
+	xmlNodePtr child;
 	dom_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1409,7 +1409,20 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(domelement, replaceWith)
 {
-	DOM_NOT_IMPLEMENTED();
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+	dom_child_node_remove(intern);
 }
 /* }}} end DOMElement::prepend */
 

@@ -491,7 +491,20 @@ PHP_METHOD(domcharacterdata, before)
 
 PHP_METHOD(domcharacterdata, replaceWith)
 {
-	DOM_NOT_IMPLEMENTED();
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+	dom_child_node_remove(intern);
 }
 
 #endif
