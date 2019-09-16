@@ -171,6 +171,11 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				newNodeObj = Z_DOMOBJ_P(&nodes[i]);
 				newNode = dom_object_get_node(newNodeObj);
 
+				if (newNode->doc != documentNode) {
+					php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
+					return NULL;
+				}
+
 				if (newNode->parent != NULL) {
 					xmlUnlinkNode(newNode);
 				}
