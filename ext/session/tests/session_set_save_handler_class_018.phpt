@@ -55,11 +55,11 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'session_set_save_handler_class_018';
+		return pathinfo(__FILE__)['filename'];
 	}
 
 	public function validate_sid($id) {
-		return 'session_set_save_handler_class_018'===$id;
+		return pathinfo(__FILE__)['filename']===$id;
 	}
 }
 

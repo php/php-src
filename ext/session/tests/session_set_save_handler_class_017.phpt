@@ -55,7 +55,7 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return 'session_set_save_handler_class_017';
+		return pathinfo(__FILE__)['filename'];
 	}
 }
 

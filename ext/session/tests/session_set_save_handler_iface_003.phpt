@@ -56,7 +56,7 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
 	}
 
 	public function create_sid() {
-		return 'session_set_save_handler_iface_003';
+		return pathinfo(__FILE__)['filename'];
 	}
 }
 

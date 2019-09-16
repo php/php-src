@@ -50,7 +50,7 @@ class MySession2 {
 	}
 
 	public function create_sid() {
-		return 'session_set_save_handler_sid_001';
+		return pathinfo(__FILE__)['filename'];
 	}
 }
 
