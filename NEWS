@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed incorrect usage of QM_ASSIGN instruction. It must not return IS_VAR.
-    As a side effect, this allowed passigng left hand list() "by reference",
+    As a side effect, this allowed passing left hand list() "by reference",
     instead of compile-time error. (Dmitry)
   . Fixed bug #78531 (Crash when using undefined variable as object). (Dmitry)
   . Fixed bug #78535 (auto_detect_line_endings value not parsed as bool).
