@@ -65,6 +65,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 		zval_ptr_dtor(&result);
+
+		/* Destroy any thrown exception. */
+		if (EG(exception)) {
+			zend_object_release(EG(exception));
+			EG(exception) = NULL;
+		}
 	}
 
 	/* Unserialize may create circular structure. Make sure we free them. */
