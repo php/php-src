@@ -992,6 +992,85 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		ssa_verify_integrity(op_array, ssa, "before dfa");
 #endif
 
+		/* Split series of assignments */
+		for (v = op_array->last_var; v < ssa->vars_count; v++) {
+			int op_2, v_2;
+			zend_op *opline2;
+
+			if (ssa->vars[v].var < op_array->last_var
+			 || ssa->vars[v].definition < 0
+			 || ssa->ops[ssa->vars[v].definition].result_def != v
+			 || ssa->vars[v].use_chain < 0
+			 || ssa->vars[v].phi_use_chain != NULL
+			 || ssa->vars[v].sym_use_chain != NULL) {
+				continue;
+			}
+
+			op_1 = ssa->vars[v].definition;
+			opline = op_array->opcodes + op_1;
+
+			if (opline->result_type != IS_VAR
+			 || (opline->opcode != ZEND_ASSIGN
+			  && opline->opcode != ZEND_ASSIGN_OP
+			  && opline->opcode != ZEND_PRE_INC
+			  && opline->opcode != ZEND_POST_INC)
+			 || opline->op1_type != IS_CV) {
+				continue;
+			}
+
+			op_2 = ssa->vars[v].use_chain;
+			opline2 = op_array->opcodes + op_2;
+			v_2 = ssa->ops[op_1].op1_def;
+
+			if (ssa->vars[v_2].use_chain >= 0
+			 && ssa->vars[v_2].use_chain <= op_2) {
+			 continue;
+			}
+
+			if (ssa->ops[op_2].op1_use == v
+			 && ssa->ops[op_2].op1_use_chain < 0
+			 && opline2->opcode != ZEND_SEND_REF
+			 && opline2->opcode != ZEND_SEND_VAR
+			 && opline2->opcode != ZEND_SEND_VAR_EX
+			 && opline2->opcode != ZEND_SEND_VAR_NO_REF
+			 && opline2->opcode != ZEND_SEND_VAR_NO_REF_EX
+			 && opline2->opcode != ZEND_RETURN_BY_REF) {
+
+				opline->result_type = IS_UNUSED;
+				opline->result.var = 0;
+				opline2->op1_type = IS_CV;
+				opline2->op1.var = opline->op1.var;
+
+				ssa->vars[v].definition = -1;
+				ssa->vars[v].use_chain = -1;
+				ssa->ops[op_1].result_def = -1;
+
+				ssa->ops[op_2].op1_use_chain = ssa->vars[v_2].use_chain;
+				ssa->ops[op_2].op1_use = v_2;
+				ssa->vars[v_2].use_chain = op_2;
+
+			} else if (ssa->ops[op_2].op2_use == v
+			        && ssa->ops[op_2].op2_use_chain < 0) {
+
+				opline->result_type = IS_UNUSED;
+				opline->result.var = 0;
+				opline2->op2_type = IS_CV;
+				opline2->op2.var = opline->op1.var;
+
+				ssa->vars[v].definition = -1;
+				ssa->vars[v].use_chain = -1;
+				ssa->ops[op_1].result_def = -1;
+
+				ssa->ops[op_2].op2_use_chain = ssa->vars[v_2].use_chain;
+				ssa->ops[op_2].op2_use = v_2;
+				ssa->vars[v_2].use_chain = op_2;
+			}
+		}
+
+#if ZEND_DEBUG_DFA
+		ssa_verify_integrity(op_array, ssa, "after split series of assignments");
+#endif
+
 		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
 			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
 				remove_nops = 1;
