@@ -1144,7 +1144,11 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	object_init_ex(rval, ce);
+	if (object_init_ex(rval, ce) == FAILURE) {
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+
 	if (incomplete_class) {
 		php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 	}
