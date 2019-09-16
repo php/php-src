@@ -32,19 +32,33 @@
 #include "ext/standard/php_var.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	zval arg;
+	unsigned char *orig_data = malloc(Size+1);
+
+	memcpy(orig_data, Data, Size);
+	orig_data[Size] = '\0';
 
 	if (fuzzer_request_startup()==FAILURE) {
 		return 0;
 	}
 
-	ZVAL_STRINGL(&arg, (const char *) Data, Size);
-	fuzzer_call_php_func_zval("unserialize", 1, &arg);
-	zval_ptr_dtor(&arg);
+	{
+		const unsigned char *data = orig_data;
+		zval result;
+		ZVAL_UNDEF(&result);
+
+		php_unserialize_data_t var_hash;
+		PHP_VAR_UNSERIALIZE_INIT(var_hash);
+		php_var_unserialize(&result, (const unsigned char **) &data, data + Size, &var_hash);
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+		zval_ptr_dtor(&result);
+	}
 
 	/* Unserialize may create circular structure. Make sure we free them. */
 	zend_gc_collect_cycles();
 	php_request_shutdown(NULL);
+
+	free(orig_data);
 
 	return 0;
 }
