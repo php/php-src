@@ -651,6 +651,8 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		}
 
 		array_init_size(&ary, elements);
+		/* Avoid reallocation due to packed -> mixed conversion. */
+		zend_hash_real_init_mixed(Z_ARRVAL(ary));
 		if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements, NULL)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
