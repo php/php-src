@@ -1,13 +1,38 @@
 Fuzzing SAPI for PHP
+--------------------
 
-Enable fuzzing targets with --enable-fuzzer switch.
+The following `./configure` options can be used to enable the fuzzing SAPI, as well as all availablefuzzers. If you don't build the exif/json/mbstring extensions, fuzzers for these extensions will not be built.
 
-Your compiler should support -fsanitize=address and you need
-to have Fuzzer library around.
+```sh
+./configure \
+    --enable-fuzzer \
+    --with-pic \
+    --enable-exif \
+    --enable-json \
+    --enable-mbstring
+```
+
+You will need a recent version of clang that supports the `-fsanitize=fuzzer-no-link` option.
 
 When running `make` it creates these binaries in `sapi/fuzzer/`:
-* php-fuzz-parser - fuzzing language parser
-* php-fuzz-unserialize - fuzzing unserialize() function
-* php-fuzz-json - fuzzing JSON parser
-* php-fuzz-exif - fuzzing exif_read_data() function (use --enable-exif)
-* php-fuzz-mbstring - fuzzing mb_ereg[i] (requires --enable-mbstring)
+
+* `php-fuzz-parser`: Fuzzing language parser and compiler
+* `php-fuzz-unserialize`: Fuzzing unserialize() function
+* `php-fuzz-json`: Fuzzing JSON parser (requires --enable-json)
+* `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
+* `php-fuzz-mbstring`: fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
+
+Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
+
+```sh
+cp -r sapi/fuzzer/corpus/exif ./my-exif-corpus
+sapi/fuzzer/php-fuzz-exif ./my-exif-corpus
+```
+
+For the unserialize fuzzer, a dictionary of internal classes should be generated first:
+
+```sh
+sapi/cli/php sapi/fuzzer/corpus/generate_unserialize_dict.php
+cp -r sapi/fuzzer/corpus/unserialize ./my-unserialize-corpus
+sapi/fuzzer/php-fuzz-unserialize -dict=$PWD/sapi/fuzzer/corpus/unserialize.dict ./my-unserialize-corpus
+```
