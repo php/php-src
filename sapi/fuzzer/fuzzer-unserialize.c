@@ -42,6 +42,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	fuzzer_call_php_func_zval("unserialize", 1, &arg);
 	zval_ptr_dtor(&arg);
 
+	/* Unserialize may create circular structure. Make sure we free them. */
+	zend_gc_collect_cycles();
 	php_request_shutdown(NULL);
 
 	return 0;
