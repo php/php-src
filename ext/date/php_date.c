@@ -4364,6 +4364,20 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		} \
 	} while (0);
 
+#define PHP_DATE_INTERVAL_READ_PROPERTY_DAYS(member) \
+	do { \
+		zval *z_arg = zend_hash_str_find(myht, "days", sizeof("days") - 1); \
+		if (z_arg && Z_TYPE_P(z_arg) == IS_FALSE) { \
+			(*intobj)->diff->member = -99999; \
+		} else if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) { \
+			zend_string *str = zval_get_string(z_arg); \
+			DATE_A64I((*intobj)->diff->member, ZSTR_VAL(str)); \
+			zend_string_release(str); \
+		} else { \
+			(*intobj)->diff->member = -1LL; \
+		} \
+	} while (0);
+
 #define PHP_DATE_INTERVAL_READ_PROPERTY_DOUBLE(element, member, def) \
 	do { \
 		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
@@ -4392,7 +4406,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	PHP_DATE_INTERVAL_READ_PROPERTY("weekday_behavior", weekday_behavior, int, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("first_last_day_of", first_last_day_of, int, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("invert", invert, int, 0);
-	PHP_DATE_INTERVAL_READ_PROPERTY_I64("days", days);
+	PHP_DATE_INTERVAL_READ_PROPERTY_DAYS(days);
 	PHP_DATE_INTERVAL_READ_PROPERTY("special_type", special.type, unsigned int, 0);
 	PHP_DATE_INTERVAL_READ_PROPERTY_I64("special_amount", special.amount);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_weekday_relative", have_weekday_relative, unsigned int, 0);

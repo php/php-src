@@ -71,7 +71,7 @@ object(DateInterval)#2 (16) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  int(0)
+  bool(false)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>

@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
     Lundin)
 
+- Date:
+  . Fixed bug #70153 (\DateInterval incorrectly unserialized). (Maksim Iakunin)
+
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
