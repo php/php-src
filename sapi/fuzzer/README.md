@@ -7,10 +7,13 @@ The following `./configure` options can be used to enable the fuzzing SAPI, as w
 ./configure \
     --enable-fuzzer \
     --with-pic \
+    --enable-debug-assertions \
     --enable-exif \
     --enable-json \
     --enable-mbstring
 ```
+
+The `--with-pic` option is required to avoid a linking failure. The `--enable-debug-assertions` option can be used to enable debug assertions despite the use of a release build.
 
 You will need a recent version of clang that supports the `-fsanitize=fuzzer-no-link` option.
 

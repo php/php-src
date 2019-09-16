@@ -35,7 +35,8 @@ const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"implicit_flush=1\n"
 	"max_execution_time=20\n"
-	"output_buffering=0\n";
+	"output_buffering=0\n"
+	"error_reporting=0";
 
 static int startup(sapi_module_struct *sapi_module)
 {
