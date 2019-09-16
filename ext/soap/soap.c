@@ -858,7 +858,7 @@ PHP_METHOD(SoapFault, __construct)
 	size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL, *this_ptr;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|s!z!s!z",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|s!z!s!z!",
 		&code,
 		&fault_string, &fault_string_len,
 		&fault_actor, &fault_actor_len,
