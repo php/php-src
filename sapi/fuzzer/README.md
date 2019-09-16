@@ -35,15 +35,15 @@ sapi/fuzzer/php-fuzz-exif ./my-exif-corpus
 For the unserialize fuzzer, a dictionary of internal classes should be generated first:
 
 ```sh
-sapi/cli/php sapi/fuzzer/corpus/generate_unserialize_dict.php
+sapi/cli/php sapi/fuzzer/generate_unserialize_dict.php
 cp -r sapi/fuzzer/corpus/unserialize ./my-unserialize-corpus
-sapi/fuzzer/php-fuzz-unserialize -dict=$PWD/sapi/fuzzer/corpus/unserialize.dict ./my-unserialize-corpus
+sapi/fuzzer/php-fuzz-unserialize -dict=$PWD/sapi/fuzzer/dict/unserialize ./my-unserialize-corpus
 ```
 
 For the parser fuzzer, a corpus may be generated from Zend test files:
 
 ```sh
-sapi/cli/php sapi/fuzzer/corpus/generate_parser_corpus.php
+sapi/cli/php sapi/fuzzer/generate_parser_corpus.php
 mkdir ./my-parser-corpus
 sapi/fuzzer/php-fuzz-parser -merge=1 ./my-parser-corpus sapi/fuzzer/corpus/parser
 sapi/fuzzer/php-fuzz-parser -only_ascii=1 ./my-parser-corpus

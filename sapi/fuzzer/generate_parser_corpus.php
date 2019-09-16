@@ -1,12 +1,12 @@
 <?php
 
-$testsDir = __DIR__ . '/../../../Zend/tests/';
+$testsDir = __DIR__ . '/../../Zend/tests/';
 $it = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($testsDir),
     RecursiveIteratorIterator::LEAVES_ONLY
 );
 
-$corpusDir = __DIR__ . '/parser';
+$corpusDir = __DIR__ . '/corpus/parser';
 @mkdir($corpusDir);
 
 foreach ($it as $file) {

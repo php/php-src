@@ -6,4 +6,4 @@ foreach (get_declared_classes() as $class) {
     $dict .= "\"$len:\\\"$class\\\"\"\n";
 }
 
-file_put_contents(__DIR__ . "/unserialize.dict", $dict);
+file_put_contents(__DIR__ . "/dict/unserialize", $dict);
