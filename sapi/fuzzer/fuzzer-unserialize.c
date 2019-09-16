@@ -73,7 +73,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		}
 	}
 
-	/* Unserialize may create circular structure. Make sure we free them. */
+	/* Unserialize may create circular structure. Make sure we free them.
+	 * Two calls are performed to handle objects with destructors. */
+	zend_gc_collect_cycles();
 	zend_gc_collect_cycles();
 	php_request_shutdown(NULL);
 
