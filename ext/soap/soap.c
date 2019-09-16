@@ -25,6 +25,7 @@
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
 #endif
+#include "soap_arginfo.h"
 #include "zend_exceptions.h"
 
 
@@ -235,206 +236,61 @@ PHP_METHOD(SoapParam, __construct);
 /* SoapHeader Functions */
 PHP_METHOD(SoapHeader, __construct);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_soap__void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapparam___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapheader___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, namespace)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, mustunderstand)
-	ZEND_ARG_INFO(0, actor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapfault___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, faultcode)
-	ZEND_ARG_INFO(0, faultstring)
-	ZEND_ARG_INFO(0, faultactor)
-	ZEND_ARG_INFO(0, detail)
-	ZEND_ARG_INFO(0, faultname)
-	ZEND_ARG_INFO(0, headerfault)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapvar___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, type_name)
-	ZEND_ARG_INFO(0, type_namespace)
-	ZEND_ARG_INFO(0, node_name)
-	ZEND_ARG_INFO(0, node_namespace)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_fault, 0, 0, 2)
-	ZEND_ARG_INFO(0, code)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, actor)
-	ZEND_ARG_INFO(0, details)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_addsoapheader, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, wsdl)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_setpersistence, 0, 0, 1)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_setclass, 0, 0, 1)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_setobject, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapserver_getfunctions, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_addfunction, 0, 0, 1)
-	ZEND_ARG_INFO(0, functions)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapserver_handle, 0, 0, 0)
-	ZEND_ARG_INFO(0, soap_request)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, wsdl)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___call, 0, 0, 2)
-	ZEND_ARG_INFO(0, function_name)
-	ZEND_ARG_INFO(0, arguments)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___soapcall, 0, 0, 2)
-	ZEND_ARG_INFO(0, function_name)
-	ZEND_ARG_INFO(0, arguments)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, input_headers)
-	ZEND_ARG_INFO(1, output_headers)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getfunctions, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___gettypes, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getlastrequest, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getlastresponse, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getlastrequestheaders, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getlastresponseheaders, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___dorequest, 0, 0, 4)
-	ZEND_ARG_INFO(0, request)
-	ZEND_ARG_INFO(0, location)
-	ZEND_ARG_INFO(0, action)
-	ZEND_ARG_INFO(0, version)
-	ZEND_ARG_INFO(0, one_way)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getcookies, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setsoapheaders, 0, 0, 0)
-	ZEND_ARG_INFO(0, soapheaders)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setlocation, 0, 0, 0)
-	ZEND_ARG_INFO(0, new_location)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soap_use_soap_error_handler, 0, 0, 0)
-	ZEND_ARG_INFO(0, handler)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_soap_is_soap_fault, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry soap_functions[] = {
-	PHP_FE(use_soap_error_handler, 	arginfo_soap_use_soap_error_handler)
-	PHP_FE(is_soap_fault, 			arginfo_soap_is_soap_fault)
+	PHP_FE(use_soap_error_handler, 	arginfo_use_soap_error_handler)
+	PHP_FE(is_soap_fault, 			arginfo_is_soap_fault)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_fault_functions[] = {
-	PHP_ME(SoapFault, __construct, arginfo_soapfault___construct, 0)
-	PHP_ME(SoapFault, __toString, arginfo_soap__void, 0)
+	PHP_ME(SoapFault, __construct, arginfo_class_SoapFault___construct, 0)
+	PHP_ME(SoapFault, __toString, arginfo_class_SoapFault___toString, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_server_functions[] = {
-	PHP_ME(SoapServer, __construct, 	arginfo_soapserver___construct, 0)
-	PHP_ME(SoapServer, setPersistence, 	arginfo_soapserver_setpersistence, 0)
-	PHP_ME(SoapServer, setClass, 		arginfo_soapserver_setclass, 0)
-	PHP_ME(SoapServer, setObject, 		arginfo_soapserver_setobject, 0)
-	PHP_ME(SoapServer, addFunction, 	arginfo_soapserver_addfunction, 0)
-	PHP_ME(SoapServer, getFunctions, 	arginfo_soapserver_getfunctions, 0)
-	PHP_ME(SoapServer, handle, 			arginfo_soapserver_handle, 0)
-	PHP_ME(SoapServer, fault, 			arginfo_soapserver_fault, 0)
-	PHP_ME(SoapServer, addSoapHeader, 	arginfo_soapserver_addsoapheader, 0)
+	PHP_ME(SoapServer, __construct, 	arginfo_class_SoapServer___construct, 0)
+	PHP_ME(SoapServer, setPersistence, 	arginfo_class_SoapServer_setPersistence, 0)
+	PHP_ME(SoapServer, setClass, 		arginfo_class_SoapServer_setClass, 0)
+	PHP_ME(SoapServer, setObject, 		arginfo_class_SoapServer_setObject, 0)
+	PHP_ME(SoapServer, addFunction, 	arginfo_class_SoapServer_addFunction, 0)
+	PHP_ME(SoapServer, getFunctions, 	arginfo_class_SoapServer_getFunctions, 0)
+	PHP_ME(SoapServer, handle, 			arginfo_class_SoapServer_handle, 0)
+	PHP_ME(SoapServer, fault, 			arginfo_class_SoapServer_fault, 0)
+	PHP_ME(SoapServer, addSoapHeader, 	arginfo_class_SoapServer_addSoapHeader, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_client_functions[] = {
-	PHP_ME(SoapClient, __construct, 				arginfo_soapclient___construct, 0)
-	PHP_ME(SoapClient, __call, 						arginfo_soapclient___call, 0)
-	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), arginfo_soapclient___soapcall, 0)
-	PHP_ME(SoapClient, __getLastRequest, 			arginfo_soapclient___getlastrequest, 0)
-	PHP_ME(SoapClient, __getLastResponse, 			arginfo_soapclient___getlastresponse, 0)
-	PHP_ME(SoapClient, __getLastRequestHeaders, 	arginfo_soapclient___getlastrequestheaders, 0)
-	PHP_ME(SoapClient, __getLastResponseHeaders, 	arginfo_soapclient___getlastresponseheaders, 0)
-	PHP_ME(SoapClient, __getFunctions, 				arginfo_soapclient___getfunctions, 0)
-	PHP_ME(SoapClient, __getTypes, 					arginfo_soapclient___gettypes, 0)
-	PHP_ME(SoapClient, __doRequest, 				arginfo_soapclient___dorequest, 0)
-	PHP_ME(SoapClient, __setCookie, 				arginfo_soapclient___setcookie, 0)
-	PHP_ME(SoapClient, __getCookies, 				arginfo_soapclient___getcookies, 0)
-	PHP_ME(SoapClient, __setLocation, 				arginfo_soapclient___setlocation, 0)
-	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_soapclient___setsoapheaders, 0)
+	PHP_ME(SoapClient, __construct, 				arginfo_class_SoapClient___construct, 0)
+	PHP_ME(SoapClient, __call, 						arginfo_class_SoapClient___call, 0)
+	ZEND_NAMED_ME(__soapCall, ZEND_MN(SoapClient___call), arginfo_class_SoapClient___soapCall, 0)
+	PHP_ME(SoapClient, __getLastRequest, 			arginfo_class_SoapClient___getLastRequest, 0)
+	PHP_ME(SoapClient, __getLastResponse, 			arginfo_class_SoapClient___getLastResponse, 0)
+	PHP_ME(SoapClient, __getLastRequestHeaders, 	arginfo_class_SoapClient___getLastRequestHeaders, 0)
+	PHP_ME(SoapClient, __getLastResponseHeaders, 	arginfo_class_SoapClient___getLastResponseHeaders, 0)
+	PHP_ME(SoapClient, __getFunctions, 				arginfo_class_SoapClient___getFunctions, 0)
+	PHP_ME(SoapClient, __getTypes, 					arginfo_class_SoapClient___getTypes, 0)
+	PHP_ME(SoapClient, __doRequest, 				arginfo_class_SoapClient___doRequest, 0)
+	PHP_ME(SoapClient, __setCookie, 				arginfo_class_SoapClient___setCookie, 0)
+	PHP_ME(SoapClient, __getCookies, 				arginfo_class_SoapClient___getCookies, 0)
+	PHP_ME(SoapClient, __setLocation, 				arginfo_class_SoapClient___setLocation, 0)
+	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_class_SoapClient___setSoapHeaders, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_var_functions[] = {
-	PHP_ME(SoapVar, __construct, arginfo_soapvar___construct, 0)
+	PHP_ME(SoapVar, __construct, arginfo_class_SoapVar___construct, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_param_functions[] = {
-	PHP_ME(SoapParam, __construct, arginfo_soapparam___construct, 0)
+	PHP_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, 0)
 	PHP_FE_END
 };
 
 static const zend_function_entry soap_header_functions[] = {
-	PHP_ME(SoapHeader, __construct, arginfo_soapheader___construct, 0)
+	PHP_ME(SoapHeader, __construct, arginfo_class_SoapHeader___construct, 0)
 	PHP_FE_END
 };
 
@@ -858,7 +714,7 @@ PHP_METHOD(SoapFault, __construct)
 	size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL, *this_ptr;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|s!z!s!z",
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|s!z!s!z!",
 		&code,
 		&fault_string, &fault_string_len,
 		&fault_actor, &fault_actor_len,
@@ -3101,7 +2957,7 @@ PHP_METHOD(SoapClient, __setCookie)
 	zval *cookies;
 	zval *this_ptr = ZEND_THIS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &val, &val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &name, &name_len, &val, &val_len) == FAILURE) {
 		return;
 	}
 
