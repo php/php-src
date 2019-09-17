@@ -8606,6 +8606,10 @@ ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
 				if (SUCCESS == Z_OBJ_HT_P(op1)->count_elements(op1, &count)) {
 					break;
 				}
+				if (UNEXPECTED(EG(exception))) {
+					count = 0;
+					break;
+				}
 			}
 
 			/* if not and the object implements Countable we call its count() method */

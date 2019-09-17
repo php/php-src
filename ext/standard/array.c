@@ -794,6 +794,9 @@ PHP_FUNCTION(count)
 				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value))) {
 					return;
 				}
+				if (EG(exception)) {
+					return;
+				}
 			}
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), zend_ce_countable)) {

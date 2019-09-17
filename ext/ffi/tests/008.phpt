@@ -16,7 +16,7 @@ foreach ($a as $key => $val) {
 
 $a = FFI::new("struct {int x,y;}");
 try {
-	var_dump(@count($a));
+	var_dump(count($a));
 } catch (Throwable $e) {
 	echo get_class($e) . ": " . $e->getMessage()."\n";
 }
