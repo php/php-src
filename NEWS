@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC2
+19 Sep 2019, PHP 7.4.0RC2
 
 - Core:
   . Fixed incorrect usage of QM_ASSIGN instruction. It must not return IS_VAR.
