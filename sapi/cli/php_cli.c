@@ -1228,6 +1228,10 @@ int main(int argc, char *argv[])
 	 */
 	argv = save_ps_args(argc, argv);
 
+	/* Check std stream validity very early, to avoid some code opening a file
+	 * and overwriting an stdio file descriptor. */
+	cli_check_stdio_stream_validity();
+
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE)
 	php_win32_console_fileno_set_vt100(STDOUT_FILENO, TRUE);
 	php_win32_console_fileno_set_vt100(STDERR_FILENO, TRUE);
@@ -1363,10 +1367,6 @@ exit_loop:
 	}
 
 	sapi_module->ini_entries = ini_entries;
-
-	/* Check std stream validity prior to module startup, in case MINIT opens file
-	 * descriptors and overrides the stdio file descriptors. */
-	cli_check_stdio_stream_validity();
 
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
