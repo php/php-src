@@ -87,6 +87,21 @@ PHP 8.0 UPGRADE NOTES
   . mktime() and gmmktime() now require at least one argument. time() can be
     used to get the current timestamp.
 
+- dom:
+  . Remove unimplemented classes from ext/dom that had no behavior and contained
+    test data. These classes have also been removed in the latest version of DOM
+	standard:
+
+     * DOMNameList
+     * DomImplementationList
+     * DOMConfiguration
+     * DomError
+     * DomErrorHandler
+     * DOMImplementationSource
+     * DOMLocator
+     * DOMUserDataHandler
+     * DOMTypeInfo
+
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
 
@@ -156,7 +171,7 @@ PHP 8.0 UPGRADE NOTES
 - PDO:
   . The method PDOStatement::setFetchMode() now accepts the following signature:
 
-        PDOStatement::setFetchMode($mode, $classname, $params) 
+        PDOStatement::setFetchMode($mode, $classname, $params)
 
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
