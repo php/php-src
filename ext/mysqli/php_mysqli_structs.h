@@ -123,6 +123,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	zend_bool		persistent;
+	zend_bool		disable_cleanup; /* Disable dtor cleanup */
 #if defined(MYSQLI_USE_MYSQLND)
 	int				async_result_fetch_type;
 #endif

@@ -34,6 +34,7 @@ PHP_FUNCTION(mysqli_connect_errno);
 PHP_FUNCTION(mysqli_connect_error);
 PHP_FUNCTION(mysqli_data_seek);
 PHP_FUNCTION(mysqli_debug);
+PHP_FUNCTION(mysqli_disable_cleanup);
 PHP_FUNCTION(mysqli_dump_debug_info);
 PHP_FUNCTION(mysqli_errno);
 PHP_FUNCTION(mysqli_error);

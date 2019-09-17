@@ -804,6 +804,25 @@ PHP_FUNCTION(mysqli_debug)
 }
 /* }}} */
 
+/* {{{ proto void mysqli_disable_cleanup(object link, bool value)
+   Turn link cleanup on or off when the object is destroyed
+*/
+PHP_FUNCTION(mysqli_disable_cleanup)
+{
+	MY_MYSQL *mysql;
+	zval *mysql_link;
+	zend_bool value;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &mysql_link, mysqli_link_class_entry, &value) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
+	mysql->disable_cleanup = value;
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 /* {{{ proto bool mysqli_dump_debug_info(object link)
 */
 PHP_FUNCTION(mysqli_dump_debug_info)
@@ -1510,6 +1529,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
 	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;
+	mysql->disable_cleanup = FALSE;
 
 	if (!is_method) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);
