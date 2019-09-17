@@ -160,6 +160,14 @@ TSRM_API const char *tsrm_api_name(void);
 # define TSRM_TLS __thread
 #endif
 
+#if !defined(__has_attribute) || !__has_attribute(tls_model)
+# define TSRM_TLS_MODEL_ATTR
+#elif __PIC__
+# define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
+#else
+# define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("local-exec")))
+#endif
+
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
 
@@ -174,8 +182,8 @@ TSRM_API const char *tsrm_api_name(void);
 #define TSRMG_BULK_STATIC(id, type)	((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])
 #define TSRMG_FAST_STATIC(offset, type, element)	(TSRMG_FAST_BULK_STATIC(offset, type)->element)
 #define TSRMG_FAST_BULK_STATIC(offset, type)	((type) (((char*) TSRMLS_CACHE)+(offset)))
-#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE;
-#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR;
+#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE TSRM_TLS_MODEL_ATTR = NULL;
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
 #define TSRMLS_CACHE _tsrm_ls_cache
 
