@@ -8,9 +8,10 @@ allow_url_fopen=1
 <?php
 require 'server.inc';
 
+$timeout = 0.5;
 $options = [
   'http' => [
-    'timeout' => '0.1',
+    'timeout' => $timeout,
   ],
 ];
 
@@ -20,8 +21,9 @@ $pid = http_server_sleep('tcp://127.0.0.1:12342');
 
 $start = microtime(true);
 file_get_contents('http://127.0.0.1:12342/', false, $ctx);
-if (microtime(true) - $start >= 0.2) {
-    echo 'FAIL';
+$diff = microtime(true) - $start;
+if ($diff >= 2 * $timeout) {
+    echo "FAIL: $diff\n";
 }
 
 http_server_kill($pid);
