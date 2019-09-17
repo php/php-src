@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #78525 (Memory leak in pdo when reusing native prepared
     statements). (Nikita)
 
+- Standard:
+  . Fixed bug #76342 (file_get_contents waits twice specified timeout).
+    (Thomas Calvet)
+
 12 Sep 2019, PHP 7.3.10RC1
 
 - Core:
