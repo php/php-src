@@ -76,6 +76,16 @@ PHP 8.0 UPGRADE NOTES
   . The precedence of the concatenation operator has changed relative to
     bitshifts and addition as well as subtraction.
     RFC: https://wiki.php.net/rfc/concatenation_precedence
+  . Arguments with a default-value that resolves to null at run-time will no
+    longer implicitly mark the argument type as nullable. Either use an explicit
+    nullable type, or an explicit null default value instead.
+
+        // Replace
+        function test(int $arg = CONST_RESOLVING_TO_NULL) {}
+        // With
+        function test(?int $arg = CONST_RESOLVING_TO_NULL) {}
+        // Or
+        function test(int $arg = null) {}
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

@@ -1115,23 +1115,6 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
-static int is_null_constant(zend_class_entry *scope, zval *default_value)
-{
-	if (Z_CONSTANT_P(default_value)) {
-		zval constant;
-
-		ZVAL_COPY(&constant, default_value);
-		if (UNEXPECTED(zval_update_constant_ex(&constant, scope) != SUCCESS)) {
-			return 0;
-		}
-		if (Z_TYPE(constant) == IS_NULL) {
-			return 1;
-		}
-		zval_ptr_dtor(&constant);
-	}
-	return 0;
-}
-
 static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
 {
     switch (type_hint) {
@@ -1313,12 +1296,11 @@ static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *o
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot, zval *default_value)
+static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
 	zend_class_entry *ce = NULL;
 
-	if (Z_TYPE_P(arg) == IS_NULL &&
-		(ZEND_TYPE_ALLOW_NULL(arg_info->type) || (default_value && is_null_constant(op_array->scope, default_value)))) {
+	if (Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 		/* Null passed to nullable type */
 		return;
 	}
