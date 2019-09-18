@@ -3411,12 +3411,17 @@ check_func:
 			}
 			return 0;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
-				fcc->called_scope = fcc->calling_scope;
-				if (fcc == &fcc_local) {
-					zend_release_fcall_info_cache(fcc);
+			if (Z_OBJ_HANDLER_P(callable, get_closure)) {
+				if (Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
+					fcc->called_scope = fcc->calling_scope;
+					if (fcc == &fcc_local) {
+						zend_release_fcall_info_cache(fcc);
+					}
+					return 1;
+				} else {
+					/* Discard exceptions thrown from Z_OBJ_HANDLER_P(callable, get_closure) */
+					zend_clear_exception();
 				}
-				return 1;
 			}
 			if (error) *error = estrdup("no array or string given");
 			return 0;

@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC3
 
+- FFI:
+  . Fixed bug #78543 (is_callable() on FFI\CData throws Exception). (cmb)
 
 19 Sep 2019, PHP 7.4.0RC2
 
