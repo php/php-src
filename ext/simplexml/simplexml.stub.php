@@ -1,13 +1,12 @@
 <?php
 
-/** @return SimpleXMLElement */
-function simplexml_load_file(string $filename, string $class_name = 'SimpleXMLElement', int $options = 0, string $ns = null, bool $is_prefix = false) {}
+/** @return SimpleXMLElement|false */
+function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
 
-/** @return SimpleXMLElement */
-function simplexml_load_string(string $data, string $class_name = 'SimpleXMLElement', int $options = 0, string $ns = null, bool $is_prefix = false) {}
+/** @return SimpleXMLElement|false */
+function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
 
-/** @return SimpleXMLElement */
-function simplexml_import_dom(DOMNode $node, string $class_name = 'SimpleXMLElement') {}
+function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
 class SimpleXMLElement {
     /** @return array|false */
