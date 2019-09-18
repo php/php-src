@@ -17,6 +17,7 @@ function dba_exists($key, $handle): bool {}
 
 /**
  * @param string|array $key
+ * @param int|resource $skip actually this parameter is optional, not $handle
  * @param resource $handle
  * @return string|false
  */
