@@ -52,16 +52,15 @@ sapi/fuzzer/php-fuzz-parser -only_ascii=1 ./my-parser-corpus
 For the mbstring fuzzer, you may want to build the libonig dependency with instrumentation. At this time, libonig is not clean under ubsan, so only the fuzzer and address sanitizers may be used.
 
 ```sh
-mkdir libonig
-pushd libonig
-wget -O - https://github.com/kkos/oniguruma/releases/download/v6.9.3/onig-6.9.3.tar.gz \
-    | tar -xz --strip-components=1
+git clone https://github.com/kkos/oniguruma.git
+pushd oniguruma
+autoreconf -vfi
 ./configure CC=clang CFLAGS="-fsanitize=fuzzer-no-link,address -O2 -g"
 make
 popd
 
-export ONIG_CFLAGS="-I$PWD/libonig/src"
-export ONIG_LIBS="-L$PWD/libonig/src/.libs -l:libonig.a"
+export ONIG_CFLAGS="-I$PWD/oniguruma/src"
+export ONIG_LIBS="-L$PWD/oniguruma/src/.libs -l:libonig.a"
 ```
 
 This will link an instrumented libonig statically into the PHP binary.
