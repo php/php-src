@@ -18,6 +18,7 @@ function dba_exists($key, $handle): bool {}
 /**
  * @param string|array $key
  * @param resource $handle
+ * @return string|false
  */
 function dba_fetch($key, $skip, $handle = UNKOWN) {}
 
