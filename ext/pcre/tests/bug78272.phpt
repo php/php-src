@@ -16,14 +16,12 @@ if ($pid === 0) {
     print "End child\n";
     exit(0);
 } else {
-    print "Main start\n";
     pcntl_waitpid($pid, $status);
     print "End Main\n";
     exit(0);
 }
 ?>
 --EXPECT--
-Main start
 Child start
 Array
 (
