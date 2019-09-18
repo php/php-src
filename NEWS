@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #78525 (Memory leak in pdo when reusing native prepared
     statements). (Nikita)
 
+- PCRE:
+  . Fixed bug #78272 (calling preg_match() before pcntl_fork() will freeze
+    child process). (Nikita)
+
 - Standard:
   . Fixed bug #76342 (file_get_contents waits twice specified timeout).
     (Thomas Calvet)
