@@ -29,6 +29,7 @@
 #include "ext/spl/php_spl.h"
 #include "ext/spl/spl_iterators.h"
 #include "sxe.h"
+#include "sxe_arginfo.h"
 
 PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator = NULL;
 PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
@@ -166,19 +167,14 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	ZVAL_COPY_DEREF(return_value, data);
 }
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_simplexmliterator__void, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry funcs_SimpleXMLIterator[] = {
-	PHP_ME(ce_SimpleXMLIterator, rewind,                 arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, valid,                  arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, current,                arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, key,                    arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, next,                   arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, hasChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	PHP_ME(ce_SimpleXMLIterator, getChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, rewind,                 arginfo_class_SimpleXMLIterator_rewind, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, valid,                  arginfo_class_SimpleXMLIterator_valid, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, current,                arginfo_class_SimpleXMLIterator_current, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, key,                    arginfo_class_SimpleXMLIterator_key, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, next,                   arginfo_class_SimpleXMLIterator_next, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, hasChildren,            arginfo_class_SimpleXMLIterator_hasChildren, ZEND_ACC_PUBLIC)
+	PHP_ME(ce_SimpleXMLIterator, getChildren,            arginfo_class_SimpleXMLIterator_getChildren, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
