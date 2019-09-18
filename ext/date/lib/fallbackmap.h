@@ -37,6 +37,6 @@
 	{ "jst",   0,  540 * 60, "Asia/Tokyo" },
 	{ "est",   0,  600 * 60, "Australia/Melbourne" },
 	{ "cst",   1,  630 * 60, "Australia/Adelaide" },
-	{ "est",   1,  660 * 60, "Australia/Melbourne" },
+	{ "edt",   1,  660 * 60, "Australia/Melbourne" },
 	{ "nzst",  0,  720 * 60, "Pacific/Auckland" },
 	{ "nzdt",  1,  780 * 60, "Pacific/Auckland" },
