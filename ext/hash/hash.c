@@ -29,6 +29,8 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
+#include "hash_arginfo.h"
+
 HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
 static zend_object_handlers php_hashcontext_handlers;
@@ -597,6 +599,10 @@ Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
@@ -1302,119 +1308,6 @@ PHP_MINFO_FUNCTION(hash)
 #endif
 
 }
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_init, 0, 0, 1)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_update, 0)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_stream, 0, 0, 2)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, handle)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, stream_context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_copy, 0)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_pbkdf2, 0, 0, 4)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, iterations)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_equals, 0)
-	ZEND_ARG_INFO(0, known_string)
-	ZEND_ARG_INFO(0, user_string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hkdf, 0, 0, 2)
-	ZEND_ARG_INFO(0, ikm)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, salt)
-ZEND_END_ARG_INFO()
-
-/* BC Land */
-#ifdef PHP_MHASH_BC
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_hash_name, 0)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
-	ZEND_ARG_INFO(0, hash)
-	ZEND_ARG_INFO(0, input_password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, bytes)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_count, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mhash, 0, 0, 2)
-	ZEND_ARG_INFO(0, hash)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-#endif
-
 /* }}} */
 
 /* {{{ hash_functions[]

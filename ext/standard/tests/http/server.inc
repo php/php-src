@@ -7,14 +7,7 @@ function http_server_skipif($socket_string) {
 	if (!stream_socket_server($socket_string)) die('skip stream_socket_server() failed');
 }
 
-/* Minimal HTTP server with predefined responses.
- *
- * $socket_string is the socket to create and listen on (e.g. tcp://127.0.0.1:1234)
- * $files is an array of files containing N responses for N expected requests. Server dies after N requests.
- * $output is a stream on which everything sent by clients is written to
- */
-function http_server($socket_string, array $files, &$output = null) {
-
+function http_server_init($socket_string, &$output = null) {
 	pcntl_alarm(60);
 
 	$server = stream_socket_server($socket_string, $errno, $errstr);
@@ -34,6 +27,21 @@ function http_server($socket_string, array $files, &$output = null) {
 		die('could not fork');
 	} else if ($pid) {
 		return $pid;
+	}
+
+	return $server;
+}
+
+/* Minimal HTTP server with predefined responses.
+ *
+ * $socket_string is the socket to create and listen on (e.g. tcp://127.0.0.1:1234)
+ * $files is an array of files containing N responses for N expected requests. Server dies after N requests.
+ * $output is a stream on which everything sent by clients is written to
+ */
+function http_server($socket_string, array $files, &$output = null) {
+
+	if (!is_resource($server = http_server_init($socket_string, $output))) {
+		return $server;
 	}
 
 	foreach($files as $file) {
@@ -80,6 +88,24 @@ function http_server($socket_string, array $files, &$output = null) {
 
 		fclose($sock);
 	}
+
+	exit(0);
+}
+
+function http_server_sleep($socket_string, $micro_seconds = 500000)
+{
+	if (!is_resource($server = http_server_init($socket_string, $output))) {
+		return $server;
+	}
+
+	$sock = stream_socket_accept($server);
+	if (!$sock) {
+		exit(1);
+	}
+
+	usleep($micro_seconds);
+
+	fclose($sock);
 
 	exit(0);
 }

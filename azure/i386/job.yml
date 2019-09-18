@@ -61,6 +61,7 @@ jobs:
             --enable-sysvmsg \
             --with-ffi \
             --enable-zend-test \
+            --with-mhash \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d

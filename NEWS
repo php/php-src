@@ -48,4 +48,8 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
 
+- XMLWriter:
+  . Changed functions to accept/return XMKWriter objects instead of resources.
+    (cmb)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

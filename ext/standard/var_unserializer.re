@@ -651,6 +651,8 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, zend_
 		}
 
 		array_init_size(&ary, elements);
+		/* Avoid reallocation due to packed -> mixed conversion. */
+		zend_hash_real_init_mixed(Z_ARRVAL(ary));
 		if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL(ary), elements, NULL)) {
 			ZVAL_DEREF(rval);
 			GC_ADD_FLAGS(Z_OBJ_P(rval), IS_OBJ_DESTRUCTOR_CALLED);
@@ -953,7 +955,7 @@ use_double:
 	*p = YYCURSOR;
     if (!var_hash) return 0;
 
-	if (elements < 0 || elements >= HT_MAX_SIZE) {
+	if (elements < 0 || elements >= HT_MAX_SIZE || elements > max - YYCURSOR) {
 		return 0;
 	}
 
@@ -1124,10 +1126,11 @@ object ":" uiv ":" ["]	{
 	}
 
 	elements = parse_iv2(*p + 2, p);
-	if (elements < 0) {
+	if (elements < 0 || elements > max - YYCURSOR) {
 		zend_string_release_ex(class_name, 0);
 		return 0;
 	}
+
 	*p += 2;
 
 	has_unserialize = !incomplete_class
@@ -1143,7 +1146,11 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
-	object_init_ex(rval, ce);
+	if (object_init_ex(rval, ce) == FAILURE) {
+		zend_string_release_ex(class_name, 0);
+		return 0;
+	}
+
 	if (incomplete_class) {
 		php_store_class_name(rval, ZSTR_VAL(class_name), len2);
 	}
