@@ -3904,7 +3904,12 @@ PHP_FUNCTION(usleep)
 		php_error_docref(NULL, E_WARNING, "Number of microseconds must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
-	usleep((unsigned int)num);
+	if (usleep((unsigned int)num) < 0) {
+#if ZEND_DEBUG
+		php_error_docref(NULL, E_NOTICE, "usleep() failed with errno %d: %s",
+			errno, strerror(errno));
+#endif
+	}
 #endif
 }
 /* }}} */
