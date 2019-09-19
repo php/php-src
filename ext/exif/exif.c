@@ -3171,6 +3171,14 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 }
 /* }}} */
 
+#define REQUIRE_NON_EMPTY() do { \
+	if (byte_count == 0) { \
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname(tag, tagname, -12, tag_table)); \
+		return FALSE; \
+	} \
+} while (0)
+
+
 /* {{{ exif_process_IFD_TAG
  * Process one of the nested IFDs directories. */
 static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
@@ -3288,8 +3296,12 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	}
 #endif
 
+	/* NB: The following code may not assume that there is at least one component!
+	 * byte_count may be zero! */
+
 	if (section_index==SECTION_THUMBNAIL) {
 		if (!ImageInfo->Thumbnail.data) {
+			REQUIRE_NON_EMPTY();
 			switch(tag) {
 				case TAG_IMAGEWIDTH:
 				case TAG_COMP_IMAGE_WIDTH:
@@ -3372,6 +3384,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			case TAG_FNUMBER:
 				/* Simplest way of expressing aperture, so I trust it the most.
 				   (overwrite previously computed value if there is one) */
+				REQUIRE_NON_EMPTY();
 				ImageInfo->ApertureFNumber = (float)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel);
 				break;
 
@@ -3380,6 +3393,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				/* More relevant info always comes earlier, so only use this field if we don't
 				   have appropriate aperture information yet. */
 				if (ImageInfo->ApertureFNumber == 0) {
+					REQUIRE_NON_EMPTY();
 					ImageInfo->ApertureFNumber
 						= expf(exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel)*logf(2.0)*0.5);
 				}
@@ -3391,6 +3405,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				   SHUTTERSPEED comes after EXPOSURE TIME
 				  */
 				if (ImageInfo->ExposureTime == 0) {
+					REQUIRE_NON_EMPTY();
 					ImageInfo->ExposureTime
 						= expf(-exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel)*logf(2.0));
 				}
@@ -3400,20 +3415,24 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_COMP_IMAGE_WIDTH:
+				REQUIRE_NON_EMPTY();
 				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, exif_rewrite_tag_format_to_unsigned(format), ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FOCALPLANE_X_RES:
+				REQUIRE_NON_EMPTY();
 				ImageInfo->FocalplaneXRes = exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel);
 				break;
 
 			case TAG_SUBJECT_DISTANCE:
 				/* Inidcates the distacne the autofocus camera is focused to.
 				   Tends to be less accurate as distance increases. */
+				REQUIRE_NON_EMPTY();
 				ImageInfo->Distance = (float)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel);
 				break;
 
 			case TAG_FOCALPLANE_RESOLUTION_UNIT:
+				REQUIRE_NON_EMPTY();
 				switch((int)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel)) {
 					case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
 					case 2:
@@ -3456,6 +3475,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 			case TAG_GPS_IFD_POINTER:
 			case TAG_INTEROP_IFD_POINTER:
 				if (ReadNextIFD) {
+					REQUIRE_NON_EMPTY();
 					char *Subdir_start;
 					int sub_section_index = 0;
 					switch(tag) {
