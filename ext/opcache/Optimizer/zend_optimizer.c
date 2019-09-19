@@ -657,8 +657,8 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_VERIFY_RETURN_TYPE: {
 					zend_arg_info *ret_info = op_array->arg_info - 1;
 					if (ZEND_TYPE_IS_CLASS(ret_info->type)
-						|| ZEND_TYPE_CODE(ret_info->type) == IS_CALLABLE
-						|| !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(val))
+						|| (ZEND_TYPE_IS_MASK(ret_info->type)
+							&& !ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(val)))
 						|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 						return 0;
 					}

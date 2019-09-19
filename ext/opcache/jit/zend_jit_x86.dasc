@@ -7019,19 +7019,10 @@ static uint32_t skip_valid_arguments(zend_op_array *op_array, zend_ssa *ssa, zen
 		zend_arg_info *arg_info = func->op_array.arg_info + num_args;
 
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
-			if (!ZEND_TYPE_IS_CLASS(arg_info->type)) {
-				unsigned char code = ZEND_TYPE_CODE(arg_info->type);
+			if (ZEND_TYPE_IS_MASK(arg_info->type)) {
+				uint32_t type_mask = ZEND_TYPE_MASK(arg_info->type);
 				uint32_t info = _ssa_op1_info(op_array, ssa, call_info->arg_info[num_args].opline);
-
-				if (code == _IS_BOOL) {
-					if (info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_FALSE|MAY_BE_TRUE))) {
-						break;
-					}
-				} else if (code <= IS_RESOURCE) {
-					if (info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (1 << code))) {
-						break;
-					}
-				} else {
+				if ((info & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
 					break;
 				}
 			} else {
@@ -8945,6 +8936,16 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 {
 	uint32_t arg_num = opline->op1.num;
 
+	|	cmp dword EX->This.u2.num_args, arg_num
+	|	jb >1
+	|.cold_code
+	|1:
+	|	SAVE_VALID_OPLINE opline
+	|	mov FCARG1a, FP
+	|	EXT_CALL zend_missing_arg_error, r0
+	|	jmp ->exception_handler
+	|.code
+
 	if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		zend_arg_info *arg_info = NULL;
 
@@ -8966,18 +8967,13 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 					|	add r0, offsetof(zend_reference, val)
 				}
 				if (!ZEND_TYPE_IS_CLASS(type)) {
-					unsigned char code = ZEND_TYPE_CODE(type);
-
-					if (code == _IS_BOOL) {
-						|	cmp byte [r0 + 8], IS_FALSE
-						|	je >1
-						|	cmp byte [r0 + 8], IS_TRUE
-						|	jne >8
-						|1:
-					} else {
-						|	cmp byte [r0 + 8], code
-						|	jne >8
-					}
+					// TODO: Use bt?
+					uint32_t type_mask = ZEND_TYPE_MASK(type);
+					|	mov edx, 1
+					|	mov cl, byte [r0 + 8]
+					|	shl edx, cl
+					|	test edx, type_mask
+					|	je >8
 				} else {
 					|	SAVE_VALID_OPLINE opline
 					|	cmp byte [r0 + 8], IS_OBJECT
@@ -9054,16 +9050,6 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 		}
 	}
 
-	|	cmp dword EX->This.u2.num_args, arg_num
-	|	jb >1
-	|.cold_code
-	|1:
-	|	SAVE_VALID_OPLINE opline
-	|	mov FCARG1a, FP
-	|	EXT_CALL zend_missing_arg_error, r0
-	|	jmp ->exception_handler
-	|.code
-
 	if ((opline+1)->opcode != ZEND_RECV && (opline+1)->opcode != ZEND_RECV_INIT) {
 		last_valid_opline = NULL;
 		if (!zend_jit_set_valid_ip(Dst, opline + 1)) {
@@ -9125,8 +9111,12 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			|	LOAD_ZVAL_ADDR r0, res_addr
 			|	ZVAL_DEREF r0, MAY_BE_REF
 			if (!ZEND_TYPE_IS_CLASS(arg_info->type)) {
-			|	cmp byte [r0 + 8], ZEND_TYPE_CODE(arg_info->type)
-			|	jne >8
+				// TODO: Use bt?
+			|	mov edx, 1
+			|	mov cl, byte [r0 + 8]
+			|	shl edx, cl
+			|	test edx, ZEND_TYPE_MASK(arg_info->type)
+			|	je >8
 			} else {
 			|	cmp byte [r0 + 8], IS_OBJECT
 			|	jne >8

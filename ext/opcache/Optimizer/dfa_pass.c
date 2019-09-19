@@ -312,6 +312,8 @@ static inline zend_bool can_elide_return_type_check(
 	zend_ssa_var_info *use_info = &ssa->var_info[ssa_op->op1_use];
 	zend_ssa_var_info *def_info = &ssa->var_info[ssa_op->op1_def];
 
+	/* TODO: It would be better to rewrite this without using def_info,
+	 * which may not be an exact representation of the type. */
 	if (use_info->type & MAY_BE_REF) {
 		return 0;
 	}
@@ -322,7 +324,8 @@ static inline zend_bool can_elide_return_type_check(
 	}
 
 	/* These types are not represented exactly */
-	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE || ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
+	if (ZEND_TYPE_IS_MASK(info->type)
+			&& (ZEND_TYPE_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE))) {
 		return 0;
 	}
 

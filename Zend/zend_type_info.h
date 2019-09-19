@@ -34,7 +34,12 @@
 #define MAY_BE_ANY                  (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)
 #define MAY_BE_REF                  (1 << IS_REFERENCE) /* may be reference */
 
-#define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
+/* These are used in zend_type, but not for type inference. */
+#define MAY_BE_CALLABLE             (1 << IS_CALLABLE)
+#define MAY_BE_ITERABLE             (1 << IS_ITERABLE)
+#define MAY_BE_VOID                 (1 << IS_VOID)
+
+#define MAY_BE_ARRAY_SHIFT          (IS_VOID)
 
 #define MAY_BE_ARRAY_OF_NULL		(MAY_BE_NULL     << MAY_BE_ARRAY_SHIFT)
 #define MAY_BE_ARRAY_OF_FALSE		(MAY_BE_FALSE    << MAY_BE_ARRAY_SHIFT)
@@ -48,11 +53,11 @@
 #define MAY_BE_ARRAY_OF_ANY			(MAY_BE_ANY      << MAY_BE_ARRAY_SHIFT)
 #define MAY_BE_ARRAY_OF_REF			(MAY_BE_REF      << MAY_BE_ARRAY_SHIFT)
 
-#define MAY_BE_ARRAY_KEY_LONG       (1<<21)
-#define MAY_BE_ARRAY_KEY_STRING     (1<<22)
+#define MAY_BE_ARRAY_KEY_LONG       (1<<25)
+#define MAY_BE_ARRAY_KEY_STRING     (1<<26)
 #define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
 
-#define MAY_BE_ERROR                (1<<23)
-#define MAY_BE_CLASS                (1<<24)
+#define MAY_BE_ERROR                (1<<27)
+#define MAY_BE_CLASS                (1<<28)
 
 #endif /* ZEND_TYPE_INFO_H */

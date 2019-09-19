@@ -506,6 +506,12 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_ARGV,                   "argv") \
 	_(ZEND_STR_ARGC,                   "argc") \
 	_(ZEND_STR_ARRAY_CAPITALIZED,      "Array") \
+	_(ZEND_STR_BOOL,                   "bool") \
+	_(ZEND_STR_INT,                    "int") \
+	_(ZEND_STR_FLOAT,                  "float") \
+	_(ZEND_STR_CALLABLE,               "callable") \
+	_(ZEND_STR_ITERABLE,               "iterable") \
+	_(ZEND_STR_VOID,                   "void") \
 
 
 typedef enum _zend_known_string_id {

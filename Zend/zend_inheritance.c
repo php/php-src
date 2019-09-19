@@ -348,7 +348,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		}
 
 		return unlinked_instanceof(fe_ce, proto_ce) ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
-	} else if (ZEND_TYPE_CODE(proto_type) == IS_ITERABLE) {
+	} else if (ZEND_TYPE_MASK(proto_type) & MAY_BE_ITERABLE) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
 			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
@@ -360,9 +360,9 @@ static inheritance_status zend_perform_covariant_type_check(
 				? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 		}
 
-		return ZEND_TYPE_CODE(fe_type) == IS_ITERABLE || ZEND_TYPE_CODE(fe_type) == IS_ARRAY
+		return ZEND_TYPE_MASK(fe_type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE)
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
-	} else if (ZEND_TYPE_CODE(proto_type) == IS_OBJECT) {
+	} else if (ZEND_TYPE_MASK(proto_type) & MAY_BE_OBJECT) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			/* Currently, any class name would be allowed here. We still perform a class lookup
 			 * for forward-compatibility reasons, as we may have named types in the future that
@@ -376,9 +376,10 @@ static inheritance_status zend_perform_covariant_type_check(
 			return INHERITANCE_SUCCESS;
 		}
 
-		return ZEND_TYPE_CODE(fe_type) == IS_OBJECT ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+		return ZEND_TYPE_MASK(fe_type) & MAY_BE_OBJECT ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else {
-		return ZEND_TYPE_CODE(fe_type) == ZEND_TYPE_CODE(proto_type)
+		return ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(fe_type))
+			== ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(proto_type))
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
 }
@@ -516,33 +517,10 @@ static inheritance_status zend_do_perform_implementation_check(
 
 static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function *fptr, zend_arg_info *arg_info, int return_hint) /* {{{ */
 {
-
-	if (ZEND_TYPE_IS_SET(arg_info->type) && ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-		smart_str_appendc(str, '?');
-	}
-
-	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-		const char *class_name;
-		size_t class_name_len;
-
-		class_name = ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type));
-		class_name_len = ZSTR_LEN(ZEND_TYPE_NAME(arg_info->type));
-
-		if (!strcasecmp(class_name, "self") && fptr->common.scope) {
-			class_name = ZSTR_VAL(fptr->common.scope->name);
-			class_name_len = ZSTR_LEN(fptr->common.scope->name);
-		} else if (!strcasecmp(class_name, "parent") && fptr->common.scope && fptr->common.scope->parent) {
-			class_name = ZSTR_VAL(fptr->common.scope->parent->name);
-			class_name_len = ZSTR_LEN(fptr->common.scope->parent->name);
-		}
-
-		smart_str_appendl(str, class_name, class_name_len);
-		if (!return_hint) {
-			smart_str_appendc(str, ' ');
-		}
-	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
-		const char *type_name = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
-		smart_str_appends(str, type_name);
+	if (ZEND_TYPE_IS_SET(arg_info->type)) {
+		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, fptr->common.scope);
+		smart_str_append(str, type_str);
+		zend_string_release(type_str);
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
@@ -942,14 +920,13 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
 				if (!property_types_compatible(parent_info, child_info)) {
+					zend_string *type_str =
+						zend_type_to_string_resolved(parent_info->type, parent_info->ce);
 					zend_error_noreturn(E_COMPILE_ERROR,
-					"Type of %s::$%s must be %s%s (as in class %s)",
+					"Type of %s::$%s must be %s (as in class %s)",
 						ZSTR_VAL(ce->name),
 						ZSTR_VAL(key),
-						ZEND_TYPE_ALLOW_NULL(parent_info->type) ? "?" : "",
-						ZEND_TYPE_IS_CLASS(parent_info->type)
-							? ZSTR_VAL(ZEND_TYPE_IS_CE(parent_info->type) ? ZEND_TYPE_CE(parent_info->type)->name : zend_resolve_property_type(ZEND_TYPE_NAME(parent_info->type), parent_info->ce))
-							: zend_get_type_by_const(ZEND_TYPE_CODE(parent_info->type)),
+						ZSTR_VAL(type_str),
 						ZSTR_VAL(ce->parent->name));
 				}
 			} else if (UNEXPECTED(ZEND_TYPE_IS_SET(child_info->type) && !ZEND_TYPE_IS_SET(parent_info->type))) {
