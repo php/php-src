@@ -327,7 +327,8 @@ static inline zend_bool can_elide_return_type_check(
 		return 0;
 	}
 
-	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE) {
+	/* These types are not represented exactly */
+	if (ZEND_TYPE_CODE(info->type) == IS_CALLABLE || ZEND_TYPE_CODE(info->type) == IS_ITERABLE) {
 		return 0;
 	}
 
