@@ -113,7 +113,7 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry
- * ZEND_TYPE_CODE()       - returns standard type code (e.g. IS_LONG, _IS_BOOL)
+ * ZEND_TYPE_MASK()       - returns MAY_BE_* type mask
  *
  * ZEND_TYPE_ALLOW_NULL() - checks if NULL is allowed
  *
@@ -123,44 +123,57 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
 
 typedef uintptr_t zend_type;
 
+#define _ZEND_TYPE_CODE_MAX ((Z_L(1)<<(IS_VOID+1))-1)
+#define _ZEND_TYPE_FLAG_MASK Z_L(0x3)
+#define _ZEND_TYPE_CE_BIT Z_L(0x1)
+/* Must have same value as MAY_BE_NULL */
+#define _ZEND_TYPE_NULLABLE_BIT Z_L(0x2)
+
 #define ZEND_TYPE_IS_SET(t) \
-	((t) > Z_L(0x3))
+	((t) > _ZEND_TYPE_FLAG_MASK)
 
 #define ZEND_TYPE_IS_CODE(t) \
-	(((t) > Z_L(0x3)) && ((t) <= Z_L(0x3ff)))
+	(((t) > _ZEND_TYPE_FLAG_MASK) && ((t) <= _ZEND_TYPE_CODE_MAX))
 
 #define ZEND_TYPE_IS_CLASS(t) \
-	((t) > Z_L(0x3ff))
+	((t) > _ZEND_TYPE_CODE_MAX)
 
 #define ZEND_TYPE_IS_CE(t) \
-	(((t) & Z_L(0x2)) != 0)
+	(((t) & _ZEND_TYPE_CE_BIT) != 0)
 
 #define ZEND_TYPE_IS_NAME(t) \
 	(ZEND_TYPE_IS_CLASS(t) && !ZEND_TYPE_IS_CE(t))
 
 #define ZEND_TYPE_NAME(t) \
-	((zend_string*)((t) & ~Z_L(0x3)))
+	((zend_string*)((t) & ~_ZEND_TYPE_FLAG_MASK))
 
 #define ZEND_TYPE_CE(t) \
-	((zend_class_entry*)((t) & ~Z_L(0x3)))
+	((zend_class_entry*)((t) & ~_ZEND_TYPE_FLAG_MASK))
 
-#define ZEND_TYPE_CODE(t) \
-	((t) >> Z_L(2))
+#define ZEND_TYPE_MASK(t) \
+	(t)
+
+#define ZEND_TYPE_CONTAINS_CODE(t, code) \
+	(((t) & (1 << (code))) != 0)
 
 #define ZEND_TYPE_ALLOW_NULL(t) \
-	(((t) & Z_L(0x1)) != 0)
+	(((t) & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
 #define ZEND_TYPE_WITHOUT_NULL(t) \
-	((t) & ~Z_L(0x1))
+	((t) & ~_ZEND_TYPE_NULLABLE_BIT)
 
-#define ZEND_TYPE_ENCODE(code, allow_null) \
-	(((code) << Z_L(2)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+#define ZEND_TYPE_ENCODE(maybe_code) \
+	(maybe_code)
+
+#define ZEND_TYPE_ENCODE_CODE(code, allow_null) \
+	(((code) == _IS_BOOL ? (MAY_BE_FALSE|MAY_BE_TRUE) : (1 << (code))) \
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CE(ce, allow_null) \
-	(((uintptr_t)(ce)) | ((allow_null) ? Z_L(0x3) : Z_L(0x2)))
+	(((uintptr_t)(ce)) | _ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CLASS(class_name, allow_null) \
-	(((uintptr_t)(class_name)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+	(((uintptr_t)(class_name)) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CLASS_CONST_0(class_name) \
 	((zend_type) class_name)
@@ -424,7 +437,7 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* Fake types used only for type hinting (Z_TYPE(zv) can not use them) */
+/* Fake types used only for type hinting. IS_VOID should be the last. */
 #define IS_CALLABLE					12
 #define IS_ITERABLE					13
 #define IS_VOID						14
