@@ -410,7 +410,7 @@ struct _zend_ast_ref {
 	/*zend_ast        ast; zend_ast follows the zend_ast_ref structure */
 };
 
-/* regular data types */
+/* Regular data types: Must be in sync with zend_variables.c. */
 #define IS_UNDEF					0
 #define IS_NULL						1
 #define IS_FALSE					2
@@ -422,21 +422,21 @@ struct _zend_ast_ref {
 #define IS_OBJECT					8
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
+#define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* constant expressions */
-#define IS_CONSTANT_AST				11
+/* Fake types used only for type hinting (Z_TYPE(zv) can not use them) */
+#define IS_CALLABLE					12
+#define IS_ITERABLE					13
+#define IS_VOID						14
 
 /* internal types */
-#define IS_INDIRECT             	13
-#define IS_PTR						14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	15
+#define IS_PTR						16
+#define _IS_ERROR					17
 
-/* fake types used only for type hinting (Z_TYPE(zv) can not use them) */
-#define _IS_BOOL					16
-#define IS_CALLABLE					17
-#define IS_ITERABLE					18
-#define IS_VOID						19
-#define _IS_NUMBER					20
+/* used for casts */
+#define _IS_BOOL					18
+#define _IS_NUMBER					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
