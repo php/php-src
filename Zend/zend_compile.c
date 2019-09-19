@@ -4541,6 +4541,8 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
 	opnum_start = get_next_op_number();
+	zend_emit_op(NULL, ZEND_LOOP, NULL, NULL);
+
 	zend_compile_stmt(stmt_ast);
 
 	opnum_cond = get_next_op_number();
@@ -4564,6 +4566,8 @@ void zend_compile_do_while(zend_ast *ast) /* {{{ */
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
 	opnum_start = get_next_op_number();
+	zend_emit_op(NULL, ZEND_LOOP, NULL, NULL);
+
 	zend_compile_stmt(stmt_ast);
 
 	opnum_cond = get_next_op_number();
@@ -4615,6 +4619,8 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
 	opnum_start = get_next_op_number();
+	zend_emit_op(NULL, ZEND_LOOP, NULL, NULL);
+
 	zend_compile_stmt(stmt_ast);
 
 	opnum_loop = get_next_op_number();

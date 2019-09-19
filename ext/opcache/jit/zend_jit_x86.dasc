@@ -2180,22 +2180,7 @@ static int zend_jit_hybrid_func_counter_stub(dasm_State **Dst)
 	|	mov r2, aword [r1]
 	|	sub word [r2], ZEND_JIT_HOT_FUNC_COST
 	|	jle >1
-	|	GET_IP r2
-	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
-	|	// divide by sizeof(zend_op)
-	|	.if X64
-	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r2, 5
-	|	.else
-	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r2, 2
-	|		imul r2, 0xb6db6db7
-	|	.endif
-	|	.if X64
-	|		jmp aword [r1+r2*8+8]
-	|	.else
-	|		jmp aword [r1+r2*4+4]
-	|	.endif
+	|	jmp aword [r1+sizeof(void*)]
 	|1:
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
@@ -2212,26 +2197,16 @@ static int zend_jit_hybrid_loop_counter_stub(dasm_State **Dst)
 	|	mov r2, aword [r1]
 	|	sub word [r2], ZEND_JIT_HOT_LOOP_COST
 	|	jle >1
-	|	GET_IP r2
-	|	sub r2, aword [r0 + offsetof(zend_op_array, opcodes)]
-	|	// divide by sizeof(zend_op)
-	|	.if X64
-	||		ZEND_ASSERT(sizeof(zend_op) == 32);
-	|		sar r2, 5
-	|	.else
-	||		ZEND_ASSERT(sizeof(zend_op) == 28);
-	|		sar r2, 2
-	|		imul r2, 0xb6db6db7
-	|	.endif
-	|	.if X64
-	|		jmp aword [r1+r2*8+8]
-	|	.else
-	|		jmp aword [r1+r2*4+4]
-	|	.endif
+	|	ADD_IP sizeof(zend_op)
+	|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
+	|	jne ->interrupt_handler
+	|	JMP_IP
 	|1:
 	|	mov FCARG1a, FP
 	|	GET_IP FCARG2a
 	|	EXT_CALL zend_jit_hot_func, r0
+	|	MEM_OP2_1_ZTS cmp, byte, executor_globals, vm_interrupt, 0, r0
+	|	jne ->interrupt_handler
 	|	JMP_IP
 	return 1;
 }
@@ -9941,6 +9916,14 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		case ZEND_RETURN:
 			regset = ZEND_REGSET_EMPTY;
 			break;
+		case ZEND_LOOP:
+#if ZTS
+			/* %r0 is used to check EG(vm_interrupt) */
+			regset = ZEND_REGSET(ZREG_R0);
+#else
+			regset = ZEND_REGSET_EMPTY;
+#endif
+			break;
 		case ZEND_QM_ASSIGN:
 			if (ssa->ops[line].op1_def == current_var ||
 			    ssa->ops[line].result_def == current_var) {
@@ -10195,18 +10178,6 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 		default:
 			break;
 	}
-
-#if ZTS
-	/* %r0 is used to check EG(vm_interrupt) */
-	{
-		uint32_t b = ssa->cfg.map[line];
-
-		if ((ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) != 0
-		 && ssa->cfg.blocks[b].start == line) {
-			ZEND_REGSET_INCL(regset, ZREG_R0);
-		}
-	}
-#endif
 
 	return regset;
 }

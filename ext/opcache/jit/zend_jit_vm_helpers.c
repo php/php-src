@@ -182,6 +182,26 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLE
 	ZEND_OPCODE_TAIL_CALL(handler);
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_interrupt_helper(ZEND_OPCODE_HANDLER_ARGS)
+{
+	EG(vm_interrupt) = 0;
+	if (EG(timed_out)) {
+		zend_timeout(0);
+	} else if (zend_interrupt_function) {
+#ifdef HAVE_GCC_GLOBAL_REGS
+		EX(opline) = opline;
+#endif
+		zend_interrupt_function(execute_data);
+#ifdef HAVE_GCC_GLOBAL_REGS
+		execute_data = EG(current_execute_data);
+		opline = EX(opline);
+#else
+		return 1;
+#endif
+	}
+	ZEND_OPCODE_RETURN();
+}
+
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_jit_op_array_extension *jit_extension =
@@ -196,7 +216,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_H
 		zend_jit_hot_func(execute_data, opline);
 		ZEND_OPCODE_RETURN();
 	} else {
-		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)jit_extension->orig_handlers[opline - EX(func)->op_array.opcodes];
+		zend_vm_opcode_handler_t handler =
+			(zend_vm_opcode_handler_t)jit_extension->orig_enter_handler;
 		ZEND_OPCODE_TAIL_CALL(handler);
 	}
 }
@@ -213,11 +234,17 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 
 	if (UNEXPECTED(*(jit_extension->counter) <= 0)) {
 		zend_jit_hot_func(execute_data, opline);
-		ZEND_OPCODE_RETURN();
 	} else {
-		zend_vm_opcode_handler_t handler = (zend_vm_opcode_handler_t)jit_extension->orig_handlers[opline - EX(func)->op_array.opcodes];
-		ZEND_OPCODE_TAIL_CALL(handler);
+#ifndef HAVE_GCC_GLOBAL_REGS
+		EX(opline) = opline + 1;
+#else
+		opline++;
+#endif
+    }
+	if (UNEXPECTED(EG(vm_interrupt))) {
+		ZEND_OPCODE_TAIL_CALL(zend_jit_interrupt_helper);
 	}
+	ZEND_OPCODE_RETURN();
 }
 
 static zend_always_inline int _zend_quick_get_constant(

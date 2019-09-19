@@ -2141,11 +2141,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				goto jit_failure;
 			}
 		}
-		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
-			if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
-				goto jit_failure;
-			}
-		}
 		if (!ssa->cfg.blocks[b].len) {
 			continue;
 		}
@@ -2418,6 +2413,11 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 				case ZEND_OP_DATA:
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
+					break;
+				case ZEND_LOOP:
+					if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
+						goto jit_failure;
+					}
 					break;
 				case ZEND_JMP:
 					if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
@@ -2694,18 +2694,30 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 {
 	zend_op_array *op_array = &EX(func)->op_array;
 	zend_jit_op_array_extension *jit_extension;
-	uint32_t i;
 
 	zend_shared_alloc_lock();
 	jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
 
 	if (jit_extension) {
+		zend_op *op, *end;
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
 		*(jit_extension->counter) = ZEND_JIT_HOT_COUNTER_INIT;
-		for (i = 0; i < op_array->last; i++) {
-			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
+		op = (zend_op*)op_array->opcodes;
+		end = op + op_array->last;
+		if (jit_extension->orig_enter_handler) {
+			while (op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT) {
+				op++;
+			}
+			op->handler = jit_extension->orig_enter_handler;
+		}
+		while (op != end) {
+			if (op->opcode == ZEND_LOOP) {
+				/* TODO: avoid function call */
+				zend_vm_set_opcode_handler(op);
+			}
+			op++;
 		}
 		ZEND_SET_FUNC_INFO(op_array, NULL);
 
@@ -2724,33 +2736,34 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes;
+	zend_op *end;
 	zend_jit_op_array_extension *jit_extension;
-	zend_cfg cfg;
-	uint32_t i;
-
-	if (zend_jit_build_cfg(op_array, &cfg) != SUCCESS) {
-		return FAILURE;
-	}
 
 	jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension) + (op_array->last - 1) * sizeof(void*));
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
-	for (i = 0; i < op_array->last; i++) {
-		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
-	}
-	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
+	jit_extension->orig_enter_handler = NULL;
 
 	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 		opline++;
 	}
 
-	opline->handler = (const void*)zend_jit_func_counter_handler;
+	if (opline->opcode != ZEND_LOOP) {
+		jit_extension->orig_enter_handler = opline->handler;
+	}
 
-	for (i = 0; i < cfg.blocks_count; i++) {
-		if ((cfg.blocks[i].flags & ZEND_BB_REACHABLE) &&
-		    (cfg.blocks[i].flags & ZEND_BB_LOOP_HEADER)) {
-		    op_array->opcodes[cfg.blocks[i].start].handler =
+	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
+
+	if (opline->opcode != ZEND_LOOP) {
+		opline->handler = (const void*)zend_jit_func_counter_handler;
+	}
+
+	end = op_array->opcodes + op_array->last;
+	while (opline != end) {
+		if (opline->opcode == ZEND_LOOP) {
+		    opline->handler =
 				(const void*)zend_jit_loop_counter_handler;
 		}
+		opline++;
 	}
 
 	return SUCCESS;

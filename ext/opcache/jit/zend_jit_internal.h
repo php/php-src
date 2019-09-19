@@ -37,7 +37,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 
 typedef struct _zend_jit_op_array_extension {
 	int16_t    *counter;
-	const void *orig_handlers[1];
+	const void *orig_enter_handler;
 } zend_jit_op_array_extension;
 
 static zend_always_inline zend_long zend_jit_op_array_hash(const zend_op_array *op_array)
