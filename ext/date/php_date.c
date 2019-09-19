@@ -2923,7 +2923,7 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	zval              tmp_obj;
 	timelib_tzinfo   *tzi;
 
-	z_date = zend_hash_str_find(myht, "date", sizeof("data")-1);
+	z_date = zend_hash_str_find(myht, "date", sizeof("date")-1);
 	if (z_date && Z_TYPE_P(z_date) == IS_STRING) {
 		zval *z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
 		if (z_timezone_type && Z_TYPE_P(z_timezone_type) == IS_LONG) {
