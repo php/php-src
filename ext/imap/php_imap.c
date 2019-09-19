@@ -540,7 +540,7 @@ static const zend_function_entry imap_functions[] = {
 
 	PHP_FE(imap_mail,								arginfo_imap_mail)
 	PHP_FE(imap_getsubscribed,						arginfo_imap_getsubscribed)
-	PHP_FE(imap_getmailboxes						arginfo_imap_getmailboxes)
+	PHP_FE(imap_getmailboxes,						arginfo_imap_getmailboxes)
 
 	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_headerinfo)
 	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_list)
