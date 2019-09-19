@@ -254,14 +254,12 @@ function imap_lsub($stream_id, string $ref, string $pattern) {}
 /**
  * @param resource $stream_id
  * @return array|false
- * @todo Is this right? It seems like this is/was meant to be an alias for imap_lsub_full, which isn;t exposed as a function?
  */
 function imap_getsubscribed($stream_id, string $ref, string $pattern) {}
 
 /**
  * @param resource $stream_id
  * @return array|false
- * @todo Is this right? It seems like this is/was meant to be an alias for imap_list_full, which isn't exposed as a function?
  */
 function imap_getmailboxes($stream_id, string $ref, string $pattern) {}
 
