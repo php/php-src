@@ -3333,6 +3333,9 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				if (byte_count>1 && (length=php_strnlen(value_ptr, byte_count)) > 0) {
 					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
+						EFREE_IF(ImageInfo->CopyrightPhotographer);
+						EFREE_IF(ImageInfo->CopyrightEditor);
+						EFREE_IF(ImageInfo->Copyright);
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
 						ImageInfo->CopyrightEditor        = estrndup(value_ptr+length+1, byte_count-length-1);
 						spprintf(&ImageInfo->Copyright, 0, "%s, %s", ImageInfo->CopyrightPhotographer, ImageInfo->CopyrightEditor);
@@ -3340,6 +3343,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
 					} else {
+						EFREE_IF(ImageInfo->Copyright);
 						ImageInfo->Copyright = estrndup(value_ptr, byte_count);
 					}
 				}
