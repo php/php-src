@@ -143,7 +143,11 @@ TSRM_API const char *tsrm_api_name(void);
 # define TSRM_TLS __thread
 #endif
 
-#if !defined(__has_attribute) || !__has_attribute(tls_model)
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
+#if !__has_attribute(tls_model)
 # define TSRM_TLS_MODEL_ATTR
 #elif __PIC__
 # define TSRM_TLS_MODEL_ATTR __attribute__((tls_model("initial-exec")))
