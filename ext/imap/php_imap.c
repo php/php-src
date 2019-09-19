@@ -539,13 +539,13 @@ static const zend_function_entry imap_functions[] = {
 #endif
 
 	PHP_FE(imap_mail,								arginfo_imap_mail)
+	PHP_FE(imap_getsubscribed,						arginfo_imap_getsubscribed)
+	PHP_FE(imap_getmailboxes						arginfo_imap_getmailboxes)
 
 	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_headerinfo)
 	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_list)
-	PHP_FALIAS(imap_getmailboxes,	imap_list_full,		arginfo_imap_getmailboxes)
 	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_listscan)
 	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_lsub)
-	PHP_FALIAS(imap_getsubscribed,	imap_lsub_full,		arginfo_imap_getsubscribed)
 	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_body)
 	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_listscan)
 	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_createmailbox)
@@ -1926,7 +1926,7 @@ PHP_FUNCTION(imap_list)
 /* {{{ proto array imap_getmailboxes(resource stream_id, string ref, string pattern)
    Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
 /* Author: CJH */
-PHP_FUNCTION(imap_list_full)
+PHP_FUNCTION(imap_getmailboxes)
 {
 	zval *streamind, mboxob;
 	zend_string *ref, *pat;
@@ -2246,7 +2246,7 @@ PHP_FUNCTION(imap_lsub)
 /* {{{ proto array imap_getsubscribed(resource stream_id, string ref, string pattern)
    Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
 /* Author: CJH */
-PHP_FUNCTION(imap_lsub_full)
+PHP_FUNCTION(imap_getsubscribed)
 {
 	zval *streamind, mboxob;
 	zend_string *ref, *pat;
