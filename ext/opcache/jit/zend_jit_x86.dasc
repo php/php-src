@@ -9021,16 +9021,13 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 					|	mov CARG3, arg_num
 					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 					|	mov aword A5, r0
-					|	mov aword A6, 0
 					|	EXT_CALL zend_jit_verify_arg_slow, r0
 				|.elif X64
 					|	mov CARG3, arg_num
 					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 					|	mov CARG5, r0
-					|	xor CARG6, CARG6
 					|	EXT_CALL zend_jit_verify_arg_slow, r0
 				|.else
-					|	push 0
 					|	push r0
 					|	push (ptrdiff_t)arg_info
 					|	push arg_num
@@ -9190,16 +9187,13 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 		|	mov aword A5, r0
-		|	ADDR_OP2_2 mov, aword A6, zv, r0
 		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.elif X64
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 		|	mov CARG5, r0
-		|	LOAD_ADDR CARG6, zv
 		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.else
-		|	push zv
 		|	push r0
 		|	push (ptrdiff_t)arg_info
 		|	push arg_num

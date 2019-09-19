@@ -3104,11 +3104,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			ce = NULL;
 			if (arg_info) {
 				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-				if (opline->opcode == ZEND_RECV_INIT &&
-				           Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)) == IS_CONSTANT_AST) {
-					/* The constant may resolve to NULL */
-					tmp |= MAY_BE_NULL;
-				}
 				if (arg_info->pass_by_reference) {
 					tmp |= MAY_BE_REF;
 				}

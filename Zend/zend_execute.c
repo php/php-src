@@ -793,23 +793,6 @@ static ZEND_COLD void zend_verify_arg_error(
 	}
 }
 
-static int is_null_constant(zend_class_entry *scope, zval *default_value)
-{
-	if (Z_TYPE_P(default_value) == IS_CONSTANT_AST) {
-		zval constant;
-
-		ZVAL_COPY(&constant, default_value);
-		if (UNEXPECTED(zval_update_constant_ex(&constant, scope) != SUCCESS)) {
-			return 0;
-		}
-		if (Z_TYPE(constant) == IS_NULL) {
-			return 1;
-		}
-		zval_ptr_dtor_nogc(&constant);
-	}
-	return 0;
-}
-
 static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *arg)
 {
 	switch (type_hint) {
@@ -1043,7 +1026,7 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 static zend_always_inline zend_bool zend_check_type(
 		zend_type type,
 		zval *arg, zend_class_entry **ce, void **cache_slot,
-		zval *default_value, zend_class_entry *scope,
+		zend_class_entry *scope,
 		zend_bool is_return_type, zend_bool is_internal)
 {
 	zend_reference *ref = NULL;
@@ -1063,19 +1046,19 @@ static zend_always_inline zend_bool zend_check_type(
 		} else {
 			*ce = zend_fetch_class(ZEND_TYPE_NAME(type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 			if (UNEXPECTED(!*ce)) {
-				return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
+				return Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(type);
 			}
 			*cache_slot = (void *) *ce;
 		}
 		if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 			return instanceof_function(Z_OBJCE_P(arg), *ce);
 		}
-		return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
+		return Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(type);
 	} else if (EXPECTED(ZEND_TYPE_CODE(type) == Z_TYPE_P(arg))) {
 		return 1;
 	}
 
-	if (Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)))) {
+	if (Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(type)) {
 		/* Null passed to nullable type */
 		return 1;
 	}
@@ -1104,7 +1087,7 @@ static zend_always_inline zend_bool zend_check_type(
 	 * because this case is already checked at compile-time. */
 }
 
-static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info = &zf->common.arg_info[arg_num-1];
 	zend_class_entry *ce;
@@ -1113,7 +1096,7 @@ static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint3
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
 	ce = NULL;
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, 0))) {
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
 	}
@@ -1121,7 +1104,7 @@ static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint3
 	return 1;
 }
 
-static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
+static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
 	zend_class_entry *ce;
@@ -1131,7 +1114,7 @@ static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, u
 	cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 
 	ce = NULL;
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0, 0))) {
+	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
 	}
@@ -1158,7 +1141,7 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 			break;
 		}
 
-		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, NULL, fbc->common.scope, 0, /* is_internal */ 1))) {
+		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, &dummy_cache_slot, fbc->common.scope, 0, /* is_internal */ 1))) {
 			return 0;
 		}
 		arg++;
@@ -1254,7 +1237,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 		return 1;
 	}
 
-	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, &dummy_cache_slot, NULL, NULL, 1, /* is_internal */ 1))) {
+	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, &dummy_cache_slot, NULL, 1, /* is_internal */ 1))) {
 		zend_verify_internal_return_error(zf, ce, ret);
 		return 0;
 	}
@@ -1268,7 +1251,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 	zend_class_entry *ce = NULL;
 
-	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, cache_slot, NULL, NULL, 1, 0))) {
+	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, &ce, cache_slot, NULL, 1, 0))) {
 		zend_verify_return_error(zf, ce, ret);
 	}
 }
