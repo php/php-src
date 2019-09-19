@@ -32,10 +32,6 @@ int json_yydebug = 1;
 #define YYFREE free
 #endif
 
-#define PHP_JSON_USE(uv) ((void) (uv))
-#define PHP_JSON_USE_1(uvr, uv1) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1)
-#define PHP_JSON_USE_2(uvr, uv1, uv2) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1); PHP_JSON_USE(uv2)
-
 #define PHP_JSON_DEPTH_DEC --parser->depth
 #define PHP_JSON_DEPTH_INC \
 	if (parser->max_depth && parser->depth >= parser->max_depth) { \
@@ -67,10 +63,10 @@ int json_yydebug = 1;
 %token <value> PHP_JSON_T_DOUBLE
 %token <value> PHP_JSON_T_STRING
 %token <value> PHP_JSON_T_ESTRING
-%token <value> PHP_JSON_T_EOI
-%token <value> PHP_JSON_T_ERROR
+%token PHP_JSON_T_EOI
+%token PHP_JSON_T_ERROR
 
-%type <value> start object key value array errlex
+%type <value> start object key value array
 %type <value> members member elements element
 %type <pair> pair
 
@@ -90,11 +86,7 @@ start:
 			{
 				ZVAL_COPY_VALUE(&$$, &$1);
 				ZVAL_COPY_VALUE(parser->return_value, &$1);
-				PHP_JSON_USE($2); YYACCEPT;
-			}
-	|	value errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
+				YYACCEPT;
 			}
 ;
 
@@ -148,10 +140,6 @@ member:
 				}
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
-	|	member errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
-			}
 ;
 
 pair:
@@ -159,10 +147,6 @@ pair:
 			{
 				$$.key = Z_STR($1);
 				ZVAL_COPY_VALUE(&$$.val, &$3);
-			}
-	|	key errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
 			}
 ;
 
@@ -212,10 +196,6 @@ element:
 				parser->methods.array_append(parser, &$1, &$3);
 				ZVAL_COPY_VALUE(&$$, &$1);
 			}
-	|	element errlex
-			{
-				PHP_JSON_USE_2($$, $1, $2);
-			}
 ;
 
 key:
@@ -233,15 +213,6 @@ value:
 	|	PHP_JSON_T_NUL
 	|	PHP_JSON_T_TRUE
 	|	PHP_JSON_T_FALSE
-	|	errlex
-;
-
-errlex:
-		PHP_JSON_T_ERROR
-			{
-				PHP_JSON_USE_1($$, $1);
-				YYERROR;
-			}
 ;
 
 %% /* Functions */
