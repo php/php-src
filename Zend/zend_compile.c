@@ -4504,6 +4504,18 @@ void zend_compile_goto(zend_ast *ast) /* {{{ */
 
 	/* Label resolution and unwinding adjustments happen in pass two. */
 	zend_handle_loops_and_finally(NULL);
+
+	if (CG(context).labels) {
+		zend_string *label = zend_ast_get_str(label_ast);
+		zend_label *dest = zend_hash_find_ptr(CG(context).labels, label);
+
+		if (dest
+		 &&CG(active_op_array)->opcodes[dest->opline_num].opcode != ZEND_LOOP) {
+			/* This is a backward JMP, that may create non-natural loop */
+			zend_emit_op(NULL, ZEND_LOOP, NULL, NULL);
+		}
+	}
+
 	opline = zend_emit_op(NULL, ZEND_GOTO, NULL, &label_node);
 	opline->op1.num = get_next_op_number() - opnum_start - 1;
 	opline->extended_value = CG(context).current_brk_cont;
