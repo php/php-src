@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Ensure IDNA2003 rules are used with idn_to_ascii() and idn_to_utf8()
     when requested. (Sara)
 
+- MBString:
+  . Fixed bug #78559 (Heap buffer overflow in mb_eregi). (cmb)
+
 - MySQLnd:
   . Fixed connect_attr issues and added the _server_host connection attribute.
     (Qianqian Bu)
