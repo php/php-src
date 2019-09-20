@@ -1420,21 +1420,19 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				} else if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
 					zend_type type = op_array->arg_info[opline->op1.num-1].type;
-					if (ZEND_TYPE_IS_MASK(type)) {
-						uint32_t mask = ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(type));
-						if (mask == MAY_BE_LONG) {
-							tmp->underflow = 0;
-							tmp->min = ZEND_LONG_MIN;
-							tmp->max = ZEND_LONG_MAX;
-							tmp->overflow = 0;
-							return 1;
-						} else if (mask == (MAY_BE_FALSE|MAY_BE_TRUE)) {
-							tmp->underflow = 0;
-							tmp->min = 0;
-							tmp->max = 1;
-							tmp->overflow = 0;
-							return 1;
-						}
+					uint32_t mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
+					if (mask == MAY_BE_LONG) {
+						tmp->underflow = 0;
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
+						tmp->overflow = 0;
+						return 1;
+					} else if (mask == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+						tmp->underflow = 0;
+						tmp->min = 0;
+						tmp->max = 1;
+						tmp->overflow = 0;
+						return 1;
 					}
 				}
 			}
@@ -2231,42 +2229,36 @@ static inline zend_class_entry *get_class_entry(const zend_script *script, zend_
 }
 
 static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
+	uint32_t result_mask = type_mask & MAY_BE_ANY;
 	if (type_mask & MAY_BE_VOID) {
-		type_mask &= ~MAY_BE_VOID;
-		type_mask |= MAY_BE_NULL;
+		result_mask |= MAY_BE_NULL;
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
-		type_mask &= ~MAY_BE_CALLABLE;
-		type_mask |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		result_mask |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
 	if (type_mask & MAY_BE_ITERABLE) {
-		type_mask &= ~MAY_BE_ITERABLE;
-		type_mask |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		result_mask |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
 	if (type_mask & MAY_BE_ARRAY) {
-		type_mask |= MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+		result_mask |= MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
-	return type_mask;
+	return result_mask;
 }
 
 uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
 {
-	uint32_t tmp = 0;
+	uint32_t tmp;
+	if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
+	}
 
+	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
 	*pce = NULL;
 	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-		// class type hinting...
 		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
 		tmp |= MAY_BE_OBJECT;
 		*pce = get_class_entry(script, lcname);
 		zend_string_release_ex(lcname, 0);
-	} else if (ZEND_TYPE_IS_MASK(arg_info->type)) {
-		tmp |= zend_convert_type_declaration_mask(ZEND_TYPE_MASK(arg_info->type));
-	} else {
-		tmp |= MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-	}
-	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-		tmp |= MAY_BE_NULL;
 	}
 	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
@@ -2365,7 +2357,7 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 		uint32_t type = ZEND_TYPE_IS_CLASS(prop_info->type)
 			? MAY_BE_OBJECT
-			: zend_convert_type_declaration_mask(ZEND_TYPE_MASK(prop_info->type));
+			: zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
 
 		if (ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 			type |= MAY_BE_NULL;
@@ -3097,7 +3089,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			ce = NULL;
 			if (arg_info) {
 				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-				if (arg_info->pass_by_reference) {
+				if (ZEND_ARG_SEND_MODE(arg_info)) {
 					tmp |= MAY_BE_REF;
 				}
 			} else {

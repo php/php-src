@@ -1292,10 +1292,10 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			} else {
 				func.required_num_args = info->required_num_args;
 			}
-			if (info->return_reference) {
+			if (ZEND_ARG_SEND_MODE(info)) {
 				func.fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 			}
-			if (funcs->arg_info[funcs->num_args].is_variadic) {
+			if (ZEND_ARG_IS_VARIADIC(&funcs->arg_info[funcs->num_args])) {
 				func.fn_flags |= ZEND_ACC_VARIADIC;
 				/* Don't count the variadic argument */
 				func.num_args--;

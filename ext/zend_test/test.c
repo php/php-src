@@ -237,7 +237,8 @@ PHP_MINIT_FUNCTION(zend_test)
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
-			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, ZEND_TYPE_ENCODE_CODE(IS_LONG, 0));
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
+			(zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
 		zend_string_release(name);
 	}
 
@@ -248,7 +249,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		ZVAL_NULL(&val);
 		zend_declare_typed_property(
 			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL,
-			ZEND_TYPE_ENCODE_CLASS(class_name, 1));
+			(zend_type) ZEND_TYPE_INIT_CLASS(class_name, 1, 0));
 		zend_string_release(name);
 	}
 
@@ -258,7 +259,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
 			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL,
-			ZEND_TYPE_ENCODE_CODE(IS_LONG, 0));
+			(zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
 		zend_string_release(name);
 	}
 

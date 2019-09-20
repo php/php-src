@@ -594,10 +594,7 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 		for (i = 0 ; i < num_args; i++) {
 			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
 				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
-
-				new_arg_info[i].type =
-					ZEND_TYPE_ENCODE_CLASS(
-						name, ZEND_TYPE_ALLOW_NULL(arg_info[i].type));
+				ZEND_TYPE_SET_PTR(new_arg_info[i].type, name);
 			}
 		}
 		func->common.arg_info = new_arg_info + 1;
@@ -968,7 +965,7 @@ static void zend_resolve_property_types(void) /* {{{ */
 					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
 
 					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
-					prop_info->type = ZEND_TYPE_ENCODE_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+					prop_info->type = (zend_type) ZEND_TYPE_INIT_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type), 0);
 					zend_string_release(lc_type_name);
 					zend_string_release(type_name);
 				}

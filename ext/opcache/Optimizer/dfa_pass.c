@@ -307,8 +307,7 @@ static inline zend_bool can_elide_return_type_check(
 	}
 
 	/* These types are not represented exactly */
-	if (ZEND_TYPE_IS_MASK(info->type)
-			&& (ZEND_TYPE_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE))) {
+	if (ZEND_TYPE_FULL_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE)) {
 		return 0;
 	}
 
