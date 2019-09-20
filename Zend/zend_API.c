@@ -2055,11 +2055,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			if (ZEND_TYPE_IS_SET(info->type)) {
 				if (ZEND_TYPE_IS_CLASS(info->type)) {
-					const char *type_name = (const char*)info->type;
-
-					if (type_name[0] == '?') {
-						type_name++;
-					}
+					const char *type_name = ZEND_TYPE_LITERAL_NAME(info->type);
 					if (!scope && (!strcasecmp(type_name, "self") || !strcasecmp(type_name, "parent"))) {
 						zend_error_noreturn(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", type_name);
 					}
@@ -2140,16 +2136,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			reg_function->common.arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(new_arg_info[i].type)) {
-					const char *class_name = (const char*)new_arg_info[i].type;
-					zend_bool allow_null = 0;
-					zend_string *str;
-
-					if (class_name[0] == '?') {
-						class_name++;
-						allow_null = 1;
-					}
-					str = zend_string_init_interned(class_name, strlen(class_name), 1);
-					new_arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(str, allow_null);
+					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
+					ZEND_TYPE_SET_PTR(new_arg_info[i].type,
+						zend_string_init_interned(class_name, strlen(class_name), 1));
 				}
 			}
 		}
@@ -3715,7 +3704,7 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, ZEND_TYPE_ENCODE_NONE());
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE());
 }
 /* }}} */
 

@@ -382,8 +382,7 @@ static inheritance_status zend_perform_covariant_type_check(
 
 		return ZEND_TYPE_MASK(fe_type) & MAY_BE_OBJECT ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else {
-		return ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(fe_type))
-			== ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(proto_type))
+		return ZEND_TYPE_MASK_WITHOUT_NULL(fe_type) == ZEND_TYPE_MASK_WITHOUT_NULL(proto_type)
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
 }
@@ -847,7 +846,8 @@ inheritance_status property_types_compatible(
 		const zend_property_info *parent_info, const zend_property_info *child_info) {
 	zend_string *parent_name, *child_name;
 	zend_class_entry *parent_type_ce, *child_type_ce;
-	if (parent_info->type == child_info->type) {
+	if (ZEND_TYPE_MASK(parent_info->type) == ZEND_TYPE_MASK(child_info->type)
+			&& ZEND_TYPE_NAME(parent_info->type) == ZEND_TYPE_NAME(child_info->type)) {
 		return INHERITANCE_SUCCESS;
 	}
 

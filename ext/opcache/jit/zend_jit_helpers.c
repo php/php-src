@@ -1345,7 +1345,7 @@ static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference
 {
 	zend_property_info *prop;
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (!ZEND_TYPE_IS_MASK(prop->type) || !(ZEND_TYPE_MASK(prop->type) & MAY_BE_DOUBLE)) {
+		if (!(ZEND_TYPE_MASK(prop->type) & MAY_BE_DOUBLE)) {
 			return prop;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();

@@ -2572,15 +2572,15 @@ ZEND_METHOD(reflection_parameter, isArray)
 {
 	reflection_object *intern;
 	parameter_reference *param;
-	zend_type type;
+	uint32_t type_mask;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	type = ZEND_TYPE_WITHOUT_NULL(param->arg_info->type);
-	RETVAL_BOOL(ZEND_TYPE_MASK(type) == MAY_BE_ARRAY);
+	type_mask = ZEND_TYPE_MASK_WITHOUT_NULL(param->arg_info->type);
+	RETVAL_BOOL(type_mask == MAY_BE_ARRAY);
 }
 /* }}} */
 
@@ -2590,15 +2590,15 @@ ZEND_METHOD(reflection_parameter, isCallable)
 {
 	reflection_object *intern;
 	parameter_reference *param;
-	zend_type type;
+	uint32_t type_mask;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	type = ZEND_TYPE_WITHOUT_NULL(param->arg_info->type);
-	RETVAL_BOOL(ZEND_TYPE_MASK(type) == MAY_BE_CALLABLE);
+	type_mask = ZEND_TYPE_MASK_WITHOUT_NULL(param->arg_info->type);
+	RETVAL_BOOL(type_mask == MAY_BE_CALLABLE);
 }
 /* }}} */
 
@@ -2829,6 +2829,11 @@ ZEND_METHOD(reflection_type, allowsNull)
 }
 /* }}} */
 
+static zend_string *zend_type_to_string_without_null(zend_type type) {
+	ZEND_TYPE_MASK(type) &= ~MAY_BE_NULL;
+	return zend_type_to_string(type);
+}
+
 /* {{{ proto public string ReflectionType::__toString()
    Return the text of the type hint */
 ZEND_METHOD(reflection_type, __toString)
@@ -2857,7 +2862,7 @@ ZEND_METHOD(reflection_named_type, getName)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(param->type)));
+	RETURN_STR(zend_type_to_string_without_null(param->type));
 }
 /* }}} */
 
@@ -2873,7 +2878,7 @@ ZEND_METHOD(reflection_named_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_IS_MASK(param->type));
+	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type));
 }
 /* }}} */
 

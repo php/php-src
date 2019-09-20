@@ -7102,7 +7102,7 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 		zend_arg_info *arg_info = func->op_array.arg_info + num_args;
 
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
-			if (ZEND_TYPE_IS_MASK(arg_info->type)) {
+			if (ZEND_TYPE_IS_ONLY_MASK(arg_info->type)) {
 				uint32_t type_mask = ZEND_TYPE_MASK(arg_info->type);
 				uint32_t info = _ssa_op1_info(op_array, ssa, call_info->arg_info[num_args].opline);
 				if ((info & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
