@@ -1616,7 +1616,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_odbc_utils.c \
+       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)

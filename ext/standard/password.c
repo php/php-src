@@ -169,9 +169,7 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 	 * resistance towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
 	 * values. */
-	for (i = 0; i < ZSTR_LEN(hash); i++) {
-		status |= (ZSTR_VAL(ret)[i] ^ ZSTR_VAL(hash)[i]);
-	}
+	status = php_safe_bcmp(ZSTR_VAL(ret), ZSTR_VAL(hash), ZSTR_LEN(hash));
 
 	zend_string_free(ret);
 	return status == 0;
