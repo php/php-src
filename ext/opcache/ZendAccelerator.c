@@ -602,8 +602,8 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			}
 			for (i = 0 ; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
-					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
+					ZEND_TYPE_SET_PTR(arg_info[i].type,
+						new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)));
 				}
 			}
 		}
@@ -3580,7 +3580,7 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 			}
 
 			zend_string_release(name);
-			prop->type = ZEND_TYPE_ENCODE_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
+			prop->type = (zend_type) ZEND_TYPE_INIT_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
 		} ZEND_HASH_FOREACH_END();
 	}
 

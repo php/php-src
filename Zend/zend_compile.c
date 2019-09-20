@@ -1096,7 +1096,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	} else if (ZEND_TYPE_IS_CE(type)) {
 		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
 	} else {
-		uint32_t type_mask = ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(type));
+		uint32_t type_mask = ZEND_TYPE_MASK_WITHOUT_NULL(type);
 		switch (type_mask) {
 			case MAY_BE_FALSE|MAY_BE_TRUE:
 				str = ZSTR_KNOWN(ZEND_STR_BOOL);
@@ -2123,7 +2123,7 @@ static void zend_emit_return_type_check(
 		zend_op *opline;
 
 		/* `return ...;` is illegal in a void function (but `return;` isn't) */
-		if (ZEND_TYPE_IS_MASK(type) && ZEND_TYPE_CONTAINS_CODE(type, IS_VOID)) {
+		if (ZEND_TYPE_CONTAINS_CODE(type, IS_VOID)) {
 			if (expr) {
 				if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -2149,8 +2149,7 @@ static void zend_emit_return_type_check(
 		}
 
 		if (expr && expr->op_type == IS_CONST) {
-			if (ZEND_TYPE_IS_MASK(type)
-					&& ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
+			if (ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
 				/* we don't need run-time check */
 				return;
 			}
@@ -5312,7 +5311,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 	}
 
 	if (ast->kind == ZEND_AST_TYPE) {
-		return ZEND_TYPE_ENCODE_CODE(ast->attr, allow_null);
+		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, allow_null);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
@@ -5326,7 +5325,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 			if (type == IS_VOID && allow_null) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
 			}
-			return ZEND_TYPE_ENCODE_CODE(type, allow_null);
+			return (zend_type) ZEND_TYPE_INIT_CODE(type, allow_null);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
@@ -5337,7 +5336,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 				zend_string_addref(class_name);
 			}
 
-			return ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
+			return (zend_type) ZEND_TYPE_INIT_CLASS(class_name, allow_null);
 		}
 	}
 }
@@ -5453,7 +5452,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->name = zend_string_copy(name);
 		arg_info->pass_by_reference = is_ref;
 		arg_info->is_variadic = is_variadic;
-		arg_info->type = ZEND_TYPE_ENCODE_NONE();
+		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE();
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
@@ -5984,13 +5983,12 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
-		zend_type type = ZEND_TYPE_ENCODE_NONE();
+		zend_type type = ZEND_TYPE_INIT_NONE();
 
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, 0);
 
-			if (ZEND_TYPE_IS_MASK(type)
-					&& (ZEND_TYPE_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE))) {
+			if (ZEND_TYPE_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Property %s::$%s cannot have type %s",
