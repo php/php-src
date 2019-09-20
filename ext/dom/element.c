@@ -499,9 +499,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 
 	if (attrp->type == XML_NAMESPACE_DECL) {
 		xmlNsPtr curns;
-		xmlNodePtr nsparent;
 
-		nsparent = attrp->_private;
 		curns = xmlNewNs(NULL, attrp->name, NULL);
 		if (attrp->children) {
 			curns->prefix = xmlStrdup((xmlChar *) attrp->children);
@@ -512,7 +510,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", attrp->name);
 		}
 		attrp->type = XML_NAMESPACE_DECL;
-		attrp->parent = nsparent;
+		attrp->parent = nodep;
 		attrp->ns = curns;
 	}
 
