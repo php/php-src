@@ -152,7 +152,6 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 }
 
 static bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
-	size_t i;
 	int status = 0;
 	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
 
@@ -160,7 +159,7 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 		return 0;
 	}
 
-	if (ZSTR_LEN(ret) != ZSTR_LEN(hash) || ZSTR_LEN(hash) < 13) {
+	if (ZSTR_LEN(hash) < 13) {
 		zend_string_free(ret);
 		return 0;
 	}
@@ -169,7 +168,7 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 	 * resistance towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
 	 * values. */
-	status = php_safe_bcmp(ZSTR_VAL(ret), ZSTR_VAL(hash), ZSTR_LEN(hash));
+	status = php_safe_bcmp(ret, hash);
 
 	zend_string_free(ret);
 	return status == 0;

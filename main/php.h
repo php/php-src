@@ -180,7 +180,7 @@ END_EXTERN_C()
 #endif
 
 BEGIN_EXTERN_C()
-PHPAPI int php_safe_bcmp(const void *a, const void *b, size_t siz);
+PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b);
 END_EXTERN_C()
 
 #ifndef HAVE_STRTOK_R

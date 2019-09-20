@@ -1111,7 +1111,6 @@ PHP_FUNCTION(hash_pbkdf2)
 PHP_FUNCTION(hash_equals)
 {
 	zval *known_zval, *user_zval;
-	char *known_str, *user_str;
 	int result = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
@@ -1129,15 +1128,8 @@ PHP_FUNCTION(hash_equals)
 		RETURN_THROWS();
 	}
 
-	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
-		RETURN_FALSE;
-	}
-
-	known_str = Z_STRVAL_P(known_zval);
-	user_str = Z_STRVAL_P(user_zval);
-
 	/* This is security sensitive code. Do not optimize this for speed. */
-	result = php_safe_bcmp(known_str, user_str, Z_STRLEN_P(known_zval));
+	result = php_safe_bcmp(Z_STR_P(known_zval), Z_STR_P(user_zval));
 
 	RETURN_BOOL(0 == result);
 }

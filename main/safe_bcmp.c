@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 8                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -12,7 +10,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author: David Carlier <devnexen@gmail.com>                           |
   +----------------------------------------------------------------------+
 */
 
@@ -20,14 +18,23 @@
 
 #include <string.h>
 
-PHPAPI int php_safe_bcmp(const void *a, const void *b, size_t siz)
+/*
+ * Returns 0 if both inputs match, 1 if they don't.
+ * Returns -1 early if inputs do not have the same lengths.
+ *
+ */
+PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b)
 {
-	const volatile unsigned char *ua = (const volatile unsigned char *)a;
-	const volatile unsigned char *ub = (const volatile unsigned char *)b;
+	const volatile unsigned char *ua = (const volatile unsigned char *)ZSTR_VAL(a);
+	const volatile unsigned char *ub = (const volatile unsigned char *)ZSTR_VAL(b);
 	size_t i = 0;
 	int r = 0;
 
-	while (i < siz) {
+	if (ZSTR_LEN(a) != ZSTR_LEN(b)) {
+		return -1;
+	}
+
+	while (i < ZSTR_LEN(a)) {
 		r |= ua[i] ^ ub[i];
 		++i;
 	}
