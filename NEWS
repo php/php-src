@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #78543 (is_callable() on FFI\CData throws Exception). (cmb)
 
+- GMP:
+  . Fixed bug #78574 (broken shared build). (Remi)
+
 19 Sep 2019, PHP 7.4.0RC2
 
 - Core:
