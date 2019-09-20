@@ -4510,7 +4510,7 @@ void zend_compile_goto(zend_ast *ast) /* {{{ */
 		zend_label *dest = zend_hash_find_ptr(CG(context).labels, label);
 
 		if (dest
-		 &&CG(active_op_array)->opcodes[dest->opline_num].opcode != ZEND_LOOP) {
+		 && CG(active_op_array)->opcodes[dest->opline_num].opcode != ZEND_LOOP) {
 			/* This is a backward JMP, that may create non-natural loop */
 			zend_emit_op(NULL, ZEND_LOOP, NULL, NULL);
 		}
