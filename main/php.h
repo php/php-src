@@ -179,6 +179,10 @@ END_EXTERN_C()
 #define explicit_bzero php_explicit_bzero
 #endif
 
+BEGIN_EXTERN_C()
+PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b);
+END_EXTERN_C()
+
 #ifndef HAVE_STRTOK_R
 BEGIN_EXTERN_C()
 char *strtok_r(char *s, const char *delim, char **last);
