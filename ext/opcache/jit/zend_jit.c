@@ -2759,6 +2759,10 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 
 	end = op_array->opcodes + op_array->last;
 	while (opline != end) {
+		/* TODO: FE_FETCH instructions are not handled now.
+		 *       It's possible to add LOOP instruction after FE_FETCH,
+		 *       or create special handlers for FE_FETCH opcodes.
+		 */
 		if (opline->opcode == ZEND_LOOP) {
 		    opline->handler =
 				(const void*)zend_jit_loop_counter_handler;
