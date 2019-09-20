@@ -384,6 +384,36 @@ isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
+Inspecting method 'disable_cleanup'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 1
+Number of Parameters: 2
+Number of Required Parameters: 2
+
+Inspecting parameter 'link' of method 'disable_cleanup'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'value' of method 'disable_cleanup'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
+
 Inspecting method 'dump_debug_info'
 isFinal: no
 isAbstract: no

@@ -28,6 +28,7 @@ require_once('skipifconnectfailure.inc');
 		'commit'				=> true,
 		'connect'				=> true,
 		'dump_debug_info'		=> true,
+		'disable_cleanup'		=> true,
 		'escape_string'			=> true,
 		'get_charset'			=> true,
 		'get_client_info'		=> true,
