@@ -6577,10 +6577,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 			GC_ADDREF(gc);
 		}
 	}
-	if (UNEXPECTED(EG(exception))) {
-		HANDLE_EXCEPTION();
-	}
-	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_SET_OPCODE(EX(opline) + 1);
 	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_CONTINUE();
 }
@@ -6761,10 +6758,7 @@ ZEND_VM_C_LABEL(fe_fetch_w_exit):
 		Z_ADDREF_P(value);
 		ZVAL_REF(EX_VAR(opline->op2.var), Z_REF_P(value));
 	}
-	if (UNEXPECTED(EG(exception))) {
-		HANDLE_EXCEPTION();
-	}
-	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_SET_OPCODE(EX(opline) + 1);
 	ZEND_VM_INTERRUPT_CHECK();
 	ZEND_VM_CONTINUE();
 }
@@ -9340,7 +9334,9 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 
 	variable_ptr = EX_VAR(opline->op2.var);
 	zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZEND_VM_SET_OPCODE(EX(opline) + 1);
+	ZEND_VM_INTERRUPT_CHECK();
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
