@@ -583,12 +583,8 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 		smart_str_append_printf(str, "<required> ");
 	}
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
-		/* TODO: We should be using ?Type instead of "or NULL" here. */
-		zend_string *type_str = zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(arg_info->type));
+		zend_string *type_str = zend_type_to_string(arg_info->type);
 		smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
-		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-			smart_str_append_printf(str, "or NULL ");
-		}
 		zend_string_release(type_str);
 	}
 	if (arg_info->pass_by_reference) {
@@ -800,13 +796,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_append_printf(str, "  %s- Return [ ", indent);
 		if (ZEND_TYPE_IS_SET(fptr->common.arg_info[-1].type)) {
-			/* TODO: We should use ?Type instead of "or NULL" here */
-			zend_string *type_str =
-				zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(fptr->common.arg_info[-1].type));
+			zend_string *type_str = zend_type_to_string(fptr->common.arg_info[-1].type);
 			smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
-			if (ZEND_TYPE_ALLOW_NULL(fptr->common.arg_info[-1].type)) {
-				smart_str_appends(str, "or NULL ");
-			}
 			zend_string_release(type_str);
 		}
 		smart_str_appends(str, "]\n");
