@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
 
+- MBString:
+  . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
+    (cmb)
+
 - Mysqlnd:
   . Fixed bug #78525 (Memory leak in pdo when reusing native prepared
     statements). (Nikita)

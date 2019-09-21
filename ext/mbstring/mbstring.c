@@ -407,6 +407,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_numericentity, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, convmap)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, is_hex)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_send_mail, 0, 0, 3)
