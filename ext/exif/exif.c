@@ -2322,14 +2322,11 @@ static void exif_iif_free(image_info_type *image_info, int section_index) {
 				efree(f);
 			}
 			switch(image_info->info_list[section_index].list[i].format) {
-				case TAG_FMT_SBYTE:
-				case TAG_FMT_BYTE:
-					/* in contrast to strings bytes do not need to allocate buffer for NULL if length==0 */
-					if (image_info->info_list[section_index].list[i].length<1)
-						break;
-				default:
 				case TAG_FMT_UNDEFINED:
 				case TAG_FMT_STRING:
+				case TAG_FMT_SBYTE:
+				case TAG_FMT_BYTE:
+				default:
 					if ((f=image_info->info_list[section_index].list[i].value.s) != NULL) {
 						efree(f);
 					}
@@ -3543,9 +3540,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_MAKE:
+				EFREE_IF(ImageInfo->make);
 				ImageInfo->make = estrndup(value_ptr, byte_count);
 				break;
 			case TAG_MODEL:
+				EFREE_IF(ImageInfo->model);
 				ImageInfo->model = estrndup(value_ptr, byte_count);
 				break;
 
