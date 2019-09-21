@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - GMP:
   . Fixed bug #78574 (broken shared build). (Remi)
 
+- MBString:
+  . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
+    (cmb)
+
 19 Sep 2019, PHP 7.4.0RC2
 
 - Core:
