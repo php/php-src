@@ -172,6 +172,8 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
+  . The $is_hex parameter, which was not used internally, has been removed from
+    mb_decode_numericentity().
 
 - PCRE:
   . When passing invalid escape sequences they are no longer intepreted as

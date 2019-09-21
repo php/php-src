@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
+- MBString:
+  . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
+
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
