@@ -3,7 +3,7 @@
 /**
  * @return resource|false
  */
-function imap_open(string $mailbox, string $user, string $password, int $options = 0, int $n_retries = 0) {}
+function imap_open(string $mailbox, string $user, string $password, int $options = 0, int $n_retries = 0, array $params = UNKNOWN) {}
 
 /**
  * @param resource $stream_id
@@ -37,9 +37,9 @@ function imap_headers($stream_id) {}
  * @param resource $stream_id
  * @return object|false
  */
-function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = '') {}
+function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN) {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = ''): object {}
+function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): object {}
 
 /**
  * @return string|false
@@ -106,12 +106,12 @@ function imap_expunge($stream_id): bool {}
 /**
  * @param resource $stream_id
  */
-function imap_delete($stream_id, int $msg_no, int $options = 0): bool {}
+function imap_delete($stream_id, string $msg_no, int $options = 0): bool {}
 
 /**
  * @param resource $stream_id
  */
-function imap_undelete($stream_id, int $msg_no, int $options = 0): bool {}
+function imap_undelete($stream_id, string $msg_no, int $options = 0): bool {}
 
 /**
  * @param resource $stream_id
@@ -168,7 +168,7 @@ function imap_unsubscribe($stream_id, string $mailbox): bool {}
 /**
  * @param resource $stream_id
  */
-function imap_append($stream_id, string $folder, string $message, string $options = '', string $internal_date = ''): bool {}
+function imap_append($stream_id, string $folder, string $message, string $options = UNKNOWN, string $internal_date = UNKNOWN): bool {}
 
 /**
  * @param resource $stream_id
@@ -206,9 +206,8 @@ function imap_status($stream_id, string $mailbox, int $options) {}
 
 /**
  * @param resource $stream_id
- * @return object|false
  */
-function imap_mailboxmsginfo($stream_id) {}
+function imap_mailboxmsginfo($stream_id): object {}
 
 /**
  * @param resource $stream_id
@@ -224,7 +223,7 @@ function imap_clearflag_full($stream_id, string $sequence, string $flag, int $op
  * @param resource $stream_id
  * @return array|false
  */
-function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria ='', string $charset = '') {}
+function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = '') {}
 
 
 /**
@@ -269,9 +268,15 @@ function imap_getmailboxes($stream_id, string $ref, string $pattern) {}
  */
 function imap_fetch_overview($stream_id, string $sequence, int $options = 0) {}
 
-function imap_alerts(): array {}
+/**
+ * @return array|false
+ */
+function imap_alerts() {}
 
-function imap_errors(): array {}
+/**
+ * @return array|false
+ */
+function imap_errors() {}
 
 /**
  * @return string|false
