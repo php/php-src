@@ -58,7 +58,7 @@
 	PHPTidyObj *obj;	\
 	zval *object; \
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, tidy_ce_doc) == FAILURE) {	\
-		RETURN_FALSE;	\
+		return;	\
 	}	\
 	obj = Z_TIDY_P(object);	\
 
@@ -461,14 +461,14 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		zend_bool use_include_path = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|zsb", &arg1, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		if (!(data = php_tidy_file_to_mem(ZSTR_VAL(arg1), use_include_path))) {
 			RETURN_FALSE;
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zs", &arg1, &config, &enc, &enc_len) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 		data = arg1;
 	}
@@ -1110,7 +1110,7 @@ static PHP_FUNCTION(tidy_parse_string)
 	PHPTidyObj *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zs", &input, &options, &enc, &enc_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
@@ -1173,7 +1173,7 @@ static PHP_FUNCTION(tidy_parse_file)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|zsb", &inputfile,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	tidy_instanciate(tidy_ce_doc, return_value);
@@ -1275,7 +1275,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 	zval *object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	obj = Z_TIDY_P(object);
@@ -1429,7 +1429,7 @@ static PHP_FUNCTION(tidy_getopt)
 	zval *object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	obj = Z_TIDY_P(object);
@@ -1481,7 +1481,7 @@ static TIDY_DOC_METHOD(__construct)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Pzsb", &inputfile,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	obj = Z_TIDY_P(object);
@@ -1520,7 +1520,7 @@ static TIDY_DOC_METHOD(parseFile)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|zsb", &inputfile,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
@@ -1555,7 +1555,7 @@ static TIDY_DOC_METHOD(parseString)
 	TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zs", &input, &options, &enc, &enc_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(input))) {
