@@ -54,15 +54,9 @@
 
 #define TIDY_FETCH_OBJECT	\
 	PHPTidyObj *obj;	\
-	TIDY_SET_CONTEXT; \
-	if (object) {	\
-		if (zend_parse_parameters_none() == FAILURE) {	\
-			return;	\
-		}	\
-	} else {	\
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), NULL, "O", &object, tidy_ce_doc) == FAILURE) {	\
-			RETURN_FALSE;	\
-		}	\
+	zval *object; \
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, tidy_ce_doc) == FAILURE) {	\
+		RETURN_FALSE;	\
 	}	\
 	obj = Z_TIDY_P(object);	\
 
@@ -1404,17 +1398,10 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 	char *optval, *optname;
 	size_t optname_len;
 	TidyOption opt;
+	zval *object;
 
-	TIDY_SET_CONTEXT;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &optname, &optname_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), NULL, "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	obj = Z_TIDY_P(object);
@@ -1565,17 +1552,10 @@ static PHP_FUNCTION(tidy_getopt)
 	size_t optname_len;
 	TidyOption opt;
 	TidyOptionType optt;
+	zval *object;
 
-	TIDY_SET_CONTEXT;
-
-	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &optname, &optname_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), NULL, "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-			RETURN_FALSE;
-		}
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	obj = Z_TIDY_P(object);
