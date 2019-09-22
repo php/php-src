@@ -53,7 +53,6 @@ PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entity_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entityreference_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_string_extend_class_entry;
 #if defined(LIBXML_XPATH_ENABLED)
 PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 #endif
@@ -767,8 +766,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_processinginstruction_prop_handlers, "data", sizeof("data")-1, dom_processinginstruction_data_read, dom_processinginstruction_data_write);
 	zend_hash_merge(&dom_processinginstruction_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_processinginstruction_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMStringExtend", NULL, php_dom_string_extend_class_functions, dom_string_extend_class_entry);
 
 #if defined(LIBXML_XPATH_ENABLED)
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));

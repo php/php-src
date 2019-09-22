@@ -16,7 +16,7 @@ if test "$PHP_DOM" != "no"; then
                             domstringlist.c domexception.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
-                            element.c node.c string_extend.c characterdata.c \
+                            element.c node.c characterdata.c \
                             documenttype.c entity.c \
                             nodelist.c text.c comment.c \
                             entityreference.c \
