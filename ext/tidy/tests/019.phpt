@@ -8,9 +8,9 @@ tidy_repair_*() and invalid parameters
 $l = 1;
 $s = "";
 
-tidy_repair_string($s, $l, $l, $l);
-tidy_repair_string($s, $s, $s, $s);
-tidy_repair_string($l, $l, $l ,$l);
+tidy_repair_string($s, $l, $l);
+tidy_repair_string($s, $s, $s);
+tidy_repair_string($l, $l, $l);
 
 tidy_repair_file($s, $l, $l, $l);
 tidy_repair_file($s, $s, $s, $s);

@@ -452,13 +452,14 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
-	zend_bool use_include_path = 0;
 	TidyDoc doc;
 	TidyBuffer *errbuf;
 	zend_string *data, *arg1;
 	zval *config = NULL;
 
 	if (is_file) {
+		zend_bool use_include_path = 0;
+
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|zsb", &arg1, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 			RETURN_FALSE;
 		}
@@ -466,7 +467,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zsb", &arg1, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zs", &arg1, &config, &enc, &enc_len) == FAILURE) {
 			RETURN_FALSE;
 		}
 		data = arg1;
