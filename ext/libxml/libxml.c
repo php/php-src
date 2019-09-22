@@ -41,6 +41,7 @@
 #endif
 
 #include "php_libxml.h"
+#include "libxml_arginfo.h"
 
 #define PHP_LIBXML_ERROR 0
 #define PHP_LIBXML_CTX_ERROR 1
@@ -87,33 +88,6 @@ static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
 static int php_libxml_post_deactivate(void);
 
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_libxml_set_streams_context, 0)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_use_internal_errors, 0, 0, 0)
-	ZEND_ARG_INFO(0, use_errors)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_libxml_get_last_error, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_libxml_get_errors, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_libxml_clear_errors, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_disable_entity_loader, 0, 0, 0)
-	ZEND_ARG_INFO(0, disable)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 0, 1)
-	ZEND_ARG_INFO(0, resolver_function)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ extension definition structures */
