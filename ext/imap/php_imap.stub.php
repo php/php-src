@@ -223,7 +223,7 @@ function imap_clearflag_full($stream_id, string $sequence, string $flag, int $op
  * @param resource $stream_id
  * @return array|false
  */
-function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = '') {}
+function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = UNKNOWN) {}
 
 
 /**
@@ -288,7 +288,7 @@ function imap_last_error() {}
  * @param resource $stream_id
  * @return array|false
  */
-function imap_search($stream_id, string $criteria, int $options = 0, string $charset = '') {}
+function imap_search($stream_id, string $criteria, int $options = \SE_FREE, string $charset = '') {}
 
 /**
  * @return string|false
@@ -319,7 +319,7 @@ function imap_mime_header_decode(string $str) {}
  * @param resource $stream_id
  * @return array|false
  */
-function imap_thread($stream_id, int $options = 0) {}
+function imap_thread($stream_id, int $options = \SE_FREE) {}
 
 /**
  * @return int|bool
@@ -356,4 +356,4 @@ function imap_setacl($stream_id, string $mailbox, string $id, string $rights): b
 function imap_getacl($stream_id, string $mailbox) {}
 #endif
 
-function imap_mail(string $to, string $subject, string $message, string $additional_headers = '', string $cc = '', string $bcc = '', string $rpath = ''): bool {}
+function imap_mail(string $to, string $subject, string $message, string $additional_headers = UNKNOWN, string $cc = UNKNOWN, string $bcc = UNKNOWN, string $rpath = UNKNOWN): bool {}
