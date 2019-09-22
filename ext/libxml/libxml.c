@@ -1003,6 +1003,10 @@ static PHP_FUNCTION(libxml_get_last_error)
 {
 	xmlErrorPtr error;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	error = xmlGetLastError();
 
 	if (error) {
@@ -1033,6 +1037,10 @@ static PHP_FUNCTION(libxml_get_errors)
 {
 
 	xmlErrorPtr error;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (LIBXML(error_list)) {
 
@@ -1071,6 +1079,10 @@ static PHP_FUNCTION(libxml_get_errors)
    Clear last error from libxml */
 static PHP_FUNCTION(libxml_clear_errors)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	xmlResetLastError();
 	if (LIBXML(error_list)) {
 		zend_llist_clean(LIBXML(error_list));
