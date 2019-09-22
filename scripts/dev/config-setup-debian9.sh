@@ -31,7 +31,6 @@ sudo apt-get -y install \
   libedit-dev \
   libsnmp-dev \
   libsodium-dev \
-  libargon2-dev \
   libtidy-dev \
   libxslt1-dev \
   libzip-dev \
@@ -94,7 +93,6 @@ cd "${0%/*}/../.."
   --enable-soap \
   --enable-sockets \
   --with-sodium \
-  --with-password-argon2 \
   --enable-sysvmsg \
   --enable-sysvsem \
   --enable-sysvshm \
