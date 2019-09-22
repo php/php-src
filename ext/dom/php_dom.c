@@ -36,7 +36,6 @@
 /* {{{ class entries */
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
-PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
@@ -67,7 +66,6 @@ zend_object_handlers dom_xpath_object_handlers;
 
 static HashTable classes;
 /* {{{ prop handler tables */
-static HashTable dom_domstringlist_prop_handlers;
 static HashTable dom_document_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
@@ -594,12 +592,6 @@ PHP_MINIT_FUNCTION(dom)
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
 
-	REGISTER_DOM_CLASS(ce, "DOMStringList", NULL, php_dom_domstringlist_class_functions, dom_domstringlist_class_entry);
-
-	zend_hash_init(&dom_domstringlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domstringlist_prop_handlers, "length", sizeof("length")-1, dom_domstringlist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domstringlist_prop_handlers);
-
 	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, php_dom_domimplementation_class_functions, dom_domimplementation_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, php_dom_node_class_functions, dom_node_class_entry);
@@ -864,7 +856,6 @@ PHP_MINFO_FUNCTION(dom)
 
 PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 {
-	zend_hash_destroy(&dom_domstringlist_prop_handlers);
 	zend_hash_destroy(&dom_document_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);

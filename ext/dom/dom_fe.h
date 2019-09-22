@@ -21,7 +21,6 @@
 #define DOM_FE_H
 
 extern const zend_function_entry php_dom_domexception_class_functions[];
-extern const zend_function_entry php_dom_domstringlist_class_functions[];
 extern const zend_function_entry php_dom_domimplementation_class_functions[];
 extern const zend_function_entry php_dom_documentfragment_class_functions[];
 extern const zend_function_entry php_dom_document_class_functions[];
@@ -68,9 +67,6 @@ typedef enum {
 /* Introduced in DOM Level 3: */
 	VALIDATION_ERR                 = 16
 } dom_exception_code;
-
-/* domstringlist methods */
-PHP_FUNCTION(dom_domstringlist_item);
 
 /* domimplementation methods */
 PHP_METHOD(domimplementation, hasFeature);

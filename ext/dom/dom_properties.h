@@ -71,9 +71,6 @@ int dom_documenttype_public_id_read(dom_object *obj, zval *retval);
 int dom_documenttype_system_id_read(dom_object *obj, zval *retval);
 int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval);
 
-/* domstringlist properties */
-int dom_domstringlist_length_read(dom_object *obj, zval *retval);
-
 /* element properties */
 int dom_element_tag_name_read(dom_object *obj, zval *retval);
 int dom_element_schema_type_info_read(dom_object *obj, zval *retval);
