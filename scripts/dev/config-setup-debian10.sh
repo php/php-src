@@ -42,6 +42,7 @@ cd "${0%/*}/../.."
 ./buildconf
 
 ./configure \
+  --enable-debug \
   --enable-fpm \
   --with-fpm-systemd \
   --enable-phpdbg \
@@ -80,6 +81,7 @@ cd "${0%/*}/../.."
   --with-ldap-sasl \
   --enable-mbstring \
   --with-mysqli \
+  --with-mysql=shared \
   --enable-pcntl \
   --with-pdo-mysql \
   --with-pdo-pgsql \
@@ -99,5 +101,13 @@ cd "${0%/*}/../.."
   --with-tidy \
   --with-xsl \
   --with-zip \
-  --enable-mysqlnd
+  --enable-mysqlnd \
+  --enable-apcu \
+  --with-xmlrpc \
+  --enable-ast \
+  --with-pear \
+  --enable-werror \
+  --enable-phar \
+  --enable-zend-test=shared
+  "$@"
 
