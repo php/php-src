@@ -35,11 +35,11 @@ function imap_headers($stream_id) {}
 
 /**
  * @param resource $stream_id
- * @return object|false
+ * @return \stdClass|false
  */
 function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN) {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): object {}
+function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): \stdClass {}
 
 /**
  * @return string|false
@@ -58,7 +58,7 @@ function imap_body($stream_id, int $msg_no, int $options = 0) {}
 
 /**
  * @param resource $stream_id
- * @return object|false
+ * @return \stdClass|false
  */
 function imap_bodystruct($stream_id, int $msg_no, string $section) {}
 
@@ -89,7 +89,7 @@ function imap_fetchheader($stream_id, int $msg_no, int $options = 0) {}
 
 /**
  * @param resource $stream_id
- * @return object|false
+ * @return \stdClass|false
  */
 function imap_fetchstructure($stream_id, int $msg_no, int $options = 0) {}
 
@@ -115,7 +115,7 @@ function imap_undelete($stream_id, string $msg_no, int $options = 0): bool {}
 
 /**
  * @param resource $stream_id
- * @return object|false
+ * @return \stdClass|false
  */
 function imap_check($stream_id) {}
 
@@ -200,14 +200,14 @@ function imap_utf8(string $mime_encoded_text): string {}
 
 /**
  * @param resource $stream_id
- * @return object|false
+ * @return \stdClass|false
  */
 function imap_status($stream_id, string $mailbox, int $options) {}
 
 /**
  * @param resource $stream_id
  */
-function imap_mailboxmsginfo($stream_id): object {}
+function imap_mailboxmsginfo($stream_id): \stdClass {}
 
 /**
  * @param resource $stream_id
