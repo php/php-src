@@ -23,7 +23,7 @@ function tidy_clean_repair(tidy $object): bool {}
  * @param array|string $config_options
  * @return string|false
  */
-function tidy_repair_string(string $data, $config_file = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+function tidy_repair_string(string $data, $config_file = UNKNOWN, string $encoding = UNKNOWN) {}
 
 /**
  * @param array|string $config_options

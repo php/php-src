@@ -29,7 +29,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_string, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_file)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
