@@ -5323,6 +5323,9 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
+			if (type == IS_VOID && allow_null) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
+			}
 			return ZEND_TYPE_ENCODE_CODE(type, allow_null);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
@@ -5354,13 +5357,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		arg_infos->is_variadic = 0;
 		arg_infos->type = zend_compile_typename(return_type_ast, 0);
-
-		if (ZEND_TYPE_IS_MASK(arg_infos->type)
-				&& ZEND_TYPE_CONTAINS_CODE(arg_infos->type, IS_VOID)
-				&& ZEND_TYPE_ALLOW_NULL(arg_infos->type)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
-		}
-
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 	} else {
