@@ -3105,7 +3105,7 @@ try_again:
 			zend_object *zobj = Z_OBJ_P(callable);
 
 			if (zobj->handlers->get_closure
-					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object) == SUCCESS) {
+					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object, 1) == SUCCESS) {
 				zend_class_entry *ce = zobj->ce;
 				zend_string *callable_name = zend_string_alloc(
 					ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
@@ -3230,18 +3230,12 @@ check_func:
 			}
 			return 0;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure)) {
-				if (Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
+			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				if (fcc == &fcc_local) {
 					zend_release_fcall_info_cache(fcc);
 				}
 				return 1;
-				} else {
-					/* Discard exceptions thrown from Z_OBJ_HANDLER_P(callable, get_closure)
-					   TODO: extend get_closure() with additional argument and prevent exception throwing in the first place */
-					zend_clear_exception();
-			}
 			}
 			if (error) *error = estrdup("no array or string given");
 			return 0;
