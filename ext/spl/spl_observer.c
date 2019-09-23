@@ -782,6 +782,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 	--p; /* for ';' */
 	count = Z_LVAL_P(pcount);
+	if (count < 0) {
+		goto outexcept;
+	}
 
 	ZVAL_UNDEF(&entry);
 	ZVAL_UNDEF(&inf);
