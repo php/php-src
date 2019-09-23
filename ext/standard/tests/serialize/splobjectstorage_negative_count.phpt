@@ -1,5 +1,7 @@
 --TEST--
 OSS-Fuzz: Unserializing SplObjectStorage with negative number of elements
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) die("skip requires 64-bit"); ?>
 --FILE--
 <?php
 
