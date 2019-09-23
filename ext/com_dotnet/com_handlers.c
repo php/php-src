@@ -319,7 +319,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].type = ZEND_TYPE_ENCODE_CODE(0,1);
+								f.arg_info[i].type = ZEND_TYPE_ENCODE_NONE();
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
 									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
 								}

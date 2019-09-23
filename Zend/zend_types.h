@@ -129,10 +129,10 @@ typedef uintptr_t zend_type;
 #define _ZEND_TYPE_NULLABLE_BIT Z_L(0x2)
 
 #define ZEND_TYPE_IS_SET(t) \
-	((t) > _ZEND_TYPE_FLAG_MASK)
+	((t) != 0)
 
 #define ZEND_TYPE_IS_MASK(t) \
-	(((t) > _ZEND_TYPE_FLAG_MASK) && ((t) <= _ZEND_TYPE_CODE_MAX))
+	((t) <= _ZEND_TYPE_CODE_MAX)
 
 #define ZEND_TYPE_IS_CLASS(t) \
 	((t) > _ZEND_TYPE_CODE_MAX)
@@ -160,6 +160,9 @@ typedef uintptr_t zend_type;
 
 #define ZEND_TYPE_WITHOUT_NULL(t) \
 	((t) & ~_ZEND_TYPE_NULLABLE_BIT)
+
+#define ZEND_TYPE_ENCODE_NONE() \
+	(0)
 
 #define ZEND_TYPE_ENCODE_MASK(maybe_code) \
 	(maybe_code)

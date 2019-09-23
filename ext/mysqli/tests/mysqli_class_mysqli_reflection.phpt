@@ -53,42 +53,42 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'host' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'user' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'password' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'database' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'port' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'socket' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -111,42 +111,42 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'host' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'user' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'password' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'database' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'port' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'socket' of method '__construct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -169,7 +169,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'mode' of method 'autocommit'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -192,14 +192,14 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'flags' of method 'begin_transaction'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'name' of method 'begin_transaction'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -222,21 +222,21 @@ Number of Required Parameters: 3
 
 Inspecting parameter 'user' of method 'change_user'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'password' of method 'change_user'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'database' of method 'change_user'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -291,14 +291,14 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'flags' of method 'commit'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'name' of method 'commit'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -321,42 +321,42 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'host' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'user' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'password' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'database' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'port' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'socket' of method 'connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -379,7 +379,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'debug_options' of method 'debug'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -418,7 +418,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'string_to_escape' of method 'escape_string'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -537,7 +537,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'connection_id' of method 'kill'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -576,7 +576,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'multi_query'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -615,14 +615,14 @@ Number of Required Parameters: 2
 
 Inspecting parameter 'option' of method 'options'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'value' of method 'options'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -682,14 +682,14 @@ isDefaultValueAvailable: no
 
 Inspecting parameter 'sec' of method 'poll'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'usec' of method 'poll'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -712,7 +712,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'prepare'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -735,14 +735,14 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'query'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'resultmode' of method 'query'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -765,49 +765,49 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'host' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'user' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'password' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'database' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'port' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'socket' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'flags' of method 'real_connect'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -830,7 +830,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'string_to_escape' of method 'real_escape_string'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -853,7 +853,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'real_query'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -892,7 +892,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'options' of method 'refresh'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -915,7 +915,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'name' of method 'release_savepoint'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -938,14 +938,14 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'flags' of method 'rollback'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting parameter 'name' of method 'rollback'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -968,7 +968,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'name' of method 'savepoint'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -991,7 +991,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'database' of method 'select_db'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -1014,7 +1014,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'charset' of method 'set_charset'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -1037,14 +1037,14 @@ Number of Required Parameters: 2
 
 Inspecting parameter 'option' of method 'set_opt'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'value' of method 'set_opt'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -1067,35 +1067,35 @@ Number of Required Parameters: 5
 
 Inspecting parameter 'key' of method 'ssl_set'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'cert' of method 'ssl_set'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'certificate_authority' of method 'ssl_set'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'certificate_authority_path' of method 'ssl_set'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting parameter 'cipher' of method 'ssl_set'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -1150,7 +1150,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'flags' of method 'store_result'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
