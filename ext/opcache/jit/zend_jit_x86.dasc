@@ -8980,7 +8980,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 					|	jne >9
 					|	mov FCARG1a, r0
 					|	mov r0,	EX->run_time_cache
-					|	add r0, opline->op2.num
+					|	add r0, opline->extended_value
 					|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
 					|.if X64WIN
 						|	mov CARG3, arg_num
@@ -9011,7 +9011,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 				|9:
 				|	mov FCARG1a, r0
 				|	mov r0,	EX->run_time_cache
-				|	add r0, opline->op2.num
+				|	add r0, opline->extended_value
 				|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
 				|.if X64WIN
 					|	mov CARG3, arg_num

@@ -3127,7 +3127,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_SPEC_UNUSED_H
 		zval *param = EX_VAR(opline->result.var);
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->op2.num)) || EG(exception))) {
+		if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value)) || EG(exception))) {
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -3155,7 +3155,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_VARIADIC_SPEC_UNUSED_HAND
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 				do {
-					zend_verify_variadic_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->op2.num));
+					zend_verify_variadic_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value));
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
 					param++;

@@ -5186,7 +5186,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED|CACHE_SLOT)
+ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
@@ -5199,7 +5199,7 @@ ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED|CACHE_SLOT)
 		zval *param = EX_VAR(opline->result.var);
 
 		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->op2.num)) || EG(exception))) {
+		if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value)) || EG(exception))) {
 			HANDLE_EXCEPTION();
 		}
 	}
@@ -5254,7 +5254,7 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST, CACHE_SLOT)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED|CACHE_SLOT)
+ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
@@ -5274,7 +5274,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED|CACHE_SLOT)
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 				do {
-					zend_verify_variadic_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->op2.num));
+					zend_verify_variadic_arg_type(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value));
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
 					param++;

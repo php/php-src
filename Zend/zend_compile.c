@@ -5481,19 +5481,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			}
 
 			/* Allocate cache slot to speed-up run-time class resolution */
-			if (opline->opcode == ZEND_RECV_INIT) {
-				if (is_class) {
-					opline->extended_value = zend_alloc_cache_slot();
-				}
-			} else if (is_class) {
-				opline->op2.num = op_array->cache_size;
-				op_array->cache_size += sizeof(void*);
-			} else {
-				opline->op2.num = -1;
-			}
-		} else {
-			if (opline->opcode != ZEND_RECV_INIT) {
-				opline->op2.num = -1;
+			if (is_class) {
+				opline->extended_value = zend_alloc_cache_slot();
 			}
 		}
 	}

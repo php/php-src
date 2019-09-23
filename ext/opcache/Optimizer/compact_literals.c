@@ -503,15 +503,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (opline->opcode) {
 				case ZEND_RECV_INIT:
-					if (class_name_type_hint(op_array, opline->op1.num)) {
-						opline->extended_value = cache_size;
-						cache_size += sizeof(void *);
-					}
-					break;
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
 					if (class_name_type_hint(op_array, opline->op1.num)) {
-						opline->op2.num = cache_size;
+						opline->extended_value = cache_size;
 						cache_size += sizeof(void *);
 					}
 					break;
