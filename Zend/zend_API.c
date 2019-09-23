@@ -1073,7 +1073,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 					}
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						if (prop_info->type) {
+						if (ZEND_TYPE_IS_SET(prop_info->type)) {
 							zval tmp;
 
 							ZVAL_COPY(&tmp, val);
@@ -1149,7 +1149,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
-				if (UNEXPECTED(property_info->type)) {
+				if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
@@ -3725,7 +3725,7 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0);
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, ZEND_TYPE_ENCODE_NONE());
 }
 /* }}} */
 
@@ -4024,7 +4024,7 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 
 	ZEND_ASSERT(!Z_ISREF_P(value));
 	Z_TRY_ADDREF_P(value);
-	if (prop_info->type) {
+	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		ZVAL_COPY_VALUE(&tmp, value);
 		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
 			Z_TRY_DELREF_P(value);

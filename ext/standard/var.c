@@ -76,7 +76,7 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
-		ZEND_ASSERT(prop_info->type);
+		ZEND_ASSERT(ZEND_TYPE_IS_SET(prop_info->type));
 		zend_string *type_str = zend_type_to_string(prop_info->type);
 		php_printf("%*cuninitialized(%s)\n",
 			level + 1, ' ', ZSTR_VAL(type_str));

@@ -3703,7 +3703,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
-		if (!prop || (prop_info->type && Z_ISUNDEF_P(prop))) {
+		if (!prop || (ZEND_TYPE_IS_SET(prop_info->type) && Z_ISUNDEF_P(prop))) {
 			continue;
 		}
 
@@ -3815,7 +3815,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 		}
 	}
 
-	if (prop_info->type && !zend_verify_property_type(prop_info, value, 0)) {
+	if (ZEND_TYPE_IS_SET(prop_info->type) && !zend_verify_property_type(prop_info, value, 0)) {
 		return;
 	}
 
