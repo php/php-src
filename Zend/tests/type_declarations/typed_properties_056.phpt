@@ -19,5 +19,5 @@ var_dump($o->foo);
 unset($o);
 ?>
 --EXPECT--
-Typed property A::$foo must be string, int used
+Cannot assign int to property A::$foo of type string
 string(3) "100"

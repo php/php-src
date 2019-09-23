@@ -899,23 +899,12 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 		return;
 	}
 
-	// TODO Switch to a more standard error message?
-	type_str = zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(info->type));
-	if (ZEND_TYPE_IS_CLASS(info->type)) {
-		zend_type_error("Typed property %s::$%s must be an instance of %s%s, %s used",
-			ZSTR_VAL(info->ce->name),
-			zend_get_unmangled_property_name(info->name),
-			ZSTR_VAL(type_str),
-			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
-			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
-	} else {
-		zend_type_error("Typed property %s::$%s must be %s%s, %s used",
-			ZSTR_VAL(info->ce->name),
-			zend_get_unmangled_property_name(info->name),
-			ZSTR_VAL(type_str),
-			ZEND_TYPE_ALLOW_NULL(info->type) ? " or null" : "",
-			Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)));
-	}
+	type_str = zend_type_to_string(info->type);
+	zend_type_error("Cannot assign %s to property %s::$%s of type %s",
+		Z_TYPE_P(property) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(property)->name) : zend_get_type_by_const(Z_TYPE_P(property)),
+		ZSTR_VAL(info->ce->name),
+		zend_get_unmangled_property_name(info->name),
+		ZSTR_VAL(type_str));
 	zend_string_release(type_str);
 }
 

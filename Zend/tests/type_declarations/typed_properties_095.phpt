@@ -60,8 +60,8 @@ var_dump(_ZendTestClass::$staticIntProp);
 ?>
 --EXPECT--
 int(123)
-Typed property _ZendTestClass::$intProp must be int, string used
-Typed property _ZendTestClass::$classProp must be an instance of stdClass or null, _ZendTestClass used
+Cannot assign string to property _ZendTestClass::$intProp of type int
+Cannot assign _ZendTestClass to property _ZendTestClass::$classProp of type ?stdClass
 object(_ZendTestClass)#1 (2) {
   ["intProp"]=>
   int(456)
@@ -70,8 +70,8 @@ object(_ZendTestClass)#1 (2) {
   }
 }
 int(123)
-Typed property _ZendTestClass::$intProp must be int, string used
-Typed property _ZendTestClass::$classProp must be an instance of stdClass or null, Test used
+Cannot assign string to property _ZendTestClass::$intProp of type int
+Cannot assign Test to property _ZendTestClass::$classProp of type ?stdClass
 object(Test)#4 (2) {
   ["intProp"]=>
   int(456)
@@ -80,5 +80,5 @@ object(Test)#4 (2) {
   }
 }
 int(123)
-Typed property _ZendTestClass::$staticIntProp must be int, string used
+Cannot assign string to property _ZendTestClass::$staticIntProp of type int
 int(456)

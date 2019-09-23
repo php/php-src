@@ -13,8 +13,8 @@ new class(new Dummy) {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property class@anonymous::$std must be an instance of stdClass, Dummy used in %s:8
+Fatal error: Uncaught TypeError: Cannot assign Dummy to property class@anonymous::$std of type stdClass in %s:%d
 Stack trace:
-#0 %s(4): class@anonymous->__construct(Object(Dummy))
+#0 %s(%d): class@anonymous->__construct(Object(Dummy))
 #1 {main}
-  thrown in %s on line 8
+  thrown in %s on line %d

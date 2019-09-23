@@ -44,7 +44,7 @@ object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
 }
-string(60) "Typed property class@anonymous::$bar must be int, float used"
+string(65) "Cannot assign float to property class@anonymous::$bar of type int"
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
@@ -54,7 +54,7 @@ object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)
 }
-string(60) "Typed property class@anonymous::$bar must be int, float used"
+string(65) "Cannot assign float to property class@anonymous::$bar of type int"
 object(class@anonymous)#1 (1) {
   ["bar"]=>
   int(%d)

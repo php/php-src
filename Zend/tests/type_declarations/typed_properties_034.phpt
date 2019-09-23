@@ -38,7 +38,7 @@ var_dump($foo);
 ?>
 --EXPECT--
 int(42)
-Typed property class@anonymous::$baz must be int, null used
+Cannot assign null to property class@anonymous::$baz of type int
 int(1)
 int(10)
 int(10)
