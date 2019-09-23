@@ -132,7 +132,7 @@ typedef uintptr_t zend_type;
 	((t) != 0)
 
 #define ZEND_TYPE_IS_MASK(t) \
-	((t) <= _ZEND_TYPE_CODE_MAX)
+	((t) != 0 && (t) <= _ZEND_TYPE_CODE_MAX)
 
 #define ZEND_TYPE_IS_CLASS(t) \
 	((t) > _ZEND_TYPE_CODE_MAX)
