@@ -8967,13 +8967,18 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, zend_op_array 
 					|	add r0, offsetof(zend_reference, val)
 				}
 				if (!ZEND_TYPE_IS_CLASS(type)) {
-					// TODO: Use bt?
 					uint32_t type_mask = ZEND_TYPE_MASK(type);
-					|	mov edx, 1
-					|	mov cl, byte [r0 + 8]
-					|	shl edx, cl
-					|	test edx, type_mask
-					|	je >8
+					if (is_power_of_two(type_mask)) {
+						uint32_t type_code = concrete_type(type_mask);
+						|	cmp byte [r0 + 8], type_code
+						|	jne >8
+					} else {
+						|	mov edx, 1
+						|	mov cl, byte [r0 + 8]
+						|	shl edx, cl
+						|	test edx, type_mask
+						|	je >8
+					}
 				} else {
 					|	SAVE_VALID_OPLINE opline
 					|	cmp byte [r0 + 8], IS_OBJECT
@@ -9111,12 +9116,18 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			|	LOAD_ZVAL_ADDR r0, res_addr
 			|	ZVAL_DEREF r0, MAY_BE_REF
 			if (!ZEND_TYPE_IS_CLASS(arg_info->type)) {
-				// TODO: Use bt?
-			|	mov edx, 1
-			|	mov cl, byte [r0 + 8]
-			|	shl edx, cl
-			|	test edx, ZEND_TYPE_MASK(arg_info->type)
-			|	je >8
+				uint32_t type_mask = ZEND_TYPE_MASK(arg_info->type);
+				if (is_power_of_two(type_mask)) {
+					uint32_t type_code = concrete_type(type_mask);
+					|	cmp byte [r0 + 8], type_code
+					|	jne >8
+				} else {
+					|	mov edx, 1
+					|	mov cl, byte [r0 + 8]
+					|	shl edx, cl
+					|	test edx, type_mask
+					|	je >8
+				}
 			} else {
 			|	cmp byte [r0 + 8], IS_OBJECT
 			|	jne >8
