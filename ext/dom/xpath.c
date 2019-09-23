@@ -35,6 +35,7 @@
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
+	ZEND_ARG_INFO(0, registerNodeNS)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_ns, 0, 0, 2)
@@ -249,12 +250,13 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 PHP_METHOD(domxpath, __construct)
 {
 	zval *doc;
+	zend_bool register_node_ns = 1;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 	dom_xpath_object *intern;
 	xmlXPathContextPtr ctx, oldctx;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &doc, dom_document_class_entry) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
 		return;
 	}
 
@@ -284,6 +286,7 @@ PHP_METHOD(domxpath, __construct)
 		intern->dom.ptr = ctx;
 		ctx->userData = (void *)intern;
 		intern->dom.document = docobj->document;
+		intern->register_node_ns = register_node_ns;
 		php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
 	}
 }
@@ -300,6 +303,26 @@ int dom_xpath_document_read(dom_object *obj, zval *retval)
 	}
 
 	php_dom_create_object((xmlNodePtr) docp, retval, obj);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ registerNodeNamespaces bool*/
+static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
+	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
+}
+
+int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
+{
+	ZVAL_BOOL(retval, php_xpath_obj_from_dom_obj(obj)->register_node_ns);
+
+	return SUCCESS;
+}
+
+int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
+{
+	php_xpath_obj_from_dom_obj(obj)->register_node_ns = zend_is_true(newval);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -354,14 +377,15 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	char *expr;
 	xmlDoc *docp = NULL;
 	xmlNsPtr *ns = NULL;
-	zend_bool register_node_ns = 1;
+	zend_bool register_node_ns;
 
 	id = ZEND_THIS;
+	intern = Z_XPATHOBJ_P(id);
+	register_node_ns = intern->register_node_ns;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
 		return;
 	}
-
-	intern = Z_XPATHOBJ_P(id);
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {

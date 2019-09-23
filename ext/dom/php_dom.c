@@ -768,6 +768,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", sizeof("document")-1, dom_xpath_document_read, NULL);
+	dom_register_prop_handler(&dom_xpath_prop_handlers, "registerNodeNamespaces", sizeof("registerNodeNamespaces")-1, dom_xpath_register_node_ns_read, dom_xpath_register_node_ns_write);
 	zend_hash_add_ptr(&classes, ce.name, &dom_xpath_prop_handlers);
 #endif
 
@@ -1017,6 +1018,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
 	intern->registered_phpfunctions = zend_new_array(0);
+	intern->register_node_ns = 1;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
 	intern->dom.std.handlers = &dom_xpath_object_handlers;

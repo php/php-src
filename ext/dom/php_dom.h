@@ -65,6 +65,7 @@ extern zend_module_entry dom_module_entry;
 
 typedef struct _dom_xpath_object {
 	int registerPhpFunctions;
+	int register_node_ns;
 	HashTable *registered_phpfunctions;
 	HashTable *node_list;
 	dom_object dom;
