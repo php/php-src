@@ -22,10 +22,7 @@
 
 #if DBA_TCADB
 #include "php_tcadb.h"
-
-#ifdef TCADB_INCLUDE_FILE
-#include TCADB_INCLUDE_FILE
-#endif
+#include "tcadb.h"
 
 #define TCADB_DATA dba_tcadb_data *dba = info->dbf
 

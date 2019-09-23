@@ -135,37 +135,21 @@ dnl
 
 dnl QDBM
 if test "$PHP_QDBM" != "no"; then
-  PHP_DBA_STD_BEGIN
-  for i in $PHP_QDBM /usr/local /usr; do
-    if test -f "$i/include/depot.h"; then
-      THIS_PREFIX=$i
-      THIS_INCLUDE=$i/include/depot.h
-      break
-    elif test -f "$i/include/qdbm/depot.h"; then
-      THIS_PREFIX=$i
-      THIS_INCLUDE=$i/include/qdbm/depot.h
-      break
-    fi
-  done
+  PKG_CHECK_MODULES([QDBM], [qdbm])
 
-  if test -n "$THIS_INCLUDE"; then
-    for LIB in qdbm; do
-      PHP_CHECK_LIBRARY($LIB, dpopen, [
-        AC_DEFINE_UNQUOTED(QDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+  PHP_EVAL_INCLINE($QDBM_CFLAGS)
+  PHP_EVAL_LIBLINE($QDBM_LIBS, DBA_SHARED_LIBADD)
+
+  PHP_CHECK_LIBRARY(qdbm, dpopen,
+  [
+    AC_DEFINE(HAVE_DBA, 1, [ ])
+    AC_DEFINE(HAVE_QDBM, 1, [ ])
         AC_DEFINE(DBA_QDBM, 1, [ ])
-        THIS_LIBS=$LIB
-      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-      if test -n "$THIS_LIBS"; then
-        break
+  ], [ ], [
+    $QDBM_LIBS
+  ])
       fi
-    done
-  fi
 
-  PHP_DBA_STD_ASSIGN
-  PHP_DBA_STD_CHECK
-  PHP_DBA_STD_ATTACH
-fi
-PHP_DBA_STD_RESULT(qdbm)
 
 dnl GDBM
 if test "$PHP_GDBM" != "no"; then
@@ -231,65 +215,36 @@ PHP_DBA_STD_RESULT(ndbm)
 
 dnl TCADB
 if test "$PHP_TCADB" != "no"; then
-  PHP_DBA_STD_BEGIN
-  for i in $PHP_TCADB /usr/local /usr; do
-	if test -f "$i/include/tcadb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/tcadb.h
-	  break
-	fi
-  done
+  PKG_CHECK_MODULES([TCADB], [tokyocabinet])
 
-  if test -n "$THIS_INCLUDE"; then
-	for LIB in tokyocabinet; do
-	  PHP_CHECK_LIBRARY($LIB, tcadbopen, [
-		AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+  PHP_EVAL_INCLINE($TCADB_CFLAGS)
+  PHP_EVAL_LIBLINE($TCADB_LIBS, DBA_SHARED_LIBADD)
+
+  PHP_CHECK_LIBRARY(tokyocabinet, tcadbopen,
+  [
+    AC_DEFINE(HAVE_DBA, 1, [ ])
+    AC_DEFINE(HAVE_TCADB, 1, [ ])
 		AC_DEFINE(DBA_TCADB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
+  ], [ ], [
+    $TCADB_LIBS
+  ])
 	  fi
-	done
-  fi
-
-  PHP_DBA_STD_ASSIGN
-  PHP_DBA_STD_CHECK
-  PHP_DBA_STD_ATTACH
-fi
-PHP_DBA_STD_RESULT(tcadb)
 
 dnl LMDB
 if test "$PHP_LMDB" != "no"; then
-  PHP_DBA_STD_BEGIN
-  for i in $PHP_LMDB /usr/local /usr; do
-	if test -f "$i/include/lmdb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/lmdb.h
-	  break
-	fi
-  done
+  PKG_CHECK_MODULES([LMDB], [lmdb])
 
-  if test -n "$THIS_INCLUDE"; then
-	for LIB in lmdb; do
-	  PHP_CHECK_LIBRARY($LIB, mdb_env_open, [
-		AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+  PHP_EVAL_INCLINE($LMDB_CFLAGS)
+  PHP_EVAL_LIBLINE($LMDB_LIBS, DBA_SHARED_LIBADD)
+
+  PHP_CHECK_LIBRARY(lmdb, mdb_env_open,
+  [
+    AC_DEFINE(HAVE_DBA, 1, [ ])
 		AC_DEFINE(DBA_LMDB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
+  ], [ ], [
+    $LMDB_LIBS
+  ])
 	  fi
-	done
-  fi
-
-  PHP_DBA_STD_ASSIGN
-  PHP_DBA_STD_CHECK
-  PHP_DBA_STD_ATTACH
-fi
-PHP_DBA_STD_RESULT(lmdb)
 
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
@@ -644,34 +599,22 @@ if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB, 1, [ ])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"
+  PHP_DBA_STD_RESULT
 elif test "$PHP_CDB" != "no"; then
-  PHP_DBA_STD_BEGIN
-  for i in $PHP_CDB /usr/local /usr; do
-    if test -f "$i/include/cdb.h"; then
-      THIS_PREFIX=$i
-      THIS_INCLUDE=$i/include/cdb.h
-      break
-    fi
-  done
+  PKG_CHECK_MODULES([CDB], [cdb])
 
-  if test -n "$THIS_INCLUDE"; then
-    for LIB in cdb c; do
-      PHP_CHECK_LIBRARY($LIB, cdb_read, [
-        AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+  PHP_EVAL_INCLINE($CDB_CFLAGS)
+  PHP_EVAL_LIBLINE($CDB_LIBS, DBA_SHARED_LIBADD)
+
+  PHP_CHECK_LIBRARY(cdb, cdb_read,
+  [
+    AC_DEFINE(HAVE_DBA, 1, [ ])
+    AC_DEFINE(HAVE_CDB, 1, [ ])
         AC_DEFINE(DBA_CDB, 1, [ ])
-        THIS_LIBS=$LIB
-      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-      if test -n "$THIS_LIBS"; then
-        break
+  ], [ ], [
+    $CDB_LIBS
+  ])
       fi
-    done
-  fi
-
-  PHP_DBA_STD_ASSIGN
-  PHP_DBA_STD_CHECK
-  PHP_DBA_STD_ATTACH
-fi
-PHP_DBA_STD_RESULT(cdb)
 
 dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then

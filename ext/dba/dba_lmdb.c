@@ -22,10 +22,7 @@
 
 #if DBA_LMDB
 #include "php_lmdb.h"
-
-#ifdef LMDB_INCLUDE_FILE
-#include LMDB_INCLUDE_FILE
-#endif
+#include "lmdb.h"
 
 struct php_lmdb_info {
 	MDB_env *env;
