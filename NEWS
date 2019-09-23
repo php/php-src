@@ -229,6 +229,10 @@ PHP                                                                        NEWS
   . Implemented FR #72189 (Add missing CURL_VERSION_* constants). (Javier
     Spagnoletti)
 
+- Date:
+  . Fixed bug #77909 (DatePeriod::__construct() with invalid recurrence count
+    value). (Ignace Nyamagana Butera)
+
 - EXIF:
   . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16).
     (CVE-2019-11040) (Stas)
