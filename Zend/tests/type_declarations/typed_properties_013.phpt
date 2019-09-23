@@ -7,4 +7,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Default value for property of type int can only be int in %s on line 3
+Fatal error: Cannot use string as default value for property Foo::$bar of type int in %s on line 3

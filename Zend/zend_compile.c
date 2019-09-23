@@ -5343,6 +5343,29 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 }
 /* }}} */
 
+static zend_bool zend_is_valid_default_value(zend_type type, zval *value)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
+	if (Z_TYPE_P(value) == IS_NULL && ZEND_TYPE_ALLOW_NULL(type)) {
+		return 1;
+	}
+
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		return 0;
+	}
+	if (ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(value))) {
+		return 1;
+	}
+	if ((ZEND_TYPE_MASK(type) & MAY_BE_DOUBLE) && Z_TYPE_P(value) == IS_LONG) {
+		/* Integers are allowed as initializers for floating-point values. */
+		return 1;
+	}
+	if ((ZEND_TYPE_MASK(type) & MAY_BE_ITERABLE) && Z_TYPE_P(value) == IS_ARRAY) {
+		return 1;
+	}
+	return 0;
+}
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5449,41 +5472,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
-			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST) {
-				if (is_class) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-						"with a class type can only be NULL");
-				} else {
-					if (arg_type & MAY_BE_CALLABLE) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with callable type can only be NULL");
-					} else if (arg_type & MAY_BE_ARRAY) {
-						if (default_type != IS_ARRAY) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with array type can only be an array or NULL");
-						}
-					} else if (arg_type & MAY_BE_DOUBLE) {
-						if (default_type != IS_DOUBLE && default_type != IS_LONG) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with a float type can only be float, integer, or NULL");
-						}
-					} else if (arg_type & MAY_BE_ITERABLE) {
-						if (default_type != IS_ARRAY) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with iterable type can only be an array or NULL");
-						}
-					} else if (arg_type & MAY_BE_OBJECT) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with an object type can only be NULL");
-					} else if (!ZEND_TYPE_CONTAINS_CODE(arg_type, default_type)) {
-						zend_string *type_str =
-							zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(arg_type));
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with a %s type can only be %s or NULL",
-							ZSTR_VAL(type_str), ZSTR_VAL(type_str));
-						zend_string_release(type_str);
-					}
-				}
+			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST
+					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
+				zend_string *type_str = zend_type_to_string(arg_info->type);
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use %s as default value for parameter $%s of type %s",
+					zend_get_type_by_const(default_type),
+					ZSTR_VAL(name), ZSTR_VAL(type_str));
 			}
 
 			/* Allocate cache slot to speed-up run-time class resolution */
@@ -6034,35 +6029,19 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		if (value_ast) {
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
-			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)) {
+			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
+					&& !zend_is_valid_default_value(type, &value_zv)) {
+				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL) {
-					if (!ZEND_TYPE_ALLOW_NULL(type)) {
-						zend_string *str = zend_type_to_string(type);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type %s may not be null. "
-								"Use the nullable type ?%s to allow null default value",
-								ZSTR_VAL(str), ZSTR_VAL(str));
-					}
-				} else if (ZEND_TYPE_IS_CLASS(type)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Property of type %s may not have default value", ZSTR_VAL(ZEND_TYPE_NAME(type)));
-				} else if (ZEND_TYPE_MASK(type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
-					if (Z_TYPE(value_zv) != IS_ARRAY) {
-						zend_string *str = zend_type_to_string(type);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type %s can only be an array",
-								ZSTR_VAL(str));
-					}
-				} else if (ZEND_TYPE_MASK(type) & MAY_BE_DOUBLE) {
-					if (Z_TYPE(value_zv) != IS_DOUBLE && Z_TYPE(value_zv) != IS_LONG) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type float can only be float or int");
-					}
-				} else if (!ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(value_zv))) {
-					zend_string *str = zend_type_to_string(type);
+						"Default value for property of type %s may not be null. "
+						"Use the nullable type ?%s to allow null default value",
+						ZSTR_VAL(str), ZSTR_VAL(str));
+				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for property of type %s can only be %s",
-							ZSTR_VAL(str), ZSTR_VAL(str));
+						"Cannot use %s as default value for property %s::$%s of type %s",
+						zend_get_type_by_const(Z_TYPE(value_zv)),
+						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}
 		} else if (!ZEND_TYPE_IS_SET(type)) {
