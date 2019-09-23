@@ -183,6 +183,10 @@ PHP                                                                        NEWS
 
 30 May 2019, PHP 7.2.19
 
+- Date:
+  . Fixed bug #77909 (DatePeriod::__construct() with invalid recurrence count
+    value). (Ignace Nyamagana Butera)
+
 - EXIF:
   . Fixed bug #77988 (heap-buffer-overflow on php_jpg_get16).
     (CVE-2019-11040) (Stas)
@@ -228,10 +232,6 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug #77794 (Incorrect Date header format in built-in server).
     (kelunik)
-
-- Date:
-  . Fixed bug #77909 (DatePeriod::__construct() with invalid recurrence count
-    value). (Ignace Nyamagana Butera)
 
 - EXIF
   . Fixed bug #77950 (Heap-buffer-overflow in _estrndup via exif_process_IFD_TAG).
