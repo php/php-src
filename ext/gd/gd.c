@@ -1465,7 +1465,7 @@ PHP_FUNCTION(imagegrabwindow)
 		RETURN_FALSE;
 	}
 
-	gd_ext_image_object_init(return_value, im);
+	php_gd_assign_libgdimageptr_as_extgdimage(return_value, im);
 }
 /* }}} */
 
