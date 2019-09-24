@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)
 
+- Standard:
+  . Fixed bug #78549 (Stack overflow due to nested serialized input). (Nikita)
+
 19 Sep 2019, PHP 7.4.0RC2
 
 - Core:

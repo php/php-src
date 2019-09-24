@@ -316,6 +316,12 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/custom_object_serialization
 
+  . A new 'max_depth' option for unserialize(), as well as a
+    unserialize_max_depth ini setting have been added. These control the
+    maximum depth of structures permitted during unserialization, and are
+    intended to prevent stack overflows. The default depth limit is 4096 and
+    can be disabled by setting unserialize_max_depth=0.
+
   . array_merge() and array_merge_recursive() may now be called without any
     arguments, in which case they will return an empty array. This is useful
     in conjunction with the spread operator, e.g. array_merge(...$arrays).

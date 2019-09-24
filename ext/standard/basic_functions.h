@@ -235,6 +235,7 @@ typedef struct _php_basic_globals {
 #endif
 
 	int umask;
+	zend_long unserialize_max_depth;
 } php_basic_globals;
 
 #ifdef ZTS
