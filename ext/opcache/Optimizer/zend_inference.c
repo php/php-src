@@ -1420,7 +1420,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				} else if (op_array->arg_info &&
 				    opline->op1.num <= op_array->num_args) {
 					zend_type type = op_array->arg_info[opline->op1.num-1].type;
-					uint32_t mask = ZEND_TYPE_MASK_WITHOUT_NULL(type);
+					uint32_t mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
 					if (mask == MAY_BE_LONG) {
 						tmp->underflow = 0;
 						tmp->min = ZEND_LONG_MIN;
@@ -2258,7 +2258,7 @@ uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_
 		return MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN;
 	}
 
-	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_MASK(arg_info->type));
+	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
 	*pce = NULL;
 	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
 		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
@@ -2363,7 +2363,7 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
 		uint32_t type = ZEND_TYPE_IS_CLASS(prop_info->type)
 			? MAY_BE_OBJECT
-			: zend_convert_type_declaration_mask(ZEND_TYPE_MASK(prop_info->type));
+			: zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
 
 		if (ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 			type |= MAY_BE_NULL;
@@ -3101,7 +3101,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			ce = NULL;
 			if (arg_info) {
 				tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
-				if (arg_info->pass_by_reference) {
+				if (ZEND_ARG_SEND_MODE(arg_info)) {
 					tmp |= MAY_BE_REF;
 				}
 			} else {

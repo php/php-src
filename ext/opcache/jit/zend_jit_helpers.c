@@ -1156,7 +1156,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 		goto err;
 	}
 
-	type_mask = ZEND_TYPE_MASK(arg_info->type);
+	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
 	if (type_mask & MAY_BE_CALLABLE) {
 		if (zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) == 0) {
 			goto err;
@@ -1167,7 +1167,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 		}
 	} else  {
 		if (Z_ISUNDEF_P(arg) ||
-		    zend_verify_scalar_type_hint(ZEND_TYPE_MASK(arg_info->type), arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0) == 0) {
+		    zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0) == 0) {
 			goto err;
 		}
 	}
@@ -1323,7 +1323,7 @@ static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference
 {
 	zend_property_info *prop;
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (!(ZEND_TYPE_MASK(prop->type) & MAY_BE_DOUBLE)) {
+		if (!(ZEND_TYPE_FULL_MASK(prop->type) & MAY_BE_DOUBLE)) {
 			return prop;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();

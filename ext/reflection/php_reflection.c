@@ -587,10 +587,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 		smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
 		zend_string_release(type_str);
 	}
-	if (arg_info->pass_by_reference) {
+	if (ZEND_ARG_SEND_MODE(arg_info)) {
 		smart_str_appendc(str, '&');
 	}
-	if (arg_info->is_variadic) {
+	if (ZEND_ARG_IS_VARIADIC(arg_info)) {
 		smart_str_appends(str, "...");
 	}
 	if (arg_info->name) {
@@ -2558,7 +2558,7 @@ ZEND_METHOD(reflection_parameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	type_mask = ZEND_TYPE_MASK_WITHOUT_NULL(param->arg_info->type);
+	type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(param->arg_info->type);
 	RETVAL_BOOL(type_mask == MAY_BE_ARRAY);
 }
 /* }}} */
@@ -2576,7 +2576,7 @@ ZEND_METHOD(reflection_parameter, isCallable)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	type_mask = ZEND_TYPE_MASK_WITHOUT_NULL(param->arg_info->type);
+	type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(param->arg_info->type);
 	RETVAL_BOOL(type_mask == MAY_BE_CALLABLE);
 }
 /* }}} */
@@ -2610,7 +2610,7 @@ ZEND_METHOD(reflection_parameter, isPassedByReference)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->pass_by_reference);
+	RETVAL_BOOL(ZEND_ARG_SEND_MODE(param->arg_info));
 }
 /* }}} */
 
@@ -2627,7 +2627,7 @@ ZEND_METHOD(reflection_parameter, canBePassedByValue)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	/* true if it's ZEND_SEND_BY_VAL or ZEND_SEND_PREFER_REF */
-	RETVAL_BOOL(param->arg_info->pass_by_reference != ZEND_SEND_BY_REF);
+	RETVAL_BOOL(ZEND_ARG_SEND_MODE(param->arg_info) != ZEND_SEND_BY_REF);
 }
 /* }}} */
 
@@ -2788,7 +2788,7 @@ ZEND_METHOD(reflection_parameter, isVariadic)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(param->arg_info->is_variadic);
+	RETVAL_BOOL(ZEND_ARG_IS_VARIADIC(param->arg_info));
 }
 /* }}} */
 
@@ -2809,7 +2809,7 @@ ZEND_METHOD(reflection_type, allowsNull)
 /* }}} */
 
 static zend_string *zend_type_to_string_without_null(zend_type type) {
-	ZEND_TYPE_MASK(type) &= ~MAY_BE_NULL;
+	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
 	return zend_type_to_string(type);
 }
 

@@ -3580,7 +3580,7 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 			}
 
 			zend_string_release(name);
-			prop->type = (zend_type) ZEND_TYPE_INIT_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
+			prop->type = (zend_type) ZEND_TYPE_INIT_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type), 0);
 		} ZEND_HASH_FOREACH_END();
 	}
 

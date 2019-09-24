@@ -231,7 +231,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 				}
 
 				if (!is_variadic) {
-					is_variadic = arginfo ? arginfo[j].is_variadic : 0;
+					is_variadic = arginfo ? ZEND_ARG_IS_VARIADIC(&arginfo[j]) : 0;
 				}
 
 				phpdbg_xml(" variadic=\"%s\" name=\"%s\">", is_variadic ? "variadic" : "", arg_name ? arg_name : "");

@@ -348,7 +348,7 @@ static inheritance_status zend_perform_covariant_type_check(
 		}
 
 		return unlinked_instanceof(fe_ce, proto_ce) ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
-	} else if (ZEND_TYPE_MASK(proto_type) & MAY_BE_ITERABLE) {
+	} else if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_ITERABLE) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			zend_string *fe_class_name = resolve_class_name(fe, ZEND_TYPE_NAME(fe_type));
 			zend_class_entry *fe_ce = lookup_class(fe, fe_class_name);
@@ -360,9 +360,9 @@ static inheritance_status zend_perform_covariant_type_check(
 				? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 		}
 
-		return ZEND_TYPE_MASK(fe_type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE)
+		return ZEND_TYPE_FULL_MASK(fe_type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE)
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
-	} else if (ZEND_TYPE_MASK(proto_type) & MAY_BE_OBJECT) {
+	} else if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_OBJECT) {
 		if (ZEND_TYPE_IS_CLASS(fe_type)) {
 			/* Currently, any class name would be allowed here. We still perform a class lookup
 			 * for forward-compatibility reasons, as we may have named types in the future that
@@ -376,9 +376,10 @@ static inheritance_status zend_perform_covariant_type_check(
 			return INHERITANCE_SUCCESS;
 		}
 
-		return ZEND_TYPE_MASK(fe_type) & MAY_BE_OBJECT ? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
+		return ZEND_TYPE_FULL_MASK(fe_type) & MAY_BE_OBJECT
+			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	} else {
-		return ZEND_TYPE_MASK_WITHOUT_NULL(fe_type) == ZEND_TYPE_MASK_WITHOUT_NULL(proto_type)
+		return ZEND_TYPE_PURE_MASK_WITHOUT_NULL(fe_type) == ZEND_TYPE_PURE_MASK_WITHOUT_NULL(proto_type)
 			? INHERITANCE_SUCCESS : INHERITANCE_ERROR;
 	}
 }
@@ -485,7 +486,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		/* by-ref constraints on arguments are invariant */
-		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
+		if (ZEND_ARG_SEND_MODE(fe_arg_info) != ZEND_ARG_SEND_MODE(proto_arg_info)) {
 			return INHERITANCE_ERROR;
 		}
 	}
@@ -556,11 +557,11 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 		for (i = 0; i < num_args;) {
 			zend_append_type_hint(&str, fptr, arg_info, 0);
 
-			if (arg_info->pass_by_reference) {
+			if (ZEND_ARG_SEND_MODE(arg_info)) {
 				smart_str_appendc(&str, '&');
 			}
 
-			if (arg_info->is_variadic) {
+			if (ZEND_ARG_IS_VARIADIC(arg_info)) {
 				smart_str_appends(&str, "...");
 			}
 
@@ -577,7 +578,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 				smart_str_append_unsigned(&str, i);
 			}
 
-			if (i >= required && !arg_info->is_variadic) {
+			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 				smart_str_appends(&str, " = ");
 				if (fptr->type == ZEND_USER_FUNCTION) {
 					zend_op *precv = NULL;
@@ -858,7 +859,7 @@ zend_string* zend_resolve_property_type(zend_string *type, zend_class_entry *sco
 zend_bool property_types_compatible(zend_property_info *parent_info, zend_property_info *child_info) {
 	zend_string *parent_name, *child_name;
 	zend_class_entry *parent_type_ce, *child_type_ce;
-	if (ZEND_TYPE_MASK(parent_info->type) == ZEND_TYPE_MASK(child_info->type)
+	if (ZEND_TYPE_PURE_MASK(parent_info->type) == ZEND_TYPE_PURE_MASK(child_info->type)
 			&& ZEND_TYPE_NAME(parent_info->type) == ZEND_TYPE_NAME(child_info->type)) {
 		return 1;
 	}

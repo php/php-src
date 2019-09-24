@@ -2052,10 +2052,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			} else {
 				internal_function->required_num_args = info->required_num_args;
 			}
-			if (info->return_reference) {
+			if (ZEND_ARG_SEND_MODE(info)) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 			}
-			if (ptr->arg_info[ptr->num_args].is_variadic) {
+			if (ZEND_ARG_IS_VARIADIC(&ptr->arg_info[ptr->num_args])) {
 				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
 				/* Don't count the variadic argument */
 				internal_function->num_args--;
@@ -3708,7 +3708,7 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE());
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, (zend_type) ZEND_TYPE_INIT_NONE(0));
 }
 /* }}} */
 

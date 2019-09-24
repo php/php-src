@@ -547,16 +547,16 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			if (arg_info->name) {
 				if (zstr_args) {
 					name = zend_strpprintf(0, "%s$%s",
-							arg_info->pass_by_reference ? "&" : "",
+							ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
 							ZSTR_VAL(arg_info->name));
 				} else {
 					name = zend_strpprintf(0, "%s$%s",
-							arg_info->pass_by_reference ? "&" : "",
+							ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
 							((zend_internal_arg_info*)arg_info)->name);
 				}
 			} else {
 				name = zend_strpprintf(0, "%s$param%d",
-						arg_info->pass_by_reference ? "&" : "",
+						ZEND_ARG_SEND_MODE(arg_info) ? "&" : "",
 						i + 1);
 			}
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));

@@ -106,18 +106,19 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
  * ZEND_TYPE_IS_SET()     - checks if type-hint exists
- * ZEND_TYPE_IS_MASK()    - checks if type-hint refer to standard type
+ * ZEND_TYPE_IS_ONLY_MASK() - checks if type-hint refer to standard type
  * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
  * ZEND_TYPE_IS_CE()      - checks if type-hint refer to some class by zend_class_entry *
  * ZEND_TYPE_IS_NAME()    - checks if type-hint refer to some class by zend_string *
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry
- * ZEND_TYPE_MASK()       - returns MAY_BE_* type mask
+ * ZEND_TYPE_PURE_MASK()  - returns MAY_BE_* type mask
+ * ZEND_TYPE_FULL_MASK()  - returns MAY_BE_* type mask together with other flags
  *
  * ZEND_TYPE_ALLOW_NULL() - checks if NULL is allowed
  *
- * ZEND_TYPE_ENCODE_*() should be used for construction.
+ * ZEND_TYPE_INIT_*() should be used for construction.
  */
 
 typedef struct {
@@ -129,17 +130,16 @@ typedef struct {
 	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
 } zend_type;
 
-#define _ZEND_TYPE_MASK ((1u<<(IS_VOID+1))-1)
-#define _ZEND_TYPE_CE_BIT (1u << 30)
-#define _ZEND_TYPE_NAME_BIT (1u << 31)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
+#define _ZEND_TYPE_MASK ((1u << 24) - 1)
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << (IS_VOID+1)) - 1)
+#define _ZEND_TYPE_CE_BIT (1u << 22)
+#define _ZEND_TYPE_NAME_BIT (1u << 23)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2
 
 #define ZEND_TYPE_IS_SET(t) \
-	((t).type_mask != 0)
-
-#define ZEND_TYPE_IS_MASK(t) \
-	((t).type_mask != 0 && (t) <= _ZEND_TYPE_CODE_MAX)
+	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
 #define ZEND_TYPE_IS_CLASS(t) \
 	(((t.type_mask) & (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_CE_BIT)) != 0)
@@ -151,7 +151,7 @@ typedef struct {
 	(((t.type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
 
 #define ZEND_TYPE_IS_ONLY_MASK(t) \
-	((t).type_mask != 0 && (t).ptr == NULL)
+	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)
 
 #define ZEND_TYPE_NAME(t) \
 	((zend_string *) (t).ptr)
@@ -165,11 +165,19 @@ typedef struct {
 #define ZEND_TYPE_SET_PTR(t, _ptr) \
 	((t).ptr = (_ptr))
 
-#define ZEND_TYPE_MASK(t) \
+/* FULL_MASK() includes the MAY_BE_* type mask, the CE/NAME bits, as well as extra reserved bits.
+ * The PURE_MASK() only includes the MAY_BE_* type mask. */
+#define ZEND_TYPE_FULL_MASK(t) \
 	((t).type_mask)
 
-#define ZEND_TYPE_MASK_WITHOUT_NULL(t) \
+#define ZEND_TYPE_PURE_MASK(t) \
+	((t).type_mask & _ZEND_TYPE_MAY_BE_MASK)
+
+#define ZEND_TYPE_FULL_MASK_WITHOUT_NULL(t) \
 	((t).type_mask & ~_ZEND_TYPE_NULLABLE_BIT)
+
+#define ZEND_TYPE_PURE_MASK_WITHOUT_NULL(t) \
+	((t).type_mask & _ZEND_TYPE_MAY_BE_MASK & ~_ZEND_TYPE_NULLABLE_BIT)
 
 #define ZEND_TYPE_CONTAINS_CODE(t, code) \
 	(((t).type_mask & (1u << (code))) != 0)
@@ -177,24 +185,27 @@ typedef struct {
 #define ZEND_TYPE_ALLOW_NULL(t) \
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
-#define ZEND_TYPE_INIT_NONE() \
-	{ NULL, 0 }
+#define ZEND_TYPE_INIT_NONE(extra_flags) \
+	{ NULL, (extra_flags) }
 
 #define ZEND_TYPE_INIT_MASK(_type_mask) \
 	{ NULL, (_type_mask) }
 
-#define ZEND_TYPE_INIT_CODE(code, allow_null) \
+#define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? (MAY_BE_FALSE|MAY_BE_TRUE) : (1 << (code))) \
-		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0))
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
-#define ZEND_TYPE_INIT_CE(_ce, allow_null) \
-	{ (void *) (_ce), _ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) }
+#define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
+	{ (void *) (_ce), \
+		_ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
-#define ZEND_TYPE_INIT_CLASS(class_name, allow_null) \
-	{ (void *) (class_name), _ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) }
+#define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
+	{ (void *) (class_name), \
+		_ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
-#define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null) \
-	{ (void *) (class_name), _ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) }
+#define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
+	{ (void *) (class_name), \
+		_ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */

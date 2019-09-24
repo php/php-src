@@ -116,7 +116,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			for (i = 0; i < num_args; i++) {
 				/* Don't inline functions with by-reference arguments. This would require
 				 * correct handling of INDIRECT arguments. */
-				if (func->op_array.arg_info[i].pass_by_reference) {
+				if (ZEND_ARG_SEND_MODE(&func->op_array.arg_info[i])) {
 					return;
 				}
 			}
