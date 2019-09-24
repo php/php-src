@@ -299,7 +299,7 @@
 	{ "cet",   0,   3600, "Europe/Andorra"                },
 	{ "cet",   0,   3600, "Europe/Athens"                 },
 	{ "cet",   0,   3600, "Europe/Belgrade"               },
-	{ "cet",   0,   3600, "Europe/Berne"                 },
+	{ "cet",   0,   3600, "Europe/Berne"                  },
 	{ "cet",   0,   3600, "Europe/Bratislava"             },
 	{ "cet",   0,   3600, "Europe/Brussels"               },
 	{ "cet",   0,   3600, "Europe/Budapest"               },
