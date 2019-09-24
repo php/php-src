@@ -31,6 +31,8 @@
 #define VAR_WAKEUP_FLAG 1
 #define VAR_UNSERIALIZE_FLAG 2
 
+#define DEFAULT_MAX_DEPTH 4096
+
 typedef struct {
 	zend_long used_slots;
 	void *next;
@@ -49,6 +51,8 @@ struct php_unserialize_data {
 	var_dtor_entries *last_dtor;
 	HashTable        *allowed_classes;
 	HashTable        *ref_props;
+	zend_long         cur_depth;
+	zend_long         max_depth;
 	var_entries       entries;
 };
 
@@ -61,6 +65,8 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->first_dtor = d->last_dtor = NULL;
 		d->allowed_classes = NULL;
 		d->ref_props = NULL;
+		d->cur_depth = 0;
+		d->max_depth = DEFAULT_MAX_DEPTH;
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
 		if (!BG(serialize_lock)) {
@@ -90,6 +96,13 @@ PHPAPI HashTable *php_var_unserialize_get_allowed_classes(php_unserialize_data_t
 }
 PHPAPI void php_var_unserialize_set_allowed_classes(php_unserialize_data_t d, HashTable *classes) {
 	d->allowed_classes = classes;
+}
+
+PHPAPI void php_var_unserialize_set_max_depth(php_unserialize_data_t d, zend_long max_depth) {
+	d->max_depth = max_depth;
+}
+PHPAPI zend_long php_var_unserialize_get_max_depth(php_unserialize_data_t d) {
+	return d->max_depth;
 }
 
 static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
@@ -438,6 +451,16 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_object *obj)
 {
+	if (var_hash) {
+		if ((*var_hash)->max_depth > 0 && ++(*var_hash)->cur_depth > (*var_hash)->max_depth) {
+			php_error_docref(NULL, E_WARNING,
+				"Maximum depth of " ZEND_LONG_FMT " exceeded. "
+				"The depth limit can be changed using the max_depth option",
+				(*var_hash)->max_depth);
+			return 0;
+		}
+	}
+
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
 		zend_ulong idx;
@@ -591,6 +614,9 @@ string_key:
 		}
 	}
 
+	if (var_hash) {
+		(*var_hash)->cur_depth--;
+	}
 	return 1;
 }
 

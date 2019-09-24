@@ -1174,7 +1174,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation[, array allowed_classes])
+/* {{{ proto mixed unserialize(string variable_representation[, array options])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(unserialize)
 	size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
-	zval *options = NULL, *classes = NULL;
+	zval *options = NULL;
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
 
@@ -1201,11 +1201,13 @@ PHP_FUNCTION(unserialize)
 
 	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
 	if (options != NULL) {
-		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		zval *classes, *max_depth;
+
+		classes = zend_hash_str_find_deref(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
 			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
-			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-			RETURN_FALSE;
+			RETVAL_FALSE;
+			goto cleanup;
 		}
 
 		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes))) {
@@ -1225,12 +1227,25 @@ PHP_FUNCTION(unserialize)
 
 			/* Exception during string conversion. */
 			if (EG(exception)) {
-				zend_hash_destroy(class_hash);
-				FREE_HASHTABLE(class_hash);
-				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+				goto cleanup;
 			}
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
+
+		max_depth = zend_hash_str_find_deref(Z_ARRVAL_P(options), "max_depth", sizeof("max_depth") - 1);
+		if (max_depth) {
+			if (Z_TYPE_P(max_depth) != IS_LONG) {
+				php_error_docref(NULL, E_WARNING, "max_depth should be int");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			if (Z_LVAL_P(max_depth) < 0) {
+				php_error_docref(NULL, E_WARNING, "max_depth cannot be negative");
+				RETVAL_FALSE;
+				goto cleanup;
+			}
+			php_var_unserialize_set_max_depth(var_hash, Z_LVAL_P(max_depth));
+		}
 	}
 
 	if (BG(unserialize).level > 1) {
@@ -1254,6 +1269,7 @@ PHP_FUNCTION(unserialize)
 		gc_check_possible_root(ref);
 	}
 
+cleanup:
 	if (class_hash) {
 		zend_hash_destroy(class_hash);
 		FREE_HASHTABLE(class_hash);
