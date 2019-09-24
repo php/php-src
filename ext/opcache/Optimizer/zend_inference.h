@@ -30,7 +30,7 @@
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
 #define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1<<31) /* may be non-reference with refcount > 1  */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
