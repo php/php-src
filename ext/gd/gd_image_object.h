@@ -29,8 +29,16 @@ typedef struct _gd_ext_image_object {
 	zend_object std;
 } php_gd_image_object;
 
-static void php_gd_object_minit_helper();
-static zend_always_inline gdImagePtr php_gd_image_ptr_from_zval_p(zval*);
-static void php_gd_image_object_from_gd_ptr(zval* val, gdImagePtr image);
+void php_gd_object_minit_helper();
+
+static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj) {
+	return (php_gd_image_object *) ((char *) (obj) - XtOffsetOf(php_gd_image_object, std));
+}
+
+static zend_always_inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp) {
+	return php_gd_exgdimage_from_zobj_p(Z_OBJ_P(zp))->image;
+}
+
+void php_gd_assign_libgdimageptr_as_extgdimage(zval* val, gdImagePtr image);
 
 #endif //SRC_GD_IMAGE_OBJECT_H
