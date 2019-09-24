@@ -7103,7 +7103,7 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
 			if (ZEND_TYPE_IS_ONLY_MASK(arg_info->type)) {
-				uint32_t type_mask = ZEND_TYPE_MASK(arg_info->type);
+				uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
 				uint32_t info = _ssa_op1_info(op_array, ssa, call_info->arg_info[num_args].opline);
 				if ((info & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
 					break;
@@ -9032,12 +9032,12 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 				|	LOAD_ZVAL_ADDR r0, res_addr
-				if (arg_info->pass_by_reference) {
+				if (ZEND_ARG_SEND_MODE(arg_info)) {
 					|	GET_Z_PTR r0, r0
 					|	add r0, offsetof(zend_reference, val)
 				}
 				if (!ZEND_TYPE_IS_CLASS(type)) {
-					uint32_t type_mask = ZEND_TYPE_MASK(type);
+					uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 					if (is_power_of_two(type_mask)) {
 						uint32_t type_code = concrete_type(type_mask);
 						|	cmp byte [r0 + 8], type_code
@@ -9186,7 +9186,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 			|	LOAD_ZVAL_ADDR r0, res_addr
 			|	ZVAL_DEREF r0, MAY_BE_REF
 			if (!ZEND_TYPE_IS_CLASS(arg_info->type)) {
-				uint32_t type_mask = ZEND_TYPE_MASK(arg_info->type);
+				uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
 				if (is_power_of_two(type_mask)) {
 					uint32_t type_code = concrete_type(type_mask);
 					|	cmp byte [r0 + 8], type_code

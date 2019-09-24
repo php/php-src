@@ -965,7 +965,7 @@ static void zend_resolve_property_types(void) /* {{{ */
 					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
 
 					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
-					prop_info->type = (zend_type) ZEND_TYPE_INIT_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+					prop_info->type = (zend_type) ZEND_TYPE_INIT_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type), 0);
 					zend_string_release(lc_type_name);
 					zend_string_release(type_name);
 				}
