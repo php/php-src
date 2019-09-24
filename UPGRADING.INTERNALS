@@ -9,6 +9,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   f. Arginfo argument types
   g. zend_free_op type and should_free argument of zend_get_zval_ptr()
   h. zend_value_error()
+  i. get_closure() object handler
 
 2. Build system changes
   a. Abstract
@@ -70,6 +71,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   h. Added the zend_value_error() function, which is intended to be used
      to raise ValueError when inappropriate argument values are passed
      to functions.
+
+  i. get_closure() object handlers now accept an additional zend_bool parameter
+     `check_only`. If it is true, the handler is called to check whether the
+     object is callable; in this case the handler should not throw an exception.
 
 ========================
 2. Build system changes
