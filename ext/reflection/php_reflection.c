@@ -75,6 +75,7 @@ PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
 PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_named_type_ptr;
+PHPAPI zend_class_entry *reflection_union_type_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
@@ -127,6 +128,8 @@ typedef struct _parameter_reference {
 /* Struct for type hints */
 typedef struct _type_reference {
 	zend_type type;
+	/* Whether to use backwards compatible null representation */
+	zend_bool legacy_behavior;
 } type_reference;
 
 typedef enum {
@@ -228,7 +231,14 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_TYPE:
 		{
 			type_reference *type_ref = intern->ptr;
-			if (ZEND_TYPE_IS_NAME(type_ref->type)) {
+			if (ZEND_TYPE_HAS_LIST(type_ref->type)) {
+				void *entry;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type_ref->type), entry) {
+					if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+						zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(type_ref->type)) {
 				zend_string_release(ZEND_TYPE_NAME(type_ref->type));
 			}
 			efree(type_ref);
@@ -1130,22 +1140,50 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 }
 /* }}} */
 
+/* For backwards compatibility reasons, we need to return T|null style unions
+ * as a ReflectionNamedType. Here we determine what counts as a union type and
+ * what doesn't. */
+static zend_bool is_union_type(zend_type type) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		return 1;
+	}
+	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
+	if (ZEND_TYPE_HAS_CLASS(type)) {
+		return type_mask_without_null != 0;
+	}
+	if (type_mask_without_null == MAY_BE_BOOL) {
+		return 0;
+	}
+	/* Check that only one bit is set. */
+	return (type_mask_without_null & (type_mask_without_null - 1)) != 0;
+}
+
 /* {{{ reflection_type_factory */
-static void reflection_type_factory(zend_type type, zval *object)
+static void reflection_type_factory(zend_type type, zval *object, zend_bool legacy_behavior)
 {
 	reflection_object *intern;
 	type_reference *reference;
+	zend_bool is_union = is_union_type(type);
 
-	reflection_instantiate(reflection_named_type_ptr, object);
+	reflection_instantiate(
+		is_union ? reflection_union_type_ptr : reflection_named_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->type = type;
+	reference->legacy_behavior = legacy_behavior && !is_union;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 
 	/* Property types may be resolved during the lifetime of the ReflectionType,
 	 * so we need to make sure that the strings we reference are not released. */
-	if (ZEND_TYPE_IS_NAME(type)) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+				zend_string_addref(ZEND_TYPE_LIST_GET_NAME(entry));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_addref(ZEND_TYPE_NAME(type));
 	}
 }
@@ -2482,7 +2520,8 @@ ZEND_METHOD(reflection_parameter, getClass)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (ZEND_TYPE_IS_CLASS(param->arg_info->type)) {
+	// TODO: This is going to return null for union types, which is rather odd.
+	if (ZEND_TYPE_HAS_NAME(param->arg_info->type)) {
 		/* Class name is stored as a string, we might also get "self" or "parent"
 		 * - For "self", simply use the function scope. If scope is NULL then
 		 *   the function is global and thus self does not make any sense
@@ -2562,7 +2601,7 @@ ZEND_METHOD(reflection_parameter, getType)
 	if (!ZEND_TYPE_IS_SET(param->arg_info->type)) {
 		RETURN_NULL();
 	}
-	reflection_type_factory(param->arg_info->type, return_value);
+	reflection_type_factory(param->arg_info->type, return_value, 1);
 }
 /* }}} */
 
@@ -2862,7 +2901,10 @@ ZEND_METHOD(reflection_named_type, getName)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string_without_null(param->type));
+	if (param->legacy_behavior) {
+		RETURN_STR(zend_type_to_string_without_null(param->type));
+	}
+	RETURN_STR(zend_type_to_string(param->type));
 }
 /* }}} */
 
@@ -2879,6 +2921,83 @@ ZEND_METHOD(reflection_named_type, isBuiltin)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type));
+}
+/* }}} */
+
+static void append_type(zval *return_value, zend_type type) {
+	zval reflection_type;
+	reflection_type_factory(type, &reflection_type, 0);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &reflection_type);
+}
+
+static void append_type_mask(zval *return_value, uint32_t type_mask) {
+	append_type(return_value, (zend_type) ZEND_TYPE_INIT_MASK(type_mask));
+}
+
+/* {{{ proto public string ReflectionUnionType::getTypes()
+   Returns the types that are part of this union type */
+ZEND_METHOD(reflection_union_type, getTypes)
+{
+	reflection_object *intern;
+	type_reference *param;
+	uint32_t type_mask;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	array_init(return_value);
+	if (ZEND_TYPE_HAS_LIST(param->type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+				append_type(return_value,
+					(zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_LIST_GET_NAME(entry), 0, 0));
+			} else {
+				append_type(return_value,
+					(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_LIST_GET_CE(entry), 0, 0));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
+		append_type(return_value,
+			(zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_NAME(param->type), 0, 0));
+	} else if (ZEND_TYPE_HAS_CE(param->type)) {
+		append_type(return_value,
+			(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_CE(param->type), 0, 0));
+	}
+
+	type_mask = ZEND_TYPE_PURE_MASK(param->type);
+	ZEND_ASSERT(!(type_mask & MAY_BE_VOID));
+	if (type_mask & MAY_BE_CALLABLE) {
+		append_type_mask(return_value, MAY_BE_CALLABLE);
+	}
+	if (type_mask & MAY_BE_ITERABLE) {
+		append_type_mask(return_value, MAY_BE_ITERABLE);
+	}
+	if (type_mask & MAY_BE_OBJECT) {
+		append_type_mask(return_value, MAY_BE_OBJECT);
+	}
+	if (type_mask & MAY_BE_ARRAY) {
+		append_type_mask(return_value, MAY_BE_ARRAY);
+	}
+	if (type_mask & MAY_BE_STRING) {
+		append_type_mask(return_value, MAY_BE_STRING);
+	}
+	if (type_mask & MAY_BE_LONG) {
+		append_type_mask(return_value, MAY_BE_LONG);
+	}
+	if (type_mask & MAY_BE_DOUBLE) {
+		append_type_mask(return_value, MAY_BE_DOUBLE);
+	}
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
+		append_type_mask(return_value, MAY_BE_BOOL);
+	} else if (type_mask & MAY_BE_FALSE) {
+		append_type_mask(return_value, MAY_BE_FALSE);
+	}
+	if (type_mask & MAY_BE_NULL) {
+		append_type_mask(return_value, MAY_BE_NULL);
+	}
 }
 /* }}} */
 
@@ -3347,7 +3466,7 @@ ZEND_METHOD(reflection_function, getReturnType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(fptr->common.arg_info[-1].type, return_value);
+	reflection_type_factory(fptr->common.arg_info[-1].type, return_value, 1);
 }
 /* }}} */
 
@@ -5575,7 +5694,7 @@ ZEND_METHOD(reflection_property, getType)
 		RETURN_NULL();
 	}
 
-	reflection_type_factory(ref->prop->type, return_value);
+	reflection_type_factory(ref->prop->type, return_value, 1);
 }
 /* }}} */
 
@@ -6429,6 +6548,11 @@ static const zend_function_entry reflection_named_type_functions[] = {
 	PHP_FE_END
 };
 
+static const zend_function_entry reflection_union_type_functions[] = {
+	ZEND_ME(reflection_union_type, getTypes, arginfo_class_ReflectionUnionType_getTypes, 0)
+	PHP_FE_END
+};
+
 static const zend_function_entry reflection_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_class_ReflectionExtension___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_DEP_ME(reflection_extension, export, arginfo_class_ReflectionExtension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -6551,6 +6675,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", reflection_named_type_functions);
 	reflection_init_class_handlers(&_reflection_entry);
 	reflection_named_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionUnionType", reflection_union_type_functions);
+	reflection_init_class_handlers(&_reflection_entry);
+	reflection_union_type_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_type_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	reflection_init_class_handlers(&_reflection_entry);

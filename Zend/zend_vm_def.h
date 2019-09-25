@@ -4108,8 +4108,7 @@ ZEND_VM_COLD_CONST_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV
 			ZVAL_DEREF(retval_ptr);
 		}
 
-		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
-			&& !(ZEND_TYPE_FULL_MASK(ret_info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE))
+		if (UNEXPECTED((ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_ANY)
 			&& !ZEND_TYPE_CONTAINS_CODE(ret_info->type, Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)

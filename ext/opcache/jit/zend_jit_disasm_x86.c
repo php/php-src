@@ -424,7 +424,6 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_zval_copy_deref_helper)
 	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
-	REGISTER_HELPER(zend_jit_verify_arg_object);
 	REGISTER_HELPER(zend_jit_verify_arg_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_dynamic);

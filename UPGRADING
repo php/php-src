@@ -318,6 +318,8 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Added support for union types.
+    RFC: https://wiki.php.net/rfc/union_types_v2
   . Added ValueError class.
 
 ========================================

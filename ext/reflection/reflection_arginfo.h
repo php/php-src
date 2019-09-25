@@ -428,6 +428,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionNamedType_isBuiltin arginfo_class_Reflector___toString
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionUnionType_getTypes, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ReflectionExtension___clone arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionExtension_export arginfo_class_ReflectionFunction_export

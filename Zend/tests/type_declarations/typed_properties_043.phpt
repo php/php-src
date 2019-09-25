@@ -41,9 +41,9 @@ var_dump(Bar::$selfProp, Bar::$selfNullProp, Bar::$parentProp);
 
 ?>
 --EXPECT--
-Cannot write a value to a 'self' typed static property of a trait
-Cannot write a non-null value to a 'self' typed static property of a trait
-Cannot access parent:: when current class scope has no parent
+Cannot assign stdClass to property Test::$selfProp of type self
+Cannot assign stdClass to property Test::$selfNullProp of type ?self
+Cannot assign stdClass to property Test::$parentProp of type parent
 NULL
 object(Bar)#3 (0) {
 }

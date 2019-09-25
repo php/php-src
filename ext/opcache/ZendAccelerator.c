@@ -601,7 +601,13 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
+					void **entry;
+					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(arg_info[i].type), entry) {
+						ZEND_ASSERT(ZEND_TYPE_LIST_IS_NAME(*entry));
+						*entry = zend_new_interned_string(ZEND_TYPE_LIST_GET_NAME(*entry));
+					} ZEND_TYPE_LIST_FOREACH_END();
+				} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
 					ZEND_TYPE_SET_PTR(arg_info[i].type,
 						new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)));
 				}
@@ -3539,6 +3545,32 @@ static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
 	return ok;
 }
 
+static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class_entry *self_ce) {
+	zend_string *lcname = zend_string_tolower(name);
+	zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lcname);
+	zend_string_release(lcname);
+	if (!ce) {
+		return NULL;
+	}
+	if (ce == self_ce) {
+		/* Ignore the following requirements if this is the class referring to itself */
+		return ce;
+	}
+#ifdef ZEND_WIN32
+	/* On Windows we can't link with internal class, because of ASLR */
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		return NULL;
+	}
+#endif
+	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+		return NULL;
+	}
+	if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+		return NULL;
+	}
+	return ce;
+}
+
 static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 {
 	zend_bool ok = 1;
@@ -3547,64 +3579,59 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			zend_string *name, *lcname;
-
-			if (!ZEND_TYPE_IS_NAME(prop->type)) {
-				continue;
-			}
-
-			name = ZEND_TYPE_NAME(prop->type);
-			lcname = zend_string_tolower(name);
-			p = zend_hash_find_ptr(EG(class_table), lcname);
-			zend_string_release(lcname);
-			if (!p) {
-				ok = 0;
-				continue;
-			}
-			if (p != ce) {
-#ifdef ZEND_WIN32
-				/* On Windows we can't link with internal class, because of ASLR */
-				if (p->type == ZEND_INTERNAL_CLASS) {
+			if (ZEND_TYPE_HAS_LIST(prop->type)) {
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
+					if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+						p = preload_fetch_resolved_ce(ZEND_TYPE_LIST_GET_NAME(*entry), ce);
+						if (!p) {
+							ok = 0;
+							continue;
+						}
+						*entry = ZEND_TYPE_LIST_ENCODE_CE(p);
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
+				p = preload_fetch_resolved_ce(ZEND_TYPE_NAME(prop->type), ce);
+				if (!p) {
 					ok = 0;
 					continue;
 				}
-#endif
-				if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-					ok = 0;
-					continue;
-				}
-				if (!(p->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-					ok = 0;
-					continue;
-				}
+				ZEND_TYPE_SET_CE(prop->type, p);
 			}
-
-			zend_string_release(name);
-			prop->type = (zend_type) ZEND_TYPE_INIT_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type), 0);
 		} ZEND_HASH_FOREACH_END();
 	}
 
 	return ok;
 }
 
-static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
-	zend_string *name, *lcname;
-	zend_bool known;
-	if (!ZEND_TYPE_IS_NAME(type)) {
-		return 1;
-	}
-
-	name = ZEND_TYPE_NAME(type);
+static zend_bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
 	if (zend_string_equals_literal_ci(name, "self") ||
 		zend_string_equals_literal_ci(name, "parent") ||
 		zend_string_equals_ci(name, ce->name)) {
 		return 1;
 	}
 
-	lcname = zend_string_tolower(name);
-	known = zend_hash_exists(EG(class_table), lcname);
+	zend_string *lcname = zend_string_tolower(name);
+	zend_bool known = zend_hash_exists(EG(class_table), lcname);
 	zend_string_release(lcname);
 	return known;
+}
+
+static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)
+					&& !preload_is_class_type_known(ce, ZEND_TYPE_LIST_GET_NAME(entry))) {
+				return 0;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	}
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		return preload_is_class_type_known(ce, ZEND_TYPE_NAME(type));
+	}
+	return 1;
 }
 
 static zend_bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {

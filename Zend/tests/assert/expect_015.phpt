@@ -62,7 +62,7 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
 	}
 }));
 
-assert(0 && ($a = function &(array &$a, X $b = null) use ($c,&$d) : X {
+assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use ($c,&$d) : X {
 	final class A {
 		final protected function f2() {
 			if (!$x) {
@@ -204,7 +204,7 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c,
 
 })) failed in %sexpect_015.php on line %d
 
-Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null) use($c, &$d): X {
+Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
     final class A {
         protected final function f2() {
             if (!$x) {

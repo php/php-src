@@ -56,25 +56,31 @@ typedef struct _literal_info {
 		info[n].flags = ((kind) | (related)); \
 	} while (0)
 
-static zend_bool class_name_type_hint(const zend_op_array *op_array, uint32_t arg_num)
+static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
 {
 	zend_arg_info *arg_info;
-
 	if (arg_num > 0) {
-		if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			if (EXPECTED(arg_num <= op_array->num_args)) {
-				arg_info = &op_array->arg_info[arg_num-1];
-			} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
-				arg_info = &op_array->arg_info[op_array->num_args];
-			} else {
-				return 0;
-			}
-			return ZEND_TYPE_IS_CLASS(arg_info->type);
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			return 0;
+		}
+		if (EXPECTED(arg_num <= op_array->num_args)) {
+			arg_info = &op_array->arg_info[arg_num-1];
+		} else if (UNEXPECTED(op_array->fn_flags & ZEND_ACC_VARIADIC)) {
+			arg_info = &op_array->arg_info[op_array->num_args];
+		} else {
+			return 0;
 		}
 	} else {
 		arg_info = op_array->arg_info - 1;
-		return ZEND_TYPE_IS_CLASS(arg_info->type);
 	}
+
+	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
+			return ZEND_TYPE_LIST(arg_info->type)->num_types;
+		}
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -505,17 +511,23 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_RECV_INIT:
 				case ZEND_RECV:
 				case ZEND_RECV_VARIADIC:
-					if (class_name_type_hint(op_array, opline->op1.num)) {
+				{
+					size_t num_classes = type_num_classes(op_array, opline->op1.num);
+					if (num_classes) {
 						opline->extended_value = cache_size;
-						cache_size += sizeof(void *);
+						cache_size += num_classes * sizeof(void *);
 					}
 					break;
+				}
 				case ZEND_VERIFY_RETURN_TYPE:
-					if (class_name_type_hint(op_array, 0)) {
+				{
+					size_t num_classes = type_num_classes(op_array, 0);
+					if (num_classes) {
 						opline->op2.num = cache_size;
-						cache_size += sizeof(void *);
+						cache_size += num_classes * sizeof(void *);
 					}
 					break;
+				}
 				case ZEND_ASSIGN_STATIC_PROP_OP:
 					if (opline->op1_type == IS_CONST) {
 						// op1 static property
