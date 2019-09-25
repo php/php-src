@@ -179,7 +179,7 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imagegrabscreen,							arginfo_imagegrabscreen)
 #endif
 
-	PHP_FE(imagerotate,     						arginfo_imagerotate)
+	PHP_FE(imagerotate,		  						arginfo_imagerotate)
 	PHP_FE(imageflip,								arginfo_imageflip)
 
 	PHP_FE(imageantialias,							arginfo_imageantialias)
@@ -189,7 +189,7 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imageaffine,								arginfo_imageaffine)
 	PHP_FE(imageaffinematrixconcat,					arginfo_imageaffinematrixconcat)
 	PHP_FE(imageaffinematrixget,					arginfo_imageaffinematrixget)
-	PHP_FE(imagesetinterpolation,                   arginfo_imagesetinterpolation)
+	PHP_FE(imagesetinterpolation,					arginfo_imagesetinterpolation)
 	PHP_FE(imagesettile,							arginfo_imagesettile)
 	PHP_FE(imagesetbrush,							arginfo_imagesetbrush)
 	PHP_FE(imagesetstyle,							arginfo_imagesetstyle)
@@ -228,7 +228,7 @@ static const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_JPG
 	PHP_FE(imagejpeg,								arginfo_imagejpeg)
 #endif
-	PHP_FE(imagewbmp,                               arginfo_imagewbmp)
+	PHP_FE(imagewbmp,								arginfo_imagewbmp)
 	PHP_FE(imagegd,									arginfo_imagegd)
 	PHP_FE(imagegd2,								arginfo_imagegd2)
 #ifdef HAVE_GD_BMP
@@ -268,12 +268,12 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imagetypes,								arginfo_imagetypes)
 
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
-	PHP_FE(imagexbm,                                arginfo_imagexbm)
+	PHP_FE(imagexbm,								arginfo_imagexbm)
 
 	PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
 
 /* gd filters */
-	PHP_FE(imagefilter,     						arginfo_imagefilter)
+	PHP_FE(imagefilter,		 						arginfo_imagefilter)
 	PHP_FE(imageconvolution,						arginfo_imageconvolution)
 
 	PHP_FE(imageresolution,							arginfo_imageresolution)
@@ -578,7 +578,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
 
-    /* GD2 image format types */
+	/* GD2 image format types */
 	REGISTER_LONG_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_GD2_COMPRESSED", GD2_FMT_COMPRESSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
@@ -968,19 +968,19 @@ PHP_FUNCTION(imagesetstyle)
 	gdImagePtr im;
 	int *stylearr;
 	int index = 0;
-    uint32_t num_styles;
+  	uint32_t num_styles;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa", &IM, gd_image_ce, &styles) == FAILURE)  {
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa", &IM, gd_image_ce, &styles) == FAILURE)  {
 		return;
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-    num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
-    if (num_styles == 0) {
-        zend_value_error("Styles array must not be empty");
-        return;
-    }
+	num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
+	if (num_styles == 0) {
+		zend_value_error("Styles array must not be empty");
+ 		return;
+	}
 
 	/* copy the style values in the stylearr */
 	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
