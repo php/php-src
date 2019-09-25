@@ -1434,7 +1434,7 @@ SXE_METHOD(asXML)
 	size_t                 filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
