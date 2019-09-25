@@ -1434,7 +1434,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 					ret = &retval;
 					ZVAL_UNDEF(ret);
 				}
-				goto fcall_end;
+				goto fcall_by_name_end;
 			}
 		}
 
@@ -1467,7 +1467,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 		EG(current_execute_data) = execute_data;
 
-fcall_end:
+fcall_by_name_end:
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
@@ -1518,7 +1518,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 					ret = &retval;
 					ZVAL_UNDEF(ret);
 				}
-				goto fcall_end;
+				goto fcall_by_name_end;
 			}
 		}
 
@@ -1551,7 +1551,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 
 		EG(current_execute_data) = execute_data;
 
-fcall_end:
+fcall_by_name_end:
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
