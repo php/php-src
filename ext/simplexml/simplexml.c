@@ -1660,6 +1660,10 @@ SXE_METHOD(getName)
 	xmlNodePtr      node;
 	int             namelen;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	GET_NODE(sxe, node);
@@ -1939,6 +1943,10 @@ static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
    Returns the string content */
 SXE_METHOD(__toString)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
