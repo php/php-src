@@ -34,5 +34,7 @@ steps:
                        postgresql \
                        postgresql-contrib \
                        llvm \
+                       lcov \
+                       gcovr \
                        ${{ parameters.packages }}
     displayName: 'APT'

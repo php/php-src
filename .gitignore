@@ -249,8 +249,10 @@ tmp-php.ini
 # ------------------------------------------------------------------------------
 *.gcda
 *.gcno
+/gcovr_html/
 /lcov_html/
 /php_lcov.info
+/coverage.xml
 
 # ------------------------------------------------------------------------------
 # Archives generated during the PHP release process

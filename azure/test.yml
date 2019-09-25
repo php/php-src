@@ -31,3 +31,23 @@ steps:
       failTaskOnFailedTests: true
     displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Results'
     condition: or(succeeded(), failed())
+  - script: |
+      rm -rf coverage.xml | true
+      gcovr -sr . -o coverage.xml --xml \
+        -e '.*/ext/bcmath/libbcmath/.*' \
+        -e '.*/ext/date/lib/.*' \
+        -e '.*/ext/fileinfo/libmagic/.*' \
+        -e '.*/ext/gd/libgd/.*' \
+        -e '.*/ext/hash/sha3/.*' \
+        -e '.*/ext/mbstring/libmbfl/.*' \
+        -e '.*/ext/opcache/jit/libudis86/.*' \
+        -e '.*/ext/pcre/pcre2lib/.*' \
+        -e '.*/ext/xmlrpc/libxmlrpc/.*'
+    displayName: 'Coverage ${{ parameters.configurationName }} ${{ parameters.runTestsName }}'
+    condition: or(succeeded(), failed())
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: coverage.xml
+    displayName: 'Export ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Coverage'
+    condition: or(succeeded(), failed())

@@ -57,5 +57,6 @@ steps:
         --with-mhash \
         --enable-werror \
         --with-config-file-path=/etc \
-        --with-config-file-scan-dir=/etc/php.d
+        --with-config-file-scan-dir=/etc/php.d \
+        --enable-gcov
   displayName: 'Configure Build'
