@@ -3782,7 +3782,7 @@ PHP_FUNCTION(imageflip)
 			break;
 
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown flip mode");
+			zend_value_error("Unknown flip mode");
 			RETURN_FALSE;
 	}
 

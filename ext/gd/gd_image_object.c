@@ -17,12 +17,20 @@
  */
 
 #include "gd_image_object.h"
+#include "gd_arginfo.h"
 #include "zend.h"
+#include "zend_interfaces.h"
+#include "../../Zend/zend.h"
+
+/*
+ * List of unique methods implemented by GdImage
+ */
 
 static zend_object_handlers php_gd_image_object_handlers;
+static PHP_METHOD(GdImage, __wakeup);
 
 static const zend_function_entry gd_image_object_methods[] = {
-		PHP_FE_END
+	PHP_FE_END
 };
 
 static zend_function *php_gd_image_object_get_constructor(zend_object *object) {
@@ -61,6 +69,8 @@ void php_gd_object_minit_helper() {
 	gd_image_ce = zend_register_internal_class(&ce);
 	gd_image_ce->ce_flags |= ZEND_ACC_FINAL;
 	gd_image_ce->create_object = php_gd_image_object_create;
+	gd_image_ce->serialize = zend_class_serialize_deny;
+	gd_image_ce->unserialize = zend_class_unserialize_deny;
 
 	/* setting up the object handlers for the GdImage class */
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
