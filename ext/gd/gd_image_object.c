@@ -27,7 +27,6 @@
  */
 
 static zend_object_handlers php_gd_image_object_handlers;
-static PHP_METHOD(GdImage, __wakeup);
 
 static const zend_function_entry gd_image_object_methods[] = {
 	PHP_FE_END
