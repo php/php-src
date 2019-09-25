@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,6 +33,7 @@
 
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
+#include "ldap_arginfo.h"
 
 #ifdef PHP_WIN32
 #include <string.h>
@@ -4377,384 +4376,6 @@ PHP_FUNCTION(ldap_exop_refresh)
 
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_connect, 0, 0, 0)
-	ZEND_ARG_INFO(0, hostname)
-	ZEND_ARG_INFO(0, port)
-#ifdef HAVE_ORALDAP
-	ZEND_ARG_INFO(0, wallet)
-	ZEND_ARG_INFO(0, wallet_passwd)
-	ZEND_ARG_INFO(0, authmode)
-#endif
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_resource, 0, 0, 1)
-	ZEND_ARG_INFO(0, link_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_bind, 0, 0, 1)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, bind_rdn)
-	ZEND_ARG_INFO(0, bind_password)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_bind_ext, 0, 0, 1)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, bind_rdn)
-	ZEND_ARG_INFO(0, bind_password)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_LDAP_SASL
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sasl_bind, 0, 0, 1)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, binddn)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, sasl_mech)
-	ZEND_ARG_INFO(0, sasl_realm)
-	ZEND_ARG_INFO(0, sasl_authz_id)
-	ZEND_ARG_INFO(0, props)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_read, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, base_dn)
-	ZEND_ARG_INFO(0, filter)
-	ZEND_ARG_INFO(0, attributes)
-	ZEND_ARG_INFO(0, attrsonly)
-	ZEND_ARG_INFO(0, sizelimit)
-	ZEND_ARG_INFO(0, timelimit)
-	ZEND_ARG_INFO(0, deref)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_list, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, base_dn)
-	ZEND_ARG_INFO(0, filter)
-	ZEND_ARG_INFO(0, attributes)
-	ZEND_ARG_INFO(0, attrsonly)
-	ZEND_ARG_INFO(0, sizelimit)
-	ZEND_ARG_INFO(0, timelimit)
-	ZEND_ARG_INFO(0, deref)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_search, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, base_dn)
-	ZEND_ARG_INFO(0, filter)
-	ZEND_ARG_INFO(0, attributes)
-	ZEND_ARG_INFO(0, attrsonly)
-	ZEND_ARG_INFO(0, sizelimit)
-	ZEND_ARG_INFO(0, timelimit)
-	ZEND_ARG_INFO(0, deref)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_count_entries, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_first_entry, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_next_entry, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_entries, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_first_attribute, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_next_attribute, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_attributes, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_values, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-	ZEND_ARG_INFO(0, attribute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_values_len, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-	ZEND_ARG_INFO(0, attribute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_dn, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, result_entry_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_explode_dn, 0, 0, 2)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, with_attrib)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_dn2ufn, 0, 0, 1)
-	ZEND_ARG_INFO(0, dn)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_add, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_add_ext, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete_ext, 0, 0, 2)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify_batch, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_ARRAY_INFO(0, modifications_info, 0)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add_ext, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace_ext, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del_ext, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_err2str, 0, 0, 1)
-	ZEND_ARG_INFO(0, errno)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, attribute)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-#ifdef LDAP_CONTROL_PAGEDRESULTS
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, pagesize)
-	ZEND_ARG_INFO(0, iscritical)
-	ZEND_ARG_INFO(0, cookie)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_control_paged_result_response, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, cookie)
-	ZEND_ARG_INFO(1, estimated)
-ZEND_END_ARG_INFO();
-#endif
-
-#if (LDAP_API_VERSION > 2000) || HAVE_ORALDAP
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, newrdn)
-	ZEND_ARG_INFO(0, newparent)
-	ZEND_ARG_INFO(0, deleteoldrdn)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename_ext, 0, 0, 5)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, newrdn)
-	ZEND_ARG_INFO(0, newparent)
-	ZEND_ARG_INFO(0, deleteoldrdn)
-	ZEND_ARG_INFO(0, servercontrols)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_option, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(1, retval)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_option, 0, 0, 3)
-	ZEND_ARG_INFO(0, link_identifier)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, newval)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_first_reference, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_next_reference, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, entry)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_LDAP_PARSE_REFERENCE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_reference, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, entry)
-	ZEND_ARG_INFO(1, referrals)
-ZEND_END_ARG_INFO()
-#endif
-
-
-#ifdef HAVE_LDAP_PARSE_RESULT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_result, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, errcode)
-	ZEND_ARG_INFO(1, matcheddn)
-	ZEND_ARG_INFO(1, errmsg)
-	ZEND_ARG_INFO(1, referrals)
-	ZEND_ARG_INFO(1, serverctrls)
-ZEND_END_ARG_INFO()
-#endif
-#endif
-
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, callback)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_escape, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, ignore)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-#ifdef STR_TRANSLATION
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_t61_to_8859, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_8859_to_t61, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop, 0, 0, 2)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, reqoid)
-	ZEND_ARG_INFO(0, reqdata)
-	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(1, retdata)
-	ZEND_ARG_INFO(1, retoid)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_PASSWD
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_passwd, 0, 0, 1)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, user)
-	ZEND_ARG_INFO(0, oldpw)
-	ZEND_ARG_INFO(0, newpw)
-	ZEND_ARG_INFO(1, serverctrls)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_WHOAMI_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 1)
-	ZEND_ARG_INFO(0, link)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_REFRESH_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_refresh, 0, 0, 3)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, dn)
-	ZEND_ARG_INFO(0, ttl)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
-	ZEND_ARG_INFO(0, link)
-	ZEND_ARG_INFO(0, result)
-	ZEND_ARG_INFO(1, retdata)
-	ZEND_ARG_INFO(1, retoid)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
-
 /*
 	This is just a small subset of the functionality provided by the LDAP library. All the
 	operations are synchronous. Referrals are not handled automatically.
@@ -4763,17 +4384,17 @@ ZEND_END_ARG_INFO()
  */
 static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								arginfo_ldap_connect)
-	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_resource)
+	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_close)
 	PHP_FE(ldap_bind,									arginfo_ldap_bind)
 	PHP_FE(ldap_bind_ext,								arginfo_ldap_bind_ext)
 #ifdef HAVE_LDAP_SASL
 	PHP_FE(ldap_sasl_bind,								arginfo_ldap_sasl_bind)
 #endif
-	PHP_FE(ldap_unbind,									arginfo_ldap_resource)
+	PHP_FE(ldap_unbind,									arginfo_ldap_unbind)
 	PHP_FE(ldap_read,									arginfo_ldap_read)
 	PHP_FE(ldap_list,									arginfo_ldap_list)
 	PHP_FE(ldap_search,									arginfo_ldap_search)
-	PHP_FE(ldap_free_result,							arginfo_ldap_resource)
+	PHP_FE(ldap_free_result,							arginfo_ldap_free_result)
 	PHP_FE(ldap_count_entries,							arginfo_ldap_count_entries)
 	PHP_FE(ldap_first_entry,							arginfo_ldap_first_entry)
 	PHP_FE(ldap_next_entry,								arginfo_ldap_next_entry)
@@ -4802,9 +4423,9 @@ static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_mod_del_ext,							arginfo_ldap_mod_del_ext)
 /* end gjt mod */
 
-	PHP_FE(ldap_errno,									arginfo_ldap_resource)
+	PHP_FE(ldap_errno,									arginfo_ldap_errno)
 	PHP_FE(ldap_err2str,								arginfo_ldap_err2str)
-	PHP_FE(ldap_error,									arginfo_ldap_resource)
+	PHP_FE(ldap_error,									arginfo_ldap_error)
 	PHP_FE(ldap_compare,								arginfo_ldap_compare)
 
 #if (LDAP_API_VERSION > 2000) || HAVE_ORALDAP
@@ -4821,7 +4442,7 @@ static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_parse_result,							arginfo_ldap_parse_result)
 #endif
 #ifdef HAVE_LDAP_START_TLS_S
-	PHP_FE(ldap_start_tls,								arginfo_ldap_resource)
+	PHP_FE(ldap_start_tls,								arginfo_ldap_start_tls)
 #endif
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
 	PHP_FE(ldap_exop,									arginfo_ldap_exop)

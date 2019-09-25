@@ -101,7 +101,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'offset' of method 'data_seek'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -124,7 +124,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'result_type' of method 'fetch_all'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -147,7 +147,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'result_type' of method 'fetch_array'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -202,7 +202,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'field_nr' of method 'fetch_field_direct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -241,7 +241,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'class_name' of method 'fetch_object'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -287,7 +287,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'field_nr' of method 'field_seek'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no

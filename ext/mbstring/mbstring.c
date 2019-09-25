@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -3963,8 +3961,14 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zend_bool is_hex = 0;
 	mbfl_string string, result, *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|sb", &str, &str_len, &zconvmap, &encoding, &encoding_len, &is_hex) == FAILURE) {
-		return;
+	if (type == 0) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|sb", &str, &str_len, &zconvmap, &encoding, &encoding_len, &is_hex) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|s", &str, &str_len, &zconvmap, &encoding, &encoding_len) == FAILURE) {
+			return;
+		}
 	}
 
 	string.no_language = MBSTRG(language);

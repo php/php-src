@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -50,82 +48,7 @@
 #include "php_qdbm.h"
 #include "php_tcadb.h"
 #include "php_lmdb.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, handlername)
-	ZEND_ARG_VARIADIC_INFO(0, handler_parameters)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_open, 0, 0, 2)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, handlername)
-	ZEND_ARG_VARIADIC_INFO(0, handler_parameters)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_close, 0)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_exists, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_fetch, 0, 0, 2)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, skip)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_key_split, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_firstkey, 0)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_nextkey, 0)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_delete, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_insert, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_replace, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_optimize, 0)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_sync, 0)
-	ZEND_ARG_INFO(0, handle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_handlers, 0, 0, 0)
-	ZEND_ARG_INFO(0, full_info)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dba_list, 0)
-ZEND_END_ARG_INFO()
-
-/* }}} */
+#include "dba_arginfo.h"
 
 /* {{{ dba_functions[]
  */

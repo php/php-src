@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -400,12 +398,12 @@ static inline zend_long parse_iv2(const unsigned char *p, const unsigned char **
 	 || (SIZEOF_ZEND_LONG == 4
 	 	&& UNEXPECTED(p - start == MAX_LENGTH_OF_LONG - 1)
 	 	&& UNEXPECTED(*start > '2'))
-	 || UNEXPECTED(result - neg > ZEND_LONG_MAX)) {
+	 || UNEXPECTED(result > ZEND_LONG_MAX + neg)) {
 		php_error_docref(NULL, E_WARNING, "Numerical result out of range");
 		return (!neg) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 	}
 
-	return (!neg) ? (zend_long)result : -(zend_long)result;
+	return (zend_long) ((!neg) ? result : -result);
 }
 
 static inline zend_long parse_iv(const unsigned char *p)

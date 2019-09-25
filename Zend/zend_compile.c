@@ -1080,6 +1080,70 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 }
 /* }}} */
 
+zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
+	zend_bool nullable = ZEND_TYPE_ALLOW_NULL(type);
+	zend_string *str;
+	if (ZEND_TYPE_IS_NAME(type)) {
+		zend_string *name = ZEND_TYPE_NAME(type);
+		if (scope) {
+			if (zend_string_equals_literal_ci(name, "self")) {
+				name = scope->name;
+			} else if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
+				name = scope->parent->name;
+			}
+		}
+		str = zend_string_copy(name);
+	} else if (ZEND_TYPE_IS_CE(type)) {
+		str = zend_string_copy(ZEND_TYPE_CE(type)->name);
+	} else {
+		uint32_t type_mask = ZEND_TYPE_MASK(ZEND_TYPE_WITHOUT_NULL(type));
+		switch (type_mask) {
+			case MAY_BE_FALSE|MAY_BE_TRUE:
+				str = ZSTR_KNOWN(ZEND_STR_BOOL);
+				break;
+			case MAY_BE_LONG:
+				str = ZSTR_KNOWN(ZEND_STR_INT);
+				break;
+			case MAY_BE_DOUBLE:
+				str = ZSTR_KNOWN(ZEND_STR_FLOAT);
+				break;
+			case MAY_BE_STRING:
+				str = ZSTR_KNOWN(ZEND_STR_STRING);
+				break;
+			case MAY_BE_ARRAY:
+				str = ZSTR_KNOWN(ZEND_STR_ARRAY);
+				break;
+			case MAY_BE_OBJECT:
+				str = ZSTR_KNOWN(ZEND_STR_OBJECT);
+				break;
+			case MAY_BE_CALLABLE:
+				str = ZSTR_KNOWN(ZEND_STR_CALLABLE);
+				break;
+			case MAY_BE_ITERABLE:
+				str = ZSTR_KNOWN(ZEND_STR_ITERABLE);
+				break;
+			case MAY_BE_VOID:
+				str = ZSTR_KNOWN(ZEND_STR_VOID);
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+	}
+
+	if (nullable) {
+		zend_string *nullable_str = zend_string_alloc(ZSTR_LEN(str) + 1, 0);
+		ZSTR_VAL(nullable_str)[0] = '?';
+		memcpy(ZSTR_VAL(nullable_str) + 1, ZSTR_VAL(str), ZSTR_LEN(str));
+		ZSTR_VAL(nullable_str)[ZSTR_LEN(nullable_str)] = '\0';
+		zend_string_release(str);
+		return nullable_str;
+	}
+	return str;
+}
+
+zend_string *zend_type_to_string(zend_type type) {
+	return zend_type_to_string_resolved(type, NULL);
+}
+
 static void zend_mark_function_as_generator() /* {{{ */
 {
 	if (!CG(active_op_array)->function_name) {
@@ -1089,19 +1153,22 @@ static void zend_mark_function_as_generator() /* {{{ */
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_arg_info return_info = CG(active_op_array)->arg_info[-1];
+		zend_bool valid_type;
+		if (ZEND_TYPE_IS_CLASS(return_info.type)) {
+			zend_string *name = ZEND_TYPE_NAME(return_info.type);
+			valid_type = zend_string_equals_literal_ci(name, "Traversable")
+				|| zend_string_equals_literal_ci(name, "Iterator")
+				|| zend_string_equals_literal_ci(name, "Generator");
+		} else {
+			valid_type = (ZEND_TYPE_MASK(return_info.type) & MAY_BE_ITERABLE) != 0;
+		}
 
-		if (ZEND_TYPE_CODE(return_info.type) != IS_ITERABLE) {
-			const char *msg = "Generators may only declare a return type of Generator, Iterator, Traversable, or iterable, %s is not permitted";
-
-			if (!ZEND_TYPE_IS_CLASS(return_info.type)) {
-				zend_error_noreturn(E_COMPILE_ERROR, msg, zend_get_type_by_const(ZEND_TYPE_CODE(return_info.type)));
-			}
-
-			if (!zend_string_equals_literal_ci(ZEND_TYPE_NAME(return_info.type), "Traversable")
-				&& !zend_string_equals_literal_ci(ZEND_TYPE_NAME(return_info.type), "Iterator")
-				&& !zend_string_equals_literal_ci(ZEND_TYPE_NAME(return_info.type), "Generator")) {
-				zend_error_noreturn(E_COMPILE_ERROR, msg, ZSTR_VAL(ZEND_TYPE_NAME(return_info.type)));
-			}
+		if (!valid_type) {
+			zend_string *str = zend_type_to_string(return_info.type);
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Generators may only declare a return type of " \
+				"Generator, Iterator, Traversable, or iterable, %s is not permitted",
+				ZSTR_VAL(str));
 		}
 	}
 
@@ -2051,11 +2118,12 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
 static void zend_emit_return_type_check(
 		znode *expr, zend_arg_info *return_info, zend_bool implicit) /* {{{ */
 {
-	if (ZEND_TYPE_IS_SET(return_info->type)) {
+	zend_type type = return_info->type;
+	if (ZEND_TYPE_IS_SET(type)) {
 		zend_op *opline;
 
 		/* `return ...;` is illegal in a void function (but `return;` isn't) */
-		if (ZEND_TYPE_CODE(return_info->type) == IS_VOID) {
+		if (ZEND_TYPE_IS_MASK(type) && ZEND_TYPE_CONTAINS_CODE(type, IS_VOID)) {
 			if (expr) {
 				if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
 					zend_error_noreturn(E_COMPILE_ERROR,
@@ -2070,7 +2138,7 @@ static void zend_emit_return_type_check(
 		}
 
 		if (!expr && !implicit) {
-			if (ZEND_TYPE_ALLOW_NULL(return_info->type)) {
+			if (ZEND_TYPE_ALLOW_NULL(type)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"A function with return type must return a value "
 					"(did you mean \"return null;\" instead of \"return;\"?)");
@@ -2081,12 +2149,8 @@ static void zend_emit_return_type_check(
 		}
 
 		if (expr && expr->op_type == IS_CONST) {
-			if ((ZEND_TYPE_CODE(return_info->type) == Z_TYPE(expr->u.constant))
-			 ||((ZEND_TYPE_CODE(return_info->type) == _IS_BOOL)
-			  && (Z_TYPE(expr->u.constant) == IS_FALSE
-			   || Z_TYPE(expr->u.constant) == IS_TRUE))
-			 || (ZEND_TYPE_ALLOW_NULL(return_info->type)
-			  && Z_TYPE(expr->u.constant) == IS_NULL)) {
+			if (ZEND_TYPE_IS_MASK(type)
+					&& ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
 				/* we don't need run-time check */
 				return;
 			}
@@ -5248,7 +5312,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 	}
 
 	if (ast->kind == ZEND_AST_TYPE) {
-		return ZEND_TYPE_ENCODE(ast->attr, allow_null);
+		return ZEND_TYPE_ENCODE_CODE(ast->attr, allow_null);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
 		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
@@ -5259,7 +5323,10 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
-			return ZEND_TYPE_ENCODE(type, allow_null);
+			if (type == IS_VOID && allow_null) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
+			}
+			return ZEND_TYPE_ENCODE_CODE(type, allow_null);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
@@ -5276,6 +5343,29 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 }
 /* }}} */
 
+static zend_bool zend_is_valid_default_value(zend_type type, zval *value)
+{
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
+	if (Z_TYPE_P(value) == IS_NULL && ZEND_TYPE_ALLOW_NULL(type)) {
+		return 1;
+	}
+
+	if (ZEND_TYPE_IS_CLASS(type)) {
+		return 0;
+	}
+	if (ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(value))) {
+		return 1;
+	}
+	if ((ZEND_TYPE_MASK(type) & MAY_BE_DOUBLE) && Z_TYPE_P(value) == IS_LONG) {
+		/* Integers are allowed as initializers for floating-point values. */
+		return 1;
+	}
+	if ((ZEND_TYPE_MASK(type) & MAY_BE_ITERABLE) && Z_TYPE_P(value) == IS_ARRAY) {
+		return 1;
+	}
+	return 0;
+}
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -5290,11 +5380,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		arg_infos->is_variadic = 0;
 		arg_infos->type = zend_compile_typename(return_type_ast, 0);
-
-		if (ZEND_TYPE_CODE(arg_infos->type) == IS_VOID && ZEND_TYPE_ALLOW_NULL(arg_infos->type)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Void type cannot be nullable");
-		}
-
 		arg_infos++;
 		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 	} else {
@@ -5368,8 +5453,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		arg_info->name = zend_string_copy(name);
 		arg_info->pass_by_reference = is_ref;
 		arg_info->is_variadic = is_variadic;
-		/* TODO: Keep compatibility, but may be better reset "allow_null" ??? */
-		arg_info->type = ZEND_TYPE_ENCODE(0, 1);
+		arg_info->type = ZEND_TYPE_ENCODE_NONE();
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
@@ -5381,72 +5465,24 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			arg_info->type = zend_compile_typename(type_ast, default_type == IS_NULL);
 
 			is_class = ZEND_TYPE_IS_CLASS(arg_info->type);
-			arg_type = ZEND_TYPE_CODE(arg_info->type);
+			arg_type = !is_class ? ZEND_TYPE_MASK(arg_info->type) : 0;
 
-			if (arg_type == IS_VOID) {
+			if (arg_type & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
-			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST) {
-				if (is_class) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-						"with a class type can only be NULL");
-				} else switch (arg_type) {
-					case IS_CALLABLE:
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with callable type can only be NULL");
-						break;
-
-					case IS_ARRAY:
-						if (default_type != IS_ARRAY) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with array type can only be an array or NULL");
-						}
-						break;
-
-					case IS_DOUBLE:
-						if (default_type != IS_DOUBLE && default_type != IS_LONG) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with a float type can only be float, integer, or NULL");
-						}
-						break;
-
-					case IS_ITERABLE:
-						if (default_type != IS_ARRAY) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with iterable type can only be an array or NULL");
-						}
-						break;
-
-					case IS_OBJECT:
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-							"with an object type can only be NULL");
-						break;
-
-					default:
-						if (!ZEND_SAME_FAKE_TYPE(arg_type, default_type)) {
-							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
-								"with a %s type can only be %s or NULL",
-								zend_get_type_by_const(arg_type), zend_get_type_by_const(arg_type));
-						}
-						break;
-				}
+			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST
+					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
+				zend_string *type_str = zend_type_to_string(arg_info->type);
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use %s as default value for parameter $%s of type %s",
+					zend_get_type_by_const(default_type),
+					ZSTR_VAL(name), ZSTR_VAL(type_str));
 			}
 
 			/* Allocate cache slot to speed-up run-time class resolution */
-			if (opline->opcode == ZEND_RECV_INIT) {
-				if (is_class) {
-					opline->extended_value = zend_alloc_cache_slot();
-				}
-			} else if (is_class) {
-				opline->op2.num = op_array->cache_size;
-				op_array->cache_size += sizeof(void*);
-			} else {
-				opline->op2.num = -1;
-			}
-		} else {
-			if (opline->opcode != ZEND_RECV_INIT) {
-				opline->op2.num = -1;
+			if (is_class) {
+				opline->extended_value = zend_alloc_cache_slot();
 			}
 		}
 	}
@@ -5948,17 +5984,17 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
-		zend_type type = 0;
+		zend_type type = ZEND_TYPE_ENCODE_NONE();
 
 		if (type_ast) {
 			type = zend_compile_typename(type_ast, 0);
 
-			if (ZEND_TYPE_CODE(type) == IS_VOID || ZEND_TYPE_CODE(type) == IS_CALLABLE) {
+			if (ZEND_TYPE_IS_MASK(type)
+					&& (ZEND_TYPE_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE))) {
+				zend_string *str = zend_type_to_string(type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Property %s::$%s cannot have type %s",
-					ZSTR_VAL(ce->name),
-					ZSTR_VAL(name),
-					zend_get_type_by_const(ZEND_TYPE_CODE(type)));
+					ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 			}
 		}
 
@@ -5981,35 +6017,19 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		if (value_ast) {
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
-			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)) {
+			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
+					&& !zend_is_valid_default_value(type, &value_zv)) {
+				zend_string *str = zend_type_to_string(type);
 				if (Z_TYPE(value_zv) == IS_NULL) {
-					if (!ZEND_TYPE_ALLOW_NULL(type)) {
-						const char *name = ZEND_TYPE_IS_CLASS(type)
-							? ZSTR_VAL(ZEND_TYPE_NAME(type)) : zend_get_type_by_const(ZEND_TYPE_CODE(type));
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type %s may not be null. "
-								"Use the nullable type ?%s to allow null default value",
-								name, name);
-					}
-				} else if (ZEND_TYPE_IS_CLASS(type)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Property of type %s may not have default value", ZSTR_VAL(ZEND_TYPE_NAME(type)));
-				} else if (ZEND_TYPE_CODE(type) == IS_ARRAY || ZEND_TYPE_CODE(type) == IS_ITERABLE) {
-					if (Z_TYPE(value_zv) != IS_ARRAY) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type %s can only be an array",
-								zend_get_type_by_const(ZEND_TYPE_CODE(type)));
-					}
-				} else if (ZEND_TYPE_CODE(type) == IS_DOUBLE) {
-					if (Z_TYPE(value_zv) != IS_DOUBLE && Z_TYPE(value_zv) != IS_LONG) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-								"Default value for property of type float can only be float or int");
-					}
-				} else if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(type), Z_TYPE(value_zv))) {
+						"Default value for property of type %s may not be null. "
+						"Use the nullable type ?%s to allow null default value",
+						ZSTR_VAL(str), ZSTR_VAL(str));
+				} else {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for property of type %s can only be %s",
-							zend_get_type_by_const(ZEND_TYPE_CODE(type)),
-							zend_get_type_by_const(ZEND_TYPE_CODE(type)));
+						"Cannot use %s as default value for property %s::$%s of type %s",
+						zend_get_type_by_const(Z_TYPE(value_zv)),
+						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}
 		} else if (!ZEND_TYPE_IS_SET(type)) {

@@ -11,7 +11,7 @@ Function [ <internal:standard> function htmlspecialchars ] {
   - Parameters [4] {
     Parameter #0 [ <required> string $string ]
     Parameter #1 [ <optional> int $quote_style ]
-    Parameter #2 [ <optional> string or NULL $encoding ]
+    Parameter #2 [ <optional> ?string $encoding ]
     Parameter #3 [ <optional> bool $double_encode ]
   }
   - Return [ string ]

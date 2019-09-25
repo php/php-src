@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1984,23 +1982,29 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 }
 /* }}} */
 
-static int zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+static int zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
 	zend_function  *func;
 
 	if (type->kind != ZEND_FFI_TYPE_POINTER) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to call non C function pointer");
+		if (!check_only) {
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to call non C function pointer");
+		}
 		return FAILURE;
 	}
 	type = ZEND_FFI_TYPE(type->pointer.type);
 	if (type->kind != ZEND_FFI_TYPE_FUNC) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to call non C function pointer");
+		if (!check_only) {
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to call non C function pointer");
+		}
 		return FAILURE;
 	}
 	if (!cdata->ptr) {
-		zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+		if (!check_only) {
+			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
+		}
 		return FAILURE;
 	}
 

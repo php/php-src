@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,7 +20,6 @@
 
 extern PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
-extern PHP_DOM_EXPORT zend_class_entry *dom_domstringlist_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
@@ -39,7 +36,6 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_entity_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_entityreference_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
-extern PHP_DOM_EXPORT zend_class_entry *dom_string_extend_class_entry;
 #if defined(LIBXML_XPATH_ENABLED)
 extern PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 #endif

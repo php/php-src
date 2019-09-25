@@ -45,9 +45,9 @@ var_dump(Foo::$bar);
 --EXPECT--
 string(70) "Cannot increment property Foo::$bar of type int past its maximal value"
 int(9223372036854775807)
-string(48) "Typed property Foo::$bar must be int, float used"
+string(53) "Cannot assign float to property Foo::$bar of type int"
 int(9223372036854775807)
 string(70) "Cannot increment property Foo::$bar of type int past its maximal value"
 int(9223372036854775807)
-string(48) "Typed property Foo::$bar must be int, float used"
+string(53) "Cannot assign float to property Foo::$bar of type int"
 int(9223372036854775807)

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -582,17 +580,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	} else {
 		smart_str_append_printf(str, "<required> ");
 	}
-	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-		smart_str_append_printf(str, "%s ",
-			ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type)));
-		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-			smart_str_append_printf(str, "or NULL ");
-		}
-	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
-		smart_str_append_printf(str, "%s ", zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type)));
-		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-			smart_str_append_printf(str, "or NULL ");
-		}
+	if (ZEND_TYPE_IS_SET(arg_info->type)) {
+		zend_string *type_str = zend_type_to_string(arg_info->type);
+		smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
+		zend_string_release(type_str);
 	}
 	if (arg_info->pass_by_reference) {
 		smart_str_appendc(str, '&');
@@ -802,17 +793,10 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	smart_str_free(&param_indent);
 	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		smart_str_append_printf(str, "  %s- Return [ ", indent);
-		if (ZEND_TYPE_IS_CLASS(fptr->common.arg_info[-1].type)) {
-			smart_str_append_printf(str, "%s ",
-				ZSTR_VAL(ZEND_TYPE_NAME(fptr->common.arg_info[-1].type)));
-			if (ZEND_TYPE_ALLOW_NULL(fptr->common.arg_info[-1].type)) {
-				smart_str_appends(str, "or NULL ");
-			}
-		} else if (ZEND_TYPE_IS_CODE(fptr->common.arg_info[-1].type)) {
-			smart_str_append_printf(str, "%s ", zend_get_type_by_const(ZEND_TYPE_CODE(fptr->common.arg_info[-1].type)));
-			if (ZEND_TYPE_ALLOW_NULL(fptr->common.arg_info[-1].type)) {
-				smart_str_appends(str, "or NULL ");
-			}
+		if (ZEND_TYPE_IS_SET(fptr->common.arg_info[-1].type)) {
+			zend_string *type_str = zend_type_to_string(fptr->common.arg_info[-1].type);
+			smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
+			zend_string_release(type_str);
 		}
 		smart_str_appends(str, "]\n");
 	}
@@ -1808,7 +1792,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 	if (!Z_ISUNDEF(intern->obj)) {
 		Z_OBJ_HT(intern->obj)->get_closure(
-			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object);
+			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, 0);
 	}
 
 	result = zend_call_function(&fci, &fcc);
@@ -1871,7 +1855,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 
 	if (!Z_ISUNDEF(intern->obj)) {
 		Z_OBJ_HT(intern->obj)->get_closure(
-			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object);
+			Z_OBJ(intern->obj), &fcc.called_scope, &fcc.function_handler, &fcc.object, 0);
 	}
 
 	result = zend_call_function(&fci, &fcc);
@@ -2565,13 +2549,15 @@ ZEND_METHOD(reflection_parameter, isArray)
 {
 	reflection_object *intern;
 	parameter_reference *param;
+	zend_type type;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_CODE(param->arg_info->type) == IS_ARRAY);
+	type = ZEND_TYPE_WITHOUT_NULL(param->arg_info->type);
+	RETVAL_BOOL(ZEND_TYPE_MASK(type) == MAY_BE_ARRAY);
 }
 /* }}} */
 
@@ -2581,13 +2567,15 @@ ZEND_METHOD(reflection_parameter, isCallable)
 {
 	reflection_object *intern;
 	parameter_reference *param;
+	zend_type type;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_CODE(param->arg_info->type) == IS_CALLABLE);
+	type = ZEND_TYPE_WITHOUT_NULL(param->arg_info->type);
+	RETVAL_BOOL(ZEND_TYPE_MASK(type) == MAY_BE_CALLABLE);
 }
 /* }}} */
 
@@ -2603,7 +2591,8 @@ ZEND_METHOD(reflection_parameter, allowsNull)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_ALLOW_NULL(param->arg_info->type));
+	RETVAL_BOOL(!ZEND_TYPE_IS_SET(param->arg_info->type)
+		|| ZEND_TYPE_ALLOW_NULL(param->arg_info->type));
 }
 /* }}} */
 
@@ -2817,19 +2806,6 @@ ZEND_METHOD(reflection_type, allowsNull)
 }
 /* }}} */
 
-/* {{{ reflection_type_name */
-static zend_string *reflection_type_name(type_reference *param) {
-	if (ZEND_TYPE_IS_NAME(param->type)) {
-		return zend_string_copy(ZEND_TYPE_NAME(param->type));
-	} else if (ZEND_TYPE_IS_CE(param->type)) {
-		return zend_string_copy(ZEND_TYPE_CE(param->type)->name);
-	} else {
-		const char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->type));
-		return zend_string_init(name, strlen(name), 0);
-	}
-}
-/* }}} */
-
 /* {{{ proto public string ReflectionType::__toString()
    Return the text of the type hint */
 ZEND_METHOD(reflection_type, __toString)
@@ -2842,7 +2818,7 @@ ZEND_METHOD(reflection_type, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(reflection_type_name(param));
+	RETURN_STR(zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(param->type)));
 }
 /* }}} */
 
@@ -2858,7 +2834,7 @@ ZEND_METHOD(reflection_named_type, getName)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(reflection_type_name(param));
+	RETURN_STR(zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(param->type)));
 }
 /* }}} */
 
@@ -2874,7 +2850,7 @@ ZEND_METHOD(reflection_named_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_IS_CODE(param->type));
+	RETVAL_BOOL(ZEND_TYPE_IS_MASK(param->type));
 }
 /* }}} */
 
@@ -3725,7 +3701,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
-		if (!prop || (prop_info->type && Z_ISUNDEF_P(prop))) {
+		if (!prop || (ZEND_TYPE_IS_SET(prop_info->type) && Z_ISUNDEF_P(prop))) {
 			continue;
 		}
 
@@ -3837,7 +3813,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 		}
 	}
 
-	if (prop_info->type && !zend_verify_property_type(prop_info, value, 0)) {
+	if (ZEND_TYPE_IS_SET(prop_info->type) && !zend_verify_property_type(prop_info, value, 0)) {
 		return;
 	}
 

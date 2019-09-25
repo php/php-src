@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -46,6 +44,7 @@
 #undef ERROR
 #endif
 #include "php_imap.h"
+#include "php_imap_arginfo.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -97,373 +96,6 @@ void *fs_get(size_t size);
 ZEND_DECLARE_MODULE_GLOBALS(imap)
 static PHP_GINIT_FUNCTION(imap);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, user)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, n_retries)
-	ZEND_ARG_INFO(0, params)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_reopen, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, n_retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_append, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, folder)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, date)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_msg, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_ping, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_num_recent, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quota, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, qroot)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_get_quotaroot, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mbox)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_set_quota, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, qroot)
-	ZEND_ARG_INFO(0, mailbox_size)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setacl, 0, 0, 4)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, rights)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getacl, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_expunge, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_gc, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headers, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_body, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_copy, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msglist)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_move, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, sequence)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_createmailbox, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_renamemailbox, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, old_name)
-	ZEND_ARG_INFO(0, new_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_deletemailbox, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_list, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, ref)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getmailboxes, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, ref)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_listscan, 0, 0, 4)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, ref)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, content)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_check, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_delete, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_undelete, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headerinfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, from_length)
-	ZEND_ARG_INFO(0, subject_length)
-	ZEND_ARG_INFO(0, default_host)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 0, 1)
-	ZEND_ARG_INFO(0, headers)
-	ZEND_ARG_INFO(0, default_host)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_lsub, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, ref)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_getsubscribed, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, ref)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_subscribe, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_unsubscribe, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchstructure, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchbody, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, section)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_savebody, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, section)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_base64, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_qprint, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_8bit, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_binary, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mailboxmsginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_write_address, 0, 0, 3)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, personal)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_rfc822_parse_adrlist, 0, 0, 2)
-	ZEND_ARG_INFO(0, address_string)
-	ZEND_ARG_INFO(0, default_host)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf8, 0, 0, 1)
-	ZEND_ARG_INFO(0, mime_encoded_text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, buf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf7_encode, 0, 0, 1)
-	ZEND_ARG_INFO(0, buf)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_IMAP_MUTF7
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_utf8_to_mutf7, 0, 0, 1)
-	ZEND_ARG_INFO(0, in)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mutf7_to_utf8, 0, 0, 1)
-	ZEND_ARG_INFO(0, in)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_setflag_full, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, sequence)
-	ZEND_ARG_INFO(0, flag)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_clearflag_full, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, sequence)
-	ZEND_ARG_INFO(0, flag)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_sort, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, criteria)
-	ZEND_ARG_INFO(0, reverse)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, search_criteria)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchheader, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_uid, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_msgno, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, unique_msg_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_status, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, mailbox)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_bodystruct, 0, 0, 3)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, msg_no)
-	ZEND_ARG_INFO(0, section)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetch_overview, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, sequence)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail_compose, 0, 0, 2)
-	ZEND_ARG_INFO(0, envelope)
-	ZEND_ARG_INFO(0, body)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mail, 0, 0, 3)
-	ZEND_ARG_INFO(0, to)
-	ZEND_ARG_INFO(0, subject)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, additional_headers)
-	ZEND_ARG_INFO(0, cc)
-	ZEND_ARG_INFO(0, bcc)
-	ZEND_ARG_INFO(0, rpath)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_search, 0, 0, 2)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, criteria)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_imap_alerts, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_imap_errors, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_imap_last_error, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_mime_header_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_thread, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream_id)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_timeout, 0, 0, 1)
-	ZEND_ARG_INFO(0, timeout_type)
-	ZEND_ARG_INFO(0, timeout)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ imap_functions[]
  */
@@ -481,7 +113,7 @@ static const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_body,								arginfo_imap_body)
 	PHP_FE(imap_bodystruct,							arginfo_imap_bodystruct)
 	PHP_FE(imap_fetchbody,							arginfo_imap_fetchbody)
-	PHP_FE(imap_fetchmime,							arginfo_imap_fetchbody)
+	PHP_FE(imap_fetchmime,							arginfo_imap_fetchmime)
 	PHP_FE(imap_savebody,							arginfo_imap_savebody)
 	PHP_FE(imap_fetchheader,						arginfo_imap_fetchheader)
 	PHP_FE(imap_fetchstructure,						arginfo_imap_fetchstructure)
@@ -539,13 +171,13 @@ static const zend_function_entry imap_functions[] = {
 #endif
 
 	PHP_FE(imap_mail,								arginfo_imap_mail)
+	PHP_FE(imap_getsubscribed,						arginfo_imap_getsubscribed)
+	PHP_FE(imap_getmailboxes,						arginfo_imap_getmailboxes)
 
 	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_headerinfo)
 	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_list)
-	PHP_FALIAS(imap_getmailboxes,	imap_list_full,		arginfo_imap_getmailboxes)
 	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_listscan)
 	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_lsub)
-	PHP_FALIAS(imap_getsubscribed,	imap_lsub_full,		arginfo_imap_getsubscribed)
 	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_body)
 	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_listscan)
 	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_createmailbox)
@@ -1926,7 +1558,7 @@ PHP_FUNCTION(imap_list)
 /* {{{ proto array imap_getmailboxes(resource stream_id, string ref, string pattern)
    Reads the list of mailboxes and returns a full array of objects containing name, attributes, and delimiter */
 /* Author: CJH */
-PHP_FUNCTION(imap_list_full)
+PHP_FUNCTION(imap_getmailboxes)
 {
 	zval *streamind, mboxob;
 	zend_string *ref, *pat;
@@ -2246,7 +1878,7 @@ PHP_FUNCTION(imap_lsub)
 /* {{{ proto array imap_getsubscribed(resource stream_id, string ref, string pattern)
    Return a list of subscribed mailboxes, in the same format as imap_getmailboxes() */
 /* Author: CJH */
-PHP_FUNCTION(imap_lsub_full)
+PHP_FUNCTION(imap_getsubscribed)
 {
 	zval *streamind, mboxob;
 	zend_string *ref, *pat;

@@ -1,7 +1,10 @@
 --TEST--
 libxml_disable_entity_loader()
 --SKIPIF--
-<?php if (!extension_loaded('libxml') || !extension_loaded('dom') || defined('PHP_WINDOWS_VERSION_MAJOR')) die('skip'); ?>
+<?php
+if (!extension_loaded('libxml')) die('skip libxml extension not available');
+if (!extension_loaded('dom')) die('skip dom extension not available');
+if (defined('PHP_WINDOWS_VERSION_MAJOR')) die('skip not for Windows'); ?>
 --FILE--
 <?php
 

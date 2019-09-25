@@ -31,7 +31,7 @@ var_dump($test);
 
 ?>
 --EXPECT--
-Typed property Test1::$prop must be an instance of Foobar, int used
+Cannot assign int to property Test1::$prop of type Foobar
 object(Test1)#1 (1) {
   ["prop"]=>
   uninitialized(Foobar)

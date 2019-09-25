@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -82,25 +80,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_namespace_uri, 0, 0, 1)
 	ZEND_ARG_INFO(0, prefix)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_equal_node, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, arg, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_feature, 0, 0, 2)
-	ZEND_ARG_INFO(0, feature)
-	ZEND_ARG_INFO(0, version)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_set_user_data, 0, 0, 3)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, handler)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_get_user_data, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getNodePath, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
@@ -145,10 +124,6 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 	PHP_FALIAS(lookupPrefix, dom_node_lookup_prefix, arginfo_dom_node_lookup_prefix)
 	PHP_FALIAS(isDefaultNamespace, dom_node_is_default_namespace, arginfo_dom_node_is_default_namespace)
 	PHP_FALIAS(lookupNamespaceUri, dom_node_lookup_namespace_uri, arginfo_dom_node_lookup_namespace_uri)
-	PHP_FALIAS(isEqualNode, dom_node_is_equal_node, arginfo_dom_node_is_equal_node)
-	PHP_FALIAS(getFeature, dom_node_get_feature, arginfo_dom_node_get_feature)
-	PHP_FALIAS(setUserData, dom_node_set_user_data, arginfo_dom_node_set_user_data)
-	PHP_FALIAS(getUserData, dom_node_get_user_data, arginfo_dom_node_get_user_data)
 	PHP_ME(domnode, getNodePath, arginfo_dom_node_getNodePath, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, getLineNo, arginfo_dom_node_getLineNo, ZEND_ACC_PUBLIC)
 	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
@@ -1653,46 +1628,6 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */
-
-/* {{{ proto bool dom_node_is_equal_node(DomNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_node_is_equal_node)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_node_is_equal_node */
-
-/* {{{ proto DomNode dom_node_get_feature(string feature, string version);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_node_get_feature)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_node_get_feature */
-
-/* {{{ proto mixed dom_node_set_user_data(string key, mixed data, userdatahandler handler);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_node_set_user_data)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_node_set_user_data */
-
-/* {{{ proto mixed dom_node_get_user_data(string key);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_node_get_user_data)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_node_get_user_data */
 
 static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {

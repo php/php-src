@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -782,6 +780,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 	--p; /* for ';' */
 	count = Z_LVAL_P(pcount);
+	if (count < 0) {
+		goto outexcept;
+	}
 
 	ZVAL_UNDEF(&entry);
 	ZVAL_UNDEF(&inf);

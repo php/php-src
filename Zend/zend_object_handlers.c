@@ -454,7 +454,7 @@ found:
 	}
 
 	offset = property_info->offset;
-	if (EXPECTED(!property_info->type)) {
+	if (EXPECTED(!ZEND_TYPE_IS_SET(property_info->type))) {
 		property_info = NULL;
 	} else {
 		*info_ptr = property_info;
@@ -1482,7 +1482,7 @@ undeclared_property:
 	ZVAL_DEINDIRECT(ret);
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
-				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
+				&& Z_TYPE_P(ret) == IS_UNDEF && ZEND_TYPE_IS_SET(property_info->type))) {
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
 			zend_get_unmangled_property_name(property_name));
@@ -1767,7 +1767,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce = obj->ce;

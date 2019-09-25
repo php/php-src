@@ -45,7 +45,7 @@ var_dump($rp->getValue());
 int(42)
 Typed static property Test::$y must not be accessed before initialization
 int(24)
-Typed property Test::$y must be int, string used
+Cannot assign string to property Test::$y of type int
 int(24)
 Cannot assign string to reference held by property Test::$y of type int
 int(24)

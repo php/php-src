@@ -26,11 +26,11 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
-#define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
+#define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_RC1                  (1<<27) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1<<28) /* may be non-reference with refcount > 1  */
+#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
