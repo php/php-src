@@ -233,7 +233,18 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 				prop_info->ce = ARENA_REALLOC(prop_info->ce);
 			}
 
-			if (ZEND_TYPE_IS_CE(prop_info->type)) {
+			if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
+					if (ZEND_TYPE_LIST_IS_CE(*entry)) {
+						zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+						if (IN_ARENA(ce)) {
+							ce = ARENA_REALLOC(ce);
+							*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+						}
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_CE(prop_info->type)) {
 				zend_class_entry *ce = ZEND_TYPE_CE(prop_info->type);
 				if (IN_ARENA(ce)) {
 					ce = ARENA_REALLOC(ce);

@@ -2254,11 +2254,14 @@ uint32_t zend_fetch_arg_info_type(const zend_script *script, zend_arg_info *arg_
 
 	tmp = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(arg_info->type));
 	*pce = NULL;
-	if (ZEND_TYPE_IS_CLASS(arg_info->type)) {
-		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
+	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
 		tmp |= MAY_BE_OBJECT;
-		*pce = get_class_entry(script, lcname);
-		zend_string_release_ex(lcname, 0);
+		/* As we only have space to store one CE, we use a plain object type for class unions. */
+		if (ZEND_TYPE_HAS_NAME(arg_info->type)) {
+			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
+			*pce = get_class_entry(script, lcname);
+			zend_string_release_ex(lcname, 0);
+		}
 	}
 	if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
@@ -2354,32 +2357,28 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 
 static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_info *prop_info, zend_class_entry **pce)
 {
+	if (pce) {
+		*pce = NULL;
+	}
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
-		uint32_t type = ZEND_TYPE_IS_CLASS(prop_info->type)
-			? MAY_BE_OBJECT
-			: zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
+		uint32_t type = zend_convert_type_declaration_mask(ZEND_TYPE_PURE_MASK(prop_info->type));
 
-		if (ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
-			type |= MAY_BE_NULL;
-		}
 		if (type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 			type |= MAY_BE_RC1 | MAY_BE_RCN;
 		}
-		if (pce) {
-			if (ZEND_TYPE_IS_CE(prop_info->type)) {
-				*pce = ZEND_TYPE_CE(prop_info->type);
-			} else if (ZEND_TYPE_IS_NAME(prop_info->type)) {
-				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
-				*pce = get_class_entry(script, lcname);
-				zend_string_release(lcname);
-			} else {
-				*pce = NULL;
+		if (ZEND_TYPE_HAS_CLASS(prop_info->type)) {
+			type |= MAY_BE_OBJECT;
+			if (pce) {
+				if (ZEND_TYPE_HAS_CE(prop_info->type)) {
+					*pce = ZEND_TYPE_CE(prop_info->type);
+				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
+					zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(prop_info->type));
+					*pce = get_class_entry(script, lcname);
+					zend_string_release(lcname);
+				}
 			}
 		}
 		return type;
-	}
-	if (pce) {
-		*pce = NULL;
 	}
 	return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
 }

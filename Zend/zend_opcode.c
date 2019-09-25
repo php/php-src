@@ -102,6 +102,19 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	zend_function_dtor(&tmp);
 }
 
+static void zend_always_inline zend_type_release(zend_type *type) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+				zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string_release(ZEND_TYPE_NAME(*type));
+	}
+}
+
 void zend_free_internal_arg_info(zend_internal_function *function) {
 	if ((function->fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 		function->arg_info) {
@@ -114,9 +127,7 @@ void zend_free_internal_arg_info(zend_internal_function *function) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
-			}
+			zend_type_release(&arg_info[i].type);
 		}
 		free(arg_info);
 	}
@@ -303,9 +314,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->doc_comment) {
 						zend_string_release_ex(prop_info->doc_comment, 0);
 					}
-					if (ZEND_TYPE_IS_NAME(prop_info->type)) {
-						zend_string_release(ZEND_TYPE_NAME(prop_info->type));
-					}
+					zend_type_release(&prop_info->type);
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
@@ -496,9 +505,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release_ex(arg_info[i].name, 0);
 			}
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 0);
-			}
+			zend_type_release(&arg_info[i].type);
 		}
 		efree(arg_info);
 	}

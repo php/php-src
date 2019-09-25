@@ -105,11 +105,11 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * zend_type - is an abstraction layer to represent information about type hint.
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
- * ZEND_TYPE_IS_SET()     - checks if type-hint exists
- * ZEND_TYPE_IS_ONLY_MASK() - checks if type-hint refer to standard type
- * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
- * ZEND_TYPE_IS_CE()      - checks if type-hint refer to some class by zend_class_entry *
- * ZEND_TYPE_IS_NAME()    - checks if type-hint refer to some class by zend_string *
+ * ZEND_TYPE_IS_SET()        - checks if there is a type-hint
+ * ZEND_TYPE_HAS_ONLY_MASK() - checks if type-hint refer to standard type only
+ * ZEND_TYPE_HAS_CLASS()     - checks if type-hint contains some class
+ * ZEND_TYPE_HAS_CE()        - checks if type-hint contains some class as zend_class_entry *
+ * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry
@@ -130,25 +130,36 @@ typedef struct {
 	/* TODO: We could use the extra 32-bit of padding on 64-bit systems. */
 } zend_type;
 
+typedef struct {
+	size_t num_types;
+	void *types[1];
+} zend_type_list;
+
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
 #define _ZEND_TYPE_MASK ((1u << 24) - 1)
 #define _ZEND_TYPE_MAY_BE_MASK ((1u << (IS_VOID+1)) - 1)
-#define _ZEND_TYPE_CE_BIT (1u << 22)
+/* Only one of these bits may be set. */
+#define _ZEND_TYPE_LIST_BIT (1u << 21)
+#define _ZEND_TYPE_CE_BIT   (1u << 22)
 #define _ZEND_TYPE_NAME_BIT (1u << 23)
+#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2
 
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
-#define ZEND_TYPE_IS_CLASS(t) \
-	(((t.type_mask) & (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_CE_BIT)) != 0)
+#define ZEND_TYPE_HAS_CLASS(t) \
+	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
 
-#define ZEND_TYPE_IS_CE(t) \
-	(((t.type_mask) & _ZEND_TYPE_CE_BIT) != 0)
+#define ZEND_TYPE_HAS_CE(t) \
+	((((t).type_mask) & _ZEND_TYPE_CE_BIT) != 0)
 
-#define ZEND_TYPE_IS_NAME(t) \
-	(((t.type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
+#define ZEND_TYPE_HAS_NAME(t) \
+	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
+
+#define ZEND_TYPE_HAS_LIST(t) \
+	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
 
 #define ZEND_TYPE_IS_ONLY_MASK(t) \
 	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)
@@ -162,8 +173,62 @@ typedef struct {
 #define ZEND_TYPE_CE(t) \
 	((zend_class_entry *) (t).ptr)
 
+#define ZEND_TYPE_LIST(t) \
+	((zend_type_list *) (t).ptr)
+
+/* Type lists use the low bit to distinguish NAME and CE entries,
+ * both of which may exist in the same list. */
+#define ZEND_TYPE_LIST_IS_CE(entry) \
+	(((uintptr_t) (entry)) & 1)
+
+#define ZEND_TYPE_LIST_IS_NAME(entry) \
+	!ZEND_TYPE_LIST_IS_CE(entry)
+
+#define ZEND_TYPE_LIST_GET_NAME(entry) \
+	((zend_string *) (entry))
+
+#define ZEND_TYPE_LIST_GET_CE(entry) \
+	((zend_class_entry *) ((uintptr_t) (entry) & ~1))
+
+#define ZEND_TYPE_LIST_ENCODE_NAME(name) \
+	((void *) (name))
+
+#define ZEND_TYPE_LIST_ENCODE_CE(ce) \
+	((void *) (((uintptr_t) ce) | 1))
+
+#define ZEND_TYPE_LIST_SIZE(num_types) \
+	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(void *))
+
+#define ZEND_TYPE_LIST_FOREACH_PTR(list, entry_ptr) do { \
+	void **_list = (list)->types; \
+	void **_end = _list + (list)->num_types; \
+	for (; _list < _end; _list++) { \
+		entry_ptr = _list;
+
+#define ZEND_TYPE_LIST_FOREACH(list, entry) do { \
+	void **_list = (list)->types; \
+	void **_end = _list + (list)->num_types; \
+	for (; _list < _end; _list++) { \
+		entry = *_list;
+
+#define ZEND_TYPE_LIST_FOREACH_END() \
+	} \
+} while (0)
+
 #define ZEND_TYPE_SET_PTR(t, _ptr) \
 	((t).ptr = (_ptr))
+
+#define ZEND_TYPE_SET_PTR_AND_KIND(t, _ptr, kind_bit) do { \
+	(t).ptr = (_ptr); \
+	(t).type_mask &= ~_ZEND_TYPE_KIND_MASK; \
+	(t).type_mask |= (kind_bit); \
+} while (0)
+
+#define ZEND_TYPE_SET_CE(t, ce) \
+	ZEND_TYPE_SET_PTR_AND_KIND(t, ce, _ZEND_TYPE_CE_BIT)
+
+#define ZEND_TYPE_SET_LIST(t, list) \
+	ZEND_TYPE_SET_PTR_AND_KIND(t, list, _ZEND_TYPE_LIST_BIT)
 
 /* FULL_MASK() includes the MAY_BE_* type mask, the CE/NAME bits, as well as extra reserved bits.
  * The PURE_MASK() only includes the MAY_BE_* type mask. */

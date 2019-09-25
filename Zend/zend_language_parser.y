@@ -255,7 +255,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
 %type <ast> isset_variable type return_type type_expr
 %type <ast> identifier
-%type <ast> inline_function
+%type <ast> inline_function union_type
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
@@ -660,12 +660,18 @@ optional_type:
 type_expr:
 		type		{ $$ = $1; }
 	|	'?' type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	union_type	{ $$ = $1; }
 ;
 
 type:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
+;
+
+union_type:
+		type '|' type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	union_type '|' type { $$ = zend_ast_list_add($1, $3); }
 ;
 
 return_type:

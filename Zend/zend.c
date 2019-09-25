@@ -947,6 +947,15 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
+static zend_class_entry *resolve_type_name(zend_string *type_name) { 
+	zend_string *lc_type_name = zend_string_tolower(type_name);
+	zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
+
+	ZEND_ASSERT(ce && ce->type == ZEND_INTERNAL_CLASS);
+	zend_string_release(lc_type_name);
+	return ce;
+}
+
 static void zend_resolve_property_types(void) /* {{{ */
 {
 	zend_class_entry *ce;
@@ -959,14 +968,16 @@ static void zend_resolve_property_types(void) /* {{{ */
 
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
+				if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+					void **entry;
+					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
+						zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+						*entry = ZEND_TYPE_LIST_ENCODE_CE(resolve_type_name(type_name));
+						zend_string_release(type_name);
+					} ZEND_TYPE_LIST_FOREACH_END();
+				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
 					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
-					zend_string *lc_type_name = zend_string_tolower(type_name);
-					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
-
-					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
-					prop_info->type = (zend_type) ZEND_TYPE_INIT_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type), 0);
-					zend_string_release(lc_type_name);
+					ZEND_TYPE_SET_CE(prop_info->type, resolve_type_name(type_name));
 					zend_string_release(type_name);
 				}
 			} ZEND_HASH_FOREACH_END();
