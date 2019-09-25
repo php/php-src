@@ -4079,7 +4079,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 					ret = &retval;
 					ZVAL_UNDEF(ret);
 				}
-				ZEND_VM_C_GOTO(fcall_end);
+				ZEND_VM_C_GOTO(fcall_by_name_end);
 			}
 		}
 
@@ -4093,7 +4093,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 				ret = &retval;
 				ZVAL_UNDEF(ret);
 			}
-			ZEND_VM_C_GOTO(fcall_end);
+			ZEND_VM_C_GOTO(fcall_by_name_end);
 		}
 
 		ret = RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &retval;
@@ -4112,7 +4112,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL))
 
 		EG(current_execute_data) = execute_data;
 
-ZEND_VM_C_LABEL(fcall_end):
+ZEND_VM_C_LABEL(fcall_by_name_end):
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
