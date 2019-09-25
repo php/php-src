@@ -17,7 +17,16 @@ $xp->registerNamespace('prefix', 'urn:b');
 
 echo($xp->query('//prefix:root')->length . "\n");
 
+var_dump($xp->registerNodeNamespaces);
+$xp->registerNodeNamespaces = true;
+
+var_dump($xp->registerNodeNamespaces);
+
+echo($xp->query('//prefix:root')->length . "\n");
 ?>
 --EXPECT--
 1
 0
+bool(false)
+bool(true)
+1
