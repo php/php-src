@@ -249,6 +249,8 @@ tmp-php.ini
 # ------------------------------------------------------------------------------
 *.gcda
 *.gcno
+/gcovr.xml
+/gcovr_html/
 /lcov_html/
 /php_lcov.info
 

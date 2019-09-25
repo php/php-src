@@ -1,0 +1,62 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  runTestsParameters: ''
+  timeoutInMinutes: 60
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: apt.yml
+      parameters:
+        packages: lcov
+    - script: |
+        sudo -H pip install gcovr
+      displayName: 'Install gcovr'
+    - template: configure.yml
+      parameters:
+        configurationParameters: --enable-gcov ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+      displayName: 'Install Build'
+    - script: |
+        mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres psql -c "CREATE DATABASE test;"
+      displayName: 'Setup'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsParameters: ${{ parameters.runTestsParameters }}
+    - script: |
+        rm -f coverage.xml | true
+        gcovr -sr . -o coverage.xml --xml \
+          --exclude-directories 'ext/date/lib$$' \
+          -e 'ext/bcmath/libbcmath/.*' \
+          -e 'ext/date/lib/.*' \
+          -e 'ext/fileinfo/libmagic/.*' \
+          -e 'ext/gd/libgd/.*' \
+          -e 'ext/hash/sha3/.*' \
+          -e 'ext/mbstring/libmbfl/.*' \
+          -e 'ext/opcache/jit/libudis86/.*' \
+          -e 'ext/pcre/pcre2lib/.*' \
+          -e 'ext/xmlrpc/libxmlrpc/.*'
+      displayName: 'Generate ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Test Coverage'
+      condition: or(succeeded(), failed())
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: coverage.xml
+      displayName: 'Publish ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Test Coverage'
+      condition: or(succeeded(), failed())

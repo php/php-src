@@ -20,6 +20,10 @@ jobs:
     parameters:
       configurationName: RELEASE_ZTS
       configurationParameters: '--disable-debug --enable-maintainer-zts'
+  - template: azure/coverage_job.yml
+    parameters:
+      configurationName: COVERAGE
+      configurationParameters: '--enable-debug --disable-maintainer-zts'
   - template: azure/i386/job.yml
     parameters:
       configurationName: I386_DEBUG_ZTS
