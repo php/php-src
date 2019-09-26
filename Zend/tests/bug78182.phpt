@@ -4,12 +4,13 @@ Bug #78182: Segmentation fault during by-reference property assignment
 <?php
 $varName = 'var';
 $propName = 'prop';
-$$varName->$propName =& $$varName;
+try {
+    $$varName->$propName =& $$varName;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($var);
 ?>
---EXPECTF--
-Warning: Creating default object from empty value in %s on line %d
-object(stdClass)#1 (1) {
-  ["prop"]=>
-  *RECURSION*
-}
+--EXPECT--
+Attempt to modify property 'prop' of non-object
+NULL

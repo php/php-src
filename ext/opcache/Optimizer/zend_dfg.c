@@ -123,10 +123,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_DIM_RW:
 					case ZEND_FETCH_DIM_FUNC_ARG:
 					case ZEND_FETCH_DIM_UNSET:
-					case ZEND_FETCH_OBJ_W:
-					case ZEND_FETCH_OBJ_RW:
-					case ZEND_FETCH_OBJ_FUNC_ARG:
-					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_FETCH_LIST_W:
 					case ZEND_VERIFY_RETURN_TYPE:
 					case ZEND_PRE_INC_OBJ:

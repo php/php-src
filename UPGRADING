@@ -86,6 +86,11 @@ PHP 8.0 UPGRADE NOTES
         function test(?int $arg = CONST_RESOLVING_TO_NULL) {}
         // Or
         function test(int $arg = null) {}
+  . Attempting to write to a property of a non-object will now result in an
+    Error exception. Previously this resulted in a warning and either converted
+    the value into an object (if it was null, false or an empty string) or
+    ignored the write altogether (in all other cases).
+    RFC: Part of https://wiki.php.net/rfc/engine_warnings
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

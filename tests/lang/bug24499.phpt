@@ -12,7 +12,8 @@ class Id {
 }
 
 $id = new Id();
-@$obj->foo = "bar";
+$obj = new stdClass;
+$obj->foo = "bar";
 $id->tester($obj);
 print_r($obj);
 ?>

@@ -3361,6 +3361,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_LIST_R:
 		case ZEND_FETCH_LIST_W:
 			if (ssa_ops[i].op1_def >= 0) {
+				uint32_t key_type = 0;
 				tmp = t1 & ~(MAY_BE_RC1|MAY_BE_RCN);
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
 				    opline->opcode == ZEND_FETCH_DIM_RW ||
@@ -3382,20 +3383,20 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 					if (opline->op2_type == IS_UNUSED) {
-						tmp |= MAY_BE_ARRAY_KEY_LONG;
+						key_type |= MAY_BE_ARRAY_KEY_LONG;
 					} else {
 						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-							tmp |= MAY_BE_ARRAY_KEY_LONG;
+							key_type |= MAY_BE_ARRAY_KEY_LONG;
 						}
 						if (t2 & MAY_BE_STRING) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
+							key_type |= MAY_BE_ARRAY_KEY_STRING;
 							if (opline->op2_type != IS_CONST) {
 								// FIXME: numeric string
-								tmp |= MAY_BE_ARRAY_KEY_LONG;
+								key_type |= MAY_BE_ARRAY_KEY_LONG;
 							}
 						}
 						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
+							key_type |= MAY_BE_ARRAY_KEY_STRING;
 						}
 					}
 				} else if (opline->opcode == ZEND_FETCH_DIM_UNSET) {
@@ -3419,19 +3420,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							case ZEND_FETCH_LIST_W:
 							case ZEND_ASSIGN_DIM:
 							case ZEND_ASSIGN_DIM_OP:
-								tmp |= MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
-								break;
-							case ZEND_FETCH_OBJ_W:
-							case ZEND_FETCH_OBJ_RW:
-							case ZEND_FETCH_OBJ_FUNC_ARG:
-							case ZEND_ASSIGN_OBJ:
-							case ZEND_ASSIGN_OBJ_OP:
-							case ZEND_ASSIGN_OBJ_REF:
-							case ZEND_PRE_INC_OBJ:
-							case ZEND_PRE_DEC_OBJ:
-							case ZEND_POST_INC_OBJ:
-							case ZEND_POST_DEC_OBJ:
-								tmp |= MAY_BE_ARRAY_OF_OBJECT;
+								tmp |= key_type | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_ARRAY;
 								break;
 							case ZEND_SEND_VAR_EX:
 							case ZEND_SEND_FUNC_ARG:
@@ -3446,7 +3435,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							case ZEND_VERIFY_RETURN_TYPE:
 							case ZEND_MAKE_REF:
 							case ZEND_FE_RESET_RW:
-								tmp |= MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+								tmp |= key_type | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 								break;
 							case ZEND_PRE_INC:
 							case ZEND_PRE_DEC:
@@ -3454,10 +3443,23 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							case ZEND_POST_DEC:
 								if (tmp & MAY_BE_ARRAY_OF_LONG) {
 									/* may overflow */
-									tmp |= MAY_BE_ARRAY_OF_DOUBLE;
+									tmp |= key_type | MAY_BE_ARRAY_OF_DOUBLE;
 								} else if (!(tmp & (MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE))) {
-									tmp |= MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE;
+									tmp |= key_type | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE;
 								}
+								break;
+							case ZEND_FETCH_OBJ_W:
+							case ZEND_FETCH_OBJ_RW:
+							case ZEND_FETCH_OBJ_FUNC_ARG:
+							case ZEND_ASSIGN_OBJ:
+							case ZEND_ASSIGN_OBJ_OP:
+							case ZEND_ASSIGN_OBJ_REF:
+							case ZEND_PRE_INC_OBJ:
+							case ZEND_PRE_DEC_OBJ:
+							case ZEND_POST_INC_OBJ:
+							case ZEND_POST_DEC_OBJ:
+								/* These will result in an error exception, unless the element
+								 * is already an object. */
 								break;
 							case ZEND_SEND_VAR:
 								/* This can occur if a DIM_FETCH_FUNC_ARG with UNUSED op2 is left
@@ -3508,21 +3510,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_OBJ_W:
 		case ZEND_FETCH_OBJ_UNSET:
 		case ZEND_FETCH_OBJ_FUNC_ARG:
-			if (ssa_ops[i].op1_def >= 0) {
-				tmp = t1;
-				if (opline->opcode == ZEND_FETCH_OBJ_W ||
-				    opline->opcode == ZEND_FETCH_OBJ_RW ||
-				    opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG) {
-					if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
-						if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-							tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
-							tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
-						}
-					}
-				}
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
-			}
 			if (ssa_ops[i].result_def >= 0) {
 				tmp = zend_fetch_prop_type(script,
 					zend_fetch_prop_info(op_array, ssa, opline, i), &ce);

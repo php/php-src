@@ -2,13 +2,13 @@
 Bug #36303 (foreach on error_zval produces segfault)
 --FILE--
 <?php
-$x="test";
-foreach($x->a->b as &$v) {
+$x=[PHP_INT_MAX=>"test"];
+foreach ($x[] as &$v) {
 }
 echo "ok\n";
 ?>
 --EXPECTF--
-Warning: Attempt to modify property 'a' of non-object in %sbug36303.php on line 3
+Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %sbug36303.php on line 3
+Warning: Invalid argument supplied for foreach() in %s on line %d
 ok
