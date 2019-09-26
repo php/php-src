@@ -1012,8 +1012,8 @@ static const func_info_t func_infos[] = {
 	F1("json_last_error_msg",                   MAY_BE_STRING),
 
 	/* ext/xml */
-	FN("xml_parser_create",                     MAY_BE_FALSE | MAY_BE_RESOURCE),
-	FN("xml_parser_create_ns",                  MAY_BE_FALSE | MAY_BE_RESOURCE),
+	FN("xml_parser_create",                     MAY_BE_FALSE | MAY_BE_OBJECT),
+	FN("xml_parser_create_ns",                  MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("xml_set_object",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_element_handler",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_character_data_handler",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1375,12 +1375,10 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GD_JPG
 	F1("imagecreatefromjpeg",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("imagejpeg",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("jpeg2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #ifdef HAVE_GD_PNG
 	F1("imagecreatefrompng",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("imagepng",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("png2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #ifdef HAVE_GD_WEBP
 	F1("imagecreatefromwebp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -1448,7 +1446,6 @@ static const func_info_t func_infos[] = {
 	F1("imagefttext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettfbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettftext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F0("image2wbmp",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imagefilter",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imageconvolution",						MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imageflip",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
