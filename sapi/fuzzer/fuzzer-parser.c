@@ -26,7 +26,14 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	char *s = malloc(Size+1);
+	char *s;
+	if (Size > 64 * 1024) {
+		/* Large inputs have a large impact on fuzzer performance,
+		 * but are unlikely to be necessary to reach new codepaths. */
+		return 0;
+	}
+
+	s = malloc(Size+1);
 	memcpy(s, Data, Size);
 	s[Size] = '\0';
 
