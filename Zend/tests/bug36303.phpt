@@ -1,5 +1,7 @@
 --TEST--
 Bug #36303 (foreach on error_zval produces segfault)
+--XFAIL--
+TODO: ERROR zval still possible?
 --FILE--
 <?php
 $x = [];

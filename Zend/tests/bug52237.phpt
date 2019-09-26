@@ -1,5 +1,7 @@
 --TEST--
 Bug #52237 (Crash when passing the reference of the property of a non-object)
+--XFAIL--
+TODO: ERROR zval still possible?
 --FILE--
 <?php
 $data = [];

@@ -50,7 +50,7 @@ $arrays = array (
        array("hello", $heredoc => array("heredoc", 'string'), "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(new classA() => 11, @$unset_var => array("unset"), $fp => 'resource', 11, "hello")
+/*8*/ array(@$unset_var => array("unset"), $fp => 'resource', 11, "hello")
 );
 
 // initialise the second array
@@ -79,8 +79,6 @@ echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_merge_recursive() : assoc. array with diff. keys to $arr1 argument ***
-
-Warning: Illegal offset type in %s on line %d
 
 Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --

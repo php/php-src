@@ -58,7 +58,11 @@ function foo4() {
 	$array[0][1] = 1;
 	var_dump($array);
 
-	$array[function() {}] = 2;
+    try {
+        $array[function() {}] = 2;
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 	var_dump($array);
 
 	$array2[][] = 3;
@@ -106,8 +110,7 @@ array(1) {
     int(1)
   }
 }
-
-Warning: Illegal offset type in %sassign_dim_002.php on line 51
+Illegal offset type
 array(1) {
   [0]=>
   array(2) {
@@ -127,5 +130,5 @@ array(1) {
   }
 }
 
-Warning: Cannot use a scalar value as an array in %sassign_dim_002.php on line 61
+Warning: Cannot use a scalar value as an array in %sassign_dim_002.php on line 65
 int(1)

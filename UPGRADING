@@ -95,6 +95,10 @@ PHP 8.0 UPGRADE NOTES
     is already used will now result in an Error exception. Previously this was
     a warning.
     RFC: Part of https://wiki.php.net/rfc/engine_warnings
+  . Attempting to use an invalid type (array or object) as an array key or
+    string offset will now result in a TypeError exception. Previously this was
+    a warning.
+    RFC: Part of https://wiki.php.net/rfc/engine_warnings
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

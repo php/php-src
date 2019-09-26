@@ -1220,7 +1220,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(v
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
 {
-	zend_error(E_WARNING, "Illegal offset type");
+	zend_type_error("Illegal offset type");
 }
 
 static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
@@ -2361,7 +2361,7 @@ str_idx:
 		ZVAL_UNDEFINED_OP2();
 		goto str_idx;
 	} else {
-		zend_error(E_WARNING, "Illegal offset type in isset or empty");
+		zend_type_error("Illegal offset type in isset or empty");
 		return NULL;
 	}
 }
