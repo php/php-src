@@ -1975,20 +1975,20 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 	|	SET_Z_TYPE_INFO FP + r0, IS_NULL
 	|1:
 	|.if X64WIN
-		|	mov CARG1, E_WARNING
+		|	xor CARG1, CARG1
 		|	LOAD_ADDR CARG2, "Cannot add element to the array as the next element is already occupied"
-		|	EXT_CALL zend_error, r0
+		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 0x28
 	|.elif X64
-		|	mov CARG1, E_WARNING
+		|	xor CARG1, CARG1
 		|	LOAD_ADDR CARG2, "Cannot add element to the array as the next element is already occupied"
-		|	EXT_CALL zend_error, r0
+		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 8
 	|.else
 		|	sub r4, 8
 		|	push "Cannot add element to the array as the next element is already occupied"
-		|	push E_WARNING
-		|	EXT_CALL zend_error, r0
+		|	push 0
+		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 28
 	|.endif
 	|	ret
@@ -4644,7 +4644,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	jz >1
 			|.cold_code
 			|1:
-			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			|	// zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			|	CANNOT_ADD_ELEMENT opline
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9
@@ -4880,7 +4880,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			|	jz >1
 			|.cold_code
 			|1:
-			|	// zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			|	// zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			|	CANNOT_ADD_ELEMENT opline
 			|	//ZEND_VM_C_GOTO(assign_dim_op_ret_null);
 			|	jmp >9

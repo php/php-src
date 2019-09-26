@@ -29,7 +29,11 @@ foo2();
 
 function foo3() {
 	$array = array(PHP_INT_MAX => "dummy");
-	$array[] = array();
+    try {
+        $array[] = array();
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 
 	$array = new ArrayObject();
 	$array[index()] = 1;
@@ -83,9 +87,8 @@ array(1) {
   array(0) {
   }
 }
-
-Warning: Cannot add element to the array as the next element is already occupied in %sassign_dim_002.php on line 22
-object(ArrayObject)#1 (1) {
+Cannot add element to the array as the next element is already occupied
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {
     [2]=>
@@ -104,7 +107,7 @@ array(1) {
   }
 }
 
-Warning: Illegal offset type in %sassign_dim_002.php on line 47
+Warning: Illegal offset type in %sassign_dim_002.php on line 51
 array(1) {
   [0]=>
   array(2) {
@@ -124,5 +127,5 @@ array(1) {
   }
 }
 
-Warning: Cannot use a scalar value as an array in %sassign_dim_002.php on line 57
+Warning: Cannot use a scalar value as an array in %sassign_dim_002.php on line 61
 int(1)

@@ -1892,7 +1892,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_scalar_as_array(v
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
 {
-	zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+	zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim)

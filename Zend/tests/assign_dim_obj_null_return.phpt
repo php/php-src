@@ -7,12 +7,22 @@ function test() {
     $array = [PHP_INT_MAX => 42];
     $true = true;
 
-    var_dump($array[] = 123);
+    try {
+        var_dump($array[] = 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+
     var_dump($array[[]] = 123);
     var_dump($array[new stdClass] = 123);
     var_dump($true[123] = 456);
 
-    var_dump($array[] += 123);
+    try {
+        var_dump($array[] += 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+
     var_dump($array[[]] += 123);
     var_dump($array[new stdClass] += 123);
     var_dump($true[123] += 456);
@@ -33,8 +43,7 @@ test();
 
 ?>
 --EXPECTF--
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-NULL
+Cannot add element to the array as the next element is already occupied
 
 Warning: Illegal offset type in %s on line %d
 NULL
@@ -44,9 +53,7 @@ NULL
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 NULL
-
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-NULL
+Cannot add element to the array as the next element is already occupied
 
 Warning: Illegal offset type in %s on line %d
 NULL

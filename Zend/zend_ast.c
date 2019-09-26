@@ -411,9 +411,9 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
 			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), expr)) {
-				zend_error(E_WARNING,
+				zend_throw_error(NULL,
 					"Cannot add element to the array as the next element is already occupied");
-				zval_ptr_dtor_nogc(expr);
+				return FAILURE;
 			}
 			break;
 		case IS_STRING:
@@ -458,8 +458,9 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 				return FAILURE;
 			} else {
 				if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
-					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-					break;
+					zend_throw_error(NULL,
+						"Cannot add element to the array as the next element is already occupied");
+					return FAILURE;
 				}
 				Z_TRY_ADDREF_P(val);
 			}
