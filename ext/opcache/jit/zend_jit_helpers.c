@@ -260,7 +260,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = 1;
 			goto num_index;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			ZVAL_NULL(result);
 			return;
 	}
@@ -332,7 +332,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			ZVAL_NULL(result);
 			return;
 	}
@@ -401,7 +401,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = 1;
 			goto num_index;
 		default:
-			zend_error(E_WARNING, "Illegal offset type in isset or empty");
+			zend_type_error("Illegal offset type in isset or empty");
 			return 0;
 	}
 
@@ -468,7 +468,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = 1;
 			goto num_index;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			return NULL;
 	}
 
@@ -536,7 +536,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			return NULL;
 	}
 
@@ -590,7 +590,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_type_error("Illegal offset type");
 				break;
 		}
 
@@ -638,7 +638,7 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_type_error("Illegal offset type");
 				break;
 		}
 
@@ -737,7 +737,7 @@ try_again:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_type_error("Illegal offset type");
 				break;
 		}
 

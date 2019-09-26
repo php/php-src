@@ -13,8 +13,17 @@ function test() {
         echo $e->getMessage(), "\n";
     }
 
-    var_dump($array[[]] = 123);
-    var_dump($array[new stdClass] = 123);
+    try {
+        var_dump($array[[]] = 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+
+    try {
+        var_dump($array[new stdClass] = 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($true[123] = 456);
 
     try {
@@ -23,8 +32,17 @@ function test() {
         echo $e->getMessage(), "\n";
     }
 
-    var_dump($array[[]] += 123);
-    var_dump($array[new stdClass] += 123);
+    try {
+        var_dump($array[[]] += 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+
+    try {
+        var_dump($array[new stdClass] += 123);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($true[123] += 456);
 
     try {
@@ -44,22 +62,14 @@ test();
 ?>
 --EXPECTF--
 Cannot add element to the array as the next element is already occupied
-
-Warning: Illegal offset type in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-NULL
+Illegal offset type
+Illegal offset type
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 NULL
 Cannot add element to the array as the next element is already occupied
-
-Warning: Illegal offset type in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-NULL
+Illegal offset type
+Illegal offset type
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 NULL
