@@ -612,70 +612,39 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 		zend_get_unmangled_property_name(prop->name));
 }
 
-static zend_never_inline zend_bool zend_verify_ref_stdClass_assignable(zend_reference *ref);
 static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
 
 /* this should modify object only if it's empty */
-static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_error(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
-	zend_object *obj;
-	zval *ref = NULL;
-	if (Z_ISREF_P(object)) {
-		ref = object;
-		object = Z_REFVAL_P(object);
+	/* TODO: What about the ERROR case? */
+	if (EXPECTED(!Z_ISERROR_P(object))) {
+		zend_string *tmp_property_name;
+		zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+
+		if (opline->opcode == ZEND_PRE_INC_OBJ
+		 || opline->opcode == ZEND_PRE_DEC_OBJ
+		 || opline->opcode == ZEND_POST_INC_OBJ
+		 || opline->opcode == ZEND_POST_DEC_OBJ) {
+			zend_throw_error(NULL,
+				"Attempt to increment/decrement property '%s' of non-object",
+				ZSTR_VAL(property_name));
+		} else if (opline->opcode == ZEND_FETCH_OBJ_W
+				|| opline->opcode == ZEND_FETCH_OBJ_RW
+				|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+				|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
+			zend_throw_error(NULL,
+				"Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+		} else {
+			zend_throw_error(NULL,
+				"Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
+		}
+		zend_tmp_string_release(tmp_property_name);
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) > IS_FALSE &&
-			(Z_TYPE_P(object) != IS_STRING || Z_STRLEN_P(object) != 0))) {
-		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
-			zend_string *tmp_property_name;
-			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-
-			if (opline->opcode == ZEND_PRE_INC_OBJ
-			 || opline->opcode == ZEND_PRE_DEC_OBJ
-			 || opline->opcode == ZEND_POST_INC_OBJ
-			 || opline->opcode == ZEND_POST_DEC_OBJ) {
-				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
-			} else if (opline->opcode == ZEND_FETCH_OBJ_W
-					|| opline->opcode == ZEND_FETCH_OBJ_RW
-					|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
-					|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
-				zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-			} else {
-				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-			}
-			zend_tmp_string_release(tmp_property_name);
-		}
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-		return NULL;
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
-
-	if (ref && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(ref))) {
-		if (UNEXPECTED(!zend_verify_ref_stdClass_assignable(Z_REF_P(ref)))) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-			}
-			return NULL;
-		}
-	}
-
-	zval_ptr_dtor_nogc(object);
-	object_init(object);
-	obj = Z_OBJ_P(object);
-	GC_ADDREF(obj);
-	zend_error(E_WARNING, "Creating default object from empty value");
-	if (GC_REFCOUNT(obj) == 1) {
-		/* the enclosing container was deleted, obj is unreferenced */
-		OBJ_RELEASE(obj);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-		return NULL;
-	}
-	GC_DELREF(obj);
-	return object;
 }
 
 static ZEND_COLD void zend_verify_type_error_common(
@@ -2535,32 +2504,11 @@ static zend_always_inline zend_bool promotes_to_array(zval *val) {
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE);
 }
 
-static zend_always_inline zend_bool promotes_to_object(zval *val) {
-	ZVAL_DEREF(val);
-	return Z_TYPE_P(val) <= IS_FALSE
-		|| (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) == 0);
-}
-
 static zend_always_inline zend_bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
 	return ZEND_TYPE_IS_MASK(type) && (ZEND_TYPE_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY));
-}
-
-static zend_always_inline zend_bool check_type_stdClass_assignable(zend_type type) {
-	if (!ZEND_TYPE_IS_SET(type)) {
-		return 1;
-	}
-	if (ZEND_TYPE_IS_CLASS(type)) {
-		if (ZEND_TYPE_IS_CE(type)) {
-			return ZEND_TYPE_CE(type) == zend_standard_class_def;
-		} else {
-			return zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "stdclass");
-		}
-	} else {
-		return (ZEND_TYPE_MASK(type) & MAY_BE_OBJECT) != 0;
-	}
 }
 
 /* Checks whether an array can be assigned to the reference. Returns conflicting property if
@@ -2571,20 +2519,6 @@ static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_referen
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		if (!check_type_array_assignable(prop->type)) {
 			zend_throw_auto_init_in_ref_error(prop, "array");
-			return 0;
-		}
-	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-	return 1;
-}
-
-/* Checks whether an stdClass can be assigned to the reference. Returns conflicting property if
- * assignment is not possible, NULL otherwise. */
-static zend_never_inline zend_bool zend_verify_ref_stdClass_assignable(zend_reference *ref) {
-	zend_property_info *prop;
-	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
-	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (!check_type_stdClass_assignable(prop->type)) {
-			zend_throw_auto_init_in_ref_error(prop, "stdClass");
 			return 0;
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
@@ -2625,21 +2559,6 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 					return 0;
 				}
 			}
-			break;
-		case ZEND_FETCH_OBJ_WRITE:
-			if (promotes_to_object(ptr)) {
-				if (!prop_info) {
-					prop_info = zend_object_fetch_property_type_info(obj, ptr);
-					if (!prop_info) {
-						break;
-					}
-				}
-				if (!check_type_stdClass_assignable(prop_info->type)) {
-					zend_throw_auto_init_in_prop_error(prop_info, "stdClass");
-					if (result) ZVAL_ERROR(result);
-					return 0;
-				}
-	        }
 			break;
 		case ZEND_FETCH_REF:
 			if (Z_TYPE_P(ptr) != IS_REFERENCE) {
@@ -2691,11 +2610,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 
-			container = make_real_object(container, prop_ptr OPLINE_CC EXECUTE_DATA_CC);
-			if (UNEXPECTED(!container)) {
-				ZVAL_ERROR(result);
-				return;
-			}
+			zend_throw_non_object_error(container, prop_ptr OPLINE_CC EXECUTE_DATA_CC);
+			ZVAL_ERROR(result);
+			return;
 		} while (0);
 	}
 

@@ -2,10 +2,10 @@
 Bug #52237 (Crash when passing the reference of the property of a non-object)
 --FILE--
 <?php
-$data = 'test';
-preg_match('//', '', $data->info);
-var_dump($data);
+$data = [PHP_INT_MAX => 'test'];
+preg_match('//', '', $data[]);
+var_dump(count($data));
 ?>
 --EXPECTF--
-Warning: Attempt to modify property 'info' of non-object in %sbug52237.php on line 3
-string(4) "test"
+Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
+int(1)
