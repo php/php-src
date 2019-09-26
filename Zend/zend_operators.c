@@ -1224,12 +1224,18 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 
 				if (EXPECTED(op1 != op2)) {
 					if (Z_TYPE_P(op1) == IS_ARRAY) {
+						if (op1 == result) {
+							zval_ptr_dtor(result);
+						}
 						ZVAL_LONG(result, 0);
 						return SUCCESS;
 					} else {
 						op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
 					}
 					if (Z_TYPE_P(op2) == IS_ARRAY) {
+						if (op1 == result) {
+							zval_ptr_dtor(result);
+						}
 						ZVAL_LONG(result, 1L);
 						return SUCCESS;
 					} else {
@@ -1237,6 +1243,9 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 					}
 				} else {
 					if (Z_TYPE_P(op1) == IS_ARRAY) {
+						if (op1 == result) {
+							zval_ptr_dtor(result);
+						}
 						ZVAL_LONG(result, 0);
 						return SUCCESS;
 					} else {
