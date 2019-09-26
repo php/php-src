@@ -23,6 +23,8 @@ $xp->registerNodeNamespaces = true;
 var_dump($xp->registerNodeNamespaces);
 
 echo($xp->query('//prefix:root')->length . "\n");
+
+var_dump($xp);
 ?>
 --EXPECT--
 1
@@ -30,3 +32,9 @@ echo($xp->query('//prefix:root')->length . "\n");
 bool(false)
 bool(true)
 1
+object(DOMXPath)#4 (2) {
+  ["document"]=>
+  string(22) "(object value omitted)"
+  ["registerNodeNamespaces"]=>
+  bool(true)
+}
