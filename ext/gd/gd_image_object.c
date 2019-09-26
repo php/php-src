@@ -30,12 +30,14 @@ static const zend_function_entry gd_image_object_methods[] = {
 	PHP_FE_END
 };
 
-static zend_function *php_gd_image_object_get_constructor(zend_object *object) {
+static zend_function *php_gd_image_object_get_constructor(zend_object *object)
+{
 	zend_throw_error(NULL, "You cannot initialize a GdImage object except through helper functions");
 	return NULL;
 }
 
-zend_object *php_gd_image_object_create(zend_class_entry *class_type) {
+zend_object *php_gd_image_object_create(zend_class_entry *class_type)
+{
 	size_t block_len = sizeof(php_gd_image_object) + zend_object_properties_size(class_type);
 	php_gd_image_object *intern = emalloc(block_len);
 	memset(intern, 0, block_len);
@@ -47,7 +49,8 @@ zend_object *php_gd_image_object_create(zend_class_entry *class_type) {
 	return &intern->std;
 };
 
-static void php_gd_image_object_free(zend_object *intern) {
+static void php_gd_image_object_free(zend_object *intern)
+{
 	php_gd_image_object *img_obj_ptr = php_gd_exgdimage_from_zobj_p(intern);
 	gdImageDestroy(img_obj_ptr->image);
 	img_obj_ptr->image = NULL;
@@ -55,12 +58,14 @@ static void php_gd_image_object_free(zend_object *intern) {
 	zend_object_std_dtor(intern);
 };
 
-void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image) {
+void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
+{
 	object_init_ex(val, gd_image_ce);
 	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
 }
 
-void php_gd_object_minit_helper() {
+void php_gd_object_minit_helper()
+{
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "GdImage", gd_image_object_methods);
 	gd_image_ce = zend_register_internal_class(&ce);

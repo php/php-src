@@ -966,18 +966,18 @@ PHP_FUNCTION(imagesetstyle)
 	gdImagePtr im;
 	int *stylearr;
 	int index = 0;
-  	uint32_t num_styles;
+	uint32_t num_styles;
 
- 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa", &IM, gd_image_ce, &styles) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa", &IM, gd_image_ce, &styles) == FAILURE)  {
 		return;
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
-	if (num_styles == 0) {
+	if (num_styles == 0){
 		zend_value_error("Styles array must not be empty");
- 		return;
+		return;
 	}
 
 	/* copy the style values in the stylearr */

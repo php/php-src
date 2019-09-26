@@ -7,7 +7,7 @@ function imageloadfont(string $filename) {}
 
 function imagesetstyle($im, array $styles): bool {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatetruecolor(int $x_size, int $y_size) {}
 
 function imageistruecolor(GdImage $im): bool {}
@@ -46,74 +46,74 @@ function imagecopyresampled(GdImage $dst_im, GdImage $src_im, int $dst_x, int $d
 
 #ifdef PHP_WIN32
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagegrabwindow(int $handle, int $client_area = 0) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagegrabscreen() {}
 
 #endif
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagerotate(GdImage $im, float $angle, int $bgdcolor, int $ignoretransparent = 0) {}
 
 function imagesettile(GdImage $im, $tile): bool {}
 
 function imagesetbrush(GdImage $im, $brush): bool {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreate(int $x_size, int $y_size) {}
 
 function imagetypes(): int {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromstring(string $image) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromgif(string $filename) {}
 
 #ifdef HAVE_GD_JPG
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromjpeg(string $filename) {}
 #endif
 
 #ifdef HAVE_GD_PNG
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefrompng(string $filename) {}
 #endif
 
 #ifdef HAVE_GD_WEBP
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromwebp(string $filename) {}
 #endif
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromxbm(string $filename) {}
 
 #ifdef HAVE_GD_XPM
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromxpm(string $filename) {}
 #endif
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromwbmp(string $filename) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromgd(string $filename) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromgd2(string $filename) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromgd2part(string $filename, int $srcX, int $srcY, int $width, int $height) {}
 
 #ifdef HAVE_GD_BMP
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefrombmp(string $filename) {}
 #endif
     
 #ifdef HAVE_GD_TGA
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecreatefromtga(string $filename) {}
 #endif
 
@@ -215,7 +215,7 @@ function imagecharup(GdImage $im, int $font, int $x, int $y, string $c, int $col
 
 function imagestring(GdImage $im, int $font, int $x, int $y, string $str, int $col): bool {}
 
-function imagestringup($im, int $font, int $x, int $y, string $str, int $col): bool {}
+function imagestringup(GdImage $im, int $font, int $x, int $y, string $str, int $col): bool {}
 
 function imagecopy(GdImage $dst_im, GdImage $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h): bool {}
 
@@ -252,16 +252,16 @@ function imageflip(GdImage $im, int $mode): bool {}
 
 function imageantialias(GdImage $im, bool $on): bool {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecrop(GdImage $im, array $rect) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagecropauto(GdImage $im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imagescale(GdImage $im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED) {}
 
-/** @return resource|false */
+/** @return GdImage|false */
 function imageaffine(GdImage $im, array $affine, array $clip = UNKNOWN) {}
 
 /** @return array|false */

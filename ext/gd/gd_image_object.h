@@ -29,11 +29,13 @@ typedef struct _gd_ext_image_object {
 
 void php_gd_object_minit_helper();
 
-static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj) {
+static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj)
+{
 	return (php_gd_image_object *) ((char *) (obj) - XtOffsetOf(php_gd_image_object, std));
 }
 
-static zend_always_inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp) {
+static zend_always_inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
+{
 	return php_gd_exgdimage_from_zobj_p(Z_OBJ_P(zp))->image;
 }
 

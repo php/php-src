@@ -402,14 +402,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestring, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagestringup, 0, 6, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_TYPE_INFO(0, font, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_imagestringup arginfo_imagestring
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopy, 0, 8, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_im, GdImage, 0)
