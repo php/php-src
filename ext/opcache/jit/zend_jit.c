@@ -2728,6 +2728,9 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	zend_cfg cfg;
 	uint32_t i;
 
+	ZEND_ASSERT(zend_jit_func_counter_handler != NULL);
+	ZEND_ASSERT(zend_jit_loop_counter_handler != NULL);
+
 	if (zend_jit_build_cfg(op_array, &cfg) != SUCCESS) {
 		return FAILURE;
 	}
@@ -2784,6 +2787,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		zend_op *opline = op_array->opcodes;
 
 		/* Set run-time JIT handler */
+		ZEND_ASSERT(zend_jit_runtime_jit_handler != NULL);
 		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 			opline++;
 		}
@@ -2794,6 +2798,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
 		zend_op *opline = op_array->opcodes;
 
+		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
 		if (op_array->function_name) {
 			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
 				opline++;
@@ -2995,40 +3000,42 @@ static int zend_jit_make_stubs(void)
 	}
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		dasm_setup(&dasm_state, dasm_actions);
-		if (!zend_jit_hybrid_runtime_jit_stub(&dasm_state)) {
-			return 0;
-		}
-		zend_jit_runtime_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_runtime_jit");
-		if (!zend_jit_runtime_jit_handler) {
-			return 0;
-		}
+		if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_runtime_jit_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_runtime_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_runtime_jit");
+			if (!zend_jit_runtime_jit_handler) {
+				return 0;
+			}
+		} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_profile_jit_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_profile_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_profile_jit");
+			if (!zend_jit_profile_jit_handler) {
+				return 0;
+			}
+		} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS) {
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_func_counter_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_func_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter");
+			if (!zend_jit_func_counter_handler) {
+				return 0;
+			}
 
-		dasm_setup(&dasm_state, dasm_actions);
-		if (!zend_jit_hybrid_profile_jit_stub(&dasm_state)) {
-			return 0;
-		}
-		zend_jit_profile_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_profile_jit");
-		if (!zend_jit_profile_jit_handler) {
-			return 0;
-		}
-
-		dasm_setup(&dasm_state, dasm_actions);
-		if (!zend_jit_hybrid_func_counter_stub(&dasm_state)) {
-			return 0;
-		}
-		zend_jit_func_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter");
-		if (!zend_jit_func_counter_handler) {
-			return 0;
-		}
-
-		dasm_setup(&dasm_state, dasm_actions);
-		if (!zend_jit_hybrid_loop_counter_stub(&dasm_state)) {
-			return 0;
-		}
-		zend_jit_loop_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter");
-		if (!zend_jit_loop_counter_handler) {
-			return 0;
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_loop_counter_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_loop_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter");
+			if (!zend_jit_loop_counter_handler) {
+				return 0;
+			}
 		}
 	} else {
 		zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
