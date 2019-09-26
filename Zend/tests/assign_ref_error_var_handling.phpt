@@ -9,17 +9,22 @@ function val() {
 
 $var = 24;
 $arr = [PHP_INT_MAX => "foo"];
-var_dump($arr[] =& $var);
+try {
+    var_dump($arr[] =& $var);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(count($arr));
-var_dump($arr[] =& val());
+try {
+    var_dump($arr[] =& val());
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(count($arr));
 
 ?>
---EXPECTF--
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-NULL
+--EXPECT--
+Cannot add element to the array as the next element is already occupied
 int(1)
-
-Warning: Cannot add element to the array as the next element is already occupied in %s on line %d
-NULL
+Cannot add element to the array as the next element is already occupied
 int(1)

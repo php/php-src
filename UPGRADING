@@ -91,6 +91,10 @@ PHP 8.0 UPGRADE NOTES
     the value into an object (if it was null, false or an empty string) or
     ignored the write altogether (in all other cases).
     RFC: Part of https://wiki.php.net/rfc/engine_warnings
+  . Attempting to append an element to an array for which the PHP_INT_MAX key
+    is already used will now result in an Error exception. Previously this was
+    a warning.
+    RFC: Part of https://wiki.php.net/rfc/engine_warnings
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
