@@ -1158,7 +1158,7 @@ tail_call:
 		} else {
 			zend_ast_export_indent(str, indent);
 			smart_str_appends(str, "} else ");
-			if (ast->child[1]->kind == ZEND_AST_IF) {
+			if (ast->child[1] && ast->child[1]->kind == ZEND_AST_IF) {
 				list = (zend_ast_list*)ast->child[1];
 				goto tail_call;
 			} else {
