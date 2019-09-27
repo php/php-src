@@ -1450,6 +1450,7 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 	zval offset_copy;
 
 	if (!offset) {
+		zend_throw_error(NULL, "Cannot access node list without offset");
 		return NULL;
 	}
 

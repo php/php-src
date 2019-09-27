@@ -2147,7 +2147,7 @@ fetch_from_array:
 				ZVAL_INDIRECT(result, retval);
 			}
 		} else {
-			ZEND_ASSERT(EG(exception));
+			ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
 			ZVAL_UNDEF(result);
 		}
 	} else {
