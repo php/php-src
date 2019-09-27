@@ -20,7 +20,9 @@ AC_DEFUN([PHP_FUZZER_TARGET], [
 
 if test "$PHP_FUZZER" != "no"; then
   AC_MSG_RESULT([yes])
-  PHP_REQUIRE_CXX()
+  dnl Don't use PHP_REQUIRE_CXX() to avoid unnecessarily pulling in -lstdc++
+  AC_PROG_CXX
+  AC_PROG_CXXCPP
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/fuzzer/Makefile.frag)
   SAPI_FUZZER_PATH=sapi/fuzzer
   PHP_SUBST(SAPI_FUZZER_PATH)
@@ -41,7 +43,7 @@ if test "$PHP_FUZZER" != "no"; then
       AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
     ])
   else
-    FUZZING_LIB="-lFuzzingEngine"
+    FUZZING_LIB="$LIB_FUZZING_ENGINE"
     FUZZING_CC="$CXX -stdlib=libc++"
   fi
   PHP_SUBST(FUZZING_LIB)
