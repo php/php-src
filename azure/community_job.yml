@@ -17,6 +17,8 @@ jobs:
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
       vmImage: 'ubuntu-latest'
+    variables:
+      ubsan_options: 'print_stacktrace=1'
     steps:
     - template: apt.yml
     - script: |
