@@ -70,7 +70,7 @@ echo "Done";
 
 Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(1) {
   [0]=>
@@ -125,10 +125,12 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 8 --
-array(2) {
+array(3) {
   [""]=>
   string(5) "hello"
-  [0]=>
+  [5]=>
+  string(8) "resource"
+  [6]=>
   int(11)
 }
 Done

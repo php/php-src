@@ -79,13 +79,13 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : associative array with diff. keys for 'arr1' argument ***
 
-Warning: Illegal offset type in %s on line %d%d
+Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d%d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Warning: Illegal offset type in %s on line %d%d
+Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d%d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(0) {
 }
@@ -157,16 +157,20 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 10 --
-array(1) {
+array(2) {
   [""]=>
   string(5) "hello"
+  [5]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-array(6) {
+array(7) {
   ["hello"]=>
   int(1)
   ["fruit"]=>
   float(2.2)
+  [5]=>
+  string(8) "resource"
   [133]=>
   string(3) "int"
   [444]=>

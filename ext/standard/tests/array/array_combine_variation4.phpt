@@ -92,11 +92,11 @@ echo "Done";
 
 Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Illegal offset type in %s on line %d
 -- Iteration 1 --
@@ -169,16 +169,20 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 10 --
-array(1) {
+array(2) {
   ["hello"]=>
   string(5) "hello"
+  ["resource"]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-array(6) {
+array(7) {
   [1]=>
   int(1)
   ["2.2"]=>
   float(2.2)
+  ["resource"]=>
+  string(8) "resource"
   ["int"]=>
   string(3) "int"
   ["float"]=>

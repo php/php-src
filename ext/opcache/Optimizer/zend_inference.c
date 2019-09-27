@@ -3243,7 +3243,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					if (opline->op2_type == IS_UNUSED) {
 						tmp |= MAY_BE_ARRAY_KEY_LONG;
 					} else {
-						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE)) {
+						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
 							tmp |= MAY_BE_ARRAY_KEY_LONG;
 						}
 						if (t2 & (MAY_BE_STRING)) {
