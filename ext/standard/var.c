@@ -1315,3 +1315,13 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
 }
 /* }}} */
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("unserialize.max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)
+PHP_INI_END()
+
+PHP_MINIT_FUNCTION(var)
+{
+	REGISTER_INI_ENTRIES();
+	return SUCCESS;
+}

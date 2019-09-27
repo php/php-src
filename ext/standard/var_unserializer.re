@@ -31,8 +31,6 @@
 #define VAR_WAKEUP_FLAG 1
 #define VAR_UNSERIALIZE_FLAG 2
 
-#define DEFAULT_MAX_DEPTH 4096
-
 typedef struct {
 	zend_long used_slots;
 	void *next;
@@ -66,7 +64,7 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->allowed_classes = NULL;
 		d->ref_props = NULL;
 		d->cur_depth = 0;
-		d->max_depth = DEFAULT_MAX_DEPTH;
+		d->max_depth = BG(unserialize_max_depth);
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
 		if (!BG(serialize_lock)) {
@@ -455,7 +453,8 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 		if ((*var_hash)->max_depth > 0 && ++(*var_hash)->cur_depth > (*var_hash)->max_depth) {
 			php_error_docref(NULL, E_WARNING,
 				"Maximum depth of " ZEND_LONG_FMT " exceeded. "
-				"The depth limit can be changed using the max_depth option",
+				"The depth limit can be changed using the max_depth unserialize() option "
+				"or the unserialize.max_depth ini setting",
 				(*var_hash)->max_depth);
 			return 0;
 		}
