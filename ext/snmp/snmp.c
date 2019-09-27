@@ -1357,7 +1357,7 @@ static int netsnmp_session_set_security(struct snmp_session *session, char *sec_
 */
 static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
-	zval *oid, *value, *type;
+	zval *oid, *value = NULL, *type = NULL;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
 	size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
