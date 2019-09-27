@@ -86,18 +86,16 @@ PHP 8.0 UPGRADE NOTES
         function test(?int $arg = CONST_RESOLVING_TO_NULL) {}
         // Or
         function test(int $arg = null) {}
-  . Attempting to write to a property of a non-object will now result in an
-    Error exception. Previously this resulted in a warning and either converted
-    the value into an object (if it was null, false or an empty string) or
-    ignored the write altogether (in all other cases).
-    RFC: Part of https://wiki.php.net/rfc/engine_warnings
-  . Attempting to append an element to an array for which the PHP_INT_MAX key
-    is already used will now result in an Error exception. Previously this was
-    a warning.
-    RFC: Part of https://wiki.php.net/rfc/engine_warnings
-  . Attempting to use an invalid type (array or object) as an array key or
-    string offset will now result in a TypeError exception. Previously this was
-    a warning.
+  . A number of warnings have been converted into Error exceptions:
+
+    * Attempting to write to a property of a non-object. Previously this
+      implicitly created an stdClass object for null, false and empty strings.
+    * Attempting to append an element to an array for which the PHP_INT_MAX key
+      is already used.
+    * Attempting to use an invalid type (array or object) as an array key or
+      string offset.
+    * Attempting to write to an index of a scalar value.
+
     RFC: Part of https://wiki.php.net/rfc/engine_warnings
 
 - COM:
