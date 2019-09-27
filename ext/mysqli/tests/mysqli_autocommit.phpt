@@ -13,7 +13,7 @@ mysqli_autocommit()
 	}
 
 	if (!have_innodb($link))
-		die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+		die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
