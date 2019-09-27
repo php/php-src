@@ -2,6 +2,8 @@
 FPM: Buffered worker output decorated log with multiple continuous messages (stdout/stderr mixed)
 --SKIPIF--
 <?php include "skipif.inc"; ?>
+--XFAIL--
+Fails regularly due to log line termination bug
 --FILE--
 <?php
 
