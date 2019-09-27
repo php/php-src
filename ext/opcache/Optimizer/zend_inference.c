@@ -2065,16 +2065,10 @@ uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 	}
 	if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		tmp |= MAY_BE_NULL;
-		if (t1 & MAY_BE_ERROR) {
-			if (write) {
-				tmp |= MAY_BE_ERROR;
-			}
-		}
 	}
 	if (t1 & (MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
-		tmp |= MAY_BE_NULL;
-		if (write) {
-			tmp |= MAY_BE_ERROR;
+		if (!write) {
+			tmp |= MAY_BE_NULL;
 		}
 	}
 	return tmp;
@@ -2425,8 +2419,8 @@ static int zend_update_type_info(const zend_op_array *op_array,
 	/* If one of the operands cannot have any type, this means the operand derives from
 	 * unreachable code. Propagate the empty result early, so that that the following
 	 * code may assume that operands have at least one type. */
-	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS|MAY_BE_ERROR))
-		|| !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS|MAY_BE_ERROR))) {
+	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
+		|| !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))) {
 		tmp = 0;
 		if (ssa_ops[i].result_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
@@ -2717,9 +2711,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_LONG;
 				}
 			} else {
-				if (t1 & MAY_BE_ERROR) {
-					tmp |= MAY_BE_NULL;
-				}
 				if (t1 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
 					if (opline->opcode == ZEND_PRE_INC) {
 						tmp |= MAY_BE_LONG;
@@ -2752,7 +2743,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
 					tmp |= MAY_BE_RC1|MAY_BE_RCN;
 				}
-				tmp |= t1 & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_REF|MAY_BE_RCN);
+				tmp |= t1 & ~(MAY_BE_UNDEF|MAY_BE_REF|MAY_BE_RCN);
 				if (t1 & MAY_BE_UNDEF) {
 					tmp |= MAY_BE_NULL;
 				}
@@ -2779,9 +2770,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					tmp |= MAY_BE_LONG;
 				}
 			} else {
-				if (t1 & MAY_BE_ERROR) {
-					tmp |= MAY_BE_NULL;
-				}
 				if (t1 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
 					if (opline->opcode == ZEND_POST_INC) {
 						tmp |= MAY_BE_LONG;
@@ -2959,7 +2947,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			if (opline->op2_type == IS_VAR && opline->extended_value == ZEND_RETURNS_FUNCTION) {
 				tmp = (MAY_BE_REF | MAY_BE_RCN | MAY_BE_RC1 | t2) & ~MAY_BE_UNDEF;
 			} else {
-				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_RC1|MAY_BE_RCN);
+				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_RC1|MAY_BE_RCN);
 			}
 			if (t2 & MAY_BE_UNDEF) {
 				tmp |= MAY_BE_NULL;
@@ -2987,7 +2975,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			if ((opline+1)->op1_type == IS_VAR && (opline->extended_value & ZEND_RETURNS_FUNCTION)) {
 				tmp = (MAY_BE_REF | MAY_BE_RCN | MAY_BE_RC1 | t2) & ~MAY_BE_UNDEF;
 			} else {
-				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_RC1|MAY_BE_RCN);
+				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_RC1|MAY_BE_RCN);
 			}
 			if (t2 & MAY_BE_UNDEF) {
 				tmp |= MAY_BE_NULL;
@@ -3484,18 +3472,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
 				opline->result_type == IS_VAR,
 				opline->op2_type == IS_UNUSED);
-			if (opline->opcode == ZEND_FETCH_DIM_W ||
-			    opline->opcode == ZEND_FETCH_DIM_RW ||
-			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
-			    opline->opcode == ZEND_FETCH_LIST_W) {
-				if (t1 & (MAY_BE_ERROR|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE|MAY_BE_OBJECT)) {
-					tmp |= MAY_BE_ERROR;
-				} else if (opline->op2_type == IS_UNUSED) {
-					tmp |= MAY_BE_ERROR;
-				} else if (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-					tmp |= MAY_BE_ERROR;
-				}
-			} else if (opline->opcode == ZEND_FETCH_DIM_IS && (t1 & MAY_BE_STRING)) {
+			if (opline->opcode == ZEND_FETCH_DIM_IS && (t1 & MAY_BE_STRING)) {
 				tmp |= MAY_BE_NULL;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
@@ -3514,7 +3491,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				tmp = zend_fetch_prop_type(script,
 					zend_fetch_prop_info(op_array, ssa, opline, i), &ce);
 				if (opline->result_type != IS_TMP_VAR) {
-					tmp |= MAY_BE_REF | MAY_BE_ERROR;
+					tmp |= MAY_BE_REF;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 				if (ce) {
@@ -3531,7 +3508,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			tmp = zend_fetch_prop_type(script,
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
 			if (opline->result_type != IS_TMP_VAR) {
-				tmp |= MAY_BE_REF | MAY_BE_ERROR;
+				tmp |= MAY_BE_REF;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			if (ce) {

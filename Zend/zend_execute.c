@@ -617,30 +617,27 @@ static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_referen
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_error(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
-	/* TODO: What about the ERROR case? */
-	if (EXPECTED(!Z_ISERROR_P(object))) {
-		zend_string *tmp_property_name;
-		zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 
-		if (opline->opcode == ZEND_PRE_INC_OBJ
-		 || opline->opcode == ZEND_PRE_DEC_OBJ
-		 || opline->opcode == ZEND_POST_INC_OBJ
-		 || opline->opcode == ZEND_POST_DEC_OBJ) {
-			zend_throw_error(NULL,
-				"Attempt to increment/decrement property '%s' of non-object",
-				ZSTR_VAL(property_name));
-		} else if (opline->opcode == ZEND_FETCH_OBJ_W
-				|| opline->opcode == ZEND_FETCH_OBJ_RW
-				|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
-				|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
-			zend_throw_error(NULL,
-				"Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-		} else {
-			zend_throw_error(NULL,
-				"Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-		}
-		zend_tmp_string_release(tmp_property_name);
+	if (opline->opcode == ZEND_PRE_INC_OBJ
+	 || opline->opcode == ZEND_PRE_DEC_OBJ
+	 || opline->opcode == ZEND_POST_INC_OBJ
+	 || opline->opcode == ZEND_POST_DEC_OBJ) {
+		zend_throw_error(NULL,
+			"Attempt to increment/decrement property '%s' of non-object",
+			ZSTR_VAL(property_name));
+	} else if (opline->opcode == ZEND_FETCH_OBJ_W
+			|| opline->opcode == ZEND_FETCH_OBJ_RW
+			|| opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+			|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
+		zend_throw_error(NULL,
+			"Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+	} else {
+		zend_throw_error(NULL,
+			"Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 	}
+	zend_tmp_string_release(tmp_property_name);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1914,7 +1911,7 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 			zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 			zend_wrong_string_offset(EXECUTE_DATA_C);
 		}
-	} else if (EXPECTED(!Z_ISERROR_P(container))) {
+	} else {
 		zend_use_scalar_as_array();
 	}
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -2079,13 +2076,13 @@ fetch_from_array:
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(retval == NULL)) {
 				zend_cannot_add_element();
-				ZVAL_ERROR(result);
+				ZVAL_UNDEF(result);
 				return;
 			}
 		} else {
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type EXECUTE_DATA_CC);
 			if (UNEXPECTED(!retval)) {
-				ZVAL_ERROR(result);
+				ZVAL_UNDEF(result);
 				return;
 			}
 		}
@@ -2100,7 +2097,7 @@ fetch_from_array:
 			if (type != BP_VAR_UNSET) {
 				if (ZEND_REF_HAS_TYPE_SOURCES(ref)) {
 					if (UNEXPECTED(!zend_verify_ref_array_assignable(ref))) {
-						ZVAL_ERROR(result);
+						ZVAL_UNDEF(result);
 						return;
 					}
 				}
@@ -2118,7 +2115,7 @@ fetch_from_array:
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
 			zend_wrong_string_offset(EXECUTE_DATA_C);
 		}
-		ZVAL_ERROR(result);
+		ZVAL_UNDEF(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (ZEND_CONST_COND(dim_type == IS_CV, dim != NULL) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			dim = ZVAL_UNDEFINED_OP2();
@@ -2150,7 +2147,8 @@ fetch_from_array:
 				ZVAL_INDIRECT(result, retval);
 			}
 		} else {
-			ZVAL_ERROR(result);
+			ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
+			ZVAL_UNDEF(result);
 		}
 	} else {
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
@@ -2168,15 +2166,13 @@ return_null:
 				}
 				ZVAL_NULL(result);
 			}
-		} else if (EXPECTED(Z_ISERROR_P(container))) {
-			ZVAL_ERROR(result);
 		} else {
 			if (type == BP_VAR_UNSET) {
 				zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
-				ZVAL_NULL(result);
+				ZVAL_UNDEF(result);
 			} else {
 				zend_use_scalar_as_array();
-				ZVAL_ERROR(result);
+				ZVAL_UNDEF(result);
 			}
 		}
 	}
@@ -2698,12 +2694,11 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
+	/* variable_ptr may be ERROR if fetching the property threw an exception. */
 	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		variable_ptr = &EG(uninitialized_zval);
-	} else if (/*OP_DATA_TYPE == IS_VAR &&*/ UNEXPECTED(Z_ISERROR_P(value_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (/*OP_DATA_TYPE == IS_VAR &&*/
 	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&

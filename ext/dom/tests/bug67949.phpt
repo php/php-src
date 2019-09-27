@@ -42,7 +42,11 @@ var_dump(isset($nodes[$offset]), $nodes[$offset]->textContent);
 var_dump($offset);
 
 echo "testing read_dimension with null offset\n";
-var_dump($nodes[][] = 1);
+try {
+    var_dump($nodes[][] = 1);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "testing attribute access\n";
 $anchor = $doc->getElementsByTagName('a')[0];
@@ -82,7 +86,7 @@ bool(true)
 string(4) "data"
 string(4) "test"
 testing read_dimension with null offset
-NULL
+Cannot access node list without offset
 testing attribute access
 string(4) "href"
 ==DONE==

@@ -7542,37 +7542,6 @@ static int zend_jit_send_ref(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		|	// ret = Z_INDIRECT_P(ret);
 		|	GET_Z_PTR r0, r0
 		|1:
-		if (op1_info & MAY_BE_ERROR) {
-			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-				if (cold) {
-					|	IF_NOT_Z_TYPE r0, _IS_ERROR, >1
-				} else {
-					|	IF_Z_TYPE r0, _IS_ERROR, >1
-					|.cold_code
-					|1:
-				}
-			}
-
-			|	// ZVAL_NEW_EMPTY_REF(arg);
-			|	EMALLOC sizeof(zend_reference), op_array, opline
-			|	SET_ZVAL_PTR arg_addr, r0
-			|	SET_ZVAL_TYPE_INFO arg_addr, IS_REFERENCE_EX
-			|	mov dword [r0], 1
-			|	mov dword [r0 + offsetof(zend_reference, gc.u.type_info)], IS_REFERENCE
-			|	mov aword [r0 + offsetof(zend_reference, sources.ptr)], 0
-			ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 8);
-			|	// ZVAL_NULL(Z_REFVAL_P(arg));
-			|	SET_ZVAL_TYPE_INFO ref_addr, IS_NULL
-
-			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-				|	jmp >7
-				if (cold) {
-					|1:
-				} else {
-					|.code
-				}
-			}
-		}
 	} else if (opline->op1_type == IS_CV) {
 		if (op1_info & MAY_BE_UNDEF) {
 			if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {

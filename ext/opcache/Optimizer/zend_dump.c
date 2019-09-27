@@ -311,10 +311,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			fprintf(stderr, "resource");
 		}
 	}
-	if (info & MAY_BE_ERROR) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "error");
-	}
 //TODO: this is useful only for JIT???
 	if (info & MAY_BE_IN_REG) {
 		if (first) first = 0; else fprintf(stderr, ", ");
