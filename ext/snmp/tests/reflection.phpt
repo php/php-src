@@ -7,15 +7,15 @@ Test SNMP Reflection
 
 /* ALL PHP_ME user callable methods of SNMP class should appear here */
 
-reflection::export(new reflectionmethod('snmp', '__construct'));
-reflection::export(new reflectionmethod('snmp', 'close'));
-reflection::export(new reflectionmethod('snmp', 'setSecurity'));
-reflection::export(new reflectionmethod('snmp', 'get'));
-reflection::export(new reflectionmethod('snmp', 'getnext'));
-reflection::export(new reflectionmethod('snmp', 'walk'));
-reflection::export(new reflectionmethod('snmp', 'set'));
-reflection::export(new reflectionmethod('snmp', 'getErrno'));
-reflection::export(new reflectionmethod('snmp', 'getError'));
+echo new reflectionmethod('snmp', '__construct');
+echo new reflectionmethod('snmp', 'close');
+echo new reflectionmethod('snmp', 'setSecurity');
+echo new reflectionmethod('snmp', 'get');
+echo new reflectionmethod('snmp', 'getnext');
+echo new reflectionmethod('snmp', 'walk');
+echo new reflectionmethod('snmp', 'set');
+echo new reflectionmethod('snmp', 'getErrno');
+echo new reflectionmethod('snmp', 'getError');
 
 
 ?>
@@ -32,13 +32,11 @@ Method [ <internal:snmp, ctor> public method __construct ] {
     Parameter #4 [ <optional> $retries ]
   }
 }
-
 Method [ <internal:snmp> public method close ] {
 
   - Parameters [0] {
   }
 }
-
 Method [ <internal:snmp> public method setSecurity ] {
 
   - Parameters [7] {
@@ -51,7 +49,6 @@ Method [ <internal:snmp> public method setSecurity ] {
     Parameter #6 [ <required> $contextEngineID ]
   }
 }
-
 Method [ <internal:snmp> public method get ] {
 
   - Parameters [2] {
@@ -59,7 +56,6 @@ Method [ <internal:snmp> public method get ] {
     Parameter #1 [ <optional> $use_orignames ]
   }
 }
-
 Method [ <internal:snmp> public method getnext ] {
 
   - Parameters [2] {
@@ -67,7 +63,6 @@ Method [ <internal:snmp> public method getnext ] {
     Parameter #1 [ <optional> $use_orignames ]
   }
 }
-
 Method [ <internal:snmp> public method walk ] {
 
   - Parameters [4] {
@@ -77,7 +72,6 @@ Method [ <internal:snmp> public method walk ] {
     Parameter #3 [ <required> $non_repeaters ]
   }
 }
-
 Method [ <internal:snmp> public method set ] {
 
   - Parameters [3] {
@@ -86,17 +80,14 @@ Method [ <internal:snmp> public method set ] {
     Parameter #2 [ <required> $value ]
   }
 }
-
 Method [ <internal:snmp> public method getErrno ] {
 
   - Parameters [0] {
   }
 }
-
 Method [ <internal:snmp> public method getError ] {
 
   - Parameters [0] {
   }
 }
-
 ===DONE===
