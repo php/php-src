@@ -6119,6 +6119,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -8291,6 +8295,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -9243,6 +9251,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -10713,6 +10725,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -18671,6 +18687,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -19086,6 +19106,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -19575,6 +19599,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -19969,6 +19997,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -23830,6 +23862,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -26051,6 +26087,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -27638,6 +27678,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -29837,6 +29881,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -41447,6 +41495,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if (IS_CONST == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -44968,6 +45020,10 @@ num_index:
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
 			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
 		} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
 			str = ZSTR_EMPTY_ALLOC();
@@ -46692,6 +46748,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_UNUSED == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();
@@ -50188,6 +50248,10 @@ num_index:
 			goto num_index;
 		} else if (Z_TYPE_P(offset) == IS_TRUE) {
 			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
 			goto num_index;
 		} else if (IS_CV == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
 			ZVAL_UNDEFINED_OP2();

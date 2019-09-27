@@ -103,11 +103,11 @@ echo "Done";
 
 Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Illegal offset type in %s on line %d
 
-Warning: Illegal offset type in %s on line %d
+Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 int(1)
 array(1) {
@@ -330,15 +330,17 @@ array(5) {
   string(6) "string"
 }
 -- Iteration 10 --
-int(2)
-array(2) {
+int(3)
+array(3) {
   [0]=>
   int(10)
   [""]=>
   string(5) "hello"
+  [1]=>
+  string(8) "resource"
 }
-int(4)
-array(4) {
+int(5)
+array(5) {
   [0]=>
   int(10)
   [1]=>
@@ -347,10 +349,12 @@ array(4) {
   string(5) "world"
   [""]=>
   string(5) "hello"
+  [3]=>
+  string(8) "resource"
 }
 -- Iteration 11 --
-int(7)
-array(7) {
+int(8)
+array(8) {
   [0]=>
   int(10)
   ["hello"]=>
@@ -358,16 +362,18 @@ array(7) {
   ["fruit"]=>
   float(2.2)
   [1]=>
-  string(3) "int"
+  string(8) "resource"
   [2]=>
+  string(3) "int"
+  [3]=>
   string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>
   string(7) "heredoc"
 }
-int(9)
-array(9) {
+int(10)
+array(10) {
   [0]=>
   int(10)
   [1]=>
@@ -379,8 +385,10 @@ array(9) {
   ["fruit"]=>
   float(2.2)
   [3]=>
-  string(3) "int"
+  string(8) "resource"
   [4]=>
+  string(3) "int"
+  [5]=>
   string(5) "float"
   [""]=>
   string(5) "unset"
