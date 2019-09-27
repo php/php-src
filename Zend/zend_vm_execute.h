@@ -1928,7 +1928,7 @@ send_again:
 		zend_object_iterator *iter;
 
 		if (!ce || !ce->get_iterator) {
-			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+			zend_type_error("Only arrays and Traversables can be unpacked");
 		} else {
 
 			iter = ce->get_iterator(ce, args, 0);
@@ -2005,7 +2005,7 @@ send_again:
 		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(args) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+		zend_type_error("Only arrays and Traversables can be unpacked");
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -2184,7 +2184,7 @@ add_unpack_again:
 		zend_object_iterator *iter;
 
 		if (!ce || !ce->get_iterator) {
-			zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+			zend_type_error("Only arrays and Traversables can be unpacked");
 		} else {
 			iter = ce->get_iterator(ce, op1, 0);
 			if (UNEXPECTED(!iter)) {
