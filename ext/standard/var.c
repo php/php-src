@@ -1185,6 +1185,7 @@ PHP_FUNCTION(unserialize)
 	zval *options = NULL;
 	zval *retval;
 	HashTable *class_hash = NULL, *prev_class_hash;
+	zend_long prev_max_depth, prev_cur_depth;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(buf, buf_len)
@@ -1200,6 +1201,8 @@ PHP_FUNCTION(unserialize)
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	prev_class_hash = php_var_unserialize_get_allowed_classes(var_hash);
+	prev_max_depth = php_var_unserialize_get_max_depth(var_hash);
+	prev_cur_depth = php_var_unserialize_get_cur_depth(var_hash);
 	if (options != NULL) {
 		zval *classes, *max_depth;
 
@@ -1244,7 +1247,11 @@ PHP_FUNCTION(unserialize)
 				RETVAL_FALSE;
 				goto cleanup;
 			}
+
 			php_var_unserialize_set_max_depth(var_hash, Z_LVAL_P(max_depth));
+			/* If the max_depth for a nested unserialize() call has been overridden,
+			 * start counting from zero again (for the nested call only). */
+			php_var_unserialize_set_cur_depth(var_hash, 0);
 		}
 	}
 
@@ -1275,8 +1282,10 @@ cleanup:
 		FREE_HASHTABLE(class_hash);
 	}
 
-	/* Reset to previous allowed_classes in case this is a nested call */
+	/* Reset to previous options in case this is a nested call */
 	php_var_unserialize_set_allowed_classes(var_hash, prev_class_hash);
+	php_var_unserialize_set_max_depth(var_hash, prev_max_depth);
+	php_var_unserialize_set_cur_depth(var_hash, prev_cur_depth);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	/* Per calling convention we must not return a reference here, so unwrap. We're doing this at

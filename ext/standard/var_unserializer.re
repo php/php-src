@@ -103,6 +103,13 @@ PHPAPI zend_long php_var_unserialize_get_max_depth(php_unserialize_data_t d) {
 	return d->max_depth;
 }
 
+PHPAPI void php_var_unserialize_set_cur_depth(php_unserialize_data_t d, zend_long cur_depth) {
+	d->cur_depth = cur_depth;
+}
+PHPAPI zend_long php_var_unserialize_get_cur_depth(php_unserialize_data_t d) {
+	return d->cur_depth;
+}
+
 static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
@@ -450,7 +457,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, zend_object *obj)
 {
 	if (var_hash) {
-		if ((*var_hash)->max_depth > 0 && ++(*var_hash)->cur_depth > (*var_hash)->max_depth) {
+		if ((*var_hash)->max_depth > 0 && (*var_hash)->cur_depth >= (*var_hash)->max_depth) {
 			php_error_docref(NULL, E_WARNING,
 				"Maximum depth of " ZEND_LONG_FMT " exceeded. "
 				"The depth limit can be changed using the max_depth unserialize() option "
@@ -458,6 +465,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 				(*var_hash)->max_depth);
 			return 0;
 		}
+		(*var_hash)->cur_depth++;
 	}
 
 	while (elements-- > 0) {
@@ -469,7 +477,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 
 		if (!php_var_unserialize_internal(&key, p, max, NULL, 1)) {
 			zval_ptr_dtor(&key);
-			return 0;
+			goto failure;
 		}
 
 		data = NULL;
@@ -499,7 +507,7 @@ numeric_key:
 				}
 			} else {
 				zval_ptr_dtor(&key);
-				return 0;
+				goto failure;
 			}
 		} else {
 			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
@@ -514,7 +522,7 @@ string_key:
 
 					if (UNEXPECTED(zend_unmangle_property_name_ex(Z_STR(key), &unmangled_class, &unmangled_prop, &unmangled_prop_len) == FAILURE)) {
 						zval_ptr_dtor(&key);
-						return 0;
+						goto failure;
 					}
 
 					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
@@ -581,13 +589,13 @@ string_key:
 				goto string_key;
 			} else {
 				zval_ptr_dtor(&key);
-				return 0;
+				goto failure;
 			}
 		}
 
 		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
 			zval_ptr_dtor(&key);
-			return 0;
+			goto failure;
 		}
 
 		if (UNEXPECTED(info)) {
@@ -595,7 +603,7 @@ string_key:
 				zval_ptr_dtor(data);
 				ZVAL_UNDEF(data);
 				zval_dtor(&key);
-				return 0;
+				goto failure;
 			}
 			if (Z_ISREF_P(data)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), info);
@@ -609,7 +617,7 @@ string_key:
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
-			return 0;
+			goto failure;
 		}
 	}
 
@@ -617,6 +625,12 @@ string_key:
 		(*var_hash)->cur_depth--;
 	}
 	return 1;
+
+failure:
+	if (var_hash) {
+		(*var_hash)->cur_depth--;
+	}
+	return 0;
 }
 
 static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
