@@ -15,10 +15,6 @@ snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 echo "Check error handing\n";
-echo "4args (5 needed)\n";
-$z = snmp2_set($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0');
-var_dump($z);
-
 echo "No type & no value (timeout & retries instead)\n";
 $z = snmp2_set($hostname, $communityWrite, 'SNMPv2-MIB::sysLocation.0', $timeout, $retries);
 var_dump($z);
@@ -142,10 +138,6 @@ var_dump((snmpget($hostname, $communityWrite, $oid2, $timeout, $retries) === $ol
 ?>
 --EXPECTF--
 Check error handing
-4args (5 needed)
-
-Warning: snmp2_set() expects at least 5 parameters, 3 given in %s on line %d
-bool(false)
 No type & no value (timeout & retries instead)
 
 Warning: snmp2_set(): Bogus type '-1', should be single char, got 2 in %s on line %d
