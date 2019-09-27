@@ -57,7 +57,7 @@
 #define MAY_BE_ARRAY_KEY_STRING     (1<<26)
 #define MAY_BE_ARRAY_KEY_ANY        (MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_KEY_STRING)
 
-#define MAY_BE_ERROR                (1<<27)
+/* Bit 27 unused  */
 #define MAY_BE_CLASS                (1<<28)
 
 #endif /* ZEND_TYPE_INFO_H */

@@ -930,9 +930,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			zend_assign_to_string_offset(object_ptr, dim, value, result);
 		}
 	} else {
-//???		if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-			zend_throw_error(NULL, "Cannot use a scalar value as an array");
-//???		}
+		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -977,9 +975,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 //???		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 //???			ZEND_VM_C_GOTO(assign_dim_op_convert_to_array);
 		} else {
-//???			if (UNEXPECTED(OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-				zend_throw_error(NULL, "Cannot use a scalar value as an array");
-//???			}
+			zend_throw_error(NULL, "Cannot use a scalar value as an array");
 //???			if (retval) {
 //???				ZVAL_NULL(retval);
 //???			}
