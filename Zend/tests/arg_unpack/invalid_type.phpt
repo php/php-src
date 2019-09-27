@@ -7,53 +7,37 @@ function test(...$args) {
     var_dump($args);
 }
 
-test(...null);
-test(...42);
-test(...new stdClass);
+try {
+    test(...null);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test(...42);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test(...new stdClass);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
-test(1, 2, 3, ..."foo", ...[4, 5]);
-test(1, 2, 3, ...new StdClass, ...3.14, ...[4, 5]);
+try {
+    test(1, 2, 3, ..."foo", ...[4, 5]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test(1, 2, 3, ...new StdClass, ...3.14, ...[4, 5]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-array(0) {
-}
-
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-array(0) {
-}
-
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-array(0) {
-}
-
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
-}
-
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-
-Warning: Only arrays and Traversables can be unpacked in %s on line %d
-array(5) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
-}
+--EXPECT--
+Only arrays and Traversables can be unpacked
+Only arrays and Traversables can be unpacked
+Only arrays and Traversables can be unpacked
+Only arrays and Traversables can be unpacked
+Only arrays and Traversables can be unpacked

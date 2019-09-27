@@ -94,7 +94,8 @@ PHP 8.0 UPGRADE NOTES
       is already used.
     * Attempting to use an invalid type (array or object) as an array key or
       string offset.
-    * Attempting to write to an index of a scalar value.
+    * Attempting to write to an array index of a scalar value.
+    * Attempting to unpack a non-array/Traversable.
 
     RFC: Part of https://wiki.php.net/rfc/engine_warnings
 
