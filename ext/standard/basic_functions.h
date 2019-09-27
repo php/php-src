@@ -219,12 +219,6 @@ typedef struct _php_basic_globals {
 	HashTable url_adapt_session_hosts_ht;
 	url_adapt_state_ex_t url_adapt_output_ex;
 	HashTable url_adapt_output_hosts_ht;
-
-#ifdef HAVE_MMAP
-	void *mmap_file;
-	size_t mmap_len;
-#endif
-
 	HashTable *user_filter_map;
 
 	/* file.c */
