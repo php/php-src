@@ -24,7 +24,12 @@ function test() {
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
-    var_dump($true[123] = 456);
+
+    try {
+        var_dump($true[123] = 456);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 
     try {
         var_dump($array[] += 123);
@@ -43,7 +48,12 @@ function test() {
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
-    var_dump($true[123] += 456);
+
+    try {
+        var_dump($true[123] += 456);
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 
     try {
         var_dump($true->foo = 123);
@@ -60,18 +70,14 @@ function test() {
 test();
 
 ?>
---EXPECTF--
+--EXPECT--
 Cannot add element to the array as the next element is already occupied
 Illegal offset type
 Illegal offset type
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-NULL
+Cannot use a scalar value as an array
 Cannot add element to the array as the next element is already occupied
 Illegal offset type
 Illegal offset type
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-NULL
+Cannot use a scalar value as an array
 Attempt to assign property 'foo' of non-object
 Attempt to assign property 'foo' of non-object

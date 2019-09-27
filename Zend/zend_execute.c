@@ -1887,7 +1887,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(con
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_scalar_as_array(void)
 {
-	zend_error(E_WARNING, "Cannot use a scalar value as an array");
+	zend_throw_error(NULL, "Cannot use a scalar value as an array");
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
@@ -2172,7 +2172,7 @@ return_null:
 			ZVAL_ERROR(result);
 		} else {
 			if (type == BP_VAR_UNSET) {
-				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+				zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
 				ZVAL_NULL(result);
 			} else {
 				zend_use_scalar_as_array();
