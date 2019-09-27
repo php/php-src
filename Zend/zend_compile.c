@@ -469,17 +469,6 @@ static int lookup_cv(zend_string *name) /* {{{ */{
 }
 /* }}} */
 
-void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
-{
-	zval_ptr_dtor_nogc(CT_CONSTANT_EX(op_array, n));
-	if (n + 1 == op_array->last_literal) {
-		op_array->last_literal--;
-	} else {
-		ZVAL_UNDEF(CT_CONSTANT_EX(op_array, n));
-	}
-}
-/* }}} */
-
 static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 {
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
