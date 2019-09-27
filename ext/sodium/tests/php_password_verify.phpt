@@ -2,7 +2,7 @@
 Test interoperability of password_verify()
 --SKIPIF--
 <?php
-if (!function_exits('sodium_crypto_pwhash_str')) {
+if (!function_exists('sodium_crypto_pwhash_str')) {
   echo "skip - No crypto_pwhash_str_verify";
 }
 
