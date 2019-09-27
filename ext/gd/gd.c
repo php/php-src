@@ -33,7 +33,8 @@
 #include "php_gd.h"
 #include "ext/standard/info.h"
 #include "php_open_temporary_file.h"
-#include "gd_image_object.h"
+#include "zend_object_handlers.h"
+#include "zend_interfaces.h"
 
 #ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -131,166 +132,272 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static int _php_image_type(char data[12]);
 
+/* output streaming (formerly gd_ctx.c) */
+static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
+
+/*********************************************************
+ *
+ * GD Object Representation
+ *
+ ********************************************************/
+
+zend_class_entry *gd_image_ce;
+
+typedef struct _gd_ext_image_object {
+	gdImagePtr image;
+	zend_object std;
+} php_gd_image_object;
+
+static zend_object_handlers php_gd_image_object_handlers;
+
+static const zend_function_entry gd_image_object_methods[] = {
+		PHP_FE_END
+};
+
+static zend_function *php_gd_image_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "You cannot initialize a GdImage object except through helper functions");
+	return NULL;
+}
+
+/**
+ * Returns the underlying php_gd_image_object from a zend_object
+ */
+
+static zend_always_inline php_gd_image_object* php_gd_exgdimage_from_zobj_p(zend_object* obj)
+{
+	return (php_gd_image_object *) ((char *) (obj) - XtOffsetOf(php_gd_image_object, std));
+}
+
+/**
+ * Converts an extension GdImage instance contained within a zval into the gdImagePtr
+ * for use with library APIs
+ */
+static zend_always_inline gdImagePtr php_gd_libgdimageptr_from_zval_p(zval* zp)
+{
+	return php_gd_exgdimage_from_zobj_p(Z_OBJ_P(zp))->image;
+}
+
+
+zend_object *php_gd_image_object_create(zend_class_entry *class_type)
+{
+	size_t block_len = sizeof(php_gd_image_object) + zend_object_properties_size(class_type);
+	php_gd_image_object *intern = emalloc(block_len);
+	memset(intern, 0, block_len);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+	intern->std.handlers = &php_gd_image_object_handlers;
+
+	return &intern->std;
+};
+
+static void php_gd_image_object_free(zend_object *intern)
+{
+	php_gd_image_object *img_obj_ptr = php_gd_exgdimage_from_zobj_p(intern);
+	gdImageDestroy(img_obj_ptr->image);
+	img_obj_ptr->image = NULL;
+
+	zend_object_std_dtor(intern);
+};
+
+/**
+ * Creates a new GdImage object wrapping the gdImagePtr and attaches it
+ * to the zval (usually return_value).
+ *
+ * This function must only be called once per valid gdImagePtr
+ */
+void php_gd_assign_libgdimageptr_as_extgdimage(zval *val, gdImagePtr image)
+{
+	object_init_ex(val, gd_image_ce);
+	php_gd_exgdimage_from_zobj_p(Z_OBJ_P(val))->image = image;
+}
+
+static void php_gd_object_minit_helper()
+{
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "GdImage", gd_image_object_methods);
+	gd_image_ce = zend_register_internal_class(&ce);
+	gd_image_ce->ce_flags |= ZEND_ACC_FINAL;
+	gd_image_ce->create_object = php_gd_image_object_create;
+	gd_image_ce->serialize = zend_class_serialize_deny;
+	gd_image_ce->unserialize = zend_class_unserialize_deny;
+
+	/* setting up the object handlers for the GdImage class */
+	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	php_gd_image_object_handlers.clone_obj = NULL;
+	php_gd_image_object_handlers.free_obj = php_gd_image_object_free;
+	php_gd_image_object_handlers.get_constructor = php_gd_image_object_get_constructor;
+	php_gd_image_object_handlers.offset = XtOffsetOf(php_gd_image_object, std);
+}
+
+
+/*********************************************************
+ *
+ * Extension Implementation
+ *
+ ********************************************************/
+
 /* {{{ gd_functions[]
  */
 static const zend_function_entry gd_functions[] = {
-	PHP_FE(gd_info,                                 arginfo_gd_info)
-	PHP_FE(imagearc,								arginfo_imagearc)
-	PHP_FE(imageellipse,							arginfo_imageellipse)
-	PHP_FE(imagechar,								arginfo_imagechar)
-	PHP_FE(imagecharup,								arginfo_imagecharup)
-	PHP_FE(imagecolorat,							arginfo_imagecolorat)
-	PHP_FE(imagecolorallocate,						arginfo_imagecolorallocate)
-	PHP_FE(imagepalettecopy,						arginfo_imagepalettecopy)
-	PHP_FE(imagecreatefromstring,					arginfo_imagecreatefromstring)
-	PHP_FE(imagecolorclosest,						arginfo_imagecolorclosest)
-	PHP_FE(imagecolorclosesthwb,					arginfo_imagecolorclosesthwb)
-	PHP_FE(imagecolordeallocate,					arginfo_imagecolordeallocate)
-	PHP_FE(imagecolorresolve,						arginfo_imagecolorresolve)
-	PHP_FE(imagecolorexact,							arginfo_imagecolorexact)
-	PHP_FE(imagecolorset,							arginfo_imagecolorset)
-	PHP_FE(imagecolortransparent,					arginfo_imagecolortransparent)
-	PHP_FE(imagecolorstotal,						arginfo_imagecolorstotal)
-	PHP_FE(imagecolorsforindex,						arginfo_imagecolorsforindex)
-	PHP_FE(imagecopy,								arginfo_imagecopy)
-	PHP_FE(imagecopymerge,							arginfo_imagecopymerge)
-	PHP_FE(imagecopymergegray,						arginfo_imagecopymergegray)
-	PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
-	PHP_FE(imagecreate,								arginfo_imagecreate)
-	PHP_FE(imagecreatetruecolor,					arginfo_imagecreatetruecolor)
-	PHP_FE(imageistruecolor,						arginfo_imageistruecolor)
-	PHP_FE(imagetruecolortopalette,					arginfo_imagetruecolortopalette)
-	PHP_FE(imagepalettetotruecolor,					arginfo_imagepalettetotruecolor)
-	PHP_FE(imagesetthickness,						arginfo_imagesetthickness)
-	PHP_FE(imagefilledarc,							arginfo_imagefilledarc)
-	PHP_FE(imagefilledellipse,						arginfo_imagefilledellipse)
-	PHP_FE(imagealphablending,						arginfo_imagealphablending)
-	PHP_FE(imagesavealpha,							arginfo_imagesavealpha)
-	PHP_FE(imagecolorallocatealpha,					arginfo_imagecolorallocatealpha)
-	PHP_FE(imagecolorresolvealpha, 					arginfo_imagecolorresolvealpha)
-	PHP_FE(imagecolorclosestalpha,					arginfo_imagecolorclosestalpha)
-	PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
-	PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
+		PHP_FE(gd_info,                                 arginfo_gd_info)
+		PHP_FE(imagearc,								arginfo_imagearc)
+		PHP_FE(imageellipse,							arginfo_imageellipse)
+		PHP_FE(imagechar,								arginfo_imagechar)
+		PHP_FE(imagecharup,								arginfo_imagecharup)
+		PHP_FE(imagecolorat,							arginfo_imagecolorat)
+		PHP_FE(imagecolorallocate,						arginfo_imagecolorallocate)
+		PHP_FE(imagepalettecopy,						arginfo_imagepalettecopy)
+		PHP_FE(imagecreatefromstring,					arginfo_imagecreatefromstring)
+		PHP_FE(imagecolorclosest,						arginfo_imagecolorclosest)
+		PHP_FE(imagecolorclosesthwb,					arginfo_imagecolorclosesthwb)
+		PHP_FE(imagecolordeallocate,					arginfo_imagecolordeallocate)
+		PHP_FE(imagecolorresolve,						arginfo_imagecolorresolve)
+		PHP_FE(imagecolorexact,							arginfo_imagecolorexact)
+		PHP_FE(imagecolorset,							arginfo_imagecolorset)
+		PHP_FE(imagecolortransparent,					arginfo_imagecolortransparent)
+		PHP_FE(imagecolorstotal,						arginfo_imagecolorstotal)
+		PHP_FE(imagecolorsforindex,						arginfo_imagecolorsforindex)
+		PHP_FE(imagecopy,								arginfo_imagecopy)
+		PHP_FE(imagecopymerge,							arginfo_imagecopymerge)
+		PHP_FE(imagecopymergegray,						arginfo_imagecopymergegray)
+		PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
+		PHP_FE(imagecreate,								arginfo_imagecreate)
+		PHP_FE(imagecreatetruecolor,					arginfo_imagecreatetruecolor)
+		PHP_FE(imageistruecolor,						arginfo_imageistruecolor)
+		PHP_FE(imagetruecolortopalette,					arginfo_imagetruecolortopalette)
+		PHP_FE(imagepalettetotruecolor,					arginfo_imagepalettetotruecolor)
+		PHP_FE(imagesetthickness,						arginfo_imagesetthickness)
+		PHP_FE(imagefilledarc,							arginfo_imagefilledarc)
+		PHP_FE(imagefilledellipse,						arginfo_imagefilledellipse)
+		PHP_FE(imagealphablending,						arginfo_imagealphablending)
+		PHP_FE(imagesavealpha,							arginfo_imagesavealpha)
+		PHP_FE(imagecolorallocatealpha,					arginfo_imagecolorallocatealpha)
+		PHP_FE(imagecolorresolvealpha, 					arginfo_imagecolorresolvealpha)
+		PHP_FE(imagecolorclosestalpha,					arginfo_imagecolorclosestalpha)
+		PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
+		PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
 
 #ifdef PHP_WIN32
-	PHP_FE(imagegrabwindow,							arginfo_imagegrabwindow)
+		PHP_FE(imagegrabwindow,							arginfo_imagegrabwindow)
 	PHP_FE(imagegrabscreen,							arginfo_imagegrabscreen)
 #endif
 
-	PHP_FE(imagerotate,		  						arginfo_imagerotate)
-	PHP_FE(imageflip,								arginfo_imageflip)
+		PHP_FE(imagerotate,		  						arginfo_imagerotate)
+		PHP_FE(imageflip,								arginfo_imageflip)
 
-	PHP_FE(imageantialias,							arginfo_imageantialias)
-	PHP_FE(imagecrop,								arginfo_imagecrop)
-	PHP_FE(imagecropauto,							arginfo_imagecropauto)
-	PHP_FE(imagescale,								arginfo_imagescale)
-	PHP_FE(imageaffine,								arginfo_imageaffine)
-	PHP_FE(imageaffinematrixconcat,					arginfo_imageaffinematrixconcat)
-	PHP_FE(imageaffinematrixget,					arginfo_imageaffinematrixget)
-	PHP_FE(imagesetinterpolation,					arginfo_imagesetinterpolation)
-	PHP_FE(imagesettile,							arginfo_imagesettile)
-	PHP_FE(imagesetbrush,							arginfo_imagesetbrush)
-	PHP_FE(imagesetstyle,							arginfo_imagesetstyle)
+		PHP_FE(imageantialias,							arginfo_imageantialias)
+		PHP_FE(imagecrop,								arginfo_imagecrop)
+		PHP_FE(imagecropauto,							arginfo_imagecropauto)
+		PHP_FE(imagescale,								arginfo_imagescale)
+		PHP_FE(imageaffine,								arginfo_imageaffine)
+		PHP_FE(imageaffinematrixconcat,					arginfo_imageaffinematrixconcat)
+		PHP_FE(imageaffinematrixget,					arginfo_imageaffinematrixget)
+		PHP_FE(imagesetinterpolation,					arginfo_imagesetinterpolation)
+		PHP_FE(imagesettile,							arginfo_imagesettile)
+		PHP_FE(imagesetbrush,							arginfo_imagesetbrush)
+		PHP_FE(imagesetstyle,							arginfo_imagesetstyle)
 
 #ifdef HAVE_GD_PNG
-	PHP_FE(imagecreatefrompng,						arginfo_imagecreatefrompng)
+		PHP_FE(imagecreatefrompng,						arginfo_imagecreatefrompng)
 #endif
 #ifdef HAVE_GD_WEBP
-	PHP_FE(imagecreatefromwebp,						arginfo_imagecreatefromwebp)
+		PHP_FE(imagecreatefromwebp,						arginfo_imagecreatefromwebp)
 #endif
-	PHP_FE(imagecreatefromgif,						arginfo_imagecreatefromgif)
+		PHP_FE(imagecreatefromgif,						arginfo_imagecreatefromgif)
 #ifdef HAVE_GD_JPG
-	PHP_FE(imagecreatefromjpeg,						arginfo_imagecreatefromjpeg)
+		PHP_FE(imagecreatefromjpeg,						arginfo_imagecreatefromjpeg)
 #endif
-	PHP_FE(imagecreatefromwbmp,						arginfo_imagecreatefromwbmp)
-	PHP_FE(imagecreatefromxbm,						arginfo_imagecreatefromxbm)
+		PHP_FE(imagecreatefromwbmp,						arginfo_imagecreatefromwbmp)
+		PHP_FE(imagecreatefromxbm,						arginfo_imagecreatefromxbm)
 #if defined(HAVE_GD_XPM)
-	PHP_FE(imagecreatefromxpm,						arginfo_imagecreatefromxpm)
+		PHP_FE(imagecreatefromxpm,						arginfo_imagecreatefromxpm)
 #endif
-	PHP_FE(imagecreatefromgd,						arginfo_imagecreatefromgd)
-	PHP_FE(imagecreatefromgd2,						arginfo_imagecreatefromgd2)
-	PHP_FE(imagecreatefromgd2part,					arginfo_imagecreatefromgd2part)
+		PHP_FE(imagecreatefromgd,						arginfo_imagecreatefromgd)
+		PHP_FE(imagecreatefromgd2,						arginfo_imagecreatefromgd2)
+		PHP_FE(imagecreatefromgd2part,					arginfo_imagecreatefromgd2part)
 #ifdef HAVE_GD_BMP
-	PHP_FE(imagecreatefrombmp,						arginfo_imagecreatefrombmp)
+		PHP_FE(imagecreatefrombmp,						arginfo_imagecreatefrombmp)
 #endif
 #ifdef HAVE_GD_TGA
-	PHP_FE(imagecreatefromtga,						arginfo_imagecreatefromtga)
+		PHP_FE(imagecreatefromtga,						arginfo_imagecreatefromtga)
 #endif
 #ifdef HAVE_GD_PNG
-	PHP_FE(imagepng,								arginfo_imagepng)
+		PHP_FE(imagepng,								arginfo_imagepng)
 #endif
 #ifdef HAVE_GD_WEBP
-	PHP_FE(imagewebp,								arginfo_imagewebp)
+		PHP_FE(imagewebp,								arginfo_imagewebp)
 #endif
-	PHP_FE(imagegif,								arginfo_imagegif)
+		PHP_FE(imagegif,								arginfo_imagegif)
 #ifdef HAVE_GD_JPG
-	PHP_FE(imagejpeg,								arginfo_imagejpeg)
+		PHP_FE(imagejpeg,								arginfo_imagejpeg)
 #endif
-	PHP_FE(imagewbmp,								arginfo_imagewbmp)
-	PHP_FE(imagegd,									arginfo_imagegd)
-	PHP_FE(imagegd2,								arginfo_imagegd2)
+		PHP_FE(imagewbmp,								arginfo_imagewbmp)
+		PHP_FE(imagegd,									arginfo_imagegd)
+		PHP_FE(imagegd2,								arginfo_imagegd2)
 #ifdef HAVE_GD_BMP
-	PHP_FE(imagebmp,								arginfo_imagebmp)
+		PHP_FE(imagebmp,								arginfo_imagebmp)
 #endif
 
-	PHP_FE(imagedestroy,							arginfo_imagedestroy)
-	PHP_FE(imagegammacorrect,						arginfo_imagegammacorrect)
-	PHP_FE(imagefill,								arginfo_imagefill)
-	PHP_FE(imagefilledpolygon,						arginfo_imagefilledpolygon)
-	PHP_FE(imagefilledrectangle,					arginfo_imagefilledrectangle)
-	PHP_FE(imagefilltoborder,						arginfo_imagefilltoborder)
-	PHP_FE(imagefontwidth,							arginfo_imagefontwidth)
-	PHP_FE(imagefontheight,							arginfo_imagefontheight)
-	PHP_FE(imageinterlace,							arginfo_imageinterlace)
-	PHP_FE(imageline,								arginfo_imageline)
-	PHP_FE(imageloadfont,							arginfo_imageloadfont)
-	PHP_FE(imagepolygon,							arginfo_imagepolygon)
-	PHP_FE(imageopenpolygon,						arginfo_imageopenpolygon)
-	PHP_FE(imagerectangle,							arginfo_imagerectangle)
-	PHP_FE(imagesetpixel,							arginfo_imagesetpixel)
-	PHP_FE(imagestring,								arginfo_imagestring)
-	PHP_FE(imagestringup,							arginfo_imagestringup)
-	PHP_FE(imagesx,									arginfo_imagesx)
-	PHP_FE(imagesy,									arginfo_imagesy)
-	PHP_FE(imagesetclip,							arginfo_imagesetclip)
-	PHP_FE(imagegetclip,							arginfo_imagegetclip)
-	PHP_FE(imagedashedline,							arginfo_imagedashedline)
+		PHP_FE(imagedestroy,							arginfo_imagedestroy)
+		PHP_FE(imagegammacorrect,						arginfo_imagegammacorrect)
+		PHP_FE(imagefill,								arginfo_imagefill)
+		PHP_FE(imagefilledpolygon,						arginfo_imagefilledpolygon)
+		PHP_FE(imagefilledrectangle,					arginfo_imagefilledrectangle)
+		PHP_FE(imagefilltoborder,						arginfo_imagefilltoborder)
+		PHP_FE(imagefontwidth,							arginfo_imagefontwidth)
+		PHP_FE(imagefontheight,							arginfo_imagefontheight)
+		PHP_FE(imageinterlace,							arginfo_imageinterlace)
+		PHP_FE(imageline,								arginfo_imageline)
+		PHP_FE(imageloadfont,							arginfo_imageloadfont)
+		PHP_FE(imagepolygon,							arginfo_imagepolygon)
+		PHP_FE(imageopenpolygon,						arginfo_imageopenpolygon)
+		PHP_FE(imagerectangle,							arginfo_imagerectangle)
+		PHP_FE(imagesetpixel,							arginfo_imagesetpixel)
+		PHP_FE(imagestring,								arginfo_imagestring)
+		PHP_FE(imagestringup,							arginfo_imagestringup)
+		PHP_FE(imagesx,									arginfo_imagesx)
+		PHP_FE(imagesy,									arginfo_imagesy)
+		PHP_FE(imagesetclip,							arginfo_imagesetclip)
+		PHP_FE(imagegetclip,							arginfo_imagegetclip)
+		PHP_FE(imagedashedline,							arginfo_imagedashedline)
 
 #ifdef HAVE_GD_FREETYPE
-	PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
+		PHP_FE(imagettfbbox,							arginfo_imagettfbbox)
 	PHP_FE(imagettftext,							arginfo_imagettftext)
 	PHP_FE(imageftbbox,								arginfo_imageftbbox)
 	PHP_FE(imagefttext,								arginfo_imagefttext)
 #endif
 
-	PHP_FE(imagetypes,								arginfo_imagetypes)
+		PHP_FE(imagetypes,								arginfo_imagetypes)
 
-	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
-	PHP_FE(imagexbm,								arginfo_imagexbm)
+		PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
+		PHP_FE(imagexbm,								arginfo_imagexbm)
 
-	PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
+		PHP_FE(imagecolormatch,							arginfo_imagecolormatch)
 
 /* gd filters */
-	PHP_FE(imagefilter,		 						arginfo_imagefilter)
-	PHP_FE(imageconvolution,						arginfo_imageconvolution)
+		PHP_FE(imagefilter,		 						arginfo_imagefilter)
+		PHP_FE(imageconvolution,						arginfo_imageconvolution)
 
-	PHP_FE(imageresolution,							arginfo_imageresolution)
+		PHP_FE(imageresolution,							arginfo_imageresolution)
 
-	PHP_FE_END
+		PHP_FE_END
 };
 /* }}} */
 
 zend_module_entry gd_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"gd",
-	gd_functions,
-	PHP_MINIT(gd),
-	PHP_MSHUTDOWN(gd),
-	NULL,
-	PHP_RSHUTDOWN(gd),
-	PHP_MINFO(gd),
-	PHP_GD_VERSION,
-	STANDARD_MODULE_PROPERTIES
+		STANDARD_MODULE_HEADER,
+		"gd",
+		gd_functions,
+		PHP_MINIT(gd),
+		PHP_MSHUTDOWN(gd),
+		NULL,
+		PHP_RSHUTDOWN(gd),
+		PHP_MINFO(gd),
+		PHP_GD_VERSION,
+		STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_GD
@@ -299,211 +406,13 @@ ZEND_GET_MODULE(gd)
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL)
+PHP_INI_ENTRY("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL)
 PHP_INI_END()
 /* }}} */
 
-
-#define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
-
-		static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
-{
-	/* without the following downcast, the write will fail
-	 * (i.e., will write a zero byte) for all
-	 * big endian architectures:
-	 */
-	unsigned char ch = (unsigned char) c;
-	php_write(&ch, 1);
-} /* }}} */
-
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
-{
-	return php_write((void *)buf, l);
-} /* }}} */
-
-static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
-{
-	if(ctx) {
-		efree(ctx);
-	}
-} /* }}} */
-
-static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
-	char ch = (char) c;
-	php_stream * stream = (php_stream *)ctx->data;
-	php_stream_write(stream, &ch, 1);
-} /* }}} */
-
-static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
-{
-	php_stream * stream = (php_stream *)ctx->data;
-	return php_stream_write(stream, (void *)buf, l);
-} /* }}} */
-
-static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
-{
-	if(ctx->data) {
-		ctx->data = NULL;
-	}
-	if(ctx) {
-		efree(ctx);
-	}
-} /* }}} */
-
-static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
-{
-
-	if(ctx->data) {
-		php_stream_close((php_stream *) ctx->data);
-		ctx->data = NULL;
-	}
-	if(ctx) {
-		efree(ctx);
-	}
-} /* }}} */
-
-/* {{{ _php_image_output_ctx */
-static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
-{
-	zval *imgind;
-	char *file = NULL;
-	size_t file_len = 0;
-	zend_long quality, basefilter;
-	zend_bool compressed = 1;
-	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
-	int q = -1, i;
-	int f = -1;
-	gdIOCtx *ctx = NULL;
-	zval *to_zval = NULL;
-	php_stream *stream;
-	int close_stream = 1;
-
-	/* The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
-	 * from imagey<type>().
-	 */
-	switch (image_type) {
-		case PHP_GDIMG_TYPE_XBM:
-			if (zend_parse_parameters(argc, "Op!|ll", &imgind, gd_image_ce, &file, &file_len, &quality, &basefilter) == FAILURE) {
-				return;
-			}
-			break;
-		case PHP_GDIMG_TYPE_BMP:
-			if (zend_parse_parameters(argc, "O|z!b", &imgind, gd_image_ce, &to_zval, &compressed) == FAILURE) {
-				return;
-			}
-			break;
-		default:
-			/* PHP_GDIMG_TYPE_GIF
-			 * PHP_GDIMG_TYPE_PNG
-			 * PHP_GDIMG_TYPE_JPG
-			 * PHP_GDIMG_TYPE_WBM
-			 * PHP_GDIMG_TYPE_WEBP
-			 * */
-			if (zend_parse_parameters(argc, "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
-				return;
-			}
-	}
-
-	im = php_gd_libgdimageptr_from_zval_p(imgind);
-
-	if (image_type != PHP_GDIMG_TYPE_BMP && argc >= 3) {
-		q = quality; /* or colorindex for foreground of BW images (defaults to black) */
-		if (argc == 4) {
-			f = basefilter;
-		}
-	}
-
-	if (argc > 1 && to_zval != NULL) {
-		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
-			php_stream_from_zval_no_verify(stream, to_zval);
-			if (stream == NULL) {
-				RETURN_FALSE;
-			}
-			close_stream = 0;
-		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
-			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
-				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
-				return;
-			}
-
-			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
-			if (stream == NULL) {
-				RETURN_FALSE;
-			}
-		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, it must a filename or a stream");
-			RETURN_FALSE;
-		}
-	} else if (argc > 1 && file != NULL) {
-		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
-		if (stream == NULL) {
-			RETURN_FALSE;
-		}
-	} else {
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_output_putc;
-		ctx->putBuf = _php_image_output_putbuf;
-		ctx->gd_free = _php_image_output_ctxfree;
-	}
-
-	if (!ctx)	{
-		ctx = ecalloc(1, sizeof(gdIOCtx));
-		ctx->putC = _php_image_stream_putc;
-		ctx->putBuf = _php_image_stream_putbuf;
-		if (close_stream) {
-			ctx->gd_free = _php_image_stream_ctxfreeandclose;
-		} else {
-			ctx->gd_free = _php_image_stream_ctxfree;
-		}
-		ctx->data = (void *)stream;
-	}
-
-	switch(image_type) {
-		case PHP_GDIMG_TYPE_JPG:
-			(*func_p)(im, ctx, q);
-			break;
-		case PHP_GDIMG_TYPE_WEBP:
-			if (q == -1) {
-				q = 80;
-			}
-			(*func_p)(im, ctx, q);
-			break;
-		case PHP_GDIMG_TYPE_PNG:
-			(*func_p)(im, ctx, q, f);
-			break;
-		case PHP_GDIMG_TYPE_XBM:
-		case PHP_GDIMG_TYPE_WBM:
-			if (argc < 3) {
-				for(i=0; i < gdImageColorsTotal(im); i++) {
-					if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
-				}
-				q = i;
-			}
-			if (image_type == PHP_GDIMG_TYPE_XBM) {
-				(*func_p)(im, file ? file : "", q, ctx);
-			} else {
-				(*func_p)(im, q, ctx);
-			}
-			break;
-		case PHP_GDIMG_TYPE_BMP:
-			(*func_p)(im, ctx, (int) compressed);
-			break;
-		default:
-			(*func_p)(im, ctx);
-			break;
-	}
-
-	ctx->gd_free(ctx);
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-
 /* {{{ php_free_gd_font
  */
-static void php_free_gd_font(zend_resource *rsrc)
+		static void php_free_gd_font(zend_resource *rsrc)
 {
 	gdFontPtr fp = (gdFontPtr) rsrc->ptr;
 
@@ -519,7 +428,6 @@ static void php_free_gd_font(zend_resource *rsrc)
  */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
-
 	switch (type) {
 #ifndef PHP_WIN32
 		case GD_DEBUG:
@@ -4258,5 +4166,210 @@ PHP_FUNCTION(imageresolution)
 			add_next_index_long(return_value, gdImageResolutionX(im));
 			add_next_index_long(return_value, gdImageResolutionY(im));
 	}
+}
+/* }}} */
+
+
+/*********************************************************
+ *
+ * Stream Handling
+ * Formerly contained within ext/gd/gd_ctx.c and included
+ * at the the top of this file
+ *
+ ********************************************************/
+
+#define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
+
+static void _php_image_output_putc(struct gdIOCtx *ctx, int c) /* {{{ */
+{
+	/* without the following downcast, the write will fail
+	 * (i.e., will write a zero byte) for all
+	 * big endian architectures:
+	 */
+	unsigned char ch = (unsigned char) c;
+	php_write(&ch, 1);
+} /* }}} */
+
+static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
+{
+	return php_write((void *)buf, l);
+} /* }}} */
+
+static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
+{
+	if(ctx) {
+		efree(ctx);
+	}
+} /* }}} */
+
+static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
+	char ch = (char) c;
+	php_stream * stream = (php_stream *)ctx->data;
+	php_stream_write(stream, &ch, 1);
+} /* }}} */
+
+static int _php_image_stream_putbuf(struct gdIOCtx *ctx, const void* buf, int l) /* {{{ */
+{
+	php_stream * stream = (php_stream *)ctx->data;
+	return php_stream_write(stream, (void *)buf, l);
+} /* }}} */
+
+static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
+{
+	if(ctx->data) {
+		ctx->data = NULL;
+	}
+	if(ctx) {
+		efree(ctx);
+	}
+} /* }}} */
+
+static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
+{
+
+	if(ctx->data) {
+		php_stream_close((php_stream *) ctx->data);
+		ctx->data = NULL;
+	}
+	if(ctx) {
+		efree(ctx);
+	}
+} /* }}} */
+
+/* {{{ _php_image_output_ctx */
+static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
+{
+	zval *imgind;
+	char *file = NULL;
+	size_t file_len = 0;
+	zend_long quality, basefilter;
+	zend_bool compressed = 1;
+	gdImagePtr im;
+	int argc = ZEND_NUM_ARGS();
+	int q = -1, i;
+	int f = -1;
+	gdIOCtx *ctx = NULL;
+	zval *to_zval = NULL;
+	php_stream *stream;
+	int close_stream = 1;
+
+	/* The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
+	 * from imagey<type>().
+	 */
+	switch (image_type) {
+		case PHP_GDIMG_TYPE_XBM:
+			if (zend_parse_parameters(argc, "Op!|ll", &imgind, gd_image_ce, &file, &file_len, &quality, &basefilter) == FAILURE) {
+				return;
+			}
+			break;
+		case PHP_GDIMG_TYPE_BMP:
+			if (zend_parse_parameters(argc, "O|z!b", &imgind, gd_image_ce, &to_zval, &compressed) == FAILURE) {
+				return;
+			}
+			break;
+		default:
+			/* PHP_GDIMG_TYPE_GIF
+			 * PHP_GDIMG_TYPE_PNG
+			 * PHP_GDIMG_TYPE_JPG
+			 * PHP_GDIMG_TYPE_WBM
+			 * PHP_GDIMG_TYPE_WEBP
+			 * */
+			if (zend_parse_parameters(argc, "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &basefilter) == FAILURE) {
+				return;
+			}
+	}
+
+	im = php_gd_libgdimageptr_from_zval_p(imgind);
+
+	if (image_type != PHP_GDIMG_TYPE_BMP && argc >= 3) {
+		q = quality; /* or colorindex for foreground of BW images (defaults to black) */
+		if (argc == 4) {
+			f = basefilter;
+		}
+	}
+
+	if (argc > 1 && to_zval != NULL) {
+		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
+			php_stream_from_zval_no_verify(stream, to_zval);
+			if (stream == NULL) {
+				RETURN_FALSE;
+			}
+			close_stream = 0;
+		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
+			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
+				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
+				return;
+			}
+
+			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+			if (stream == NULL) {
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL, E_WARNING, "Invalid 2nd parameter, it must a filename or a stream");
+			RETURN_FALSE;
+		}
+	} else if (argc > 1 && file != NULL) {
+		stream = php_stream_open_wrapper(file, "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+		if (stream == NULL) {
+			RETURN_FALSE;
+		}
+	} else {
+		ctx = ecalloc(1, sizeof(gdIOCtx));
+		ctx->putC = _php_image_output_putc;
+		ctx->putBuf = _php_image_output_putbuf;
+		ctx->gd_free = _php_image_output_ctxfree;
+	}
+
+	if (!ctx)	{
+		ctx = ecalloc(1, sizeof(gdIOCtx));
+		ctx->putC = _php_image_stream_putc;
+		ctx->putBuf = _php_image_stream_putbuf;
+		if (close_stream) {
+			ctx->gd_free = _php_image_stream_ctxfreeandclose;
+		} else {
+			ctx->gd_free = _php_image_stream_ctxfree;
+		}
+		ctx->data = (void *)stream;
+	}
+
+	switch(image_type) {
+		case PHP_GDIMG_TYPE_JPG:
+			(*func_p)(im, ctx, q);
+			break;
+		case PHP_GDIMG_TYPE_WEBP:
+			if (q == -1) {
+				q = 80;
+			}
+			(*func_p)(im, ctx, q);
+			break;
+		case PHP_GDIMG_TYPE_PNG:
+			(*func_p)(im, ctx, q, f);
+			break;
+		case PHP_GDIMG_TYPE_XBM:
+		case PHP_GDIMG_TYPE_WBM:
+			if (argc < 3) {
+				for(i=0; i < gdImageColorsTotal(im); i++) {
+					if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
+				}
+				q = i;
+			}
+			if (image_type == PHP_GDIMG_TYPE_XBM) {
+				(*func_p)(im, file ? file : "", q, ctx);
+			} else {
+				(*func_p)(im, q, ctx);
+			}
+			break;
+		case PHP_GDIMG_TYPE_BMP:
+			(*func_p)(im, ctx, (int) compressed);
+			break;
+		default:
+			(*func_p)(im, ctx);
+			break;
+	}
+
+	ctx->gd_free(ctx);
+
+	RETURN_TRUE;
 }
 /* }}} */

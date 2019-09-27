@@ -166,7 +166,7 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-    PHP_NEW_EXTENSION(gd, gd.c gd_image_object.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
+    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_CFLAGS="-I$ext_srcdir/libgd $GD_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
@@ -183,7 +183,7 @@ dnl Various checks for GD features
     AC_DEFINE(HAVE_LIBGD, 1, [ ])
     PHP_GD_CHECK_VERSION
 
-    PHP_NEW_EXTENSION(gd, gd.c gd_image_object.c $extra_sources, $ext_shared)
+    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)
     GD_HEADER_DIRS="ext/gd/"
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
