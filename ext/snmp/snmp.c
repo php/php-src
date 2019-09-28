@@ -1869,6 +1869,10 @@ PHP_METHOD(snmp, getErrno)
 
 	snmp_object = Z_SNMP_P(object);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	RETVAL_LONG(snmp_object->snmp_errno);
 	return;
 }
@@ -1882,6 +1886,10 @@ PHP_METHOD(snmp, getError)
 	zval *object = ZEND_THIS;
 
 	snmp_object = Z_SNMP_P(object);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	RETURN_STRING(snmp_object->snmp_errstr);
 }
