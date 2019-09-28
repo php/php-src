@@ -2123,20 +2123,8 @@ TEST $file
 	if (array_key_exists('SKIPIF', $section_text)) {
 
 		if (trim($section_text['SKIPIF'])) {
-			$errorHandler = '<?php
-set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    if (!(error_reporting() & $errno))
-        return;
-    echo "ERROR ", $errstr, PHP_EOL;
-});
-set_exception_handler(function ($e) {
-    echo "ERROR ", $e->getMessage(), PHP_EOL;
-});
-?>
-';
-			$skipifContent = $errorHandler . $section_text['SKIPIF'];
-			show_file_block('skip', $skipifContent);
-			save_text($test_skipif, $skipifContent, $temp_skipif);
+			show_file_block('skip', $section_text['SKIPIF']);
+			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
@@ -2147,7 +2135,7 @@ set_exception_handler(function ($e) {
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
+			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
 
@@ -2172,12 +2160,31 @@ set_exception_handler(function ($e) {
 				return 'SKIPPED';
 			}
 
-			if (!strncasecmp('error', ltrim($output), 5)) {
-				if (preg_match('/^\s*error\s*(.+)\s*/i', $output, $m)) {
-					$bork_info = $m[1];
-				} else {
-					$bork_info = trim($output);
+			$keywordFound = false;
+
+			if (!strncasecmp('info', ltrim($output), 4)) {
+				if (preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) {
+					$info = " (info: $m[1])";
+					$keywordFound = true;
 				}
+			}
+
+			if (!strncasecmp('warn', ltrim($output), 4)) {
+				if (preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) {
+					$warn = true; /* only if there is a reason */
+					$info = " (warn: $m[1])";
+					$keywordFound = true;
+				}
+			}
+
+			if (!strncasecmp('xfail', ltrim($output), 5)) {
+				// Pretend we have an XFAIL section
+				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
+				$keywordFound = true;
+			}
+
+			if (!$keywordFound && trim($output) !== '') {
+				$bork_info = trim($output);
 				show_result("BORK", $bork_info, '', 'Invalid output from SKIPIF', $temp_filenames);
 				$PHP_FAILED_TESTS['BORKED'][] = array(
 					'name' => $file,
@@ -2189,24 +2196,6 @@ set_exception_handler(function ($e) {
 
 				junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
 				return 'BORKED';
-			}
-
-			if (!strncasecmp('info', ltrim($output), 4)) {
-				if (preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) {
-					$info = " (info: $m[1])";
-				}
-			}
-
-			if (!strncasecmp('warn', ltrim($output), 4)) {
-				if (preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) {
-					$warn = true; /* only if there is a reason */
-					$info = " (warn: $m[1])";
-				}
-			}
-
-			if (!strncasecmp('xfail', ltrim($output), 5)) {
-				// Pretend we have an XFAIL section
-				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
 			}
 		}
 	}
