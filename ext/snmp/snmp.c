@@ -1380,7 +1380,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			if (st & SNMP_CMD_SET) {
 				if (zend_parse_parameters(argc, "ssssssszzz|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
 					&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &oid, &type, &value, &timeout, &retries) == FAILURE) {
-					RETURN_FALSE;
+					return;
 				}
 			} else {
 				/* SNMP_CMD_GET
@@ -1389,13 +1389,13 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 */
 				if (zend_parse_parameters(argc, "sssssssz|ll", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
 					&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len, &oid, &timeout, &retries) == FAILURE) {
-					RETURN_FALSE;
+					return;
 				}
 			}
 		} else {
 			if (st & SNMP_CMD_SET) {
 				if (zend_parse_parameters(argc, "sszzz|ll", &a1, &a1_len, &a2, &a2_len, &oid, &type, &value, &timeout, &retries) == FAILURE) {
-					RETURN_FALSE;
+					return;
 				}
 			} else {
 				/* SNMP_CMD_GET
@@ -1403,25 +1403,25 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 				 * SNMP_CMD_WALK
 				 */
 				if (zend_parse_parameters(argc, "ssz|ll", &a1, &a1_len, &a2, &a2_len, &oid, &timeout, &retries) == FAILURE) {
-					RETURN_FALSE;
+					return;
 				}
 			}
 		}
 	} else {
 		if (st & SNMP_CMD_SET) {
 			if (zend_parse_parameters(argc, "zzz", &oid, &type, &value) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		} else if (st & SNMP_CMD_WALK) {
 			if (zend_parse_parameters(argc, "z|bll", &oid, &suffix_keys, &(objid_query.max_repetitions), &(objid_query.non_repeaters)) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 			if (suffix_keys) {
 				st |= SNMP_USE_SUFFIX_AS_KEYS;
 			}
 		} else if (st & SNMP_CMD_GET) {
 			if (zend_parse_parameters(argc, "z|b", &oid, &use_orignames) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 			if (use_orignames) {
 				st |= SNMP_ORIGINAL_NAMES_AS_KEYS;
@@ -1430,7 +1430,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 			/* SNMP_CMD_GETNEXT
 			 */
 			if (zend_parse_parameters(argc, "z", &oid) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		}
 	}
@@ -1554,7 +1554,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &a1) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int)a1);
@@ -1569,7 +1569,7 @@ PHP_FUNCTION(snmp_set_enum_print)
 	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &a1) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
@@ -1584,7 +1584,7 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 	zend_long a1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &a1) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	switch((int) a1) {
@@ -1692,7 +1692,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 	zend_long method;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &method) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (method >= 0 && method <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
@@ -1710,7 +1710,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 PHP_FUNCTION(snmp_get_valueretrieval)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(SNMP_G(valueretrieval));
@@ -1725,7 +1725,7 @@ PHP_FUNCTION(snmp_read_mib)
 	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!read_mib(filename)) {
@@ -1794,7 +1794,7 @@ PHP_METHOD(snmp, close)
 	snmp_object = Z_SNMP_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	netsnmp_session_free(&(snmp_object->session));
@@ -1849,7 +1849,7 @@ PHP_METHOD(snmp, setSecurity)
 
 	if (zend_parse_parameters(argc, "s|ssssss", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
 		&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (netsnmp_session_set_security(snmp_object->session, a1, a2, a3, a4, a5, a6, a7)) {
@@ -1870,7 +1870,7 @@ PHP_METHOD(snmp, getErrno)
 	snmp_object = Z_SNMP_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETVAL_LONG(snmp_object->snmp_errno);
@@ -1888,7 +1888,7 @@ PHP_METHOD(snmp, getError)
 	snmp_object = Z_SNMP_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_STRING(snmp_object->snmp_errstr);
