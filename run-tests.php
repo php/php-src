@@ -2178,7 +2178,7 @@ set_exception_handler(function ($e) {
 				} else {
 					$bork_info = trim($output);
 				}
-				show_result("BORK", $bork_info, '', $temp_filenames);
+				show_result("BORK", $bork_info, '', 'Invalid output from SKIPIF', $temp_filenames);
 				$PHP_FAILED_TESTS['BORKED'][] = array(
 					'name' => $file,
 					'test_name' => '',
