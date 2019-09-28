@@ -5,7 +5,7 @@ memory_limit=-1
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
-if (!GD_BUNGLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
+if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--

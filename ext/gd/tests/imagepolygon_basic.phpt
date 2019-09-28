@@ -1,16 +1,16 @@
 --TEST--
-imageploygon()
+imagepolygon()
 --SKIPIF--
 <?php
 	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
-	require_once('skipif_imagetype.inc');
+	require_once(__DIR__ . '/../../standard/tests/image/skipif_imagetype.inc');
 ?>
 --FILE--
 <?php
 
 /* Prototype  : bool imagepolygon  ( resource $image  , array $points  , int $num_points  , int $color  )
  * Description: Draws a polygon.
- * Source code: ext/standard/image.c
+ * Source code: ext/gd/gd.c
  * Alias to functions:
  */
 
