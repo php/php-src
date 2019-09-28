@@ -2185,7 +2185,7 @@ TEST $file
 
 			if (!$keywordFound && trim($output) !== '') {
 				$bork_info = trim($output);
-				show_result("BORK", $bork_info, '', 'Invalid output from SKIPIF', $temp_filenames);
+				show_result("BORK", $bork_info, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
 				$PHP_FAILED_TESTS['BORKED'][] = array(
 					'name' => $file,
 					'test_name' => '',
@@ -2252,7 +2252,7 @@ TEST $file
 		} else {
 
 			$bork_info = "Redirect info must contain exactly one TEST string to be used as redirect directory.";
-			show_result("BORK", $bork_info, '', $temp_filenames);
+			show_result("BORK", $bork_info, '', '', $temp_filenames);
 			$PHP_FAILED_TESTS['BORKED'][] = array(
 				'name' => $file,
 				'test_name' => '',
@@ -2270,7 +2270,7 @@ TEST $file
 		}
 
 		$bork_info = "Redirected test did not contain redirection info";
-		show_result("BORK", $bork_info, '', $temp_filenames);
+		show_result("BORK", $bork_info, '', '', $temp_filenames);
 		$PHP_FAILED_TESTS['BORKED'][] = array(
 			'name' => $file,
 			'test_name' => '',
