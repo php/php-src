@@ -2179,7 +2179,7 @@ inline_char_handler:
 
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
-	} else {
+	} else if (!SCNG(heredoc_scan_ahead)) {
 		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
 	}
 
@@ -2833,7 +2833,9 @@ nowdoc_scan_done:
 		RETURN_TOKEN(END);
 	}
 
-	zend_error(E_COMPILE_WARNING, "Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
+	if (!SCNG(heredoc_scan_ahead)) {
+		zend_error(E_COMPILE_WARNING, "Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
+	}
 	if (PARSER_MODE()) {
 		goto restart;
 	} else {
