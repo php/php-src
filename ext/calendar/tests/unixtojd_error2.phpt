@@ -1,8 +1,7 @@
 --TEST--
 unixtojd() - when function receives more than 1 parameter
 --CREDITS--
-dterra - <danilo_terra@live.com>
-# Hacktoberfest 2019
+Danilo Terra - <danilo_terra@live.com>
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --INI--

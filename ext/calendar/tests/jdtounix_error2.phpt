@@ -1,7 +1,7 @@
 --TEST--
 jdtounix() - when parameter is not an integer
 --CREDITS--
-edgarsandi - <edgar.r.sandi@gmail.com>
+Danilo Terra - <danilo_terra@live.com>
 --INI--
 date.timezone=UTC
 --SKIPIF--
