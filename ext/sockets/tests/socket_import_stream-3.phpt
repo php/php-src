@@ -9,7 +9,7 @@ $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 $br = socket_bind($s, '0.0.0.0', 58379);
 if ($br === false)
 	die("SKIP IPv4/port 58379 not available");
-$so = socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
 	"group"	=> '224.0.0.23',
 	"interface" => "lo",
 ));

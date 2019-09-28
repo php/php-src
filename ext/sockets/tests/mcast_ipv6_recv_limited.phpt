@@ -13,7 +13,7 @@ $br = socket_bind($s, '::', 3000);
 /* On Linux, there is no route ff00::/8 by default on lo, which makes it
  * troublesome to send multicast traffic from lo, which we must since
  * we're dealing with interface-local traffic... */
-$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
 ));
@@ -24,12 +24,12 @@ $r = socket_sendto($s, $m = "testing packet", strlen($m), 0, 'ff01::114', 3000);
 if ($r === false) {
 	die('skip unable to send multicast packet.');
 }
-$so = socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_LEAVE_GROUP, array(
 	"group"	=> 'ff01::114',
 	"interface" => 0,
 ));
 if (defined("MCAST_JOIN_SOURCE_GROUP")) {
-	$so = socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
+	$so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
 		"group"	=> 'ff01::114',
 		"interface" => 0,
 		"source" => '2001::dead:beef',
