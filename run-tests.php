@@ -2123,8 +2123,20 @@ TEST $file
 	if (array_key_exists('SKIPIF', $section_text)) {
 
 		if (trim($section_text['SKIPIF'])) {
-			show_file_block('skip', $section_text['SKIPIF']);
-			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
+			$errorHandler = '<?php
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno))
+        return;
+    echo "ERROR ", $errstr, PHP_EOL;
+});
+set_exception_handler(function ($e) {
+    echo "ERROR ", $e->getMessage(), PHP_EOL;
+});
+?>
+';
+			$skipifContent = $errorHandler . $section_text['SKIPIF'];
+			show_file_block('skip', $skipifContent);
+			save_text($test_skipif, $skipifContent, $temp_skipif);
 			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
@@ -2158,6 +2170,25 @@ TEST $file
 				$message = !empty($m[1]) ? $m[1] : '';
 				junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 				return 'SKIPPED';
+			}
+
+			if (!strncasecmp('error', ltrim($output), 5)) {
+				if (preg_match('/^\s*error\s*(.+)\s*/i', $output, $m)) {
+					$bork_info = $m[1];
+				} else {
+					$bork_info = trim($output);
+				}
+				show_result("BORK", $bork_info, '', $temp_filenames);
+				$PHP_FAILED_TESTS['BORKED'][] = array(
+					'name' => $file,
+					'test_name' => '',
+					'output' => '',
+					'diff' => '',
+					'info' => "$bork_info [$file]",
+				);
+
+				junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
+				return 'BORKED';
 			}
 
 			if (!strncasecmp('info', ltrim($output), 4)) {
