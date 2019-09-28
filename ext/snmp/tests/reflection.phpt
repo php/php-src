@@ -25,11 +25,11 @@ echo new reflectionmethod('snmp', 'getError');
 Method [ <internal:snmp, ctor> public method __construct ] {
 
   - Parameters [5] {
-    Parameter #0 [ <required> $version ]
-    Parameter #1 [ <required> $host ]
-    Parameter #2 [ <required> $community ]
-    Parameter #3 [ <optional> $timeout ]
-    Parameter #4 [ <optional> $retries ]
+    Parameter #0 [ <required> int $version ]
+    Parameter #1 [ <required> string $host ]
+    Parameter #2 [ <required> string $community ]
+    Parameter #3 [ <optional> int $timeout ]
+    Parameter #4 [ <optional> int $retries ]
   }
 }
 Method [ <internal:snmp> public method close ] {
@@ -40,36 +40,35 @@ Method [ <internal:snmp> public method close ] {
 Method [ <internal:snmp> public method setSecurity ] {
 
   - Parameters [7] {
-    Parameter #0 [ <required> $sec_level ]
-    Parameter #1 [ <required> $auth_protocol ]
-    Parameter #2 [ <required> $auth_passphrase ]
-    Parameter #3 [ <required> $priv_protocol ]
-    Parameter #4 [ <required> $priv_passphrase ]
-    Parameter #5 [ <required> $contextName ]
-    Parameter #6 [ <required> $contextEngineID ]
+    Parameter #0 [ <required> string $sec_level ]
+    Parameter #1 [ <optional> string $auth_protocol ]
+    Parameter #2 [ <optional> string $auth_passphrase ]
+    Parameter #3 [ <optional> string $priv_protocol ]
+    Parameter #4 [ <optional> string $priv_passphrase ]
+    Parameter #5 [ <optional> string $contextName ]
+    Parameter #6 [ <optional> string $contextEngineID ]
   }
 }
 Method [ <internal:snmp> public method get ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <optional> $use_orignames ]
+    Parameter #1 [ <optional> bool $use_orignames ]
   }
 }
 Method [ <internal:snmp> public method getnext ] {
 
-  - Parameters [2] {
+  - Parameters [1] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <optional> $use_orignames ]
   }
 }
 Method [ <internal:snmp> public method walk ] {
 
   - Parameters [4] {
     Parameter #0 [ <required> $object_id ]
-    Parameter #1 [ <required> $suffix_keys ]
-    Parameter #2 [ <required> $max_repetitions ]
-    Parameter #3 [ <required> $non_repeaters ]
+    Parameter #1 [ <optional> bool $suffix_keys ]
+    Parameter #2 [ <optional> int $max_repetitions ]
+    Parameter #3 [ <optional> int $non_repeaters ]
   }
 }
 Method [ <internal:snmp> public method set ] {

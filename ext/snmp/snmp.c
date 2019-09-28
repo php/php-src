@@ -30,6 +30,7 @@
 
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+#include "snmp_arginfo.h"
 
 #if HAVE_SNMP
 
@@ -123,229 +124,6 @@ zend_class_entry *php_snmp_exception_ce;
 /* Class object properties */
 static HashTable php_snmp_properties;
 
-/* {{{ arginfo */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpgetnext, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpwalk, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmprealwalk, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get_quick_print, 0, 0, 1)
-	ZEND_ARG_INFO(0, d)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_quick_print, 0, 0, 1)
-	ZEND_ARG_INFO(0, quick_print)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_enum_print, 0, 0, 1)
-	ZEND_ARG_INFO(0, enum_print)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 0, 1)
-	ZEND_ARG_INFO(0, oid_format)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_get, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_getnext, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_walk, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_real_walk, 0, 0, 3)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp2_set, 0, 0, 5)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, sec_name)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_getnext, 0, 0, 8)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, sec_name)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_walk, 0, 0, 8)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, sec_name)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_real_walk, 0, 0, 8)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, sec_name)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, sec_name)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set_valueretrieval, 0, 0, 1)
-	ZEND_ARG_INFO(0, method)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_snmp_get_valueretrieval, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_read_mib, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-/* OO arginfo */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_create, 0, 0, 3)
-	ZEND_ARG_INFO(0, version)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, community)
-	ZEND_ARG_INFO(0, timeout)
-	ZEND_ARG_INFO(0, retries)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_snmp_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_setSecurity, 0, 0, 8)
-	ZEND_ARG_INFO(0, sec_level)
-	ZEND_ARG_INFO(0, auth_protocol)
-	ZEND_ARG_INFO(0, auth_passphrase)
-	ZEND_ARG_INFO(0, priv_protocol)
-	ZEND_ARG_INFO(0, priv_passphrase)
-	ZEND_ARG_INFO(0, contextName)
-	ZEND_ARG_INFO(0, contextEngineID)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_get, 0, 0, 1)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, use_orignames)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_walk, 0, 0, 4)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, suffix_keys)
-	ZEND_ARG_INFO(0, max_repetitions)
-	ZEND_ARG_INFO(0, non_repeaters)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp_set, 0, 0, 3)
-	ZEND_ARG_INFO(0, object_id)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 struct objid_query {
 	int count;
 	int offset;
@@ -365,13 +143,13 @@ static const zend_function_entry snmp_functions[] = {
 	PHP_FE(snmpgetnext, 				arginfo_snmpgetnext)
 	PHP_FE(snmpwalk, 				arginfo_snmpwalk)
 	PHP_FE(snmprealwalk, 				arginfo_snmprealwalk)
-	PHP_FALIAS(snmpwalkoid, snmprealwalk, 		arginfo_snmprealwalk)
+	PHP_FALIAS(snmpwalkoid, snmprealwalk, 		arginfo_snmpwalkoid)
 	PHP_FE(snmpset, 				arginfo_snmpset)
 	PHP_FE(snmp_get_quick_print, 			arginfo_snmp_get_quick_print)
 	PHP_FE(snmp_set_quick_print, 			arginfo_snmp_set_quick_print)
 	PHP_FE(snmp_set_enum_print, 			arginfo_snmp_set_enum_print)
 	PHP_FE(snmp_set_oid_output_format, 		arginfo_snmp_set_oid_output_format)
-	PHP_FALIAS(snmp_set_oid_numeric_print, snmp_set_oid_output_format, arginfo_snmp_set_oid_output_format)
+	PHP_FALIAS(snmp_set_oid_numeric_print, snmp_set_oid_output_format, arginfo_snmp_set_oid_numeric_print)
 
 	PHP_FE(snmp2_get, 				arginfo_snmp2_get)
 	PHP_FE(snmp2_getnext, 				arginfo_snmp2_getnext)
@@ -2203,16 +1981,16 @@ static void free_php_snmp_properties(zval *el)  /* {{{ */
 
 /* {{{ php_snmp_class_methods[] */
 static const zend_function_entry php_snmp_class_methods[] = {
-	PHP_ME(snmp,	 __construct,		arginfo_snmp_create,		ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 close,				arginfo_snmp_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 setSecurity,		arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 __construct,		arginfo_class_SNMP___construct,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 close,				arginfo_class_SNMP_close,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 setSecurity,		arginfo_class_SNMP_setSecurity,	ZEND_ACC_PUBLIC)
 
-	PHP_ME(snmp,	 get,				arginfo_snmp_get,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getnext,			arginfo_snmp_get,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 walk,				arginfo_snmp_walk,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 set,				arginfo_snmp_set,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getErrno,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(snmp,	 getError,			arginfo_snmp_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 get,				arginfo_class_SNMP_get,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getnext,			arginfo_class_SNMP_getnext,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 walk,				arginfo_class_SNMP_walk,		ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 set,				arginfo_class_SNMP_set,			ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getErrno,			arginfo_class_SNMP_getErrno,	ZEND_ACC_PUBLIC)
+	PHP_ME(snmp,	 getError,			arginfo_class_SNMP_getError,	ZEND_ACC_PUBLIC)
 
 	PHP_FE_END
 };
