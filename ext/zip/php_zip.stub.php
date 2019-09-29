@@ -66,10 +66,10 @@ class ZipArchive
     /** @return bool */
     public function close() {}
 
-    /** @return int|false */
+    /** @return int */
     public function count() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getStatusString() {}
 
     /** @return bool */
