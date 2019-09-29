@@ -79,7 +79,7 @@ class ZipArchive
     public function addFromString(string $name, string $content) {}
 
     /** @return bool */
-    public function addFile(string $filepath, string $entryname = UNBEKANNT, int $start = 0, int $length = 0) {}
+    public function addFile(string $filepath, string $entryname = UNKNOWN, int $start = 0, int $length = 0) {}
 
     /** @return array|false */
     public function addGlob(string $pattern, int $flags = 0, $options = UNKNOWN) {}
