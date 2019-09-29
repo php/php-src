@@ -3529,7 +3529,7 @@ PHP_FUNCTION(openssl_csr_new)
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_csr_get_subject(mixed $csr [, bool $use_shortnames = TRUE])
+/* {{{ proto mixed openssl_csr_get_subject(mixed csr [, bool use_shortnames = TRUE])
    Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_subject)
 {
@@ -3560,7 +3560,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_csr_get_public_key(mixed $csr [, bool $use_shortnames = TRUE])
+/* {{{ proto mixed openssl_csr_get_public_key(mixed csr [, bool use_shortnames = TRUE])
 	Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_public_key)
 {
