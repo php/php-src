@@ -21,6 +21,8 @@
 
 #include "zend.h"
 
+#ifndef ZEND_TRACK_ARENA_ALLOC
+
 typedef struct _zend_arena zend_arena;
 
 struct _zend_arena {
@@ -47,8 +49,6 @@ static zend_always_inline void zend_arena_destroy(zend_arena *arena)
 		arena = prev;
 	} while (arena);
 }
-
-#define ZEND_ARENA_ALIGNMENT 8U
 
 static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t size)
 {
@@ -109,5 +109,116 @@ static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *
 	ZEND_ASSERT((char*)checkpoint > (char*)arena && (char*)checkpoint <= arena->end);
 	arena->ptr = (char*)checkpoint;
 }
+
+static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+{
+	while (arena) {
+		if ((char*)ptr > (char*)arena && (char*)ptr <= arena->ptr) {
+			return 1;
+		}
+		arena = arena->prev;
+	}
+	return 0;
+}
+
+#else
+
+/* Use normal allocations and keep track of them for mass-freeing.
+ * This is intended for use with asan/valgrind. */
+
+typedef struct _zend_arena zend_arena;
+
+struct _zend_arena {
+	void **ptr;
+	void **end;
+	struct _zend_arena *prev;
+	void *ptrs[0];
+};
+
+#define ZEND_TRACKED_ARENA_SIZE 1000
+
+static zend_always_inline zend_arena *zend_arena_create(size_t _size)
+{
+	zend_arena *arena = (zend_arena*) emalloc(
+		sizeof(zend_arena) + sizeof(void *) * ZEND_TRACKED_ARENA_SIZE);
+	arena->ptr = &arena->ptrs[0];
+	arena->end = &arena->ptrs[ZEND_TRACKED_ARENA_SIZE];
+	arena->prev = NULL;
+	return arena;
+}
+
+static zend_always_inline void zend_arena_destroy(zend_arena *arena)
+{
+	do {
+		zend_arena *prev = arena->prev;
+		void **ptr;
+		for (ptr = arena->ptrs; ptr < arena->ptr; ptr++) {
+			efree(*ptr);
+		}
+		efree(arena);
+		arena = prev;
+	} while (arena);
+}
+
+static zend_always_inline void *zend_arena_alloc(zend_arena **arena_ptr, size_t size)
+{
+	zend_arena *arena = *arena_ptr;
+	if (arena->ptr == arena->end) {
+		*arena_ptr = zend_arena_create(0);
+		(*arena_ptr)->prev = arena;
+		arena = *arena_ptr;
+	}
+
+	return *arena->ptr++ = emalloc(size);
+}
+
+static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
+{
+	int overflow;
+	size_t size;
+	void *ret;
+
+	size = zend_safe_address(unit_size, count, 0, &overflow);
+	if (UNEXPECTED(overflow)) {
+		zend_error(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+	}
+	ret = zend_arena_alloc(arena_ptr, size);
+	memset(ret, 0, size);
+	return ret;
+}
+
+static zend_always_inline void* zend_arena_checkpoint(zend_arena *arena)
+{
+	return arena->ptr;
+}
+
+static zend_always_inline void zend_arena_release(zend_arena **arena_ptr, void *checkpoint)
+{
+	while (1) {
+		zend_arena *arena = *arena_ptr;
+		zend_arena *prev = arena->prev;
+		while (1) {
+			if (arena->ptr == (void **) checkpoint) {
+				return;
+			}
+			if (arena->ptr == arena->ptrs) {
+				break;
+			}
+			arena->ptr--;
+			efree(*arena->ptr);
+		}
+		efree(arena);
+		*arena_ptr = prev;
+		ZEND_ASSERT(*arena_ptr);
+	}
+}
+
+static zend_always_inline zend_bool zend_arena_contains(zend_arena *arena, void *ptr)
+{
+	/* TODO: Dummy */
+	return 1;
+}
+
+#endif
 
 #endif /* _ZEND_ARENA_H_ */

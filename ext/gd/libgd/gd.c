@@ -1256,7 +1256,7 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	if (dx == 0 && dy == 0) {
 		return;
 	}
-	if (abs(dx) > abs(dy)) {
+	if (abs((int)dx) > abs((int)dy)) {
 		if (dx < 0) {
 			tmp = x1;
 			x1 = x2;
@@ -1593,7 +1593,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 	int i, pti;
 	int lx = 0, ly = 0;
 	int fx = 0, fy = 0;
-	int startx, starty, endx, endy;
+	int startx = -1, starty = -1, endx = -1, endy = -1;
 
     if ((s % 360)  == (e % 360)) {
 		s = 0; e = 360;
@@ -1990,7 +1990,8 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
+skip:
+			for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
 
 			l = x;
 		} while (x<=x2);
@@ -2062,7 +2063,8 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 			if (x>x2+1) {
 				FILL_PUSH(y, x2+1, x-1, -dy);
 			}
-skip:		for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+skip:
+			for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
 			l = x;
 		} while (x<=x2);
 	}

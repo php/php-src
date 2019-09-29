@@ -96,7 +96,7 @@ for($index = 0; $index < count($values); $index ++) {
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
 int(0)
@@ -144,36 +144,52 @@ strrpos() expects parameter 1 to be string, array given
 int(0)
 bool(false)
 -- Iteration 16 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 17 --
 int(0)
 bool(false)
 -- Iteration 18 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 19 --
 int(0)
 bool(false)
 -- Iteration 20 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 21 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 22 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 23 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 24 --
 strrpos() expects parameter 1 to be string, resource given
 strrpos() expects parameter 1 to be string, resource given
 -- Iteration 25 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 -- Iteration 26 --
-bool(false)
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 *** Done ***

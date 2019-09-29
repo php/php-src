@@ -11,4 +11,4 @@ class test {
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Default value for parameters with array type can only be an array or NULL in %s on line %d
+Fatal error: Cannot use string as default value for parameter $a of type array in %s on line %d

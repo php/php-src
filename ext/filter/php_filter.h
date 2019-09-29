@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -92,6 +90,7 @@ void php_filter_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_int(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
 

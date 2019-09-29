@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,6 +27,7 @@ extern zend_module_entry sodium_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sodium);
+PHP_MINIT_FUNCTION(sodium_password_hash);
 PHP_MSHUTDOWN_FUNCTION(sodium);
 PHP_RINIT_FUNCTION(sodium);
 PHP_RSHUTDOWN_FUNCTION(sodium);

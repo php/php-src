@@ -20,4 +20,4 @@ bzclose($fp);
 ?>
 DONE
 --EXPECT--
-DONE
+ERROR: bzread()

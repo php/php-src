@@ -14,7 +14,7 @@ BUILD_FILES = \
 	build/php_cxx_compile_stdcxx.m4 \
 	build/pkg.m4 \
 	build/Makefile.global \
-	acinclude.m4 \
+	build/php.m4 \
 	run-tests.php
 
 BUILD_FILES_EXEC = \

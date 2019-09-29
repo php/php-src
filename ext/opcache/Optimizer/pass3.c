@@ -113,47 +113,12 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 					}
 
-					if ((opline->op1_type & (IS_VAR | IS_CV))
+					if (ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opline->opcode)
+					    && (opline->op1_type & (IS_VAR | IS_CV))
 						&& opline->op1.var == next_opline->op1.var
 						&& opline->op1_type == next_opline->op1_type) {
-						switch (opline->opcode) {
-							case ZEND_ADD:
-								opline->opcode = ZEND_ASSIGN_ADD;
-								break;
-							case ZEND_SUB:
-								opline->opcode = ZEND_ASSIGN_SUB;
-								break;
-							case ZEND_MUL:
-								opline->opcode = ZEND_ASSIGN_MUL;
-								break;
-							case ZEND_DIV:
-								opline->opcode = ZEND_ASSIGN_DIV;
-								break;
-							case ZEND_MOD:
-								opline->opcode = ZEND_ASSIGN_MOD;
-								break;
-							case ZEND_POW:
-								opline->opcode = ZEND_ASSIGN_POW;
-								break;
-							case ZEND_CONCAT:
-								opline->opcode = ZEND_ASSIGN_CONCAT;
-								break;
-							case ZEND_SL:
-								opline->opcode = ZEND_ASSIGN_SL;
-								break;
-							case ZEND_SR:
-								opline->opcode = ZEND_ASSIGN_SR;
-								break;
-							case ZEND_BW_OR:
-								opline->opcode = ZEND_ASSIGN_BW_OR;
-								break;
-							case ZEND_BW_AND:
-								opline->opcode = ZEND_ASSIGN_BW_AND;
-								break;
-							case ZEND_BW_XOR:
-								opline->opcode = ZEND_ASSIGN_BW_XOR;
-								break;
-						}
+						opline->extended_value = opline->opcode;
+						opline->opcode = ZEND_ASSIGN_OP;
 						COPY_NODE(opline->result, next_opline->result);
 						MAKE_NOP(next_opline);
 						opline++;

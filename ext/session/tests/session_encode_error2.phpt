@@ -84,7 +84,11 @@ $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     var_dump(session_start());
-    $_SESSION[$input] = "Hello World!";
+    try {
+        $_SESSION[$input] = "Hello World!";
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump(session_encode());
     var_dump(session_destroy());
     $iterator++;
@@ -225,8 +229,7 @@ bool(true)
 
 -- Iteration 21 --
 bool(true)
-
-Warning: Illegal offset type in %s on line 82
+Illegal offset type
 bool(false)
 bool(true)
 

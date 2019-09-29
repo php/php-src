@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -131,7 +129,6 @@ typedef struct _php_period_obj php_period_obj;
 
 struct _php_date_obj {
 	timelib_time *time;
-	HashTable    *props;
 	zend_object   std;
 };
 
@@ -149,7 +146,6 @@ struct _php_timezone_obj {
 		timelib_sll       utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
 		timelib_abbr_info z;          /* TIMELIB_ZONETYPE_ABBR */
 	} tzi;
-	HashTable *props;
 	zend_object std;
 };
 
@@ -161,7 +157,6 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 
 struct _php_interval_obj {
 	timelib_rel_time *diff;
-	HashTable        *props;
 	int               initialized;
 	zend_object       std;
 };
@@ -199,6 +194,8 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 ZEND_END_MODULE_GLOBALS(date)
 
 #define DATEG(v) ZEND_MODULE_GLOBALS_ACCESSOR(date, v)
+
+PHPAPI time_t php_time();
 
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(char *string, zend_long *now);

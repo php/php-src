@@ -28,7 +28,7 @@ dnl  OF THE POSSIBILITY OF SUCH DAMAGE.
 dnl
 dnl PTHREADS_FLAGS
 dnl
-dnl Set some magic defines to achieve POSIX threads conformance
+dnl Set some magic defines to achieve POSIX threads conformance.
 dnl
 AC_DEFUN([PTHREADS_FLAGS],[
   if test -z "$host_alias" && test -n "$host"; then
@@ -52,18 +52,17 @@ AC_DEFUN([PTHREADS_FLAGS],[
     PTHREAD_FLAGS=-D_REENTRANT;;
   *sco*)
     PTHREAD_FLAGS=-D_REENTRANT;;
-dnl Solves sigwait() problem, creates problems with u_long etc.
-dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 -D_XOPEN_SOURCE_EXTENDED=1";;
   esac
 
   if test -n "$PTHREAD_FLAGS"; then
     CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
   fi
-])dnl
+])
+
 dnl
 dnl PTHREADS_CHECK_COMPILE
 dnl
-dnl Check whether the current setup can use POSIX threads calls
+dnl Check whether the current setup can use POSIX threads calls.
 dnl
 AC_DEFUN([PTHREADS_CHECK_COMPILE], [
 AC_LINK_IFELSE([ AC_LANG_SOURCE([
@@ -85,11 +84,12 @@ int main() {
   ], [
   pthreads_checked=no
   ]
-) ] )dnl
+) ] )
+
 dnl
-dnl PTHREADS_CHECK()
+dnl PTHREADS_CHECK
 dnl
-dnl Try to find a way to enable POSIX threads
+dnl Try to find a way to enable POSIX threads.
 dnl
 dnl  Magic flags
 dnl  -kthread          gcc (FreeBSD)
@@ -102,14 +102,6 @@ dnl  -qthreaded        AIX cc V5
 dnl  -threads          gcc (HP-UX)
 dnl
 AC_DEFUN([PTHREADS_CHECK],[
-
-save_CFLAGS=$CFLAGS
-save_LIBS=$LIBS
-PTHREADS_ASSIGN_VARS
-PTHREADS_CHECK_COMPILE
-LIBS=$save_LIBS
-CFLAGS=$save_CFLAGS
-
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=
 if test "$pthreads_working" != "yes"; then
@@ -145,21 +137,4 @@ fi
 if test "x$ac_cv_pthreads_cflags" != "x" -o "x$ac_cv_pthreads_lib" != "x"; then
   pthreads_working="yes"
 fi
-
-if test "$pthreads_working" = "yes"; then
-  threads_result="POSIX-Threads found"
-else
-  threads_result="POSIX-Threads not found"
-fi
-])dnl
-dnl
-dnl
-AC_DEFUN([PTHREADS_ASSIGN_VARS],[
-if test -n "$ac_cv_pthreads_lib"; then
-  LIBS="$LIBS -l$ac_cv_pthreads_lib"
-fi
-
-if test -n "$ac_cv_pthreads_cflags"; then
-  CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
-fi
-])dnl
+])

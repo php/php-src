@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +22,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
+#include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 
@@ -61,50 +60,6 @@ struct php_msgbuf {
 
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_get_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, perms)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_send, 0, 0, 3)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, msgtype)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, serialize)
-	ZEND_ARG_INFO(0, blocking)
-	ZEND_ARG_INFO(1, errorcode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, desiredmsgtype)
-	ZEND_ARG_INFO(1, msgtype)
-	ZEND_ARG_INFO(0, maxsize)
-	ZEND_ARG_INFO(1, message)
-	ZEND_ARG_INFO(0, unserialize)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(1, errorcode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_remove_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, queue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
-	ZEND_ARG_INFO(0, queue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_set_queue, 0, 0, 2)
-	ZEND_ARG_INFO(0, queue)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_queue_exists, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ sysvmsg_functions[]
  *
@@ -370,9 +325,9 @@ PHP_FUNCTION(msg_receive)
 
 	if (result >= 0) {
 		/* got it! */
-		ZEND_TRY_ASSIGN_LONG(out_msgtype, messagebuffer->mtype);
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, messagebuffer->mtype);
 		if (zerrcode) {
-			ZEND_TRY_ASSIGN_LONG(zerrcode, 0);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, 0);
 		}
 
 		RETVAL_TRUE;
@@ -384,20 +339,20 @@ PHP_FUNCTION(msg_receive)
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash)) {
 				php_error_docref(NULL, E_WARNING, "message corrupted");
-				ZEND_TRY_ASSIGN_FALSE(out_message);
+				ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 				RETVAL_FALSE;
 			} else {
-				ZEND_TRY_ASSIGN_VALUE(out_message, &tmp);
+				ZEND_TRY_ASSIGN_REF_TMP(out_message, &tmp);
 			}
 			PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		} else {
-			ZEND_TRY_ASSIGN_STRINGL(out_message, messagebuffer->mtext, result);
+			ZEND_TRY_ASSIGN_REF_STRINGL(out_message, messagebuffer->mtext, result);
 		}
 	} else {
-		ZEND_TRY_ASSIGN_LONG(out_msgtype, 0);
-		ZEND_TRY_ASSIGN_FALSE(out_message);
+		ZEND_TRY_ASSIGN_REF_LONG(out_msgtype, 0);
+		ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 		if (zerrcode) {
-			ZEND_TRY_ASSIGN_LONG(zerrcode, errno);
+			ZEND_TRY_ASSIGN_REF_LONG(zerrcode, errno);
 		}
 	}
 	efree(messagebuffer);
@@ -484,7 +439,7 @@ PHP_FUNCTION(msg_send)
 	if (result == -1) {
 		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
-			ZEND_TRY_ASSIGN_LONG(zerror, errno);
+			ZEND_TRY_ASSIGN_REF_LONG(zerror, errno);
 		}
 	} else {
 		RETVAL_TRUE;

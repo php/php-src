@@ -1,7 +1,5 @@
 /*
 	+----------------------------------------------------------------------+
-	| PHP Version 7                                                        |
-	+----------------------------------------------------------------------+
 	| Copyright (c) The PHP Group                                          |
 	+----------------------------------------------------------------------+
 	| This source file is subject to version 3.01 of the PHP license,      |
@@ -52,9 +50,7 @@
 #if HAVE_CTYPE
 #include "ext/ctype/php_ctype.h"
 #endif
-#if HAVE_DATE
 #include "ext/date/php_date.h"
-#endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
 #endif
@@ -91,9 +87,7 @@
 #include "ext/xml/php_xml.h"
 #endif
 #include "ext/com_dotnet/php_com_dotnet.h"
-#ifdef HAVE_SPL
 #include "ext/spl/php_spl.h"
-#endif
 #if HAVE_XML && HAVE_XMLREADER
 #include "ext/xmlreader/php_xmlreader.h"
 #endif
@@ -116,15 +110,11 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_CTYPE
 	,phpext_ctype_ptr
 #endif
-#if HAVE_DATE
 	,phpext_date_ptr
-#endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
 #endif
-#if HAVE_HASH
 	,phpext_hash_ptr
-#endif
 #if HAVE_ICONV
 	,phpext_iconv_ptr
 #endif
@@ -157,9 +147,7 @@ static zend_module_entry * const php_builtin_extensions[] = {
 #if HAVE_XML
 	,phpext_xml_ptr
 #endif
-#if HAVE_SPL
 	,phpext_spl_ptr
-#endif
 #if HAVE_XML && HAVE_XMLREADER
 	,phpext_xmlreader_ptr
 #endif

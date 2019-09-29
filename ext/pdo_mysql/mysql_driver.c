@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -568,9 +566,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",  NULL,	0 },
 		{ "dbname",   "",	0 },
-		{ "host",   "localhost",	0 },
-		{ "port",   "3306",	0 },
+		{ "host",     "localhost",	0 },
+		{ "port",     "3306",	0 },
 		{ "unix_socket",  PDO_DEFAULT_MYSQL_UNIX_ADDR,	0 },
+		{ "user",     NULL,	0 },
+		{ "password", NULL,	0 },
 	};
 	int connect_opts = 0
 #ifdef CLIENT_MULTI_RESULTS
@@ -596,7 +596,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	PDO_DBG_INF("multi results");
 #endif
 
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 7);
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 
@@ -806,6 +806,14 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
 #endif
 		unix_socket = vars[4].optval;
+	}
+
+	if (!dbh->username && vars[5].optval) {
+		dbh->username = pestrdup(vars[5].optval, dbh->is_persistent);
+	}
+
+	if (!dbh->password && vars[6].optval) {
+		dbh->password = pestrdup(vars[6].optval, dbh->is_persistent);
 	}
 
 	/* TODO: - Check zval cache + ZTS */

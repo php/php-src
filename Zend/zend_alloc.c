@@ -57,10 +57,8 @@
 #include "zend_operators.h"
 #include "zend_multiply.h"
 #include "zend_bitset.h"
+#include <signal.h>
 
-#ifdef HAVE_SIGNAL_H
-# include <signal.h>
-#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -77,9 +75,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <fcntl.h>
 #include <errno.h>
 
@@ -113,6 +109,15 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
  * so pretend it doesn't exist. */
 #ifndef __linux__
 # undef HAVE_MREMAP
+#endif
+
+#ifndef __APPLE__
+# define ZEND_MM_FD -1
+#else
+/* Mac allows to track anonymous page via vmmap per TAG id.
+ * user land applications are allowed to take from 240 to 255.
+ */
+# define ZEND_MM_FD (250<<24)
 #endif
 
 #ifndef ZEND_MM_STAT
@@ -270,6 +275,7 @@ struct _zend_mm_heap {
 			void      *(*_realloc)(void*, size_t  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 		} debug;
 	} custom_heap;
+	HashTable *tracked_allocs;
 #endif
 };
 
@@ -420,7 +426,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	flags |= MAP_FIXED | MAP_EXCL;
 #endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
-	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, ZEND_MM_FD, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR && !defined(MAP_EXCL)
@@ -464,7 +470,7 @@ static void *zend_mm_mmap(size_t size)
 	}
 #endif
 
-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, ZEND_MM_FD, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR
@@ -536,50 +542,6 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 #endif
 }
 
-static zend_always_inline int zend_mm_bitset_find_zero(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != (zend_mm_bitset)-1) {
-			return i * ZEND_MM_BITSET_LEN + zend_mm_bitset_nts(tmp);
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
-static zend_always_inline int zend_mm_bitset_find_one(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != 0) {
-			return i * ZEND_MM_BITSET_LEN + zend_ulong_ntz(tmp);
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
-static zend_always_inline int zend_mm_bitset_find_zero_and_set(zend_mm_bitset *bitset, int size)
-{
-	int i = 0;
-
-	do {
-		zend_mm_bitset tmp = bitset[i];
-		if (tmp != (zend_mm_bitset)-1) {
-			int n = zend_mm_bitset_nts(tmp);
-			bitset[i] |= Z_UL(1) << n;
-			return i * ZEND_MM_BITSET_LEN + n;
-		}
-		i++;
-	} while (i < size);
-	return -1;
-}
-
 static zend_always_inline int zend_mm_bitset_is_set(zend_mm_bitset *bitset, int bit)
 {
 	return ZEND_BIT_TEST(bitset, bit);
@@ -639,7 +601,7 @@ static zend_always_inline void zend_mm_bitset_reset_range(zend_mm_bitset *bitset
 
 		if (pos != end) {
 			/* reset bits from "bit" to ZEND_MM_BITSET_LEN-1 */
-			tmp = ~((Z_L(1) << bit) - 1);
+			tmp = ~((Z_UL(1) << bit) - 1);
 			bitset[pos++] &= ~tmp;
 			while (pos != end) {
 				/* set all bits */
@@ -986,7 +948,7 @@ get_chunk:
 				heap->cached_chunks = chunk->next;
 			} else {
 #if ZEND_MM_LIMIT
-				if (UNEXPECTED(heap->real_size + ZEND_MM_CHUNK_SIZE > heap->limit)) {
+				if (UNEXPECTED(ZEND_MM_CHUNK_SIZE > heap->limit - heap->real_size)) {
 					if (zend_mm_gc(heap)) {
 						goto get_chunk;
 					} else if (heap->overflow == 0) {
@@ -1512,8 +1474,8 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 			}
 		} else /* if (new_size > old_size) */ {
 #if ZEND_MM_LIMIT
-			if (UNEXPECTED(heap->real_size + (new_size - old_size) > heap->limit)) {
-				if (zend_mm_gc(heap) && heap->real_size + (new_size - old_size) <= heap->limit) {
+			if (UNEXPECTED(new_size - old_size > heap->limit - heap->real_size)) {
+				if (zend_mm_gc(heap) && new_size - old_size <= heap->limit - heap->real_size) {
 					/* pass */
 				} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
@@ -1799,8 +1761,8 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	void *ptr;
 
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(heap->real_size + new_size > heap->limit)) {
-		if (zend_mm_gc(heap) && heap->real_size + new_size <= heap->limit) {
+	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {
+		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
 			/* pass */
 		} else if (heap->overflow == 0) {
 #if ZEND_DEBUG
@@ -2230,6 +2192,11 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 }
 #endif
 
+#if ZEND_MM_CUSTOM
+static void *tracked_malloc(size_t size);
+static void tracked_free_all();
+#endif
+
 void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 {
 	zend_mm_chunk *p;
@@ -2237,6 +2204,19 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
+		if (heap->custom_heap.std._malloc == tracked_malloc) {
+			if (silent) {
+				tracked_free_all();
+			}
+			zend_hash_clean(heap->tracked_allocs);
+			if (full) {
+				zend_hash_destroy(heap->tracked_allocs);
+				free(heap->tracked_allocs);
+				/* Make sure the heap free below does not use tracked_free(). */
+				heap->custom_heap.std._free = free;
+			}
+		}
+
 		if (full) {
 			if (ZEND_DEBUG && heap->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
 				heap->custom_heap.debug._free(heap ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
@@ -2421,26 +2401,48 @@ ZEND_API int is_zend_ptr(const void *ptr)
 	return 0;
 }
 
+#if ZEND_MM_CUSTOM
+
+static ZEND_COLD void* ZEND_FASTCALL _malloc_custom(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		return AG(mm_heap)->custom_heap.debug._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else {
+		return AG(mm_heap)->custom_heap.std._malloc(size);
+	}
+}
+
+static ZEND_COLD void ZEND_FASTCALL _efree_custom(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		AG(mm_heap)->custom_heap.debug._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else {
+		AG(mm_heap)->custom_heap.std._free(ptr);
+    }
+}
+
+static ZEND_COLD void* ZEND_FASTCALL _realloc_custom(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		return AG(mm_heap)->custom_heap.debug._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else {
+		return AG(mm_heap)->custom_heap.std._realloc(ptr, size);
+	}
+}
+#endif
+
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 #undef _emalloc
 
 #if ZEND_MM_CUSTOM
 # define ZEND_MM_CUSTOM_ALLOCATOR(size) do { \
 		if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) { \
-			if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) { \
-				return AG(mm_heap)->custom_heap.debug._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
-			} else { \
-				return AG(mm_heap)->custom_heap.std._malloc(size); \
-			} \
+			return _malloc_custom(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 		} \
 	} while (0)
 # define ZEND_MM_CUSTOM_DEALLOCATOR(ptr) do { \
 		if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) { \
-			if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) { \
-				AG(mm_heap)->custom_heap.debug._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
-			} else { \
-				AG(mm_heap)->custom_heap.std._free(ptr); \
-			} \
+			_efree_custom(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 			return; \
 		} \
 	} while (0)
@@ -2525,11 +2527,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 {
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
-		if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-			return AG(mm_heap)->custom_heap.debug._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		} else {
-			return AG(mm_heap)->custom_heap.std._malloc(size);
-		}
+		return _malloc_custom(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 #endif
 	return zend_mm_alloc_heap(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2539,11 +2537,7 @@ ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_OR
 {
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
-		if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-			AG(mm_heap)->custom_heap.debug._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		} else {
-			AG(mm_heap)->custom_heap.std._free(ptr);
-	    }
+		_efree_custom(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		return;
 	}
 #endif
@@ -2554,11 +2548,7 @@ ZEND_API void* ZEND_FASTCALL _erealloc(void *ptr, size_t size ZEND_FILE_LINE_DC 
 {
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
-		if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-			return AG(mm_heap)->custom_heap.debug._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		} else {
-			return AG(mm_heap)->custom_heap.std._realloc(ptr, size);
-		}
+		return _realloc_custom(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 #endif
 	return zend_mm_realloc_heap(AG(mm_heap), ptr, size, 0, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2568,11 +2558,7 @@ ZEND_API void* ZEND_FASTCALL _erealloc2(void *ptr, size_t size, size_t copy_size
 {
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
-		if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-			return AG(mm_heap)->custom_heap.debug._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-		} else {
-			return AG(mm_heap)->custom_heap.std._realloc(ptr, size);
-		}
+		return _realloc_custom(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 #endif
 	return zend_mm_realloc_heap(AG(mm_heap), ptr, size, 1, copy_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2703,6 +2689,42 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
 
+#if ZEND_MM_CUSTOM
+static void *tracked_malloc(size_t size)
+{
+	void *ptr = __zend_malloc(size);
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	return ptr;
+}
+
+static void tracked_free(void *ptr) {
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	free(ptr);
+}
+
+static void *tracked_realloc(void *ptr, size_t new_size) {
+	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	zend_hash_index_del(AG(mm_heap)->tracked_allocs, h);
+	ptr = __zend_realloc(ptr, new_size);
+	h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
+	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	return ptr;
+}
+
+static void tracked_free_all() {
+	HashTable *tracked_allocs = AG(mm_heap)->tracked_allocs;
+	zend_ulong h;
+	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
+		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
+		free(ptr);
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
 	char *tmp;
@@ -2710,12 +2732,23 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #if ZEND_MM_CUSTOM
 	tmp = getenv("USE_ZEND_ALLOC");
 	if (tmp && !zend_atoi(tmp, 0)) {
-		alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
-		memset(alloc_globals->mm_heap, 0, sizeof(zend_mm_heap));
-		alloc_globals->mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		alloc_globals->mm_heap->custom_heap.std._malloc = __zend_malloc;
-		alloc_globals->mm_heap->custom_heap.std._free = free;
-		alloc_globals->mm_heap->custom_heap.std._realloc = __zend_realloc;
+		zend_bool tracked = (tmp = getenv("USE_TRACKED_ALLOC")) && zend_atoi(tmp, 0);
+		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
+		memset(mm_heap, 0, sizeof(zend_mm_heap));
+		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		if (!tracked) {
+			/* Use system allocator. */
+			mm_heap->custom_heap.std._malloc = __zend_malloc;
+			mm_heap->custom_heap.std._free = free;
+			mm_heap->custom_heap.std._realloc = __zend_realloc;
+		} else {
+			/* Use system allocator and track allocations for auto-free. */
+			mm_heap->custom_heap.std._malloc = tracked_malloc;
+			mm_heap->custom_heap.std._free = tracked_free;
+			mm_heap->custom_heap.std._realloc = tracked_realloc;
+			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
+			zend_hash_init(mm_heap->tracked_allocs, 1024, NULL, NULL, 1);
+		}
 		return;
 	}
 #endif

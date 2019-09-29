@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -605,7 +603,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "insert_id",			sizeof("insert_id") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_info", 		sizeof("server_info") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "server_version", 	sizeof("server_version") - 1, ZEND_ACC_PUBLIC);
-	zend_declare_property_null(ce, "stat", 				sizeof("stat") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "sqlstate", 			sizeof("sqlstate") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "protocol_version", 	sizeof("protocol_version") - 1,  ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "thread_id",			sizeof("thread_id") - 1, ZEND_ACC_PUBLIC);
@@ -1198,7 +1195,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	if (into_object) {
 		zend_string *class_name = NULL;
 
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sz", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sa", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
 			return;
 		}
 		if (class_name == NULL) {

@@ -17,6 +17,10 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
+$dir = __DIR__ . '/file_put_contents_variation8';
+mkdir($dir);
+chdir($dir);
+
 /* An array of filenames */
 $names_arr = array(
   -1,
@@ -50,6 +54,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo $e->getMessage(), "\n";
   }
 }
+rmdir($dir);
 
 echo "\n*** Done ***\n";
 ?>

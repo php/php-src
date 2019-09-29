@@ -2,7 +2,7 @@
 htmlentities() test 13 (default_charset / EUC-JP)
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+internal_encoding=pass
 default_charset=EUC-JP
 filter.default=unsafe_raw
 --FILE--
@@ -13,5 +13,5 @@ filter.default=unsafe_raw
 --EXPECTF--
 EUC-JP
 
-Strict Standards: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s on line %d
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s on line %d
 string(6) "¡¢¡£¡¤"

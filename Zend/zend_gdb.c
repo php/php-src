@@ -123,9 +123,10 @@ ZEND_API int zend_gdb_present(void)
 				}
 				pid = atoi(s);
 				if (pid) {
+					char out[1024];
 					sprintf(buf, "/proc/%d/exe", (int)pid);
-					if (readlink(buf, buf, sizeof(buf) - 1) > 0) {
-						if (strstr(buf, "gdb")) {
+					if (readlink(buf, out, sizeof(out) - 1) > 0) {
+						if (strstr(out, "gdb")) {
 							ret = 1;
 						}
 					}

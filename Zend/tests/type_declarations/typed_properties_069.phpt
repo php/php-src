@@ -22,6 +22,6 @@ var_dump(nonNumericStringRef());
 
 ?>
 --EXPECT--
-Typed property Foo::$i must be int, string used
+Cannot assign string to property Foo::$i of type int
 Typed static property Foo::$i must not be accessed before initialization
 string(1) "x"

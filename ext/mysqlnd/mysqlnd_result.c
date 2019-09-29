@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -190,8 +188,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 		result->row_packet = NULL;
 	}
 
-	mysqlnd_mempool_restore_state(result->result_set_memory_pool);
-
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -246,7 +242,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 {
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
-	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
+	DBG_INF_FMT("Freeing "PRIu64" row(s)", set->row_count);
 
 	mysqlnd_error_info_free_contents(&set->error_info);
 
@@ -261,8 +257,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		set->row_buffers = NULL;
 	}
 
-	mysqlnd_mempool_restore_state(set->result_set_memory_pool);
-
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -275,6 +269,12 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 	DBG_ENTER("mysqlnd_res::free_result_buffers");
 	DBG_INF_FMT("%s", result->unbuf? "unbuffered":(result->stored_data? "buffered":"unknown"));
 
+	if (result->meta) {
+		ZEND_ASSERT(zend_arena_contains(result->memory_pool->arena, result->meta));
+		result->meta->m->free_metadata(result->meta);
+		result->meta = NULL;
+	}
+
 	if (result->unbuf) {
 		result->unbuf->m.free_result(result->unbuf, result->conn? result->conn->stats : NULL);
 		result->unbuf = NULL;
@@ -282,6 +282,9 @@ MYSQLND_METHOD(mysqlnd_res, free_result_buffers)(MYSQLND_RES * result)
 		result->stored_data->m.free_result(result->stored_data);
 		result->stored_data = NULL;
 	}
+
+	mysqlnd_mempool_restore_state(result->memory_pool);
+	mysqlnd_mempool_save_state(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -296,10 +299,12 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal)(MYSQLND_RES * re
 
 	result->m.free_result_buffers(result);
 
-	if (result->meta) {
-		result->meta->m->free_metadata(result->meta);
-		result->meta = NULL;
+	if (result->conn) {
+		result->conn->m->free_reference(result->conn);
+		result->conn = NULL;
 	}
+
+	mysqlnd_mempool_destroy(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -311,16 +316,9 @@ static
 void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 {
 	DBG_ENTER("mysqlnd_res::free_result_internal");
+
 	result->m.skip_result(result);
-
 	result->m.free_result_contents(result);
-
-	if (result->conn) {
-		result->conn->m->free_reference(result->conn);
-		result->conn = NULL;
-	}
-
-	mysqlnd_mempool_destroy(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -354,7 +352,8 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 
 	/* It's safe to reread without freeing */
 	if (FAIL == result->meta->m->read_metadata(result->meta, conn, result)) {
-		result->m.free_result_contents(result);
+		result->meta->m->free_metadata(result->meta);
+		result->meta = NULL;
 		DBG_RETURN(FAIL);
 	}
 	/* COM_FIELD_LIST is broken and has premature EOF, thus we need to hack here and in mysqlnd_res_meta.c */
@@ -390,7 +389,9 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 		UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 
 		if (FAIL == (ret = PACKET_READ(conn, &rset_header))) {
-			php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			if (conn->error_info->error_no != CR_SERVER_GONE_ERROR) {
+				php_error_docref(NULL, E_WARNING, "Error reading result set's header");
+			}
 			break;
 		}
 
@@ -514,7 +515,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 					DBG_ERR("Error occurred while reading the EOF packet");
 					result->m.free_result_contents(result);
-					mysqlnd_mempool_destroy(result->memory_pool);
 					if (!stmt) {
 						conn->current_result = NULL;
 					} else {
@@ -1925,6 +1925,8 @@ mysqlnd_result_init(const unsigned int field_count)
 	ret->field_count	= field_count;
 	ret->m = *mysqlnd_result_get_methods();
 
+	mysqlnd_mempool_save_state(pool);
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1940,7 +1942,6 @@ mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_cou
 
 	DBG_ENTER("mysqlnd_result_unbuffered_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
@@ -1975,12 +1976,10 @@ mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field
 
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 
@@ -2018,12 +2017,10 @@ mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_co
 
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
-	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 

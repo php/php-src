@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -118,13 +116,13 @@ static HRESULT STDMETHODCALLTYPE stm_read(IStream *This, void *pv, ULONG cb, ULO
 
 static HRESULT STDMETHODCALLTYPE stm_write(IStream *This, void const *pv, ULONG cb, ULONG *pcbWritten)
 {
-	ULONG nwrote;
+	ssize_t nwrote;
 	FETCH_STM();
 
-	nwrote = (ULONG)php_stream_write(stm->stream, pv, cb);
+	nwrote = php_stream_write(stm->stream, pv, cb);
 
 	if (pcbWritten) {
-		*pcbWritten = nwrote > 0 ? nwrote : 0;
+		*pcbWritten = nwrote > 0 ? (ULONG)nwrote : 0;
 	}
 	if (nwrote > 0) {
 		return S_OK;
@@ -382,7 +380,6 @@ CPH_METHOD(SaveToFile)
 	if (helper->ipf) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p!|b",
 					&filename, &filename_len, &remember)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
 			return;
 		}
 
@@ -446,7 +443,6 @@ CPH_METHOD(LoadFromFile)
 
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|l",
 					&filename, &filename_len, &flags)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
 			return;
 		}
 
@@ -542,7 +538,6 @@ CPH_METHOD(LoadFromStream)
 	CPH_FETCH();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 
@@ -604,7 +599,6 @@ CPH_METHOD(SaveToStream)
 	CPH_NO_OBJ();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 
@@ -652,7 +646,6 @@ CPH_METHOD(__construct)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|O!",
 				&zobj, php_com_variant_class_entry)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid arguments");
 		return;
 	}
 

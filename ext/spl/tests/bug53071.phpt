@@ -23,5 +23,5 @@ echo "Done.\n";
 
 ?>
 --EXPECT--
-int(4)
+int(3)
 Done.

@@ -302,6 +302,10 @@ void zend_shared_alloc_shutdown(void)
 	g_shared_alloc_handler = NULL;
 #ifndef ZEND_WIN32
 	close(lock_file);
+
+# ifdef ZTS
+	tsrm_mutex_free(zts_lock);
+# endif
 #endif
 }
 
@@ -610,6 +614,25 @@ void zend_accel_shared_protect(int mode)
 
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode);
+	}
+#elif defined(ZEND_WIN32)
+	int i;
+
+	if (!smm_shared_globals) {
+		return;
+	}
+
+	if (mode) {
+		mode = PAGE_READONLY;
+	} else {
+		mode = PAGE_READWRITE;
+	}
+
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
+		DWORD oldProtect;
+		if (!VirtualProtect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->end, mode, &oldProtect)) {
+			zend_accel_error(ACCEL_LOG_ERROR, "Failed to protect memory");
+		}
 	}
 #endif
 }

@@ -32,6 +32,6 @@ echo "*** Done ***";
 int(44)
 int(44)
 int(44)
-bool(false)
+int(63)
 int(55)
 *** Done ***

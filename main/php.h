@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -128,8 +126,6 @@ typedef int pid_t;
 #endif
 #include <assert.h>
 
-#define APACHE 0
-
 #if HAVE_UNIX_H
 #include <unix.h>
 #endif
@@ -230,10 +226,6 @@ typedef unsigned int socklen_t;
 #include "zend_stack.h"
 #include <string.h>
 
-#ifndef HAVE_STRERROR
-char *strerror(int);
-#endif
-
 #if HAVE_PWD_H
 # ifdef PHP_WIN32
 #include "win32/param.h"
@@ -243,9 +235,7 @@ char *strerror(int);
 # endif
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
@@ -347,7 +337,7 @@ static inline ZEND_ATTRIBUTE_DEPRECATED void php_std_error_handling() {}
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args) PHP_ATTRIBUTE_FORMAT(printf, 4, 0);
 
 /* PHPAPI void php_error(int type, const char *format, ...); */
-PHPAPI ZEND_COLD void php_error_docref0(const char *docref, int type, const char *format, ...)
+PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
@@ -357,8 +347,6 @@ PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, 
 PHPAPI ZEND_COLD void php_win32_docref2_from_error(DWORD error, const char *param1, const char *param2);
 #endif
 END_EXTERN_C()
-
-#define php_error_docref php_error_docref0
 
 #define zenderror phperror
 #define zendlex phplex
@@ -377,6 +365,11 @@ PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 PHPAPI void php_com_initialize(void);
 PHPAPI char *php_get_current_user(void);
+
+PHPAPI const char *php_get_internal_encoding(void);
+PHPAPI const char *php_get_input_encoding(void);
+PHPAPI const char *php_get_output_encoding(void);
+PHPAPI extern void (*php_internal_encoding_changed)(void);
 END_EXTERN_C()
 
 /* PHP-named Zend macro wrappers */
@@ -450,40 +443,5 @@ END_EXTERN_C()
 #define PHP_CONNECTION_TIMEOUT 2
 
 #include "php_reentrancy.h"
-
-/* Finding offsets of elements within structures.
- * Taken from the Apache code, which in turn, was taken from X code...
- */
-
-#ifndef XtOffset
-#if defined(CRAY) || (defined(__arm) && !(defined(LINUX) || defined(__riscos__)))
-#ifdef __STDC__
-#define XtOffset(p_type, field) _Offsetof(p_type, field)
-#else
-#ifdef CRAY2
-#define XtOffset(p_type, field) \
-    (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
-
-#else /* !CRAY2 */
-
-#define XtOffset(p_type, field) ((unsigned int)&(((p_type)NULL)->field))
-
-#endif /* !CRAY2 */
-#endif /* __STDC__ */
-#else /* ! (CRAY || __arm) */
-
-#define XtOffset(p_type, field) \
-    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
-
-#endif /* !CRAY */
-#endif /* ! XtOffset */
-
-#ifndef XtOffsetOf
-#ifdef offsetof
-#define XtOffsetOf(s_type, field) offsetof(s_type, field)
-#else
-#define XtOffsetOf(s_type, field) XtOffset(s_type*, field)
-#endif
-#endif /* !XtOffsetOf */
 
 #endif

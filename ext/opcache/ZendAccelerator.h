@@ -185,10 +185,17 @@ typedef struct _zend_accel_directives {
 	zend_bool      huge_code_pages;
 #endif
 	char *preload;
+#ifndef ZEND_WIN32
+	char *preload_user;
+#endif
+#ifdef ZEND_WIN32
+	char *cache_id;
+#endif
 #ifdef HAVE_JIT
 	zend_long      jit;
 	zend_long      jit_buffer_size;
 	zend_long      jit_debug;
+	zend_long      jit_bisect_limit;
 #endif
 } zend_accel_directives;
 
@@ -196,6 +203,8 @@ typedef struct _zend_accel_globals {
 	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */
+	zend_bool               accelerator_enabled; /* accelerator enabled for current request */
+	zend_bool               pcre_reseted;
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	zend_string            *cwd;                  /* current working directory or NULL */
@@ -209,7 +218,6 @@ typedef struct _zend_accel_globals {
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
-	char                    system_id[32];
 	HashTable               xlat_table;
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
@@ -219,6 +227,9 @@ typedef struct _zend_accel_globals {
 	void                   *arena_mem;
 	zend_persistent_script *current_persistent_script;
 	zend_bool               is_immutable_class;
+#ifdef HAVE_JIT
+	zend_bool               jit_enabled;
+#endif
 	/* cache to save hash lookup on the same INCLUDE opcode */
 	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
@@ -273,6 +284,10 @@ typedef struct _zend_accel_shared_globals {
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
+extern char accel_system_id[32];
+#ifdef ZEND_WIN32
+extern char accel_uname_id[32];
+#endif
 extern zend_bool accel_startup_ok;
 extern zend_bool file_cache_only;
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -314,5 +329,20 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
+
+/* memory write protection */
+#define SHM_PROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(1); \
+		} \
+	} while (0)
+
+#define SHM_UNPROTECT() \
+	do { \
+		if (ZCG(accel_directives).protect_memory) { \
+			zend_accel_shared_protect(0); \
+		} \
+	} while (0)
 
 #endif /* ZEND_ACCELERATOR_H */

@@ -1,5 +1,3 @@
-static const char rcsid[] = "#(@) $Id$";
-
 /*
 
 	   Encode or decode file as MIME base64 (RFC 1341)

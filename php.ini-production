@@ -99,19 +99,14 @@
 ;   Production Value: Off
 
 ; display_startup_errors
-;   Default Value: Off
+;   Default Value: On
 ;   Development Value: On
 ;   Production Value: Off
 
 ; error_reporting
-;   Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
+;   Default Value: E_ALL
 ;   Development Value: E_ALL
 ;   Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
-
-; html_errors
-;   Default Value: On
-;   Development Value: On
-;   Production value: On
 
 ; log_errors
 ;   Default Value: Off
@@ -359,6 +354,12 @@ zend.enable_gc = On
 ; Default: ""
 ;zend.script_encoding =
 
+; Allows to include or exclude arguments from stack traces generated for exceptions
+; Default: Off
+; In production, it is recommended to turn this setting on to prohibit the output 
+; of sensitive information in stack traces
+zend.exception_ignore_args = On
+
 ;;;;;;;;;;;;;;;;;
 ; Miscellaneous ;
 ;;;;;;;;;;;;;;;;;
@@ -450,7 +451,7 @@ memory_limit = 128M
 ;   E_ALL & ~E_NOTICE  (Show all errors, except for notices)
 ;   E_ALL & ~E_NOTICE & ~E_STRICT  (Show all errors, except for notices and coding standards warnings.)
 ;   E_COMPILE_ERROR|E_RECOVERABLE_ERROR|E_ERROR|E_CORE_ERROR  (Show only errors)
-; Default Value: E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED
+; Default Value: E_ALL
 ; Development Value: E_ALL
 ; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; http://php.net/error-reporting
@@ -474,11 +475,9 @@ error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 display_errors = Off
 
 ; The display of errors which occur during PHP's startup sequence are handled
-; separately from display_errors. PHP's default behavior is to suppress those
-; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. We strongly recommend you
-; set this to 'off' for production servers.
-; Default Value: Off
+; separately from display_errors. We strongly recommend you set this to 'off'
+; for production servers to avoid leaking configuration details.
+; Default Value: On
 ; Development Value: On
 ; Production Value: Off
 ; http://php.net/display-startup-errors
@@ -530,11 +529,8 @@ report_memleaks = On
 ; error message as HTML for easier reading. This directive controls whether
 ; the error message is formatted as HTML or not.
 ; Note: This directive is hardcoded to Off for the CLI SAPI
-; Default Value: On
-; Development Value: On
-; Production value: On
 ; http://php.net/html-errors
-html_errors = On
+;html_errors = On
 
 ; If html_errors is set to On *and* docref_root is not empty, then PHP
 ; produces clickable error messages that direct to a page describing the error
@@ -588,6 +584,7 @@ html_errors = On
 ;   ascii (all printable ASCII characters and NL)
 ;   no-ctrl (all characters except control characters)
 ;   all (all characters)
+;   raw (like "all", but messages are not split at newlines)
 ; http://php.net/syslog.filter
 ;syslog.filter = ascii
 
@@ -896,13 +893,13 @@ default_socket_timeout = 60
 ;
 ;extension=bz2
 ;extension=curl
+;extension=ffi
 ;extension=fileinfo
 ;extension=gd2
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
 ;extension=imap
-;extension=interbase
 ;extension=ldap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
@@ -951,10 +948,10 @@ cli_server.color = On
 ;date.default_longitude = 35.2333
 
 ; http://php.net/date.sunrise-zenith
-;date.sunrise_zenith = 90.583333
+;date.sunrise_zenith = 90.833333
 
 ; http://php.net/date.sunset-zenith
-;date.sunset_zenith = 90.583333
+;date.sunset_zenith = 90.833333
 
 [filter]
 ; http://php.net/filter.default
@@ -1115,37 +1112,6 @@ odbc.defaultlrl = 4096
 ; http://php.net/odbc.defaultbinmode
 odbc.defaultbinmode = 1
 
-[Interbase]
-; Allow or prevent persistent links.
-ibase.allow_persistent = 1
-
-; Maximum number of persistent links.  -1 means no limit.
-ibase.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-ibase.max_links = -1
-
-; Default database name for ibase_connect().
-;ibase.default_db =
-
-; Default username for ibase_connect().
-;ibase.default_user =
-
-; Default password for ibase_connect().
-;ibase.default_password =
-
-; Default charset for ibase_connect().
-;ibase.default_charset =
-
-; Default timestamp format.
-ibase.timestampformat = "%Y-%m-%d %H:%M:%S"
-
-; Default date format.
-ibase.dateformat = "%Y-%m-%d"
-
-; Default time format.
-ibase.timeformat = "%H:%M:%S"
-
 [MySQLi]
 
 ; Maximum number of persistent links.  -1 means no limit.
@@ -1176,11 +1142,11 @@ mysqli.default_port = 3306
 ; http://php.net/mysqli.default-socket
 mysqli.default_socket =
 
-; Default host for mysql_connect() (doesn't apply in safe mode).
+; Default host for mysqli_connect() (doesn't apply in safe mode).
 ; http://php.net/mysqli.default-host
 mysqli.default_host =
 
-; Default user for mysql_connect() (doesn't apply in safe mode).
+; Default user for mysqli_connect() (doesn't apply in safe mode).
 ; http://php.net/mysqli.default-user
 mysqli.default_user =
 
@@ -1858,6 +1824,10 @@ ldap.max_links = -1
 ; errors.
 ;opcache.mmap_base=
 
+; Facilitates multiple OPcache instances per user (for Windows only). All PHP
+; processes with the same cache ID and user share an OPcache instance.
+;opcache.cache_id=
+
 ; Enables and sets the second level cache directory.
 ; It should improve performance when SHM memory is full, at server restart or
 ; SHM reset. The default "" disables file based caching.
@@ -1892,6 +1862,11 @@ ldap.max_links = -1
 ; start-up.
 ; http://php.net/opcache.preload
 ;opcache.preload=
+
+; Preloading code as root is not allowed for security reasons. This directive
+; facilitates to let the preloading to be run as another user.
+; http://php.net/opcache.preload_user
+;opcache.preload_user=
 
 ; Prevents caching files that are less than this number of seconds old. It
 ; protects from caching of incompletely updated files. In case all file updates

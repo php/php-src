@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -157,7 +155,8 @@ zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *o
 	}
 
 	zend_iterator_init(&iterator->intern);
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &resourcebundle_iterator_funcs;
 
 	iterator->subject = rb;

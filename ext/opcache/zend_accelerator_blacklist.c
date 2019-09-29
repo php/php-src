@@ -232,11 +232,7 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 	}
 }
 
-#ifdef HAVE_GLOB
 static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filename)
-#else
-void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
-#endif
 {
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1], *blacklist_path = NULL;
 	FILE *fp;
@@ -315,12 +311,11 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	if (blacklist_path) {
 		free(blacklist_path);
 	}
-	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-#ifdef HAVE_GLOB
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
+#ifdef HAVE_GLOB
 	glob_t globbuf;
 	int    ret;
 	unsigned int i;
@@ -340,8 +335,11 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		}
 		globfree(&globbuf);
 	}
-}
+#else
+	zend_accel_blacklist_loadone(blacklist, filename);
 #endif
+	zend_accel_blacklist_update_regexp(blacklist);
+}
 
 zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
 {

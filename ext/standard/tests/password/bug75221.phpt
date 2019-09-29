@@ -9,7 +9,7 @@ if (!defined('PASSWORD_ARGON2I')) die('skip password_hash not built with Argon2'
 $hash = password_hash(
     "php",
     PASSWORD_ARGON2I,
-    ['memory_cost' => 16384, 'time_cost' => 2, 'threads' => 4]
+    ['memory_cost' => 64 << 10, 'time_cost' => 4, 'threads' => 1]
 );
 var_dump(substr($hash, -1, 1) !== "\0");
 ?>

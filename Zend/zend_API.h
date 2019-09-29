@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_execute.h"
+#include "zend_type_info.h"
 
 
 BEGIN_EXTERN_C()
@@ -76,6 +77,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_DEP_FALIAS(name, alias, arg_info)		ZEND_FENTRY(name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
 #define ZEND_NAMED_ME(zend_name, name, arg_info, flags)	ZEND_FENTRY(zend_name, name, arg_info, flags)
 #define ZEND_ME(classname, name, arg_info, flags)	ZEND_FENTRY(name, ZEND_MN(classname##_##name), arg_info, flags)
+#define ZEND_DEP_ME(classname, name, arg_info, flags) ZEND_ME(classname, name, arg_info, flags | ZEND_ACC_DEPRECATED)
 #define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_FENTRY(name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 #define ZEND_MALIAS(classname, name, alias, arg_info, flags) \
                                                     ZEND_FENTRY(name, ZEND_MN(classname##_##alias), arg_info, flags)
@@ -97,11 +99,11 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_ARG_INFO(pass_by_ref, name)                             { #name, 0, pass_by_ref, 0},
 #define ZEND_ARG_PASS_INFO(pass_by_ref)                              { NULL,  0, pass_by_ref, 0},
 #define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null)  { #name, ZEND_TYPE_ENCODE_CLASS_CONST(#classname, allow_null), pass_by_ref, 0 },
-#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null)           { #name, ZEND_TYPE_ENCODE(IS_ARRAY, allow_null), pass_by_ref, 0 },
-#define ZEND_ARG_CALLABLE_INFO(pass_by_ref, name, allow_null)        { #name, ZEND_TYPE_ENCODE(IS_CALLABLE, allow_null), pass_by_ref, 0 },
-#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE(type_hint, allow_null), pass_by_ref, 0 },
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null)           { #name, ZEND_TYPE_ENCODE_CODE(IS_ARRAY, allow_null), pass_by_ref, 0 },
+#define ZEND_ARG_CALLABLE_INFO(pass_by_ref, name, allow_null)        { #name, ZEND_TYPE_ENCODE_CODE(IS_CALLABLE, allow_null), pass_by_ref, 0 },
+#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE_CODE(type_hint, allow_null), pass_by_ref, 0 },
 #define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name)                             { #name, 0, pass_by_ref, 1 },
-#define ZEND_ARG_VARIADIC_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE(type_hint, allow_null), pass_by_ref, 1 },
+#define ZEND_ARG_VARIADIC_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, ZEND_TYPE_ENCODE_CODE(type_hint, allow_null), pass_by_ref, 1 },
 #define ZEND_ARG_VARIADIC_OBJ_INFO(pass_by_ref, name, classname, allow_null)  { #name, ZEND_TYPE_ENCODE_CLASS_CONST(#classname, allow_null), pass_by_ref, 1 },
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(name, return_reference, required_num_args, class_name, allow_null) \
@@ -113,7 +115,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(name, return_reference, required_num_args, type, allow_null) \
 	static const zend_internal_arg_info name[] = { \
-		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE(type, allow_null), return_reference, 0 },
+		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_ENCODE_CODE(type, allow_null), return_reference, 0 },
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(name, type, allow_null) \
 	ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(name, 0, -1, type, allow_null)
 
@@ -140,7 +142,7 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_MODULE_ACTIVATE_D(module)		int ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_DEACTIVATE_D(module)	int ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	int ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
-#define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
+#define ZEND_MODULE_INFO_D(module)			ZEND_COLD void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 #define ZEND_MODULE_GLOBALS_CTOR_D(module)  void ZEND_MODULE_GLOBALS_CTOR_N(module)(zend_##module##_globals *module##_globals)
 #define ZEND_MODULE_GLOBALS_DTOR_D(module)  void ZEND_MODULE_GLOBALS_DTOR_N(module)(zend_##module##_globals *module##_globals)
 
@@ -246,7 +248,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 #define zend_get_parameters_array_ex(param_count, argument_array) \
 	_zend_get_parameters_array_ex(param_count, argument_array)
 #define zend_parse_parameters_none() \
-	(EXPECTED(ZEND_NUM_ARGS() == 0) ? SUCCESS : zend_wrong_parameters_none_error())
+	(EXPECTED(ZEND_NUM_ARGS() == 0) ? SUCCESS : (zend_wrong_parameters_none_error(), FAILURE))
 #define zend_parse_parameters_none_throw() \
 	zend_parse_parameters_none()
 
@@ -257,7 +259,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...);
 ZEND_API int zend_parse_parameters_throw(int num_args, const char *type_spec, ...);
-ZEND_API char *zend_zval_type_name(const zval *arg);
+ZEND_API const char *zend_zval_type_name(const zval *arg);
 ZEND_API zend_string *zend_zval_get_type(const zval *arg);
 
 ZEND_API int zend_parse_method_parameters(int num_args, zval *this_ptr, const char *type_spec, ...);
@@ -356,7 +358,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 ZEND_API zval *zend_read_static_property_ex(zend_class_entry *scope, zend_string *name, zend_bool silent);
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent);
 
-ZEND_API char *zend_get_type_by_const(int type);
+ZEND_API const char *zend_get_type_by_const(int type);
 
 #define ZEND_THIS                           (&EX(This))
 
@@ -405,17 +407,19 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval 
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
-ZEND_API int add_index_long(zval *arg, zend_ulong idx, zend_long n);
-ZEND_API int add_index_null(zval *arg, zend_ulong idx);
-ZEND_API int add_index_bool(zval *arg, zend_ulong idx, int b);
-ZEND_API int add_index_resource(zval *arg, zend_ulong idx, zend_resource *r);
-ZEND_API int add_index_double(zval *arg, zend_ulong idx, double d);
-ZEND_API int add_index_str(zval *arg, zend_ulong idx, zend_string *str);
-ZEND_API int add_index_string(zval *arg, zend_ulong idx, const char *str);
-ZEND_API int add_index_stringl(zval *arg, zend_ulong idx, const char *str, size_t length);
+ZEND_API int add_index_long(zval *arg, zend_ulong index, zend_long n);
+ZEND_API int add_index_null(zval *arg, zend_ulong index);
+ZEND_API int add_index_bool(zval *arg, zend_ulong index, int b);
+ZEND_API int add_index_resource(zval *arg, zend_ulong index, zend_resource *r);
+ZEND_API int add_index_double(zval *arg, zend_ulong index, double d);
+ZEND_API int add_index_str(zval *arg, zend_ulong index, zend_string *str);
+ZEND_API int add_index_string(zval *arg, zend_ulong index, const char *str);
+ZEND_API int add_index_stringl(zval *arg, zend_ulong index, const char *str, size_t length);
 
-#define add_index_zval(arg, index, value) \
-	(zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE)
+static zend_always_inline int add_index_zval(zval *arg, zend_ulong index, zval *value)
+{
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, value) ? SUCCESS : FAILURE;
+}
 
 ZEND_API int add_next_index_long(zval *arg, zend_long n);
 ZEND_API int add_next_index_null(zval *arg);
@@ -426,8 +430,10 @@ ZEND_API int add_next_index_str(zval *arg, zend_string *str);
 ZEND_API int add_next_index_string(zval *arg, const char *str);
 ZEND_API int add_next_index_stringl(zval *arg, const char *str, size_t length);
 
-#define add_next_index_zval(arg, value) \
-	(zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE)
+static zend_always_inline int add_next_index_zval(zval *arg, zval *value)
+{
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), value) ? SUCCESS : FAILURE;
+}
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
@@ -526,19 +532,30 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data);
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force);
 ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, int force);
-ZEND_API int zend_forbid_dynamic_call(const char *func_name);
+
+static zend_always_inline int zend_forbid_dynamic_call(const char *func_name)
+{
+	zend_execute_data *ex = EG(current_execute_data);
+	ZEND_ASSERT(ex != NULL && ex->func != NULL);
+
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
+		zend_throw_error(NULL, "Cannot call %s dynamically", func_name);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
 
 ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);
 
-ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
+ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce);
 
 ZEND_API zend_bool zend_is_iterable(zval *iterable);
 
 ZEND_API zend_bool zend_is_countable(zval *countable);
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
-ZEND_API ZEND_FUNCTION(display_disabled_class);
 END_EXTERN_C()
 
 #if ZEND_DEBUG
@@ -610,28 +627,30 @@ END_EXTERN_C()
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
 #define RETVAL_RES(r)			 		ZVAL_RES(return_value, r)
 #define RETVAL_ARR(r)			 		ZVAL_ARR(return_value, r)
+#define RETVAL_EMPTY_ARRAY()			ZVAL_EMPTY_ARRAY(return_value)
 #define RETVAL_OBJ(r)			 		ZVAL_OBJ(return_value, r)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_FALSE(return_value)
 #define RETVAL_TRUE   					ZVAL_TRUE(return_value)
 
-#define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
-#define RETURN_NULL() 					{ RETVAL_NULL(); return;}
-#define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
-#define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
-#define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
-#define RETURN_INTERNED_STR(s)			{ RETVAL_INTERNED_STR(s); return; }
-#define RETURN_NEW_STR(s)				{ RETVAL_NEW_STR(s); return; }
-#define RETURN_STR_COPY(s)				{ RETVAL_STR_COPY(s); return; }
-#define RETURN_STRING(s) 				{ RETVAL_STRING(s); return; }
-#define RETURN_STRINGL(s, l) 			{ RETVAL_STRINGL(s, l); return; }
-#define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
-#define RETURN_RES(r) 					{ RETVAL_RES(r); return; }
-#define RETURN_ARR(r) 					{ RETVAL_ARR(r); return; }
-#define RETURN_OBJ(r) 					{ RETVAL_OBJ(r); return; }
-#define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
-#define RETURN_FALSE  					{ RETVAL_FALSE; return; }
-#define RETURN_TRUE   					{ RETVAL_TRUE; return; }
+#define RETURN_BOOL(b) 					do { RETVAL_BOOL(b); return; } while (0)
+#define RETURN_NULL() 					do { RETVAL_NULL(); return;} while (0)
+#define RETURN_LONG(l) 					do { RETVAL_LONG(l); return; } while (0)
+#define RETURN_DOUBLE(d) 				do { RETVAL_DOUBLE(d); return; } while (0)
+#define RETURN_STR(s) 					do { RETVAL_STR(s); return; } while (0)
+#define RETURN_INTERNED_STR(s)			do { RETVAL_INTERNED_STR(s); return; } while (0)
+#define RETURN_NEW_STR(s)				do { RETVAL_NEW_STR(s); return; } while (0)
+#define RETURN_STR_COPY(s)				do { RETVAL_STR_COPY(s); return; } while (0)
+#define RETURN_STRING(s) 				do { RETVAL_STRING(s); return; } while (0)
+#define RETURN_STRINGL(s, l) 			do { RETVAL_STRINGL(s, l); return; } while (0)
+#define RETURN_EMPTY_STRING() 			do { RETVAL_EMPTY_STRING(); return; } while (0)
+#define RETURN_RES(r) 					do { RETVAL_RES(r); return; } while (0)
+#define RETURN_ARR(r) 					do { RETVAL_ARR(r); return; } while (0)
+#define RETURN_EMPTY_ARRAY()			do { RETVAL_EMPTY_ARRAY(); return; } while (0)
+#define RETURN_OBJ(r) 					do { RETVAL_OBJ(r); return; } while (0)
+#define RETURN_ZVAL(zv, copy, dtor)		do { RETVAL_ZVAL(zv, copy, dtor); return; } while (0)
+#define RETURN_FALSE  					do { RETVAL_FALSE; return; } while (0)
+#define RETURN_TRUE   					do { RETVAL_TRUE; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
@@ -671,9 +690,9 @@ ZEND_API int zend_try_assign_typed_ref_res(zend_reference *ref, zend_resource *r
 ZEND_API int zend_try_assign_typed_ref_zval(zend_reference *ref, zval *zv);
 ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, zend_bool strict);
 
-#define ZEND_TRY_ASSIGN_NULL(zv) do { \
+#define _ZEND_TRY_ASSIGN_NULL(zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_null(ref); \
@@ -685,9 +704,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_NULL(_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_FALSE(zv) do { \
+#define ZEND_TRY_ASSIGN_NULL(zv) \
+	_ZEND_TRY_ASSIGN_NULL(zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_NULL(zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_NULL(zv, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_FALSE(zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_bool(ref, 0); \
@@ -699,9 +726,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_FALSE(_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_TRUE(zv) do { \
+#define ZEND_TRY_ASSIGN_FALSE(zv) \
+	_ZEND_TRY_ASSIGN_FALSE(zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_FALSE(zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_FALSE(zv, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_TRUE(zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_bool(ref, 1); \
@@ -713,9 +748,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_TRUE(_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_BOOL(zv, bval) do { \
+#define ZEND_TRY_ASSIGN_TRUE(zv) \
+	_ZEND_TRY_ASSIGN_TRUE(zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_TRUE(zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_TRUE(zv, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_BOOL(zv, bval, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_bool(ref, 1); \
@@ -727,9 +770,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_BOOL(_zv, bval); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
+#define ZEND_TRY_ASSIGN_BOOL(zv, bval) \
+	_ZEND_TRY_ASSIGN_BOOL(zv, bval, 0)
+
+#define ZEND_TRY_ASSIGN_REF_BOOL(zv, bval) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_BOOL(zv, bval, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_LONG(zv, lval, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_long(ref, lval); \
@@ -741,9 +792,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_LONG(_zv, lval); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_DOUBLE(zv, dval) do { \
+#define ZEND_TRY_ASSIGN_LONG(zv, lval) \
+	_ZEND_TRY_ASSIGN_LONG(zv, lval, 0)
+
+#define ZEND_TRY_ASSIGN_REF_LONG(zv, lval) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_LONG(zv, lval, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_DOUBLE(zv, dval, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_double(ref, dval); \
@@ -755,9 +814,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_DOUBLE(_zv, dval); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_EMPTY_STRING(zv) do { \
+#define ZEND_TRY_ASSIGN_DOUBLE(zv, dval) \
+	_ZEND_TRY_ASSIGN_DOUBLE(zv, dval, 0)
+
+#define ZEND_TRY_ASSIGN_REF_DOUBLE(zv, dval) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_DOUBLE(zv, dval, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_EMPTY_STRING(zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_empty_string(ref); \
@@ -769,9 +836,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_EMPTY_STRING(_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_STR(zv, str) do { \
+#define ZEND_TRY_ASSIGN_EMPTY_STRING(zv) \
+	_ZEND_TRY_ASSIGN_EMPTY_STRING(zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_EMPTY_STRING(zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_EMPTY_STRING(zv, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_STR(zv, str, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_str(ref, str); \
@@ -783,9 +858,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_STR(_zv, str); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_NEW_STR(zv, str) do { \
+#define ZEND_TRY_ASSIGN_STR(zv, str) \
+	_ZEND_TRY_ASSIGN_STR(zv, str, 0)
+
+#define ZEND_TRY_ASSIGN_REF_STR(zv, str) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_STR(zv, str, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_NEW_STR(zv, str, is_str) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_str || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_str(ref, str); \
@@ -797,9 +880,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_NEW_STR(_zv, str); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_STRING(zv, string) do { \
+#define ZEND_TRY_ASSIGN_NEW_STR(zv, str) \
+	_ZEND_TRY_ASSIGN_NEW_STR(zv, str, 0)
+
+#define ZEND_TRY_ASSIGN_REF_NEW_STR(zv, str) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_NEW_STR(zv, str, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_STRING(zv, string, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_string(ref, string); \
@@ -811,9 +902,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_STRING(_zv, string); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) do { \
+#define ZEND_TRY_ASSIGN_STRING(zv, string) \
+	_ZEND_TRY_ASSIGN_STRING(zv, string, 0)
+
+#define ZEND_TRY_ASSIGN_REF_STRING(zv, string) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_STRING(zv, string, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_STRINGL(zv, string, len, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_stringl(ref, string, len); \
@@ -825,9 +924,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_STRINGL(_zv, string, len); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_ARR(zv, arr) do { \
+#define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) \
+	_ZEND_TRY_ASSIGN_STRINGL(zv, string, len, 0)
+
+#define ZEND_TRY_ASSIGN_REF_STRINGL(zv, string, len) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_STRINGL(zv, string, len, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_ARR(zv, arr, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_arr(ref, arr); \
@@ -839,9 +946,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_ARR(_zv, arr); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_RES(zv, res) do { \
+#define ZEND_TRY_ASSIGN_ARR(zv, arr) \
+	_ZEND_TRY_ASSIGN_ARR(zv, arr, 0)
+
+#define ZEND_TRY_ASSIGN_REF_ARR(zv, arr) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_ARR(zv, arr, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_RES(zv, res, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_res(ref, res); \
@@ -853,9 +968,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_RES(_zv, res); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_TMP(zv, other_zv) do { \
+#define ZEND_TRY_ASSIGN_RES(zv, res) \
+	_ZEND_TRY_ASSIGN_RES(zv, res, 0)
+
+#define ZEND_TRY_ASSIGN_REF_RES(zv, res) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_RES(zv, res, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_TMP(zv, other_zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref(ref, other_zv); \
@@ -867,9 +990,17 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_VALUE(zv, other_zv) do { \
+#define ZEND_TRY_ASSIGN_TMP(zv, other_zv) \
+	_ZEND_TRY_ASSIGN_TMP(zv, other_zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_TMP(zv, other_zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_TMP(zv, other_zv, 1); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_VALUE(zv, other_zv, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_zval(ref, other_zv); \
@@ -881,14 +1012,27 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
+#define ZEND_TRY_ASSIGN_VALUE(zv, other_zv) \
+	_ZEND_TRY_ASSIGN_VALUE(zv, other_zv, 0)
+
+#define ZEND_TRY_ASSIGN_REF_VALUE(zv, other_zv) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_VALUE(zv, other_zv, 1); \
+} while (0)
+
 #define ZEND_TRY_ASSIGN_COPY(zv, other_zv) do { \
 	Z_TRY_ADDREF_P(other_zv); \
 	ZEND_TRY_ASSIGN_VALUE(zv, other_zv); \
 } while (0)
 
-#define ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict) do { \
+#define ZEND_TRY_ASSIGN_REF_COPY(zv, other_zv) do { \
+	Z_TRY_ADDREF_P(other_zv); \
+	ZEND_TRY_ASSIGN_REF_VALUE(zv, other_zv); \
+} while (0)
+
+#define _ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict, is_ref) do { \
 	zval *_zv = zv; \
-	if (EXPECTED(Z_ISREF_P(_zv))) { \
+	if (is_ref || UNEXPECTED(Z_ISREF_P(_zv))) { \
 		zend_reference *ref = Z_REF_P(_zv); \
 		if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) { \
 			zend_try_assign_typed_ref_zval_ex(ref, other_zv, strict); \
@@ -900,9 +1044,22 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 	ZVAL_COPY_VALUE(_zv, other_zv); \
 } while (0)
 
+#define ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict) \
+	_ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict, 0)
+
+#define ZEND_TRY_ASSIGN_REF_VALUE_EX(zv, other_zv, strict) do { \
+	ZEND_ASSERT(Z_ISREF_P(zv)); \
+	_ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict, 1); \
+} while (0)
+
 #define ZEND_TRY_ASSIGN_COPY_EX(zv, other_zv, strict) do { \
 	Z_TRY_ADDREF_P(other_zv); \
 	ZEND_TRY_ASSIGN_VALUE_EX(zv, other_zv, strict); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_REF_COPY_EX(zv, other_zv, strict) do { \
+	Z_TRY_ADDREF_P(other_zv); \
+	ZEND_TRY_ASSIGN_REF_VALUE_EX(zv, other_zv, strict); \
 } while (0)
 
 /* Initializes a reference to an empty array and returns dereferenced zval,
@@ -947,7 +1104,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_RESOURCE,	"resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
 	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float")
+	_(Z_EXPECTED_DOUBLE,	"float") \
+	_(Z_EXPECTED_NUMBER,	"int or float") \
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -960,7 +1118,7 @@ typedef enum _zend_expected_type {
 ZEND_API ZEND_COLD int  ZEND_FASTCALL zend_wrong_parameters_none_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_num_args, int max_num_args);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
 
 #define ZPP_ERROR_OK             0
@@ -975,7 +1133,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
 		int _num_args = EX_NUM_ARGS(); \
-		int _i; \
+		int _i = 0; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = Z_EXPECTED_LONG; \
 		char *_error = NULL; \
@@ -1000,7 +1158,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 				_error_code = ZPP_ERROR_FAILURE; \
 				break; \
 			} \
-			_i = 0; \
 			_real_arg = ZEND_CALL_ARG(execute_data, 0);
 
 #define ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
@@ -1180,7 +1337,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 /* old "l" */
 #define Z_PARAM_LONG_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 0))) { \
+		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1192,20 +1349,21 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_LONG(dest) \
 	Z_PARAM_LONG_EX(dest, _dummy, 0, 0)
 
-/* old "L" */
-#define Z_PARAM_STRICT_LONG_EX2(dest, is_null, check_null, deref, separate) \
-		Z_PARAM_PROLOGUE(deref, separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 1))) { \
-			_expected_type = Z_EXPECTED_LONG; \
-			_error_code = ZPP_ERROR_WRONG_ARG; \
-			break; \
-		}
 
-#define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) \
-	Z_PARAM_STRICT_LONG_EX2(dest, is_null, check_null, separate, separate)
+/* no old equivalent */
+#define Z_PARAM_NUMBER_EX(dest, check_null) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null))) { \
+		_expected_type = Z_EXPECTED_NUMBER; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
 
-#define Z_PARAM_STRICT_LONG(dest) \
-	Z_PARAM_STRICT_LONG_EX(dest, _dummy, 0, 0)
+#define Z_PARAM_NUMBER_OR_NULL(dest) \
+	Z_PARAM_NUMBER_EX(dest, 1)
+
+#define Z_PARAM_NUMBER(dest) \
+	Z_PARAM_NUMBER_EX(dest, 0)
 
 /* old "o" */
 #define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
@@ -1329,14 +1487,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_ZVAL(dest) \
 	Z_PARAM_ZVAL_EX(dest, 0, 0)
 
-/* old "z" (with dereference) */
-#define Z_PARAM_ZVAL_DEREF_EX(dest, check_null, separate) \
-		Z_PARAM_PROLOGUE(1, separate); \
-		zend_parse_arg_zval_deref(_arg, &dest, check_null);
-
-#define Z_PARAM_ZVAL_DEREF(dest) \
-	Z_PARAM_ZVAL_DEREF_EX(dest, 0, 0)
-
 /* old "+" and "*" */
 #define Z_PARAM_VARIADIC_EX(spec, dest, dest_num, post_varargs) do { \
 		int _num_varargs = _num_args - _i - (post_varargs); \
@@ -1363,12 +1513,11 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_slow(zval *arg, zend_bool *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, zend_bool *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_long_slow(zval *arg, zend_long *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_slow(zval *arg, zend_long *dest);
-ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_double_slow(zval *arg, double *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **dest);
 ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest);
+ZEND_API int ZEND_FASTCALL zend_parse_arg_number_slow(zval *arg, zval **dest);
 
 static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
 {
@@ -1388,7 +1537,7 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, zend_bool *is_null, int check_null, int cap)
+static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, zend_bool *is_null, int check_null)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1398,8 +1547,6 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 		*is_null = 1;
 		*dest = 0;
-	} else if (cap) {
-		return zend_parse_arg_long_cap_slow(arg, dest);
 	} else {
 		return zend_parse_arg_long_slow(arg, dest);
 	}
@@ -1418,6 +1565,18 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 		*dest = 0.0;
 	} else {
 		return zend_parse_arg_double_slow(arg, dest);
+	}
+	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_number(zval *arg, zval **dest, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_DOUBLE)) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return zend_parse_arg_number_slow(arg, dest);
 	}
 	return 1;
 }

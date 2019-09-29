@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,7 +23,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_posix.h"
-
+#include "posix_arginfo.h"
 
 #if HAVE_POSIX
 
@@ -51,172 +49,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_kill, 0, 0, 2)
-	ZEND_ARG_INFO(0, pid)
-	ZEND_ARG_INFO(0, sig)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getpid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getppid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getuid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setuid, 0, 0, 1)
-	ZEND_ARG_INFO(0, uid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_geteuid, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_SETEUID
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_seteuid, 0, 0, 1)
-	ZEND_ARG_INFO(0, uid)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getgid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setgid, 0, 0, 1)
-	ZEND_ARG_INFO(0, gid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getegid, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_SETEGID
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setegid, 0, 0, 1)
-	ZEND_ARG_INFO(0, gid)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_GETGROUPS
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getgroups, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_GETLOGIN
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getlogin, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getpgrp, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_SETSID
-ZEND_BEGIN_ARG_INFO(arginfo_posix_setsid, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setpgid, 0, 0, 2)
-	ZEND_ARG_INFO(0, pid)
-	ZEND_ARG_INFO(0, pgid)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_GETPGID
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpgid, 0, 0, 1)
-	ZEND_ARG_INFO(0, pid)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_GETSID
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getsid, 0, 0, 1)
-	ZEND_ARG_INFO(0, pid)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_uname, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_times, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_CTERMID
-ZEND_BEGIN_ARG_INFO(arginfo_posix_ctermid, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_ttyname, 0, 0, 1)
-	ZEND_ARG_INFO(0, fd)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_isatty, 0, 0, 1)
-	ZEND_ARG_INFO(0, fd)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getcwd, 0)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_MKFIFO
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mkfifo, 0, 0, 2)
-	ZEND_ARG_INFO(0, pathname)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_MKNOD
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_mknod, 0, 0, 2)
-	ZEND_ARG_INFO(0, pathname)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, major)
-	ZEND_ARG_INFO(0, minor)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_access, 0, 0, 1)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrnam, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getgrgid, 0, 0, 1)
-	ZEND_ARG_INFO(0, gid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwnam, 0, 0, 1)
-	ZEND_ARG_INFO(0, username)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwuid, 0, 0, 1)
-	ZEND_ARG_INFO(0, uid)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_GETRLIMIT
-ZEND_BEGIN_ARG_INFO(arginfo_posix_getrlimit, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_SETRLIMIT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setrlimit, 0, 0, 3)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, softlimit)
-	ZEND_ARG_INFO(0, hardlimit)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO(arginfo_posix_get_last_error, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_strerror, 0, 0, 1)
-	ZEND_ARG_INFO(0, errno)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_INITGROUPS
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_initgroups, 0, 0, 2)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, base_group_id)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
 
 /* {{{ posix_functions[]
  */
@@ -302,7 +134,7 @@ static const zend_function_entry posix_functions[] = {
 #endif
 
 	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
-	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_get_last_error)
+	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_errno)
 	PHP_FE(posix_strerror,							arginfo_posix_strerror)
 #ifdef HAVE_INITGROUPS
 	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
@@ -769,7 +601,6 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
-		php_error_docref(NULL, E_WARNING, "expects argument 1 to be a valid stream resource");
 		return 0;
 	}
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
@@ -998,8 +829,15 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 	} else {
 		add_assoc_null(array_group, "passwd");
 	}
-	for (count = 0; g->gr_mem[count] != NULL; count++) {
-		add_next_index_string(&array_members, g->gr_mem[count]);
+	for (count = 0;; count++) {
+		/* gr_mem entries may be misaligned on macos. */
+		char *gr_mem;
+		memcpy(&gr_mem, &g->gr_mem[count], sizeof(char *));
+		if (!gr_mem) {
+			break;
+		}
+
+		add_next_index_string(&array_members, gr_mem);
 	}
 	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", sizeof("members")-1, &array_members);
 	add_assoc_long(array_group, "gid", g->gr_gid);

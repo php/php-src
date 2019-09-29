@@ -1,5 +1,3 @@
-dnl config.m4 for extension imap
-
 AC_DEFUN([IMAP_INC_CHK],[if test -r "$i$1/c-client.h"; then
     AC_DEFINE(HAVE_IMAP2000, 1, [ ])
     IMAP_DIR=$i
@@ -48,15 +46,12 @@ AC_DEFUN([PHP_IMAP_TEST_BUILD], [
 
 AC_DEFUN([PHP_IMAP_KRB_CHK], [
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(IMAP_SHARED_LIBADD,
-    [
-      AC_DEFINE(HAVE_IMAP_KRB,1,[ ])
-    ], [
-      AC_MSG_ERROR([Kerberos libraries not found.
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
 
-      Check the path given to --with-kerberos (if no path is given, searches in /usr/kerberos, /usr/local and /usr )
-      ])
-    ])
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, IMAP_SHARED_LIBADD)
+
+    AC_DEFINE(HAVE_IMAP_KRB, 1, [Whether IMAP extension has Kerberos support])
   else
     AC_EGREP_HEADER(auth_gss, $IMAP_INC_DIR/linkage.h, [
       AC_MSG_ERROR([This c-client library is built with Kerberos support.
@@ -98,8 +93,8 @@ PHP_ARG_WITH([imap],
 
 PHP_ARG_WITH([kerberos],
   [for IMAP Kerberos support],
-  [AS_HELP_STRING([[--with-kerberos[=DIR]]],
-    [IMAP: Include Kerberos support. DIR is the Kerberos install prefix])],
+  [AS_HELP_STRING([--with-kerberos],
+    [IMAP: Include Kerberos support])],
   [no],
   [no])
 

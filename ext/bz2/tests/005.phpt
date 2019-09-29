@@ -20,7 +20,7 @@ $data = bzcompress($string);
 $data2 = bzcompress($string, 1, 10);
 
 $data3 = $data2;
-$data3{3} = 0;
+$data3[3] = 0;
 
 var_dump(bzdecompress(1,1));
 var_dump(bzdecompress($data3));

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,6 +31,18 @@
 # define INADDR_NONE ((unsigned long int) -1)
 #endif
 
+
+/* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
+#define FETCH_DOUBLE_OPTION(var_name, option_name) \
+   	var_name = 0; \
+	var_name##_set = 0; \
+	if (option_array) { \
+		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
+			var_name = zval_get_double(option_val); \
+			var_name##_set = 1; \
+		} \
+	}
+/* }}} */
 
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name) \
@@ -335,6 +345,8 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	zend_long lval;
 	double dval;
+	double min_range, max_range;
+	int   min_range_set, max_range_set;
 
 	int first, n;
 
@@ -367,6 +379,9 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	} else {
 		tsd_sep = "',.";
 	}
+
+	FETCH_DOUBLE_OPTION(min_range, "min_range");
+	FETCH_DOUBLE_OPTION(max_range, "max_range");
 
 	num = p = emalloc(len+1);
 	if (str < end && (*str == '+' || *str == '-')) {
@@ -419,10 +434,16 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
 			zval_ptr_dtor(value);
+			if ((min_range_set && (lval < min_range)) || (max_range_set && (lval > max_range))) {
+				goto error;
+			}
 			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
 			if ((!dval && p - num > 1 && strpbrk(num, "123456789")) || !zend_finite(dval)) {
+				goto error;
+			}
+			if ((min_range_set && (dval < min_range)) || (max_range_set && (dval > max_range))) {
 				goto error;
 			}
 			zval_ptr_dtor(value);

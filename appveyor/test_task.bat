@@ -11,7 +11,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=master
 	set STABILITY=staging
 )
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
 if not exist "%DEPS_DIR%" (
 	echo "%DEPS_DIR%" doesn't exist
 	exit /b 3
@@ -27,7 +27,7 @@ set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
 set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
 set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
 set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
-set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST% port=%PDO_MYSQL_TEST_PORT% dbname=test user=%PDO_MYSQL_TEST_USER% password=%MYSQL_PW%
+set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
 "C:\Program Files\MySql\MySQL Server 5.7\bin\mysql.exe" --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
 if %errorlevel% neq 0 exit /b 3
 
@@ -58,7 +58,7 @@ rem set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for Opcache
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enabled=1 -d opcache.enable_cli=1
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1
 
 rem prepare for enchant
 mkdir c:\enchant_plugins

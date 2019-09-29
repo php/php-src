@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,10 +20,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -658,7 +654,7 @@ static int php_url_scanner_ex_activate(int type)
 		ctx = &BG(url_adapt_output_ex);
 	}
 
-	memset(ctx, 0, ((size_t) &((url_adapt_state_ex_t *)0)->tags));
+	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
 
 	return SUCCESS;
 }

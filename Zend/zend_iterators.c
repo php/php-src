@@ -36,8 +36,6 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* read dim */
 	NULL, /* write dim */
 	NULL,
-	NULL, /* get */
-	NULL, /* set */
 	NULL, /* has prop */
 	NULL, /* unset prop */
 	NULL, /* has dim */

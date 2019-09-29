@@ -2,7 +2,8 @@
 Bug #76777 (first parameter of libxml_set_external_entity_loader callback undefined)
 --SKIPIF--
 <?php
-if (!extension_loaded('libxml')) die('skip');
+if (!extension_loaded('libxml')) die('skip libxml extension not available');
+if (!extension_loaded('dom')) die('skip dom extension not available');
 if (getenv("SKIP_ONLINE_TESTS")) die('skip online test');
 ?>
 --FILE--

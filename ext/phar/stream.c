@@ -361,7 +361,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 /**
  * used for fread($fp) and company on a fopen()ed phar file handle
  */
-static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	size_t got;
@@ -375,7 +375,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {
 
 	if (entry->is_deleted) {
 		stream->eof = 1;
-		return 0;
+		return -1;
 	}
 
 	/* use our proxy position */
@@ -436,14 +436,14 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 /**
  * Used for writing to a phar file
  */
-static size_t phar_stream_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+static ssize_t phar_stream_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *) stream->abstract;
 
 	php_stream_seek(data->fp, data->position, SEEK_SET);
 	if (count != php_stream_write(data->fp, buf, count)) {
 		php_stream_wrapper_log_error(stream->wrapper, stream->flags, "phar error: Could not write %d characters to \"%s\" in phar \"%s\"", (int) count, data->internal_file->filename, data->phar->fname);
-		return 0;
+		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
 	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {

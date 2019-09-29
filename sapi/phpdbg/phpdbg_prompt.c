@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -373,6 +371,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default) /
 
 			ZEND_IGNORE_VALUE(asprintf(&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME));
 			phpdbg_try_file_init(init_file, strlen(init_file), 1);
+			free(init_file);
 			if (i == -1) {
 				break;
 			}
@@ -421,7 +420,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				if (PHPDBG_G(exec)) {
 					phpdbg_notice("exec", "type=\"unset\" context=\"%s\"", "Unsetting old execution context: %s", PHPDBG_G(exec));
-					efree(PHPDBG_G(exec));
+					free(PHPDBG_G(exec));
 					PHPDBG_G(exec) = NULL;
 					PHPDBG_G(exec_len) = 0L;
 				}
@@ -436,7 +435,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				VCWD_CHDIR_FILE(res);
 
-				*SG(request_info).argv = PHPDBG_G(exec);
+				*SG(request_info).argv = estrndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 				php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
@@ -534,9 +533,9 @@ int phpdbg_compile_stdin(zend_string *code) {
 	}
 
 	if (PHPDBG_G(exec)) {
-		efree(PHPDBG_G(exec));
+		free(PHPDBG_G(exec));
 	}
-	PHPDBG_G(exec) = estrdup("Standard input code");
+	PHPDBG_G(exec) = strdup("Standard input code");
 	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
 	{ /* remove leading ?> from source */
 		int i;
@@ -566,10 +565,7 @@ int phpdbg_compile(void) /* {{{ */
 {
 	zend_file_handle fh;
 	char *buf;
-	char *start_line = NULL;
 	size_t len;
-	size_t start_line_len;
-	int i;
 
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
@@ -577,53 +573,8 @@ int phpdbg_compile(void) /* {{{ */
 	}
 
 	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE) == SUCCESS && zend_stream_fixup(&fh, &buf, &len) == SUCCESS) {
-		/* Skip #! line */
-		if (len >= 3 && buf[0] == '#' && buf[1] == '!') {
-			char *end = buf + len;
-			do {
-				switch (fh.handle.stream.mmap.buf++[0]) {
-					case '\r':
-						if (fh.handle.stream.mmap.buf[0] == '\n') {
-							fh.handle.stream.mmap.buf++;
-						}
-					case '\n':
-						CG(start_lineno) = 2;
-						start_line_len = fh.handle.stream.mmap.buf - buf;
-						start_line = emalloc(start_line_len);
-						memcpy(start_line, buf, start_line_len);
-						fh.handle.stream.mmap.len -= start_line_len;
-						end = fh.handle.stream.mmap.buf;
-				}
-			} while (fh.handle.stream.mmap.buf + 1 < end);
-		}
-
+		CG(skip_shebang) = 1;
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE);
-
-		/* prepend shebang line to file_source */
-		if (start_line) {
-			phpdbg_file_source *data = zend_hash_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
-
-			dtor_func_t dtor = PHPDBG_G(file_sources).pDestructor;
-			PHPDBG_G(file_sources).pDestructor = NULL;
-			zend_hash_del(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename);
-			PHPDBG_G(file_sources).pDestructor = dtor;
-
-			data = erealloc(data, sizeof(phpdbg_file_source) + sizeof(uint32_t) * ++data->lines);
-			memmove(data->line + 1, data->line, sizeof(uint32_t) * data->lines);
-			data->line[0] = 0;
-			data->buf = erealloc(data->buf, data->len + start_line_len);
-			memmove(data->buf + start_line_len, data->buf, data->len);
-			memcpy(data->buf, start_line, start_line_len);
-			efree(start_line);
-			data->len += start_line_len;
-			for (i = 1; i <= data->lines; i++) {
-				data->line[i] += start_line_len;
-			}
-			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
-		}
-
-		fh.handle.stream.mmap.buf = buf;
-		fh.handle.stream.mmap.len = len;
 		zend_destroy_file_handle(&fh);
 		if (EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
@@ -838,7 +789,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			while (*p == ' ') p++;
 			while (*p) {
 				char sep = ' ';
-				char *buf = emalloc(end - p + 1), *q = buf;
+				char *buf = emalloc(end - p + 2), *q = buf;
 
 				if (*p == '<') {
 					/* use as STDIN */
@@ -1632,7 +1583,14 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 				sigio_watcher_start();
 			}
 #endif
-			switch (ret = phpdbg_stack_execute(&stack, allow_async_unsafe)) {
+			zend_try {
+				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
+			} zend_catch {
+				phpdbg_stack_free(&stack);
+				zend_bailout();
+			} zend_end_try();
+
+			switch (ret) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {
@@ -1687,33 +1645,33 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 	return ret;
 } /* }}} */
 
+static inline void list_code() {
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
+		const char *file_char = zend_get_executed_filename();
+		zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
+		phpdbg_list_file(file, 3, zend_get_executed_lineno()-1, zend_get_executed_lineno());
+		efree(file);
+	}
+}
+
 /* code may behave weirdly if EG(exception) is set; thus backup it */
 #define DO_INTERACTIVE(allow_async_unsafe) do { \
-	const zend_op *backup_opline; \
-	const zend_op *before_ex; \
 	if (exception) { \
+		const zend_op *before_ex = EG(opline_before_exception); \
+		const zend_op *backup_opline = NULL; \
 		if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) { \
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
-		before_ex = EG(opline_before_exception); \
 		GC_ADDREF(exception); \
 		zend_clear_exception(); \
-	} \
-	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
-		const char *file_char = zend_get_executed_filename(); \
-		zend_string *file = zend_string_init(file_char, strlen(file_char), 0); \
-		phpdbg_list_file(file, 3, zend_get_executed_lineno()-1, zend_get_executed_lineno()); \
-		efree(file); \
-	} \
-	\
-	switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
-		zval zv; \
-		case PHPDBG_LEAVE: \
-		case PHPDBG_FINISH: \
-		case PHPDBG_UNTIL: \
-		case PHPDBG_NEXT: \
-			if (exception) { \
-				if (EG(current_execute_data) && EG(current_execute_data)->func && ZEND_USER_CODE(EG(current_execute_data)->func->common.type) \
+		list_code(); \
+		switch (phpdbg_interactive(allow_async_unsafe, NULL)) { \
+			zval zv; \
+			case PHPDBG_LEAVE: \
+			case PHPDBG_FINISH: \
+			case PHPDBG_UNTIL: \
+			case PHPDBG_NEXT: \
+				if (backup_opline \
 				 && (backup_opline->opcode == ZEND_HANDLE_EXCEPTION || backup_opline->opcode == ZEND_CATCH)) { \
 					EG(current_execute_data)->opline = backup_opline; \
 					EG(exception) = exception; \
@@ -1722,11 +1680,12 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 					zend_throw_exception_internal(&zv); \
 				} \
 				EG(opline_before_exception) = before_ex; \
-			} \
-			/* fallthrough */ \
-		default: \
-			goto next; \
+		} \
+	} else { \
+		list_code(); \
+		phpdbg_interactive(allow_async_unsafe, NULL); \
 	} \
+	goto next; \
 } while (0)
 
 void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */

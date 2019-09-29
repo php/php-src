@@ -3,7 +3,9 @@ Bug #76275: Assertion failure in file cache when unserializing empty try_catch_a
 --INI--
 opcache.enabled=1
 opcache.enable_cli=1
-opcache.file_cache=/tmp
+opcache.file_cache={TMP}
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 if (PHP_VERSION_ID >= 70000) {

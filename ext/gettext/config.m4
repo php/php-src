@@ -1,5 +1,3 @@
-dnl config.m4 for extension gettext
-
 PHP_ARG_WITH([gettext],
   [for GNU gettext support],
   [AS_HELP_STRING([[--with-gettext[=DIR]]],

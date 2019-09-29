@@ -2,8 +2,8 @@
 user defined error handler + set_error_handling(EH_THROW)
 --SKIPIF--
 <?php
-	if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
-	if (!extension_loaded("spl") || is_dir('/this/path/does/not/exist')) die("skip");
+if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
+if (is_dir('/this/path/does/not/exist')) die("skip directory /this/path/does/not/exist already exists");
 ?>
 --FILE--
 <?php

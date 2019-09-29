@@ -1,5 +1,3 @@
-dnl config.m4 for sapi embed
-
 PHP_ARG_ENABLE([embed],,
   [AS_HELP_STRING([[--enable-embed[=TYPE]]],
     [EXPERIMENTAL: Enable building of embedded SAPI library TYPE is either

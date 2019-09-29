@@ -15,7 +15,11 @@ var_dump(IntlDateFormatter::formatObject(new stdclass));
 class A extends IntlCalendar {function __construct(){}}
 var_dump(IntlDateFormatter::formatObject(new A));
 class B extends DateTime {function __construct(){}}
-var_dump(IntlDateFormatter::formatObject(new B));
+try {
+    var_dump(IntlDateFormatter::formatObject(new B));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $cal = IntlCalendar::createInstance();
 var_dump(IntlDateFormatter::formatObject($cal, -2));
@@ -34,10 +38,8 @@ bool(false)
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: bad IntlCalendar instance: not initialized properly in %s on line %d
 bool(false)
 
-Warning: DateTime::getTimestamp(): The DateTime object has not been correctly initialized by its constructor in %s on line %d
-
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: error calling ::getTimeStamp() on the object in %s on line %d
-bool(false)
+The DateTime object has not been correctly initialized by its constructor
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the date/time format type is invalid in %s on line %d
 bool(false)

@@ -5,6 +5,8 @@
 
 #include "fpm_worker_pool.h"
 
+#define STREAM_SET_MSG_PREFIX_FMT "[pool %s] child %d said into %s: "
+
 int fpm_stdio_init_main();
 int fpm_stdio_init_final();
 int fpm_stdio_init_child(struct fpm_worker_pool_s *wp);

@@ -93,7 +93,7 @@ struct _zend_compiler_globals {
 
 	struct _zend_ini_parser_param *ini_parser_param;
 
-	uint32_t start_lineno;
+	zend_bool skip_shebang;
 	zend_bool increment_lineno;
 
 	zend_string *doc_comment;
@@ -124,6 +124,9 @@ struct _zend_compiler_globals {
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;
+
+	HashTable *delayed_variance_obligations;
+	HashTable *delayed_autoloads;
 };
 
 
@@ -133,7 +136,9 @@ struct _zend_executor_globals {
 
 	/* symbol table cache */
 	zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];
+	/* Pointer to one past the end of the symtable_cache */
 	zend_array **symtable_cache_limit;
+	/* Pointer to first unused symtable_cache slot */
 	zend_array **symtable_cache_ptr;
 
 	zend_array symbol_table;		/* main symbol table */
@@ -229,12 +234,15 @@ struct _zend_executor_globals {
 
 	HashTable weakrefs;
 
+	zend_bool exception_ignore_args;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
 #define EG_FLAGS_INITIAL				(0)
 #define EG_FLAGS_IN_SHUTDOWN			(1<<0)
 #define EG_FLAGS_OBJECT_STORE_NO_REUSE	(1<<1)
+#define EG_FLAGS_IN_RESOURCE_SHUTDOWN	(1<<2)
 
 struct _zend_ini_scanner_globals {
 	zend_file_handle *yy_in;

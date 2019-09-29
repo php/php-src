@@ -33,11 +33,15 @@ echo "-- anonymous function with NULL body --\n";
 var_dump( array_map( function($a) { }, $array1));
 
 echo "-- passing NULL as 'arr1' --\n";
-var_dump( array_map( function($a) { return array($a); }, NULL));
+try {
+    var_dump( array_map( function($a) { return array($a); }, NULL));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : anonymous callback function ***
 -- anonymous function with all parameters and body --
 array(3) {
@@ -84,7 +88,5 @@ array(3) {
   NULL
 }
 -- passing NULL as 'arr1' --
-
-Warning: array_map(): Expected parameter 2 to be an array, null given in %s on line %d
-NULL
+Expected parameter 2 to be an array, null given
 Done

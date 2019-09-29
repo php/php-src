@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Xinchen Hui <xinchen.h@zend.com>                            |
+   | Authors: Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -103,19 +103,12 @@ ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 #ifndef __has_attribute
 # define __has_attribute(x) 0
 #endif
-#ifndef __has_feature
-# define __has_feature(x) 0
-#endif
 
 /* Address sanitizer is incompatible with ifunc resolvers, so exclude the
  * CPU support helpers from asan.
  * See also https://github.com/google/sanitizers/issues/342. */
 #if __has_attribute(no_sanitize_address)
-# if __has_feature(memory_sanitizer)
-#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address)) __attribute__((no_sanitize("memory")))
-# else
-#  define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
-# endif
+# define ZEND_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
 #else
 # define ZEND_NO_SANITIZE_ADDRESS
 #endif

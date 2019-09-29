@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -71,7 +69,7 @@ struct LSAPI_key_value_pair
 };
 
 
-#define LSAPI_MAX_RESP_HEADERS  100
+#define LSAPI_MAX_RESP_HEADERS  1000
 
 typedef struct lsapi_request
 {
@@ -265,6 +263,9 @@ static inline off_t LSAPI_GetReqBodyRemain_r( LSAPI_Request * pReq )
 }
 
 
+int LSAPI_End_Response_r(LSAPI_Request * pReq);
+
+
 
 int LSAPI_Is_Listen(void);
 
@@ -347,6 +348,9 @@ static inline int LSAPI_SetRespStatus( int code )
 
 static inline int LSAPI_ErrResponse( int code, const char ** pRespHeaders, const char * pBody, int bodyLen )
 {   return LSAPI_ErrResponse_r( &g_req, code, pRespHeaders, pBody, bodyLen );   }
+
+static inline int LSAPI_End_Response(void)
+{   return LSAPI_End_Response_r( &g_req );                         }
 
 int LSAPI_IsRunning(void);
 

@@ -5,7 +5,7 @@ PDO_sqlite: Testing sqliteCreateCollation()
 --FILE--
 <?php
 
-$db = new pdo('sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->exec('CREATE TABLE test(field BLOB)');

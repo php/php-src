@@ -9,5 +9,6 @@ mb_internal_encoding('UTF-16');
 var_dump(mb_strrpos("abc abc abc", "abc", "UTF-8"));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: mb_strrpos(): Passing the encoding as third parameter is deprecated. Use an explicit zero offset in %s on line %d
 int(8)

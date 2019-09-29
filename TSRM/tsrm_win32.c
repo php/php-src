@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -458,7 +456,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	process_pair *proc;
 	char *cmd = NULL;
 	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
-	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
@@ -770,7 +767,7 @@ static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {
 	// Note that LONGLONG is a 64-bit value
 	LONGLONG ll;
 
-	ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	ll = t * 10000000LL + 116444736000000000LL;
 	pft->dwLowDateTime = (DWORD)ll;
 	pft->dwHighDateTime = ll >> 32;
 }

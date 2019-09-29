@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -88,7 +86,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 	enum_func_status return_value = PASS;
 	php_stream * net_stream = net->data->m.get_stream(net);
 	size_t old_chunk_size = net_stream->chunk_size;
-	size_t to_read = count, ret;
+	size_t to_read = count;
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_net::network_read_ex");
@@ -96,7 +94,8 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 
 	net_stream->chunk_size = MIN(to_read, net->data->options.net_read_buffer_size);
 	while (to_read) {
-		if (!(ret = php_stream_read(net_stream, (char *) p, to_read))) {
+		ssize_t ret = php_stream_read(net_stream, (char *) p, to_read);
+		if (ret <= 0) {
 			DBG_ERR_FMT("Error while reading header from socket");
 			return_value = FAIL;
 			break;
@@ -112,11 +111,11 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 
 
 /* {{{ mysqlnd_net::network_write_ex */
-static size_t
+static ssize_t
 MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zend_uchar * const buffer, const size_t count,
 											  MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
-	size_t ret;
+	ssize_t ret;
 	DBG_ENTER("mysqlnd_net::network_write_ex");
 	DBG_INF_FMT("sending %u bytes", count);
 	ret = php_stream_write(net->data->m.get_stream(net), (char *)buffer, count);
@@ -364,11 +363,12 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 {
 	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
 	zend_uchar * safe_storage = safe_buf;
-	size_t bytes_sent, packets_sent = 1;
+	size_t packets_sent = 1;
 	size_t left = count;
 	zend_uchar * p = (zend_uchar *) buffer;
 	zend_uchar * compress_buf = NULL;
 	size_t to_be_sent;
+	ssize_t bytes_sent;
 
 	DBG_ENTER("mysqlnd_net::send_ex");
 	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, net->data->compressed);
@@ -458,7 +458,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 		  indeed it then loop once more, then to_be_sent will become 0, left will stay 0. Empty
 		  packet will be sent and this loop will end.
 		*/
-	} while (bytes_sent && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
+	} while (bytes_sent > 0 && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
 	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, net->packet_no);
 
@@ -472,7 +472,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 	}
 
 	/* Even for zero size payload we have to send a packet */
-	if (!bytes_sent) {
+	if (bytes_sent <= 0) {
 		DBG_ERR_FMT("Can't %u send bytes", count);
 		SET_CLIENT_ERROR(*error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}
@@ -866,10 +866,14 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 
 	if (PHP_STREAM_OPTION_RETURN_ERR != was_blocked) {
 		/* Do a read of 1 byte */
-		int bytes_consumed;
+		ssize_t bytes_consumed;
 
 		do {
-			skipped_bytes += (bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf)));
+			bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf));
+			if (bytes_consumed <= 0) {
+				break;
+			}
+			skipped_bytes += bytes_consumed;
 		} while (bytes_consumed == sizeof(tmp_buf));
 
 		if (was_blocked) {
@@ -877,9 +881,9 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 		}
 
 		if (bytes_consumed) {
-			DBG_ERR_FMT("Skipped %u bytes. Last command %s hasn't consumed all the output from the server",
+			DBG_ERR_FMT("Skipped %zu bytes. Last command %s hasn't consumed all the output from the server",
 						bytes_consumed, mysqlnd_command_to_text[net->last_command]);
-			php_error_docref(NULL, E_WARNING, "Skipped %u bytes. Last command %s hasn't "
+			php_error_docref(NULL, E_WARNING, "Skipped %zu bytes. Last command %s hasn't "
 							 "consumed all the output from the server",
 							 bytes_consumed, mysqlnd_command_to_text[net->last_command]);
 		}

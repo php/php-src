@@ -6,7 +6,10 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload_inheritance_error_ind.inc
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
+?>
 --FILE--
 <?php
 echo "Foobar\n";

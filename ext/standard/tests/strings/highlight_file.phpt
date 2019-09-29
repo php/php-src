@@ -36,6 +36,8 @@ var_dump(highlight_file($filename));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
+
 Warning: highlight_file(%shighlight_file.dat): failed to open stream: No such file or directory in %s on line %d
 
 Warning: highlight_file(): Failed opening '%shighlight_file.dat' for highlighting in %s on line %d

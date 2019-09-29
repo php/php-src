@@ -12,7 +12,7 @@ ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlcal_get_skipped_wall_time_option(1));
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_skipped_wall_time_option() must be an instance of IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_get_skipped_wall_time_option() expects parameter 1 to be IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_skipped_wall_time_option(1)
 #1 {main}

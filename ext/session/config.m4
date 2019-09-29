@@ -1,5 +1,3 @@
-dnl config.m4 for extension session
-
 PHP_ARG_ENABLE([session],
   [whether to enable PHP sessions],
   [AS_HELP_STRING([--disable-session],

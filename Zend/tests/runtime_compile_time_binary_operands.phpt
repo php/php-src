@@ -108,16 +108,16 @@ function prepareLine($op1, $op2, $cmp, $operator) {
 	$error = "echo '" . addcslashes("$op1_p $operator $op2_p", "\\'") . '\', "\n"; $f++;';
 
 	$compare = "@($op1_p $operator $op2_p)";
-	$line = "\$c++; try { ";
+	$line = "\$c++; ";
 	try {
 		$result = makeParam($cmp());
-		$line .= "if (" . ($result === "(NAN)" ? "!is_nan($compare)" : "$compare !== $result") . ") { $error } } catch (Error \$e) { $error }";
+		$line .= "if (" . ($result === "(NAN)" ? "!is_nan($compare)" : "$compare !== $result") . ") { $error }";
 	} catch (Error $e) {
 		if (get_class($e) == "Error") {
 			return "// exempt $op1_p $operator $op2_p from checking, it generates a compile time error";
 		}
 		$msg = makeParam($e->getMessage());
-		$line .= "$compare; $error } catch (Error \$e) { if (\$e->getMessage() !== $msg) { $error } }";
+		$line .= "try { $compare; $error } catch (Error \$e) { if (\$e->getMessage() !== $msg) { $error } }";
 	}
 	return $line;
 }
@@ -130,7 +130,10 @@ fwrite($file, "<?php\n");
 foreach ($input as $left) {
 	foreach ($input as $right) {
 		foreach ($operands as $operand) {
-			fwrite($file, prepareLine($left, $right, function() use ($left, $right, $operand) { return eval("return @(\$left $operand \$right);"); }, $operand) . "\n");
+			$line = prepareLine($left, $right, function() use ($left, $right, $operand) {
+				return eval("return @(\$left $operand \$right);");
+			}, $operand);
+			fwrite($file, $line . "\n");
 		}
 	}
 }

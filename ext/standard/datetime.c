@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -69,7 +67,7 @@ PHPAPI char *php_std_date(time_t t)
 char *strptime(const char *s, const char *format, struct tm *tm);
 #endif
 
-/* {{{ proto string strptime(string timestamp, string format)
+/* {{{ proto array|false strptime(string timestamp, string format)
    Parse a time/date generated with strftime() */
 PHP_FUNCTION(strptime)
 {

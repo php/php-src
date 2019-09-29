@@ -147,8 +147,15 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 	struct tm *tm, tmbuf;
 
 	tm = php_localtime_r(&time, &tmbuf);
-	cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
-	ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	if (tm->tm_year >= 1980) {
+		cdate = ((tm->tm_year+1900-1980)<<9) + ((tm->tm_mon+1)<<5) + tm->tm_mday;
+		ctime = ((tm->tm_hour)<<11) + ((tm->tm_min)<<5) + ((tm->tm_sec)>>1);
+	} else {
+		/* This is the earliest date/time supported by zip. */
+		cdate = (1<<5) + 1; /* 1980-01-01 */
+		ctime = 0; /* 00:00:00 */
+	}
+
 	PHAR_SET_16(dtime, ctime);
 	PHAR_SET_16(ddate, cdate);
 }
@@ -814,8 +821,8 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	memset(&local, 0, sizeof(local));
 	memset(&central, 0, sizeof(central));
 	memset(&perms, 0, sizeof(perms));
-	strncpy(local.signature, "PK\3\4", 4);
-	strncpy(central.signature, "PK\1\2", 4);
+	memcpy(local.signature, "PK\3\4", 4);
+	memcpy(central.signature, "PK\1\2", 4);
 	PHAR_SET_16(central.extra_len, sizeof(perms));
 	PHAR_SET_16(local.extra_len, sizeof(perms));
 	perms.tag[0] = 'n';
@@ -1402,7 +1409,7 @@ fperror:
 	pass.free_fp = pass.free_ufp = 1;
 	memset(&eocd, 0, sizeof(eocd));
 
-	strncpy(eocd.signature, "PK\5\6", 4);
+	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
 		phar->sig_flags = PHAR_SIG_SHA1;
 	}

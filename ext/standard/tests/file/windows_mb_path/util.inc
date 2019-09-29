@@ -94,8 +94,14 @@ function create_verify_dir($prefix, $basename, $cp = 65001)
 {
 	$full = $prefix . DIRECTORY_SEPARATOR . $basename;
 
-	if (!mkdir($full) || get_basename_with_cp($full, $cp, false) !== $basename) {
+	if (!mkdir($full)) {
 		echo "failed to create dir '$full'\n";
+		return;
+	}
+
+	$now = get_basename_with_cp($full, $cp, false);
+	if ($now !== $basename) {
+		echo "expected '$basename', got '$now'\n";
 	}
 }
 

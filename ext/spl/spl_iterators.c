@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -469,7 +467,8 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.data, zobject);
+	Z_ADDREF_P(zobject);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(zobject));
 	iterator->intern.funcs = &spl_recursive_it_iterator_funcs;
 	return (zend_object_iterator*)iterator;
 }
@@ -582,7 +581,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0);
-	ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
+	ZVAL_OBJ(&intern->iterators[0].zobject, Z_OBJ_P(iterator));
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
 
@@ -1065,23 +1064,18 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *objec
 {
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 	zval                      *data;
-	zend_error_handling        error_handling;
 
 	data = iterator->funcs->get_current_data(iterator);
-
-	/* Replace exception handling so the catchable fatal error that is thrown when a class
-	 * without __toString is converted to string is converted into an exception. */
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 	if (data) {
 		ZVAL_DEREF(data);
+		/* TODO: Remove this special case? */
 		if (Z_TYPE_P(data) == IS_ARRAY) {
-			ZVAL_STRINGL(return_value, "Array", sizeof("Array")-1);
+			RETVAL_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 		} else {
 			ZVAL_COPY(return_value, data);
 			convert_to_string(return_value);
 		}
 	}
-	zend_restore_error_handling(&error_handling);
 }
 
 static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object, zval *return_value)
@@ -1531,9 +1525,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	}
 
 	if (inc_refcount) {
-		Z_TRY_ADDREF_P(zobject);
+		Z_ADDREF_P(zobject);
 	}
-	ZVAL_COPY_VALUE(&intern->inner.zobject, zobject);
+	ZVAL_OBJ(&intern->inner.zobject, Z_OBJ_P(zobject));
 
 	intern->inner.ce = dit_type == DIT_IteratorIterator ? ce : Z_OBJCE_P(zobject);
 	intern->inner.object = Z_OBJ_P(zobject);
@@ -1964,7 +1958,7 @@ SPL_METHOD(RegexIterator, accept)
 	spl_dual_it_object *intern;
 	zend_string *result, *subject;
 	size_t count = 0;
-	zval zcount, *replacement, tmp_replacement, rv;
+	zval zcount, rv;
 	pcre2_match_data *match_data;
 	pcre2_code *re;
 	int rc;
@@ -1986,6 +1980,11 @@ SPL_METHOD(RegexIterator, accept)
 			RETURN_FALSE;
 		}
 		subject = zval_get_string(&intern->current.data);
+	}
+
+	/* Exception during string conversion. */
+	if (EG(exception)) {
+		return;
 	}
 
 	switch (intern->u.regex.mode)
@@ -2019,14 +2018,14 @@ SPL_METHOD(RegexIterator, accept)
 			RETVAL_BOOL(count > 1);
 			break;
 
-		case REGIT_MODE_REPLACE:
-			replacement = zend_read_property(intern->std.ce, ZEND_THIS, "replacement", sizeof("replacement")-1, 1, &rv);
-			if (Z_TYPE_P(replacement) != IS_STRING) {
-				ZVAL_COPY(&tmp_replacement, replacement);
-				convert_to_string(&tmp_replacement);
-				replacement = &tmp_replacement;
+		case REGIT_MODE_REPLACE: {
+			zval *replacement = zend_read_property(intern->std.ce, ZEND_THIS, "replacement", sizeof("replacement")-1, 1, &rv);
+			zend_string *replacement_str = zval_try_get_string(replacement);
+			if (UNEXPECTED(!replacement_str)) {
+				return;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), Z_STR_P(replacement), -1, &count);
+
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count);
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -2036,10 +2035,9 @@ SPL_METHOD(RegexIterator, accept)
 				ZVAL_STR(&intern->current.data, result);
 			}
 
-			if (replacement == &tmp_replacement) {
-				zval_ptr_dtor(replacement);
-			}
+			zend_string_release(replacement_str);
 			RETVAL_BOOL(count > 0);
+		}
 	}
 
 	if (intern->u.regex.flags & REGIT_INVERTED) {
@@ -3293,7 +3291,7 @@ SPL_METHOD(AppendIterator, append)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &it, zend_ce_iterator) == FAILURE) {
 		return;
 	}
 	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator) == SUCCESS && spl_dual_it_valid(intern) != SUCCESS) {
@@ -3532,11 +3530,7 @@ PHP_FUNCTION(iterator_to_array)
 	}
 
 	array_init(return_value);
-
-	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value) != SUCCESS) {
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
-	}
+	spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value);
 } /* }}} */
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3557,9 +3551,11 @@ PHP_FUNCTION(iterator_count)
 		RETURN_FALSE;
 	}
 
-	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == SUCCESS) {
-		RETURN_LONG(count);
+	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {
+		return;
 	}
+
+	RETURN_LONG(count);
 }
 /* }}} */
 
@@ -3598,12 +3594,13 @@ PHP_FUNCTION(iterator_apply)
 
 	apply_info.count = 0;
 	zend_fcall_info_args(&apply_info.fci, apply_info.args);
-	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == SUCCESS) {
-		RETVAL_LONG(apply_info.count);
-	} else {
-		RETVAL_FALSE;
+	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
+		zend_fcall_info_args(&apply_info.fci, NULL);
+		return;
 	}
+
 	zend_fcall_info_args(&apply_info.fci, NULL);
+	RETURN_LONG(apply_info.count);
 }
 /* }}} */
 

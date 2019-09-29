@@ -17,7 +17,7 @@ targetNamespace="http://soap.dev/soap/types">
           <xsd:element name="region_id" type="xsd:long" default="52"/>
         </xsd:all>
       </xsd:complexType>
-    </xsd:schema> 
+    </xsd:schema>
   </wsdl:types>
   <wsdl:message name="addInput">
     <wsdl:part name="publisher" type="types:publisher"/>

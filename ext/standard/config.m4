@@ -5,6 +5,10 @@ AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <string.h>
 
 int main(int argc, char **argv)
 {
@@ -67,6 +71,9 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
@@ -92,6 +99,9 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
@@ -116,6 +126,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
+
+#include <stdlib.h>
+#include <string.h>
 
 int main() {
 #if HAVE_CRYPT
@@ -152,6 +165,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char salt[30], answer[70];
@@ -184,6 +200,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char salt[21], answer[21+86];
@@ -214,6 +233,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
+
+#include <stdlib.h>
+#include <string.h>
 
 int main() {
 #if HAVE_CRYPT
@@ -284,14 +306,14 @@ fi
 dnl
 dnl Check for available functions
 dnl
-dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
-dnl as soon as we support C99.
-AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
+dnl log2 could be used to improve the log function, however it requires C99. The
+dnl check for log2 should be turned on, as soon as we support C99.
+AC_CHECK_FUNCS(asinh acosh atanh log1p hypot)
 AC_FUNC_FNMATCH
 
 dnl
-dnl Check if there is a support means of creating a new process
-dnl and defining which handles it receives
+dnl Check if there is a support means of creating a new process and defining
+dnl which handles it receives
 dnl
 AC_CHECK_FUNCS(fork CreateProcess, [
   php_can_support_proc_open=yes
@@ -335,7 +357,8 @@ fi
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
-dnl ext/standard/php_dns.h will collect these in a single define: HAVE_FULL_DNS_FUNCS
+dnl ext/standard/php_dns.h will collect these in a single define
+dnl HAVE_FULL_DNS_FUNCS
 dnl
 PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
 PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)
@@ -375,7 +398,7 @@ dnl
 dnl Check for i18n capabilities
 dnl
 AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen mbrlen mbsinit])
+AC_CHECK_FUNCS([mblen])
 AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_WCHAR_H
@@ -447,7 +470,6 @@ AC_CHECK_HEADERS([net/if.h],[], [],
   #endif
   #include <net/if.h>
 ])
-AC_CHECK_HEADERS([netdb.h])
 AC_MSG_CHECKING([for usable getifaddrs])
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/types.h>

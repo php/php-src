@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -48,13 +46,6 @@
 #endif
 
 BEGIN_EXTERN_C()
-
-#if defined(HAVE_POSIX_READDIR_R)
-#define php_readdir_r readdir_r
-#else
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
-		struct dirent **result);
-#endif
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 #define PHP_NEED_REENTRANCY 1

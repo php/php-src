@@ -25,18 +25,6 @@ if (mysqli_get_server_version($link) >= 50600)
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!is_null($tmp = @$mysqli->change_user()))
-		printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$mysqli->change_user($link)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$mysqli->change_user($link, $link)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	if (!is_null($tmp = @$mysqli->change_user($link, $link, $link, $link)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
 	if (false !== ($tmp = $mysqli->change_user($user . '_unknown_really', $passwd . 'non_empty', $db)))
 		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -83,8 +71,8 @@ if (mysqli_get_server_version($link) >= 50600)
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->change_user($user, $passwd, $db)))
-		printf("[018] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->change_user($user, $passwd, $db)))
+		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,10 +32,6 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_is_whitespace_in_element_content, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_replace_whole_text, 0, 0, 1)
-	ZEND_ARG_INFO(0, content)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO();
@@ -54,7 +48,6 @@ const zend_function_entry php_dom_text_class_functions[] = {
 	PHP_FALIAS(splitText, dom_text_split_text, arginfo_dom_text_split_text)
 	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
 	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_FALIAS(replaceWholeText, dom_text_replace_whole_text, arginfo_dom_text_replace_whole_text)
 	PHP_ME(domtext, __construct, arginfo_dom_text_construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -214,15 +207,5 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 	}
 }
 /* }}} end dom_text_is_whitespace_in_element_content */
-
-/* {{{ proto DOMText dom_text_replace_whole_text(string content)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_text_replace_whole_text)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_text_replace_whole_text */
 
 #endif

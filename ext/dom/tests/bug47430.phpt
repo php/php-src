@@ -11,7 +11,11 @@ $dom->loadXML($xml);
 
 $elements = $dom->getElementsByTagName('i');
 foreach ($elements as $i) {
-  $i->previousSibling->nodeValue = '';
+    try {
+        $i->previousSibling->nodeValue = '';
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 $arr = array();
@@ -20,10 +24,9 @@ $arr[0] = 'Value';
 print_r($arr);
 
 ?>
---EXPECTF--
-Warning: Creating default object from empty value in %s on line %d
-
-Warning: Creating default object from empty value in %s on line %d
+--EXPECT--
+Attempt to assign property 'nodeValue' of non-object
+Attempt to assign property 'nodeValue' of non-object
 Array
 (
     [0] => Value

@@ -34,7 +34,6 @@ $inputs = array(
       'empty string DQ' => "",
       'string DQ' => "string",
       'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
       'undefined var' => @$undefined_var,
 );
 
@@ -46,14 +45,11 @@ var_dump($inputs);
 --EXPECT--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
-array(10) {
+array(9) {
   ["uppercase NULL"]=>
   NULL
   ["empty string DQ"]=>
   string(0) ""
-  ["instance of classWithoutToString"]=>
-  object(classWithoutToString)#2 (0) {
-  }
   ["undefined var"]=>
   NULL
   ["float -10.5"]=>

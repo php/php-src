@@ -47,7 +47,7 @@ string(10) "ISO-8859-1"
 string(0) ""
 string(0) ""
 string(0) ""
-string(5) "UTF-8"
+string(10) "ISO-8859-1"
 bool(true)
 string(5) "UTF-8"
 Done

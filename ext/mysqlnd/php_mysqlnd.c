@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -47,29 +45,6 @@ mysqlnd_minfo_print_hash(zval *values)
 		convert_to_string(values_entry);
 		php_info_print_table_row(2, ZSTR_VAL(string_key), Z_STRVAL_P(values_entry));
 	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_minfo_dump_plugin_stats */
-static int
-mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument)
-{
-	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
-	if (plugin_header->plugin_stats.values) {
-		char buf[64];
-		zval values;
-		snprintf(buf, sizeof(buf), "%s statistics", plugin_header->plugin_name);
-
-		mysqlnd_fill_stats_hash(plugin_header->plugin_stats.values, plugin_header->plugin_stats.names, &values ZEND_FILE_LINE_CC);
-
-		php_info_print_table_start();
-		php_info_print_table_header(2, buf, "");
-		mysqlnd_minfo_print_hash(&values);
-		php_info_print_table_end();
-		zend_array_destroy(Z_ARR(values));
-	}
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -161,10 +136,6 @@ PHP_MINFO_FUNCTION(mysqlnd)
 	}
 
 	php_info_print_table_end();
-
-
-	/* Print client stats */
-	mysqlnd_plugin_apply_with_argument(mysqlnd_minfo_dump_plugin_stats, NULL);
 }
 /* }}} */
 

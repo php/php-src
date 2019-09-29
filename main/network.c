@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -514,6 +512,8 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 #if HAVE_IPV6
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
 #endif
+
+	memset(sa, 0, sizeof(struct sockaddr));
 
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -104,6 +102,9 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			unsigned int i;
 			for (i = 0; i < S->out_sqlda.sqld; i++) {
 				XSQLVAR *var = &S->out_sqlda.sqlvar[i];
+				if (var->sqlind) {
+					efree(var->sqlind);
+				}
 				var->sqlind = (void*)ecalloc(1, var->sqllen + 2 * sizeof(short));
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
@@ -612,6 +613,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			/* keep native BOOLEAN type */
 			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
 				switch (Z_TYPE_P(parameter)) {
+<<<<<<< HEAD
 				   case IS_LONG:
 				   case IS_DOUBLE:
 				   case IS_TRUE:
@@ -656,6 +658,52 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					   strcpy(stmt->error_code, "HY105");
 					   S->H->last_app_error = "Binding arrays/objects is not supported";
 					   return 0;
+=======
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_TRUE:
+					case IS_FALSE:
+						*(FB_BOOLEAN*)var->sqldata = zend_is_true(parameter) ? FB_TRUE : FB_FALSE;
+						break;
+					case IS_STRING:
+						{
+							zend_long lval;
+							double dval;
+						
+							if ((Z_STRLEN_P(parameter) == 0)) {
+								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+								break;
+							}
+
+							switch (is_numeric_string(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), &lval, &dval, 0)) {
+								case IS_LONG:
+									*(FB_BOOLEAN*)var->sqldata = (lval != 0) ? FB_TRUE : FB_FALSE;
+									break;
+								case IS_DOUBLE:
+									*(FB_BOOLEAN*)var->sqldata = (dval != 0) ? FB_TRUE : FB_FALSE;
+									break;
+								default:
+									if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "true", 4, 4)) {
+										*(FB_BOOLEAN*)var->sqldata = FB_TRUE;
+									} else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
+										*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
+									} else {
+										strcpy(stmt->error_code, "HY105");
+										S->H->last_app_error = "Cannot convert string to boolean";
+										return 0;
+									}
+
+							}
+						}
+						break;
+					case IS_NULL:
+						*var->sqlind = -1;
+						break;
+					default:
+						strcpy(stmt->error_code, "HY105");
+						S->H->last_app_error = "Binding arrays/objects is not supported";
+						return 0;
+>>>>>>> upstream/master
 				}
 				break;
 			}
@@ -697,7 +745,11 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						/* keep the allow-NULL flag */
 						var->sqltype = SQL_TEXT | (var->sqltype & 1);
 						var->sqldata = Z_STRVAL_P(parameter);
+<<<<<<< HEAD
 						var->sqllen	= Z_STRLEN_P(parameter);
+=======
+						var->sqllen = Z_STRLEN_P(parameter);
+>>>>>>> upstream/master
 						break;
 					}
 				case IS_NULL:
@@ -717,9 +769,9 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			break;
 
 		case PDO_PARAM_EVT_FETCH_POST:
-                        if (param->paramno == -1) {
-                            return 0;
-                        }
+			if (param->paramno == -1) {
+				return 0;
+			}
 			if (param->is_param) {
 				break;
 			}
@@ -747,13 +799,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							break;
 						}
 					case PDO_PARAM_EVT_NORMALIZE:
-							 if (!param->is_param) {
-								  char *s = ZSTR_VAL(param->name);
-								  while (*s != '\0') {
-									   *s = toupper(*s);
-										s++;
-								  }
-							 }
+						if (!param->is_param) {
+							char *s = ZSTR_VAL(param->name);
+							while (*s != '\0') {
+								*s = toupper(*s);
+								s++;
+							}
+						}
 						break;
 					default:
 						ZVAL_NULL(parameter);
@@ -779,7 +831,9 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
-			convert_to_string(val);
+			if (!try_convert_to_string(val)) {
+				return 0;
+			}
 
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
 				RECORD_ERROR(stmt);

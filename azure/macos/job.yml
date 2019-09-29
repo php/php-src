@@ -1,0 +1,91 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+
+jobs:
+  - job: ${{ parameters.configurationName }}
+    pool:
+      vmImage: 'macOS-10.14'
+    steps:
+    - template: brew.yml
+    - script: |
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxml2/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxslt/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/zlib/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
+        ./buildconf --force
+        ./configure ${{ parameters.configurationParameters }} \
+            --enable-option-checking=fatal \
+            --prefix=/usr/local \
+            --disable-phpdbg \
+            --enable-fpm \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pgsql \
+            --with-pdo-pgsql \
+            --with-pdo-sqlite \
+            --without-pear \
+            --enable-gd \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-tidy=/usr/local/opt/tidyp \
+            --with-xmlrpc \
+            --with-libxml \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --with-readline=/usr/local/opt/readline \
+            --enable-mbstring \
+            --with-curl \
+            --with-gettext=/usr/local/opt/gettext \
+            --enable-sockets \
+            --with-bz2=/usr/local/opt/bzip2 \
+            --with-openssl \
+            --with-gmp=/usr/local/opt/gmp \
+            --with-iconv=/usr/local/opt/libiconv \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-pspell=/usr/local/opt/aspell \
+            --with-kerberos \
+            --enable-sysvmsg \
+            --with-ffi \
+            --enable-zend-test \
+            --enable-intl \
+            --with-mhash \
+            --enable-werror \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d
+      displayName: 'Configure Build'
+    - script: |
+        export PATH="/usr/local/opt/bison/bin:$PATH"
+        make -j$(sysctl -n hw.ncpu) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+      displayName: 'Install Build'
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'OpCache'
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1
+    - template: test.yml
+      parameters:
+        configurationName: ${{ parameters.configurationName }}
+        runTestsName: 'JIT'
+        runTestsParameters: -d zend_extension=opcache.so -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M

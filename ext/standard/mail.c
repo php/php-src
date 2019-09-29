@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,9 +33,7 @@
 #endif
 
 #if PHP_SIGCHILD
-#if HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 #endif
 
 #include "php_syslog.h"
@@ -277,7 +273,7 @@ PHPAPI zend_string *php_mail_build_headers(zval *headers)
 }
 
 
-/* {{{ proto int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
+/* {{{ proto bool mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Send an email message */
 PHP_FUNCTION(mail)
 {

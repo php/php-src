@@ -6,6 +6,7 @@ class LogTool
 {
     const P_TIME = '\[\d\d-\w\w\w-\d{4} \d\d:\d\d:\d\d\]';
     const P_PREFIX = '\[pool unconfined\] child \d+ said into stderr: ';
+    const P_PREFIX_STDOUT = '\[pool unconfined\] child \d+ said into stdout: ';
     const FINAL_SUFFIX = ', pipe is closed';
 
     /**
@@ -130,7 +131,7 @@ class LogTool
      * @param bool $decorated
      * @return bool
      */
-    public function checkWrappedMessage(array $lines, bool $terminated = true, bool $decorated = true)
+    public function checkWrappedMessage(array $lines, bool $terminated = true, bool $decorated = true, bool $is_stderr = true)
     {
         if ($this->message === null) {
             throw new \LogicException('The message has not been set');
@@ -140,7 +141,7 @@ class LogTool
                 '/^(%s %s: %s)"([^"]*)"(.*)?$/',
                 self::P_TIME,
                 $this->getExpectedLevel(),
-                self::P_PREFIX
+                $is_stderr ? self::P_PREFIX : self::P_PREFIX_STDOUT
             );
         } else {
             $this->pattern = null;
@@ -157,7 +158,7 @@ class LogTool
             $suffixPattern = sprintf(
                 '/^%s %s: %s(.*)$/',
                 self::P_TIME, $this->getExpectedLevel(),
-                self::P_PREFIX
+                $is_stderr ? self::P_PREFIX : self::P_PREFIX_STDOUT
             );
             $line = $lines[++$idx];
             if (preg_match($suffixPattern, $line, $matches) === 0) {

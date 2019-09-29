@@ -7,11 +7,6 @@
 # include <php_config.h>
 #endif
 
-#undef PACKAGE_NAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_TARNAME
-#undef PACKAGE_STRING
-
 #define SUPPORT_UNICODE 1
 #define SUPPORT_PCRE2_8 1
 

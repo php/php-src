@@ -88,7 +88,7 @@ if (!$res->execute(array(false))) {
 } else {
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
 }
---EXPECT--
+--EXPECTF--
 Array
 (
     [0] => Array
@@ -117,7 +117,7 @@ Array
 (
     [0] => 22P02
     [1] => 7
-    [2] => ERROR:  invalid input syntax for type boolean: ""
+    [2] => %s:  %sboolean%s
 )
 EMUL
 Array
@@ -148,5 +148,5 @@ Array
 (
     [0] => 22P02
     [1] => 7
-    [2] => ERROR:  invalid input syntax for type boolean: ""
+    [2] => %s:  %sboolean%s
 )

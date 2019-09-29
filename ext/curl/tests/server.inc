@@ -12,30 +12,13 @@ function curl_cli_server_start() {
     $php_executable = getenv('TEST_PHP_EXECUTABLE');
     $doc_root = __DIR__;
     $router = "responder/get.inc";
-
-    if (substr(PHP_OS, 0, 3) == 'WIN') {
-        $descriptorspec = array(
-            0 => STDIN,
-            1 => STDOUT,
-            2 => array("pipe", "w"),
-        );
-
-        $cmd = "{$php_executable} -t {$doc_root} -n -S " . PHP_CURL_SERVER_ADDRESS;
-        $cmd .= " {$router}";
-        $handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
-    } else {
-        $descriptorspec = array(
-            0 => STDIN,
-            1 => STDOUT,
-            2 => STDERR,
-        );
-
-        $cmd = "exec {$php_executable} -t {$doc_root} -n -S " . PHP_CURL_SERVER_ADDRESS;
-        $cmd .= " {$router}";
-        $cmd .= " 2>/dev/null";
-
-        $handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
-    }
+    $cmd = [$php_executable, '-t', $doc_root, '-n', '-S', PHP_CURL_SERVER_ADDRESS, $router];
+    $descriptorspec = array(
+        0 => STDIN,
+        1 => STDOUT,
+        2 => array("null"),
+    );
+    $handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root, null, array("suppress_errors" => true));
 
     // note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
     //       it might not be listening yet...need to wait until fsockopen() call returns

@@ -13,7 +13,7 @@ if (!extension_loaded("mbstring")) {
 zend.multibyte=1
 mbstring.encoding_translation = On
 zend.script_encoding=Shift_JIS
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
 --FILE--
 <?php
 	function —\Ž\”\($ˆø”)

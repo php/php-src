@@ -2,8 +2,7 @@
 htmlentities() test 9 (mbstring / Shift_JIS)
 --INI--
 output_handler=
-error_reporting=~E_STRICT
-mbstring.internal_encoding=Shift_JIS
+internal_encoding=Shift_JIS
 --SKIPIF--
 <?php
 	extension_loaded("mbstring") or die("skip mbstring not available\n");
@@ -14,7 +13,9 @@ mbstring.internal_encoding=Shift_JIS
 	var_dump(bin2hex(htmlentities("\x81\x41\x81\x42\x81\x43", ENT_QUOTES, '')));
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 SJIS
+
+Notice: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(12) "814181428143"
 ===DONE===

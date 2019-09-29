@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,8 +24,6 @@
 #include <unknwn.h>
 #include <dispex.h>
 #include "win32/winutil.h"
-
-#include "zend_ts_hash.h"
 
 typedef struct _php_com_dotnet_object {
 	zend_object zo;
@@ -70,7 +66,6 @@ static inline int php_com_is_valid_object(zval *zv)
 } while(0)
 
 /* com_extension.c */
-TsHashTable php_com_typelibraries;
 zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
 
 /* com_handlers.c */
@@ -175,6 +170,9 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 void php_com_typelibrary_dtor(zval *pDest);
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink);
 int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage);
+ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
+PHP_MINIT_FUNCTION(com_typeinfo);
+PHP_MSHUTDOWN_FUNCTION(com_typeinfo);
 
 /* com_iterator.c */
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref);

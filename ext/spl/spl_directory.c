@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -189,7 +187,7 @@ PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_
 #ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR) {
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
-			return php_glob_stream_get_path(intern->u.dir.dirp, 0, len);
+			return php_glob_stream_get_path(intern->u.dir.dirp, len);
 		}
 	}
 #endif
@@ -377,8 +375,7 @@ static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 			intern->u.dir.index = index;
 			break;
 		case SPL_FS_FILE:
-			zend_throw_error(NULL, "An object of class %s cannot be cloned", ZSTR_VAL(old_object->ce->name));
-			return new_object;
+			ZEND_ASSERT(0);
 	}
 
 	intern->file_class = source->file_class;
@@ -617,7 +614,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zend_object *object, int 
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1);
 	path = spl_filesystem_object_get_pathname(intern, &path_len);
-	ZVAL_STRINGL(&tmp, path, path_len);
+	ZVAL_STRINGL(&tmp, path ? path : "", path_len);
 	zend_symtable_update(rv, pnstr, &tmp);
 	zend_string_release_ex(pnstr, 0);
 
@@ -889,7 +886,11 @@ SPL_METHOD(SplFileInfo, getPath)
 	}
 
   	path = spl_filesystem_object_get_path(intern, &path_len);
-	RETURN_STRINGL(path, path_len);
+	if (path) {
+		RETURN_STRINGL(path, path_len);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -1585,7 +1586,7 @@ SPL_METHOD(GlobIterator, __construct)
 }
 /* }}} */
 
-/* {{{ proto int GlobIterator::cont()
+/* {{{ proto int GlobIterator::count()
    Return the number of directories and files found by globbing */
 SPL_METHOD(GlobIterator, count)
 {
@@ -1637,7 +1638,8 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	/* ->current must be initialized; rewind doesn't set it and valid
 	 * doesn't check whether it's set */
@@ -1838,7 +1840,8 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
 
-	ZVAL_COPY(&iterator->intern.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.data, Z_OBJ_P(object));
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 
 	return &iterator->intern;
@@ -2853,7 +2856,7 @@ SPL_METHOD(SplFileObject, fscanf)
 }
 /* }}} */
 
-/* {{{ proto mixed SplFileObject::fwrite(string str [, int length])
+/* {{{ proto int|false SplFileObject::fwrite(string str [, int length])
    Binary-safe file write */
 SPL_METHOD(SplFileObject, fwrite)
 {
@@ -2861,6 +2864,7 @@ SPL_METHOD(SplFileObject, fwrite)
 	char *str;
 	size_t str_len;
 	zend_long length = 0;
+	ssize_t written;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &length) == FAILURE) {
 		return;
@@ -2883,13 +2887,18 @@ SPL_METHOD(SplFileObject, fwrite)
 		RETURN_LONG(0);
 	}
 
-	RETURN_LONG(php_stream_write(intern->u.file.stream, str, str_len));
+	written = php_stream_write(intern->u.file.stream, str, str_len);
+	if (written < 0) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(written);
 } /* }}} */
 
 SPL_METHOD(SplFileObject, fread)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_long length = 0;
+	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &length) == FAILURE) {
 		return;
@@ -2905,11 +2914,11 @@ SPL_METHOD(SplFileObject, fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_NEW_STR(return_value, zend_string_alloc(length, 0));
-	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
-
-	/* needed because recv/read/gzread doesn't put a null at the end*/
-	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
+	str = php_stream_read_to_str(intern->u.file.stream, length);
+	if (!str) {
+		RETURN_FALSE;
+	}
+	RETURN_STR(str);
 }
 
 /* {{{ proto bool SplFileObject::fstat()
@@ -3064,7 +3073,7 @@ static const zend_function_entry spl_SplFileObject_functions[] = {
 	SPL_ME(SplFileObject, seek,           arginfo_file_object_seek,          ZEND_ACC_PUBLIC)
 	/* mappings */
 	SPL_MA(SplFileObject, getCurrentLine, SplFileObject, fgets,      arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
-	SPL_MA(SplFileObject, __toString,     SplFileObject, current,    arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
+	SPL_MA(SplFileObject, __toString,     SplFileObject, fgets,      arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -3121,6 +3130,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 
 	memcpy(&spl_filesystem_object_check_handlers, &spl_filesystem_object_handlers, sizeof(zend_object_handlers));
+	spl_filesystem_object_check_handlers.clone_obj = NULL;
 	spl_filesystem_object_check_handlers.get_method = spl_filesystem_object_get_method_check;
 
 #ifdef HAVE_GLOB

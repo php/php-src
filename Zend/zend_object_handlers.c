@@ -123,6 +123,11 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* 
 		if (zobj->properties) {
 			*table = NULL;
 			*n = 0;
+			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)
+			 && EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+				GC_DELREF(zobj->properties);
+				zobj->properties = zend_array_dup(zobj->properties);
+			}
 			return zobj->properties;
 		} else {
 			*table = zobj->properties_table;
@@ -449,7 +454,7 @@ found:
 	}
 
 	offset = property_info->offset;
-	if (EXPECTED(!property_info->type)) {
+	if (EXPECTED(!ZEND_TYPE_IS_SET(property_info->type))) {
 		property_info = NULL;
 	} else {
 		*info_ptr = property_info;
@@ -462,7 +467,7 @@ found:
 }
 /* }}} */
 
-static zend_never_inline void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
+static ZEND_COLD void zend_wrong_offset(zend_class_entry *ce, zend_string *member) /* {{{ */
 {
 	zend_property_info *dummy;
 
@@ -1229,6 +1234,13 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
+		ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+}
+/* }}} */
+
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
@@ -1289,6 +1301,10 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 	}
 
 exit:
+	if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+		zend_abstract_method_call(fbc);
+		fbc = NULL;
+	}
 	if (UNEXPECTED(!key)) {
 		ZSTR_ALLOCA_FREE(lc_method_name, use_heap);
 	}
@@ -1374,6 +1390,11 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		}
 	}
 
+	if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+		zend_abstract_method_call(fbc);
+		fbc = NULL;
+	}
+
 	if (UNEXPECTED(!key)) {
 		zend_string_release_ex(lc_function_name, 0);
 	}
@@ -1446,7 +1467,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 
 	/* check if static properties were destroyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+		if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & (ZEND_ACC_IMMUTABLE|ZEND_ACC_PRELOADED))) {
 			zend_class_init_statics(ce);
 		} else {
 undeclared_property:
@@ -1461,7 +1482,7 @@ undeclared_property:
 	ZVAL_DEINDIRECT(ret);
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
-				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
+				&& Z_TYPE_P(ret) == IS_UNDEF && ZEND_TYPE_IS_SET(property_info->type))) {
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
 			zend_get_unmangled_property_name(property_name));
@@ -1708,31 +1729,15 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 	switch (type) {
 		case IS_STRING:
 			ce = readobj->ce;
-			if (ce->__tostring &&
-				(zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval) || EG(exception))) {
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval *msg, ex, rv;
-					zval_ptr_dtor(&retval);
-					ZVAL_OBJ(&ex, EG(exception));
-					EG(exception) = NULL;
-					msg = zend_read_property(Z_OBJCE(ex), &ex, "message", sizeof("message") - 1, 1, &rv);
-					if (UNEXPECTED(Z_TYPE_P(msg) != IS_STRING)) {
-						ZVAL_EMPTY_STRING(&rv);
-						msg = &rv;
-					}
-					zend_error_noreturn(E_ERROR,
-							"Method %s::__toString() must not throw an exception, caught %s: %s",
-							ZSTR_VAL(ce->name), ZSTR_VAL(Z_OBJCE(ex)->name), Z_STRVAL_P(msg));
-					return FAILURE;
-				}
+			if (ce->__tostring) {
+				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
-				} else {
-					zval_ptr_dtor(&retval);
-					ZVAL_EMPTY_STRING(writeobj);
-					zend_error(E_RECOVERABLE_ERROR, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
-					return SUCCESS;
+				}
+				zval_ptr_dtor(&retval);
+				if (!EG(exception)) {
+					zend_throw_error(NULL, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
 				}
 			}
 			return FAILURE;
@@ -1762,7 +1767,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce = obj->ce;
@@ -1837,8 +1842,6 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_read_dimension,				/* read_dimension */
 	zend_std_write_dimension,				/* write_dimension */
 	zend_std_get_property_ptr_ptr,			/* get_property_ptr_ptr */
-	NULL,									/* get */
-	NULL,									/* set */
 	zend_std_has_property,					/* has_property */
 	zend_std_unset_property,				/* unset_property */
 	zend_std_has_dimension,					/* has_dimension */

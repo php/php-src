@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -50,7 +48,7 @@ int dom_documenttype_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	ZVAL_STRING(retval, (char *) (dtdptr->name));
+	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
 
 	return SUCCESS;
 }

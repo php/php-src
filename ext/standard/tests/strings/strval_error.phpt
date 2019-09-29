@@ -18,7 +18,11 @@ class MyClass
 
 // Testing strval with a object which has no toString() method
 echo "\n-- Testing strval() function with object which has not toString() method  --\n";
-var_dump( strval(new MyClass()) );
+try {
+    var_dump( strval(new MyClass()) );
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 ===DONE===
@@ -26,5 +30,5 @@ var_dump( strval(new MyClass()) );
 *** Testing strval() : error conditions ***
 
 -- Testing strval() function with object which has not toString() method  --
-
-Recoverable fatal error: Object of class MyClass could not be converted to string in %s on line %d
+Object of class MyClass could not be converted to string
+===DONE===

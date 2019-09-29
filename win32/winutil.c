@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -438,7 +436,7 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	return uname;
 }/*}}}*/
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *path, char **err)
+static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, char *format, char **err)
 {/*{{{*/
 	PLOADED_IMAGE img = ImageLoad(name, NULL);
 
@@ -457,55 +455,36 @@ PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, const char *pa
 	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
 		It should be fine, if we load a module linked with an older one into
 		the core linked with the newer one, but not the otherway round.
+		Analogously, it should be fine, if a PHP build linked with an older version
+		is used with a newer CRT, but not the other way round.
 		Otherwise, if the linker major version is not same, it is an error, as
 		per the current knowledge.
 		
 		This check is to be extended as new VS versions come out. */
-	if (14 == major && PHP_LINKER_MINOR < minor || PHP_LINKER_MAJOR != major)
+	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
+	DWORD comp_minor = (DWORD)(minor/10);
+	if (14 == major && (is_smaller ? core_minor < comp_minor : core_minor > comp_minor) || PHP_LINKER_MAJOR != major)
 #else
 	if (PHP_LINKER_MAJOR != major)
 #endif
 	{
-		spprintf(err, 0, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		spprintf(err, 0, format, name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
 		ImageUnload(img);
 		return FALSE;
 	}
-
 	ImageUnload(img);
 
 	return TRUE;
 }/*}}}*/
 
+PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, char **err)
+{/*{{{*/
+	return is_compatible(name, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
+}/*}}}*/
+
 /* Expect a CRT name DLL. */
 PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *name, char **err)
 {/*{{{*/
-	PLOADED_IMAGE img = ImageLoad(name, NULL);
-
-	if (!img) {
-		DWORD _err = GetLastError();
-		char *err_txt = php_win32_error_to_msg(_err);
-		spprintf(err, 0, "Failed to load %s, %s", name, err_txt);
-		free(err_txt);
-		return FALSE;
-	}
-	
-	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
-	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
-
-#if PHP_LINKER_MAJOR == 14
-	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
-	DWORD comp_minor = (DWORD)(minor/10);
-	if (14 == major && core_minor > comp_minor || PHP_LINKER_MAJOR != major)
-#else
-	if (PHP_LINKER_MAJOR != major)
-#endif
-	{
-		spprintf(err, 0, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
-		ImageUnload(img);
-		return FALSE;
-	}
-	ImageUnload(img);
-
-	return TRUE;
+	return is_compatible(name, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
 }/*}}}*/
 

@@ -26,5 +26,5 @@ __HALT_COMPILER();
 ?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
-RecursiveDirectoryIterator::__construct(1,1): The system cannot find the file specified. (code: 2)
+RecursiveDirectoryIterator::__construct(1,1): %s (code: 2)
 ===DONE===

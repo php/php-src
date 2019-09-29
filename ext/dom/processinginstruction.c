@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -138,7 +136,10 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 

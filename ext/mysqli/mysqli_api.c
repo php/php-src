@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -637,7 +635,7 @@ PHP_FUNCTION(mysqli_change_user)
 		RETURN_FALSE;
 	}
 #if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
-	if (mysql_get_server_version(mysql->mysql) < 501023L) {
+	if (mysql_get_server_version(mysql->mysql) < 50123L) {
 		/*
 		  Request the current charset, or it will be reset to the system one.
 		  5.0 doesn't support it. Support added in 5.1.23 by fixing the following bug :
@@ -816,7 +814,7 @@ PHP_FUNCTION(mysqli_dump_debug_info)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_BOOL(!mysql_dump_debug_info(mysql->mysql))
+	RETURN_BOOL(!mysql_dump_debug_info(mysql->mysql));
 }
 /* }}} */
 
@@ -899,7 +897,10 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			if (!(stmt->param.is_null[i] = (Z_ISNULL_P(param)))) {
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
-						convert_to_string_ex(param);
+						if (!try_convert_to_string(param)) {
+							return;
+						}
+
 						stmt->stmt->params[i].buffer = Z_STRVAL_P(param);
 						stmt->stmt->params[i].buffer_length = Z_STRLEN_P(param);
 						break;
@@ -967,7 +968,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 			zval *result;
 			/* it must be a reference, isn't it? */
 			if (Z_ISREF(stmt->result.vars[i])) {
-				result = stmt->result.vars[i];
+				result = &stmt->result.vars[i];
 			} else {
 				continue; // but be safe ...
 			}
@@ -992,16 +993,16 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								} while (--j > 0);
 								tmp[10]= '\0';
 								/* unsigned int > INT_MAX is 10 digits - ALWAYS */
-								ZEND_TRY_ASSIGN_STRINGL(result, tmp, 10);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, tmp, 10);
 								efree(tmp);
 								break;
 							}
 #endif
 						}
 						if (stmt->stmt->fields[i].flags & UNSIGNED_FLAG) {
-							ZEND_TRY_ASSIGN_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
+							ZEND_TRY_ASSIGN_REF_LONG(result, *(unsigned int *)stmt->result.buf[i].val);
 						} else {
-							ZEND_TRY_ASSIGN_LONG(result, *(int *)stmt->result.buf[i].val);
+							ZEND_TRY_ASSIGN_REF_LONG(result, *(int *)stmt->result.buf[i].val);
 						}
 						break;
 					case IS_DOUBLE:
@@ -1018,7 +1019,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 							dval = *((double *)stmt->result.buf[i].val);
 						}
 
-						ZEND_TRY_ASSIGN_DOUBLE(result, dval);
+						ZEND_TRY_ASSIGN_REF_DOUBLE(result, dval);
 						break;
 					}
 					case IS_STRING:
@@ -1059,20 +1060,20 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								 * use MYSQLI_LL_SPEC.
 								 */
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
-								ZEND_TRY_ASSIGN_STRING(result, tmp);
+								ZEND_TRY_ASSIGN_REF_STRING(result, tmp);
 							} else {
-								ZEND_TRY_ASSIGN_LONG(result, llval);
+								ZEND_TRY_ASSIGN_REF_LONG(result, llval);
 							}
 						} else {
 #if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
-								ZEND_TRY_ASSIGN_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
 							} else {
 #else
 							{
 #endif
-								ZEND_TRY_ASSIGN_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
+								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
 							}
 						}
 						break;
@@ -1080,7 +1081,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						break;
 				}
 			} else {
-				ZEND_TRY_ASSIGN_NULL(result);
+				ZEND_TRY_ASSIGN_REF_NULL(result);
 			}
 		}
 	} else {
@@ -1602,18 +1603,12 @@ PHP_FUNCTION(mysqli_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	if (!mysql_more_results(mysql->mysql)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
-						"Please, call mysqli_more_results()/mysqli::more_results() to check "
-						"whether to call this function/method");
-	}
-
 	RETURN_BOOL(!mysql_next_result(mysql->mysql));
 }
 /* }}} */
 
 #if defined(HAVE_STMT_NEXT_RESULT) && defined(MYSQLI_USE_MYSQLND)
-/* {{{ proto bool mysqli_stmt_next_result(object link)
+/* {{{ proto bool mysqli_stmt_more_results(object link)
    check if there any more query results from a multi query */
 PHP_FUNCTION(mysqli_stmt_more_results)
 {
@@ -1639,12 +1634,6 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
-
-	if (!mysqlnd_stmt_more_results(stmt->stmt)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
-						"Please, call mysqli_stmt_more_results()/mysqli_stmt::more_results() to check "
-						"whether to call this function/method");
-	}
 
 	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
 }
@@ -1781,7 +1770,9 @@ PHP_FUNCTION(mysqli_options)
 	if (expected_type != Z_TYPE_P(mysql_value)) {
 		switch (expected_type) {
 			case IS_STRING:
-				convert_to_string_ex(mysql_value);
+				if (!try_convert_to_string(mysql_value)) {
+					return;
+				}
 				break;
 			case IS_LONG:
 				convert_to_long_ex(mysql_value);
@@ -2023,8 +2014,8 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_stmt_affected_rows(object stmt)
-   Return the number of rows affected in the last query for the given link */
+/* {{{ proto string|int|false mysqli_stmt_affected_rows(object stmt)
+   Return the number of rows affected in the last query for the given link. */
 PHP_FUNCTION(mysqli_stmt_affected_rows)
 {
 	MY_STMT			*stmt;

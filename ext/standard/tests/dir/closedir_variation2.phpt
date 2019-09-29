@@ -26,7 +26,11 @@ echo "Directory Handle: ";
 var_dump($dh);
 
 echo "\n-- Close directory handle second time: --\n";
-var_dump(closedir($dh));
+try {
+    var_dump(closedir($dh));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "Directory Handle: ";
 var_dump($dh);
 ?>
@@ -44,8 +48,6 @@ NULL
 Directory Handle: resource(%d) of type (Unknown)
 
 -- Close directory handle second time: --
-
-Warning: closedir(): supplied resource is not a valid Directory resource in %s on line %d
-bool(false)
+closedir(): supplied resource is not a valid Directory resource
 Directory Handle: resource(%d) of type (Unknown)
 ===DONE===

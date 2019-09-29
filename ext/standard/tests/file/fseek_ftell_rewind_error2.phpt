@@ -16,16 +16,19 @@ Test fseek(), ftell() & rewind() functions : error conditions - ftell()
 echo "*** Testing ftell() : error conditions ***\n";
 
 // ftell on a file handle which is already closed
-echo "-- Testing ftell with closed/unset file handle --";
+echo "-- Testing ftell with closed/unset file handle --\n";
 $fp = fopen(__FILE__, "r");
 fclose($fp);
-var_dump(ftell($fp));
+try {
+    var_dump(ftell($fp));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ftell() : error conditions ***
 -- Testing ftell with closed/unset file handle --
-Warning: ftell(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+ftell(): supplied resource is not a valid stream resource
 Done

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,16 +32,12 @@
 #include <inttypes.h>
 #endif
 
-#ifdef HAVE_LOCALE_H
 #include <locale.h>
 #ifdef ZTS
 #include "ext/standard/php_string.h"
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
-#endif
-#else
-#define LCONV_DECIMAL_POINT '.'
 #endif
 
 /*
@@ -572,7 +566,7 @@ typedef struct buf_area buffy;
 	    INS_CHAR( ch, sp, bep, cc ) ;	\
 	    width-- ;				\
 	}					\
-	while ( width > len )
+	while ( (size_t)width > len )
 
 /*
  * Prefix the character ch to the string str
@@ -612,12 +606,10 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 	struct lconv lconv;
 #else
 	struct lconv *lconv = NULL;
-#endif
 #endif
 
 	/*
@@ -1025,14 +1017,12 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						s = "INF";
 						s_len = 3;
 					} else {
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 						localeconv_r(&lconv);
 #else
 						if (!lconv) {
 							lconv = localeconv();
 						}
-#endif
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
@@ -1086,14 +1076,12 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-#ifdef HAVE_LOCALE_H
 #ifdef ZTS
 					localeconv_r(&lconv);
 #else
 					if (!lconv) {
 						lconv = localeconv();
 					}
-#endif
 #endif
 					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-') {
@@ -1198,7 +1186,7 @@ fmt_error:
 					s_len--;
 					min_width--;
 				}
-				PAD((size_t)min_width, s_len, pad_char);
+				PAD(min_width, s_len, pad_char);
 			}
 			/*
 			 * Print the string s.
@@ -1209,7 +1197,7 @@ fmt_error:
 			}
 
 			if (adjust_width && adjust == LEFT && (size_t)min_width > s_len)
-				PAD((size_t)min_width, s_len, pad_char);
+				PAD(min_width, s_len, pad_char);
 			if (free_zcopy) {
 				zval_ptr_dtor_str(&zcopy);
 			}

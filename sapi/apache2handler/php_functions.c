@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -559,6 +557,6 @@ zend_module_entry php_apache_module = {
 	NULL,
 	NULL,
 	PHP_MINFO(apache),
-	NULL,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };

@@ -23,9 +23,7 @@
 
 #ifdef ZEND_SIGNALS
 
-# ifdef HAVE_SIGNAL_H
-#  include <signal.h>
-# endif
+#include <signal.h>
 
 #ifndef NSIG
 #define NSIG 65

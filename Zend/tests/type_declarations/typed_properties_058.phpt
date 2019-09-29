@@ -28,5 +28,5 @@ for ($i = 0; $i < 2; $i++) {
 ?>
 --EXPECT--
 int(5)
-Typed property B::$foo must be string, int used
-Typed property B::$foo must be string, int used
+Cannot assign int to property B::$foo of type string
+Cannot assign int to property B::$foo of type string

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -423,14 +421,14 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt) && stmt->row_count);
 	}
 #else
 	if (mysql_next_result(H->server) > 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt) && stmt->row_count);
 	}
 #endif
 }
@@ -557,6 +555,10 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 #elif SIZEOF_ZEND_LONG==4
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
+						break;
+					case IS_TRUE:
+					case IS_FALSE:
+						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_TINY);
 						break;
 					case IS_DOUBLE:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_DOUBLE);
@@ -874,7 +876,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 		case MYSQL_TYPE_SHORT:
 		case MYSQL_TYPE_INT24:
 		case MYSQL_TYPE_LONG:
-#if SIZEOF_LONG==8
+#if SIZEOF_ZEND_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);

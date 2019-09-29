@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -45,7 +43,7 @@ extern "C" {
 	 UDAT_PATTERN == (i))
 
 /* {{{ */
-static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 	const char	*locale_str;
@@ -69,7 +67,7 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 	intl_error_reset(NULL);
 	object = return_value;
 	/* Parse parameters. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|zzs",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		return FAILURE;
@@ -189,7 +187,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -207,7 +205,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = ZEND_THIS;
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_string *err = intl_error_get_message(NULL);
 			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));

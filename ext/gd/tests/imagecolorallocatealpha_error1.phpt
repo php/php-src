@@ -9,7 +9,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $resource = tmpfile();
-imagecolorallocatealpha($resource, 255, 255, 255, 50);
+try {
+    imagecolorallocatealpha($resource, 255, 255, 255, 50);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagecolorallocatealpha(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagecolorallocatealpha(): supplied resource is not a valid Image resource

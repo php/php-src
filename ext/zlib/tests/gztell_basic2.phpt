@@ -8,7 +8,7 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
-$f = "temp2.txt.gz";
+$f = "gztell_basic2.txt.gz";
 $h = gzopen($f, 'w');
 $sizes = array(7, 22, 54, 17, 27, 15, 1000);
 // tell should be 7, 29, 83, 100, 127, 142, 1142

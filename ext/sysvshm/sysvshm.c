@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,47 +31,11 @@
 #include <errno.h>
 
 #include "php_sysvshm.h"
+#include "sysvshm_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "php_ini.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_attach, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, memsize)
-	ZEND_ARG_INFO(0, perm)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_detach, 0, 0, 1)
-	ZEND_ARG_INFO(0, shm_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_has_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove, 0, 0, 1)
-	ZEND_ARG_INFO(0, shm_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_put_var, 0, 0, 3)
-	ZEND_ARG_INFO(0, shm_identifier)
-	ZEND_ARG_INFO(0, variable_key)
-	ZEND_ARG_INFO(0, variable)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_get_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ sysvshm_functions[]
  */

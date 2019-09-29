@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -43,13 +41,9 @@
 # include <unistd.h>
 #endif
 
-#if HAVE_SIGNAL_H
-# include <signal.h>
-#endif
+#include <signal.h>
 
-#if HAVE_SETLOCALE
-# include <locale.h>
-#endif
+#include <locale.h>
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -248,7 +242,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint32_t str_leng
 {
 	ssize_t ret;
 
-	/* sapi has started which means everyhting must be send through fcgi */
+	/* sapi has started which means everything must be send through fcgi */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		ret = fcgi_write(request, FCGI_STDOUT, str, str_length);
@@ -1532,7 +1526,7 @@ static zend_module_entry cgi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(cgi),
-	NO_VERSION_YET,
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -1567,7 +1561,6 @@ int main(int argc, char *argv[])
 	zend_bool old_rc_debug;
 #endif
 
-#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
 								that sockets created via fsockopen()
@@ -1575,7 +1568,6 @@ int main(int argc, char *argv[])
 								closes it.  in apache|apxs mode apache
 								does that for us!  thies@thieso.net
 								20000419 */
-#endif
 #endif
 
 #ifdef ZTS

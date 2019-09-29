@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -179,10 +177,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 		if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
 			UnicodeString argName = mp.getSubstring(name_part);
-			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length() * sizeof(UChar))) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length() * sizeof(UChar),
 						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
@@ -343,20 +341,24 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		}
 
 		if (used_tz == NULL) {
-			zval nullzv, *zvptr = &nullzv;
-			ZVAL_NULL(zvptr);
-			used_tz = timezone_process_timezone_argument(zvptr, &err, "msgfmt_format");
+			zval nullzv;
+			ZVAL_NULL(&nullzv);
+			used_tz = timezone_process_timezone_argument(&nullzv, &err, "msgfmt_format");
 			if (used_tz == NULL) {
 				continue;
 			}
 		}
 
-		df->setTimeZone(*used_tz);
+		df->adoptTimeZone(used_tz->clone());
 	}
 
 	if (U_SUCCESS(err.code)) {
 		mfo->mf_data.tz_set = 1;
 	}
+
+  if (used_tz) {
+    delete used_tz;
+  }
 }
 
 U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
@@ -423,7 +425,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				continue;
 			}
 
-			storedArgType = (Formattable::Type*)zend_hash_str_find_ptr(types, (char*)key.getBuffer(), key.length());
+			storedArgType = (Formattable::Type*)zend_hash_str_find_ptr(types, (char*)key.getBuffer(), key.length() * sizeof(UChar));
 		}
 
 		if (storedArgType != NULL) {

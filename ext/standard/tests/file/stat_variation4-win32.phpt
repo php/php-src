@@ -44,7 +44,7 @@ $new_stat = stat($old_dirname);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
-var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "==") );
 // clear the stat
 clearstatcache();
 
@@ -62,7 +62,7 @@ $new_stat = stat($old_filename);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
-var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "==") );
 // clear the stat
 clearstatcache();
 

@@ -81,9 +81,7 @@ Ok for CURLOPT_WRITEHEADER
 Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
 
 Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
-Hello World!
-Hello World!Hello World!
-Hello World!Ok for CURLOPT_FILE
+%AOk for CURLOPT_FILE
 
 Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
 

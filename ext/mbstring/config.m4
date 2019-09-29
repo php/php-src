@@ -1,5 +1,3 @@
-dnl config.m4 for extension mbstring
-
 AC_DEFUN([PHP_MBSTRING_ADD_SOURCES], [
   PHP_MBSTRING_SOURCES="$PHP_MBSTRING_SOURCES $1"
 ])
@@ -14,10 +12,6 @@ AC_DEFUN([PHP_MBSTRING_ADD_BUILD_DIR], [
 
 AC_DEFUN([PHP_MBSTRING_ADD_INCLUDE], [
   PHP_MBSTRING_EXTRA_INCLUDES="$PHP_MBSTRING_EXTRA_INCLUDES $1"
-])
-
-AC_DEFUN([PHP_MBSTRING_ADD_CONFIG_HEADER], [
-  PHP_MBSTRING_EXTRA_CONFIG_HEADERS="$PHP_MBSTRING_EXTRA_CONFIG_HEADERS $1"
 ])
 
 AC_DEFUN([PHP_MBSTRING_ADD_CFLAG], [
@@ -41,21 +35,16 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
     PHP_ADD_INCLUDE([$ext_builddir/$dir])
   done
 
-  if test "$ext_shared" = "no"; then
-    out="php_config.h"
-  else
-    if test -f "$ext_builddir/config.h.in"; then
-      out="$abs_builddir/config.h"
-    else
-      out="php_config.h"
-    fi
+  out="php_config.h"
+
+  if test "$ext_shared" != "no" && test -f "$ext_builddir/config.h.in"; then
+    out="$abs_builddir/config.h"
   fi
 
-  for cfg in $PHP_MBSTRING_EXTRA_CONFIG_HEADERS; do
-    cat > $ext_builddir/$cfg <<EOF
+  cat > $ext_builddir/libmbfl/config.h <<EOF
 #include "$out"
 EOF
-  done
+
   PHP_MBSTRING_ADD_INSTALL_HEADERS([mbstring.h])
   PHP_INSTALL_HEADERS([ext/mbstring], [$PHP_MBSTRING_INSTALL_HEADERS])
 ])
@@ -101,7 +90,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
   PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/nls])
   PHP_MBSTRING_ADD_INCLUDE([libmbfl])
   PHP_MBSTRING_ADD_INCLUDE([libmbfl/mbfl])
-  PHP_MBSTRING_ADD_CONFIG_HEADER([libmbfl/config.h])
 
   PHP_MBSTRING_ADD_SOURCES([
     libmbfl/filters/html_entities.c

@@ -21,7 +21,7 @@
   </schema>
   </types>
   <message name="testMessage">
-  	<part name="testParam" type="tns:testType"/>
+	<part name="testParam" type="tns:testType"/>
   </message>
 	<portType name="testPortType">
 		<operation name="test">
@@ -43,7 +43,7 @@
 	</binding>
 	<service name="testService">
    <port name="testPort" binding="tns:testBinding">
-     <soap:address location="test://" /> 
+     <soap:address location="test://" />
    </port>
  </service>
 </definitions>

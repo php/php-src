@@ -1,5 +1,3 @@
-dnl config.m4 for extension readline
-
 PHP_ARG_WITH([libedit],
   [for libedit readline replacement],
   [AS_HELP_STRING([--with-libedit],
@@ -11,7 +9,8 @@ if test "$PHP_LIBEDIT" = "no"; then
     [AS_HELP_STRING([[--with-readline[=DIR]]],
       [Include readline support (CLI/CGI only)])])
 else
-  dnl "register" the --with-readline option to preven invalid "unknown configure option" warning
+  dnl "register" the --with-readline option to prevent invalid "unknown
+  dnl configure option" warning
   php_with_readline=no
 fi
 

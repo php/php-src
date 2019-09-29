@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -79,7 +77,7 @@ PHPAPI int php_mkdir(const char *dir, zend_long mode);
 
 #define PHP_CSV_NO_ESCAPE EOF
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int escape_char, size_t buf_len, char *buf, zval *return_value);
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -116,7 +114,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	zend_long auto_detect_line_endings;
+	zend_bool auto_detect_line_endings;
 	zend_long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */

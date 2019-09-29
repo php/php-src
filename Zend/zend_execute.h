@@ -41,27 +41,29 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, int use_autoload);
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex);
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name);
-ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name);
-ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions);
-ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions);
+ZEND_API int zend_eval_string(const char *str, zval *retval_ptr, const char *string_name);
+ZEND_API int zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
+ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, int handle_exceptions);
+ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, int handle_exceptions);
 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;
 
-ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
-ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 
-ZEND_API zend_property_info* ZEND_FASTCALL zend_check_ref_array_assignable(zend_reference *ref);
 ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference *ref, zval *zv, zend_bool strict);
 ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict);
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(zend_property_info *prop, zval *zv);
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1, zend_property_info *prop2, zval *zv);
+
+ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, zend_bool strict, zend_bool is_internal_arg);
+ZEND_API ZEND_COLD void zend_verify_arg_error(
+		const zend_function *zf, const zend_arg_info *arg_info,
+		int arg_num, const zend_class_entry *ce, zval *value);
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources
@@ -78,88 +80,12 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API void ZEND_FASTCALL zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 ZEND_API void ZEND_FASTCALL zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
 
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
+ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict, zend_refcounted *ref);
+
+static zend_always_inline void zend_copy_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_refcounted *ref)
 {
-	zend_refcounted *ref = NULL;
-	zval tmp;
-
-	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
-		ref = Z_COUNTED_P(value);
-		value = Z_REFVAL_P(value);
-	}
-
-	do {
-		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
-			zend_refcounted *garbage;
-
-			if (Z_ISREF_P(variable_ptr)) {
-				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
-					zend_bool need_copy = ZEND_CONST_COND(value_type & (IS_CONST|IS_CV), 1) ||
-						((value_type & IS_VAR) && UNEXPECTED(ref) && GC_REFCOUNT(ref) > 1);
-					if (need_copy) {
-						ZVAL_COPY(&tmp, value);
-						value = &tmp;
-					}
-					if (!zend_verify_ref_assignable_zval(Z_REF_P(variable_ptr), value, strict)) {
-						if (need_copy) {
-							Z_TRY_DELREF_P(value);
-						}
-						zval_ptr_dtor(value);
-						return Z_REFVAL_P(variable_ptr);
-					}
-					if (need_copy) {
-						Z_TRY_DELREF_P(value);
-					}
-				}
-
-				variable_ptr = Z_REFVAL_P(variable_ptr);
-				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
-					break;
-				}
-			}
-			if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
-	    		UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
-				Z_OBJ_HANDLER_P(variable_ptr, set)(Z_OBJ_P(variable_ptr), value);
-				return variable_ptr;
-			}
-			if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && variable_ptr == value) {
-				if (value_type == IS_VAR && ref) {
-					ZEND_ASSERT(GC_REFCOUNT(ref) > 1);
-					GC_DELREF(ref);
-				}
-				return variable_ptr;
-			}
-			garbage = Z_COUNTED_P(variable_ptr);
-			if (GC_DELREF(garbage) == 0) {
-				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
-						Z_ADDREF_P(variable_ptr);
-					}
-				} else if (value_type & (IS_CONST|IS_CV)) {
-					if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
-						Z_ADDREF_P(variable_ptr);
-					}
-				} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
-					if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-						efree_size(ref, sizeof(zend_reference));
-					} else if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
-						Z_ADDREF_P(variable_ptr);
-					}
-				}
-				rc_dtor_func(garbage);
-				return variable_ptr;
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
-					gc_possible_root(garbage);
-				}
-			}
-		}
-	} while (0);
-
 	ZVAL_COPY_VALUE(variable_ptr, value);
-	if (ZEND_CONST_COND(value_type == IS_CONST, 0)) {
+	if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
 			Z_ADDREF_P(variable_ptr);
 		}
@@ -174,12 +100,52 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			Z_ADDREF_P(variable_ptr);
 		}
 	}
+}
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type, zend_bool strict)
+{
+	zend_refcounted *ref = NULL;
+
+	if (ZEND_CONST_COND(value_type & (IS_VAR|IS_CV), 1) && Z_ISREF_P(value)) {
+		ref = Z_COUNTED_P(value);
+		value = Z_REFVAL_P(value);
+	}
+
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
+			zend_refcounted *garbage;
+
+			if (Z_ISREF_P(variable_ptr)) {
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
+					return zend_assign_to_typed_ref(variable_ptr, value, value_type, strict, ref);
+				}
+
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
+				}
+			}
+			garbage = Z_COUNTED_P(variable_ptr);
+			zend_copy_to_variable(variable_ptr, value, value_type, ref);
+			if (GC_DELREF(garbage) == 0) {
+				rc_dtor_func(garbage);
+			} else { /* we need to split */
+				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+				if (UNEXPECTED(GC_MAY_LEAK(garbage))) {
+					gc_possible_root(garbage);
+				}
+			}
+			return variable_ptr;
+		}
+	} while (0);
+
+	zend_copy_to_variable(variable_ptr, value, value_type, ref);
 	return variable_ptr;
 }
 
 ZEND_API int zval_update_constant(zval *pp);
 ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
-ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result);
+ZEND_API ZEND_COLD int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -214,20 +180,15 @@ ZEND_API void zend_vm_stack_init_ex(size_t page_size);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
-static zend_always_inline void zend_vm_init_call_frame(zend_execute_data *call, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
+static zend_always_inline void zend_vm_init_call_frame(zend_execute_data *call, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	call->func = func;
-	if (object) {
-		Z_OBJ(call->This) = object;
-		ZEND_SET_CALL_INFO(call, 1, call_info);
-	} else {
-		Z_CE(call->This) = called_scope;
-		ZEND_SET_CALL_INFO(call, 0, call_info);
-	}
+	Z_PTR(call->This) = object_or_called_scope;
+	ZEND_CALL_INFO(call) = call_info;
 	ZEND_CALL_NUM_ARGS(call) = num_args;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
 
@@ -236,11 +197,11 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
 		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
 		ZEND_ASSERT_VM_STACK_GLOBAL;
-		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, called_scope, object);
+		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, object_or_called_scope);
 		return call;
 	} else {
 		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
-		zend_vm_init_call_frame(call, call_info, func, num_args, called_scope, object);
+		zend_vm_init_call_frame(call, call_info, func, num_args, object_or_called_scope);
 		return call;
 	}
 }
@@ -255,12 +216,12 @@ static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, ze
 	return used_stack * sizeof(zval);
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
 
 	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,
-		func, num_args, called_scope, object);
+		func, num_args, object_or_called_scope);
 }
 
 static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_info, zend_execute_data *call)
@@ -366,32 +327,29 @@ ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute
 ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler);
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
-/* former zend_execute_locks.h */
-typedef zval* zend_free_op;
-
-ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type);
+ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data, int type);
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data);
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
 
 #define CACHE_ADDR(num) \
-	((void**)((char*)EX_RUN_TIME_CACHE() + (num)))
+	((void**)((char*)EX(run_time_cache) + (num)))
 
 #define CACHED_PTR(num) \
-	((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0]
+	((void**)((char*)EX(run_time_cache) + (num)))[0]
 
 #define CACHE_PTR(num, ptr) do { \
-		((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] = (ptr); \
+		((void**)((char*)EX(run_time_cache) + (num)))[0] = (ptr); \
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR(num, ce) \
-	(EXPECTED(((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[0] == (void*)(ce)) ? \
-		((void**)((char*)EX_RUN_TIME_CACHE() + (num)))[1] : \
+	(EXPECTED(((void**)((char*)EX(run_time_cache) + (num)))[0] == (void*)(ce)) ? \
+		((void**)((char*)EX(run_time_cache) + (num)))[1] : \
 		NULL)
 
 #define CACHE_POLYMORPHIC_PTR(num, ce, ptr) do { \
-		void **slot = (void**)((char*)EX_RUN_TIME_CACHE() + (num)); \
+		void **slot = (void**)((char*)EX(run_time_cache) + (num)); \
 		slot[0] = (ce); \
 		slot[1] = (ptr); \
 	} while (0)

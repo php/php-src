@@ -12,24 +12,28 @@ echo "*** Testing array_multisort() : error conditions ***\n";
 
 echo "\n-- Testing array_multisort() function with repeated flags --\n";
 $ar1 = array(1);
-var_dump( array_multisort($ar1, SORT_ASC, SORT_ASC) );
+try {
+    var_dump( array_multisort($ar1, SORT_ASC, SORT_ASC) );
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "\n-- Testing array_multisort() function with repeated flags --\n";
 $ar1 = array(1);
-var_dump( array_multisort($ar1, SORT_STRING, SORT_NUMERIC) );
+try {
+    var_dump( array_multisort($ar1, SORT_STRING, SORT_NUMERIC) );
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : error conditions ***
 
 -- Testing array_multisort() function with repeated flags --
-
-Warning: array_multisort(): Argument #3 is expected to be an array or sorting flag that has not already been specified in %sarray_multisort_error.php on line %d
-bool(false)
+Argument #3 is expected to be an array or sorting flag that has not already been specified
 
 -- Testing array_multisort() function with repeated flags --
-
-Warning: array_multisort(): Argument #3 is expected to be an array or sorting flag that has not already been specified in %sarray_multisort_error.php on line %d
-bool(false)
+Argument #3 is expected to be an array or sorting flag that has not already been specified
 ===DONE===

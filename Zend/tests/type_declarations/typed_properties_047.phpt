@@ -37,4 +37,4 @@ NULL
 int(5)
 NULL
 Typed property Foo::$foo must not be accessed before initialization
-Typed property Foo::$foo must be int or null, string used
+Cannot assign string to property Foo::$foo of type ?int

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,24 +25,20 @@ extern zend_module_entry zip_module_entry;
 #include "TSRM.h"
 #endif
 
-#if defined(HAVE_LIBZIP)
 #include <zip.h>
-#else
-#include "lib/zip.h"
-#endif
 
 #ifndef ZIP_OVERWRITE
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.15.4"
+#define PHP_ZIP_VERSION "1.15.5"
 
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
 typedef struct _ze_zip_rsrc {
 	struct zip *za;
-	int index_current;
-	int num_files;
+	zip_uint64_t index_current;
+	zip_int64_t num_files;
 } zip_rsrc;
 
 typedef zip_rsrc * zip_rsrc_ptr;

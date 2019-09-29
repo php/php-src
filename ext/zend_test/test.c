@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -153,7 +151,7 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	zend_internal_function *fptr;
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = &EG(trampoline);
+		fptr = (zend_internal_function *) &EG(trampoline);
 	} else {
 		fptr = emalloc(sizeof(zend_internal_function));
 	}
@@ -173,7 +171,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 	zend_internal_function *fptr;
 
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
-		fptr = &EG(trampoline);
+		fptr = (zend_internal_function *) &EG(trampoline);
 	} else {
 		fptr = emalloc(sizeof(zend_internal_function));
 	}
@@ -219,7 +217,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zval val;
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
-			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, ZEND_TYPE_ENCODE(IS_LONG, 0));
+			zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, ZEND_TYPE_ENCODE_CODE(IS_LONG, 0));
 		zend_string_release(name);
 	}
 
@@ -240,7 +238,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		ZVAL_LONG(&val, 123);
 		zend_declare_typed_property(
 			zend_test_class, name, &val, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC, NULL,
-			ZEND_TYPE_ENCODE(IS_LONG, 0));
+			ZEND_TYPE_ENCODE_CODE(IS_LONG, 0));
 		zend_string_release(name);
 	}
 

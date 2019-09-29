@@ -1,5 +1,3 @@
-dnl config.m4 for extension pgsql
-
 PHP_ARG_WITH([pgsql],
   [for PostgreSQL support],
   [AS_HELP_STRING([[--with-pgsql[=DIR]]],
@@ -8,6 +6,9 @@ PHP_ARG_WITH([pgsql],
 
 if test "$PHP_PGSQL" != "no"; then
   PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
+
+  dnl pg_config is still the default way to retrieve build options
+  dnl pkgconfig support was only introduced in 9.3
 
   AC_MSG_CHECKING(for pg_config)
   for i in $PHP_PGSQL $PHP_PGSQL/bin /usr/local/pgsql/bin /usr/local/bin /usr/bin ""; do
@@ -84,7 +85,6 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQsendPrepare,AC_DEFINE(HAVE_PQSENDPREPARE,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQsendQueryPrepared,AC_DEFINE(HAVE_PQSENDQUERYPREPARED,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQputCopyData,AC_DEFINE(HAVE_PQPUTCOPYDATA,1,[PostgreSQL 7.4 or later]))
-  AC_CHECK_LIB(pq, PQputCopyEnd,AC_DEFINE(HAVE_PQPUTCOPYEND,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQgetCopyData,AC_DEFINE(HAVE_PQGETCOPYDATA,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQfreemem,AC_DEFINE(HAVE_PQFREEMEM,1,[PostgreSQL 7.4 or later]))
   AC_CHECK_LIB(pq, PQsetErrorVerbosity,AC_DEFINE(HAVE_PQSETERRORVERBOSITY,1,[PostgreSQL 7.4 or later]))

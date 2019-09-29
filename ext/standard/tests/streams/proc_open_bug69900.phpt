@@ -57,7 +57,7 @@ $fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 ?>
 --EXPECTF--
 hello0
-fgets() took more than %d ms (%s ms)
+fgets() took %s
 hello1
 fgets() took less than %d ms
 hello2

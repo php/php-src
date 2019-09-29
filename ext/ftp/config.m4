@@ -1,5 +1,3 @@
-dnl config.m4 for extension ftp
-
 PHP_ARG_ENABLE([ftp],
   [whether to enable FTP support],
   [AS_HELP_STRING([--enable-ftp],

@@ -30,10 +30,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
-
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -85,16 +82,17 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
-	zend_bool is_handling_safe = 1;
 
 #ifdef ZTS
 	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
-		is_handling_safe = 0;
+	if (tsrm_is_shutdown()) {
+		/* Forward to default handler handler */
+		zend_signal_handler(signo, siginfo, context);
+		return;
 	}
 #endif
 
-	if (EXPECTED(is_handling_safe && SIGG(active))) {
+	if (EXPECTED(SIGG(active))) {
 		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
 			if (UNEXPECTED(SIGG(blocked))) {
 				SIGG(blocked) = 0;
@@ -179,7 +177,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	sigset_t sigset;
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
-	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+	if (tsrm_is_shutdown()) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
 	} else
@@ -330,13 +328,13 @@ void zend_signal_activate(void)
 
 	SIGG(active) = 1;
 	SIGG(depth)  = 0;
+	SIGG(check)  = ZEND_DEBUG;
 } /* }}} */
 
 /* {{{ zend_signal_deactivate
  * */
 void zend_signal_deactivate(void)
 {
-
 	if (SIGG(check)) {
 		size_t x;
 		struct sigaction sa;
@@ -344,21 +342,32 @@ void zend_signal_deactivate(void)
 		if (SIGG(depth) != 0) {
 			zend_error(E_CORE_WARNING, "zend_signal: shutdown with non-zero blocking depth (%d)", SIGG(depth));
 		}
+
 		/* did anyone steal our installed handler */
 		for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
 			sigaction(zend_sigs[x], NULL, &sa);
-			if (sa.sa_sigaction != zend_signal_handler_defer) {
+			if (sa.sa_sigaction != zend_signal_handler_defer &&
+					sa.sa_sigaction != (void *) SIG_IGN) {
 				zend_error(E_CORE_WARNING, "zend_signal: handler was replaced for signal (%d) after startup", zend_sigs[x]);
 			}
 		}
 	}
 
-	SIGNAL_BEGIN_CRITICAL();
-	SIGG(active) = 0;
+	/* After active=0 is set, signal handlers will be called directly and other
+	 * state that is reset below will not be accessed. */
+	*((volatile int *) &SIGG(active)) = 0;
+
 	SIGG(running) = 0;
 	SIGG(blocked) = 0;
 	SIGG(depth) = 0;
-	SIGNAL_END_CRITICAL();
+
+	/* If there are any queued signals because of a missed unblock, drop them. */
+	if (SIGG(phead) && SIGG(ptail)) {
+		SIGG(ptail)->next = SIGG(pavail);
+		SIGG(pavail) = SIGG(phead);
+		SIGG(phead) = NULL;
+		SIGG(ptail) = NULL;
+	}
 }
 /* }}} */
 

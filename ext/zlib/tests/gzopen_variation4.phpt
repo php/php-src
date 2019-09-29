@@ -16,7 +16,7 @@ if (!extension_loaded("zlib")) {
 
 echo "*** Testing gzopen() : usage variation ***\n";
 
-$thisTestDir = 'gzopen_variation4.dir';
+$testName = 'gzopen_variation4';
 require_once('reading_include_path.inc');
 
 //define the files to go into these directories, create one in dir2
@@ -26,7 +26,6 @@ $modes = array("r", "r+", "rt");
 foreach($modes as $mode) {
     test_gzopen($mode);
 }
-restore_include_path();
 
 // remove the directory structure
 chdir($baseDir);

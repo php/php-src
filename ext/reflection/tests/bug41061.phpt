@@ -1,5 +1,5 @@
 --TEST--
-Reflection Bug #41061 ("visibility error" in ReflectionFunction::export())
+Reflection Bug #41061 ("visibility error" in ReflectionFunction::__toString())
 --FILE--
 <?php
 
@@ -11,8 +11,8 @@ class bar {
     }
 }
 
-Reflection::export(new ReflectionFunction('foo'));
-Reflection::export(new ReflectionMethod('bar', 'foo'));
+echo new ReflectionFunction('foo'), "\n";
+echo new ReflectionMethod('bar', 'foo'), "\n";
 ?>
 ===DONE===
 <?php exit(0); ?>

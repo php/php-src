@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -449,9 +447,9 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 	}
 	length -= 2;				/* length includes itself */
 
-	buffer = emalloc(length);
+	buffer = emalloc((size_t)length);
 
-	if (php_stream_read(stream, buffer, (zend_long) length) != length) {
+	if (php_stream_read(stream, buffer, (size_t) length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -1223,7 +1221,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 }
 /* }}} */
 
-/* {{{ proto string image_type_to_extension(int imagetype [, bool include_dot])
+/* {{{ proto string|false image_type_to_extension(int imagetype [, bool include_dot])
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
@@ -1510,7 +1508,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	}
 
 	if (!stream) {
-		   RETURN_FALSE;
+		RETURN_FALSE;
 	}
 
 	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1518,7 +1516,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 }
 /* }}} */
 
-/* {{{ proto array getimagesize(string imagefile [, array info])
+/* {{{ proto array|false getimagesize(string imagefile [, array info])
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesize)
 {
@@ -1526,7 +1524,7 @@ PHP_FUNCTION(getimagesize)
 }
 /* }}} */
 
-/* {{{ proto array getimagesizefromstring(string data [, array info])
+/* {{{ proto array|false getimagesizefromstring(string data [, array info])
    Get the size of an image as 4-element array */
 PHP_FUNCTION(getimagesizefromstring)
 {

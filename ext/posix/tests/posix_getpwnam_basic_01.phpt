@@ -12,9 +12,6 @@ User Group: PHPSP #phptestfestbrasil
   $uid = posix_geteuid();
   $user = posix_getpwuid($uid);
   $username = $user['name'];
-  if (posix_getlogin() == false) {
-    $username = false;
-  }
   $info = posix_getpwnam($username);
   print_r($info);
   var_dump($username == $info['name']);

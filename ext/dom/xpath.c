@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -329,7 +327,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 	}
 
 	if (xmlXPathRegisterNs(ctxp, prefix, ns_uri) != 0) {
-		RETURN_FALSE
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }

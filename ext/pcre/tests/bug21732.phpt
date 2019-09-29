@@ -1,7 +1,5 @@
 --TEST--
 Bug #21732 (preg_replace() segfaults with invalid parameters)
---INI--
-error_reporting=0
 --FILE--
 <?php
 class foo {
@@ -11,11 +9,15 @@ class foo {
 	}
 }
 
-var_dump(preg_replace('', array(), ''));
+try {
+    var_dump(preg_replace('', array(), ''));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde'));
 ?>
 --EXPECT--
-bool(false)
+Parameter mismatch, pattern is a string while replacement is an array
 array(4) {
   [0]=>
   string(5) "abcde"

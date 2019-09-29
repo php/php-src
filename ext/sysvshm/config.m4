@@ -1,5 +1,3 @@
-dnl config.m4 for extension sysvshm
-
 PHP_ARG_ENABLE([sysvshm],
   [whether to enable System V shared memory support],
   [AS_HELP_STRING([--enable-sysvshm],

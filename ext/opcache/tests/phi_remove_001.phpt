@@ -31,7 +31,7 @@ function getOnlyMPEGaudioInfoBruteForce($info) {
 			if ($MPEGaudioHeaderLengthCache[$head4] > 4) {
 				$WhereWeWere = mftell();
 				$next4 = test(4);
-				if ($next4{0} == "\xFF") {
+				if ($next4[0] == "\xFF") {
 					if (!isset($MPEGaudioHeaderDecodeCache[$next4])) {
 						$MPEGaudioHeaderDecodeCache[$next4] = MPEGaudioHeaderDecode($next4);
 					}

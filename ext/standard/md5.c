@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -78,7 +76,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	size_t           n;
+	ssize_t       n;
 	php_stream    *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -167,8 +165,9 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
  * doesn't work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
 # define SET(n) \
-	(*(uint32_t *)&ptr[(n) * 4])
+	(*(unaligned_uint32_t *)&ptr[(n) * 4])
 # define GET(n) \
 	SET(n)
 #else

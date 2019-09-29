@@ -34,7 +34,7 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
 	}
 
 	public function read($id) {
-		return @file_get_contents($this->path . $id);
+		return (string)@file_get_contents($this->path . $id);
 	}
 
 	public function write($id, $data) {
@@ -56,7 +56,7 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
 	}
 
 	public function create_sid() {
-		return 'my_sid';
+		return pathinfo(__FILE__)['filename'];
 	}
 }
 
@@ -73,12 +73,12 @@ session_unset();
 
 session_start();
 var_dump($_SESSION);
-
-session_write_close();
-session_unset();
---EXPECTF--
+--CLEAN--
+<?php
+@unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_iface_003');
+--EXPECT--
 *** Testing session_set_save_handler() function: id interface ***
-string(%d) "my_sid"
+string(34) "session_set_save_handler_iface_003"
 string(4) "user"
 array(1) {
   ["foo"]=>

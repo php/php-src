@@ -87,7 +87,8 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 		return;
 	}
 
-	/* Free object contents, but don't free objects themselves, so they show up as leaks */
+	/* Free object contents, but don't free objects themselves, so they show up as leaks.
+	 * Also add a ref to all objects, so the object can't be freed by something else later. */
 	end = objects->object_buckets + 1;
 	obj_ptr = objects->object_buckets + objects->top;
 
@@ -101,7 +102,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 					if (obj->handlers->free_obj != zend_object_std_dtor) {
 						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
-						GC_DELREF(obj);
 					}
 				}
 			}
@@ -115,7 +115,6 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_
 					GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
 					GC_ADDREF(obj);
 					obj->handlers->free_obj(obj);
-					GC_DELREF(obj);
 				}
 			}
 		} while (obj_ptr != end);

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -180,7 +178,7 @@ static int php_iptc_next_marker(FILE *fp, int spool, unsigned char **spoolbuf)
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
-/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool])
+/* {{{ proto string|false iptcembed(string iptcdata, string jpeg_file_name [, int spool])
    Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
@@ -311,7 +309,7 @@ PHP_FUNCTION(iptcembed)
 }
 /* }}} */
 
-/* {{{ proto array iptcparse(string iptcdata)
+/* {{{ proto array|false iptcparse(string iptcdata)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {

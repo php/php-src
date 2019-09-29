@@ -1,4 +1,3 @@
-#define HAVE_MEMORY_H 1
 /* #undef HAVE_STRINGS_H */
 /* #undef HAVE_STRCASECMP */
 #define HAVE_STRICMP 1

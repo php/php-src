@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_odbc
-
 define([PDO_ODBC_HELP_TEXT],[[
   The include and lib dirs are looked for under 'dir'. The 'flavour' can be one
   of: ibm-db2, iODBC, unixODBC, generic. If ',dir' part is omitted, default for
@@ -31,22 +29,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  ifdef([PHP_CHECK_PDO_INCLUDES],
-  [
-    PHP_CHECK_PDO_INCLUDES
-  ],[
-    AC_MSG_CHECKING([for PDO includes])
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$phpincludedir/ext
-    else
-      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-    fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
-  ])
+  PHP_CHECK_PDO_INCLUDES
 
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
@@ -141,8 +124,8 @@ if test "$PHP_PDO_ODBC" != "no"; then
   dnl Check first for an ODBC 1.0 function to assert that the libraries work
   PHP_CHECK_LIBRARY($pdo_odbc_def_lib, SQLBindCol,
   [
-    dnl And now check for an ODBC 3.0 function to assert that they're
-    dnl *good* libraries.
+    dnl And now check for an ODBC 3.0 function to assert that they're *good*
+    dnl libraries.
     PHP_CHECK_LIBRARY($pdo_odbc_def_lib, SQLAllocHandle,
     [], [
       AC_MSG_ERROR([
@@ -157,8 +140,5 @@ functions required for PDO support.
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_ODBC_INCLUDE)
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
-  ])
+  PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 fi

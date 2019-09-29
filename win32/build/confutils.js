@@ -1,8 +1,6 @@
 // Utils for configure script
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -95,11 +93,11 @@ if (typeof(CWD) == "undefined") {
 }
 
 /* defaults; we pick up the precise versions from configure.ac */
-var PHP_VERSION = 7;
-var PHP_MINOR_VERSION = 3;
+var PHP_VERSION = 8;
+var PHP_MINOR_VERSION = 0;
 var PHP_RELEASE_VERSION = 0;
 var PHP_EXTRA_VERSION = "";
-var PHP_VERSION_STRING = "7.3.0";
+var PHP_VERSION_STRING = "8.0.0";
 
 /* Get version numbers and DEFINE as a string */
 function get_version_numbers()
@@ -431,6 +429,10 @@ can be built that way. \
 			}
 			STDOUT.WriteLine("  " + arg.arg + pad + word_wrap_and_indent(max_width + 5, arg.helptext));
 		}
+		STDOUT.WriteBlankLines(1);
+		STDOUT.WriteLine("Some influential environment variables:");
+		STDOUT.WriteLine("  CFLAGS      C compiler flags");
+		STDOUT.WriteLine("  LDFLAGS     linker flags");
 		WScript.Quit(1);
 	}
 
@@ -3207,6 +3209,8 @@ function toolset_setup_linker()
 
 function toolset_setup_common_cflags()
 {
+	var envCFLAGS = WshShell.Environment("PROCESS").Item("CFLAGS");
+
 	// CFLAGS for building the PHP dll
 	DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP7DLLTS_EXPORTS /D PHP_EXPORTS \
 	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
@@ -3217,6 +3221,10 @@ function toolset_setup_common_cflags()
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS /D WINDOWS=1 \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 \
 		/D _USE_MATH_DEFINES");
+
+	if (envCFLAGS) {
+		ADD_FLAG("CFLAGS", envCFLAGS);
+	}
 
 	if (VS_TOOLSET) {
 		ADD_FLAG("CFLAGS", " /FD ");
@@ -3368,6 +3376,8 @@ function toolset_setup_intrinsic_cflags()
 
 function toolset_setup_common_ldlags()
 {
+	var envLDFLAGS = WshShell.Environment("PROCESS").Item("LDFLAGS");
+
 	// General DLL link flags
 	DEFINE("DLL_LDFLAGS", "/dll ");
 
@@ -3375,6 +3385,10 @@ function toolset_setup_common_ldlags()
 	DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
 
 	DEFINE("LDFLAGS", "/nologo ");
+
+	if (envLDFLAGS) {
+		ADD_FLAG("LDFLAGS", envLDFLAGS);
+	}
 
 	// we want msvcrt in the PHP DLL
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");

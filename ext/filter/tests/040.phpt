@@ -21,7 +21,7 @@ var_dump(filter_has_var(0, "cc"));
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 bool(false)
 bool(true)
 bool(true)
@@ -29,6 +29,8 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
+
+Warning: filter_has_var(): Unknown source in %s on line %d
 bool(false)
 bool(false)
 Done

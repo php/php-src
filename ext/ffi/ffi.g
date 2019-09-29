@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,6 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
+/*
+To generate ffi_parser.c use llk <https://github.com/dstogov/llk>:
+php llk.php ffi.g
+*/
+
 %start          declarations
 %sub-start      type_name
 %case-sensetive true
@@ -26,8 +29,6 @@
 
 %{
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
@@ -216,7 +217,7 @@ type_specifier(zend_ffi_dcl *dcl):
 	|	{if (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) yy_error_sym("unexpected", sym);}
 		"_Bool"
 		{dcl->flags |= ZEND_FFI_DCL_BOOL;}
-	|	{if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("Unexpected '%s'", sym);}
+	|	{if (dcl->flags & (ZEND_FFI_DCL_TYPE_SPECIFIERS-(ZEND_FFI_DCL_FLOAT|ZEND_FFI_DCL_DOUBLE|ZEND_FFI_DCL_LONG))) yy_error_sym("unexpected", sym);}
 		("_Complex"|"complex"|"__complex"|"__complex__")
 		{dcl->flags |= ZEND_FFI_DCL_COMPLEX;}
 //	|	"_Atomic" "(" type_name ")" // TODO: not-implemented ???
@@ -351,7 +352,7 @@ declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
 		")"
 		{nested = 1;}
 	)
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -366,7 +367,7 @@ abstract_declarator(zend_ffi_dcl *dcl):
 		")"
 		{nested = 1;}
 	)?
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -383,7 +384,7 @@ parameter_declarator(zend_ffi_dcl *dcl, const char **name, size_t *name_len):
 	|	ID(name, name_len)
 	|	/* empty */
 	)
-	array_or_function_declarators(dcl)?
+	array_or_function_declarators(dcl, &nested_dcl)?
 	{if (nested) zend_ffi_nested_declaration(dcl, &nested_dcl);}
 ;
 
@@ -394,7 +395,7 @@ pointer(zend_ffi_dcl *dcl):
 	)+
 ;
 
-array_or_function_declarators(zend_ffi_dcl *dcl):
+array_or_function_declarators(zend_ffi_dcl *dcl, zend_ffi_dcl *nested_dcl):
 	{zend_ffi_dcl dummy = ZEND_FFI_ATTR_INIT;}
 	{zend_ffi_val len = {.kind = ZEND_FFI_VAL_EMPTY};}
 	{HashTable *args = NULL;}
@@ -419,7 +420,7 @@ array_or_function_declarators(zend_ffi_dcl *dcl):
 			)
 		)
 		"]"
-		array_or_function_declarators(dcl)?
+		array_or_function_declarators(dcl, nested_dcl)?
 		{dcl->attr |= attr;}
 		{zend_ffi_make_array_type(dcl, &len);}
 	|	"("
@@ -437,9 +438,9 @@ array_or_function_declarators(zend_ffi_dcl *dcl):
 			{attr |= ZEND_FFI_ATTR_VARIADIC;}
 		)?
 		")"
-		array_or_function_declarators(dcl)?
+		array_or_function_declarators(dcl, nested_dcl)?
 		{dcl->attr |= attr;}
-		{zend_ffi_make_func_type(dcl, args);}
+		{zend_ffi_make_func_type(dcl, args, nested_dcl);}
 //	|	"(" (ID ("," ID)*)? ")" // TODO: ANSI function not-implemented ???
 	)
 ;

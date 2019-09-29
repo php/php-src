@@ -8,7 +8,7 @@ const C2 = [C1, [] => 1];
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Illegal offset type in %s:%d
+Fatal error: Uncaught TypeError: Illegal offset type in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

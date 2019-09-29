@@ -33,11 +33,6 @@
 #endif
 
 #include <stdlib.h>
-
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
-
 #include <string.h>
 #include <stddef.h>
 

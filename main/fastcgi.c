@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1373,6 +1371,8 @@ int fcgi_accept_request(fcgi_request *req)
 				if (in_shutdown) {
 					return -1;
 				}
+
+				req->hook.on_accept();
 #ifdef _WIN32
 				if (!req->tcp) {
 					pipe = (HANDLE)_get_osfhandle(req->listen_socket);
@@ -1402,8 +1402,6 @@ int fcgi_accept_request(fcgi_request *req)
 #endif
 					sa_t sa;
 					socklen_t len = sizeof(sa);
-
-					req->hook.on_accept();
 
 					FCGI_LOCK(req->listen_socket);
 					req->fd = accept(listen_socket, (struct sockaddr *)&sa, &len);

@@ -1,8 +1,6 @@
 #!/bin/sh
 #
 #  +----------------------------------------------------------------------+
-#  | PHP Version 7                                                        |
-#  +----------------------------------------------------------------------+
 #  | Copyright (c) The PHP Group                                          |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
@@ -102,7 +100,7 @@ if ! test -x "$(command -v $MAKE)"; then
 fi
 
 echo "genfiles: Generating Zend parser and lexer files"
-$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" srcdir=Zend builddir=Zend top_srcdir=. \
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" YACC="$YACC" SED="$SED" srcdir=Zend builddir=Zend top_srcdir=. \
   -f Zend/Makefile.frag \
   Zend/zend_language_parser.c \
   Zend/zend_language_scanner.c \

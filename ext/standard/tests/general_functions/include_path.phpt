@@ -35,19 +35,29 @@ echo "Done\n";
 ?>
 --EXPECTF--
 string(1) "."
+
+Deprecated: Function restore_include_path() is deprecated in %s on line %d
 NULL
 string(1) "."
 string(3) "var"
+
+Deprecated: Function restore_include_path() is deprecated in %s on line %d
 NULL
 string(1) "."
 string(1) "."
 string(14) ".:/path/to/dir"
+
+Deprecated: Function restore_include_path() is deprecated in %s on line %d
 NULL
 string(1) "."
 bool(false)
 string(1) "."
+
+Deprecated: Function restore_include_path() is deprecated in %s on line %d
 NULL
 string(1) "."
+
+Deprecated: Function restore_include_path() is deprecated in %s on line %d
 NULL
 string(1) "."
 Done

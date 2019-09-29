@@ -6,7 +6,7 @@ if(!extension_loaded("bcmath")) print "skip";
 ?>
 --FILE--
 <?php
-var_dump(bcpowmod(1, "A", 128, -200));
+var_dump(bcpowmod(1, 0, 128, -200));
 var_dump(bcpowmod(1, 1.2, 1, 1));
 ?>
 --EXPECTF--

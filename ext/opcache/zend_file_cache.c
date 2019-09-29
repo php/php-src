@@ -49,6 +49,10 @@
 # include <sys/file.h>
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 #ifndef ZEND_WIN32
 #define zend_file_cache_unlink unlink
 #define zend_file_cache_open open
@@ -466,8 +470,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 						SERIALIZE_PTR(opline->op2.jmp_addr);
 					}
 					break;
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:
@@ -799,7 +801,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_persistent_script *new_script;
 
 	memcpy(info->magic, "OPCACHE", 8);
-	memcpy(info->system_id, ZCG(system_id), 32);
+	memcpy(info->system_id, accel_system_id, 32);
 	info->mem_size = script->size;
 	info->str_size = 0;
 	info->script_offset = (char*)script - (char*)script->mem;
@@ -828,40 +830,36 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	filename = emalloc(len + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '/';
-	memcpy(filename + len + 1, ZCG(system_id), 32);
+	memcpy(filename + len + 1, accel_system_id, 32);
 	memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
 	memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 #else
-	PHP_MD5_CTX ctx;
-	char md5uname[32];
-	unsigned char digest[16], c;
-	size_t i;
-	char *uname = php_win32_get_username();
-
-	PHP_MD5Init(&ctx);
-	PHP_MD5Update(&ctx, uname, strlen(uname));
-	PHP_MD5Final(digest, &ctx);
-	for (i = 0; i < 16; i++) {
-		c = digest[i] >> 4;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5uname[i * 2] = c;
-		c = digest[i] &  0x0f;
-		c = (c <= 9) ? c + '0' : c - 10 + 'a';
-		md5uname[(i * 2) + 1] = c;
-	}
-
 	len = strlen(ZCG(accel_directives).file_cache);
 
 	filename = emalloc(len + 33 + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
 	filename[len] = '\\';
-	memcpy(filename + 1 + len, md5uname, 32);
-	len += 32;
+	memcpy(filename + 1 + len, accel_uname_id, 32);
+	len += 1 + 32;
 	filename[len] = '\\';
 
-	memcpy(filename + len + 1, ZCG(system_id), 32);
-	if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
+	memcpy(filename + len + 1, accel_system_id, 32);
+
+	if (ZSTR_LEN(script_path) >= 7 && ':' == ZSTR_VAL(script_path)[4] && '/' == ZSTR_VAL(script_path)[5]  && '/' == ZSTR_VAL(script_path)[6]) {
+		/* phar:// or file:// */
+		*(filename + len + 33) = '\\';
+		memcpy(filename + len + 34, ZSTR_VAL(script_path), 4);
+		if (ZSTR_LEN(script_path) - 7 >= 2 && ':' == ZSTR_VAL(script_path)[8]) {
+			*(filename + len + 38) = '\\';
+			*(filename + len + 39) = ZSTR_VAL(script_path)[7];
+			memcpy(filename + len + 40, ZSTR_VAL(script_path) + 9, ZSTR_LEN(script_path) - 9);
+			memcpy(filename + len + 40 + ZSTR_LEN(script_path) - 9, SUFFIX, sizeof(SUFFIX));
+		} else {
+			memcpy(filename + len + 38, ZSTR_VAL(script_path) + 7, ZSTR_LEN(script_path) - 7);
+			memcpy(filename + len + 38 + ZSTR_LEN(script_path) - 7, SUFFIX, sizeof(SUFFIX));
+		}
+	} else if (ZSTR_LEN(script_path) >= 2 && ':' == ZSTR_VAL(script_path)[1]) {
 		/* local fs */
 		*(filename + len + 33) = '\\';
 		*(filename + len + 34) = ZSTR_VAL(script_path)[0];
@@ -872,7 +870,6 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 		memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
 		memcpy(filename + len + 33 + ZSTR_LEN(script_path), SUFFIX, sizeof(SUFFIX));
 	}
-	free(uname);
 #endif
 
 	return filename;
@@ -888,10 +885,12 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 #endif
 	void *mem, *buf;
 
+#ifdef HAVE_JIT
 	/* FIXME: dump jited codes out to file cache? */
-	if (ZCG(accel_directives).jit) {
+	if (ZCG(jit_enabled)) {
 		return FAILURE;
 	}
+#endif
 
 	filename = zend_file_cache_get_bin_file_path(script->script.filename);
 
@@ -938,6 +937,14 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
 	info.checksum = zend_adler32(info.checksum, (signed char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
+
+#if __has_feature(memory_sanitizer)
+	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
+	 * used when reading the cache. We should probably still try to get things fully initialized
+	 * for reproducibility, but for now ignore this issue. */
+	__msan_unpoison(&info, sizeof(info));
+	__msan_unpoison(buf, script->size);
+#endif
 
 #ifdef HAVE_SYS_UIO_H
 	vec[0].iov_base = &info;
@@ -1168,8 +1175,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 						UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					}
 					break;
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:
@@ -1543,7 +1548,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		efree(filename);
 		return NULL;
 	}
-	if (memcmp(info.system_id, ZCG(system_id), 32) != 0) {
+	if (memcmp(info.system_id, accel_system_id, 32) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot read from file '%s' (wrong \"system_id\")\n", filename);
 		zend_file_cache_flock(fd, LOCK_UN);
 		close(fd);

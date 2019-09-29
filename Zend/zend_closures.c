@@ -86,6 +86,10 @@ static zend_bool zend_valid_closure_binding(
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING, "Cannot unbind $this of method");
 		return 0;
+	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
+			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
+		// TODO: Only deprecate if it had $this *originally*?
+		zend_error(E_DEPRECATED, "Unbinding $this of closure is deprecated");
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {
@@ -175,7 +179,8 @@ ZEND_METHOD(Closure, call)
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
 		GC_DELREF(&closure->std);
-	} else if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
+	} else if (ZEND_USER_CODE(my_function.type)
+	 && fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
 		efree(ZEND_MAP_PTR(my_function.op_array.run_time_cache));
 	}
 }
@@ -205,7 +210,7 @@ ZEND_METHOD(Closure, bind)
 			zend_string *class_name = zval_get_tmp_string(scope_arg, &tmp_class_name);
 			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
-			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
+			} else if ((ce = zend_lookup_class(class_name)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
 				RETURN_NULL();
@@ -408,28 +413,28 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
+static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return value;
 }
 /* }}} */
 
-static zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
+static ZEND_COLD zval *zend_closure_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
+static ZEND_COLD int zend_closure_has_property(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -438,7 +443,7 @@ static int zend_closure_has_property(zend_object *object, zend_string *member, i
 }
 /* }}} */
 
-static void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
+static ZEND_COLD void zend_closure_unset_property(zend_object *object, zend_string *member, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
@@ -485,7 +490,7 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 }
 /* }}} */
 
-int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)obj;
 	*fptr_ptr = &closure->func;
@@ -738,7 +743,8 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	if (scope) {
 		closure->func.common.fn_flags |= ZEND_ACC_PUBLIC;
 		if (this_ptr && Z_TYPE_P(this_ptr) == IS_OBJECT && (closure->func.common.fn_flags & ZEND_ACC_STATIC) == 0) {
-			ZVAL_COPY(&closure->this_ptr, this_ptr);
+			Z_ADDREF_P(this_ptr);
+			ZVAL_OBJ(&closure->this_ptr, Z_OBJ_P(this_ptr));
 		}
 	}
 }

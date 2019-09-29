@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -171,7 +169,7 @@ void phpdbg_switch_frame(int frame) /* {{{ */
 
 static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 {
-	zval *funcname, *class, class_zv, *type, *args, *argstmp;
+	zval *funcname, *class, class_zv, *args, *argstmp;
 
 	funcname = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("function"));
 
@@ -183,20 +181,21 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 	}
 
 	if (class) {
-		type = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("type"));
+		zval *type = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("type"));
+
+		phpdbg_xml(" symbol=\"%s%s%s\"", Z_STRVAL_P(class), Z_STRVAL_P(type), Z_STRVAL_P(funcname));
+		phpdbg_out("%s%s%s(", Z_STRVAL_P(class), Z_STRVAL_P(type), Z_STRVAL_P(funcname));
+	} else {
+		phpdbg_xml(" symbol=\"%s\"", Z_STRVAL_P(funcname));
+		phpdbg_out("%s(", Z_STRVAL_P(funcname));
 	}
 
 	args = zend_hash_str_find(Z_ARRVAL_P(tmp), ZEND_STRL("args"));
-
-	phpdbg_xml(" symbol=\"%s%s%s\"", class ? Z_STRVAL_P(class) : "", class ? Z_STRVAL_P(type) : "", Z_STRVAL_P(funcname));
-
 	if (args) {
 		phpdbg_xml(">");
 	} else {
 		phpdbg_xml(" />");
 	}
-
-	phpdbg_out("%s%s%s(", class ? Z_STRVAL_P(class) : "", class ? Z_STRVAL_P(type) : "", Z_STRVAL_P(funcname));
 
 	if (args) {
 		const zend_function *func = NULL;

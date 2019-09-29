@@ -56,9 +56,13 @@ __toString():
 string(35) "Constant [ public bool PUB ] { 1 }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 string(35) "Constant [ public bool PUB ] { 1 }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 Constant [ public bool PUB ] { 1 }
 
 NULL
@@ -90,9 +94,13 @@ __toString():
 string(38) "Constant [ protected int PROT ] { 4 }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 string(38) "Constant [ protected int PROT ] { 4 }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 Constant [ protected int PROT ] { 4 }
 
 NULL
@@ -124,9 +132,13 @@ __toString():
 string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 Constant [ private string PRIV ] { keepOut }
 
 NULL
@@ -158,9 +170,13 @@ __toString():
 string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 string(45) "Constant [ private string PRIV ] { keepOut }
 "
 export():
+
+Deprecated: Function ReflectionClassConstant::export() is deprecated in %s on line %d
 Constant [ private string PRIV ] { keepOut }
 
 NULL

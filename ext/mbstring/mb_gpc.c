@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,11 +55,6 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	int free_buffer=0;
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
-
-	if (arg != PARSE_STRING) {
-		char *value = MBSTRG(internal_encoding_name);
-		_php_mb_ini_mbstring_internal_encoding_set(value, value ? strlen(value): 0);
-	}
 
 	if (!MBSTRG(encoding_translation)) {
 		php_default_treat_data(arg, str, destArray);

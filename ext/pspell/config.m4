@@ -1,5 +1,3 @@
-dnl config.m4 for extension pspell
-
 PHP_ARG_WITH([pspell],
   [for PSPELL support],
   [AS_HELP_STRING([[--with-pspell[=DIR]]],

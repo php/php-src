@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,6 +18,32 @@
 #include "basic_functions.h"
 #include "crc32.h"
 
+#if defined(__aarch64__)
+# pragma GCC target ("+nothing+crc")
+# include <arm_acle.h>
+# if defined(__linux__)
+#  include <sys/auxv.h>
+#  include <asm/hwcap.h>
+# endif
+
+static inline int has_crc32_insn() {
+	/* Only go through the runtime detection once. */
+	static int res = -1;
+	if (res != -1)
+		return res;
+# if defined(HWCAP_CRC32)
+	res = getauxval(AT_HWCAP) & HWCAP_CRC32;
+	return res;
+# elif defined(HWCAP2_CRC32)
+	res = getauxval(AT_HWCAP2) & HWCAP2_CRC32;
+	return res;
+# else
+	res = 0;
+	return res;
+# endif
+}
+#endif
+
 /* {{{ proto string crc32(string str)
    Calculate the crc32 polynomial of a string */
 PHP_NAMED_FUNCTION(php_if_crc32)
@@ -35,6 +59,30 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 
 	crc = crcinit^0xFFFFFFFF;
 
+#if defined(__aarch64__)
+	if (has_crc32_insn()) {
+		while(nr >= sizeof(uint64_t)) {
+			crc = __crc32d(crc, *(uint64_t *)p);
+			p += sizeof(uint64_t);
+			nr -= sizeof(uint64_t);
+		}
+		if (nr >= sizeof(int32_t)) {
+			crc = __crc32w(crc, *(uint32_t *)p);
+			p += sizeof(uint32_t);
+			nr -= sizeof(uint32_t);
+		}
+		if (nr >= sizeof(int16_t)) {
+			crc = __crc32h(crc, *(uint16_t *)p);
+			p += sizeof(uint16_t);
+			nr -= sizeof(uint16_t);
+		}
+		if (nr) {
+			crc = __crc32b(crc, *p);
+			p += sizeof(uint8_t);
+			nr -= sizeof(uint8_t);
+		}
+	}
+#endif
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}

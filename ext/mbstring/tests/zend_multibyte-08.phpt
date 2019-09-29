@@ -5,7 +5,7 @@ zend multibyte (8)
 --INI--
 zend.multibyte=On
 zend.script_encoding=ISO-8859-1
-mbstring.internal_encoding=UTF-8
+internal_encoding=UTF-8
 --FILE--
 <?php
 declare(encoding="CP932");

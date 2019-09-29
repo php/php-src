@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -36,6 +34,10 @@
 # if __FreeBSD__ && __FreeBSD_version > 1200000
 #  include <sys/random.h>
 # endif
+#endif
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
 #endif
 
 #ifdef ZTS
@@ -133,6 +135,10 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 			}
 		}
 
+#if __has_feature(memory_sanitizer)
+		/* MSan does not instrument manual syscall invocations. */
+		__msan_unpoison(bytes + read_bytes, n);
+#endif
 		read_bytes += (size_t) n;
 	}
 #endif
@@ -227,7 +233,7 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_
 		return SUCCESS;
 	}
 
-	umax = max - min;
+	umax = (zend_ulong) max - (zend_ulong) min;
 
 	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
 		return FAILURE;

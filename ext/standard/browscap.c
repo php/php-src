@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -223,12 +221,15 @@ typedef struct _browscap_parser_ctx {
 } browscap_parser_ctx;
 
 static zend_string *browscap_intern_str(
-		browscap_parser_ctx *ctx, zend_string *str) {
+		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
 	zend_string *interned = zend_hash_find_ptr(&ctx->str_interned, str);
 	if (interned) {
 		zend_string_addref(interned);
 	} else {
 		interned = zend_string_copy(str);
+		if (persistent) {
+			interned = zend_new_interned_string(str);
+		}
 		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
 	}
 
@@ -249,6 +250,9 @@ static zend_string *browscap_intern_str_ci(
 		zend_string_addref(interned);
 	} else {
 		interned = zend_string_dup(lcname, persistent);
+		if (persistent) {
+			interned = zend_new_interned_string(interned);
+		}
 		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
 	}
 
@@ -322,18 +326,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				) {
 					new_value = ZSTR_EMPTY_ALLOC();
 				} else { /* Other than true/false setting */
-					new_value = browscap_intern_str(ctx, Z_STR_P(arg2));
-
-					if (persistent) {
-						new_value = zend_new_interned_string(zend_string_copy(new_value));
-						if (ZSTR_IS_INTERNED(new_value)) {
-							if (new_value == Z_STR_P(arg2)) {
-								Z_TYPE_FLAGS_P(arg2) = 0;
-							}
-						} else {
-							zend_string_release(new_value);
-						}
-					}
+					new_value = browscap_intern_str(ctx, Z_STR_P(arg2), persistent);
 				}
 
 				if (!strcasecmp(Z_STRVAL_P(arg1), "parent")) {
@@ -354,18 +347,6 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					ctx->current_entry->parent = new_value;
 				} else {
 					new_key = browscap_intern_str_ci(ctx, Z_STR_P(arg1), persistent);
-
-					if (persistent) {
-						new_key = zend_new_interned_string(zend_string_copy(new_key));
-						if (ZSTR_IS_INTERNED(new_key)) {
-							if (new_key == Z_STR_P(arg1)) {
-								Z_TYPE_FLAGS_P(arg1) = 0;
-							}
-						} else {
-							zend_string_release(new_key);
-						}
-					}
-
 					browscap_add_kv(bdata, new_key, new_value, persistent);
 					ctx->current_entry->kv_end = bdata->kv_used;
 				}
@@ -417,6 +398,10 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 }
 /* }}} */
 
+static void str_interned_dtor(zval *zv) {
+	zend_string_release(Z_STR_P(zv));
+}
+
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
 {
 	zend_file_handle fh;
@@ -426,16 +411,11 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		return FAILURE;
 	}
 
-	fh.handle.fp = VCWD_FOPEN(filename, "r");
-	fh.opened_path = NULL;
-	fh.free_filename = 0;
+	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
 	if (!fh.handle.fp) {
 		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
 		return FAILURE;
 	}
-
-	fh.filename = filename;
-	fh.type = ZEND_HANDLE_FP;
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
 	zend_hash_init_ex(browdata->htab, 0, NULL,
@@ -449,7 +429,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	ctx.bdata = browdata;
 	ctx.current_entry = NULL;
 	ctx.current_section_name = NULL;
-	zend_hash_init(&ctx.str_interned, 8, NULL, NULL, persistent);
+	zend_hash_init(&ctx.str_interned, 8, NULL, str_interned_dtor, persistent);
 
 	zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW,
 			(zend_ini_parser_cb_t) php_browscap_parser_cb, &ctx);

@@ -127,8 +127,11 @@ static int _gdImageWBMPCtx(gdImagePtr image, int fg, gdIOCtx *out)
 		gd_error("Could not save WBMP");
 		return 1;
 	}
+
 	/* des submitted this bugfix: gdFree the memory. */
 	freewbmp(wbmp);
+
+	return 0;
 }
 
 /* gdImageCreateFromWBMPCtx

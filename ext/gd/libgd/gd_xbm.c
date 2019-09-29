@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -136,7 +134,11 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			}
 			h[3] = ch;
 		}
-		sscanf(h, "%x", &b);
+		if (sscanf(h, "%x", &b) != 1) {
+			gd_error("invalid XBM");
+			gdImageDestroy(im);
+			return 0;
+		}
 		for (bit = 1; bit <= max_bit; bit = bit << 1) {
 			gdImageSetPixel(im, x++, y, (b & bit) ? 1 : 0);
 			if (x == im->sx) {

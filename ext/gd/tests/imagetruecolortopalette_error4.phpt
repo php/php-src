@@ -9,13 +9,16 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
+require __DIR__  . '/func.inc';
+
 $image = imagecreatetruecolor(50, 50);
 
-imagetruecolortopalette($image, true, 0);
-imagetruecolortopalette($image, true, -1);
+trycatch_dump(
+    fn() => imagetruecolortopalette($image, true, 0),
+    fn() => imagetruecolortopalette($image, true, -1)
+);
 
 ?>
---EXPECTF--
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d
-
-Warning: imagetruecolortopalette(): Number of colors has to be greater than zero and no more than %d in %s line %d
+--EXPECT--
+!! [ValueError] Number of colors has to be greater than zero and no more than 2147483647
+!! [ValueError] Number of colors has to be greater than zero and no more than 2147483647

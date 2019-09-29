@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -77,9 +75,10 @@ static zval *saproxy_property_read(zend_object *object, zend_string *member, int
 	return rv;
 }
 
-static void saproxy_property_write(zend_object *object, zend_string *member, zval *value, void **cache_slot)
+static zval *saproxy_property_write(zend_object *object, zend_string *member, zval *value, void **cache_slot)
 {
 	php_com_throw_exception(E_INVALIDARG, "safearray has no properties");
+	return value;
 }
 
 static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
@@ -273,18 +272,6 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 	}
 }
 
-#if 0
-static void saproxy_object_set(zval **property, zval *value)
-{
-}
-
-static zval *saproxy_object_get(zval *property)
-{
-	/* Not yet implemented in the engine */
-	return NULL;
-}
-#endif
-
 static int saproxy_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	/* no properties */
@@ -400,8 +387,6 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_read_dimension,
 	saproxy_write_dimension,
 	NULL,
-	NULL, /* saproxy_object_get, */
-	NULL, /* saproxy_object_set, */
 	saproxy_property_exists,
 	saproxy_property_delete,
 	saproxy_dimension_exists,
@@ -541,7 +526,8 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	Z_PTR(I->iter.data) = I;
 
 	I->proxy = proxy;
-	ZVAL_COPY(&I->proxy_obj, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&I->proxy_obj, Z_OBJ_P(object));
 
 	I->indices = safe_emalloc(proxy->dimensions + 1, sizeof(LONG), 0);
 	for (i = 0; i < proxy->dimensions; i++) {

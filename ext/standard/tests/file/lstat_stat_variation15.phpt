@@ -43,7 +43,7 @@ $new_stat = lstat($linkname);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stat
-var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "=") );
+var_dump( compare_stats($old_stat, $new_stat, $all_stat_keys, "==") );
 
 echo "\n--- Done ---";
 ?>

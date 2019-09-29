@@ -95,7 +95,7 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function with unexpected values for needle ***
 
 -- Iteration 1 --
@@ -144,35 +144,35 @@ stripos() expects parameter 2 to be string, array given
 int(9)
 
 -- Iteration 16 --
-bool(false)
+int(0)
 
 -- Iteration 17 --
 int(9)
 
 -- Iteration 18 --
-bool(false)
+int(0)
 
 -- Iteration 19 --
 int(64)
 
 -- Iteration 20 --
-bool(false)
+int(0)
 
 -- Iteration 21 --
-bool(false)
+int(0)
 
 -- Iteration 22 --
-bool(false)
+int(0)
 
 -- Iteration 23 --
-bool(false)
+int(0)
 
 -- Iteration 24 --
 stripos() expects parameter 2 to be string, resource given
 
 -- Iteration 25 --
-bool(false)
+int(0)
 
 -- Iteration 26 --
-bool(false)
+int(0)
 *** Done ***

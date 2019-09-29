@@ -10,7 +10,20 @@ $(srcdir)/zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
 
 $(srcdir)/zend_language_parser.h: $(srcdir)/zend_language_parser.c
 $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
+# Tweak zendparse to be exported through ZEND_API. This has to be revisited once
+# bison supports foreign skeletons and that bison version is used. Read
+# https://git.savannah.gnu.org/cgit/bison.git/tree/data/README.md for more.
 	@$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o $@
+	@$(SED) -e 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' < $@ \
+	> $@.tmp && \
+	mv $@.tmp $@
+	@$(SED) -e 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' < $(srcdir)/zend_language_parser.h \
+	> $(srcdir)/zend_language_parser.h.tmp && \
+	mv $(srcdir)/zend_language_parser.h.tmp $(srcdir)/zend_language_parser.h
+	@nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
+	$(SED) -e "s/^#ifndef YYTOKENTYPE/#include \"zend.h\"\\$${nl}#ifndef YYTOKENTYPE/" < $(srcdir)/zend_language_parser.h \
+	> $(srcdir)/zend_language_parser.h.tmp && \
+	mv $(srcdir)/zend_language_parser.h.tmp $(srcdir)/zend_language_parser.h
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
 $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y

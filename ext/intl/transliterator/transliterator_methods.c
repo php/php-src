@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -317,9 +315,8 @@ PHP_FUNCTION( transliterator_transliterate )
 		else
 		{ /* not a transliterator object as first argument */
 			int res;
-			if(Z_TYPE_P( arg1 ) != IS_STRING )
-			{
-				convert_to_string( arg1 );
+			if( !try_convert_to_string( arg1 ) ) {
+				return;
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
@@ -327,7 +324,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			if( res == FAILURE )
 			{
 				zend_string *message = intl_error_get_message( NULL );
-				php_error_docref0( NULL, E_WARNING, "Could not create "
+				php_error_docref(NULL, E_WARNING, "Could not create "
 					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), ZSTR_VAL(message) );
 				zend_string_free( message );
 				ZVAL_UNDEF(&tmp_object);

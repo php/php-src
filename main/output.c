@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1392,7 +1390,7 @@ PHP_FUNCTION(ob_end_clean)
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_flush(void)
+/* {{{ proto string|false ob_get_flush(void)
    Get current buffer contents, flush (send) the output buffer, and delete current output buffer */
 PHP_FUNCTION(ob_get_flush)
 {
@@ -1411,7 +1409,7 @@ PHP_FUNCTION(ob_get_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ob_get_clean(void)
+/* {{{ proto string|false ob_get_clean(void)
    Get current buffer contents and delete current output buffer */
 PHP_FUNCTION(ob_get_clean)
 {
@@ -1434,7 +1432,7 @@ PHP_FUNCTION(ob_get_clean)
 }
 /* }}} */
 
-/* {{{ proto string ob_get_contents(void)
+/* {{{ proto string|false ob_get_contents(void)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
@@ -1460,7 +1458,7 @@ PHP_FUNCTION(ob_get_level)
 }
 /* }}} */
 
-/* {{{ proto int ob_get_length(void)
+/* {{{ proto int|false ob_get_length(void)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
@@ -1474,7 +1472,7 @@ PHP_FUNCTION(ob_get_length)
 }
 /* }}} */
 
-/* {{{ proto false|array ob_list_handlers()
+/* {{{ proto null|array ob_list_handlers()
    List all output_buffers in an array */
 PHP_FUNCTION(ob_list_handlers)
 {

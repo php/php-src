@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -76,13 +74,11 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
-		ZEND_ASSERT(prop_info->type);
-		php_printf("%*cuninitialized(%s%s)\n",
-			level + 1, ' ',
-			ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
-			ZEND_TYPE_IS_CLASS(prop_info->type) ?
-				ZSTR_VAL(ZEND_TYPE_IS_CE(prop_info->type) ? ZEND_TYPE_CE(prop_info->type)->name : ZEND_TYPE_NAME(prop_info->type)) :
-				zend_get_type_by_const(ZEND_TYPE_CODE(prop_info->type)));
+		ZEND_ASSERT(ZEND_TYPE_IS_SET(prop_info->type));
+		zend_string *type_str = zend_type_to_string(prop_info->type);
+		php_printf("%*cuninitialized(%s)\n",
+			level + 1, ' ', ZSTR_VAL(type_str));
+		zend_string_release(type_str);
 	} else {
 		php_var_dump(zv, level + 2);
 	}
@@ -260,13 +256,10 @@ static void zval_object_property_dump(zend_property_info *prop_info, zval *zv, z
 		ZEND_PUTS("]=>\n");
 	}
 	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
-		ZEND_ASSERT(prop_info->type);
-		php_printf("%*cuninitialized(%s%s)\n",
-			level + 1, ' ',
-			ZEND_TYPE_ALLOW_NULL(prop_info->type) ? "?" : "",
-			ZEND_TYPE_IS_CLASS(prop_info->type) ?
-				ZSTR_VAL(ZEND_TYPE_IS_CE(prop_info->type) ? ZEND_TYPE_CE(prop_info->type)->name : ZEND_TYPE_NAME(prop_info->type)) :
-				zend_get_type_by_const(ZEND_TYPE_CODE(prop_info->type)));
+		zend_string *type_str = zend_type_to_string(prop_info->type);
+		php_printf("%*cuninitialized(%s)\n",
+			level + 1, ' ', ZSTR_VAL(type_str));
+		zend_string_release(type_str);
 	} else {
 		php_debug_zval_dump(zv, level + 2);
 	}
@@ -763,7 +756,7 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 
 	if (Z_TYPE_P(retval) != IS_ARRAY) {
 		zval_ptr_dtor(retval);
-		zend_type_error("__serialize() must return an array");
+		zend_type_error("%s::__serialize() must return an array", ZSTR_VAL(Z_OBJCE_P(obj)->name));
 		return FAILURE;
 	}
 
@@ -947,7 +940,8 @@ again:
 					zval *data;
 					zend_ulong index;
 
-					ZVAL_COPY(&obj, struc);
+					Z_ADDREF_P(struc);
+					ZVAL_OBJ(&obj, Z_OBJ_P(struc));
 					if (php_var_serialize_call_magic_serialize(&retval, &obj) == FAILURE) {
 						if (!EG(exception)) {
 							smart_str_appendl(buf, "N;", 2);
@@ -1009,7 +1003,9 @@ again:
 
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
-					ZVAL_COPY(&tmp, struc);
+					
+					Z_ADDREF_P(struc);
+					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
 
 					if (php_var_serialize_call_sleep(&retval, &tmp) == FAILURE) {
 						if (!EG(exception)) {
@@ -1219,6 +1215,13 @@ PHP_FUNCTION(unserialize)
 				zend_hash_add_empty_element(class_hash, lcname);
 		        zend_string_release_ex(lcname, 0);
 			} ZEND_HASH_FOREACH_END();
+
+			/* Exception during string conversion. */
+			if (EG(exception)) {
+				zend_hash_destroy(class_hash);
+				FREE_HASHTABLE(class_hash);
+				PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+			}
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);
 	}

@@ -87,10 +87,10 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end);
 
 #if SIZEOF_ZEND_LONG == 4
-#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
+#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #else
 	/* >= as (double)ZEND_LONG_MAX is outside signed range */
-#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
+#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= (double)ZEND_LONG_MAX || (d) < (double)ZEND_LONG_MIN))
 #endif
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
@@ -148,9 +148,12 @@ static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
 	const char *p = haystack;
-	const char ne = needle[needle_len-1];
 	ptrdiff_t off_p;
 	size_t off_s;
+
+	if (needle_len == 0) {
+		return p;
+	}
 
 	if (needle_len == 1) {
 		return (const char *)memchr(p, *needle, (end-p));
@@ -164,6 +167,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 	}
 
 	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
+		const char ne = needle[needle_len-1];
 		end -= needle_len;
 
 		while (p <= end) {
@@ -206,9 +210,12 @@ static zend_always_inline const char *
 zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
     const char *p = end;
-    const char ne = needle[needle_len-1];
     ptrdiff_t off_p;
     size_t off_s;
+
+	if (needle_len == 0) {
+		return p;
+	}
 
     if (needle_len == 1) {
         return (const char *)zend_memrchr(haystack, *needle, (p - haystack));
@@ -222,13 +229,16 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const
     }
 
 	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+		const char ne = needle[needle_len-1];
 		p -= needle_len;
 
 		do {
-			if ((p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1)) && ne == p[needle_len-1]) {
-				if (!memcmp(needle + 1, p + 1, needle_len - 2)) {
-					return p;
-				}
+			p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1);
+			if (!p) {
+				return NULL;
+			}
+			if (ne == p[needle_len-1] && !memcmp(needle + 1, p + 1, needle_len - 2)) {
+				return p;
 			}
 		} while (p-- >= haystack);
 
@@ -258,6 +268,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
+ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
 static zend_always_inline zend_long zval_get_long(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
@@ -281,6 +292,39 @@ static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 	if (UNEXPECTED(tmp)) {
 		zend_string_release_ex(tmp, 0);
 	}
+}
+
+/* Like zval_get_string, but returns NULL if the conversion fails with an exception. */
+static zend_always_inline zend_string *zval_try_get_string(zval *op) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		zend_string *ret = zend_string_copy(Z_STR_P(op));
+		ZEND_ASSUME(ret != NULL);
+		return ret;
+	} else {
+		return zval_try_get_string_func(op);
+	}
+}
+
+/* Like zval_get_tmp_string, but returns NULL if the conversion fails with an exception. */
+static zend_always_inline zend_string *zval_try_get_tmp_string(zval *op, zend_string **tmp) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		zend_string *ret = Z_STR_P(op);
+		*tmp = NULL;
+		ZEND_ASSUME(ret != NULL);
+		return ret;
+	} else {
+		return *tmp = zval_try_get_string_func(op);
+	}
+}
+
+/* Like convert_to_string(), but returns whether the conversion succeeded and does not modify the
+ * zval in-place if it fails. */
+ZEND_API zend_bool ZEND_FASTCALL _try_convert_to_string(zval *op);
+static zend_always_inline zend_bool try_convert_to_string(zval *op) {
+	if (Z_TYPE_P(op) == IS_STRING) {
+		return 1;
+	}
+	return _try_convert_to_string(op);
 }
 
 /* Compatibility macros for 7.2 and below */
@@ -358,9 +402,7 @@ ZEND_API int ZEND_FASTCALL numeric_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive);
 ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
-#if HAVE_STRCOLL
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
-#endif
 
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
@@ -451,7 +493,7 @@ ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_D
 		convert_scalar_to_number(pzv);					\
 	}
 
-#if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
+#if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
 /* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
 #define ZEND_USE_TOLOWER_L 1
 #endif
@@ -466,9 +508,15 @@ ZEND_API void zend_update_current_locale(void);
 #define ZVAL_OFFSETOF_TYPE	\
 	(offsetof(zval, u1.type_info) - offsetof(zval, value))
 
+#if defined(HAVE_ASM_GOTO) && !__has_feature(memory_sanitizer)
+# define ZEND_USE_ASM_ARITHMETIC 1
+#else
+# define ZEND_USE_ASM_ARITHMETIC 0
+#endif
+
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"addl $1,(%0)\n\t"
 		"jo  %l1\n"
@@ -479,13 +527,26 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
-#elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"addq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
 		: "cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
+	__asm__ goto (
+		"ldr x5, [%0]\n\t"
+		"adds x5, x5, 1\n\t"
+		"bvs %l1\n"
+		"str x5, [%0]"
+		:
+		: "r"(&op1->value)
+		: "x5", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -518,7 +579,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"subl $1,(%0)\n\t"
 		"jo  %l1\n"
@@ -529,13 +590,26 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
-#elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"subq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
 		: "cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
+	__asm__ goto (
+		"ldr x5, [%0]\n\t"
+		"subs x5 ,x5, 1\n\t"
+		"bvs %l1\n"
+		"str x5, [%0]"
+		:
+		: "r"(&op1->value)
+		: "x5", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -568,7 +642,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"addl   (%2), %%eax\n\t"
@@ -586,7 +660,7 @@ static zend_always_inline void fast_long_add_function(zval *result, zval *op1, z
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
-#elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"movq	(%1), %%rax\n\t"
 		"addq   (%2), %%rax\n\t"
@@ -600,6 +674,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		  "n"(IS_LONG),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"adds	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -658,7 +752,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(HAVE_ASM_GOTO) && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
+#if ZEND_USE_ASM_ARITHMETIC && defined(__i386__) && !(4 == __GNUC__ && 8 == __GNUC_MINOR__)
 	__asm__ goto(
 		"movl	(%1), %%eax\n\t"
 		"subl   (%2), %%eax\n\t"
@@ -676,7 +770,7 @@ static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, z
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
-#elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__x86_64__)
 	__asm__ goto(
 		"movq	(%1), %%rax\n\t"
 		"subq   (%2), %%rax\n\t"
@@ -690,6 +784,26 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 		  "n"(IS_LONG),
 		  "n"(ZVAL_OFFSETOF_TYPE)
 		: "rax","cc", "memory"
+		: overflow);
+	return;
+overflow: ZEND_ATTRIBUTE_COLD_LABEL
+	ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+#elif ZEND_USE_ASM_ARITHMETIC && defined(__aarch64__)
+	__asm__ goto(
+		"ldr    x5, [%1]\n\t"
+		"ldr    x6, [%2]\n\t"
+		"subs	x5, x5, x6\n\t"
+		"bvs	%l5\n\t"
+		"mov	w6, %3\n\t"
+		"str	x5, [%0]\n\t"
+		"str	w6, [%0, %c4]\n"
+		:
+		: "r"(&result->value),
+		  "r"(&op1->value),
+		  "r"(&op2->value),
+		  "n"(IS_LONG),
+		  "n"(ZVAL_OFFSETOF_TYPE)
+		: "x5", "x6", "cc", "memory"
 		: overflow);
 	return;
 overflow: ZEND_ATTRIBUTE_COLD_LABEL
@@ -799,19 +913,7 @@ static zend_always_inline zend_bool fast_is_not_identical_function(zval *op1, zv
 }
 
 #define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                            \
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \
-		&& op1 == result                                                                                   \
-		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, get))                                                          \
-		&& EXPECTED(Z_OBJ_HANDLER_P(op1, set))) {                                                         \
-		int ret;                                                                                           \
-		zval rv;                                                                                           \
-		zval *objval = Z_OBJ_HANDLER_P(op1, get)(Z_OBJ_P(op1), &rv);                                      \
-		Z_TRY_ADDREF_P(objval);                                                                            \
-		ret = binary_op(objval, objval, op2);                                                              \
-		Z_OBJ_HANDLER_P(op1, set)(Z_OBJ_P(op1), objval);                                         \
-		zval_ptr_dtor(objval);                                                                             \
-		return ret;                                                                                        \
-	} else if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                      \
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                      \
 		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))) {                                               \
 		if (EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2))) { \
 			return SUCCESS;                                                                                \

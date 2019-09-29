@@ -26,11 +26,11 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
-#define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
+#define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_RC1                  (1<<27) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1<<28) /* may be non-reference with refcount > 1  */
+#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
@@ -238,6 +238,14 @@ DEFINE_SSA_OP_DEF_INFO(result)
 #define OP2_DATA_DEF_INFO()     (_ssa_op2_def_info(op_array, ssa, (opline+1)))
 #define RES_INFO()              (_ssa_result_def_info(op_array, ssa, opline))
 
+static zend_always_inline zend_bool zend_add_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a > ZEND_LONG_MAX - b)
+		|| (b < 0 && a < ZEND_LONG_MIN - b);
+}
+static zend_always_inline zend_bool zend_sub_will_overflow(zend_long a, zend_long b) {
+	return (b > 0 && a < ZEND_LONG_MIN + b)
+		|| (b < 0 && a > ZEND_LONG_MAX + b);
+}
 
 BEGIN_EXTERN_C()
 
@@ -255,6 +263,8 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
+uint32_t zend_fetch_arg_info_type(
+	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
 void zend_init_func_return_info(const zend_op_array   *op_array,
                                 const zend_script     *script,
                                 zend_ssa_var_info     *ret);

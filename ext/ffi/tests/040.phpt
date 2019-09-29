@@ -7,7 +7,7 @@ ffi.enable=1
 --FILE--
 <?php
 $x = FFI::new("int");
-$x = 5;
+$x->cdata = 5;
 var_dump($x);
 var_dump(FFI::typeof($x));
 var_dump(FFI::cast("int8_t[4]", $x));

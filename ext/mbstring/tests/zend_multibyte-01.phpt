@@ -5,7 +5,7 @@ zend multibyte (1)
 --INI--
 zend.multibyte=On
 zend.script_encoding=Shift_JIS
-mbstring.internal_encoding=Shift_JIS
+internal_encoding=Shift_JIS
 --FILE--
 <?php
 	function —\Ž\”\($ˆø”)

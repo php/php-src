@@ -49,7 +49,8 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
-			if (EXPECTED(GC_DELREF(object->properties) == 0)) {
+			if (EXPECTED(GC_DELREF(object->properties) == 0)
+					&& EXPECTED(GC_TYPE(object->properties) != IS_NULL)) {
 				zend_array_destroy(object->properties);
 			}
 		}
@@ -62,7 +63,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 				if (UNEXPECTED(Z_ISREF_P(p)) &&
 						(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(p)))) {
 					zend_property_info *prop_info = zend_get_property_info_for_slot(object, p);
-					if (prop_info->type) {
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
 						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
 					}
 				}
@@ -213,7 +214,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
 				zend_property_info *prop_info = zend_get_property_info_for_slot(new_object, dst);
-				if (prop_info->type) {
+				if (ZEND_TYPE_IS_SET(prop_info->type)) {
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
 				}
 			}

@@ -40,10 +40,7 @@ ZEND_API void zend_generator_restore_call_stack(zend_generator *generator) /* {{
 			(ZEND_CALL_INFO(call) & ~ZEND_CALL_ALLOCATED),
 			call->func,
 			ZEND_CALL_NUM_ARGS(call),
-			(Z_TYPE(call->This) == IS_UNDEF) ?
-				(zend_class_entry*)Z_OBJ(call->This) : NULL,
-			(Z_TYPE(call->This) != IS_UNDEF) ?
-				Z_OBJ(call->This) : NULL);
+			Z_PTR(call->This));
 		memcpy(((zval*)new_call) + ZEND_CALL_FRAME_SLOT, ((zval*)call) + ZEND_CALL_FRAME_SLOT, ZEND_CALL_NUM_ARGS(call) * sizeof(zval));
 		new_call->prev_execute_data = prev_call;
 		prev_call = new_call;
@@ -271,7 +268,7 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 		if (EX_CALL_INFO() & ZEND_CALL_FREE_EXTRA_ARGS) {
 			size += EX_NUM_ARGS() - op_array->num_args;
 		}
-		size += Z_TYPE(execute_data->This) == IS_OBJECT; /* $this */
+		size += (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) != 0; /* $this */
 		size += (EX_CALL_INFO() & ZEND_CALL_CLOSURE) != 0; /* Closure object */
 
 		/* Live vars */
@@ -352,7 +349,7 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		}
 	}
 
-	if (Z_TYPE(execute_data->This) == IS_OBJECT) {
+	if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
@@ -1168,7 +1165,8 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 	zend_iterator_init(iterator);
 
 	iterator->funcs = &zend_generator_iterator_functions;
-	ZVAL_COPY(&iterator->data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->data, Z_OBJ_P(object));
 
 	return iterator;
 }

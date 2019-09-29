@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -160,11 +158,14 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (attrp->children) {
 		node_list_unlink(attrp->children);
 	}
-
-	str = zval_get_string(newval);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
 

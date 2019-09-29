@@ -2705,7 +2705,7 @@ zend_strtod
 				L = c - '0';
 				s1 = s;
 				while((c = *++s) >= '0' && c <= '9')
-					L = 10*L + c - '0';
+					L = (Long) (10*(ULong)L + (c - '0'));
 				if (s - s1 > 8 || L > 19999)
 					/* Avoid confusion from exponents
 					 * so large that e might overflow.
@@ -3751,7 +3751,7 @@ zend_dtoa
 	*/
 
 	int bbits, b2, b5, be, dig, i, ieps, ilim = 0, ilim0, ilim1,
-		j, j1, k, k0, k_check, leftright, m2, m5, s2, s5,
+		j, j1 = 0, k, k0, k_check, leftright, m2, m5, s2, s5,
 		spec_case = 0, try_quick;
 	Long L;
 #ifndef Sudden_Underflow

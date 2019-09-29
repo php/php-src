@@ -31,7 +31,7 @@ $mandatory_overview_fields = array(
  *
  * Special handling for 'udate', which will vary run-to-run; assumes an IMAP
  * server with its clock synced to the current system, which is consistent with
- * setup instructions in ext/imap/tests/README
+ * setup instructions in ext/imap/tests/README.md
  *
  * @param array resp element from the return value of imap_fetch_overview()
  */

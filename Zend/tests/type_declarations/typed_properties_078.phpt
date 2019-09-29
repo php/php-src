@@ -45,7 +45,7 @@ var_dump($ref instanceof ArrayIterator);
 --EXPECT--
 array(0) {
 }
-string(89) "Typed property class@anonymous::$t must be an instance of Traversable or null, array used"
+string(72) "Cannot assign array to property class@anonymous::$t of type ?Traversable"
 array(0) {
 }
 array(1) {

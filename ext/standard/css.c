@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +17,7 @@
 #include "php.h"
 #include "info.h"
 
-PHPAPI void php_info_print_css(void) /* {{{ */
+PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 {
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");

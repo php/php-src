@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -163,10 +161,10 @@ PHP_FUNCTION(imap_fetchtext);
 PHP_FUNCTION(imap_uid);
 PHP_FUNCTION(imap_msgno);
 PHP_FUNCTION(imap_list);
-PHP_FUNCTION(imap_list_full);
+PHP_FUNCTION(imap_getmailboxes);
 PHP_FUNCTION(imap_listscan);
 PHP_FUNCTION(imap_lsub);
-PHP_FUNCTION(imap_lsub_full);
+PHP_FUNCTION(imap_getsubscribed);
 PHP_FUNCTION(imap_create);
 PHP_FUNCTION(imap_rename);
 PHP_FUNCTION(imap_status);

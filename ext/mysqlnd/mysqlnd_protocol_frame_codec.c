@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -68,11 +66,12 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 {
 	zend_uchar safe_buf[((MYSQLND_HEADER_SIZE) + (sizeof(zend_uchar)) - 1) / (sizeof(zend_uchar))];
 	zend_uchar * safe_storage = safe_buf;
-	size_t bytes_sent, packets_sent = 1;
+	size_t packets_sent = 1;
 	size_t left = count;
 	zend_uchar * p = (zend_uchar *) buffer;
 	zend_uchar * compress_buf = NULL;
 	size_t to_be_sent;
+	ssize_t bytes_sent;
 
 	DBG_ENTER("mysqlnd_pfc::send");
 	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, pfc->data->compressed);
@@ -161,7 +160,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 		  indeed it then loop once more, then to_be_sent will become 0, left will stay 0. Empty
 		  packet will be sent and this loop will end.
 		*/
-	} while (bytes_sent && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
+	} while (bytes_sent > 0 && (left > 0 || to_be_sent == MYSQLND_MAX_PACKET_SIZE));
 
 	DBG_INF_FMT("packet_size="MYSQLND_SZ_T_SPEC" packet_no=%u", left, pfc->data->packet_no);
 
@@ -175,7 +174,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 	}
 
 	/* Even for zero size payload we have to send a packet */
-	if (!bytes_sent) {
+	if (bytes_sent <= 0) {
 		DBG_ERR_FMT("Can't %u send bytes", count);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 	}

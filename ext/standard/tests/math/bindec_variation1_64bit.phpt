@@ -73,7 +73,11 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(bindec($input));
+	try {
+		var_dump(bindec($input));
+	} catch (TypeError $e) {
+		echo $e->getMessage(), "\n";
+	}
 	$iterator++;
 };
 fclose($fp);
@@ -89,24 +93,38 @@ int(0)
 int(1)
 
 -- Iteration 3 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 4 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 5 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 6 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(2)
 
 -- Iteration 7 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(8)
 
 -- Iteration 8 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(1)
 
 -- Iteration 9 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 10 --
@@ -134,17 +152,21 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-
-Notice: Array to string conversion in %s on line %d
-int(0)
+bindec() expects parameter 1 to be string, array given
 
 -- Iteration 19 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 20 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 21 --
+
+Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 
 -- Iteration 22 --
@@ -154,5 +176,5 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-int(%d)
+bindec() expects parameter 1 to be string, resource given
 ===Done===

@@ -6,7 +6,7 @@ opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 --SKIPIF--
-<?php require_once('../skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function foo(&$a) {
@@ -21,6 +21,7 @@ function foo3(&$a, $var) {
     $a = $var;
 }
 
+$obj = new stdClass;
 foo($obj->a);
 var_dump($obj);
 foo2($obj->b);
@@ -34,6 +35,7 @@ $a = fopen(__FILE__, "r");
 var_dump($obj);
 
 function bar() {
+    $obj = new stdClass;
 	foo($obj->a);
 	var_dump($obj);
 	foo2($obj->b);
@@ -47,22 +49,33 @@ function bar() {
 	var_dump($obj);
 
     $d = array();
-    foo($d->{"ab" ."c"});
+    try {
+        foo($d->{"ab" ."c"});
+    } catch (Error $err) {
+        echo $err->getMessage(), "\n";
+    }
 	var_dump($d);
 
     $e = NULL;
-    foo($e->{"ab" ."c"});
+    try {
+        foo($e->{"ab" ."c"});
+    } catch (Error $err) {
+        echo $err->getMessage(), "\n";
+    }
 	var_dump($e);
 
     $f = "";
-    foo($f->{"ab" ."c"});
+    try {
+        foo($f->{"ab" ."c"});
+    } catch (Error $err) {
+        echo $err->getMessage(), "\n";
+    }
 	var_dump($f);
 }
 
 bar();
 ?>
 --EXPECTF--
-Warning: Creating default object from empty value in %s on line 14
 object(stdClass)#%d (1) {
   ["a"]=>
   int(2)
@@ -89,8 +102,6 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-
-Warning: Creating default object from empty value in %s on line 27
 object(stdClass)#%d (1) {
   ["a"]=>
   int(2)
@@ -117,19 +128,10 @@ object(stdClass)#%d (2) {
   array(0) {
   }
 }
-
-Warning: Attempt to modify property 'abc' of non-object in %sfetch_obj_001.php on line 40
+Attempt to modify property 'abc' of non-object
 array(0) {
 }
-
-Warning: Creating default object from empty value in %s on line 44
-object(stdClass)#%d (1) {
-  ["abc"]=>
-  int(2)
-}
-
-Warning: Creating default object from empty value in %s on line 48
-object(stdClass)#%d (1) {
-  ["abc"]=>
-  int(2)
-}
+Attempt to modify property 'abc' of non-object
+NULL
+Attempt to modify property 'abc' of non-object
+string(0) ""

@@ -25,6 +25,7 @@ $stdinOffset = 0;
 
 unset($pipes[0]);
 
+$pipeEvents = [];
 while ($pipes || $writePipes) {
     $r = $pipes;
     $w = $writePipes;
@@ -51,19 +52,35 @@ while ($pipes || $writePipes) {
     foreach ($r as $pipe) {
         $type = array_search($pipe, $pipes);
         $data = fread($pipe, 8192);
-        var_dump($data);
         if (false === $data || feof($pipe)) {
+            $pipeEvents[(int)$pipe][] = "Closing pipe";
             fclose($pipe);
             unset($pipes[$type]);
+        } else {
+            $pipeEvents[(int)$pipe][] = "Read " . strlen($data) . " bytes";
         }
     }
 }
 
+var_dump($pipeEvents);
+
 ?>
 ===DONE===
 --EXPECTF--
-string(4097) "%s"
-string(4097) "%s"
-string(0) ""
-string(0) ""
+array(2) {
+  [%d]=>
+  array(2) {
+    [0]=>
+    string(15) "Read 4097 bytes"
+    [1]=>
+    string(12) "Closing pipe"
+  }
+  [%d]=>
+  array(2) {
+    [0]=>
+    string(15) "Read 4097 bytes"
+    [1]=>
+    string(12) "Closing pipe"
+  }
+}
 ===DONE===

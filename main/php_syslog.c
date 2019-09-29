@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -75,6 +73,13 @@ PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 	zend_printf_to_smart_string(&fbuf, format, args);
 	smart_string_0(&fbuf);
 	va_end(args);
+
+	if (PG(syslog_filter) == PHP_SYSLOG_FILTER_RAW) {
+		/* Just send it directly to the syslog */
+		syslog(priority, "%.*s", (int)fbuf.len, fbuf.c);
+		smart_string_free(&fbuf);
+		return;
+	}
 
 	for (ptr = fbuf.c; ; ++ptr) {
 		c = *ptr;

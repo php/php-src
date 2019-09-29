@@ -381,7 +381,7 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
 	if (flag) {
 		scd->curbit = 0;
 		scd->lastbit = 0;
-		scd->last_byte = 0;
+		scd->last_byte = 2;
 		scd->done = FALSE;
 		return 0;
 	}
@@ -467,7 +467,7 @@ LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, i
 	if (sd->sp > sd->stack)
 		return *--sd->sp;
 
-		while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
+	while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
 		if (code == sd->clear_code) {
 			for (i = 0; i < sd->clear_code; ++i) {
 				sd->table[0][i] = 0;

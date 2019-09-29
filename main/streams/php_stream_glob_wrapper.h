@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,11 +19,11 @@ PHPAPI extern const php_stream_ops     php_glob_stream_ops;
 
 BEGIN_EXTERN_C()
 
-PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *plen STREAMS_DC);
-#define php_glob_stream_get_path(stream, copy, plen)	_php_glob_stream_get_path((stream), (copy), (plen) STREAMS_CC)
+PHPAPI char* _php_glob_stream_get_path(php_stream *stream, size_t *plen STREAMS_DC);
+#define php_glob_stream_get_path(stream, plen)	_php_glob_stream_get_path((stream), (plen) STREAMS_CC)
 
-PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC);
-#define php_glob_stream_get_pattern(stream, copy, plen)	_php_glob_stream_get_pattern((stream), (copy), (plen) STREAMS_CC)
+PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, size_t *plen STREAMS_DC);
+#define php_glob_stream_get_pattern(stream, plen)	_php_glob_stream_get_pattern((stream), (plen) STREAMS_CC)
 
 PHPAPI int   _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC);
 #define php_glob_stream_get_count(stream, pflags)	_php_glob_stream_get_count((stream), (pflags) STREAMS_CC)

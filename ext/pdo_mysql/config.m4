@@ -1,5 +1,3 @@
-dnl config.m4 for extension pdo_mysql
-
 PHP_ARG_WITH([pdo-mysql],
   [for MySQL support for PDO],
   [AS_HELP_STRING([[--with-pdo-mysql[=DIR]]],
@@ -16,8 +14,8 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
-  dnl This depends on ext/mysqli/config.m4 providing the
-  dnl PHP_MYSQL_SOCKET_SEARCH macro and --with-mysql-sock configure option.
+  dnl This depends on ext/mysqli/config.m4 providing the PHP_MYSQL_SOCKET_SEARCH
+  dnl macro and --with-mysql-sock configure option.
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK
@@ -126,37 +124,21 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     ])
   fi
 
-  ifdef([PHP_CHECK_PDO_INCLUDES],
-  [
-    PHP_CHECK_PDO_INCLUDES
-  ],[
-    AC_MSG_CHECKING([for PDO includes])
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$phpincludedir/ext
-    else
-      AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
-    fi
-    AC_MSG_RESULT($pdo_cv_inc_path)
-  ])
+  PHP_CHECK_PDO_INCLUDES
 
   if test -n "$PDO_MYSQL_CONFIG"; then
     PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket`
     AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
   fi
 
-  dnl fix after renaming to pdo_mysql
   PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  ifdef([PHP_ADD_EXTENSION_DEP],
-  [
-    PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
-    if test "$PHP_MYSQL" = "mysqlnd"; then
-      PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
-    fi
-  ])
+
+  PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+
+  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
+    PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
+  fi
+
   PDO_MYSQL_MODULE_TYPE=external
 
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)

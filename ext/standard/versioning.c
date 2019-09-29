@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -201,7 +199,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 }
 
 /* }}} */
-/* {{{ proto int version_compare(string ver1, string ver2 [, string oper])
+/* {{{ proto int|bool|null version_compare(string ver1, string ver2 [, string oper])
   Compares two "PHP-standardized" version number strings */
 
 PHP_FUNCTION(version_compare)

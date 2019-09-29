@@ -3,7 +3,7 @@ testing @ and error_reporting - 9
 --FILE--
 <?php
 
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED);
 
 function bar() {
 	echo @$blah;
@@ -12,7 +12,7 @@ function bar() {
 
 function foo() {
 	echo @$undef;
-	error_reporting(E_ALL|E_STRICT);
+	error_reporting(E_ALL);
 	echo $blah;
 	return bar();
 }

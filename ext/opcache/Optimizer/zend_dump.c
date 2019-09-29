@@ -126,7 +126,7 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		zend_dump_class_fetch_type(op.num);
 	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " CONSTRUCTOR");
-	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
+	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_OP_MASK)) {
 		if (op.num & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
 			fprintf(stderr, " (unqualified-in-namespace)");
 		}
@@ -443,14 +443,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
 		fprintf(stderr, " %u", opline->extended_value);
-	} else if (ZEND_VM_EXT_DIM_OBJ == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			fprintf(stderr, " (dim)");
-		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-			fprintf(stderr, " (obj)");
-		} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
-			fprintf(stderr, " (static prop)");
-		}
+	} else if (ZEND_VM_EXT_OP == (flags & ZEND_VM_EXT_MASK)) {
+		fprintf(stderr, " (%s)", zend_get_opcode_name(opline->extended_value) + 5);
 	} else if (ZEND_VM_EXT_TYPE == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case IS_NULL:
@@ -584,14 +578,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (ref)");
 			}
 		}
-		if ((ZEND_VM_EXT_DIM_OBJ_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
+		if ((ZEND_VM_EXT_DIM_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
 			uint32_t obj_flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 			if (obj_flags == ZEND_FETCH_REF) {
 				fprintf(stderr, " (ref)");
 			} else if (obj_flags == ZEND_FETCH_DIM_WRITE) {
 				fprintf(stderr, " (dim write)");
-			} else if (obj_flags == ZEND_FETCH_OBJ_WRITE) {
-				fprintf(stderr, " (obj write)");
 			}
 		}
 	}
@@ -731,6 +723,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	fprintf(stderr, "BB%d:", n);
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
+	}
+	if (b->flags & ZEND_BB_RECV_ENTRY) {
+		fprintf(stderr, " recv");
 	}
 	if (b->flags & ZEND_BB_FOLLOW) {
 		fprintf(stderr, " follow");
@@ -1024,6 +1019,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
 						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
+						break;
 				}
 			}
 		}
@@ -1079,6 +1077,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 						break;
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
+						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
 						break;
 				}
 			}

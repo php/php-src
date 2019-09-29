@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -205,7 +203,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
-		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
+		sprintf((char *)&tmp, "%" PRIu64, stats->values[i]);
 		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }

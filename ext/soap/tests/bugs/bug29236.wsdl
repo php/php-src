@@ -75,6 +75,7 @@
           <s:enumeration value="TemporarilySuspended" />
           <s:enumeration value="PasswordResetRequired" />
           <s:enumeration value="InvalidID" />
+          <s:enumeration value="" /> <!-- For bug #77945 -->
         </s:restriction>
       </s:simpleType>
       <s:simpleType name="SessionStatus">

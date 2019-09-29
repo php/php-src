@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -62,7 +60,7 @@ PHP_FUNCTION(curl_share_close)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	zend_list_close(Z_RES_P(z_sh));
@@ -106,7 +104,7 @@ PHP_FUNCTION(curl_share_setopt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(zid), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
@@ -140,7 +138,7 @@ PHP_FUNCTION(curl_share_errno)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((sh = (php_curlsh *)zend_fetch_resource(Z_RES_P(z_sh), le_curl_share_handle_name, le_curl_share_handle)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(sh->err.no);

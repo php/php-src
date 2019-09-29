@@ -362,19 +362,19 @@ class Client
 
         while ($p != $length) {
 
-            $nlen = ord($data{$p++});
+            $nlen = ord($data[$p++]);
             if ($nlen >= 128) {
                 $nlen = ($nlen & 0x7F << 24);
-                $nlen |= (ord($data{$p++}) << 16);
-                $nlen |= (ord($data{$p++}) << 8);
-                $nlen |= (ord($data{$p++}));
+                $nlen |= (ord($data[$p++]) << 16);
+                $nlen |= (ord($data[$p++]) << 8);
+                $nlen |= (ord($data[$p++]));
             }
-            $vlen = ord($data{$p++});
+            $vlen = ord($data[$p++]);
             if ($vlen >= 128) {
                 $vlen = ($nlen & 0x7F << 24);
-                $vlen |= (ord($data{$p++}) << 16);
-                $vlen |= (ord($data{$p++}) << 8);
-                $vlen |= (ord($data{$p++}));
+                $vlen |= (ord($data[$p++]) << 16);
+                $vlen |= (ord($data[$p++]) << 8);
+                $vlen |= (ord($data[$p++]));
             }
             $array[substr($data, $p, $nlen)] = substr($data, $p+$nlen, $vlen);
             $p += ($nlen + $vlen);
@@ -392,12 +392,12 @@ class Client
     private function decodePacketHeader($data)
     {
         $ret = array();
-        $ret['version']       = ord($data{0});
-        $ret['type']          = ord($data{1});
-        $ret['requestId']     = (ord($data{2}) << 8) + ord($data{3});
-        $ret['contentLength'] = (ord($data{4}) << 8) + ord($data{5});
-        $ret['paddingLength'] = ord($data{6});
-        $ret['reserved']      = ord($data{7});
+        $ret['version']       = ord($data[0]);
+        $ret['type']          = ord($data[1]);
+        $ret['requestId']     = (ord($data[2]) << 8) + ord($data[3]);
+        $ret['contentLength'] = (ord($data[4]) << 8) + ord($data[5]);
+        $ret['paddingLength'] = ord($data[6]);
+        $ret['reserved']      = ord($data[7]);
         return $ret;
     }
 
@@ -589,9 +589,7 @@ class Client
         // but still not get the response requested
         $startTime = microtime(true);
 
-        do {
-            $resp = $this->readPacket();
-
+        while ($resp = $this->readPacket()) {
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
@@ -612,7 +610,7 @@ class Client
                 $this->set_ms_timeout($this->_readWriteTimeout);
                 throw new \Exception('Timed out');
             }
-        } while ($resp);
+        }
 
         if (!is_array($resp)) {
             $info = stream_get_meta_data($this->_sock);
@@ -636,7 +634,7 @@ class Client
         // Reset timeout
         $this->set_ms_timeout($this->_readWriteTimeout);
 
-        switch (ord($resp['content']{4})) {
+        switch (ord($resp['content'][4])) {
             case self::CANT_MPX_CONN:
                 throw new \Exception('This app can\'t multiplex [CANT_MPX_CONN]');
                 break;

@@ -1,122 +1,7 @@
-diff -u a/magic/Magdir/c-lang b/magic/Magdir/c-lang
---- a/magic/Magdir/c-lang	2017-08-14 09:40:38.000000000 +0200
-+++ b/magic/Magdir/c-lang	2018-11-10 13:06:33.171398452 +0100
-@@ -13,61 +13,61 @@
- # C
- # Check for class if include is found, otherwise class is beaten by include becouse of lowered strength
- 0	regex	\^#include			C
-->0	regex	\^class[[:space:]]+
-+>0	regex/4096	\^class[[:space:]]+
- >>&0	regex 	\\{[\.\*]\\}(;)?$			\b++
- >&0	clear	x				source text
- !:strength + 13
- !:mime	text/x-c
--0	regex	\^#[[:space:]]*pragma	C source text
-+0	regex/4096	\^#[[:space:]]*pragma	C source text
- !:mime	text/x-c
--0	regex	\^#[[:space:]]*(if\|ifn)def
-->&0	regex	\^#[[:space:]]*endif$	C source text
-+0	regex/4096	\^#[[:space:]]*(if\|ifn)def
-+>&0	regex/4096	\^#[[:space:]]*endif$	C source text
- !:mime	text/x-c
--0	regex	\^#[[:space:]]*(if\|ifn)def
-->&0	regex	\^#[[:space:]]*define	C source text
-+0	regex/4096	\^#[[:space:]]*(if\|ifn)def
-+>&0	regex/4096	\^#[[:space:]]*define	C source text
- !:mime	text/x-c
--0	regex	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
-+0	regex/4096	\^[[:space:]]*char(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
- !:mime	text/x-c
--0	regex	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
-+0	regex/4096	\^[[:space:]]*double(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
- !:mime	text/x-c
--0	regex	\^[[:space:]]*extern[[:space:]]+		C source text
-+0	regex/4096	\^[[:space:]]*extern[[:space:]]+		C source text
- !:mime	text/x-c
--0	regex	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
-+0	regex/4096	\^[[:space:]]*float(\ \\*|\\*)(.+)(=.*)?;[[:space:]]*$			C source text
- !:mime	text/x-c
--0	regex	\^struct[[:space:]]+		C source text
-+0	regex/4096	\^struct[[:space:]]+		C source text
- !:mime	text/x-c
--0	regex	\^union[[:space:]]+		C source text
-+0	regex/4096	\^union[[:space:]]+		C source text
- !:mime	text/x-c
- 0	search/8192	main(
-->&0 regex	\\)[[:space:]]*\\{		C source text
-+>&0 regex/4096	\\)[[:space:]]*\\{		C source text
- !:mime	text/x-c
- 
- # C++
- # The strength of these rules is increased so they beat the C rules above
--0	regex	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
-+0	regex/4096	\^namespace[[:space:]]+[_[:alpha:]]{1,30}[[:space:]]*\\{	C++ source text
- !:strength + 30
- !:mime	text/x-c++
- # using namespace [namespace] or using std::[lib]
--0	regex	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
-+0	regex/4096	\^using[[:space:]]+(namespace\ )?std(::)?[[:alpha:]]*[[:space:]]*;		C++ source text
- !:strength + 30
- !:mime	text/x-c++
--0	regex	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
-+0	regex/4096	\^[[:space:]]*template[[:space:]]*<.*>[[:space:]]*$	C++ source text
- !:strength + 30
- !:mime	text/x-c++
--0	regex	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
-+0	regex/4096	\^[[:space:]]*virtual[[:space:]]+.*[};][[:space:]]*$		C++ source text
- !:strength + 30
- !:mime	text/x-c++
- # But class alone is reduced to avoid beating php (Jens Schleusener)
--0	regex	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
-+0	regex/4096	\^[[:space:]]*class[[:space:]]+[[:digit:][:alpha:]:_]+[[:space:]]*\\{(.*[\n]*)*\\}(;)?$		C++ source text
- !:strength + 13
- !:mime	text/x-c++
--0	regex	\^[[:space:]]*public:		C++ source text
-+0	regex/4096	\^[[:space:]]*public:		C++ source text
- !:strength + 30
- !:mime	text/x-c++
--0	regex	\^[[:space:]]*private:		C++ source text
-+0	regex/4096	\^[[:space:]]*private:		C++ source text
- !:strength + 30
- !:mime	text/x-c++
--0	regex	\^[[:space:]]*protected:		C++ source text
-+0	regex/4096	\^[[:space:]]*protected:		C++ source text
- !:strength + 30
- !:mime	text/x-c++
- 
-diff -u a/magic/Magdir/python b/magic/Magdir/python
---- a/magic/Magdir/python	2017-08-14 09:40:38.000000000 +0200
-+++ b/magic/Magdir/python	2018-11-10 13:06:36.799268528 +0100
-@@ -63,7 +63,7 @@
- !:mime text/x-python
- 
- # import module [as abrev]
--0	regex	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
-+0	regex/4096	\^import\ [_[:alpha:]]+\ as\ [[:alpha:]][[:space:]]*$ Python script text executable
- !:mime text/x-python
- 
- # comments
-@@ -79,7 +79,7 @@
- # except: or finally:
- # block
- 0	search/4096	try:
-->&0	regex	\^[[:space:]]*except.*:$	Python script text executable
-+>&0	regex/4096	\^[[:space:]]*except.*:$	Python script text executable
- !:strength + 15
- !:mime text/x-python
- >&0	search/4096	finally:	Python script text executable
-@@ -91,7 +91,7 @@
- !:mime text/x-python
- 
- # def name(*args, **kwargs):
--0	regex	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
-+0	regex/4096	 \^[[:space:]]{0,50}def\ {1,50}[_a-zA-Z]{1,100}
- >&0	regex	 \\(([[:alpha:]*_,\ ]){0,255}\\):$ Python script text executable
- !:strength + 15
- !:mime text/x-python
-diff -u a/magic/Magdir/rpm b/magic/Magdir/rpm
---- a/magic/Magdir/rpm	2013-01-11 17:45:23.000000000 +0100
-+++ b/magic/Magdir/rpm	2018-11-10 12:27:29.858619326 +0100
+diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
+index 9a795f8..31db083 100644
+--- a/magic/Magdir/rpm
++++ b/magic/Magdir/rpm
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -125,56 +10,54 @@ diff -u a/magic/Magdir/rpm b/magic/Magdir/rpm
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff -u a/magic/Magdir/ruby b/magic/Magdir/ruby
---- a/magic/Magdir/ruby	2017-08-14 15:39:18.000000000 +0200
-+++ b/magic/Magdir/ruby	2018-11-10 13:06:28.703557761 +0100
-@@ -22,30 +22,30 @@
- # What looks like ruby, but does not have a shebang
- # (modules and such)
- # From: Lubomir Rintel <lkundrak@v3.sk>
--0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
-+0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
- >0	regex		def\ [a-z]|\ do$
-->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
- !:strength + 30
- !:mime	text/x-ruby
--0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
-+0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
- >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
-->>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+>>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
- !:strength + 30
- !:mime	text/x-ruby
- # Classes with no modules or defs, beats simple ASCII
--0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
-->&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
-+0	regex/4096		\^[[:space:]]*(class|module)[[:space:]][A-Z]
-+>&0	regex/4096	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
- !:strength + 10
- !:mime	text/x-ruby
- # Looks for function definition to balance python magic
- # def name (args)
- # end
--0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
-->&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+0	regex/4096		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
-+>&0	regex/4096		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
- !:strength + 10
- !:mime	text/x-ruby
- 
--0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
-+0	regex/4096		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
- !:mime	text/x-ruby
--0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
-+0 regex/4096 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
- !:mime	text/x-ruby
-diff -u a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
---- a/magic/Magdir/securitycerts	2009-09-19 18:28:12.000000000 +0200
-+++ b/magic/Magdir/securitycerts	2018-11-10 12:27:29.858619326 +0100
+diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
+index 8785dd8..1c340be 100644
+--- a/magic/Magdir/securitycerts
++++ b/magic/Magdir/securitycerts
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
+
+
+--- a/magic.orig.0/Magdir/images	2019-04-19 02:42:27.000000000 +0200
++++ b/magic/Magdir/images	2019-06-29 16:09:31.654107495 +0200
+@@ -30,22 +30,22 @@
+ # Prevent conflicts with CRI ADX.
+ >(2.S-2) belong	!0x28632943
+ # skip more garbage like *.iso by looking for positive image type
+->>2	ubyte			>0
++>2	ubyte			>0
+ # skip some compiled terminfo like xterm+tmux by looking for image type less equal 33
+->>>2	ubyte			<34
++>>2	ubyte			<34
+ # skip arches.3200 , Finder.Root , Slp.1 by looking for low pixel depth 1 8 15 16 24 32
+->>>>16	ubyte			1
+->>>>>0		use		tga-image
+->>>>16	ubyte			8
+->>>>>0		use		tga-image
+->>>>16	ubyte			15
+->>>>>0		use		tga-image
+->>>>16	ubyte			16
+->>>>>0		use		tga-image
+->>>>16	ubyte			24
+->>>>>0		use		tga-image
+->>>>16	ubyte			32
+->>>>>0		use		tga-image
++>>>16	ubyte			1
++>>>>0		use		tga-image
++>>>16	ubyte			8
++>>>>0		use		tga-image
++>>>16	ubyte			15
++>>>>0		use		tga-image
++>>>16	ubyte			16
++>>>>0		use		tga-image
++>>>16	ubyte			24
++>>>>0		use		tga-image
++>>>16	ubyte			32
++>>>>0		use		tga-image
+ #	display tga bitmap image information
+ 0	name				tga-image
+ >2	ubyte		<34		Targa image data

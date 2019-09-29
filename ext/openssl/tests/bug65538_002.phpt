@@ -13,7 +13,7 @@ $clientCtx = stream_context_create(['ssl' => [
     // We can't use http://curl.haxx.se/ca/cacert.pem for this test
     // as it is redirected to https which means the test would depend
     // on system cafile when opening stream.
-    'cafile' => 'http://www.php.net',
+    'cafile' => 'http://www.nginx.org',
 ]]);
 file_get_contents('https://github.com', false, $clientCtx);
 ?>

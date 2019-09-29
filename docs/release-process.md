@@ -37,34 +37,43 @@
 
     Moving extensions from php-src to PECL:
 
-    * Checkout the pecl directory, most likely you want a sparse-root checkout
+    * Ask someone with Git admin access to create a new empty repository on
+      https://git.php.net under the PECL projects and a belonging GitHub mirror.
 
+    * Clone a new copy of the php-src repository (it will rewrite history, keep
+      contributors commits and include only the extension folder):
+
+        ```sh
+        git clone https://git.php.net/repository/php-src.git ext-name
+        cd ext-name
+        git filter-branch --prune-empty --subdirectory-filter ext/ext-name master
         ```
-        svn co --depth=empty https://svn.php.net/repository/pecl
+
+    * Set remote Git push URL for the PECL extension:
+
+        ```sh
+        git remote set-url origin git@git.php.net:pecl/category/ext-name
         ```
 
-    * Create a directory for the extension including branch and tag structure,
-      no trunk at this point and commit this to svn
+    * Create branch and tags structure appropriate for the extension and push:
 
-      ```
-      cd pecl; mkdir foo foo/tags foo/branches; svn add foo; svn commit
-      ```
-
-    * Move the extension from php-src to the new location
-
-      ```
-      svn mv https://svn.php.net/repository/php/php-src/trunk/ext/foo \
-      https://svn.php.net/repository/pecl/foo/trunk
-      ```
+        ```sh
+        git push -u origin master
+        ```
 
     If the extension is still usable or not dead, in cooperation with the
     extension maintainers if any:
+
     * Create the pecl.php.net/foo package and its content, license, maintainer
     * Create the package.xml, commit
     * Release the package
 
-    For moving extensions from PECL to php-src the svn mv has to be done the
-    other way round.
+    For moving extensions from PECL to php-src the procedure needs to go through
+    the RFC process and a new Git commit without rewriting the php-src Git
+    commit history.
+
+ 8. There is a PHP release Docker image https://github.com/sgolemon/php-release
+    with forks available to help releasing.
 
 ## Rolling a non stable release (alpha/beta/RC)
 
@@ -76,48 +85,55 @@
  3. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
 
- 4. Checkout the release branch for this release (e.g., PHP-5.4.2) from the main
+ 4. Checkout the release branch for this release (e.g., PHP-7.4.2) from the main
     branch.
 
  5. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
     `configure.ac` and possibly `NEWS`. Do not use abbreviations for alpha and
-    beta. Do not use dashes, you should `#define PHP_VERSION "5.4.22RC1"` and
-    not `#define PHP_VERSION "5.4.22-RC1"`
+    beta. Do not use dashes, you should `#define PHP_VERSION "7.4.22RC1"` and
+    not `#define PHP_VERSION "7.4.22-RC1"`.
 
- 6. Compile and run `make test`, with and without ZTS, using the right Bison
-    version (for example, for PHP 7.4, minimum Bison 3.0.0 is used).
+    When releasing the first alpha version, bump also API version numbers in
+    `Zend/zend_extensions.h`, `Zend/zend_modules.h`, and `main/php.h`. The API
+    versions between the alpha/beta/.0RCx releases can be left the same or
+    bumped as little as possible because PHP extensions will need to be rebuilt
+    with each bump.
+
+ 6. Compile and run `make test`, with and without ZTS, using the right Bison and
+    re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
 
  7. Check `./sapi/cli/php -v` output for version matching.
 
  8. If all is right, commit the changes to the release branch:
 
-    ```
+    ```sh
     git commit -a
     ```
 
  9. Tag the repository release branch with the version, e.g.:
 
-    ```
-    git tag -u YOURKEYID php-5.4.2RC2
+    ```sh
+    git tag -u YOURKEYID php-7.4.2RC2
     ```
 
 10. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
-    `configure.ac` and `NEWS` in the *main* branch (PHP-5.4 for example) to
-    prepare for the **next** version. F.e. if the RC is "5.4.1RC1" then the new
-    one should be `5.4.2-dev` - regardless if we get a new RC or not. This is to
-    make sure `version_compare()` can correctly work. Commit the changes to the
-    main branch.
+    `configure.ac` and `NEWS` in the *main* branch (PHP-7.4 for example) to
+    prepare for the **next** version. For example, if the RC is "7.4.1RC1" then
+    the new one should be `7.4.2-dev` - regardless if we get a new RC or not.
+    This is to make sure `version_compare()` can correctly work. Commit the
+    changes to the main branch.
 
 11. Push the changes to the main repo, the tag, the main branch and the release
-    branch:
+    branch. Release branches for alpha/beta/.0RCx releases before the GA release
+    don't need to be pushed (a local temporary branch should be used).
 
-    ```
+    ```sh
     git push --tags origin HEAD
     git push origin {main branch}
     git push origin {release branch}
     ```
 
-12. Run: `PHPROOT=. ./scripts/dev/makedist 5.4.2RC2`, this will export the tree,
+12. Run: `./scripts/dev/makedist php-7.4.0RC2`, this will export the tree,
     create `configure` and build three tarballs (gz, bz2 and xz).
 
 13. Run `scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
@@ -129,7 +145,7 @@
     have this directory, create it.
 
 15. Now the RC can be found on https://downloads.php.net/~yourname,
-    f.e. https://downloads.php.net/~derick/.
+    e.g. https://downloads.php.net/~derick/.
 
 16. Once the release has been tagged, contact the release-managers@ distribution
     list so that Windows binaries can be created. Once those are made, they can
@@ -139,20 +155,16 @@
 
  1. Update `qa.git/include/release-qa.php` with the appropriate information. See
     the documentation within release-qa.php for more information, but all
-    releases and RCs are configured here. Only $QA_RELEASES needs to be edited.
+    releases and RCs are configured here. Only `$QA_RELEASES` needs to be
+    edited.
 
-    Example: When rolling an RC, set the 'rc' with appropriate information for
+    Example: When rolling an RC, set the `rc` with appropriate information for
     the given version.
 
     Note: Remember to update the sha256 checksum information.
 
- 2. Update `web/php.git/include/version.inc` (X_Y=major_minor version number)
-
-    * `$PHP_X_Y_RC = "5.4.0RC1"` (should be set to `false` before)
-    * `$PHP_X_Y_RC_DATE = "06 September 2007"`
-
- 3. Skip this step for non stable releases after GA of minor or major versions
-    (e.g. announce 7.3.0RC1, but not 7.3.1RC1):
+ 2. Skip this step for non stable releases after GA of minor or major versions
+    (e.g. announce 7.4.0RC1, but not 7.4.1RC1):
 
     Add a short notice to phpweb stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
@@ -164,29 +176,29 @@
 
     * Add the content for the news entry. Be sure to include the text:
 
-      ```
-      "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"
-      ```
+        ```text
+        "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"
+        ```
 
- 4. Commit and push changes to qa and web.
+ 3. Commit and push changes to qa and web.
 
     Wait for web and qa sites to update with new information before sending
     announce.
 
- 5. Send **separate** emails **To** `internals@lists.php.net` and
+ 4. Send **separate** emails **To** `internals@lists.php.net` and
     `php-general@lists.php.net` lists pointing out "the location of the release"
     and "the possible release date of either the next RC, or the final release".
     Include in this information the verification information output by
     `gen_verify_stub`.
 
- 6. Send **separate** emails (see example http://news.php.net/php.pear.qa/5201)
+ 5. Send **separate** emails (see example http://news.php.net/php.pear.qa/5201)
     **To** `php-qa@lists.php.net` and `primary-qa-tester@lists.php.net`. These
     emails are to notify the selected projects about a new release so that they
     can make sure their projects keep working. Make sure that you have been
     setup as a moderator for `primary-qa-tester@lists.php.net` by having someone
     (Hannes, Dan, Derick) run the following commands for you:
 
-    ```
+    ```sh
     ssh lists.php.net
     sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
     ```
@@ -198,8 +210,8 @@
     `Zend/zend.h`, `configure.ac` and possibly `NEWS`.
 
  2. If a CVE commit needs to be merged to the release, then have it committed to
-    the base branches and merged upwards as usual (f.e commit the CVE fix to
-    5.3, merge to 5.4, 5.5 etc...). Then you can cherry-pick it in your release
+    the base branches and merged upwards as usual (e.g. commit the CVE fix to
+    7.2, merge to 7.3, 7.4 etc...). Then you can cherry-pick it in your release
     branch. Don't forget to update `NEWS` manually in an extra commit then.
 
  3. Commit those changes. Ensure the tests at
@@ -208,16 +220,16 @@
  4. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
 
- 5. Compile and make test, with and without ZTS, using the right Bison version
-    (for example, for PHP 7.4, minimum Bison 3.0.0 is used).
+ 5. Compile and run `make test`, with and without ZTS, using the right Bison and
+    re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
 
  6. Check `./sapi/cli/php -v` output for version matching.
 
- 7. Tag the repository with the version f.e. `git tag -u YOURKEYID php-5.4.1`
+ 7. Tag the repository with the version e.g. `git tag -u YOURKEYID php-7.4.1`
 
- 8. Push the tag f.e. `git push origin php-5.4.1`.
+ 8. Push the tag e.g. `git push origin php-7.4.1`.
 
- 9. Run: `PHPROOT=. ./scripts/dev/makedist 5.4.1`, this will export the tag,
+ 9. Run: `./scripts/dev/makedist php-7.4.1`, this will export the tag,
     create configure and build three tarballs (gz, bz2 and xz). Check if the
     pear files are updated (phar). On some systems the behavior of GNU tar can
     default to produce POSIX compliant archives with PAX headers. As not every
@@ -234,7 +246,7 @@
     `web/php-distributions.git`, then update the git submodule reference in
     `web/php.git`:
 
-    ```
+    ```sh
     git submodule init
     git submodule update
     cd distributions
@@ -257,8 +269,8 @@
  1. Update `phpweb/include/releases.inc` with the old release info (updates the
     download archives).
 
-    * You can run `php bin/bumpRelease 7 2` where the first number is the major
-      version, and the second number is the minor version (7.2 in this example).
+    * You can run `php bin/bumpRelease 7 4` where the first number is the major
+      version, and the second number is the minor version (7.4 in this example).
 
     * If that fails for any non-trivially fixable reason, you can manually copy
       the old information to `include/releases.inc`.
@@ -268,13 +280,12 @@
     * `$PHP_X_Y_VERSION` to the correct version
     * `$PHP_X_Y_DATE` to the release date
     * `$PHP_X_Y_SHA256` array and update all the SHA256 sums
-    * Set `$PHP_X_Y_RC` to false!
+    * `$PHP_X_Y_TAGS` array should include `security` if this is a security
+      release
     * Make sure there are no outdated "notes" or edited "date" keys in the
       `$RELEASES[X][$PHP_X_VERSION]["source"]` array.
-    * Only for the first revision of a major or minor release bump
-      `$PHP_X_VERSION`, `$PHP_X_DATE` and `$PHP_X_RC_DATE`.
 
- 3. Create the release file (releases/x_y_z.php)
+ 3. Create the release file (`releases/x_y_z.php`)
 
     Usually we use the same content as for point 6, but included in php template
     instead of the release xml.
@@ -284,7 +295,7 @@
 
  5. Update the ChangeLog file for the given major version
 
-    f.e. `ChangeLog-7.php` from the `NEWS` file
+    e.g. `ChangeLog-7.php` from the `NEWS` file
 
     * Go over the list and put every element on one line.
     * Check for `&`, `<` and `>` and escape them if necessary.
@@ -314,7 +325,7 @@
 
  8. **Check website has been synced before announcing or pushing news**
 
-    Try, f.e. https://www.php.net/distributions/php-7.3.4.tar.xz
+    Try, e.g. https://www.php.net/distributions/php-7.4.0.tar.xz
 
     Website may update slowly (may take an hour).
 
@@ -373,8 +384,13 @@
     Add a commit on master after the branch point clearing the `NEWS`,
     `UPGRADING` and `UPGRADING.INTERNALS` files, updating the version in
     `configure.ac` (run `./configure` to automatically update
-    `main/php_versions.h`, too) and `Zend/zend.h`. Also list the new branch in
-    `CONTRIBUTING.md`.
+    `main/php_versions.h`, too) and `Zend/zend.h`. Bump the default initial
+    version also in `win32/build/confutils.js`.
+
+    Also list the new branch in `CONTRIBUTING.md`.
+
+    Bump API version numbers in `Zend/zend_extensions.h`, `Zend/zend_modules.h`,
+    and `main/php.h`.
 
     Example: https://git.php.net/?p=php-src.git;a=commit;h=a63c99b
     Push the new branch and the commit just added to master.
@@ -423,6 +439,8 @@
     `gpg --fingerprint "$USER@php.net"`. Let one or more of the previous RMs
     sign your key. Publish your public key to pgp.mit.edu with:
     `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
+    Add new keys in the php-keyring.gpg in distribution repository using:
+    `gpg2 --export --export-options export-minimal --armor <all RM keys>`
 
  3. Request karma to edit `main/php_version.h` and `Zend/zend.h`. Possibly karma
     for other restricted parts of php-src might come in question. To edit
@@ -434,4 +452,6 @@
 
  5. Request moderation access to php-announce@lists.php.net and
     primary-qa-tester@lists.php.net lists, to be able to moderate your release
-    announcements. All the announcements should be sent from the @php.net alias.
+    announcements. All the announcements should ideally be sent from the
+    @php.net alias. Note, that for sending emails as @php.net alias a custom
+    SMTP server needs to be used.

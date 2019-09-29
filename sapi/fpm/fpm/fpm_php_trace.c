@@ -99,9 +99,9 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 					return -1;
 				}
 
-				if (ZEND_CALL_KIND_EX((*call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_TOP_CODE) {
+				if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_TOP_CODE) {
 					return 0;
-				} else if (ZEND_CALL_KIND_EX(*(call_info) >> ZEND_CALL_INFO_SHIFT) == ZEND_CALL_NESTED_CODE) {
+				} else if (ZEND_CALL_KIND_EX(*call_info) == ZEND_CALL_NESTED_CODE) {
 					memcpy(buf, "[INCLUDE_OR_EVAL]", sizeof("[INCLUDE_OR_EVAL]"));
 				} else {
 					ZEND_ASSERT(0);

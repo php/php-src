@@ -1,5 +1,3 @@
-dnl config.m4 for extension mysqli
-
 dnl ext/pdo_mysql/config.m4 also depends on this macro.
 AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   for i in  \

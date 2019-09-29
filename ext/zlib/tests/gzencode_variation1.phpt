@@ -10,6 +10,10 @@ if( substr(PHP_OS, 0, 3) == "WIN" ) {
 if (!extension_loaded("zlib")) {
 	print "skip - ZLIB extension not loaded";
 }
+
+if (PHP_OS == "Darwin") {
+    print "skip - OS is encoded in headers, tested header is non Darwin";
+}
 ?>
 --FILE--
 <?php

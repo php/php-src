@@ -1,5 +1,14 @@
 dnl This file becomes configure.ac for self-contained extensions.
 
+dnl Include external macro definitions before the AC_INIT to also remove
+dnl comments starting with # and empty newlines from the included files.
+m4_include([build/ax_check_compile_flag.m4])
+m4_include([build/ax_gcc_func_attribute.m4])
+m4_include([build/libtool.m4])
+m4_include([build/php_cxx_compile_stdcxx.m4])
+m4_include([build/php.m4])
+m4_include([build/pkg.m4])
+
 AC_PREREQ([2.68])
 AC_INIT
 AC_CONFIG_SRCDIR([config.m4])
@@ -8,7 +17,6 @@ AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
 
-dnl
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
 AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir])dnl
@@ -17,18 +25,18 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   ext_shared=yes
   test "[$]$1" = "no" && $1=yes
 ])dnl
-dnl
 
 test -z "$CFLAGS" && auto_cflags=1
 
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
+PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
 
-dnl Support systems with system libraries in e.g. /usr/lib64
+dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
   [for system library directory],
   [AS_HELP_STRING([--with-libdir=NAME],
@@ -39,14 +47,14 @@ PHP_ARG_WITH([libdir],
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAMES
 
-dnl Find php-config script
+dnl Find php-config script.
 PHP_ARG_WITH([php-config],,
   [AS_HELP_STRING([--with-php-config=PATH],
     [Path to php-config [php-config]])],
   [php-config],
   [no])
 
-dnl For BC
+dnl For BC.
 PHP_CONFIG=$PHP_PHP_CONFIG
 prefix=`$PHP_CONFIG --prefix 2>/dev/null`
 phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
@@ -70,7 +78,7 @@ AC_MSG_RESULT([$EXTENSION_DIR])
 AC_MSG_CHECKING([for PHP installed headers prefix])
 AC_MSG_RESULT([$phpincludedir])
 
-dnl Checks for PHP_DEBUG / ZEND_DEBUG / ZTS
+dnl Checks for PHP_DEBUG / ZEND_DEBUG / ZTS.
 AC_MSG_CHECKING([if debug is enabled])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
@@ -103,11 +111,7 @@ php_zts_is_enabled
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 
-dnl Support for building and testing Zend extensions
-ZEND_EXT_TYPE="zend_extension"
-PHP_SUBST(ZEND_EXT_TYPE)
-
-dnl Discard optimization flags when debugging is enabled
+dnl Discard optimization flags when debugging is enabled.
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
@@ -115,7 +119,7 @@ if test "$PHP_DEBUG" = "yes"; then
   CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
   CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
   changequote([,])
-  dnl add -O0 only if GCC or ICC is used
+  dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
     CXXFLAGS="$CXXFLAGS -g -O0"
@@ -134,10 +138,10 @@ else
   ZEND_DEBUG=no
 fi
 
-dnl Always shared
+dnl Always shared.
 PHP_BUILD_SHARED
 
-dnl Required programs
+dnl Required programs.
 PHP_PROG_AWK
 
 sinclude(config.m4)
@@ -145,8 +149,9 @@ sinclude(config.m4)
 enable_static=no
 enable_shared=yes
 
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
-dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.
+dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
+dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
+dnl compiler.
 AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
   undefine([AC_PROG_CXX])
   AC_DEFUN([AC_PROG_CXX], [])
@@ -204,5 +209,7 @@ PHP_GEN_GLOBAL_MAKEFILE
 test -d modules || $php_shtool mkdir modules
 
 AC_CONFIG_HEADERS([config.h])
+
+AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([config.h.in])])
 
 AC_OUTPUT

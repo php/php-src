@@ -4,7 +4,6 @@ Bug #60570 (Stream context leaks when http request fails)
 <?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
 --INI--
 allow_url_fopen=1
-allow_url_include=1
 --FILE--
 <?php
 require 'server.inc';

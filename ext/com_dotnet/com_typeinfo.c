@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,6 +25,33 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 
+static HashTable php_com_typelibraries;
+
+#ifdef ZTS
+static MUTEX_T php_com_typelibraries_mutex;
+#endif
+
+PHP_MINIT_FUNCTION(com_typeinfo)
+{
+	zend_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
+
+#ifdef ZTS
+	php_com_typelibraries_mutex = tsrm_mutex_alloc();
+#endif
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(com_typeinfo)
+{
+	zend_hash_destroy(&php_com_typelibraries);
+
+#ifdef ZTS
+	tsrm_mutex_free(php_com_typelibraries_mutex);
+#endif
+
+	return SUCCESS;
+}
 
 /* The search string can be either:
  * a) a file name
@@ -220,34 +245,57 @@ void php_com_typelibrary_dtor(zval *pDest)
 	ITypeLib_Release(Lib);
 }
 
+ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len) {
+	ITypeLib* result;
+#ifdef ZTS
+	tsrm_mutex_lock(php_com_typelibraries_mutex);
+#endif
+
+	result = zend_hash_str_add_ptr(&php_com_typelibraries, cache_key, cache_key_len, TL);
+
+#ifdef ZTS
+	tsrm_mutex_unlock(php_com_typelibraries_mutex);
+#endif
+
+	return result;
+}
+
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	int codepage, int *cached)
 {
 	ITypeLib *TL;
 	char *name_dup;
-	size_t l;
+	zend_string *key = zend_string_init(search_string, strlen(search_string), 1);
 
-	l = strlen(search_string);
+#ifdef ZTS
+	tsrm_mutex_lock(php_com_typelibraries_mutex);
+#endif
 
-	if ((TL = zend_ts_hash_str_find_ptr(&php_com_typelibraries, search_string, l)) != NULL) {
+	if ((TL = zend_hash_find_ptr(&php_com_typelibraries, key)) != NULL) {
 		*cached = 1;
 		/* add a reference for the caller */
 		ITypeLib_AddRef(TL);
-		return TL;
+
+		goto php_com_load_typelib_via_cache_return;
 	}
 
 	*cached = 0;
-	name_dup = estrndup(search_string, l);
+	name_dup = estrndup(ZSTR_VAL(key), ZSTR_LEN(key));
 	TL = php_com_load_typelib(name_dup, codepage);
 	efree(name_dup);
 
 	if (TL) {
-		if (NULL != zend_ts_hash_str_update_ptr(&php_com_typelibraries,
-				search_string, l, TL)) {
+		if (NULL != zend_hash_add_ptr(&php_com_typelibraries, key, TL)) {
 			/* add a reference for the hash table */
 			ITypeLib_AddRef(TL);
 		}
 	}
+
+php_com_load_typelib_via_cache_return:
+#ifdef ZTS
+	tsrm_mutex_unlock(php_com_typelibraries_mutex);
+#endif
+	zend_string_release(key);
 
 	return TL;
 }

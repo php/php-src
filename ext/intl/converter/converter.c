@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -231,8 +229,16 @@ static void php_converter_to_u_callback(const void *context,
 	zval zargs[4];
 
 	ZVAL_LONG(&zargs[0], reason);
-	ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
-	ZVAL_STRINGL(&zargs[2], codeUnits, length);
+	if (args->source) {
+		ZVAL_STRINGL(&zargs[1], args->source, args->sourceLimit - args->source);
+	} else {
+		ZVAL_EMPTY_STRING(&zargs[1]);
+	}
+	if (codeUnits) {
+		ZVAL_STRINGL(&zargs[2], codeUnits, length);
+	} else {
+		ZVAL_EMPTY_STRING(&zargs[2]);
+	}
 	ZVAL_LONG(&zargs[3], *pErrorCode);
 
 	objval->to_cb.param_count    = 4;
@@ -812,7 +818,7 @@ static PHP_METHOD(UConverter, transcode) {
 
 		if (U_SUCCESS(error) &&
 			(ret = php_converter_do_convert(dest_cnv, src_cnv, str, str_len, NULL)) != NULL) {
-			RETURN_NEW_STR(ret);
+			RETVAL_NEW_STR(ret);
 		}
 
 		if (U_FAILURE(error)) {

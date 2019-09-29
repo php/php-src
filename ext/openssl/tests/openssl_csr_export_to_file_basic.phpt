@@ -41,7 +41,11 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump(openssl_csr_export_to_file($dh, $csrfile));
+try {
+    var_dump(openssl_csr_export_to_file($dh, $csrfile));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
 ?>
 --CLEAN--
@@ -51,7 +55,7 @@ if (file_exists($csrfile)) {
     unlink($csrfile);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(1086) "-----BEGIN CERTIFICATE REQUEST-----
 MIIC6jCCAdICAQAwgaQxCzAJBgNVBAYTAkJSMRowGAYDVQQIExFSaW8gR3JhbmRl
@@ -73,9 +77,5 @@ JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
 openssl_csr_export_to_file() expects parameter 1 to be resource, string given
-
-Warning: openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource in %s on line %d
-
-Warning: openssl_csr_export_to_file(): cannot get CSR from parameter 1 in %s on line %d
-bool(false)
+openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource
 bool(true)

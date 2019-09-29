@@ -68,21 +68,21 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_match ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
         Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> $flags ]
-        Parameter #4 [ <optional> $offset ]
+        Parameter #3 [ <optional> int $flags ]
+        Parameter #4 [ <optional> int $offset ]
       }
     }
     Function [ <internal:pcre> function preg_match_all ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
         Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> $flags ]
-        Parameter #4 [ <optional> $offset ]
+        Parameter #3 [ <optional> int $flags ]
+        Parameter #4 [ <optional> int $offset ]
       }
     }
     Function [ <internal:pcre> function preg_replace ] {
@@ -91,27 +91,29 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
+        Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }
     }
     Function [ <internal:pcre> function preg_replace_callback ] {
 
-      - Parameters [5] {
+      - Parameters [6] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $callback ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
+        Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
+        Parameter #5 [ <optional> int $flags ]
       }
     }
     Function [ <internal:pcre> function preg_replace_callback_array ] {
 
-      - Parameters [4] {
-        Parameter #0 [ <required> $pattern ]
+      - Parameters [5] {
+        Parameter #0 [ <required> array $pattern ]
         Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> $limit ]
+        Parameter #2 [ <optional> int $limit ]
         Parameter #3 [ <optional> &$count ]
+        Parameter #4 [ <optional> int $flags ]
       }
     }
     Function [ <internal:pcre> function preg_filter ] {
@@ -120,38 +122,40 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> $limit ]
+        Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }
     }
     Function [ <internal:pcre> function preg_split ] {
 
       - Parameters [4] {
-        Parameter #0 [ <required> $pattern ]
-        Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> $limit ]
-        Parameter #3 [ <optional> $flags ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> string $subject ]
+        Parameter #2 [ <optional> int $limit ]
+        Parameter #3 [ <optional> int $flags ]
       }
     }
     Function [ <internal:pcre> function preg_quote ] {
 
       - Parameters [2] {
-        Parameter #0 [ <required> $str ]
-        Parameter #1 [ <optional> $delim_char ]
+        Parameter #0 [ <required> string $str ]
+        Parameter #1 [ <optional> ?string $delim_char ]
       }
+      - Return [ string ]
     }
     Function [ <internal:pcre> function preg_grep ] {
 
       - Parameters [3] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $input ]
-        Parameter #2 [ <optional> $flags ]
+        Parameter #0 [ <required> string $regex ]
+        Parameter #1 [ <required> array $input ]
+        Parameter #2 [ <optional> int $flags ]
       }
     }
     Function [ <internal:pcre> function preg_last_error ] {
 
       - Parameters [0] {
       }
+      - Return [ int ]
     }
   }
 }

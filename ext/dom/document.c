@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -109,12 +107,6 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_normalize_document, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_rename_node, 0, 0, 3)
-	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
-	ZEND_ARG_INFO(0, namespaceURI)
-	ZEND_ARG_INFO(0, qualifiedName)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_load, 0, 0, 1)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, options)
@@ -209,7 +201,6 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getElementById, dom_document_get_element_by_id, arginfo_dom_document_get_element_by_id)
 	PHP_FALIAS(adoptNode, dom_document_adopt_node, arginfo_dom_document_adopt_node)
 	PHP_FALIAS(normalizeDocument, dom_document_normalize_document, arginfo_dom_document_normalize_document)
-	PHP_FALIAS(renameNode, dom_document_rename_node, arginfo_dom_document_rename_node)
 	PHP_ME(domdocument, load, arginfo_dom_document_load, ZEND_ACC_PUBLIC)
 	PHP_FALIAS(save, dom_document_save, arginfo_dom_document_save)
 	PHP_ME(domdocument, loadXML, arginfo_dom_document_loadxml, ZEND_ACC_PUBLIC)
@@ -337,7 +328,10 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval);
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -431,11 +425,14 @@ int dom_document_version_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (docp->version != NULL) {
 		xmlFree((xmlChar *) docp->version );
 	}
-
-	str = zval_get_string(newval);
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
@@ -659,11 +656,14 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
+	str = zval_try_get_string(newval);
+	if (UNEXPECTED(!str)) {
+		return FAILURE;
+	}
+
 	if (docp->URL != NULL) {
 		xmlFree((xmlChar *) docp->URL);
 	}
-
-	str = zval_get_string(newval);
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 
@@ -1252,16 +1252,6 @@ PHP_FUNCTION(dom_document_normalize_document)
 	dom_normalize((xmlNodePtr) docp);
 }
 /* }}} end dom_document_normalize_document */
-
-/* {{{ proto DOMNode dom_document_rename_node(node n, string namespaceURI, string qualifiedName)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-renameNode
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_document_rename_node)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_document_rename_node */
 
 /* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)

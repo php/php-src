@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -37,7 +35,7 @@
 #if ONIGURUMA_VERSION_INT < 60800
 typedef void OnigMatchParam;
 #define onig_new_match_param() (NULL)
-#define onig_initialize_match_param(x)
+#define onig_initialize_match_param(x) (void)(x)
 #define onig_set_match_stack_limit_size_of_match_param(x, y)
 #define onig_free_match_param(x)
 #define onig_search_with_param(reg, str, end, start, range, region, option, mp) \
@@ -1124,7 +1122,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				if (zend_eval_stringl(ZSTR_VAL(eval_str), ZSTR_LEN(eval_str), &v, description) == FAILURE) {
 					efree(description);
 					zend_throw_error(NULL, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_str));
-					onig_region_free(regs, 0);
+					onig_region_free(regs, 1);
 					smart_str_free(&out_buf);
 					smart_str_free(&eval_buf);
 					RETURN_FALSE;

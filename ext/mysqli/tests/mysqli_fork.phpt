@@ -14,10 +14,10 @@ if (!function_exists('posix_getpid'))
 
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
-	die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+	die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
@@ -111,7 +111,7 @@ if (!have_innodb($link))
 						continue;
 					$tmp = mysqli_fetch_assoc($pres);
 					mysqli_free_result($pres);
-					if ($tmp['msg_id'] == $msg_id)
+					if (!$tmp || $tmp['msg_id'] == $msg_id)
 						/* no new message */
 						continue;
 					if ($tmp['msg'] == 'stop')
@@ -143,7 +143,7 @@ if (!have_innodb($link))
 				$wait_id = pcntl_waitpid($pid, $status, WNOHANG);
 				if ($pres = mysqli_query($plink, $sql)) {
 					$row = mysqli_fetch_assoc($pres);
-					if ($row['msg_id'] != $last_msg_id) {
+					if ($row && $row['msg_id'] != $last_msg_id) {
 						$last_msg_id = $row['msg_id'];
 						switch ($row['msg']) {
 							case 'start':

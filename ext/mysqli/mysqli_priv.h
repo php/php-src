@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -90,6 +88,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
 	mysql->multi_query = 1; \
 }
 
+/* Numbers that cannot be represented as a signed int are converted to a string instead (affects 32-bit builds). */
 #define MYSQLI_RETURN_LONG_INT(__val) \
 { \
 	if ((__val) < ZEND_LONG_MAX) {		\

@@ -13,15 +13,17 @@ echo "*** Testing stream_get_meta_data() : error conditions ***\n";
 echo "\n-- Testing stream_get_meta_data() function with closed stream resource --\n";
 $fp = fopen(__FILE__, 'r');
 fclose($fp);
-var_dump(stream_get_meta_data($fp));
+try {
+    var_dump(stream_get_meta_data($fp));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stream_get_meta_data() : error conditions ***
 
 -- Testing stream_get_meta_data() function with closed stream resource --
-
-Warning: stream_get_meta_data(): supplied resource is not a valid stream resource in %s on line %d
-bool(false)
+stream_get_meta_data(): supplied resource is not a valid stream resource
 Done

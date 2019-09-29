@@ -22,16 +22,18 @@ echo "*** Testing imagecolorstotal() : error conditions ***\n";
 $im = fopen(__FILE__, 'r');
 
 echo "\n-- Testing imagecolorstotal() function with a invalid resource\n";
-var_dump( imagecolorstotal($im) );
+try {
+    var_dump( imagecolorstotal($im) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 fclose($im);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorstotal() : error conditions ***
 
 -- Testing imagecolorstotal() function with a invalid resource
-
-Warning: imagecolorstotal(): supplied resource is not a valid Image resource in %s on line %d
-bool(false)
+imagecolorstotal(): supplied resource is not a valid Image resource
 ===DONE===

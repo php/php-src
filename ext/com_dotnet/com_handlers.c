@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -174,19 +172,6 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
-#if 0
-static void com_object_set(zval **property, zval *value)
-{
-	/* Not yet implemented in the engine */
-}
-
-static zval *com_object_get(zval *property)
-{
-	/* Not yet implemented in the engine */
-	return NULL;
-}
-#endif
-
 static int com_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	DISPID dispid;
@@ -332,7 +317,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].type = ZEND_TYPE_ENCODE(0,1);
+								f.arg_info[i].type = ZEND_TYPE_ENCODE_NONE();
 								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
 									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
 								}
@@ -545,8 +530,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_read_dimension,
 	com_write_dimension,
 	NULL,
-	NULL, /* com_object_get, */
-	NULL, /* com_object_set, */
 	com_property_exists,
 	com_property_delete,
 	com_dimension_exists,

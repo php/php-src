@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -239,8 +237,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
-			*period = '\0';
-			strncat(wildname, ".*", 2);
+			ZEND_ASSERT(period[0] == '.');
+			period[1] = '*';
+			period[2] = '\0';
 			if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, wildname, strlen(wildname)))) {
 				filter = factory->create_filter(filtername, filterparams, persistent);
 			}

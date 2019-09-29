@@ -95,6 +95,10 @@ void vsyslog(int priority, const char *message, va_list args)
 	DWORD evid;
 	wchar_t *strsw[2];
 
+	/* default event source */
+	if (INVALID_HANDLE_VALUE == PW32G(log_source))
+		openlog("php", LOG_PID, LOG_SYSLOG);
+
 	switch (priority) {			/* translate UNIX type into NT type */
 		case LOG_ALERT:
 			etype = EVENTLOG_ERROR_TYPE;

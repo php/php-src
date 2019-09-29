@@ -95,13 +95,13 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 ---------------------
 uk-ua_CALIFORNIA@currency=;currency=GRN:
 language : 'uk' , region : 'UA' , variant0 : 'CALIFORNIA' ,
 ---------------------
 root:
-language : 'root' ,
+%s
 ---------------------
 uk@currency=EURO:
 language : 'uk' ,

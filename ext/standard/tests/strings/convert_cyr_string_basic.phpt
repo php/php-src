@@ -21,16 +21,20 @@ echo "\n-- Now try some of characters in 128-255 range --\n";
 
 for ($i = 128; $i < 256; $i++) {
 	$str = chr($i);
-	echo "$i: " . bin2hex(convert_cyr_string($str, 'w', 'k')) . "\n";
+	echo "$i: " . bin2hex(@convert_cyr_string($str, 'w', 'k')) . "\n";
 }
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing convert_cyr_string() : basic functionality ***
 
 -- First try some simple English text --
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(102) "436f6e766572742066726f6d206f6e6520437972696c6c6963206368617261637465722073657420746f20616e6f746865722e"
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(102) "436f6e766572742066726f6d206f6e6520437972696c6c6963206368617261637465722073657420746f20616e6f746865722e"
 
 -- Now try some of characters in 128-255 range --

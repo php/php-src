@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -60,12 +58,10 @@ PHP_FUNCTION(com_create_instance)
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
 			&cp, &typelib_name, &typelib_name_len) &&
-		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+		FAILURE == zend_parse_parameters(
 			ZEND_NUM_ARGS(), "sa|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
-
-		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
 		return;
 	}
 
@@ -267,13 +263,13 @@ PHP_FUNCTION(com_create_instance)
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
 				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page);
 
-				if (NULL != zend_ts_hash_str_add_ptr(&php_com_typelibraries, typelib_name, typelib_name_len, TL)) {
+				if (NULL != php_com_cache_typelib(TL, typelib_name, typelib_name_len)) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
 				}
-
+				efree(typelib_name);
 			} else {
 				/* try it anyway */
 				php_com_import_typelib(TL, mode, obj->code_page);
@@ -302,7 +298,6 @@ PHP_FUNCTION(com_get_active_object)
 	php_com_initialize();
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
 				&module_name, &module_name_len, &code_page)) {
-		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!");
 		return;
 	}
 
@@ -704,7 +699,7 @@ PHP_FUNCTION(com_event_sink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z/",
 			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_com_initialize();
@@ -765,7 +760,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z/|s!b", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_com_initialize();

@@ -15,8 +15,6 @@ if ($contentfile === false) {
 }
 
 $pkcsfile = __DIR__ . "/openssl_pkcs7_verify__pkcsfile.tmp";
-
-$infile = __DIR__ . "/cert.crt";
 $eml = __DIR__ . "/signed.eml";
 $wrong = "wrong";
 $empty = "";

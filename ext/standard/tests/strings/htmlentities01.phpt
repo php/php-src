@@ -2,7 +2,7 @@
 htmlentities() test 1 (cp1252)
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+internal_encoding=pass
 --FILE--
 <?php
 	var_dump(htmlentities("\x82\x86\x99\x9f", ENT_QUOTES, 'cp1252'));

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -25,7 +23,7 @@
 #include "intl_data.h"
 
 /* {{{ */
-static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
+static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
 	size_t           locale_len = 0;
@@ -61,7 +59,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 PHP_FUNCTION( collator_create )
 {
 	object_init_ex( return_value, Collator_ce_ptr );
-	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0) == FAILURE) {
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -77,7 +75,7 @@ PHP_METHOD( Collator, __construct )
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = ZEND_THIS;
-	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1) == FAILURE) {
+	if (collator_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}

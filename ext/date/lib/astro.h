@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,4 +72,3 @@
 /* below the horizon.                                                      */
 #define astronomical_twilight(ts,lon,lat,start,end)  \
         timelib_astro_rise_set_altitude( ts, lon, lat, -18.0, 0, start, end )
-

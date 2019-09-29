@@ -1,5 +1,14 @@
 --TEST--
 Test proper watch comparisons when having multiple levels of indirection from a zval to its value
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
+}
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --PHPDBG--
 b 3
 r

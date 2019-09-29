@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -183,7 +181,7 @@ PHP_FUNCTION(hrtime)
 		add_next_index_long(return_value, (zend_long)(t % (php_hrtime_t)NANO_IN_SEC));
 	}
 #else
-	RETURN_FALSE
+	RETURN_FALSE;
 #endif
 }
 /* }}} */

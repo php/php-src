@@ -9,4 +9,4 @@ $obj = new A;
 var_dump($obj);
 ?>
 --EXPECTF--
-Fatal error: Property A::$a cannot have type callable in %s on line %d
+Fatal error: Property A::$a cannot have type ?callable in %s on line %d

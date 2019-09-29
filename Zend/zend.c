@@ -94,7 +94,7 @@ ZEND_API zend_bool zend_rc_debug = 0;
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
+		EG(error_reporting) = E_ALL;
 	} else {
 		EG(error_reporting) = atoi(ZSTR_VAL(new_value));
 	}
@@ -174,6 +174,7 @@ ZEND_INI_BEGIN()
 #ifdef ZEND_SIGNALS
 	STD_ZEND_INI_BOOLEAN("zend.signal_check", "0", ZEND_INI_SYSTEM, OnUpdateBool, check, zend_signal_globals_t, zend_signal_globals)
 #endif
+	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
@@ -955,7 +956,11 @@ static void zend_resolve_property_types(void) /* {{{ */
 	zend_property_info *prop_info;
 
 	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
-		if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
+		if (ce->type != ZEND_INTERNAL_CLASS) {
+			continue;
+		}
+
+		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
 					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
@@ -969,6 +974,7 @@ static void zend_resolve_property_types(void) /* {{{ */
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
+		ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -985,6 +991,8 @@ int zend_post_startup(void) /* {{{ */
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 #endif
 
+	zend_resolve_property_types();
+
 	if (zend_post_startup_cb) {
 		int (*cb)(void) = zend_post_startup_cb;
 
@@ -993,8 +1001,6 @@ int zend_post_startup(void) /* {{{ */
 			return FAILURE;
 		}
 	}
-
-	zend_resolve_property_types();
 
 #ifdef ZTS
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
@@ -1097,7 +1103,7 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
+ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
 
 	if (!EG(bailout)) {
@@ -1136,7 +1142,7 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 }
 /* }}} */
 
-ZEND_API char *get_zend_version(void) /* {{{ */
+ZEND_API const char *get_zend_version(void) /* {{{ */
 {
 	return zend_version_info;
 }
@@ -1390,7 +1396,7 @@ static ZEND_COLD void zend_error_va_list(
 }
 /* }}} */
 
-static void get_filename_lineno(int type, const char **filename, uint32_t *lineno) {
+static ZEND_COLD void get_filename_lineno(int type, const char **filename, uint32_t *lineno) {
 	/* Obtain relevant filename and lineno */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -1554,6 +1560,18 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 	va_end(va);
 } /* }}} */
 
+ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	zend_throw_exception(zend_ce_value_error, message, 0);
+	efree(message);
+	va_end(va);
+} /* }}} */
+
 ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
 {
 #if ZEND_DEBUG
@@ -1580,29 +1598,25 @@ ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const 
 }
 /* }}} */
 
-ZEND_API void zend_try_exception_handler() /* {{{ */
+ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 {
-	if (EG(exception)) {
-		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-			zval orig_user_exception_handler;
-			zval params[1], retval2;
-			zend_object *old_exception;
-			old_exception = EG(exception);
-			EG(exception) = NULL;
-			ZVAL_OBJ(&params[0], old_exception);
-			ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	zval orig_user_exception_handler;
+	zval params[1], retval2;
+	zend_object *old_exception;
+	old_exception = EG(exception);
+	EG(exception) = NULL;
+	ZVAL_OBJ(&params[0], old_exception);
+	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
-				zval_ptr_dtor(&retval2);
-				if (EG(exception)) {
-					OBJ_RELEASE(EG(exception));
-					EG(exception) = NULL;
-				}
-				OBJ_RELEASE(old_exception);
-			} else {
-				EG(exception) = old_exception;
-			}
+	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
+		zval_ptr_dtor(&retval2);
+		if (EG(exception)) {
+			OBJ_RELEASE(EG(exception));
+			EG(exception) = NULL;
 		}
+		OBJ_RELEASE(old_exception);
+	} else {
+		EG(exception) = old_exception;
 	}
 } /* }}} */
 
@@ -1628,9 +1642,13 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 		if (op_array) {
 			zend_execute(op_array, retval);
 			zend_exception_restore();
-			zend_try_exception_handler();
-			if (EG(exception)) {
-				zend_exception_error(EG(exception), E_ERROR);
+			if (UNEXPECTED(EG(exception))) {
+				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+					zend_user_exception_handler();
+				}
+				if (EG(exception)) {
+					zend_exception_error(EG(exception), E_ERROR);
+				}
 			}
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));

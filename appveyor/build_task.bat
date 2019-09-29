@@ -32,7 +32,7 @@ if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
 	set BRANCH=master
 )
 set STABILITY=staging
-set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VC%-%PHP_SDK_ARCH%
+set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
 rem SDK is cached, deps info is cached as well
 echo Updating dependencies in %DEPS_DIR%
 cmd /c phpsdk_deps --update --no-backup --branch %BRANCH% --stability %STABILITY% --deps %DEPS_DIR% --crt %PHP_BUILD_CRT%
@@ -51,7 +51,7 @@ if %errorlevel% neq 0 exit /b 3
 if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,interbase,ldap,imap,ftp
+set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
 if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
 cmd /c configure.bat ^
@@ -59,7 +59,6 @@ cmd /c configure.bat ^
 	--disable-debug-pack ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
-	--without-interbase ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^

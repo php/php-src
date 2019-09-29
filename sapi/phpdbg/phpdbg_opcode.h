@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -40,7 +38,7 @@ struct _phpdbg_oplog_entry {
 typedef struct _phpdbg_oplog_list phpdbg_oplog_list;
 struct _phpdbg_oplog_list {
 	phpdbg_oplog_list *prev;
-	phpdbg_oplog_entry *start;
+	phpdbg_oplog_entry start; /* Only "next" member used. */
 };
 
 #endif /* PHPDBG_OPCODE_H */

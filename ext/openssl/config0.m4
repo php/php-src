@@ -1,5 +1,3 @@
-dnl config.m4 for extension openssl
-
 PHP_ARG_WITH([openssl],
   [for OpenSSL support],
   [AS_HELP_STRING([--with-openssl],
@@ -7,7 +5,7 @@ PHP_ARG_WITH([openssl],
 
 PHP_ARG_WITH([kerberos],
   [for Kerberos support],
-  [AS_HELP_STRING([[--with-kerberos[=DIR]]],
+  [AS_HELP_STRING([--with-kerberos],
     [OPENSSL: Include Kerberos support])],
   [no],
   [no])
@@ -24,7 +22,10 @@ if test "$PHP_OPENSSL" != "no"; then
   PHP_SUBST(OPENSSL_SHARED_LIBADD)
 
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(OPENSSL_SHARED_LIBADD)
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
+
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, OPENSSL_SHARED_LIBADD)
   fi
 
   AC_CHECK_FUNCS([RAND_egd])

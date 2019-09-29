@@ -1,5 +1,3 @@
-dnl config.m4 for extension ctype
-
 PHP_ARG_ENABLE([ctype],
   [whether to enable ctype functions],
   [AS_HELP_STRING([--disable-ctype],

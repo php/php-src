@@ -19,7 +19,7 @@ class bar extends foo {
 	}
 }
 
-Reflection::export(new ReflectionClass(new bar));
+echo new ReflectionClass(new bar);
 
 ?>
 --EXPECTF--

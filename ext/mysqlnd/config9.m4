@@ -1,5 +1,3 @@
-dnl config.m4 for mysqlnd driver
-
 PHP_ARG_ENABLE([mysqlnd],
   [whether to enable mysqlnd],
   [AS_HELP_STRING([--enable-mysqlnd],
@@ -14,15 +12,6 @@ PHP_ARG_ENABLE([mysqlnd_compression_support],
     [Disable support for the MySQL compressed protocol in mysqlnd])],
   [yes],
   [no])
-
-if test -z "$PHP_ZLIB_DIR"; then
-  PHP_ARG_WITH([zlib-dir],
-    [for the location of libz],
-    [AS_HELP_STRING([[--with-zlib-dir[=DIR]]],
-      [mysqlnd: Set the path to libz install prefix])],
-    [no],
-    [no])
-fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
@@ -43,9 +32,6 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
 
   if test "$PHP_OPENSSL" != "no" || test "$PHP_OPENSSL_DIR" != "no"; then
-    AC_CHECK_LIB(ssl, DSA_get_default_method, AC_DEFINE(HAVE_DSA_DEFAULT_METHOD, 1, [OpenSSL 0.9.7 or later]))
-    AC_CHECK_LIB(crypto, X509_free, AC_DEFINE(HAVE_DSA_DEFAULT_METHOD, 1, [OpenSSL 0.9.7 or later]))
-
     PHP_SETUP_OPENSSL(MYSQLND_SHARED_LIBADD, [AC_DEFINE(MYSQLND_HAVE_SSL,1,[Enable mysqlnd code that uses OpenSSL directly])])
   fi
 

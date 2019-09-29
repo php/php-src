@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -148,7 +146,7 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
 	((zoi_with_current*)ii->iterator)->destroy_it = string_enum_destroy_it;
-	ZVAL_COPY_VALUE(&((zoi_with_current*)ii->iterator)->wrapping_obj, object);
+	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 }
 

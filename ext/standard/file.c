@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -163,7 +161,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
-	STD_PHP_INI_ENTRY("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateLong, auto_detect_line_endings, php_file_globals, file_globals)
+	STD_PHP_INI_ENTRY("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateBool, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
@@ -217,6 +215,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT",   STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,    CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_ANY_SERVER",	STREAM_CRYPTO_METHOD_ANY_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",	STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",	STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
@@ -225,11 +224,13 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_3_SERVER",   STREAM_CRYPTO_METHOD_TLSv1_3_SERVER,    CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_PROTO_SSLv3",	STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_PROTO_TLSv1_0",	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_PROTO_TLSv1_1",	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_PROTO_TLSv1_2",	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_PROTO_TLSv1_3",   STREAM_CRYPTO_METHOD_TLSv1_3_SERVER,    CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
@@ -355,14 +356,14 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
-		ZEND_TRY_ASSIGN_LONG(wouldblock, 0);
+		ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 0);
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
-			ZEND_TRY_ASSIGN_LONG(wouldblock, 1);
+			ZEND_TRY_ASSIGN_REF_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;
 	}
@@ -372,7 +373,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
+/* {{{ proto array|false get_meta_tags(string filename [, bool use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 PHP_FUNCTION(get_meta_tags)
 {
@@ -517,7 +518,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
+/* {{{ proto string|false file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -575,7 +576,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto int file_put_contents(string file, mixed data [, int flags [, resource context]])
+/* {{{ proto int|false file_put_contents(string file, mixed data [, int flags [, resource context]])
    Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
@@ -583,7 +584,7 @@ PHP_FUNCTION(file_put_contents)
 	char *filename;
 	size_t filename_len;
 	zval *data;
-	size_t numbytes = 0;
+	ssize_t numbytes = 0;
 	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
@@ -658,7 +659,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -666,7 +667,7 @@ PHP_FUNCTION(file_put_contents)
 
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
-				size_t bytes_written;
+				ssize_t bytes_written;
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
@@ -694,7 +695,7 @@ PHP_FUNCTION(file_put_contents)
 				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
-						php_error_docref(NULL, E_WARNING, "Only "ZEND_LONG_FMT" of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
 					zval_ptr_dtor_str(&out);
@@ -707,7 +708,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 	php_stream_close(stream);
 
-	if (numbytes == (size_t)-1) {
+	if (numbytes < 0) {
 		RETURN_FALSE;
 	}
 
@@ -717,7 +718,7 @@ PHP_FUNCTION(file_put_contents)
 
 #define PHP_FILE_BUF_SIZE	80
 
-/* {{{ proto array file(string filename [, int flags[, resource context]])
+/* {{{ proto array|false file(string filename [, int flags[, resource context]])
    Read entire file into an array */
 PHP_FUNCTION(file)
 {
@@ -813,7 +814,7 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix)
+/* {{{ proto string|false tempnam(string dir, string prefix)
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
@@ -924,7 +925,7 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ proto resource popen(string command, string mode)
+/* {{{ proto resource|false popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 PHP_FUNCTION(popen)
 {
@@ -1132,14 +1133,14 @@ PHP_FUNCTION(fscanf)
 }
 /* }}} */
 
-/* {{{ proto int fwrite(resource fp, string str [, int length])
+/* {{{ proto int|false fwrite(resource fp, string str [, int length])
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
 	zval *res;
 	char *input;
 	size_t inputlen;
-	size_t ret;
+	ssize_t ret;
 	size_t num_bytes;
 	zend_long maxlen = 0;
 	php_stream *stream;
@@ -1166,6 +1167,9 @@ PHPAPI PHP_FUNCTION(fwrite)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	ret = php_stream_write(stream, input, num_bytes);
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(ret);
 }
@@ -1460,7 +1464,7 @@ PHP_FUNCTION(unlink)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1731,13 +1735,14 @@ safe_to_copy:
 }
 /* }}} */
 
-/* {{{ proto string fread(resource fp, int length)
+/* {{{ proto string|false fread(resource fp, int length)
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *res;
 	zend_long len;
 	php_stream *stream;
+	zend_string *str;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(res)
@@ -1751,15 +1756,13 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_NEW_STR(return_value, zend_string_alloc(len, 0));
-	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
-
-	/* needed because recv/read/gzread doesn't put a null at the end*/
-	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-
-	if (Z_STRLEN_P(return_value) < len / 2) {
-		Z_STR_P(return_value) = zend_string_truncate(Z_STR_P(return_value), Z_STRLEN_P(return_value), 0);
+	str = php_stream_read_to_str(stream, len);
+	if (!str) {
+		zval_ptr_dtor_str(return_value);
+		RETURN_FALSE;
 	}
+
+	RETURN_STR(str);
 }
 /* }}} */
 
@@ -1812,7 +1815,7 @@ PHP_FUNCTION(fputcsv)
 	int escape_char = (unsigned char) '\\';	/* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
-	size_t ret;
+	ssize_t ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
@@ -1864,12 +1867,15 @@ PHP_FUNCTION(fputcsv)
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char);
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
 	RETURN_LONG(ret);
 }
 /* }}} */
 
 /* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char) */
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
+PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, int escape_char)
 {
 	int count, i = 0;
 	size_t ret;
@@ -1929,7 +1935,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
+/* {{{ proto array|false fgetcsv(resource fp [,int length [, string delimiter [, string enclosure [, string escape]]]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
@@ -2290,7 +2296,7 @@ out:
 /* }}} */
 
 #if HAVE_REALPATH || defined(ZTS)
-/* {{{ proto string realpath(string path)
+/* {{{ proto string|false realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
 {

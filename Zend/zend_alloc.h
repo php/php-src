@@ -27,21 +27,21 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT Z_L(8)
+# define ZEND_MM_ALIGNMENT ((size_t) 8)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(3)
 #elif ZEND_MM_ALIGNMENT < 4
 # undef ZEND_MM_ALIGNMENT
 # undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT Z_L(4)
+# define ZEND_MM_ALIGNMENT ((size_t) 4)
 # define ZEND_MM_ALIGNMENT_LOG2 Z_L(2)
 #endif
 
-#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - Z_L(1))
+#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
 
-#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - Z_L(1)) & ZEND_MM_ALIGNMENT_MASK)
+#define ZEND_MM_ALIGNED_SIZE(size)	(((size) + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 
 #define ZEND_MM_ALIGNED_SIZE_EX(size, alignment) \
-	(((size) + ((alignment) - Z_L(1))) & ~((alignment) - Z_L(1)))
+	(((size) + ((alignment) - 1)) & ~((alignment) - 1))
 
 typedef struct _zend_leak_info {
 	void *addr;

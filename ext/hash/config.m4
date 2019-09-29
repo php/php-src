@@ -1,8 +1,6 @@
-dnl config.m4 for extension hash
-
 PHP_ARG_WITH([mhash],
   [for mhash support],
-  [AS_HELP_STRING([[--with-mhash[=DIR]]],
+  [AS_HELP_STRING([[--with-mhash]],
     [Include mhash support])])
 
 if test "$PHP_MHASH" != "no"; then
@@ -44,6 +42,4 @@ EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h"
 
 PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
-ifdef([PHP_INSTALL_HEADERS], [
-	PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)
-])
+PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)

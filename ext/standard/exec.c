@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,9 +29,8 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_SIGNAL_H
+
 #include <signal.h>
-#endif
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -49,9 +46,7 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifdef PHP_WIN32
 # include "win32/nice.h"
@@ -181,8 +176,9 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 			RETVAL_EMPTY_STRING();
 		}
 	} else {
-		while((bufl = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
-			PHPWRITE(buf, bufl);
+		ssize_t read;
+		while ((read = php_stream_read(stream, buf, EXEC_INPUT_BUF)) > 0) {
+			PHPWRITE(buf, read);
 		}
 	}
 
@@ -219,7 +215,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 			Z_PARAM_ZVAL(ret_array)
 		}
 		Z_PARAM_ZVAL(ret_code)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!cmd_len) {
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
@@ -246,12 +242,12 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		ZEND_TRY_ASSIGN_LONG(ret_code, ret);
+		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret);
 	}
 }
 /* }}} */
 
-/* {{{ proto string exec(string command [, array &output [, int &return_value]])
+/* {{{ proto string|false exec(string command [, array &output [, int &return_value]])
    Execute an external program */
 PHP_FUNCTION(exec)
 {
@@ -259,7 +255,7 @@ PHP_FUNCTION(exec)
 }
 /* }}} */
 
-/* {{{ proto int system(string command [, int &return_value])
+/* {{{ proto int|false system(string command [, int &return_value])
    Execute an external program and display output */
 PHP_FUNCTION(system)
 {
@@ -267,7 +263,7 @@ PHP_FUNCTION(system)
 }
 /* }}} */
 
-/* {{{ proto void passthru(string command [, int &return_value])
+/* {{{ proto bool passthru(string command [, int &return_value])
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
@@ -487,7 +483,7 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
-			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
+			zend_type_error("Input string contains NULL bytes");
 			return;
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
@@ -508,17 +504,16 @@ PHP_FUNCTION(escapeshellarg)
 		Z_PARAM_STRING(argument, argument_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (argument) {
-		if (argument_len != strlen(argument)) {
-			php_error_docref(NULL, E_ERROR, "Input string contains NULL bytes");
-			return;
-		}
-		RETVAL_STR(php_escape_shell_arg(argument));
+	if (argument_len != strlen(argument)) {
+		zend_type_error("Input string contains NULL bytes");
+		return;
 	}
+
+	RETVAL_STR(php_escape_shell_arg(argument));
 }
 /* }}} */
 
-/* {{{ proto string shell_exec(string cmd)
+/* {{{ proto string|false shell_exec(string cmd)
    Execute command via shell and return complete output as string */
 PHP_FUNCTION(shell_exec)
 {

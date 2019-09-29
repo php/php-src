@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -165,7 +163,9 @@ double_offset:
 	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
 		zend_long lval;
 		double dval;
-		convert_to_string_ex(arg);
+		if (!try_convert_to_string(arg)) {
+			return;
+		}
 		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
 		case IS_DOUBLE:
 			zval_ptr_dtor(arg);

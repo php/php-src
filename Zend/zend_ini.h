@@ -26,7 +26,7 @@
 #define ZEND_INI_ALL (ZEND_INI_USER|ZEND_INI_PERDIR|ZEND_INI_SYSTEM)
 
 #define ZEND_INI_MH(name) int name(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
-#define ZEND_INI_DISP(name) void name(zend_ini_entry *ini_entry, int type)
+#define ZEND_INI_DISP(name) ZEND_COLD void name(zend_ini_entry *ini_entry, int type)
 
 typedef struct _zend_ini_entry_def {
 	const char *name;

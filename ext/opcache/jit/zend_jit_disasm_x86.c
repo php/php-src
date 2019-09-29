@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Dmitry Stogov <dmitry@php.net>                              |
-   |          Xinchen Hui <xinchen.h@zend.com>                            |
+   |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -432,8 +432,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_obj_is_dynamic);
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
-	REGISTER_HELPER(zend_jit_deprecated_or_abstract_helper);
-	REGISTER_HELPER(zend_jit_verify_internal_arg_types_helper);
+	REGISTER_HELPER(zend_jit_deprecated_helper);
 	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);
@@ -442,6 +441,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec_typed_ref);
 	REGISTER_HELPER(zend_jit_post_inc_typed_ref);
 	REGISTER_HELPER(zend_jit_post_dec_typed_ref);
+	REGISTER_HELPER(zend_jit_only_vars_by_reference);
+	REGISTER_HELPER(zend_jit_invalid_array_access);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
 #undef  REGISTER_HELPER

@@ -91,7 +91,7 @@ TODO:
    part of GD */
 typedef long gdFixed;
 /* Integer to fixed point */
-#define gd_itofx(x) ((x) << 8)
+#define gd_itofx(x) (long)((unsigned long)(x) << 8)
 
 /* Float to fixed point */
 #define gd_ftofx(x) (long)((x) * 256)
@@ -112,7 +112,7 @@ typedef long gdFixed;
 #define gd_mulfx(x,y) (((x) * (y)) >> 8)
 
 /* Divide a fixed by a fixed */
-#define gd_divfx(x,y) (((x) << 8) / (y))
+#define gd_divfx(x,y) ((long)((unsigned long)(x) << 8) / (y))
 
 typedef struct
 {
@@ -658,14 +658,6 @@ static inline int _color_blend (const int dst, const int src)
 	}
 }
 
-static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor)
-{
-	const gdFixed f_127 = gd_itofx(127);
-	register int c = src->tpixels[y][x];
-	c = c | (( (int) (gd_fxtof(gd_mulfx(coverage, f_127)) + 50.5f)) << 24);
-	return _color_blend(bgColor, c);
-}
-
 static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, const int bgColor)
 {
 	if (gdImageBoundsSafe(im, x, y)) {
@@ -1136,54 +1128,6 @@ gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width,
 		dst_offset_y++;
 	}
 	return dst_img;
-}
-
-static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int y, const int color)
-{
-	if (gdImageBoundsSafe(im, x, y)) {
-		const int c = im->tpixels[y][x];
-		if (c == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		}
-		return c;
-	} else {
-		register int border = 0;
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y < im->cy1) {
-			border = im->tpixels[0][im->cx1];
-			goto processborder;
-		}
-
-		if (y > im->cy2) {
-			if (x >= im->cx1 && x <= im->cx1) {
-				border = im->tpixels[im->cy2][x];
-				goto processborder;
-			} else {
-				return gdTrueColorAlpha(0, 0, 0, 127);
-			}
-		}
-
-		/* y is bound safe at this point */
-		if (x < im->cx1) {
-			border = im->tpixels[y][im->cx1];
-			goto processborder;
-		}
-
-		if (x > im->cx2) {
-			border = im->tpixels[y][im->cx2];
-		}
-
-processborder:
-		if (border == im->transparent) {
-			return gdTrueColorAlpha(0, 0, 0, 127);
-		} else{
-			return gdTrueColorAlpha(gdTrueColorGetRed(border), gdTrueColorGetGreen(border), gdTrueColorGetBlue(border), 127);
-		}
-	}
 }
 
 static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int new_width, const unsigned int new_height)
@@ -2173,7 +2117,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 {
 	/* round to two decimals and keep the 100x multiplication to use it in the common square angles
 	   case later. Keep the two decimal precisions so smaller rotation steps can be done, useful for
-	   slow animations, f.e. */
+	   slow animations. */
 	const int angle_rounded = fmod((int) floorf(angle * 100), 360 * 100);
 
 	if (bgcolor < 0) {
@@ -2398,8 +2342,8 @@ int gdTransformAffineCopy(gdImagePtr dst,
 
 	gdImageGetClip(dst, &c1x, &c1y, &c2x, &c2y);
 
-	end_x = bbox.width  + (int) fabs(bbox.x);
-	end_y = bbox.height + (int) fabs(bbox.y);
+	end_x = bbox.width  + abs(bbox.x);
+	end_y = bbox.height + abs(bbox.y);
 
 	/* Get inverse affine to let us work with destination -> source */
 	gdAffineInvert(inv, affine);

@@ -17,4 +17,4 @@ In autoload: string(9) "UndefBase"
 Fatal error: Uncaught Error: Class 'UndefBase' not found in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sautoload_011.php on line %d
+  thrown in %s on line %d

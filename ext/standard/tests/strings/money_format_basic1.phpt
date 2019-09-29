@@ -56,24 +56,48 @@ echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing money_format() : basic functionality***
 Format values with 14 positions, 8 digits to left, 2 to right using national format
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 Format again but with ( for negative values
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 Format with 0 for padding character
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 Format again with * for padding character
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 Format again but disable grouping character
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 Format again suppress currency symbol
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
+
+Deprecated: Function money_format() is deprecated in %s on line %d
 string
 ===DONE===

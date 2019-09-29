@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -411,7 +409,8 @@ MYSQLND_METHOD(mysqlnd_command, stmt_execute)(MYSQLND_CONN_DATA * conn, const MY
 
 	DBG_ENTER("mysqlnd_command::stmt_execute");
 
-	ret = send_command(conn->payload_decoder_factory, COM_STMT_EXECUTE, payload.s, payload.l, FALSE,
+	ret = send_command(conn->payload_decoder_factory, COM_STMT_EXECUTE,
+					   (const unsigned char *) payload.s, payload.l, FALSE,
 					   &conn->state,
 					   conn->error_info,
 					   conn->upsert_status,

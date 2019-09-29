@@ -52,8 +52,8 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 				if (next < end && next->opcode == ZEND_OP_DATA) {
 					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 						var_num = EX_VAR_TO_NUM(next->op1.var);
-						if (opline->opcode == ZEND_ASSIGN_OBJ_REF
-								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+						if (next->op1_type == IS_CV && (opline->opcode == ZEND_ASSIGN_OBJ_REF
+								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF)) {
 							DFG_SET(use, set_size, j, var_num);
 							DFG_SET(def, set_size, j, var_num);
 						} else {
@@ -107,18 +107,10 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_FE_RESET_RW:
-					case ZEND_ASSIGN_ADD:
-					case ZEND_ASSIGN_SUB:
-					case ZEND_ASSIGN_MUL:
-					case ZEND_ASSIGN_DIV:
-					case ZEND_ASSIGN_MOD:
-					case ZEND_ASSIGN_SL:
-					case ZEND_ASSIGN_SR:
-					case ZEND_ASSIGN_CONCAT:
-					case ZEND_ASSIGN_BW_OR:
-					case ZEND_ASSIGN_BW_AND:
-					case ZEND_ASSIGN_BW_XOR:
-					case ZEND_ASSIGN_POW:
+					case ZEND_ASSIGN_OP:
+					case ZEND_ASSIGN_DIM_OP:
+					case ZEND_ASSIGN_OBJ_OP:
+					case ZEND_ASSIGN_STATIC_PROP_OP:
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
 					case ZEND_POST_INC:
@@ -131,10 +123,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_DIM_RW:
 					case ZEND_FETCH_DIM_FUNC_ARG:
 					case ZEND_FETCH_DIM_UNSET:
-					case ZEND_FETCH_OBJ_W:
-					case ZEND_FETCH_OBJ_RW:
-					case ZEND_FETCH_OBJ_FUNC_ARG:
-					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_FETCH_LIST_W:
 					case ZEND_VERIFY_RETURN_TYPE:
 					case ZEND_PRE_INC_OBJ:

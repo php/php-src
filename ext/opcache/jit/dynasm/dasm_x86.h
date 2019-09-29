@@ -354,10 +354,12 @@ int dasm_link(Dst_DECL, size_t *szp)
 
 #define dasmb(x)	*cp++ = (unsigned char)(x)
 #ifndef DASM_ALIGNED_WRITES
+typedef ZEND_SET_ALIGNED(1, unsigned short unaligned_short);
+typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_int);
 #define dasmw(x) \
-  do { *((unsigned short *)cp) = (unsigned short)(x); cp+=2; } while (0)
+  do { *((unaligned_short *)cp) = (unsigned short)(x); cp+=2; } while (0)
 #define dasmd(x) \
-  do { *((unsigned int *)cp) = (unsigned int)(x); cp+=4; } while (0)
+  do { *((unaligned_int *)cp) = (unsigned int)(x); cp+=4; } while (0)
 #else
 #define dasmw(x)	do { dasmb(x); dasmb((x)>>8); } while (0)
 #define dasmd(x)	do { dasmw(x); dasmw((x)>>16); } while (0)

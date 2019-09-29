@@ -8,7 +8,7 @@ if(!extension_loaded('zip')) die('skip');
 <?php
 $dirname = __DIR__ . '/';
 include $dirname . 'utils.inc';
-$file = $dirname . '__tmp_oo_rename.zip';
+$file = $dirname . 'oo_getnameindex.zip';
 
 @unlink($file);
 
@@ -44,3 +44,7 @@ string(10) "entry1.txt"
 string(10) "entry2.txt"
 string(15) "dir/entry2d.txt"
 bool(false)
+--CLEAN--
+<?php
+unlink(__DIR__ . '/oo_getnameindex.zip');
+?>

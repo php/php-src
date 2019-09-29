@@ -15,7 +15,7 @@
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
    |          Dmitry Stogov <dmitry@php.net>                              |
-   |          Xinchen Hui <xinchen.h@zend.com>                            |
+   |          Xinchen Hui <laruence@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -106,61 +106,76 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * It shouldn't be used directly. Only through ZEND_TYPE_* macros.
  *
  * ZEND_TYPE_IS_SET()     - checks if type-hint exists
- * ZEND_TYPE_IS_CODE()    - checks if type-hint refer to standard type
+ * ZEND_TYPE_IS_MASK()    - checks if type-hint refer to standard type
  * ZEND_TYPE_IS_CLASS()   - checks if type-hint refer to some class
  * ZEND_TYPE_IS_CE()      - checks if type-hint refer to some class by zend_class_entry *
  * ZEND_TYPE_IS_NAME()    - checks if type-hint refer to some class by zend_string *
  *
  * ZEND_TYPE_NAME()       - returns referenced class name
  * ZEND_TYPE_CE()         - returns referenced class entry
- * ZEND_TYPE_CODE()       - returns standard type code (e.g. IS_LONG, _IS_BOOL)
+ * ZEND_TYPE_MASK()       - returns MAY_BE_* type mask
  *
  * ZEND_TYPE_ALLOW_NULL() - checks if NULL is allowed
  *
- * ZEND_TYPE_ENCODE() and ZEND_TYPE_ENCODE_CLASS() should be used for
- * construction.
+ * ZEND_TYPE_ENCODE_*() should be used for construction.
  */
 
 typedef uintptr_t zend_type;
 
-#define ZEND_TYPE_IS_SET(t) \
-	((t) > Z_L(0x3))
+#define _ZEND_TYPE_CODE_MAX ((Z_L(1)<<(IS_VOID+1))-1)
+#define _ZEND_TYPE_FLAG_MASK Z_L(0x3)
+#define _ZEND_TYPE_CE_BIT Z_L(0x1)
+/* Must have same value as MAY_BE_NULL */
+#define _ZEND_TYPE_NULLABLE_BIT Z_L(0x2)
 
-#define ZEND_TYPE_IS_CODE(t) \
-	(((t) > Z_L(0x3)) && ((t) <= Z_L(0x3ff)))
+#define ZEND_TYPE_IS_SET(t) \
+	((t) != 0)
+
+#define ZEND_TYPE_IS_MASK(t) \
+	((t) != 0 && (t) <= _ZEND_TYPE_CODE_MAX)
 
 #define ZEND_TYPE_IS_CLASS(t) \
-	((t) > Z_L(0x3ff))
+	((t) > _ZEND_TYPE_CODE_MAX)
 
 #define ZEND_TYPE_IS_CE(t) \
-	(((t) & Z_L(0x2)) != 0)
+	(((t) & _ZEND_TYPE_CE_BIT) != 0)
 
 #define ZEND_TYPE_IS_NAME(t) \
 	(ZEND_TYPE_IS_CLASS(t) && !ZEND_TYPE_IS_CE(t))
 
 #define ZEND_TYPE_NAME(t) \
-	((zend_string*)((t) & ~Z_L(0x3)))
+	((zend_string*)((t) & ~_ZEND_TYPE_FLAG_MASK))
 
 #define ZEND_TYPE_CE(t) \
-	((zend_class_entry*)((t) & ~Z_L(0x3)))
+	((zend_class_entry*)((t) & ~_ZEND_TYPE_FLAG_MASK))
 
-#define ZEND_TYPE_CODE(t) \
-	((t) >> Z_L(2))
+#define ZEND_TYPE_MASK(t) \
+	(t)
+
+#define ZEND_TYPE_CONTAINS_CODE(t, code) \
+	(((t) & (1 << (code))) != 0)
 
 #define ZEND_TYPE_ALLOW_NULL(t) \
-	(((t) & Z_L(0x1)) != 0)
+	(((t) & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
 #define ZEND_TYPE_WITHOUT_NULL(t) \
-	((t) & ~Z_L(0x1))
+	((t) & ~_ZEND_TYPE_NULLABLE_BIT)
 
-#define ZEND_TYPE_ENCODE(code, allow_null) \
-	(((code) << Z_L(2)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+#define ZEND_TYPE_ENCODE_NONE() \
+	(0)
+
+#define ZEND_TYPE_ENCODE_MASK(maybe_code) \
+	(maybe_code)
+
+#define ZEND_TYPE_ENCODE_CODE(code, allow_null) \
+	(((code) == _IS_BOOL ? (MAY_BE_FALSE|MAY_BE_TRUE) : (1 << (code))) \
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CE(ce, allow_null) \
-	(((uintptr_t)(ce)) | ((allow_null) ? Z_L(0x3) : Z_L(0x2)))
+	(((uintptr_t)(ce)) | _ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CLASS(class_name, allow_null) \
-	(((uintptr_t)(class_name)) | ((allow_null) ? Z_L(0x1) : Z_L(0x0)))
+	(((uintptr_t)(class_name)) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : Z_L(0x0)))
 
 #define ZEND_TYPE_ENCODE_CLASS_CONST_0(class_name) \
 	((zend_type) class_name)
@@ -201,7 +216,6 @@ struct _zval_struct {
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
 				union {
-					uint16_t  call_info;    /* call info for EX(This) */
 					uint16_t  extra;        /* not further specified */
 				} u)
 		} v;
@@ -411,7 +425,7 @@ struct _zend_ast_ref {
 	/*zend_ast        ast; zend_ast follows the zend_ast_ref structure */
 };
 
-/* regular data types */
+/* Regular data types: Must be in sync with zend_variables.c. */
 #define IS_UNDEF					0
 #define IS_NULL						1
 #define IS_FALSE					2
@@ -423,21 +437,21 @@ struct _zend_ast_ref {
 #define IS_OBJECT					8
 #define IS_RESOURCE					9
 #define IS_REFERENCE				10
+#define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* constant expressions */
-#define IS_CONSTANT_AST				11
+/* Fake types used only for type hinting. IS_VOID should be the last. */
+#define IS_CALLABLE					12
+#define IS_ITERABLE					13
+#define IS_VOID						14
 
 /* internal types */
-#define IS_INDIRECT             	13
-#define IS_PTR						14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	15
+#define IS_PTR						16
+#define _IS_ERROR					17
 
-/* fake types used only for type hinting (Z_TYPE(zv) can not use them) */
-#define _IS_BOOL					16
-#define IS_CALLABLE					17
-#define IS_ITERABLE					18
-#define IS_VOID						19
-#define _IS_NUMBER					20
+/* used for casts */
+#define _IS_BOOL					18
+#define _IS_NUMBER					19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -556,9 +570,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
+#define IS_TYPE_COLLECTABLE			(1<<1)
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
+/* IS_TYPE_COLLECTABLE may be used only with IS_TYPE_REFCOUNTED */
 # define Z_TYPE_INFO_REFCOUNTED(t)	(((t) & Z_TYPE_FLAGS_MASK) != 0)
 #else
 # define Z_TYPE_INFO_REFCOUNTED(t)	(((t) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)
@@ -568,8 +584,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_INTERNED_STRING_EX		IS_STRING
 
 #define IS_STRING_EX				(IS_STRING         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
-#define IS_ARRAY_EX					(IS_ARRAY          | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
-#define IS_OBJECT_EX				(IS_OBJECT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+#define IS_ARRAY_EX					(IS_ARRAY          | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
+#define IS_OBJECT_EX				(IS_OBJECT         | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT) | (IS_TYPE_COLLECTABLE << Z_TYPE_FLAGS_SHIFT))
 #define IS_RESOURCE_EX				(IS_RESOURCE       | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
@@ -625,11 +641,15 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
+/* IS_TYPE_COLLECTABLE may be used only with IS_TYPE_REFCOUNTED */
 #define Z_REFCOUNTED(zval)			(Z_TYPE_FLAGS(zval) != 0)
 #else
 #define Z_REFCOUNTED(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED) != 0)
 #endif
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
+
+#define Z_COLLECTABLE(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_COLLECTABLE) != 0)
+#define Z_COLLECTABLE_P(zval_p)		Z_COLLECTABLE(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
 #define Z_COPYABLE(zval)			(Z_TYPE(zval) == IS_ARRAY)
@@ -771,17 +791,17 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 			(b) ? IS_TRUE : IS_FALSE;	\
 	} while (0)
 
-#define ZVAL_LONG(z, l) {				\
+#define ZVAL_LONG(z, l) do {			\
 		zval *__z = (z);				\
 		Z_LVAL_P(__z) = l;				\
 		Z_TYPE_INFO_P(__z) = IS_LONG;	\
-	}
+	} while (0)
 
-#define ZVAL_DOUBLE(z, d) {				\
+#define ZVAL_DOUBLE(z, d) do {			\
 		zval *__z = (z);				\
 		Z_DVAL_P(__z) = d;				\
 		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
-	}
+	} while (0)
 
 #define ZVAL_STR(z, s) do {						\
 		zval *__z = (z);						\
@@ -1027,6 +1047,7 @@ static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 }
 
 static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
+	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
 	return --(p->refcount);
 }

@@ -31,9 +31,6 @@
 */
 
 
-static const char rcsid[] = "#(@) $Id$";
-
-
 /****h* ABOUT/xmlrpc
  * NAME
  *   XMLRPC_VALUE
@@ -2245,7 +2242,7 @@ XMLRPC_VALUE_TYPE XMLRPC_GetValueType(XMLRPC_VALUE value) {
  * SOURCE
  */
 XMLRPC_VECTOR_TYPE XMLRPC_GetVectorType(XMLRPC_VALUE value) {
-   return(value && value->v) ? value->v->type : xmlrpc_none;
+   return(value && value->v) ? value->v->type : xmlrpc_vector_none;
 }
 
 /*******/
@@ -2289,7 +2286,7 @@ XMLRPC_VALUE_TYPE_EASY XMLRPC_GetValueTypeEasy (XMLRPC_VALUE value) {
 			return(XMLRPC_VALUE_TYPE_EASY) value->type;
 		}
 	}
-	return xmlrpc_none;
+	return xmlrpc_type_none;
 }
 
 /*******/

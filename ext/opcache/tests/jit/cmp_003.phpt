@@ -7,7 +7,7 @@ opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 --SKIPIF--
-<?php require_once('../skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 function t() {
@@ -113,6 +113,19 @@ var_dump($i < $b || f());
 var_dump($i > $b || f());
 var_dump($i <= $b || f());
 var_dump($i >= $b || f());
+$a=NAN;
+var_dump($a == $b);
+var_dump($a != $b);
+var_dump($a < $b);
+var_dump($a > $b);
+var_dump($a <= $b);
+var_dump($a >= $b);
+var_dump($a == $b ? 1 : 0);
+var_dump($a != $b ? 1 : 0);
+var_dump($a < $b ? 1 : 0);
+var_dump($a > $b ? 1 : 0);
+var_dump($a <= $b ? 1 : 0);
+var_dump($a >= $b ? 1 : 0);
 ?>
 --EXPECT--
 bool(false)
@@ -167,3 +180,15 @@ bool(true)
 !bool(false)
 !bool(false)
 !bool(false)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+int(0)
+int(1)
+int(0)
+int(0)
+int(0)
+int(0)

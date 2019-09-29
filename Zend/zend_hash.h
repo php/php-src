@@ -40,6 +40,9 @@
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 #define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
+/* Only the low byte are real flags */
+#define HASH_FLAG_MASK 0xff
+
 #define HT_FLAGS(ht) (ht)->u.flags
 
 #define HT_INVALIDATE(ht) do { \
@@ -274,7 +277,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_
 #define zend_hash_next_free_element(ht) \
 	(ht)->nNextFreeElement
 
-ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
+ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 # define zend_new_array(size) \
@@ -294,6 +297,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void);
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t size);
+ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2);
 ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
@@ -1073,12 +1077,37 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
 		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
 
-#define ZEND_HASH_FILL_ADD(_val) do { \
-		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
+#define ZEND_HASH_FILL_SET(_val) \
+		ZVAL_COPY_VALUE(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_NULL() \
+		ZVAL_NULL(&__fill_bkt->val)
+
+#define ZEND_HASH_FILL_SET_LONG(_val) \
+		ZVAL_LONG(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_DOUBLE(_val) \
+		ZVAL_DOUBLE(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_STR(_val) \
+		ZVAL_STR(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_STR_COPY(_val) \
+		ZVAL_STR_COPY(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_SET_INTERNED_STR(_val) \
+		ZVAL_INTERNED_STR(&__fill_bkt->val, _val)
+
+#define ZEND_HASH_FILL_NEXT() do {\
 		__fill_bkt->h = (__fill_idx); \
 		__fill_bkt->key = NULL; \
 		__fill_bkt++; \
 		__fill_idx++; \
+	} while (0)
+
+#define ZEND_HASH_FILL_ADD(_val) do { \
+		ZEND_HASH_FILL_SET(_val); \
+		ZEND_HASH_FILL_NEXT(); \
 	} while (0)
 
 #define ZEND_HASH_FILL_END() \

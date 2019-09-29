@@ -122,7 +122,7 @@ if (check_box($i,$i,$i)) {
 }
 
 
-$im = imagecreatefromjpeg($cwd . '/conv_test.jpeg');
+$im = imagecreatefromjpeg($cwd . '/conv_test.jpg');
 imagefilledrectangle($im, 5,5, 10,10, 0xffffff);
 imagegif($im, $cwd . '/test_gif.gif');
 imagegif($im, $cwd . '/test_gif_2.gif');

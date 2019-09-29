@@ -1,5 +1,5 @@
 --TEST--
-bug67436: E_STRICT instead of custom error handler
+bug67436: E_WARNING instead of custom error handler
 --FILE--
 <?php
 
@@ -14,6 +14,6 @@ a::staticTest();
 $b = new b();
 $b->test();
 --EXPECTF--
-Warning: Declaration of b::test() should be compatible with a::test($arg = c::TESTCONSTANT) in %s%ebug67436%eb.inc on line %d
+Warning: The magic method __invoke() must have public visibility and cannot be static in %s on line %d
 b::test()
 a::test(c::TESTCONSTANT)

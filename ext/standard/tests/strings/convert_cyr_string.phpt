@@ -16,19 +16,35 @@ var_dump(convert_cyr_string("", "d", "i"));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
+
 Warning: convert_cyr_string(): Unknown source charset:  in %s on line %d
 
 Warning: convert_cyr_string(): Unknown destination charset:  in %s on line %d
 string(0) ""
 
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
+
 Warning: convert_cyr_string(): Unknown source charset: q in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 
 Warning: convert_cyr_string(): Unknown destination charset: q in %s on line %d
 string(6) "[[[[[["
+
+Deprecated: Function convert_cyr_string() is deprecated in %s on line %d
 string(0) ""
 Done

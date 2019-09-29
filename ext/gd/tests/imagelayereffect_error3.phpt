@@ -11,7 +11,11 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 --FILE--
 <?php
 $resource = tmpfile();
-$layer = imagelayereffect($resource, IMG_EFFECT_REPLACE);
+try {
+    $layer = imagelayereffect($resource, IMG_EFFECT_REPLACE);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: imagelayereffect(): supplied resource is not a valid Image resource in %s on line %d
+--EXPECT--
+imagelayereffect(): supplied resource is not a valid Image resource

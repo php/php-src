@@ -86,12 +86,16 @@ $values =  array (
 echo "\n--- Testing join() by supplying different values for 'pieces' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
-  echo "-- Iteration $counter --\n";
-  $pieces = $values [$index];
+    echo "-- Iteration $counter --\n";
+    $pieces = $values [$index];
 
-  var_dump( join($glue, $pieces) );
+    try {
+        var_dump( join($glue, $pieces) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
-  $counter ++;
+    $counter ++;
 }
 
 // close the resources used
@@ -99,100 +103,54 @@ fclose($fp);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing join() : usage variations ***
 
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 2 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 3 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 4 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 5 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 6 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 7 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 8 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 9 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 10 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 11 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 12 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 13 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 14 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 15 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 16 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 17 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 18 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 19 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 20 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 21 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 22 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 -- Iteration 23 --
-
-Warning: join(): Invalid arguments passed in %s on line %d
-NULL
+Invalid arguments passed
 Done

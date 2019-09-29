@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,6 +26,8 @@
 
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+
+#include "hash_arginfo.h"
 
 HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
@@ -149,12 +149,16 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		size_t n;
+		ssize_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
+		if (n < 0) {
+			efree(context);
+			RETURN_FALSE;
+		}
 	} else {
 		ops->hash_update(context, (unsigned char *) data, data_len);
 	}
@@ -248,18 +252,18 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	else if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", algo);
+		return;
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid path");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Invalid path");
+			return;
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
@@ -277,13 +281,20 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		size_t n;
+		ssize_t n;
 		ops->hash_init(context);
 		ops->hash_update(context, K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
+		if (n < 0) {
+			efree(context);
+			efree(K);
+			zend_string_release(digest);
+			RETURN_FALSE;
+		}
+
 		ops->hash_final((unsigned char *) ZSTR_VAL(digest), context);
 	} else {
 		php_hash_hmac_round((unsigned char *) ZSTR_VAL(digest), ops, context, K, (unsigned char *) data, data_len);
@@ -347,19 +358,19 @@ PHP_FUNCTION(hash_init)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
-			php_error_docref(NULL, E_WARNING, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			RETURN_FALSE;
+			zend_throw_error(NULL, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+			return;
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "HMAC requested without a key");
+			return;
 		}
 	}
 
@@ -403,8 +414,8 @@ PHP_FUNCTION(hash_init)
 
 #define PHP_HASHCONTEXT_VERIFY(func, hash) { \
 	if (!hash->context) { \
-		php_error(E_WARNING, "%s(): supplied resource is not a valid Hash Context resource", func); \
-		RETURN_NULL(); \
+		zend_throw_error(NULL, "%s(): supplied resource is not a valid Hash Context resource", func); \
+		return; \
 	} \
 }
 
@@ -447,14 +458,14 @@ PHP_FUNCTION(hash_update_stream)
 
 	while (length) {
 		char buf[1024];
-		zend_long n, toread = 1024;
+		zend_long toread = 1024;
+		ssize_t n;
 
 		if (length > 0 && toread > length) {
 			toread = length;
 		}
 
 		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
-			/* Nada mas */
 			RETURN_LONG(didread);
 		}
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
@@ -476,7 +487,7 @@ PHP_FUNCTION(hash_update_file)
 	php_stream *stream;
 	zend_string *filename;
 	char buf[1024];
-	size_t n;
+	ssize_t n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
 		return;
@@ -497,7 +508,7 @@ PHP_FUNCTION(hash_update_file)
 	}
 	php_stream_close(stream);
 
-	RETURN_TRUE;
+	RETURN_BOOL(n >= 0);
 }
 /* }}} */
 
@@ -574,7 +585,9 @@ PHP_FUNCTION(hash_copy)
 
 	if (php_hashcontext_from_object(Z_OBJ_P(return_value))->context == NULL) {
 		zval_ptr_dtor(return_value);
-		RETURN_FALSE;
+
+		zend_throw_error(NULL, "Cannot copy hash");
+		return;
 	}
 }
 /* }}} */
@@ -584,6 +597,10 @@ Return a list of registered hashing algorithms */
 PHP_FUNCTION(hash_algos)
 {
 	zend_string *str;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
@@ -626,28 +643,28 @@ PHP_FUNCTION(hash_hkdf)
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+		return;
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		php_error_docref(NULL, E_WARNING, "Input keying material cannot be empty");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Input keying material cannot be empty");
+		return;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		return;
 	} else if (length == 0) {
 		length = ops->digest_size;
 	} else if (length > (zend_long) (ops->digest_size * 255)) {
-		php_error_docref(NULL, E_WARNING, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+		return;
 	}
 
 	context = emalloc(ops->context_size);
@@ -726,27 +743,27 @@ PHP_FUNCTION(hash_pbkdf2)
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Unknown hashing algorithm: %s", algo);
+		return;
 	}
 	else if (!ops->is_crypto) {
-		php_error_docref(NULL, E_WARNING, "Non-cryptographic hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", algo);
+		return;
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL, E_WARNING, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
+		return;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		return;
 	}
 
 	if (salt_len > INT_MAX - 4) {
-		php_error_docref(NULL, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
+		return;
 	}
 
 	context = emalloc(ops->context_size);
@@ -851,13 +868,13 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
-		RETURN_FALSE;
+		zend_type_error("Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		return;
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
-		RETURN_FALSE;
+		zend_type_error("Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		return;
 	}
 
 	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
@@ -1291,143 +1308,6 @@ PHP_MINFO_FUNCTION(hash)
 }
 /* }}} */
 
-/* {{{ arginfo */
-#ifdef PHP_HASH_MD5_NOT_IN_CORE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef PHP_HASH_SHA1_NOT_IN_CORE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash, 0, 0, 2)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac, 0, 0, 3)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hmac_file, 0, 0, 3)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_init, 0, 0, 1)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_update, 0)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_stream, 0, 0, 2)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, handle)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_update_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, stream_context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_final, 0, 0, 1)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_copy, 0)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_pbkdf2, 0, 0, 4)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, iterations)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_hash_equals, 0)
-	ZEND_ARG_INFO(0, known_string)
-	ZEND_ARG_INFO(0, user_string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_hkdf, 0, 0, 2)
-	ZEND_ARG_INFO(0, ikm)
-	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, salt)
-ZEND_END_ARG_INFO()
-
-/* BC Land */
-#ifdef PHP_MHASH_BC
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_hash_name, 0)
-	ZEND_ARG_INFO(0, hash)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_keygen_s2k, 0)
-	ZEND_ARG_INFO(0, hash)
-	ZEND_ARG_INFO(0, input_password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, bytes)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mhash_count, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mhash, 0, 0, 2)
-	ZEND_ARG_INFO(0, hash)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-#endif
-
-/* }}} */
-
 /* {{{ hash_functions[]
  */
 static const zend_function_entry hash_functions[] = {
@@ -1449,17 +1329,6 @@ static const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 	PHP_FE(hash_equals,								arginfo_hash_equals)
 	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)
-
-	/* BC Land */
-#ifdef PHP_HASH_MD5_NOT_IN_CORE
-	PHP_NAMED_FE(md5, php_if_md5,					arginfo_hash_md5)
-	PHP_NAMED_FE(md5_file, php_if_md5_file,			arginfo_hash_md5_file)
-#endif /* PHP_HASH_MD5_NOT_IN_CORE */
-
-#ifdef PHP_HASH_SHA1_NOT_IN_CORE
-	PHP_NAMED_FE(sha1, php_if_sha1,					arginfo_hash_sha1)
-	PHP_NAMED_FE(sha1_file, php_if_sha1_file,		arginfo_hash_sha1_file)
-#endif /* PHP_HASH_SHA1_NOT_IN_CORE */
 
 #ifdef PHP_MHASH_BC
 	PHP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)

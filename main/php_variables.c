@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -370,9 +368,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 
 		while (!php_stream_eof(s)) {
 			char buf[SAPI_POST_HANDLER_BUFSIZ] = {0};
-			size_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
+			ssize_t len = php_stream_read(s, buf, SAPI_POST_HANDLER_BUFSIZ);
 
-			if (len && len != (size_t) -1) {
+			if (len > 0) {
 				smart_str_appendl(&post_data.str, buf, len);
 
 				if (SUCCESS != add_post_vars(arr, &post_data, 0)) {

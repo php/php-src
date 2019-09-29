@@ -8,14 +8,12 @@ require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
 /*
-Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.
+Let's not deal with cross-version issues in the EXPECTF section.
 Most of the things which we test are covered by mysqli_class_*_interface.phpt.
 Those tests go into the details and are aimed to be a development tool, no more.
 */
 if (!$IS_MYSQLND)
-	die("skip Test has been written for the latest version of mysqlnd only");
-if ($MYSQLND_VERSION < 50004)
-	die("skip Test requires mysqlnd Revision 5.0.4 or newer");
+	die("skip Test has been written for mysqlnd only");
 ?>
 --FILE--
 <?php
@@ -103,7 +101,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'offset' of method 'data_seek'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -126,7 +124,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'result_type' of method 'fetch_all'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -149,7 +147,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'result_type' of method 'fetch_array'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -204,7 +202,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'field_nr' of method 'fetch_field_direct'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
@@ -243,7 +241,7 @@ Number of Required Parameters: 0
 
 Inspecting parameter 'class_name' of method 'fetch_object'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: yes
 isDefaultValueAvailable: no
@@ -289,7 +287,7 @@ Number of Required Parameters: 1
 
 Inspecting parameter 'field_nr' of method 'field_seek'
 isArray: no
-allowsNull: no
+allowsNull: yes
 isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no

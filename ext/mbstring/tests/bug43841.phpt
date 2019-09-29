@@ -46,7 +46,7 @@ Warning: mb_strrpos(): Offset is greater than the length of haystack string in %
 bool(false)
 strrpos:
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Offset is -24 --
@@ -61,7 +61,7 @@ Warning: mb_strrpos(): Offset is greater than the length of haystack string in %
 bool(false)
 strrpos:
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Offset is -13 --

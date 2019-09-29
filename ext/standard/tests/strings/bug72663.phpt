@@ -15,8 +15,7 @@ class obj implements Serializable {
 $inner = 'a:1:{i:0;O:9:"Exception":2:{s:7:"'."\0".'*'."\0".'file";R:4;}';
 $exploit = 'a:2:{i:0;C:3:"obj":'.strlen($inner).':{'.$inner.'}i:1;R:4;}';
 
-$data = unserialize($exploit);
-echo $data[1];
+var_dump(unserialize($exploit));
 ?>
 DONE
 --EXPECTF--
@@ -25,4 +24,5 @@ Notice: unserialize(): Unexpected end of serialized data in %sbug72663.php on li
 Notice: unserialize(): Error at offset 46 of 47 bytes in %sbug72663.php on line %d
 
 Notice: unserialize(): Error at offset 79 of 80 bytes in %sbug72663.php on line %d
+bool(false)
 DONE

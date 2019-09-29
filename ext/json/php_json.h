@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,8 +18,10 @@
 #ifndef PHP_JSON_H
 #define PHP_JSON_H
 
-#define PHP_JSON_VERSION "1.7.0"
+#include "php_version.h"
 #include "zend_smart_str_public.h"
+
+#define PHP_JSON_VERSION PHP_VERSION
 
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry

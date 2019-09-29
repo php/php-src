@@ -427,6 +427,7 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 			}
 		}
 		break;
+	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
 	default:
 		break;
 	}
