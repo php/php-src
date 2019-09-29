@@ -43,3 +43,7 @@ int(0)
 bool(false)
 int(1)
 int(2)
+--CLEAN--
+<?php
+unlink(__DIR__ . '/oo_namelocate.zip');
+?>
