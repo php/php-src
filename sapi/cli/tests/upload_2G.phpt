@@ -8,6 +8,10 @@ if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");
 }
 
+if (!file_exists('/proc/meminfo')) {
+	die('skip Cannot check free RAM from /proc/meminfo on this platform');
+}
+
 $free_ram = 0;
 if ($f = fopen("/proc/meminfo","r")) {
 	while (!feof($f)) {
