@@ -50,7 +50,7 @@
 #define const_cast(s) ((char*)(s))
 
 #ifdef PHP_WIN32
-typedef void (__stdcall *info_func_t)(char*);
+typedef void(__stdcall* info_func_t)(char*);
 #else
 typedef void (*info_func_t)(char*);
 #endif
@@ -77,17 +77,19 @@ typedef struct {
 	isc_tr_handle tr;
 
 	/* the last error that didn't come from the API */
-	char const *last_app_error;
+	char const* last_app_error;
 
 	/* date and time format strings, can be set by the set_attribute method */
-	char *date_format;
-	char *time_format;
-	char *timestamp_format;
+	char* date_format;
+	char* time_format;
+	char* timestamp_format;
+
+	unsigned sql_dialect;
 
 	/* prepend table names on column names in fetch */
-	unsigned fetch_table_names:1;
+	unsigned fetch_table_names : 1;
 
-	unsigned _reserved:31;
+	unsigned _reserved : 31;
 
 } pdo_firebird_db_handle;
 
@@ -95,7 +97,7 @@ typedef struct {
 typedef struct {
 
 	/* the link that owns this statement */
-	pdo_firebird_db_handle *H;
+	pdo_firebird_db_handle* H;
 
 	/* the statement handle */
 	isc_stmt_handle stmt;
@@ -104,24 +106,24 @@ typedef struct {
 	char name[32];
 
 	/* the type of statement that was issued */
-	char statement_type:8;
+	char statement_type : 8;
 
 	/* whether EOF was reached for this statement */
-	unsigned exhausted:1;
+	unsigned exhausted : 1;
 
 	/* successful isc_dsql_execute opens a cursor */
-	unsigned cursor_open:1;
+	unsigned cursor_open : 1;
 
-	unsigned _reserved:22;
+	unsigned _reserved : 22;
 
 	/* the named params that were converted to ?'s by the driver */
-	HashTable *named_params;
+	HashTable* named_params;
 
 	/* allocated space to convert fields values to other types */
-	char **fetch_buf;
+	char** fetch_buf;
 
 	/* the input SQLDA */
-	XSQLDA *in_sqlda;
+	XSQLDA* in_sqlda;
 
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
@@ -132,7 +134,7 @@ extern const pdo_driver_t pdo_firebird_driver;
 
 extern const struct pdo_stmt_methods firebird_stmt_methods;
 
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line);
+void _firebird_error(pdo_dbh_t* dbh, pdo_stmt_t* stmt, char const* file, zend_long line);
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
