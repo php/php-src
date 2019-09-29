@@ -26,7 +26,6 @@ with t(b, s) as (
 select trim(s) as s from t where b is not distinct from :p
 SQL;
 
-<<<<<<< HEAD
 require 'testdb.inc';
 $db = new PDO('firebird:dbname='.$test_base, $user, $password) or die;
 try { 
@@ -118,94 +117,6 @@ try {
   $query->execute();
   var_dump($query->fetchColumn(0));   
   
-=======
-try {
-  $query = $dbh->prepare($sql);
-
-  // PDO::PARAM_BOOL
-  $query->bindValue('p', 0, PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 1, PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', false, PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', true, PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'false', PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'True', PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', null, PDO::PARAM_BOOL);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  // PDO::PARAM_STR
-  $query->bindValue('p', false, PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', true, PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 0, PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 1, PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'false', PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'true', PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', null, PDO::PARAM_STR);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  // PDO::PARAM_INT
-  $query->bindValue('p', false, PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', true, PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 0, PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 1, PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'false', PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
-  $query->bindValue('p', 'true', PDO::PARAM_INT);
-  $query->execute();
-  var_dump($query->fetchColumn(0));
-
->>>>>>> upstream/master
   echo "OK\n";
 }
 catch(Exception $e) {
@@ -234,8 +145,4 @@ string(5) "false"
 string(4) "true"
 string(5) "false"
 string(4) "true"
-<<<<<<< HEAD
 OK
-=======
-OK
->>>>>>> upstream/master

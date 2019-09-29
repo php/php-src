@@ -613,7 +613,6 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			/* keep native BOOLEAN type */
 			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
 				switch (Z_TYPE_P(parameter)) {
-<<<<<<< HEAD
 				   case IS_LONG:
 				   case IS_DOUBLE:
 				   case IS_TRUE:
@@ -658,7 +657,6 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					   strcpy(stmt->error_code, "HY105");
 					   S->H->last_app_error = "Binding arrays/objects is not supported";
 					   return 0;
-=======
 					case IS_LONG:
 					case IS_DOUBLE:
 					case IS_TRUE:
@@ -703,7 +701,6 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						strcpy(stmt->error_code, "HY105");
 						S->H->last_app_error = "Binding arrays/objects is not supported";
 						return 0;
->>>>>>> upstream/master
 				}
 				break;
 			}
@@ -745,11 +742,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						/* keep the allow-NULL flag */
 						var->sqltype = SQL_TEXT | (var->sqltype & 1);
 						var->sqldata = Z_STRVAL_P(parameter);
-<<<<<<< HEAD
 						var->sqllen	= Z_STRLEN_P(parameter);
-=======
-						var->sqllen = Z_STRLEN_P(parameter);
->>>>>>> upstream/master
 						break;
 					}
 				case IS_NULL:
