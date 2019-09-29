@@ -1431,6 +1431,10 @@ static ZIPARCHIVE_METHOD(close)
 	ze_zip_object *ze_obj;
 	int err;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	ZIP_FROM_OBJECT(intern, self);
 
 	ze_obj = Z_ZIP_P(self);
@@ -1465,6 +1469,10 @@ static ZIPARCHIVE_METHOD(count)
 	zval *self = ZEND_THIS;
 	zip_int64_t num;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	ZIP_FROM_OBJECT(intern, self);
 
 	num = zip_get_num_entries(intern, 0);
@@ -1484,6 +1492,10 @@ static ZIPARCHIVE_METHOD(getStatusString)
 #else
 	zip_error_t *err;
 #endif
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
@@ -2463,6 +2475,10 @@ static ZIPARCHIVE_METHOD(unchangeAll)
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zip_unchange_all(intern) != 0) {
@@ -2479,6 +2495,10 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
