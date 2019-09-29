@@ -130,119 +130,6 @@ PHP_FUNCTION(openssl_pkey_derive);
 PHP_FUNCTION(openssl_random_pseudo_bytes);
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 0, 4)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, priv_key)
-	ZEND_ARG_INFO(0, pass)
-	ZEND_ARG_INFO(0, args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export, 0, 0, 4)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(1, out)
-	ZEND_ARG_INFO(0, priv_key)
-	ZEND_ARG_INFO(0, pass)
-	ZEND_ARG_INFO(0, args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs12_read, 0)
-	ZEND_ARG_INFO(0, PKCS12)
-	ZEND_ARG_INFO(1, certs) /* array */
-	ZEND_ARG_INFO(0, pass)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_export_to_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO(0, outfilename)
-	ZEND_ARG_INFO(0, notext)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO(1, out)
-	ZEND_ARG_INFO(0, notext)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_sign, 0, 0, 4)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(0, priv_key)
-	ZEND_ARG_INFO(0, days)
-	ZEND_ARG_INFO(0, config_args) /* array */
-	ZEND_ARG_INFO(0, serial)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
-	ZEND_ARG_INFO(0, dn) /* array */
-	ZEND_ARG_INFO(1, privkey)
-	ZEND_ARG_INFO(0, configargs)
-	ZEND_ARG_INFO(0, extraattribs)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_subject, 0, 0, 1)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO(0, use_shortnames)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_public_key, 0, 0, 1)
-	ZEND_ARG_INFO(0, csr)
-	ZEND_ARG_INFO(0, use_shortnames)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_new, 0, 0, 0)
-	ZEND_ARG_INFO(0, configargs) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export_to_file, 0, 0, 2)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, outfilename)
-	ZEND_ARG_INFO(0, passphrase)
-	ZEND_ARG_INFO(0, config_args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(1, out)
-	ZEND_ARG_INFO(0, passphrase)
-	ZEND_ARG_INFO(0, config_args) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_public, 0)
-	ZEND_ARG_INFO(0, cert)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_free, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_private, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, passphrase)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, key_length)
-	ZEND_ARG_INFO(0, iterations)
-	ZEND_ARG_INFO(0, digest_algorithm)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(0, signerscerts)
-	ZEND_ARG_INFO(0, cainfo) /* array */
-	ZEND_ARG_INFO(0, extracerts)
-	ZEND_ARG_INFO(0, content)
-	ZEND_ARG_INFO(0, pk7)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_encrypt, 0, 0, 4)
 	ZEND_ARG_INFO(0, infile)
 	ZEND_ARG_INFO(0, outfile)
@@ -3642,7 +3529,7 @@ PHP_FUNCTION(openssl_csr_new)
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_csr_get_subject(mixed csr)
+/* {{{ proto mixed openssl_csr_get_subject(mixed $csr [, bool $use_shortnames = TRUE])
    Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_subject)
 {
@@ -3673,7 +3560,7 @@ PHP_FUNCTION(openssl_csr_get_subject)
 }
 /* }}} */
 
-/* {{{ proto mixed openssl_csr_get_public_key(mixed csr)
+/* {{{ proto mixed openssl_csr_get_public_key(mixed $csr [, bool $use_shortnames = TRUE])
 	Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_public_key)
 {
@@ -4334,7 +4221,7 @@ static zend_bool php_openssl_pkey_init_dh(DH *dh, zval *data)
 }
 /* }}} */
 
-/* {{{ proto resource openssl_pkey_new([array configargs])
+/* {{{ proto mixed openssl_pkey_new([array configargs])
    Generates a new private key */
 PHP_FUNCTION(openssl_pkey_new)
 {
@@ -4547,7 +4434,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkey_export_to_file(mixed key, string outfilename [, string passphrase, array config_args)
+/* {{{ proto bool openssl_pkey_export_to_file(mixed key, string outfilename [, string passphrase [, array config_args]])
    Gets an exportable representation of a key into a file */
 PHP_FUNCTION(openssl_pkey_export_to_file)
 {
@@ -4720,7 +4607,7 @@ PHP_FUNCTION(openssl_pkey_export)
 }
 /* }}} */
 
-/* {{{ proto int openssl_pkey_get_public(mixed cert)
+/* {{{ proto mixed openssl_pkey_get_public(mixed cert)
    Gets public key from X.509 certificate */
 PHP_FUNCTION(openssl_pkey_get_public)
 {
@@ -4757,7 +4644,7 @@ PHP_FUNCTION(openssl_pkey_free)
 }
 /* }}} */
 
-/* {{{ proto int openssl_pkey_get_private(string key [, string passphrase])
+/* {{{ proto mixed openssl_pkey_get_private(string key [, string passphrase])
    Gets private keys */
 PHP_FUNCTION(openssl_pkey_get_private)
 {
@@ -4783,7 +4670,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 
 /* }}} */
 
-/* {{{ proto resource openssl_pkey_get_details(resource key)
+/* {{{ proto mixed openssl_pkey_get_details(resource key)
 	returns an array with the key details (bits, pkey, type)*/
 PHP_FUNCTION(openssl_pkey_get_details)
 {
@@ -5052,7 +4939,7 @@ PHP_FUNCTION(openssl_pkey_derive)
 /* }}} */
 
 
-/* {{{ proto string openssl_pbkdf2(string password, string salt, int key_length, int iterations [, string digest_method = "sha1"])
+/* {{{ proto mixed openssl_pbkdf2(string password, string salt, int key_length, int iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
 PHP_FUNCTION(openssl_pbkdf2)
 {
