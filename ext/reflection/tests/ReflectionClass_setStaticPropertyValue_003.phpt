@@ -31,7 +31,7 @@ var_dump(Test::$y);
 
 ?>
 --EXPECT--
-Typed property Test::$y must be int, string used
+Cannot assign string to property Test::$y of type int
 int(2)
 int(21)
 Cannot assign string to reference held by property Test::$y of type int

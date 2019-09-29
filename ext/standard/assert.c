@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -316,10 +314,10 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown value " ZEND_LONG_FMT, what);
+		zend_throw_error(NULL, "Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 
-	RETURN_FALSE;
+	return;
 }
 /* }}} */

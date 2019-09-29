@@ -94,7 +94,7 @@ ZEND_API zend_bool zend_rc_debug = 0;
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
 	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED;
+		EG(error_reporting) = E_ALL;
 	} else {
 		EG(error_reporting) = atoi(ZSTR_VAL(new_value));
 	}
@@ -1557,6 +1557,18 @@ ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) /* {{
 	zend_throw_exception(zend_ce_argument_count_error, message, 0);
 	efree(message);
 
+	va_end(va);
+} /* }}} */
+
+ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) /* {{{ */
+{
+	va_list va;
+	char *message = NULL;
+
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	zend_throw_exception(zend_ce_value_error, message, 0);
+	efree(message);
 	va_end(va);
 } /* }}} */
 

@@ -9,6 +9,8 @@ if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--
 <?php
+require __DIR__ . '/func.inc';
+
 $image = imagecreatetruecolor(180, 30);
 
 // Writes the text and apply a gaussian blur on the image
@@ -19,8 +21,10 @@ $gaussian = array(
     array(2.0, 4.0, 2.0)
 );
 
-var_dump(imageconvolution($image, $gaussian, 16, 0));
+trycatch_dump(
+    fn() => imageconvolution($image, $gaussian, 16, 0)
+);
+
 ?>
---EXPECTF--
-Warning: imageconvolution(): You must have 3x3 array in %s on line %d
-bool(false)
+--EXPECT--
+!! [ValueError] Convolution matrix must be a 3x3 array

@@ -735,7 +735,7 @@ ZEND_FUNCTION(get_class)
 	zval *obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o", &obj) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!obj) {
@@ -1125,7 +1125,8 @@ ZEND_FUNCTION(method_exists)
 	zval *klass;
 	zend_string *method_name;
 	zend_string *lcname;
-	zend_class_entry * ce;
+	zend_class_entry *ce;
+	zend_function *func;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(klass)
@@ -1143,28 +1144,29 @@ ZEND_FUNCTION(method_exists)
 	}
 
 	lcname = zend_string_tolower(method_name);
-	if (zend_hash_exists(&ce->function_table, lcname)) {
-		zend_string_release_ex(lcname, 0);
-		RETURN_TRUE;
-	} else if (Z_TYPE_P(klass) == IS_OBJECT) {
+	func = zend_hash_find_ptr(&ce->function_table, lcname);
+	zend_string_release_ex(lcname, 0);
+
+	if (func) {
+		RETURN_BOOL(!(func->common.fn_flags & ZEND_ACC_PRIVATE) || func->common.scope == ce);
+	}
+
+	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		zend_object *obj = Z_OBJ_P(klass);
-		zend_function *func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
+		func = Z_OBJ_HT_P(klass)->get_method(&obj, method_name, NULL);
 		if (func != NULL) {
 			if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				/* Returns true to the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
 					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
 
-				zend_string_release_ex(lcname, 0);
 				zend_string_release_ex(func->common.function_name, 0);
 				zend_free_trampoline(func);
 				return;
 			}
-			zend_string_release_ex(lcname, 0);
 			RETURN_TRUE;
 		}
 	}
-	zend_string_release_ex(lcname, 0);
 	RETURN_FALSE;
 }
 /* }}} */

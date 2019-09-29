@@ -964,7 +964,7 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	if (h == ZEND_LONG_MIN && (flag & HASH_ADD_NEXT)) {
+	if ((flag & HASH_ADD_NEXT) && h == ZEND_LONG_MIN) {
 		h = 0;
 	}
 

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -53,70 +51,10 @@
 #include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
+#include "iconv_arginfo.h"
 
 #define _php_iconv_memequal(a, b, c) \
 	(memcmp(a, b, c) == 0)
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strlen, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_substr, 0, 0, 2)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strpos, 0, 0, 2)
-	ZEND_ARG_INFO(0, haystack)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_strrpos, 0, 0, 2)
-	ZEND_ARG_INFO(0, haystack)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_encode, 0, 0, 2)
-	ZEND_ARG_INFO(0, field_name)
-	ZEND_ARG_INFO(0, field_value)
-	ZEND_ARG_INFO(0, preference) /* ZEND_ARG_ARRAY_INFO(0, preference, 1) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, encoded_string)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_mime_decode_headers, 0, 0, 1)
-	ZEND_ARG_INFO(0, headers)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_iconv, 0)
-	ZEND_ARG_INFO(0, in_charset)
-	ZEND_ARG_INFO(0, out_charset)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_iconv_set_encoding, 0)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, charset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_iconv_get_encoding, 0, 0, 0)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 
 /* {{{ iconv_functions[]
  */
@@ -2064,7 +2002,7 @@ PHP_FUNCTION(iconv_strlen)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|s",
 		&str, &charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2098,7 +2036,7 @@ PHP_FUNCTION(iconv_substr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|ls",
 		&str, &offset, &length,
 		&charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2138,7 +2076,7 @@ PHP_FUNCTION(iconv_strpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ls",
 		&haystk, &ndl,
 		&offset, &charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2192,7 +2130,7 @@ PHP_FUNCTION(iconv_strrpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|s",
 		&haystk, &ndl,
 		&charset, &charset_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {
@@ -2237,7 +2175,7 @@ PHP_FUNCTION(iconv_mime_encode)
 		&field_name, &field_value,
 		&pref) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (pref != NULL) {
@@ -2335,7 +2273,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2375,7 +2313,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		RETURN_FALSE;
+		return;
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {

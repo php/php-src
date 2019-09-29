@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -236,19 +234,18 @@ static void print_extensions(void) /* {{{ */
 
 static inline int sapi_cli_select(php_socket_t fd)
 {
-	fd_set wfd, dfd;
+	fd_set wfd;
 	struct timeval tv;
 	int ret;
 
 	FD_ZERO(&wfd);
-	FD_ZERO(&dfd);
 
 	PHP_SAFE_FD_SET(fd, &wfd);
 
 	tv.tv_sec = (long)FG(default_socket_timeout);
 	tv.tv_usec = 0;
 
-	ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
+	ret = php_select(fd+1, NULL, &wfd, NULL, &tv);
 
 	return ret != -1;
 }
@@ -1085,7 +1082,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;
 					} else {
-						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, &ref);
+						zend_print_zval(&ref, 0);
+						zend_write("\n", 1);
 					}
 					zval_ptr_dtor(&ref);
 					zval_ptr_dtor(&arg);

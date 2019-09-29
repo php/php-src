@@ -16,7 +16,7 @@ build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 build-binaries: $(PHP_BINARIES)
 
 libphp$(PHP_MAJOR_VERSION).la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
+	$(LIBTOOL) --mode=link --tag=disable-static $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -rpath $(phptempdir) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
 	-@$(LIBTOOL) --silent --mode=install cp $@ $(phptempdir)/$@ >/dev/null 2>&1
 
 libs/libphp$(PHP_MAJOR_VERSION).bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
@@ -143,7 +143,7 @@ prof-use:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
 
 %_arginfo.h: %.stub.php
-	if type php >/dev/null 2>/dev/null; then php scripts/dev/gen_stub.php $<; fi
+	if type php >/dev/null 2>/dev/null; then php $(top_srcdir)/scripts/dev/gen_stub.php $<; fi
 
 # As we don't track includes, this is just a heuristic
 %.c: %_arginfo.h

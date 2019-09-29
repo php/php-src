@@ -1,0 +1,84 @@
+parameters:
+  configurationName: ''
+  configurationParameters: ''
+  timeoutInMinutes: 60
+
+# The purpose of the job is to test open-source community projects against an aggressive
+# debug build, that enables assertions, as well as the address and UB sanitizers. However,
+# we are only interested in finding assertion failures, segfaults and sanitizer violations,
+# and don't care about the actual test results, as there will commonly be failures for
+# pre-release versions of PHP.
+#
+# Because exit() in PHP results in an unclean shutdown, test runs are patching phpunit to
+# avoid the exit, which allows us to also check for memory leaks. Otherwise we use
+# USE_TRACKED_ALLOC=1 to avoid reporting of leaks that will be handled by ZMM.
+jobs:
+  - job: ${{ parameters.configurationName }}
+    timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+    pool:
+      vmImage: 'ubuntu-latest'
+    variables:
+      ubsan_options: 'print_stacktrace=1'
+    steps:
+    - template: apt.yml
+    - script: |
+        # Compile a newer version of curl, otherwise there will be an asan warning
+        # when running symfony tests.
+        wget https://curl.haxx.se/download/curl-7.65.3.tar.gz
+        tar xzf curl-7.65.3.tar.gz
+        cd curl-7.65.3/
+        ./configure
+        make -j2
+        sudo make install
+      displayName: 'Build Curl'
+    - template: configure.yml
+      parameters:
+        configurationParameters: ${{ parameters.configurationParameters }}
+    - script: make -j$(/usr/bin/nproc) >/dev/null
+      displayName: 'Make Build'
+    - script: |
+        sudo make install
+        sudo mkdir     /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
+        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        # Run with opcache to also catch optimizer bugs.
+        echo zend_extension=opcache.so > /etc/php.d/opcache.ini
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+        echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+      displayName: 'Install Build'
+    - script: |
+        git clone https://github.com/laravel/framework.git --branch=master --depth=1
+        cd framework
+        php7.3 /usr/bin/composer install --no-progress
+        export USE_ZEND_ALLOC=0
+        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
+        # Avoid test using exit(), which thus leaks.
+        # We can use USE_TRACKED_ALLOC=1 if more of these show up.
+        sed -i "s/function_exists('pcntl_fork')/false/" tests/Filesystem/FilesystemTest.php
+        php vendor/bin/phpunit
+      displayName: 'Test Laravel'
+    - script: |
+        git clone https://github.com/symfony/symfony.git --branch=master --depth=1
+        cd symfony
+        php7.3 /usr/bin/composer install --no-progress
+        php7.3 ./phpunit install
+        export USE_ZEND_ALLOC=0
+        export USE_TRACKED_ALLOC=1
+        export ASAN_OPTIONS=exitcode=139
+        php ./phpunit --exclude-group tty,benchmark,intl-data,transient
+        if [ $? -gt 128 ]; then
+          exit 1
+        fi
+      displayName: 'Test Symfony'
+      condition: or(succeeded(), failed())
+    - script: |
+        git clone https://github.com/amphp/amp.git --branch=master --depth=1
+        cd amp
+        php7.3 /usr/bin/composer install --no-progress --ignore-platform-reqs
+        export USE_ZEND_ALLOC=0
+        sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
+        php vendor/bin/phpunit
+      displayName: 'Test Amphp'
+      condition: or(succeeded(), failed())

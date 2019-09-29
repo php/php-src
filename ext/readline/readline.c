@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -386,6 +384,7 @@ PHP_FUNCTION(readline_list_history)
 				}
 			}
 		}
+		free(hs);
     }
 
 #else /* readline */

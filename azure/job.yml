@@ -11,62 +11,9 @@ jobs:
       vmImage: 'ubuntu-latest'
     steps:
     - template: apt.yml
-    - script: |
-        ./buildconf --force
-        ./configure ${{ parameters.configurationParameters }} \
-            --enable-option-checking=fatal \
-            --prefix=/usr \
-            --enable-phpdbg \
-            --enable-fpm \
-            --with-pdo-mysql=mysqlnd \
-            --with-mysqli=mysqlnd \
-            --with-pgsql \
-            --with-pdo-pgsql \
-            --with-pdo-sqlite \
-            --enable-intl \
-            --without-pear \
-            --enable-gd \
-            --with-jpeg \
-            --with-webp \
-            --with-freetype \
-            --with-xpm \
-            --enable-exif \
-            --with-zip \
-            --with-zlib \
-            --with-zlib-dir=/usr \
-            --enable-soap \
-            --enable-xmlreader \
-            --with-xsl \
-            --with-tidy \
-            --with-xmlrpc \
-            --enable-sysvsem \
-            --enable-sysvshm \
-            --enable-shmop \
-            --enable-pcntl \
-            --with-readline \
-            --enable-mbstring \
-            --with-curl \
-            --with-gettext \
-            --enable-sockets \
-            --with-bz2 \
-            --with-openssl \
-            --with-gmp \
-            --enable-bcmath \
-            --enable-calendar \
-            --enable-ftp \
-            --with-pspell=/usr \
-            --with-enchant=/usr \
-            --with-kerberos \
-            --enable-sysvmsg \
-            --with-ffi \
-            --enable-zend-test \
-            --with-ldap \
-            --with-ldap-sasl \
-            --with-password-argon2 \
-            --enable-werror \
-            --with-config-file-path=/etc \
-            --with-config-file-scan-dir=/etc/php.d
-      displayName: 'Configure Build'
+    - template: configure.yml
+      parameters:
+        configurationParameters: ${{ parameters.configurationParameters }}
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - script: |
@@ -75,6 +22,8 @@ jobs:
         sudo chmod 777 /etc/php.d
         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
+        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       displayName: 'Install Build'
     - script: |
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
@@ -91,12 +40,12 @@ jobs:
         runTestsName: 'OpCache'
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so -d opcache.enable_cli=1
+          -d zend_extension=opcache.so
     - template: test.yml
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsName: 'JIT'
         runTestsParameters: >-
           ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so -d opcache.enable_cli=1
+          -d zend_extension=opcache.so
           -d opcache.jit_buffer_size=16M

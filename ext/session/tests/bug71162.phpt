@@ -1,5 +1,7 @@
 --TEST--
 updateTimestamp never called when session data is empty
+--SKIPIF--
+<?php include('skipif.inc'); ?>
 --INI--
 session.use_strict_mode=0
 session.save_handler=files

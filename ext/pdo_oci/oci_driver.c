@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -748,7 +746,7 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 
 	/* username */
 	if (!dbh->username && vars[2].optval) {
-		dbh->username = vars[2].optval;
+		dbh->username = pestrdup(vars[2].optval, dbh->is_persistent);
 	}
 
 	if (dbh->username) {
@@ -763,7 +761,7 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 
 	/* password */
 	if (!dbh->password && vars[3].optval) {
-		dbh->password = vars[3].optval;
+		dbh->password = pestrdup(vars[3].optval, dbh->is_persistent);
 	}
 
 	if (dbh->password) {

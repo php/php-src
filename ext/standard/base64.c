@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -668,39 +666,6 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 #endif /* ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER */
 
 /* }}} */
-
-/* {{{ php_base64_decode_ex */
-/* generate reverse table (do not set index 0 to 64)
-static unsigned short base64_reverse_table[256];
-#define rt base64_reverse_table
-void php_base64_init(void)
-{
-	char *s = emalloc(10240), *sp;
-	char *chp;
-	short idx;
-
-	for(ch = 0; ch < 256; ch++) {
-		chp = strchr(base64_table, ch);
-		if(ch && chp) {
-			idx = chp - base64_table;
-			if (idx >= 64) idx = -1;
-			rt[ch] = idx;
-		} else {
-			rt[ch] = -1;
-		}
-	}
-	sp = s;
-	sprintf(sp, "static const short base64_reverse_table[256] = {\n");
-	for(ch =0; ch < 256;) {
-		sp = s+strlen(s);
-		sprintf(sp, "\t% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,% 3d,\n", rt[ch+0], rt[ch+1], rt[ch+2], rt[ch+3], rt[ch+4], rt[ch+5], rt[ch+6], rt[ch+7], rt[ch+8], rt[ch+9], rt[ch+10], rt[ch+11], rt[ch+12], rt[ch+13], rt[ch+14], rt[ch+15]);
-		ch += 16;
-	}
-	sprintf(sp, "};");
-	php_error_docref(NULL, E_NOTICE, "Reverse_table:\n%s", s);
-	efree(s);
-}
-*/
 
 #if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
 # if ZEND_INTRIN_AVX2_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)

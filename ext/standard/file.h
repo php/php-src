@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -116,7 +114,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	zend_long auto_detect_line_endings;
+	zend_bool auto_detect_line_endings;
 	zend_long default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */

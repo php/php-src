@@ -40,7 +40,7 @@ var_dump($example->propertyBarExists());
 
 ?>
 --EXPECT--
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(true)

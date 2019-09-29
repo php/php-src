@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -545,7 +543,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 			p+= packet->auth_data_len;
 		}
 
-		if (packet->db) {
+		if (packet->db_len > 0) {
 			/* CLIENT_CONNECT_WITH_DB should have been set */
 			size_t real_db_len = MIN(MYSQLND_MAX_ALLOWED_DB_LEN, packet->db_len);
 			memcpy(p, packet->db, real_db_len);

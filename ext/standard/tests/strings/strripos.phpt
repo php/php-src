@@ -10,11 +10,11 @@ strripos() function
 	var_dump(strripos("te".chr(0)."st", chr(0)));
 	var_dump(strripos("tEst", "test"));
 	var_dump(strripos("teSt", "test"));
-	var_dump(@strripos("foo", "f", 1));
-	var_dump(@strripos("", ""));
-	var_dump(@strripos("a", ""));
-	var_dump(@strripos("", "a"));
-	var_dump(@strripos("\\\\a", "\\a"));
+	var_dump(strripos("foo", "f", 1));
+	var_dump(strripos("", ""));
+	var_dump(strripos("a", ""));
+	var_dump(strripos("", "a"));
+	var_dump(strripos("\\\\a", "\\a"));
 ?>
 --EXPECT--
 int(5)
@@ -26,7 +26,7 @@ int(2)
 int(0)
 int(0)
 bool(false)
-bool(false)
-bool(false)
+int(0)
+int(1)
 bool(false)
 int(1)

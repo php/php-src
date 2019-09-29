@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -68,6 +66,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
 #include "php_curl.h"
+#include "curl_arginfo.h"
 
 int  le_curl;
 int  le_curl_multi_handle;
@@ -241,154 +240,6 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_version, 0, 0, 0)
-	ZEND_ARG_INFO(0, version)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_init, 0, 0, 0)
-	ZEND_ARG_INFO(0, url)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_copy_handle, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt, 0)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_setopt_array, 0)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_ARRAY_INFO(0, options, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_exec, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_getinfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, option)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_error, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_errno, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_close, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_reset, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_escape, 0)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_unescape, 0)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_setopt, 0)
-	ZEND_ARG_INFO(0, sh)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_init, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_add_handle, 0)
-	ZEND_ARG_INFO(0, mh)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_remove_handle, 0)
-	ZEND_ARG_INFO(0, mh)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_select, 0, 0, 1)
-	ZEND_ARG_INFO(0, mh)
-	ZEND_ARG_INFO(0, timeout)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_exec, 0, 0, 1)
-	ZEND_ARG_INFO(0, mh)
-	ZEND_ARG_INFO(1, still_running)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_getcontent, 0)
-	ZEND_ARG_INFO(0, ch)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_info_read, 0, 0, 1)
-	ZEND_ARG_INFO(0, mh)
-	ZEND_ARG_INFO(1, msgs_in_queue)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
-	ZEND_ARG_INFO(0, mh)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_errno, 0)
-	ZEND_ARG_INFO(0, mh)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_strerror, 0)
-	ZEND_ARG_INFO(0, errornum)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_strerror, 0)
-	ZEND_ARG_INFO(0, errornum)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_strerror, 0)
-	ZEND_ARG_INFO(0, errornum)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_init, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_close, 0)
-	ZEND_ARG_INFO(0, sh)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_setopt, 0)
-	ZEND_ARG_INFO(0, sh)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_curl_share_errno, 0)
-	ZEND_ARG_INFO(0, sh)
-ZEND_END_ARG_INFO()
-
-#if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
-ZEND_BEGIN_ARG_INFO(arginfo_curl_pause, 0)
-	ZEND_ARG_INFO(0, ch)
-	ZEND_ARG_INFO(0, bitmask)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curlfile_create, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, mimetype)
-	ZEND_ARG_INFO(0, postname)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ curl_functions[]
  */
 static const zend_function_entry curl_functions[] = {
@@ -411,6 +262,7 @@ static const zend_function_entry curl_functions[] = {
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 	PHP_FE(curl_pause,               arginfo_curl_pause)
 #endif
+	PHP_FE(curl_file_create,         arginfo_curl_file_create)
 	PHP_FE(curl_multi_init,          arginfo_curl_multi_init)
 	PHP_FE(curl_multi_add_handle,    arginfo_curl_multi_add_handle)
 	PHP_FE(curl_multi_remove_handle, arginfo_curl_multi_remove_handle)
@@ -425,7 +277,6 @@ static const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
 	PHP_FE(curl_share_errno,         arginfo_curl_share_errno)
-	PHP_FE(curl_file_create,         arginfo_curlfile_create)
 	PHP_FE_END
 };
 /* }}} */

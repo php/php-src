@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -942,7 +940,20 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 	}
 
 	if ((data->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0) {
-		buf->st_mode |= is_dir ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
+		if (is_dir) {
+			buf->st_mode |= (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6));
+		} else {
+			switch (GetFileType(h)) {
+				case FILE_TYPE_CHAR:
+					buf->st_mode |= S_IFCHR;
+					break;
+				case FILE_TYPE_PIPE:
+					buf->st_mode |= S_IFIFO;
+					break;
+				default:
+					buf->st_mode |= S_IFREG;
+			}
+		}
 		buf->st_mode |= (data->dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
 	}
 

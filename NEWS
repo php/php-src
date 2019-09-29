@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
 
+- MBString:
+  . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
+
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
@@ -45,7 +48,15 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- tidy:
+  . Removed the unused $use_include_path parameter from tidy_repair_string().
+    (cmb)
+
 - XML:
-  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita
+  . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
+
+- XMLWriter:
+  . Changed functions to accept/return XMKWriter objects instead of resources.
+    (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

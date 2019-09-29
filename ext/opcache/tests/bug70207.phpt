@@ -14,7 +14,9 @@ function bar() {
 }
 function foo() {
     try { return bar(); }
-    finally { @str_repeat("foo", -10); }
+    finally {
+        @fopen("non-existent", 'r');
+    }
 }
 
 var_dump(foo());

@@ -742,10 +742,6 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_FETCH_DIM_RW:
 				case ZEND_FETCH_DIM_FUNC_ARG:
 				case ZEND_FETCH_DIM_UNSET:
-				case ZEND_FETCH_OBJ_W:
-				case ZEND_FETCH_OBJ_RW:
-				case ZEND_FETCH_OBJ_FUNC_ARG:
-				case ZEND_FETCH_OBJ_UNSET:
 				case ZEND_FETCH_LIST_W:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;

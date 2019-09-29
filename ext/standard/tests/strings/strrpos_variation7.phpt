@@ -22,11 +22,13 @@ var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strrpos() function: with heredoc strings ***
 -- With empty heredoc string --
+int(0)
+
+Warning: strrpos(): Offset not contained in string in %s on line %d
 bool(false)
-bool(false)
-bool(false)
-bool(false)
+int(0)
+int(0)
 *** Done ***

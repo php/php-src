@@ -10,7 +10,11 @@ echo "A=$a B=$b\n";
 
 
 // Warning: Cannot use a scalar value as an array in %s on line %d
-$c[$c=1] = 1;
+try {
+    $c[$c=1] = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // i++ evaluated first, so $d[0] is 10
 $d = array(0,10);
@@ -90,8 +94,7 @@ print_r($ee);
 ?>
 --EXPECTF--
 A=hello B=bye
-
-Warning: Cannot use a scalar value as an array in %s on line %d
+Cannot use a scalar value as an array
 array(2) {
   [0]=>
   int(10)

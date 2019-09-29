@@ -44,3 +44,7 @@ string(10) "entry1.txt"
 string(10) "entry2.txt"
 string(15) "dir/entry2d.txt"
 bool(false)
+--CLEAN--
+<?php
+unlink(__DIR__ . '/oo_getnameindex.zip');
+?>

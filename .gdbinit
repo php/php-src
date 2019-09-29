@@ -252,37 +252,34 @@ define ____printzv_contents
 		____printzv &$zvalue->value.ref->val $arg1
 	end
 	if $type == 11
-		printf "const: %s", $zvalue->value.str->val
-	end
-	if $type == 12
 		printf "CONSTANT_AST"
 	end
+	if $type == 12
+		printf "CALLABLE"
+	end
 	if $type == 13
+		printf "ITERABLE"
+	end
+	if $type == 14
+		printf "VOID"
+	end
+	if $type == 15
 		printf "indirect: "
 		____printzv $zvalue->value.zv $arg1
 	end
-	if $type == 14
+	if $type == 16
 		printf "pointer: %p", $zvalue->value.ptr
 	end
-	if $type == 15
+	if $type == 17
 		printf "_ERROR"
 	end
-	if $type == 16
+	if $type == 18
 		printf "_BOOL"
 	end
-	if $type == 17
-		printf "CALLABLE"
-	end
-	if $type == 18
-		printf "ITERABLE"
-	end
 	if $type == 19
-		printf "VOID"
-	end
-	if $type == 20
 		printf "_NUMBER"
 	end
-	if $type > 20
+	if $type > 19
 		printf "unknown type %d", $type
 	end
 	printf "\n"

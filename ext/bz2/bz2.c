@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +20,7 @@
 
 #include "php.h"
 #include "php_bz2.h"
+#include "bz2_arginfo.h"
 
 #if HAVE_BZ2
 
@@ -50,57 +49,12 @@ static PHP_FUNCTION(bzerror);
 static PHP_FUNCTION(bzcompress);
 static PHP_FUNCTION(bzdecompress);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzread, 0, 0, 1)
-	ZEND_ARG_INFO(0, bz)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzopen, 0)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerrno, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerrstr, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzerror, 0)
-	ZEND_ARG_INFO(0, bz)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzcompress, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, blocksize)
-	ZEND_ARG_INFO(0, workfactor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzdecompress, 0, 0, 1)
-	ZEND_ARG_INFO(0, source)
-	ZEND_ARG_INFO(0, small)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bzwrite, 0, 0, 2)
-	ZEND_ARG_INFO(0, fp)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_bzflush, 0)
-	ZEND_ARG_INFO(0, fp)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry bz2_functions[] = {
 	PHP_FE(bzopen,       arginfo_bzopen)
 	PHP_FE(bzread,       arginfo_bzread)
 	PHP_FALIAS(bzwrite,   fwrite,		arginfo_bzwrite)
 	PHP_FALIAS(bzflush,   fflush,		arginfo_bzflush)
-	PHP_FALIAS(bzclose,   fclose,		arginfo_bzflush)
+	PHP_FALIAS(bzclose,   fclose,		arginfo_bzclose)
 	PHP_FE(bzerrno,      arginfo_bzerrno)
 	PHP_FE(bzerrstr,     arginfo_bzerrstr)
 	PHP_FE(bzerror,      arginfo_bzerror)
@@ -379,7 +333,7 @@ static PHP_FUNCTION(bzread)
 	zend_string *data;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	php_stream_from_zval(stream, bz);
@@ -579,7 +533,7 @@ static PHP_FUNCTION(bzdecompress)
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	bzs.bzalloc = NULL;

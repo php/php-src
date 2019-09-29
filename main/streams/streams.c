@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,7 +24,7 @@
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
-#include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
+#include "ext/standard/basic_functions.h" /* for BG(CurrentStatFile) */
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include <stddef.h>
 #include <fcntl.h>
@@ -1586,33 +1584,31 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 	while(1) {
 		size_t readchunk = sizeof(buf);
 		ssize_t didread;
+		char *writeptr;
 
 		if (maxlen && (maxlen - haveread) < readchunk) {
 			readchunk = maxlen - haveread;
 		}
 
 		didread = php_stream_read(src, buf, readchunk);
+		if (didread <= 0) {
+			*len = haveread;
+			return didread < 0 ? FAILURE : SUCCESS;
+		}
 
-		if (didread > 0) {
-			/* extra paranoid */
-			char *writeptr;
+		towrite = didread;
+		writeptr = buf;
+		haveread += didread;
 
-			towrite = didread;
-			writeptr = buf;
-			haveread += didread;
-
-			while (towrite) {
-				ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
-				if (didwrite <= 0) {
-					*len = haveread - (didread - towrite);
-					return FAILURE;
-				}
-
-				towrite -= didwrite;
-				writeptr += didwrite;
+		while (towrite) {
+			ssize_t didwrite = php_stream_write(dest, writeptr, towrite);
+			if (didwrite <= 0) {
+				*len = haveread - (didread - towrite);
+				return FAILURE;
 			}
-		} else {
-			break;
+
+			towrite -= didwrite;
+			writeptr += didwrite;
 		}
 
 		if (maxlen - haveread == 0) {

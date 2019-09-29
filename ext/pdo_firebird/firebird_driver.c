@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -635,11 +633,11 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
 
 	if (!dbh->username && vars[3].optval) {
-		dbh->username = vars[3].optval;
+		dbh->username = pestrdup(vars[3].optval, dbh->is_persistent);
 	}
 
 	if (!dbh->password && vars[4].optval) {
-		dbh->password = vars[4].optval;
+		dbh->password = pestrdup(vars[4].optval, dbh->is_persistent);
 	}
 
 	do {

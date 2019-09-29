@@ -432,7 +432,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fetch_obj_is_dynamic);
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
-	REGISTER_HELPER(zend_jit_deprecated_or_abstract_helper);
+	REGISTER_HELPER(zend_jit_deprecated_helper);
 	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);

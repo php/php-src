@@ -8,7 +8,7 @@ Bug #73737 (Crash when parsing a tag format)
 	var_dump($exif);
 ?>
 --EXPECTF--
-Warning: exif_thumbnail(bug73737.tiff): Process tag(x0100=ImageWidth ): Illegal components(0) in %s on line %d
+Warning: exif_thumbnail(bug73737.tiff): Process tag(x0100=ImageWidth ): Cannot be empty in %s on line %d
 
 Warning: exif_thumbnail(bug73737.tiff): Error in TIFF: filesize(x0030) less than start of IFD dir(x10102) in %s line %d
 bool(false)

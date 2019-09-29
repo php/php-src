@@ -2,6 +2,7 @@
 <?php declare(strict_types=1);
 
 use PhpParser\Node;
+use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
 
 error_reporting(E_ALL);
@@ -38,7 +39,7 @@ function processStubFile(string $stubFile) {
         $arginfoCode = generateArgInfoCode($funcInfos);
         file_put_contents($arginfoFile, $arginfoCode);
     } catch (Exception $e) {
-        echo "Caught {$e->getMessage()} while processing $stubFile\n";
+        echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
     }
 }
@@ -108,27 +109,43 @@ class Type {
 }
 
 class ArgInfo {
+    const SEND_BY_VAL = 0;
+    const SEND_BY_REF = 1;
+    const SEND_PREFER_REF = 2;
+
     /** @var string */
     public $name;
-    /** @var bool */
-    public $byRef;
+    /** @var int */
+    public $sendBy;
     /** @var bool */
     public $isVariadic;
     /** @var Type|null */
     public $type;
 
-    public function __construct(string $name, bool $byRef, bool $isVariadic, ?Type $type) {
+    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type) {
         $this->name = $name;
-        $this->byRef = $byRef;
+        $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->type = $type;
     }
 
     public function equals(ArgInfo $other): bool {
         return $this->name === $other->name
-            && $this->byRef === $other->byRef
+            && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type);
+    }
+
+    public function getSendByString(): string {
+        switch ($this->sendBy) {
+        case self::SEND_BY_VAL:
+            return "0";
+        case self::SEND_BY_REF:
+            return "1";
+        case self::SEND_PREFER_REF:
+            return "ZEND_SEND_PREFER_REF";
+        }
+        throw new Exception("Invalid sendBy value");
     }
 }
 
@@ -189,18 +206,66 @@ class FuncInfo {
 }
 
 function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
+    $comment = $func->getDocComment();
+    $paramMeta = [];
+
+    if ($comment) {
+        $commentText = substr($comment->getText(), 2, -2);
+
+        foreach (explode("\n", $commentText) as $commentLine) {
+            if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
+                $varName = $matches[1];
+                if (!isset($paramMeta[$varName])) {
+                    $paramMeta[$varName] = [];
+                }
+                $paramMeta[$varName]['preferRef'] = true;
+            }
+        }
+    }
+
     $args = [];
     $numRequiredArgs = 0;
+    $foundVariadic = false;
     foreach ($func->getParams() as $i => $param) {
+        $varName = $param->var->name;
+        $preferRef = !empty($paramMeta[$varName]['preferRef']);
+        unset($paramMeta[$varName]);
+
+        if ($preferRef) {
+            $sendBy = ArgInfo::SEND_PREFER_REF;
+        } else if ($param->byRef) {
+            $sendBy = ArgInfo::SEND_BY_REF;
+        } else {
+            $sendBy = ArgInfo::SEND_BY_VAL;
+        }
+
+        if ($foundVariadic) {
+            throw new Exception("Error in function $name: only the last parameter can be variadic");
+        }
+
+        if ($param->default instanceof Expr\ConstFetch &&
+            $param->default->name->toLowerString() === "null" &&
+            $param->type && !($param->type instanceof Node\NullableType)
+        ) {
+            throw new Exception(
+                "Parameter $varName of function $name has null default, but is not nullable");
+        }
+
+        $foundVariadic = $param->variadic;
+
         $args[] = new ArgInfo(
-            $param->var->name,
-            $param->byRef,
+            $varName,
+            $sendBy,
             $param->variadic,
             $param->type ? Type::fromNode($param->type) : null
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
         }
+    }
+
+    foreach (array_keys($paramMeta) as $var) {
+        throw new Exception("Found metadata for invalid param $var of function $name");
     }
 
     $returnType = $func->getReturnType();
@@ -305,7 +370,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
             $code .= sprintf(
                 "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
                 $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                $returnType->name, $returnType->isNullable
+                str_replace('\\', '\\\\', $returnType->name), $returnType->isNullable
             );
         }
     } else {
@@ -316,30 +381,24 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     foreach ($funcInfo->args as $argInfo) {
-        if ($argInfo->isVariadic) {
-            if ($argInfo->type) {
-                throw new Exception("Not implemented");
-            }
-            $code .= sprintf(
-                "\tZEND_ARG_VARIADIC_INFO(%d, %s)\n",
-                $argInfo->byRef, $argInfo->name
-            );
-        } else if ($argInfo->type) {
+        $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
+        if ($argInfo->type) {
             if ($argInfo->type->isBuiltin) {
                 $code .= sprintf(
-                    "\tZEND_ARG_TYPE_INFO(%d, %s, %s, %d)\n",
-                    $argInfo->byRef, $argInfo->name,
+                    "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
+                    $argKind, $argInfo->getSendByString(), $argInfo->name,
                     $argInfo->type->toTypeCode(), $argInfo->type->isNullable
                 );
             } else {
                 $code .= sprintf(
-                    "\tZEND_ARG_OBJ_INFO(%d, %s, %s, %d)\n",
-                    $argInfo->byRef, $argInfo->name,
-                    $argInfo->type->name, $argInfo->type->isNullable
+                    "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
+                    $argKind, $argInfo->getSendByString(), $argInfo->name,
+                    str_replace('\\', '\\\\', $argInfo->type->name), $argInfo->type->isNullable
                 );
             }
         } else {
-            $code .= sprintf("\tZEND_ARG_INFO(%d, %s)\n", $argInfo->byRef, $argInfo->name);
+            $code .= sprintf(
+                "\tZEND_%s_INFO(%s, %s)\n", $argKind, $argInfo->getSendByString(), $argInfo->name);
         }
     }
 

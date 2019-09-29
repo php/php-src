@@ -26,11 +26,11 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
-#define MAY_BE_IN_REG               (1<<25) /* value allocated in CPU register */
+#define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
-#define MAY_BE_RC1                  (1<<27) /* may be non-reference with refcount == 1 */
-#define MAY_BE_RCN                  (1<<28) /* may be non-reference with refcount > 1  */
+#define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
+#define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */
 
 #define MAY_HAVE_DTOR \
 	(MAY_BE_OBJECT|MAY_BE_RESOURCE \
@@ -263,6 +263,8 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
 int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
+uint32_t zend_fetch_arg_info_type(
+	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
 void zend_init_func_return_info(const zend_op_array   *op_array,
                                 const zend_script     *script,
                                 zend_ssa_var_info     *ret);

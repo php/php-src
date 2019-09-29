@@ -19,7 +19,7 @@ unset($foo->bar); # ok
 var_dump($foo->bar); # not okay, __get is nasty
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, string used in %s:16
+Fatal error: Uncaught TypeError: Cannot assign string to property Foo::$bar of type int in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line 16
+  thrown in %s on line %d

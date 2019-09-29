@@ -146,7 +146,7 @@ static const func_info_t func_infos[] = {
 	F0("sleep",                        MAY_BE_FALSE | MAY_BE_LONG),
 	F0("usleep",                       MAY_BE_NULL | MAY_BE_FALSE),
 #if HAVE_NANOSLEEP
-	F0("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F1("time_nanosleep",               MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 	F0("time_sleep_until",             MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #if HAVE_STRPTIME
@@ -220,6 +220,7 @@ static const func_info_t func_infos[] = {
 	FN("addslashes",                   MAY_BE_STRING),
 	F1("addcslashes",                  MAY_BE_STRING),
 	FN("rtrim",                        MAY_BE_STRING),
+	FN("chop",                         MAY_BE_STRING),
 	FN("str_replace",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	FN("str_ireplace",                 MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	F1("str_repeat",                   MAY_BE_NULL | MAY_BE_STRING),
@@ -244,7 +245,6 @@ static const func_info_t func_infos[] = {
 	F0("parse_str",                    MAY_BE_NULL),
 	F1("str_getcsv",                   MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING),
 	F1("str_pad",                      MAY_BE_NULL | MAY_BE_STRING),
-	F1("chop",                         MAY_BE_STRING),
 	F1("strchr",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("sprintf",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("printf",                       MAY_BE_FALSE | MAY_BE_LONG),
@@ -283,6 +283,8 @@ static const func_info_t func_infos[] = {
 	F0("proc_nice",                    MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 	F0("rand",                         MAY_BE_NULL | MAY_BE_LONG),
+	F1("random_bytes",                 MAY_BE_STRING),
+	F1("random_int",                   MAY_BE_LONG),
 	F0("srand",                        MAY_BE_NULL),
 	F0("getrandmax",                   MAY_BE_NULL | MAY_BE_LONG),
 	F0("mt_rand",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
@@ -336,7 +338,7 @@ static const func_info_t func_infos[] = {
 	F0("is_finite",                    MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_nan",                       MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_infinite",                  MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
+	F1("pow",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_OBJECT),
 	F0("exp",                          MAY_BE_DOUBLE),
 	F0("log",                          MAY_BE_FALSE | MAY_BE_DOUBLE),
 	F0("log10",                        MAY_BE_DOUBLE),
@@ -552,7 +554,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_get_transports",        MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("stream_resolve_include_path",  MAY_BE_FALSE | MAY_BE_STRING),
 	F0("stream_is_local",              MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("get_headers",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("get_headers",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	F0("stream_set_timeout",           MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("socket_set_timeout",           MAY_BE_FALSE | MAY_BE_TRUE),
@@ -686,8 +688,6 @@ static const func_info_t func_infos[] = {
 	F1("array_replace_recursive",      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FN("array_keys",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("array_values",                 MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	FN("array_key_first",              MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
-	FN("array_key_last",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	F1("array_count_values",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_LONG),
 	F1("array_column",                 MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_reverse",                MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
@@ -720,6 +720,8 @@ static const func_info_t func_infos[] = {
 	F1("array_chunk",                  MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F1("array_combine",                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	F0("array_key_exists",             MAY_BE_FALSE | MAY_BE_TRUE),
+	FN("array_key_first",              MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
+	FN("array_key_last",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	F1("pos",                          UNKNOWN_INFO),
 	F0("sizeof",                       MAY_BE_LONG),
 	F0("key_exists",                   MAY_BE_FALSE | MAY_BE_TRUE),
@@ -732,7 +734,7 @@ static const func_info_t func_infos[] = {
 	F1("str_rot13",                    MAY_BE_STRING),
 	F1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("stream_filter_register",       MAY_BE_FALSE | MAY_BE_TRUE),
-	F1("stream_bucket_make_writeable", MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("stream_bucket_make_writeable", MAY_BE_NULL | MAY_BE_OBJECT),
 	F1("stream_bucket_prepend",        MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("stream_bucket_append",         MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("stream_bucket_new",            MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -1010,8 +1012,8 @@ static const func_info_t func_infos[] = {
 	F1("json_last_error_msg",                   MAY_BE_STRING),
 
 	/* ext/xml */
-	FN("xml_parser_create",                     MAY_BE_FALSE | MAY_BE_RESOURCE),
-	FN("xml_parser_create_ns",                  MAY_BE_FALSE | MAY_BE_RESOURCE),
+	FN("xml_parser_create",                     MAY_BE_FALSE | MAY_BE_OBJECT),
+	FN("xml_parser_create_ns",                  MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("xml_set_object",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_element_handler",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("xml_set_character_data_handler",        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1063,9 +1065,12 @@ static const func_info_t func_infos[] = {
 
 	/* ext/hash */
 	F1("hash",                                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F0("hash_equals",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("hash_file",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_hmac",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hmac_algos",                       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("hash_hmac_file",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hkdf",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_init",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("hash_update",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("hash_update_stream",                    MAY_BE_NULL | MAY_BE_LONG),
@@ -1370,12 +1375,10 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GD_JPG
 	F1("imagecreatefromjpeg",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("imagejpeg",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("jpeg2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #ifdef HAVE_GD_PNG
 	F1("imagecreatefrompng",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("imagepng",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("png2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
 #ifdef HAVE_GD_WEBP
 	F1("imagecreatefromwebp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -1443,7 +1446,6 @@ static const func_info_t func_infos[] = {
 	F1("imagefttext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettfbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettftext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F0("image2wbmp",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imagefilter",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imageconvolution",						MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("imageflip",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1457,6 +1459,17 @@ static const func_info_t func_infos[] = {
 	F0("imagesetinterpolation",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("imageresolution",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 
+	/* ext/spl */
+	F1("class_implements",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("class_parents",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("class_uses",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F0("iterator_apply",						MAY_BE_NULL | MAY_BE_LONG),
+	F0("iterator_count",						MAY_BE_FALSE | MAY_BE_LONG),
+	F1("iterator_to_array",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
+	F1("spl_classes",							MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
+	F1("spl_object_hash",						MAY_BE_NULL | MAY_BE_STRING),
+	F0("spl_object_id",							MAY_BE_NULL | MAY_BE_LONG),
+
 };
 
 static HashTable func_info;
@@ -1469,11 +1482,11 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 
 	if (callee_func->type == ZEND_INTERNAL_FUNCTION) {
 		zval *zv;
-		func_info_t *info;
+		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants));
 
-		zv = zend_hash_find_ex(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants)), 1);
+		zv = zend_hash_find_ex(&func_info, lcname, 1);
 		if (zv) {
-			info = Z_PTR_P(zv);
+			func_info_t *info = Z_PTR_P(zv);
 			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
@@ -1481,10 +1494,21 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 			} else {
 				ret = info->info;
 			}
-#if 0
+			return ret;
+		}
+
+		if (callee_func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_class_entry *ce; // TODO: Use the CE.
+			ret = zend_fetch_arg_info_type(NULL, callee_func->common.arg_info - 1, &ce);
 		} else {
+#if 0
 			fprintf(stderr, "Unknown internal function '%s'\n", func->common.function_name);
 #endif
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+		}
+		if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			ret |= MAY_BE_REF;
 		}
 	} else {
 		// FIXME: the order of functions matters!!!
@@ -1492,15 +1516,14 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		if (info) {
 			ret = info->return_info.type;
 		}
-	}
-	if (!ret) {
-		ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-		if (callee_func->common.fn_flags & ZEND_ACC_GENERATOR) {
-			ret = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_OBJECT;
-		} else  if (callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			ret |= MAY_BE_REF;
-		} else {
-			ret |= MAY_BE_RC1 | MAY_BE_RCN;
+		if (!ret) {
+			ret = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF
+				| MAY_BE_RC1 | MAY_BE_RCN;
+			/* For generators RETURN_REFERENCE refers to the yielded values. */
+			if ((callee_func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+					&& !(callee_func->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				ret |= MAY_BE_REF;
+			}
 		}
 	}
 	return ret;

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -952,6 +950,7 @@ PHP_FUNCTION(sodium_crypto_generichash_init)
 		zend_throw_exception(sodium_exception_ce, "unsupported key length", 0);
 		return;
 	}
+	memset(&state_tmp, 0, sizeof state_tmp);
 	if (crypto_generichash_init((void *) &state_tmp, key, (size_t) key_len,
 								(size_t) hash_len) != 0) {
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);

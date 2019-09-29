@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -122,396 +120,6 @@ static void user_tick_function_dtor(user_tick_function_entry *tick_function_entr
 
 /* {{{ arginfo */
 
-/* {{{ array.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_krsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ksort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_count, 0, 0, 1)
-	ZEND_ARG_INFO(0, var)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natsort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_natcasesort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_asort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rsort, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_usort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_uasort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_uksort, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, cmp_function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_end, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_prev, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_next, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_reset, 0)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_current, 0)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_key, 0)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_min, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_max, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
-	ZEND_ARG_INFO(0, userdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk_recursive, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
-	ZEND_ARG_INFO(0, userdata)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_in_array, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_search, 0, 0, 2)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, haystack) /* ARRAY_INFO(0, haystack, 0) */
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_extract, 0, 0, 1)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, extract_type)
-	ZEND_ARG_INFO(0, prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_compact, 0, 0, 1)
-	ZEND_ARG_VARIADIC_INFO(0, var_names)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_fill, 0)
-	ZEND_ARG_INFO(0, start_key)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_array_fill_keys, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, keys) /* ARRAY_INFO(0, keys, 0) */
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_range, 0, 0, 2)
-	ZEND_ARG_INFO(0, low)
-	ZEND_ARG_INFO(0, high)
-	ZEND_ARG_INFO(0, step)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_shuffle, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_pop, 0)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_shift, 0)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_unshift, 0, 1, IS_LONG, 0)
-	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, vars)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_splice, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, replacement) /* ARRAY_INFO(0, arg, 1) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_slice, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_merge, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_merge_recursive, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace_recursive, 0, 0, 1)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_keys, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, search_value)
-	ZEND_ARG_INFO(0, strict)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_first, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_key_last, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_array_values, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_count_values, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_column, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, column_key)
-	ZEND_ARG_INFO(0, index_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_reverse, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, input) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_pad, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, pad_size)
-	ZEND_ARG_INFO(0, pad_value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_array_flip, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_change_key_case, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, input) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, case)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_unique, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_key, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_ukey, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_intersect_assoc, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_assoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_intersect_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_uintersect_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_compare_func)
-	ZEND_ARG_INFO(0, callback_key_compare_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_key, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_ukey, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff, 0)
-	ZEND_ARG_INFO(0, arr1)
-	ZEND_ARG_INFO(0, arr2)
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_diff_assoc, 0, 0, 2)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_diff_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_assoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_uassoc, 0)
-	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(0, arr2) /* ARRAY_INFO(0, arg2, 0) */
-	ZEND_ARG_INFO(0, callback_data_comp_func)
-	ZEND_ARG_INFO(0, callback_key_comp_func)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_order)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_flags)
-	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, arr2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, num_req)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_sum, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_product, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reduce, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, initial)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, callback)
-    ZEND_ARG_INFO(0, use_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_VARIADIC_INFO(0, arrays)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_array_key_exists, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, search)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_chunk, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, size)
-	ZEND_ARG_INFO(0, preserve_keys)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_array_combine, 0)
-	ZEND_ARG_INFO(0, keys)   /* ARRAY_INFO(0, keys, 0) */
-	ZEND_ARG_INFO(0, values) /* ARRAY_INFO(0, values, 0) */
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ basic_functions.c */
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_gpc, 0)
 ZEND_END_ARG_INFO()
@@ -737,17 +345,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
 ZEND_END_ARG_INFO()
 #endif
-/* }}} */
-/* {{{ assert.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert, 0, 0, 1)
-	ZEND_ARG_INFO(0, assertion)
-	ZEND_ARG_INFO(0, description)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
-	ZEND_ARG_INFO(0, what)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ browscap.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
@@ -1271,95 +868,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ ftok.c */
-#if HAVE_FTOK
-ZEND_BEGIN_ARG_INFO(arginfo_ftok, 0)
-	ZEND_ARG_INFO(0, pathname)
-	ZEND_ARG_INFO(0, proj)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
-/* {{{ head.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header, 0, 0, 1)
-	ZEND_ARG_INFO(0, header)
-	ZEND_ARG_INFO(0, replace)
-	ZEND_ARG_INFO(0, http_response_code)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_header_remove, 0, 0, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, expires_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_headers_sent, 0, 0, 0)
-	ZEND_ARG_INFO(1, file)
-	ZEND_ARG_INFO(1, line)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_headers_list, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
-	ZEND_ARG_INFO(0, response_code)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ hrtime.c */
-ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
-	ZEND_ARG_INFO(0, get_as_number)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ html.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_html_entity_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlentities, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, double_encode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_html_translation_table, 0, 0, 0)
-	ZEND_ARG_INFO(0, table)
-	ZEND_ARG_INFO(0, quote_style)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-/* }}} */
 /* {{{ http.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_build_query, 0, 0, 1)
 	ZEND_ARG_INFO(0, formdata)
@@ -1420,12 +928,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_iptcparse, 0)
 	ZEND_ARG_INFO(0, iptcdata)
 ZEND_END_ARG_INFO()
 /* }}} */
-
-/* {{{ lcg.c */
-ZEND_BEGIN_ARG_INFO(arginfo_lcg_value, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ levenshtein.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_levenshtein, 0, 0, 2)
 	ZEND_ARG_INFO(0, str1)
@@ -1646,23 +1148,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
 	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ md5.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ metaphone.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_metaphone, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(0, phones)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ microtime.c */
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_microtime, 0, 0, 0)
@@ -1690,22 +1176,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_unpack, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ pageinfo.c */
-ZEND_BEGIN_ARG_INFO(arginfo_getmyuid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmygid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmypid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getmyinode, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ password.c */
@@ -1786,17 +1256,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 2)
 	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-/* }}} */
-/* {{{ sha1.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
-	ZEND_ARG_INFO(0, str)
-	ZEND_ARG_INFO(0, raw_output)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ soundex.c */
@@ -4443,7 +3902,12 @@ PHP_FUNCTION(usleep)
 		php_error_docref(NULL, E_WARNING, "Number of microseconds must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
-	usleep((unsigned int)num);
+	if (usleep((unsigned int)num) < 0) {
+#if ZEND_DEBUG
+		php_error_docref(NULL, E_NOTICE, "usleep() failed with errno %d: %s",
+			errno, strerror(errno));
+#endif
+	}
 #endif
 }
 /* }}} */

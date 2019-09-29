@@ -1,11 +1,13 @@
 --TEST--
 Bug #52237 (Crash when passing the reference of the property of a non-object)
+--XFAIL--
+TODO: ERROR zval still possible?
 --FILE--
 <?php
-$data = 'test';
-preg_match('//', '', $data->info);
-var_dump($data);
+$data = [];
+preg_match('//', '', $data[[]]);
+var_dump(count($data));
 ?>
 --EXPECTF--
-Warning: Attempt to modify property 'info' of non-object in %sbug52237.php on line 3
-string(4) "test"
+Warning: Illegal offset type in %s on line %d
+int(0)

@@ -7,21 +7,19 @@ Bug #67248 (imageaffinematrixget missing check of parameters)
 ?>
 --FILE--
 <?php
+require __DIR__ . '/func.inc';
+
 for($i=0;$i<7;$i++) {
-	imageaffinematrixget($i);
+	trycatch_dump(
+        fn() => imageaffinematrixget($i)
+    );
 }
 ?>
---EXPECTF--
-Warning: imageaffinematrixget(): Array expected as options in %s on line %d
-
-Warning: imageaffinematrixget(): Array expected as options in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Number is expected as option in %s on line %d
-
-Warning: imageaffinematrixget(): Invalid type for element 5 in %s on line %d
-
-Warning: imageaffinematrixget(): Invalid type for element 6 in %s on line %d
+--EXPECT--
+!! [TypeError] Array expected as options when using translate or scale
+!! [TypeError] Array expected as options when using translate or scale
+!! [TypeError] Number is expected as option when using rotate or shear
+!! [TypeError] Number is expected as option when using rotate or shear
+!! [TypeError] Number is expected as option when using rotate or shear
+!! [ValueError] Invalid type for element 5
+!! [ValueError] Invalid type for element 6

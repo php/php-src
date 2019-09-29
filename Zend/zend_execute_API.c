@@ -268,8 +268,68 @@ void shutdown_executor(void) /* {{{ */
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
+	/* No PHP callback functions should be called after this point. */
+	EG(active) = 0;
+
 	if (!fast_shutdown) {
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+
+		/* Release static properties and static variables prior to the final GC run,
+		 * as they may hold GC roots. */
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
+			zend_op_array *op_array = Z_PTR_P(zv);
+			if (op_array->type == ZEND_INTERNAL_FUNCTION) {
+				break;
+			}
+			if (op_array->static_variables) {
+				HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+				if (ht) {
+					ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
+					zend_array_destroy(ht);
+					ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
+			zend_class_entry *ce = Z_PTR_P(zv);
+			if (ce->type == ZEND_INTERNAL_CLASS) {
+				break;
+			}
+			if (ce->default_static_members_count) {
+				zend_cleanup_internal_class_data(ce);
+			}
+			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
+				zend_op_array *op_array;
+					ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+					if (op_array->type == ZEND_USER_FUNCTION) {
+						if (op_array->static_variables) {
+							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
+							if (ht) {
+								if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) == 0) {
+									zend_array_destroy(ht);
+								}
+								ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
+							}
+						}
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* Also release error and exception handlers, which may hold objects. */
+		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_error_handler));
+			ZVAL_UNDEF(&EG(user_error_handler));
+		}
+
+		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+			zval_ptr_dtor(&EG(user_exception_handler));
+			ZVAL_UNDEF(&EG(user_exception_handler));
+		}
+
+		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
+		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
+		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
 
 #if ZEND_DEBUG
 		if (gc_enabled() && !CG(unclean_shutdown)) {
@@ -281,10 +341,6 @@ void shutdown_executor(void) /* {{{ */
 	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 
 	zend_weakrefs_shutdown();
-
-	/* All resources and objects are destroyed. */
-	/* No PHP callback functions may be called after this point. */
-	EG(active) = 0;
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
@@ -301,22 +357,6 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_discard(EG(class_table), EG(persistent_classes_count));
 		zend_cleanup_internal_classes();
 	} else {
-		/* remove error handlers before destroying classes and functions,
-		 * so that if handler used some class, crash would not happen */
-		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_error_handler));
-			ZVAL_UNDEF(&EG(user_error_handler));
-		}
-
-		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-			zval_ptr_dtor(&EG(user_exception_handler));
-			ZVAL_UNDEF(&EG(user_exception_handler));
-		}
-
-		zend_stack_clean(&EG(user_error_handlers_error_reporting), NULL, 1);
-		zend_stack_clean(&EG(user_error_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-		zend_stack_clean(&EG(user_exception_handlers), (void (*)(void *))ZVAL_PTR_DTOR, 1);
-
 		zend_vm_stack_destroy();
 
 		if (EG(full_tables_cleanup)) {
@@ -346,23 +386,6 @@ void shutdown_executor(void) /* {{{ */
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
 
-			/* Cleanup preloaded immutable functions */
-			ZEND_HASH_REVERSE_FOREACH_VAL(EG(function_table), zv) {
-				zend_op_array *op_array = Z_PTR_P(zv);
-				if (op_array->type == ZEND_INTERNAL_FUNCTION) {
-					break;
-				}
-				ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_IMMUTABLE);
-				if (op_array->static_variables) {
-					HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-					if (ht) {
-						ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-						zend_array_destroy(ht);
-						ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
-
 			ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 				if (_idx == EG(persistent_classes_count)) {
 					break;
@@ -370,33 +393,6 @@ void shutdown_executor(void) /* {{{ */
 				destroy_zend_class(zv);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END_DEL();
-
-			/* Cleanup preloaded immutable classes */
-			ZEND_HASH_REVERSE_FOREACH_VAL(EG(class_table), zv) {
-				zend_class_entry *ce = Z_PTR_P(zv);
-				if (ce->type == ZEND_INTERNAL_CLASS) {
-					break;
-				}
-				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_IMMUTABLE);
-				if (ce->default_static_members_count) {
-					zend_cleanup_internal_class_data(ce);
-				}
-				if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-					zend_op_array *op_array;
-						ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
-						if (op_array->type == ZEND_USER_FUNCTION) {
-							if (op_array->static_variables) {
-								HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
-								if (ht) {
-									ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
-									zend_array_destroy(ht);
-									ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-								}
-							}
-						}
-					} ZEND_HASH_FOREACH_END();
-				}
-			} ZEND_HASH_FOREACH_END();
 		}
 
 		zend_cleanup_internal_classes();
@@ -867,8 +863,13 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			zend_string_release_ex(lc_name, 0);
 		}
 		ce = (zend_class_entry*)Z_PTR_P(zv);
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED)) &&
-				!(flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED)) {
+		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_LINKED))) {
+			if ((flags & ZEND_FETCH_CLASS_ALLOW_UNLINKED) ||
+				((flags & ZEND_FETCH_CLASS_ALLOW_NEARLY_LINKED) &&
+					(ce->ce_flags & ZEND_ACC_NEARLY_LINKED))) {
+				ce->ce_flags |= ZEND_ACC_HAS_UNLINKED_USES;
+				return ce;
+			}
 			return NULL;
 		}
 		return ce;

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -3532,11 +3530,7 @@ PHP_FUNCTION(iterator_to_array)
 	}
 
 	array_init(return_value);
-
-	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value) != SUCCESS) {
-		zval_ptr_dtor(return_value);
-		RETURN_NULL();
-	}
+	spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value);
 } /* }}} */
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser) /* {{{ */
@@ -3557,9 +3551,11 @@ PHP_FUNCTION(iterator_count)
 		RETURN_FALSE;
 	}
 
-	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == SUCCESS) {
-		RETURN_LONG(count);
+	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {
+		return;
 	}
+
+	RETURN_LONG(count);
 }
 /* }}} */
 
@@ -3598,12 +3594,13 @@ PHP_FUNCTION(iterator_apply)
 
 	apply_info.count = 0;
 	zend_fcall_info_args(&apply_info.fci, apply_info.args);
-	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == SUCCESS) {
-		RETVAL_LONG(apply_info.count);
-	} else {
-		RETVAL_FALSE;
+	if (spl_iterator_apply(apply_info.obj, spl_iterator_func_apply, (void*)&apply_info) == FAILURE) {
+		zend_fcall_info_args(&apply_info.fci, NULL);
+		return;
 	}
+
 	zend_fcall_info_args(&apply_info.fci, NULL);
+	RETURN_LONG(apply_info.count);
 }
 /* }}} */
 

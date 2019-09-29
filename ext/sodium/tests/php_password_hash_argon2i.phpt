@@ -2,7 +2,7 @@
 Test interoperability of password_hash('argon2i')
 --SKIPIF--
 <?php
-if (!function_exits('sodium_crypto_pwhash_str_verify')) {
+if (!function_exists('sodium_crypto_pwhash_str_verify')) {
   echo "skip - No crypto_pwhash_str_verify";
 }
 if (!in_array('argon2i', password_algos(), true /* strict */)) {

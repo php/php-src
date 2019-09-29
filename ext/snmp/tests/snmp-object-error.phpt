@@ -57,17 +57,11 @@ $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries
 $session->valueretrieval = 67;
 var_dump($session->valueretrieval);
 echo "Closing session\n";
-var_dump($session->close(''));
 var_dump($session->close());
 var_dump($session->get('.1.3.6.1.2.1.1.1.0'));
 var_dump($session->close());
 
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, ''));
-var_dump($session->walk('.1.3.6.1.2.1.1', FALSE, 30, ''));
-var_dump($session->get());
-var_dump($session->getnext());
-var_dump($session->set());
 
 var_dump($session->max_oids);
 $session->max_oids = "ttt";
@@ -91,29 +85,11 @@ Open normal session
 Warning: main(): Unknown SNMP value retrieval method '67' in %s on line %d
 int(%d)
 Closing session
-
-Warning: SNMP::close() expects exactly 0 parameters, 1 given in %s on line %d
-bool(false)
 bool(true)
 
 Warning: SNMP::get(): Invalid or uninitialized SNMP object in %s on line %d
 bool(false)
 bool(true)
-
-Warning: SNMP::walk() expects parameter 3 to be int, string given in %s on line %d
-bool(false)
-
-Warning: SNMP::walk() expects parameter 4 to be int, string given in %s on line %d
-bool(false)
-
-Warning: SNMP::get() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: SNMP::getnext() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: SNMP::set() expects exactly 3 parameters, 0 given in %s on line %d
-bool(false)
 NULL
 
 Warning: main(): max_oids should be positive integer or NULL, got 0 in %s on line %d

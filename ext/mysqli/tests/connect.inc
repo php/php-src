@@ -8,15 +8,15 @@
 
 	$driver    = new mysqli_driver;
 
-	$host      = getenv("MYSQL_TEST_HOST")     ? getenv("MYSQL_TEST_HOST") : "localhost";
-	$port      = getenv("MYSQL_TEST_PORT")     ? getenv("MYSQL_TEST_PORT") : 3306;
-	$user      = getenv("MYSQL_TEST_USER")     ? getenv("MYSQL_TEST_USER") : "root";
-	$passwd    = getenv("MYSQL_TEST_PASSWD")   ? getenv("MYSQL_TEST_PASSWD") : "";
-	$db        = getenv("MYSQL_TEST_DB")       ? getenv("MYSQL_TEST_DB") : "test";
-	$engine    = getenv("MYSQL_TEST_ENGINE")   ? getenv("MYSQL_TEST_ENGINE") : "MyISAM";
-	$socket    = getenv("MYSQL_TEST_SOCKET")   ? getenv("MYSQL_TEST_SOCKET") : null;
-	$skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ? getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") : true;
-	$connect_flags = getenv("MYSQL_TEST_CONNECT_FLAGS") ? (int)getenv("MYSQL_TEST_CONNECT_FLAGS") : 0;
+	$host      = getenv("MYSQL_TEST_HOST")     ?: "localhost";
+	$port      = getenv("MYSQL_TEST_PORT")     ?: 3306;
+	$user      = getenv("MYSQL_TEST_USER")     ?: "root";
+	$passwd    = getenv("MYSQL_TEST_PASSWD")   ?: "";
+	$db        = getenv("MYSQL_TEST_DB")       ?: "test";
+	$engine    = getenv("MYSQL_TEST_ENGINE")   ?: "MyISAM";
+	$socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
+	$skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
+	$connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
 	if ($socket) {
 		ini_set('mysqli.default_socket', $socket);
 	}

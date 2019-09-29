@@ -2,8 +2,6 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -2037,6 +2035,7 @@ TEST $file
 	if (is_array($IN_REDIRECT)) {
 		$tested = $IN_REDIRECT['prefix'] . ' ' . trim($section_text['TEST']);
 		$tested_file = $tmp_relative_file;
+		$shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $tested_file);
 	}
 
 	// unlink old test results
@@ -2722,7 +2721,8 @@ COMMAND $cmd
 		// write .diff
 		$diff = generate_diff($wanted, $wanted_re, $output);
 		if (is_array($IN_REDIRECT)) {
-			$diff = "# original source file: $shortname\n" . $diff;
+			$orig_shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
+			$diff = "# original source file: $orig_shortname\n" . $diff;
 		}
 		show_file_block('diff', $diff);
 		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff, FILE_BINARY) === false) {
@@ -2769,7 +2769,7 @@ $output
 
 	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
-	junit_mark_test_as($restype, str_replace(TEST_PHP_SRCDIR . '/', '', $tested_file), $tested, null, $info, $diff);
+	junit_mark_test_as($restype, $shortname, $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }

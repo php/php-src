@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -100,7 +98,11 @@ static void add_token(zval *return_value, int token_type,
 		zval keyword;
 		array_init(&keyword);
 		add_next_index_long(&keyword, token_type);
-		add_next_index_stringl(&keyword, (char *) text, leng);
+		if (leng == 1) {
+			add_next_index_str(&keyword, ZSTR_CHAR(text[0]));
+		} else {
+			add_next_index_stringl(&keyword, (char *) text, leng);
+		}
 		add_next_index_long(&keyword, lineno);
 		add_next_index_zval(return_value, &keyword);
 	} else {

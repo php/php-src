@@ -5,6 +5,10 @@ AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], 
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <string.h>
 
 int main(int argc, char **argv)
 {
@@ -67,6 +71,9 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
@@ -92,6 +99,9 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
@@ -116,6 +126,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
+
+#include <stdlib.h>
+#include <string.h>
 
 int main() {
 #if HAVE_CRYPT
@@ -152,6 +165,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char salt[30], answer[70];
@@ -184,6 +200,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <crypt.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 int main() {
 #if HAVE_CRYPT
 	char salt[21], answer[21+86];
@@ -214,6 +233,9 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
+
+#include <stdlib.h>
+#include <string.h>
 
 int main() {
 #if HAVE_CRYPT

@@ -76,7 +76,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '*' '/' '%'
 %precedence '!'
 %precedence T_INSTANCEOF
-%precedence '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
 %precedence T_NEW T_CLONE
 
@@ -939,8 +939,8 @@ expr:
 	|	expr '%' expr 	{ $$ = zend_ast_create_binary_op(ZEND_MOD, $1, $3); }
 	| 	expr T_SL expr	{ $$ = zend_ast_create_binary_op(ZEND_SL, $1, $3); }
 	|	expr T_SR expr	{ $$ = zend_ast_create_binary_op(ZEND_SR, $1, $3); }
-	|	'+' expr %prec T_INC { $$ = zend_ast_create(ZEND_AST_UNARY_PLUS, $2); }
-	|	'-' expr %prec T_INC { $$ = zend_ast_create(ZEND_AST_UNARY_MINUS, $2); }
+	|	'+' expr %prec '~' { $$ = zend_ast_create(ZEND_AST_UNARY_PLUS, $2); }
+	|	'-' expr %prec '~' { $$ = zend_ast_create(ZEND_AST_UNARY_MINUS, $2); }
 	|	'!' expr { $$ = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BOOL_NOT, $2); }
 	|	'~' expr { $$ = zend_ast_create_ex(ZEND_AST_UNARY_OP, ZEND_BW_NOT, $2); }
 	|	expr T_IS_IDENTICAL expr
@@ -1189,7 +1189,7 @@ new_variable:
 	|	new_variable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
 	|	new_variable '{' expr '}'
-			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
 	|	new_variable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable

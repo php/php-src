@@ -86,7 +86,8 @@ static zend_bool zend_valid_closure_binding(
 			&& !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING, "Cannot unbind $this of method");
 		return 0;
-	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)) {
+	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
+			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
 		// TODO: Only deprecate if it had $this *originally*?
 		zend_error(E_DEPRECATED, "Unbinding $this of closure is deprecated");
 	}
@@ -178,7 +179,8 @@ ZEND_METHOD(Closure, call)
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
 		GC_DELREF(&closure->std);
-	} else if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
+	} else if (ZEND_USER_CODE(my_function.type)
+	 && fci_cache.function_handler->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE) {
 		efree(ZEND_MAP_PTR(my_function.op_array.run_time_cache));
 	}
 }
@@ -488,7 +490,7 @@ static zend_object *zend_closure_clone(zend_object *zobject) /* {{{ */
 }
 /* }}} */
 
-int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+int zend_closure_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)obj;
 	*fptr_ptr = &closure->func;

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -850,8 +848,6 @@ static PHP_MINIT_FUNCTION(sockets)
 #if HAVE_AI_IDN
 	REGISTER_LONG_CONSTANT("AI_IDN",			AI_IDN,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONIDN",		AI_CANONIDN,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("AI_IDN_ALLOW_UNASSIGNED",		AI_IDN_ALLOW_UNASSIGNED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("AI_IDN_USE_STD3_ASCII_RULES",	AI_IDN_USE_STD3_ASCII_RULES, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef AI_NUMERICSERV
 	REGISTER_LONG_CONSTANT("AI_NUMERICSERV",	AI_NUMERICSERV,		CONST_CS | CONST_PERSISTENT);

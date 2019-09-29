@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -1605,12 +1603,6 @@ PHP_FUNCTION(mysqli_next_result) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	if (!mysql_more_results(mysql->mysql)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
-						"Please, call mysqli_more_results()/mysqli::more_results() to check "
-						"whether to call this function/method");
-	}
-
 	RETURN_BOOL(!mysql_next_result(mysql->mysql));
 }
 /* }}} */
@@ -1642,12 +1634,6 @@ PHP_FUNCTION(mysqli_stmt_next_result) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
-
-	if (!mysqlnd_stmt_more_results(stmt->stmt)) {
-		php_error_docref(NULL, E_STRICT, "There is no next result set. "
-						"Please, call mysqli_stmt_more_results()/mysqli_stmt::more_results() to check "
-						"whether to call this function/method");
-	}
 
 	RETURN_BOOL(!mysql_stmt_next_result(stmt->stmt));
 }

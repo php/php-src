@@ -24,4 +24,4 @@ try {
 ?>
 --EXPECT--
 string(4) "okok"
-Typed property A::$a must be string, C used
+Cannot assign C to property A::$a of type string

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -235,7 +233,7 @@ PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, zend_
 		return SUCCESS;
 	}
 
-	umax = max - min;
+	umax = (zend_ulong) max - (zend_ulong) min;
 
 	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
 		return FAILURE;

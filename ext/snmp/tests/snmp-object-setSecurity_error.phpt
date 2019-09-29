@@ -18,7 +18,6 @@ $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries
 $session->setSecurity('noAuthNoPriv');
 
 #echo "Checking error handling\n";
-var_dump($session->setSecurity());
 var_dump($session->setSecurity(''));
 var_dump($session->setSecurity('bugusPriv'));
 var_dump($session->setSecurity('authNoPriv', 'TTT'));
@@ -33,9 +32,6 @@ var_dump($session->close());
 
 ?>
 --EXPECTF--
-Warning: SNMP::setSecurity() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-
 Warning: SNMP::setSecurity(): Invalid security level '' in %s on line %d
 bool(false)
 

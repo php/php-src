@@ -77,7 +77,7 @@ $vm_op_flags = array(
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
 	"ZEND_VM_EXT_FETCH_REF"   => 1<<21,
-	"ZEND_VM_EXT_DIM_OBJ_WRITE" => 1<<22,
+	"ZEND_VM_EXT_DIM_WRITE"    => 1<<22,
 	"ZEND_VM_EXT_MASK"        => 0x0f000000,
 	"ZEND_VM_EXT_NUM"         => 0x01000000,
 	"ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
@@ -134,7 +134,7 @@ $vm_ext_decode = array(
 	"FETCH_REF"            => ZEND_VM_EXT_FETCH_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
 	"CACHE_SLOT"           => ZEND_VM_EXT_CACHE_SLOT,
-	"DIM_OBJ_WRITE"        => ZEND_VM_EXT_DIM_OBJ_WRITE,
+	"DIM_WRITE"            => ZEND_VM_EXT_DIM_WRITE,
 );
 
 $vm_kind_name = array(
@@ -475,7 +475,7 @@ $op2_free_op_if_var = array(
 $op1_free_op_var_ptr = array(
 	"ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));}",
 	"TMP"      => "",
-	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",
@@ -486,7 +486,7 @@ $op1_free_op_var_ptr = array(
 $op2_free_op_var_ptr = array(
 	"ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));}",
 	"TMP"      => "",
-	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));",
+	"VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
 	"CONST"    => "",
 	"UNUSED"   => "",
 	"CV"       => "",
@@ -987,6 +987,9 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 }
 
 function is_hot_handler($hot, $op1, $op2, $extra_spec) {
+	if (isset($extra_spec["SMART_BRANCH"]) && $extra_spec["SMART_BRANCH"] == 0) {
+		return false;
+	}
 	if ($hot === 'HOT_' || $hot === 'INLINE_') {
 		return true;
 	} else if ($hot === 'HOT_NOCONST_') {
@@ -2691,10 +2694,10 @@ function gen_vm($def, $skel) {
 	out($f, "\n");
 
 	// Generate zend_vm_get_opcode_handler() function
-	out($f, "static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)\n");
+	out($f, "static const uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
-		out($f, "\treturn zend_opcode_handlers[spec];\n");
+		out($f, "\treturn spec;\n");
 	} else {
 		out($f, "\tstatic const int zend_vm_decode[] = {\n");
 		out($f, "\t\t_UNUSED_CODE, /* 0 = IS_UNUSED  */\n");
@@ -2755,16 +2758,16 @@ function gen_vm($def, $skel) {
 			}
 			out($f, "\t}\n");
 		}
-		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
+		out($f, "\treturn (spec & SPEC_START_MASK) + offset;\n");
 	}
 	out($f, "}\n\n");
 	out($f, "#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
 	out($f, "static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
-		out($f, "\treturn zend_vm_get_opcode_handler_ex(opcode, op);\n");
+		out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
 	} else {
-		out($f, "\treturn zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
+		out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];\n");
 	}
 	out($f, "}\n");
 	out($f, "#endif\n\n");
@@ -2774,65 +2777,11 @@ function gen_vm($def, $skel) {
 		out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n");
 		out($f,"static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op)\n");
 		out($f, "{\n");
-			out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
+		out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
 		if (!ZEND_VM_SPEC) {
 			out($f, "\treturn zend_opcode_handler_funcs[spec];\n");
 		} else {
-			out($f, "\tstatic const int zend_vm_decode[] = {\n");
-			out($f, "\t\t_UNUSED_CODE, /* 0 = IS_UNUSED  */\n");
-			out($f, "\t\t_CONST_CODE,  /* 1 = IS_CONST   */\n");
-			out($f, "\t\t_TMP_CODE,    /* 2 = IS_TMP_VAR */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 3              */\n");
-			out($f, "\t\t_VAR_CODE,    /* 4 = IS_VAR     */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 5              */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 6              */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 7              */\n");
-			out($f, "\t\t_CV_CODE      /* 8 = IS_CV      */\n");
-			out($f, "\t};\n");
-			out($f, "\tuint32_t offset = 0;\n");
-			out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");
-			out($f, "\tif (spec & SPEC_RULE_OP2) offset = offset * 5 + zend_vm_decode[op->op2_type];\n");
-
-			if (isset($used_extra_spec["OP_DATA"]) ||
-			    isset($used_extra_spec["RETVAL"]) ||
-			    isset($used_extra_spec["QUICK_ARG"]) ||
-			    isset($used_extra_spec["SMART_BRANCH"]) ||
-			    isset($used_extra_spec["ISSET"])) {
-
-				$else = "";
-				out($f, "\tif (spec & SPEC_EXTRA_MASK) {\n");
-
-				if (isset($used_extra_spec["OP_DATA"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_OP_DATA) offset = offset * 5 + zend_vm_decode[(op + 1)->op1_type];\n");
-					$else = "else ";
-				}
-				if (isset($used_extra_spec["RETVAL"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_RETVAL) offset = offset * 2 + (op->result_type != IS_UNUSED);\n");
-					$else = "else ";
-				}
-				if (isset($used_extra_spec["QUICK_ARG"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);\n");
-					$else = "else ";
-				}
-				if (isset($used_extra_spec["SMART_BRANCH"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
-					out($f,	"\t\t\toffset = offset * 3;\n");
-					out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
-					out($f,	"\t\t\t\toffset += 1;\n");
-					out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
-					out($f,	"\t\t\t\toffset += 2;\n");
-					out($f, "\t\t\t}\n");
-					out($f, "\t\t}\n");
-					$else = "else ";
-				}
-				if (isset($used_extra_spec["ISSET"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
-					$else = "else ";
-				}
-				out($f, "\t}\n");
-	        }
-
-			out($f, "\treturn zend_opcode_handler_funcs[(spec & SPEC_START_MASK) + offset];\n");
+			out($f, "\treturn zend_opcode_handler_funcs[zend_vm_get_opcode_handler_idx(spec, op)];\n");
 		}
 		out($f, "}\n\n");
 		out($f, "#endif\n\n");
@@ -2843,7 +2792,7 @@ function gen_vm($def, $skel) {
 	out($f, "{\n");
 	out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
 	if (!ZEND_VM_SPEC) {
-		out($f, "\top->handler = zend_vm_get_opcode_handler(opcode, op);\n");
+		out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
 	} else {
 		out($f, "\n");
 		out($f, "\tif (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {\n");
@@ -2851,7 +2800,7 @@ function gen_vm($def, $skel) {
 		out($f, "\t\t\tzend_swap_operands(op);\n");
 		out($f, "\t\t}\n");
 		out($f, "\t}\n");
-		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
+		out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];\n");
 	}
 	out($f, "}\n\n");
 
@@ -2860,7 +2809,7 @@ function gen_vm($def, $skel) {
 	out($f, "{\n");
 	out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
 	if (!ZEND_VM_SPEC) {
-		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(opcode, op);\n");
+		out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
 	} else {
 		out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
 		if (isset($used_extra_spec["TYPE"])) {
@@ -2929,7 +2878,7 @@ function gen_vm($def, $skel) {
 			out($f, "\t\t\tbreak;\n");
 			out($f, "\t}\n");
 		}
-		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(spec, op);\n");
+		out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(spec, op)];\n");
 	}
 	out($f, "}\n\n");
 

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -64,8 +62,6 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_SL", T_SL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_SR", T_SR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_INSTANCEOF", T_INSTANCEOF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("T_INC", T_INC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("T_DEC", T_DEC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_INT_CAST", T_INT_CAST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DOUBLE_CAST", T_DOUBLE_CAST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_STRING_CAST", T_STRING_CAST, CONST_CS | CONST_PERSISTENT);
@@ -88,6 +84,8 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_STRING_VARNAME", T_STRING_VARNAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NUM_STRING", T_NUM_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_EVAL", T_EVAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_INC", T_INC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_DEC", T_DEC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_EXIT", T_EXIT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_IF", T_IF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_ENDIF", T_ENDIF, CONST_CS | CONST_PERSISTENT);
@@ -207,8 +205,6 @@ char *get_token_type_name(int token_type)
 		case T_SL: return "T_SL";
 		case T_SR: return "T_SR";
 		case T_INSTANCEOF: return "T_INSTANCEOF";
-		case T_INC: return "T_INC";
-		case T_DEC: return "T_DEC";
 		case T_INT_CAST: return "T_INT_CAST";
 		case T_DOUBLE_CAST: return "T_DOUBLE_CAST";
 		case T_STRING_CAST: return "T_STRING_CAST";
@@ -231,6 +227,8 @@ char *get_token_type_name(int token_type)
 		case T_STRING_VARNAME: return "T_STRING_VARNAME";
 		case T_NUM_STRING: return "T_NUM_STRING";
 		case T_EVAL: return "T_EVAL";
+		case T_INC: return "T_INC";
+		case T_DEC: return "T_DEC";
 		case T_EXIT: return "T_EXIT";
 		case T_IF: return "T_IF";
 		case T_ENDIF: return "T_ENDIF";

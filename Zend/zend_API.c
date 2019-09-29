@@ -1073,7 +1073,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 					}
 					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						if (prop_info->type) {
+						if (ZEND_TYPE_IS_SET(prop_info->type)) {
 							zval tmp;
 
 							ZVAL_COPY(&tmp, val);
@@ -1149,7 +1149,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
-				if (UNEXPECTED(property_info->type)) {
+				if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
@@ -1554,7 +1554,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), value);
 			break;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			result = NULL;
 	}
 
@@ -2701,6 +2701,7 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {
 {
 	zend_class_entry *disabled_class;
 	zend_string *key;
+	zend_function *fn;
 
 	key = zend_string_alloc(class_name_length, 0);
 	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
@@ -2709,8 +2710,16 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {
 	if (!disabled_class) {
 		return FAILURE;
 	}
+
 	INIT_CLASS_ENTRY_INIT_METHODS((*disabled_class), disabled_class_new);
 	disabled_class->create_object = display_disabled_class;
+
+	ZEND_HASH_FOREACH_PTR(&disabled_class->function_table, fn) {
+		if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
+			fn->common.scope == disabled_class) {
+			zend_free_internal_arg_info(&fn->internal_function);
+		}
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_clean(&disabled_class->function_table);
 	return SUCCESS;
 }
@@ -3096,7 +3105,7 @@ try_again:
 			zend_object *zobj = Z_OBJ_P(callable);
 
 			if (zobj->handlers->get_closure
-					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object) == SUCCESS) {
+					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object, 1) == SUCCESS) {
 				zend_class_entry *ce = zobj->ce;
 				zend_string *callable_name = zend_string_alloc(
 					ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
@@ -3221,7 +3230,7 @@ check_func:
 			}
 			return 0;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
+			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(Z_OBJ_P(callable), &fcc->calling_scope, &fcc->function_handler, &fcc->object, 1) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
 				if (fcc == &fcc_local) {
 					zend_release_fcall_info_cache(fcc);
@@ -3710,7 +3719,7 @@ ZEND_API int zend_try_assign_typed_ref_zval_ex(zend_reference *ref, zval *zv, ze
 
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment) /* {{{ */
 {
-	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, 0);
+	return zend_declare_typed_property(ce, name, property, access_type, doc_comment, ZEND_TYPE_ENCODE_NONE());
 }
 /* }}} */
 
@@ -4009,7 +4018,7 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 
 	ZEND_ASSERT(!Z_ISREF_P(value));
 	Z_TRY_ADDREF_P(value);
-	if (prop_info->type) {
+	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		ZVAL_COPY_VALUE(&tmp, value);
 		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
 			Z_TRY_DELREF_P(value);

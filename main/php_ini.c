@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -341,7 +339,7 @@ static void php_load_zend_extension_cb(void *arg)
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 #ifdef PHP_WIN32
 	char *err;
-	if (!php_win32_image_compatible(filename, NULL, &err)) {
+	if (!php_win32_image_compatible(filename, &err)) {
 		php_error(E_CORE_WARNING, err);
 		return;
 	}
@@ -392,7 +390,7 @@ static void php_load_zend_extension_cb(void *arg)
 		}
 
 #ifdef PHP_WIN32
-		if (!php_win32_image_compatible(libpath, NULL, &err1)) {
+		if (!php_win32_image_compatible(libpath, &err1)) {
 				php_error(E_CORE_WARNING, err1);
 				efree(err1);
 				efree(libpath);

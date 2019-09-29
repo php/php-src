@@ -31,6 +31,7 @@
 #include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
+#include "opcache_arginfo.h"
 
 #if HAVE_JIT
 #include "jit/zend_jit.h"
@@ -45,26 +46,6 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-ZEND_BEGIN_ARG_INFO(arginfo_opcache_none, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_get_status, 0, 0, 0)
-	ZEND_ARG_INFO(0, fetch_scripts)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_compile_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, file)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
-	ZEND_ARG_INFO(0, script)
-	ZEND_ARG_INFO(0, force)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_is_script_cached, 0, 0, 1)
-	ZEND_ARG_INFO(0, script)
-ZEND_END_ARG_INFO()
-
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
 static ZEND_FUNCTION(opcache_invalidate);
@@ -77,12 +58,12 @@ static ZEND_FUNCTION(opcache_get_configuration);
 
 static const zend_function_entry accel_functions[] = {
 	/* User functions */
-	ZEND_FE(opcache_reset,					arginfo_opcache_none)
+	ZEND_FE(opcache_reset,					arginfo_opcache_reset)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
 	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
 	/* Private functions */
-	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
+	ZEND_FE(opcache_get_configuration,		arginfo_opcache_get_configuration)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
 	ZEND_FE_END
 };
@@ -325,6 +306,9 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.huge_code_pages"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,      accel_directives.huge_code_pages,               zend_accel_globals, accel_globals)
 #endif
 	STD_PHP_INI_ENTRY("opcache.preload"                       , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,    accel_directives.preload,                zend_accel_globals, accel_globals)
+#ifndef ZEND_WIN32
+	STD_PHP_INI_ENTRY("opcache.preload_user"                  , ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,    accel_directives.preload_user,           zend_accel_globals, accel_globals)
+#endif
 #if ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
@@ -332,6 +316,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.jit"                           , ZEND_JIT_DEFAULT, PHP_INI_SYSTEM, OnUpdateLong, accel_directives.jit,                      zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_buffer_size,               zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	   accel_directives.jit_debug,                     zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0"   , PHP_INI_SYSTEM, OnUpdateLong,      accel_directives.jit_bisect_limit,              zend_accel_globals, accel_globals)
 #endif
 ZEND_INI_END()
 
@@ -792,6 +777,9 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_bool(&directives,   "opcache.huge_code_pages",         ZCG(accel_directives).huge_code_pages);
 #endif
 	add_assoc_string(&directives, "opcache.preload", STRING_NOT_NULL(ZCG(accel_directives).preload));
+#ifndef ZEND_WIN32
+	add_assoc_string(&directives, "opcache.preload_user", STRING_NOT_NULL(ZCG(accel_directives).preload_user));
+#endif
 #if ZEND_WIN32
 	add_assoc_string(&directives, "opcache.cache_id", STRING_NOT_NULL(ZCG(accel_directives).cache_id));
 #endif
@@ -799,6 +787,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives,   "opcache.jit", ZCG(accel_directives).jit);
 	add_assoc_long(&directives,   "opcache.jit_buffer_size", ZCG(accel_directives).jit_buffer_size);
 	add_assoc_long(&directives,   "opcache.jit_debug", ZCG(accel_directives).jit_debug);
+	add_assoc_long(&directives,   "opcache.jit_bisect_limit", ZCG(accel_directives).jit_bisect_limit);
 #endif
 
 	add_assoc_zval(return_value, "directives", &directives);
@@ -876,6 +865,11 @@ static ZEND_FUNCTION(opcache_compile_file)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
+	}
+
+	if (!accel_startup_ok) {
+		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has not been properly started, can't compile file");
+		RETURN_FALSE;
 	}
 
 	zend_stream_init_filename(&handle, script_name);

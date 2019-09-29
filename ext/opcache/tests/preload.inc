@@ -43,6 +43,8 @@ class Z {
     public a $bar;
 }
 
+class Z2 extends Z {}
+
 function get_anon() {
     return new class {};
 }

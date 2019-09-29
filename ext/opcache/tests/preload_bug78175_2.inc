@@ -15,6 +15,9 @@ class Loader {
 	}
 }
 
+class ExtLoader extends Loader {
+}
+
 Loader::getLoader();
 Loader::getCounter();
 Loader::getCounter();

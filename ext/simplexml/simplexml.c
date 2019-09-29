@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,6 +28,7 @@
 #include "ext/standard/php_string.h"
 #include "php_simplexml.h"
 #include "php_simplexml_exports.h"
+#include "simplexml_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "sxe.h"
@@ -1429,88 +1428,76 @@ SXE_METHOD(asXML)
 	xmlOutputBufferPtr  outbuf;
 	xmlChar            *strval;
 	int                 strval_len;
-	char               *filename;
+	char               *filename = NULL;
 	size_t                 filename_len;
 
-	if (ZEND_NUM_ARGS() > 1) {
-		RETURN_FALSE;
-	}
-
-	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-
-		sxe = Z_SXEOBJ_P(ZEND_THIS);
-		GET_NODE(sxe, node);
-		node = php_sxe_get_first_node(sxe, node);
-
-		if (node) {
-			if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-				int bytes;
-				bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
-				if (bytes == -1) {
-					RETURN_FALSE;
-				} else {
-					RETURN_TRUE;
-				}
-			} else {
-				outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
-
-				if (outbuf == NULL) {
-					RETURN_FALSE;
-				}
-
-				xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
-				xmlOutputBufferClose(outbuf);
-				RETURN_TRUE;
-			}
-		} else {
-			RETURN_FALSE;
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
+		return;
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
 
-	if (node) {
+	if (!node) {
+		RETURN_FALSE;
+	}
+
+	if (filename) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-			if (!strval) {
-				RETVAL_FALSE;
+			int bytes;
+			bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
+			if (bytes == -1) {
+				RETURN_FALSE;
 			} else {
-				RETVAL_STRINGL((char *)strval, strval_len);
+				RETURN_TRUE;
 			}
-			xmlFree(strval);
 		} else {
-			char *return_content;
-			size_t return_len;
-			/* Should we be passing encoding information instead of NULL? */
-			outbuf = xmlAllocOutputBuffer(NULL);
+			outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
 
 			if (outbuf == NULL) {
 				RETURN_FALSE;
 			}
 
-			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-			xmlOutputBufferFlush(outbuf);
-#ifdef LIBXML2_NEW_BUFFER
-			return_content = (char *)xmlOutputBufferGetContent(outbuf);
-			return_len = xmlOutputBufferGetSize(outbuf);
-#else
-			return_content = (char *)outbuf->buffer->content;
-			return_len = outbuf->buffer->use;
-#endif
-			if (!return_content) {
-				RETVAL_FALSE;
-			} else {
-				RETVAL_STRINGL(return_content, return_len);
-			}
+			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
 			xmlOutputBufferClose(outbuf);
+			RETURN_TRUE;
 		}
+	}
+
+	if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
+		xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
+		if (!strval) {
+			RETVAL_FALSE;
+		} else {
+			RETVAL_STRINGL((char *)strval, strval_len);
+		}
+		xmlFree(strval);
 	} else {
-		RETVAL_FALSE;
+		char *return_content;
+		size_t return_len;
+		/* Should we be passing encoding information instead of NULL? */
+		outbuf = xmlAllocOutputBuffer(NULL);
+
+		if (outbuf == NULL) {
+			RETURN_FALSE;
+		}
+
+		xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
+		xmlOutputBufferFlush(outbuf);
+#ifdef LIBXML2_NEW_BUFFER
+		return_content = (char *)xmlOutputBufferGetContent(outbuf);
+		return_len = xmlOutputBufferGetSize(outbuf);
+#else
+		return_content = (char *)outbuf->buffer->content;
+		return_len = outbuf->buffer->use;
+#endif
+		if (!return_content) {
+			RETVAL_FALSE;
+		} else {
+			RETVAL_STRINGL(return_content, return_len);
+		}
+		xmlOutputBufferClose(outbuf);
 	}
 }
 /* }}} */
@@ -1670,6 +1657,10 @@ SXE_METHOD(getName)
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
 	int             namelen;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
@@ -1950,6 +1941,10 @@ static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
    Returns the string content */
 SXE_METHOD(__toString)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETURN_EMPTY_STRING();
@@ -2571,73 +2566,6 @@ PHP_FUNCTION(simplexml_import_dom)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, class_name)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_import_dom, 0, 0, 1)
-	ZEND_ARG_INFO(0, node)
-	ZEND_ARG_INFO(0, class_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_xpath, 0, 0, 1)
-	ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_registerxpathnamespace, 0, 0, 2)
-	ZEND_ARG_INFO(0, prefix)
-	ZEND_ARG_INFO(0, ns)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_asxml, 0, 0, 0)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getnamespaces, 0, 0, 0)
-	ZEND_ARG_INFO(0, recursve)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getdocnamespaces, 0, 0, 0)
-	ZEND_ARG_INFO(0, recursve)
-	ZEND_ARG_INFO(0, from_root)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_children, 0, 0, 0)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement__construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(0, data_is_url)
-	ZEND_ARG_INFO(0, ns)
-	ZEND_ARG_INFO(0, is_prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_simplexmlelement__void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_addchild, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, ns)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry simplexml_functions[] = { /* {{{ */
 	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
 	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
@@ -2675,20 +2603,20 @@ ZEND_GET_MODULE(simplexml)
 /* the method table */
 /* each method can have its own parameters and visibility */
 static const zend_function_entry sxe_functions[] = { /* {{{ */
-	SXE_ME(__construct,            arginfo_simplexmlelement__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
-	SXE_ME(asXML,                  arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
-	SXE_MALIAS(saveXML, asXML,	   arginfo_simplexmlelement_asxml, ZEND_ACC_PUBLIC)
-	SXE_ME(xpath,                  arginfo_simplexmlelement_xpath, ZEND_ACC_PUBLIC)
-	SXE_ME(registerXPathNamespace, arginfo_simplexmlelement_registerxpathnamespace, ZEND_ACC_PUBLIC)
-	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
-	SXE_ME(getNamespaces,          arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getdocnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getName,                arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
-	SXE_ME(addChild,               arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
-	SXE_ME(addAttribute,           arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
-	SXE_ME(__toString,             arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
-	SXE_ME(count,                  arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
+	SXE_ME(__construct,            arginfo_class_SimpleXMLElement___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
+	SXE_ME(asXML,                  arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
+	SXE_MALIAS(saveXML, asXML,	   arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
+	SXE_ME(xpath,                  arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
+	SXE_ME(registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
+	SXE_ME(attributes,             arginfo_class_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC)
+	SXE_ME(children,               arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
+	SXE_ME(getNamespaces,          arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getName,                arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
+	SXE_ME(addChild,               arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
+	SXE_ME(addAttribute,           arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
+	SXE_ME(__toString,             arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
+	SXE_ME(count,                  arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

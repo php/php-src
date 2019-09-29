@@ -31,7 +31,7 @@ object(Test)#1 (1) {
   ["val"]=>
   uninitialized(int)
 }
-Typed property Test::$val must be int, string used
+Cannot assign string to property Test::$val of type int
 object(Test)#1 (1) {
   ["prop"]=>
   &string(1) "x"

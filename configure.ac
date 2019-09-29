@@ -662,6 +662,8 @@ AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <netdb.h>
 #include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
 #ifndef AF_INET
 # include <sys/socket.h>
 #endif
@@ -895,6 +897,18 @@ else
   ZEND_DEBUG=no
 fi
 
+PHP_ARG_ENABLE([debug-assertions],
+  [whether to enable debug assertions in release mode],
+  [AS_HELP_STRING([--enable-debug-assertions],
+    [Compile with debug assertions even in release mode])],
+  [no],
+  [no])
+
+if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+  PHP_DEBUG=1
+  ZEND_DEBUG=yes
+fi
+
 PHP_ARG_ENABLE([rtld-now],
   [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
   [AS_HELP_STRING([--enable-rtld-now],
@@ -1102,7 +1116,9 @@ enable_static=yes
 
 case $php_sapi_module in
   shared[)]
-    enable_static=no
+    if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
+      enable_static=no
+    fi
     case $with_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
@@ -1549,6 +1565,8 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
+dnl Make directories when building in a separate build directory.
+$php_shtool mkdir -p pear
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 

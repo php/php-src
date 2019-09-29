@@ -405,7 +405,8 @@ static void gc_trace_ref(zend_refcounted *ref) {
 		fprintf(stderr, "[%p] rc=%d addr=%d %s %s ",
 			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
 			gc_color_name(GC_REF_COLOR(ref)),
-			zend_get_type_by_const(GC_TYPE(ref)));
+			GC_TYPE(ref) == IS_REFERENCE
+				? "reference" : zend_get_type_by_const(GC_TYPE(ref)));
 	}
 }
 #endif
@@ -1368,6 +1369,10 @@ tail_call:
 					ref = Z_COUNTED_P(zv);
 					goto tail_call;
 				}
+				if (GC_REF_ADDRESS(ht) != 0 && GC_REF_CHECK_COLOR(ht, GC_BLACK)) {
+					GC_TRACE_REF(ht, "removing from buffer");
+					GC_REMOVE_FROM_BUFFER(ht);
+				}
 			} else {
 				return count;
 			}
@@ -1534,7 +1539,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 		/* Destroy zvals */
 		GC_TRACE("Destroying zvals");
-		GC_G(gc_protected) = 1;
 		current = GC_IDX2PTR(GC_FIRST_ROOT);
 		last = GC_IDX2PTR(GC_G(first_unused));
 		while (current != last) {
@@ -1585,7 +1589,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;
-		GC_G(gc_protected) = 0;
 		GC_G(gc_active) = 0;
 	}
 

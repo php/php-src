@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -811,11 +809,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 	if (!dbh->username && vars[5].optval) {
-		dbh->username = vars[5].optval;
+		dbh->username = pestrdup(vars[5].optval, dbh->is_persistent);
 	}
 
 	if (!dbh->password && vars[6].optval) {
-		dbh->password = vars[6].optval;
+		dbh->password = pestrdup(vars[6].optval, dbh->is_persistent);
 	}
 
 	/* TODO: - Check zval cache + ZTS */

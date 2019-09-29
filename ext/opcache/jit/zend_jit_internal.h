@@ -28,11 +28,34 @@ extern int zend_jit_profile_counter_rid;
 	ZEND_OP_ARRAY_EXTENSION(op_array, zend_jit_profile_counter_rid)
 
 /* Hot Counters */
+
 #define ZEND_HOT_COUNTERS_COUNT 128
 
 extern int16_t zend_jit_hot_counters[ZEND_HOT_COUNTERS_COUNT];
 
 void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline);
+
+typedef struct _zend_jit_op_array_extension {
+	int16_t    *counter;
+	const void *orig_handlers[1];
+} zend_jit_op_array_extension;
+
+static zend_always_inline zend_long zend_jit_op_array_hash(const zend_op_array *op_array)
+{
+	uintptr_t x;
+
+	x = (uintptr_t)op_array->opcodes >> 3;
+#if SIZEOF_SIZE_T == 4
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = ((x >> 16) ^ x) * 0x45d9f3b;
+	x = (x >> 16) ^ x;
+#elif SIZEOF_SIZE_T == 8
+	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+	x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+	x = x ^ (x >> 31);
+#endif
+	return x;
+}
 
 extern const zend_op *zend_jit_halt_op;
 
@@ -88,7 +111,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_counter_helper(ZEND_OPCODE_H
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
-void ZEND_FASTCALL zend_jit_deprecated_or_abstract_helper(OPLINE_D);
+void ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
 
 void ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
 int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
