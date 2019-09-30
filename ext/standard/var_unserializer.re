@@ -461,7 +461,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 			php_error_docref(NULL, E_WARNING,
 				"Maximum depth of " ZEND_LONG_FMT " exceeded. "
 				"The depth limit can be changed using the max_depth unserialize() option "
-				"or the unserialize.max_depth ini setting",
+				"or the unserialize_max_depth ini setting",
 				(*var_hash)->max_depth);
 			return 0;
 		}

@@ -1326,7 +1326,7 @@ PHP_FUNCTION(memory_get_peak_usage) {
 /* }}} */
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("unserialize.max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("unserialize_max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(var)

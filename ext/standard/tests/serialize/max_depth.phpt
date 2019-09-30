@@ -38,7 +38,7 @@ var_dump(unserialize(create_nested_data(4097, 'a:1:{i:0;', '}')));
 
 // Depth can also be adjusted using ini setting
 echo "Ini setting:\n";
-ini_set("unserialize.max_depth", 128);
+ini_set("unserialize_max_depth", 128);
 var_dump(unserialize(create_nested_data(128, 'a:1:{i:0;', '}')) !== false);
 var_dump(unserialize(create_nested_data(129, 'a:1:{i:0;', '}')));
 
@@ -55,7 +55,7 @@ var_dump(unserialize(
 
 // Reset ini setting to a large value,
 // so it's clear that it won't be used in the following.
-ini_set("unserialize.max_depth", 4096);
+ini_set("unserialize_max_depth", 4096);
 
 class Test implements Serializable {
     public function serialize() {
@@ -109,41 +109,41 @@ bool(false)
 Array:
 bool(true)
 
-Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 1157 of 1294 bytes in %s on line %d
 bool(false)
 Object:
 bool(true)
 
-Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 2834 of 2971 bytes in %s on line %d
 bool(false)
 Default depth:
 bool(true)
 
-Warning: unserialize(): Maximum depth of 4096 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 4096 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 36869 of 40974 bytes in %s on line %d
 bool(false)
 Ini setting:
 bool(true)
 
-Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 128 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 1157 of 1294 bytes in %s on line %d
 bool(false)
 Ini setting overridden:
 bool(true)
 
-Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 2309 of 2574 bytes in %s on line %d
 bool(false)
 Nested unserialize combined depth limit:
 
-Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 1157 of 1294 bytes in %s on line %d
 bool(false)
@@ -151,7 +151,7 @@ bool(true)
 bool(true)
 Nested unserialize overridden depth limit:
 
-Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize.max_depth ini setting in %s on line %d
+Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
 
 Notice: unserialize(): Error at offset 2309 of 2574 bytes in %s on line %d
 bool(false)
