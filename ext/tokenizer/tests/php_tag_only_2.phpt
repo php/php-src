@@ -3,7 +3,7 @@ Tokenization of only the <?php tag
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
 --INI--
-short_open_tag=1
+short_open_tag=0
 --FILE--
 <?php
 
