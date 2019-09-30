@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)
+  . Fixed bug #78609 (mb_check_encoding() no longer supports stringable
+    objects). (cmb)
 
 - Mysqlnd:
   . Fixed bug #78525 (Memory leak in pdo when reusing native prepared
