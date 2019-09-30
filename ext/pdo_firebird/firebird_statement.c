@@ -372,7 +372,9 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
 
-			if (n >= 0) {
+			if((var->sqltype & ~1)==SQL_DOUBLE) {
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%.*F", -var->sqlscale, *(double*)var->sqldata);
+			} else if (n >= 0) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
 			} else if (n <= -f) {

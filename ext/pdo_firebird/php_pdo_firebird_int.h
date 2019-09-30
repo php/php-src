@@ -83,6 +83,8 @@ typedef struct {
 	char *date_format;
 	char *time_format;
 	char *timestamp_format;
+	
+	unsigned sql_dialect;	
 
 	/* prepend table names on column names in fetch */
 	unsigned fetch_table_names:1;
