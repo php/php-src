@@ -1,7 +1,0 @@
-// vim:ft=javascript
-
-ARG_ENABLE("zend-test", "enable zend-test extension", "no");
-
-if (PHP_ZEND_TEST != "no") {
-	EXTENSION("zend_test", "test.c", PHP_ZEND_TEST_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-}

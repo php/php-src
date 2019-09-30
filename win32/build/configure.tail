@@ -1,9 +1,0 @@
-// vim:ft=javascript
-// tail end of configure
-
-if (!MODE_PHPIZE && sapi_enabled.length < 1) {
-	MESSAGE("");
-	ERROR("No SAPI selected, please enable at least one SAPI.");
-}
-
-generate_files();

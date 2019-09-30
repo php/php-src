@@ -1,3 +1,0 @@
-*:*Microsoft Visual Studio*
-*:*Microsoft SDKs*
-*:*Windows Kits*
