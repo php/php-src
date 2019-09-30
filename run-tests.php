@@ -2136,6 +2136,7 @@ TEST $file
 			junit_start_timer($shortname);
 
 			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 \"$test_skipif\"", $env);
+			$output = trim($output);
 
 			junit_finish_timer($shortname);
 
@@ -2143,9 +2144,9 @@ TEST $file
 				@unlink($test_skipif);
 			}
 
-			if (!strncasecmp('skip', ltrim($output), 4)) {
+			if (!strncasecmp('skip', $output, 4)) {
 
-				if (preg_match('/^\s*skip\s*(.+)\s*/i', $output, $m)) {
+				if (preg_match('/^skip\s*(.+)/i', $output, $m)) {
 					show_result('SKIP', $tested, $tested_file, "reason: $m[1]", $temp_filenames);
 				} else {
 					show_result('SKIP', $tested, $tested_file, '', $temp_filenames);
@@ -2160,26 +2161,25 @@ TEST $file
 				return 'SKIPPED';
 			}
 
-			if (!strncasecmp('info', ltrim($output), 4) && preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) {
+			if (!strncasecmp('info', $output, 4) && preg_match('/^info\s*(.+)/i', $output, $m)) {
 				$info = " (info: $m[1])";
-			} elseif (!strncasecmp('warn', ltrim($output), 4) && preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) {
+			} elseif (!strncasecmp('warn', $output, 4) && preg_match('/^warn\s*(.+)/i', $output, $m)) {
 				$warn = true; /* only if there is a reason */
 				$info = " (warn: $m[1])";
-			} elseif (!strncasecmp('xfail', ltrim($output), 5)) {
+			} elseif (!strncasecmp('xfail', $output, 5)) {
 				// Pretend we have an XFAIL section
-				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
-			} elseif (trim($output) !== '') {
-				$bork_info = trim($output);
-				show_result("BORK", $bork_info, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
+				$section_text['XFAIL'] = ltrim(substr($output, 5));
+			} elseif ($output !== '') {
+				show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
 				$PHP_FAILED_TESTS['BORKED'][] = array(
 					'name' => $file,
 					'test_name' => '',
 					'output' => '',
 					'diff' => '',
-					'info' => "$bork_info [$file]",
+					'info' => "$output [$file]",
 				);
 
-				junit_mark_test_as('BORK', $shortname, $tested, null, $bork_info);
+				junit_mark_test_as('BORK', $shortname, $tested, null, $output);
 				return 'BORKED';
 			}
 		}
