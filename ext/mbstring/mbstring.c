@@ -4952,27 +4952,17 @@ PHP_FUNCTION(mb_check_encoding)
 		RETURN_FALSE;
 	}
 
-	switch(Z_TYPE_P(input)) {
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_NULL:
-		case IS_TRUE:
-		case IS_FALSE:
-			RETURN_TRUE;
-			break;
-		case IS_STRING:
-			if (!php_mb_check_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), enc ? ZSTR_VAL(enc): NULL)) {
-				RETURN_FALSE;
-			}
-			break;
-		case IS_ARRAY:
-			if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(input), enc)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "Input is something other than scalar or array");
+	if (Z_TYPE_P(input) == IS_ARRAY) {
+		if (!php_mb_check_encoding_recursive(HASH_OF(input), enc)) {
 			RETURN_FALSE;
+		}
+	} else {
+		if (!try_convert_to_string(input)) {
+			RETURN_FALSE;
+		}
+		if (!php_mb_check_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), enc ? ZSTR_VAL(enc): NULL)) {
+			RETURN_FALSE;
+		}
 	}
 	RETURN_TRUE;
 }
