@@ -14,11 +14,19 @@ set_error_handler(function($errno, $errstr) {
 });
 
 // The exceptions get eaten
-var_dump(count(token_get_all("<?php \1 echo 'Foo'; \1;")));
+try {
+    var_dump(count(token_get_all("<?php \1 echo 'Foo'; \1;")));
+} catch (Exception $e) {
+    echo $e, "\n";
+}
 
 ?>
---EXPECT--
-Unexpected character in input:  '' (ASCII=1) state=0
-Unexpected character in input:  '' (ASCII=1) state=0
+--EXPECTF--
+Unexpected character in input:  '%s' (ASCII=1) state=0
+Unexpected character in input:  '%s' (ASCII=1) state=0
 int(10)
-int(10)
+Exception: Unexpected character in input:  '%s' (ASCII=1) state=0 in %s:%d
+Stack trace:
+#0 [internal function]: {closure}(%s)
+#1 %s(%d): token_get_all(%s)
+#2 {main}

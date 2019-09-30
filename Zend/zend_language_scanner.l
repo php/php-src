@@ -882,7 +882,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
 
-static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type)
+static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type, zend_bool throw)
 {
 	register char *s, *t;
 	char *end;
@@ -1018,8 +1018,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						}
 
 						if (!valid) {
-							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence", 0);
+							if (throw) {
+								zend_throw_exception(zend_ce_parse_error,
+									"Invalid UTF-8 codepoint escape sequence", 0);
+							}
 							zval_ptr_dtor(zendlval);
 							ZVAL_UNDEF(zendlval);
 							return FAILURE;
@@ -1030,8 +1032,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						/* per RFC 3629, UTF-8 can only represent 21 bits */
 						if (codepoint > 0x10FFFF || errno) {
-							zend_throw_exception(zend_ce_parse_error,
-								"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
+							if (throw) {
+								zend_throw_exception(zend_ce_parse_error,
+									"Invalid UTF-8 codepoint escape sequence: Codepoint too large", 0);
+							}
 							zval_ptr_dtor(zendlval);
 							ZVAL_UNDEF(zendlval);
 							return FAILURE;
@@ -1822,9 +1826,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		size_t i;
 		for (i = 0; i < len; i++) {
 			if (lnum[i] == '8' || lnum[i] == '9') {
-				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 				ZVAL_UNDEF(zendlval);
 				if (PARSER_MODE()) {
+					zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 					RETURN_TOKEN(T_ERROR);
 				}
 				RETURN_TOKEN_WITH_VAL(T_LNUMBER);
@@ -2310,7 +2314,7 @@ skip_escape_conversion:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				if (EXPECTED(zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == SUCCESS)
+				if (EXPECTED(zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"', PARSER_MODE()) == SUCCESS)
 				 || !PARSER_MODE()) {
 					RETURN_TOKEN_WITH_VAL(T_CONSTANT_ENCAPSED_STRING);
 				} else {
@@ -2403,7 +2407,7 @@ skip_escape_conversion:
 	/* Check for ending label on the next line */
 	if (heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, heredoc_label->length)) {
 		if (!IS_LABEL_SUCCESSOR(YYCURSOR[heredoc_label->length])) {
-			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS) && PARSER_MODE()) {
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 			}
 
@@ -2431,6 +2435,7 @@ skip_escape_conversion:
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
+		// TODO: Exception logic should no longer be needed!
 		zend_exception_save();
 		while (heredoc_nesting_level) {
 			zval zv;
@@ -2466,7 +2471,7 @@ skip_escape_conversion:
 		    (first_token == T_VARIABLE
 		     || first_token == T_DOLLAR_OPEN_CURLY_BRACES
 		     || first_token == T_CURLY_OPEN
-		    ) && SCNG(heredoc_indentation)) {
+		    ) && SCNG(heredoc_indentation) && PARSER_MODE()) {
 			zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", SCNG(heredoc_indentation));
 		}
 
@@ -2565,7 +2570,7 @@ skip_escape_conversion:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '"') == SUCCESS)
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '"', PARSER_MODE()) == SUCCESS)
 	 || !PARSER_MODE()) {
 		RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 	} else {
@@ -2611,7 +2616,7 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '`') == SUCCESS)
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '`', PARSER_MODE()) == SUCCESS)
 	 || !PARSER_MODE()) {
 		RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 	} else {
@@ -2663,7 +2668,7 @@ double_quotes_scan_done:
 						continue;
 					}
 
-					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS) && PARSER_MODE()) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 					}
 
@@ -2727,7 +2732,7 @@ heredoc_scan_done:
 			RETURN_TOKEN(T_ERROR);
 		}
 
-		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)) {
+		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0, PARSER_MODE()) != SUCCESS)) {
 			zend_string_efree(copy);
 			RETURN_TOKEN(T_ERROR);
 		}
@@ -2784,7 +2789,7 @@ heredoc_scan_done:
 						continue;
 					}
 
-					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS) && PARSER_MODE()) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 					}
 

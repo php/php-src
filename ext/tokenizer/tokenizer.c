@@ -282,8 +282,6 @@ PHP_FUNCTION(token_get_all)
 		success = tokenize_parse(return_value, source);
 	} else {
 		success = tokenize(return_value, source);
-		/* Normal token_get_all() should not throw. */
-		zend_clear_exception();
 	}
 
 	if (!success) RETURN_FALSE;
