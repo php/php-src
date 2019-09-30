@@ -2057,7 +2057,8 @@ inline_char_handler:
 			if (CG(short_tags) /* <? */
 				|| (*(YYCURSOR + 1) == '=') /* <?= */
 				|| (!strncasecmp((char*)YYCURSOR + 1, "php", 3) && /* <?php[ \t\r\n] */
-					(YYCURSOR[4] == ' ' || YYCURSOR[4] == '\t' ||
+					(YYCURSOR + 4 == YYLIMIT ||
+					YYCURSOR[4] == ' ' || YYCURSOR[4] == '\t' ||
 					YYCURSOR[4] == '\n' || YYCURSOR[4] == '\r'))
 			) {
 				YYCURSOR--;

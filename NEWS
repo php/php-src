@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC3
 
+- Core:
+  . Fixed bug #78604 (token_get_all() does not properly tokenize FOO<?php with
+    short_open_tag=0). (Nikita)
+
 - FFI:
   . Fixed bug #78543 (is_callable() on FFI\CData throws Exception). (cmb)
 
