@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)
+  . Fixed bug #78609 (mb_check_encoding() no longer supports stringable
+    objects). (cmb)
 
 - Standard:
   . Fixed bug #76342 (file_get_contents waits twice specified timeout).
