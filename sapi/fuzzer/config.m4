@@ -3,6 +3,13 @@ AC_MSG_CHECKING(for clang fuzzer SAPI)
 PHP_ARG_ENABLE([fuzzer],,
   [AS_HELP_STRING([--enable-fuzzer],
     [Build PHP as clang fuzzing test module (for developers)])],
+  [no],
+  [no])
+
+PHP_ARG_ENABLE([fuzzer-msan],,
+  [AS_HELP_STRING([--enable-fuzzer-msan],
+    [Enable msan instead of asan/ubsan when fuzzing])],
+  [no],
   [no])
 
 dnl For newer clang versions see https://llvm.org/docs/LibFuzzer.html#fuzzer-usage
@@ -29,16 +36,25 @@ if test "$PHP_FUZZER" != "no"; then
   if test -z "$LIB_FUZZING_ENGINE"; then
     FUZZING_LIB="-fsanitize=fuzzer"
     FUZZING_CC="$CC"
-    dnl Don't include -fundefined in CXXFLAGS, because that would also require linking
-    dnl with a C++ compiler.
     AX_CHECK_COMPILE_FLAG([-fsanitize=fuzzer-no-link], [
-      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link,address"
-      dnl Disable object-size sanitizer, because it is incompatible with our zend_function
-      dnl union, and this can't be easily fixed.
-      dnl We need to specify -fno-sanitize-recover=undefined here, otherwise ubsan warnings
-      dnl will not be considered failures by the fuzzer.
-      CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize=object-size -fno-sanitize-recover=undefined"
-      CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link,address"
+      CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link"
+      CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link"
+
+      if test "$PHP_FUZZER_MSAN" = "yes"; then
+        CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+        CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
+      else
+        CFLAGS="$CFLAGS -fsanitize=address"
+        CXXFLAGS="$CXXFLAGS -fsanitize=address"
+
+        dnl Don't include -fundefined in CXXFLAGS, because that would also require linking
+        dnl with a C++ compiler.
+        dnl Disable object-size sanitizer, because it is incompatible with our zend_function
+        dnl union, and this can't be easily fixed.
+        dnl We need to specify -fno-sanitize-recover=undefined here, otherwise ubsan warnings
+        dnl will not be considered failures by the fuzzer.
+        CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize=object-size -fno-sanitize-recover=undefined"
+      fi
     ],[
       AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
     ])
