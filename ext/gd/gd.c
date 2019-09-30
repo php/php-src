@@ -3147,7 +3147,7 @@ PHP_FUNCTION(imagecopyresized)
 
 	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
 		zend_value_error("Invalid image dimensions");
-		RETURN_FALSE;
+		return;
 	}
 
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
@@ -3689,7 +3689,7 @@ PHP_FUNCTION(imageflip)
 
 		default:
 			zend_value_error("Unknown flip mode");
-			RETURN_FALSE;
+			return;
 	}
 
 	RETURN_TRUE;
