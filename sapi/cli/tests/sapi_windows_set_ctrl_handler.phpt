@@ -3,7 +3,7 @@ sapi_windows_set_ctrl_handler()
 --SKIPIF--
 <?php
 
-include "skipinf.inc";
+include "skipif.inc";
 
 if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
   die("skip this test is for Windows platforms only");

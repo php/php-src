@@ -4,7 +4,7 @@ Bug #54995 (Missing CURLINFO_RESPONSE_CODE support)
 <?php
 include 'skipif.inc';
 
-if ($curl_version['version_number'] > 0x070a08) {
+if (curl_version()['version_number'] > 0x070a08) {
 	exit("skip: tests works a versions of curl >= 7.10.8");
 }
 ?>
