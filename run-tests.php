@@ -2160,30 +2160,15 @@ TEST $file
 				return 'SKIPPED';
 			}
 
-			$keywordMissing = true;
-
-			if (!strncasecmp('info', ltrim($output), 4)) {
-				if (preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) {
-					$info = " (info: $m[1])";
-					$keywordMissing = false;
-				}
-			}
-
-			if (!strncasecmp('warn', ltrim($output), 4)) {
-				if (preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) {
-					$warn = true; /* only if there is a reason */
-					$info = " (warn: $m[1])";
-					$keywordMissing = false;
-				}
-			}
-
-			if (!strncasecmp('xfail', ltrim($output), 5)) {
+			if (!strncasecmp('info', ltrim($output), 4) && preg_match('/^\s*info\s*(.+)\s*/i', $output, $m)) {
+				$info = " (info: $m[1])";
+			} elseif (!strncasecmp('warn', ltrim($output), 4) && preg_match('/^\s*warn\s*(.+)\s*/i', $output, $m)) {
+				$warn = true; /* only if there is a reason */
+				$info = " (warn: $m[1])";
+			} elseif (!strncasecmp('xfail', ltrim($output), 5)) {
 				// Pretend we have an XFAIL section
 				$section_text['XFAIL'] = trim(substr(ltrim($output), 5));
-				$keywordMissing = false;
-			}
-
-			if ($keywordMissing && trim($output) !== '') {
+			} elseif (trim($output) !== '') {
 				$bork_info = trim($output);
 				show_result("BORK", $bork_info, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
 				$PHP_FAILED_TESTS['BORKED'][] = array(
