@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #76342 (file_get_contents waits twice specified timeout).
     (Thomas Calvet)
+  . Fixed bug #78612 (strtr leaks memory when integer keys are used and the
+    subject string shorter). (Nikita)
 
 26 Sep 2019, PHP 7.2.23
 
