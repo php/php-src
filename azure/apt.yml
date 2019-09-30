@@ -35,6 +35,6 @@ steps:
                        postgresql-contrib \
                        llvm \
                        lcov \
-                       gcovr \
                        ${{ parameters.packages }}
+      pip install gcovr
     displayName: 'APT'
