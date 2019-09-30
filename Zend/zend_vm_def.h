@@ -6881,12 +6881,24 @@ ZEND_VM_C_LABEL(num_index_prop):
 			ZEND_VM_C_GOTO(isset_again);
 		} else {
 			value = zend_find_array_dim_slow(ht, offset EXECUTE_DATA_CC);
+			if (UNEXPECTED(EG(exception))) {
+				result = 0;
+				ZEND_VM_C_GOTO(isset_dim_obj_exit);
+			}
 		}
 
 		if (!(opline->extended_value & ZEND_ISEMPTY)) {
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
+
+			if (OP1_TYPE & (IS_CONST|IS_CV)) {
+				/* avoid exception check */
+				FREE_OP2();
+				ZEND_VM_SMART_BRANCH(result, 0);
+				ZVAL_BOOL(EX_VAR(opline->result.var), result);
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
