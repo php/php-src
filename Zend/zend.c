@@ -1312,7 +1312,6 @@ static ZEND_COLD void zend_error_va_list(
 		case E_CORE_ERROR:
 		case E_CORE_WARNING:
 		case E_COMPILE_ERROR:
-		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
 			zend_error_cb(type, error_filename, error_lineno, format, args);
 			break;
