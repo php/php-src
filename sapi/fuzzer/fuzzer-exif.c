@@ -41,7 +41,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 	/* put the data in a file */
 	filename = tmpnam(NULL);
-	filedes = open(filename, O_CREAT|O_RDWR);
+	filedes = open(filename, O_CREAT|O_RDWR, 0644);
 	write(filedes, Data, Size);
 	close(filedes);
 
