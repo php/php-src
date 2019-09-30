@@ -36,5 +36,5 @@ steps:
                        llvm \
                        lcov \
                        ${{ parameters.packages }}
-      pip install gcovr
+      sudo -H pip install gcovr
     displayName: 'APT'
