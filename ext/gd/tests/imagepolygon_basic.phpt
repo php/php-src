@@ -3,7 +3,6 @@ imagepolygon()
 --SKIPIF--
 <?php
 	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
-	require_once(__DIR__ . '/../../standard/tests/image/skipif_imagetype.inc');
 ?>
 --FILE--
 <?php
