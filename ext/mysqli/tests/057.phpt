@@ -96,7 +96,7 @@ object(mysqli_stmt)#%d (%d) {
   ["sqlstate"]=>
   string(5) "00000"
   ["id"]=>
-  int(3)
+  int(%d)
 }
 bool(true)
 bool(false)
