@@ -302,7 +302,7 @@ void shutdown_executor(void) /* {{{ */
 			}
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 				zend_op_array *op_array;
-					ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
 						if (op_array->static_variables) {
 							HashTable *ht = ZEND_MAP_PTR_GET(op_array->static_variables_ptr);
