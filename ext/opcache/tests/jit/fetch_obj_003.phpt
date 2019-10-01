@@ -31,13 +31,13 @@ foo();
 bar();
 ?>
 --EXPECTF--
-Notice: Undefined property: C::$a in %sfetch_obj_003.php on line 9
+Warning: Undefined property: C::$a in %s on line %d
 object(C)#1 (1) {
   ["a"]=>
   int(2)
 }
 
-Notice: Undefined property: C::$a in %sfetch_obj_003.php on line 17
+Warning: Undefined property: C::$a in %s on line %d
 object(C)#1 (2) {
   ["a"]=>
   int(2)

@@ -103,7 +103,7 @@ array(1) {
 }
 bool(true)
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(11) "Arrayfoobar"
 int(2)
 array(2) {
