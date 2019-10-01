@@ -6,7 +6,6 @@ Test preg_grep() function : error conditions - bad regular expressions
 * proto array preg_grep(string regex, array input [, int flags])
 * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
 /*
 * Testing how preg_grep reacts to being passed bad regexes
 */
@@ -19,7 +18,7 @@ $values = array('abcdef', //Regex without delimiter
 );
 $array = array(123, 'abc', 'test');
 foreach($values as $value) {
-    print "\nArg value is $value\n";
+    @print "\nArg value is $value\n";
     try {
         var_dump(preg_grep($value, $array));
     } catch (TypeError $e) {

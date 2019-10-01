@@ -45,11 +45,11 @@ array(9) {
   &string(1) "b"
 }
 
-Notice: Array to string conversion in %sbug44925.php on line 9
+Warning: Array to string conversion in %s on line %d
 array(0) {
 }
 
-Notice: Array to string conversion in %sbug44925.php on line 11
+Warning: Array to string conversion in %s on line %d
 array(7) {
   [0]=>
   string(1) "1"

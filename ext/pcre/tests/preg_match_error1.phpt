@@ -6,7 +6,6 @@ Test preg_match() function : error conditions - bad regular expressions
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
 /*
 * Testing how preg_match reacts to being passed the wrong type of regex argument
 */
@@ -19,7 +18,7 @@ $regex_array = array('abcdef', //Regex without delimiter
 );
 $subject = 'this is a test';
 foreach($regex_array as $regex_value) {
-    print "\nArg value is $regex_value\n";
+    @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_match($regex_value, $subject));
     } catch (TypeError $e) {

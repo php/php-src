@@ -31,7 +31,7 @@ array(3) {
   string(9) "'aa' 'bb'"
 }
 
-Notice: Array to string conversion in %spreg_replace_callback2.php on line 17
+Warning: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
   string(7) "'A'rray"
