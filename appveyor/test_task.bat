@@ -58,8 +58,8 @@ mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
 copy %DEPS_DIR%\template\ssl\openssl.cnf %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
-rem set OPENSSL_CONF=
+rem set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
+set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for Opcache
