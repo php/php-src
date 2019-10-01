@@ -33,5 +33,5 @@ print "ok\n";
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: x in %s on line %d
+Warning: Undefined variable: x in %s on line %d
 ok

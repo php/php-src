@@ -42,10 +42,10 @@ echo "Done\n";
 --EXPECTF--
 string(1) "i"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 
 Warning: Illegal string offset 'run away' in %s on line %d
@@ -58,10 +58,10 @@ string(1) "o"
 Notice: A non well formed numeric value encountered in %s on line %d
 string(1) "r"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "i"
 
-Notice: String offset cast occurred in %s on line %d
+Warning: String offset cast occurred in %s on line %d
 string(1) "S"
 Illegal offset type
 

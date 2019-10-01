@@ -48,7 +48,7 @@ var_dump($a);
 ?>
 --EXPECTF--
 --> read access: 
-Notice: Trying to get property 'p' of non-object in %s on line %d
+Warning: Trying to get property 'p' of non-object in %s on line %d
 
 --> direct assignment:
 Attempt to assign property 'p' of non-object

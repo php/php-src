@@ -24,14 +24,14 @@ try {
 }
 ?>
 --EXPECTF--
-Notice: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable: u1 in %s on line %d
 Attempt to assign property 'a' of non-object
 
-Notice: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable: u2 in %s on line %d
 Attempt to increment/decrement property 'a' of non-object
 
-Notice: Undefined variable: u3 in %s on line %d
+Warning: Undefined variable: u3 in %s on line %d
 Attempt to increment/decrement property 'a' of non-object
 
-Notice: Undefined variable: u4 in %s on line %d
+Warning: Undefined variable: u4 in %s on line %d
 Attempt to modify property 'a' of non-object

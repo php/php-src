@@ -15,6 +15,6 @@ $a = $empty($b);
 --EXPECTF--
 Fatal error: Uncaught Exception: error! in %sbug51394.php:%d
 Stack trace:
-#0 %sbug51394.php(%d): eh(8, 'Undefined varia%s', '%s', %d)
+#0 %s(%d): eh(2, 'Undefined varia...', '%s', %d)
 #1 {main}
   thrown in %sbug51394.php on line %d

@@ -41,6 +41,6 @@ echo "Done\n";
 --EXPECTF--
 Fatal error: Uncaught ErrorException: Undefined variable: id in %s:%d
 Stack trace:
-#0 %s(%d): env::errorHandler(8, '%s', '%s', 34)
+#0 %s(%d): env::errorHandler(2, 'Undefined varia...', '%s', %d)
 #1 {main}
   thrown in %s on line %d

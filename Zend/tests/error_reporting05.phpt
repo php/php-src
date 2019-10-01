@@ -27,8 +27,8 @@ var_dump(error_reporting());
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Undefined variable: undef_value in %s on line %d
+Warning: Undefined variable: undef_value in %s on line %d
 
-Notice: Undefined variable: undef_name in %s on line %d
+Warning: Undefined variable: undef_name in %s on line %d
 int(32767)
 Done

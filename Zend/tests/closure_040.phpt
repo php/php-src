@@ -29,7 +29,7 @@ $cas->bindTo($a, 'A');
 
 ?>
 --EXPECTF--
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Warning: Class 'Array' not found in %s on line %d
 

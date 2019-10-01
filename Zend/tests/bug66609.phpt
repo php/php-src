@@ -24,5 +24,5 @@ $foo->blah--;    //crash
 echo "okey";
 ?>
 --EXPECTF--
-Notice: Undefined property: Bar::$bar in %sbug66609.php on line %d
+Warning: Undefined property: Bar::$bar in %s on line %d
 okey
