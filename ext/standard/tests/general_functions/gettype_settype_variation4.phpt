@@ -38,10 +38,6 @@ set_error_handler("foo");
 $var1 = "another string";
 $var2 = array(2,3,4);
 
-// a variable which is unset
-$unset_var = 10.5;
-unset( $unset_var );
-
 class point
 {
   var $x;
@@ -160,10 +156,6 @@ $var_values = array (
   new point(0, 0),
   new class_with_no_member,
 
-  /* undefined/unset vars */
-  $unset_var,
-  $undef_var,
-
   /* binary strings */
   b"0",
   b'0',
@@ -210,9 +202,6 @@ foreach ($types as $type) {
 echo "Done\n";
 ?>
 --EXPECT--
-8: Undefined variable: unset_var
-8: Undefined variable: undef_var
-
 *** Testing settype() & gettype() : usage variations ***
 
 -- Setting type of data to boolean --
