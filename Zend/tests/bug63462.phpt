@@ -52,16 +52,16 @@ $test->privateProperty   = 'value';
 --EXPECTF--
 __get nonExisting
 
-Notice: Undefined property: Test::$nonExisting in %s on line %d
+Warning: Undefined property: Test::$nonExisting in %s on line %d
 __get publicProperty
 
-Notice: Undefined property: Test::$publicProperty in %s on line %d
+Warning: Undefined property: Test::$publicProperty in %s on line %d
 __get protectedProperty
 
-Notice: Undefined property: Test::$protectedProperty in %s on line %d
+Warning: Undefined property: Test::$protectedProperty in %s on line %d
 __get privateProperty
 
-Notice: Undefined property: Test::$privateProperty in %s on line %d
+Warning: Undefined property: Test::$privateProperty in %s on line %d
 __isset nonExisting
 __isset publicProperty
 __isset protectedProperty

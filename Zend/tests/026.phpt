@@ -22,7 +22,7 @@ print "ok\n";
 
 ?>
 --EXPECTF--
-Notice: Trying to get property 'a' of non-object in %s on line %d
+Warning: Trying to get property 'a' of non-object in %s on line %d
 ok
 Attempt to assign property 'a' of non-object
 ok

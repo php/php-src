@@ -1,7 +1,5 @@
 --TEST--
 SPL: RecursiveTreeIterator and IteratorAggregate
---INI--
-error_reporting=E_ALL&~E_NOTICE
 --FILE--
 <?php
 
@@ -58,7 +56,7 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 -- flags = BYPASS_KEY --
 [0] => |-Array
 [0] => | |-a
@@ -70,22 +68,34 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 [0] =>     |-4
 [1] =>     \-c
 -- flags = BYPASS_CURRENT --
+
+Warning: Array to string conversion in %s on line %d
 [|-0] => Array
 [| |-0] => a
 [| \-1] => 1
+
+Warning: Array to string conversion in %s on line %d
 [\-a] => Array
 [  |-0] => 2
 [  |-1] => b
+
+Warning: Array to string conversion in %s on line %d
 [  \-3] => Array
 [    |-0] => 4
 [    \-1] => c
 -- flags = BYPASS_KEY|BYPASS_KEY --
+
+Warning: Array to string conversion in %s on line %d
 [0] => Array
 [0] => a
 [1] => 1
+
+Warning: Array to string conversion in %s on line %d
 [a] => Array
 [0] => 2
 [1] => b
+
+Warning: Array to string conversion in %s on line %d
 [3] => Array
 [0] => 4
 [1] => c

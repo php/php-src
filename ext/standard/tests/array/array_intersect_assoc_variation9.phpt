@@ -62,13 +62,13 @@ echo "Done";
 -- Passing the entire 2-D array to $arr1 and $arr2 --
 - With default arguments -
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(2) {
   [0]=>
   array(4) {
@@ -95,21 +95,21 @@ array(2) {
 }
 - With more arguments -
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_intersect_assoc_variation9.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(2) {
   [0]=>
   array(4) {

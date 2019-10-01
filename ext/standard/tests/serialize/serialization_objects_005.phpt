@@ -77,7 +77,7 @@ string(9) "p.changed"
 bool(false)
 bool(true)
 
-Notice: Undefined property: C::$x in %s on line 37
+Warning: Undefined property: C::$x in %s on line %d
 NULL
 
 

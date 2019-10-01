@@ -7,5 +7,5 @@ define('e', 'e');
 echo "OK\n";
 ?>
 --EXPECTF--
-Notice: Undefined variable: A in %sbug72944.php on line 3
+Warning: Undefined variable: A in %s on line %d
 OK

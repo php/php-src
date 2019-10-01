@@ -80,7 +80,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_merge_recursive() : assoc. array with diff. keys to $arr1 argument ***
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 -- With default argument --
 array(2) {

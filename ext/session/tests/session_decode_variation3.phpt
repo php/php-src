@@ -37,7 +37,7 @@ ob_end_flush();
 Warning: session_start(): Cannot find serialization handler 'blah' - session startup failed in %s on line %d
 bool(false)
 
-Notice: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined variable: _SESSION in %s on line %d
 NULL
 array(3) {
   ["foo"]=>

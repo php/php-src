@@ -68,7 +68,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_unique() : assoc. array with diff. keys passed to $input argument ***
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(1) {
   [0]=>

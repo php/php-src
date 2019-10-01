@@ -11,7 +11,7 @@ $xml = simplexml_load_string("XXXXXXX^",$x,0x6000000000000001);
 var_dump($xml);
 ?>
 --EXPECTF--
-Notice: Undefined variable: x in %s on line %d
+Warning: Undefined variable: x in %s on line %d
 
 Warning: simplexml_load_string(): Invalid options in %s on line %d
 bool(false)

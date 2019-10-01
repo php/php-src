@@ -44,7 +44,7 @@ NULL
 int(2)
 int(1)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
 Illegal offset type
 Illegal offset type

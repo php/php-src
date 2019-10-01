@@ -38,10 +38,6 @@ set_error_handler("foo");
 $var1 = "another string";
 $var2 = array(2,3,4);
 
-// a variable which is unset
-$unset_var = 10.5;
-unset( $unset_var );
-
 class point
 {
   var $x;
@@ -149,10 +145,6 @@ $var_values = array (
   new point(NULL, NULL),
   new point(2.5, 40.5),
   new point(0, 0),
-
-  /* undefined/unset vars */
-  $unset_var,
-  $undef_var
 );
 
 // test conversion to these types
@@ -185,9 +177,6 @@ foreach ($types as $type) {
 echo "Done\n";
 ?>
 --EXPECT--
-8: Undefined variable: unset_var
-8: Undefined variable: undef_var
-
 *** Testing settype() & gettype() : usage variations ***
 
 -- Setting type of data to float --
@@ -584,16 +573,6 @@ string(6) "object"
 bool(true)
 float(1)
 string(6) "double"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
 
 -- Setting type of data to double --
 -- Iteration 1 --
@@ -988,15 +967,5 @@ string(6) "object"
 8: Object of class point could not be converted to float
 bool(true)
 float(1)
-string(6) "double"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-float(0)
 string(6) "double"
 Done

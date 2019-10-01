@@ -16,7 +16,7 @@ function foo() {
 }
 var_dump(foo());
 --EXPECTF--
-Notice: Undefined variable: a in %sfetch_dim_rw_001.php on line 3
+Warning: Undefined variable: a in %s on line %d
 
 Notice: Undefined offset: 0 in %sfetch_dim_rw_001.php on line 3
 

@@ -46,7 +46,7 @@ unlink( $file );
 --EXPECTF--
 -- Testing vfprintf() function with wrong variable types as argument --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 int(5)
 string(5) "Array"
 int(9)

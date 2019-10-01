@@ -97,7 +97,18 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to write to an array index of a scalar value.
     * Attempting to unpack a non-array/Traversable.
 
-    RFC: Part of https://wiki.php.net/rfc/engine_warnings
+    A number of notices have been converted into warnings:
+
+    * Attempting to read an undefined variable.
+    * Attempting to read an undefined property.
+    * Attempting to read a property of a non-object.
+    * Attempting to access an array index of a non-array.
+    * Attempting to convert an array to string.
+    * Attempting to use a resource as an array key.
+    * Attempting to use null, a boolean or a float as a string offset.
+    * Attempting to read an out-of-bounds string offset.
+
+    RFC: https://wiki.php.net/rfc/engine_warnings
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

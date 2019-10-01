@@ -79,9 +79,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_map() : associative array with diff. keys for 'arr1' argument ***
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(0) {
 }

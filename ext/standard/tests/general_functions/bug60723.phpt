@@ -14,6 +14,6 @@ readfile($log);
 unlink($log);
 ?>
 --EXPECTF--
-Notice: Undefined variable: aa in %sbug60723.php on line %d
-[%s ASIA/Chongqing] PHP Notice:  Undefined variable: aa in %sbug60723.php on line %d
+Warning: Undefined variable: aa in %s on line %d
+[%s ASIA/Chongqing] PHP Warning:  Undefined variable: aa in %s on line %d
 [%s ASIA/Chongqing] dummy

@@ -61,7 +61,7 @@ fscanf(): supplied resource is not a valid File-Handle resource
 Warning: fscanf(): Different numbers of variable names and field specifiers in %s on line %d
 int(-1)
 
-Notice: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable: undefined_var in %s on line %d
 array(0) {
 }
 

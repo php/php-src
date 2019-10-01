@@ -41,9 +41,9 @@ array(3) {
   int(6)
 }
 
-Notice: Undefined property: C::$b in %s on line %d
+Warning: Undefined property: C::$b in %s on line %d
 
-Notice: Undefined property: C::$c in %s on line %d
+Warning: Undefined property: C::$c in %s on line %d
 int(1)
 NULL
 NULL

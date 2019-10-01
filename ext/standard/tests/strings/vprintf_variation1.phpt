@@ -141,31 +141,31 @@ int(3)
 
  -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
  -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
  -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
  -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
  -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 

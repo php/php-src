@@ -25,10 +25,10 @@ DONE
 int(0)
 Invalid format value -1
 
-Notice: Undefined variable: a in %s on line %d
+Warning: Undefined variable: a in %s on line %d
 Invalid format value -1
 
-Notice: Undefined variable: a in %s on line %d
+Warning: Undefined variable: a in %s on line %d
 NULL
 
 DONE

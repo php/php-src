@@ -148,7 +148,7 @@ string(1) "0"
 
 -- Iteration 19 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"

@@ -130,17 +130,17 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [1000]=>
   string(4) "test"
@@ -240,15 +240,15 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
@@ -544,17 +544,17 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   string(4) "test"
@@ -654,15 +654,15 @@ array(8) {
 }
 Using SORT_STRING
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s002.php on line 16
+Warning: Array to string conversion in %s on line %d
 array(8) {
   [0]=>
   float(-0.33333333333333)

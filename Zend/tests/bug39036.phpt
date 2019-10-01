@@ -14,6 +14,6 @@ var_dump($key);
 echo "Done\n";
 ?>
 --EXPECTF--
-Notice: Undefined variable: key in %s on line %d
+Warning: Undefined variable: key in %s on line %d
 NULL
 Done
