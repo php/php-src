@@ -6,7 +6,7 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 
-if (strlen(dirname(__FILE__)) > 259) die("Unsuitable starting path length");
+if (strlen(dirname(__FILE__)) > 259) die("skip Unsuitable starting path length");
 ?>
 --FILE--
 <?php
