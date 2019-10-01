@@ -19,7 +19,7 @@ array(0) {
 array(0) {
 }
 
-Notice: Undefined variable: HTTP_RAW_POST_DATA in %s on line %d
+Warning: Undefined variable: HTTP_RAW_POST_DATA in %s on line %d
 NULL
 string(9) "a=1&b=ZYX"
 string(9) "a=1&b=ZYX"

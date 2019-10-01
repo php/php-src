@@ -55,7 +55,7 @@ Class constant declarations
   echo "\nYou should not see this.";
 ?>
 --EXPECTF--
-Notice: Undefined variable: undef in %s on line 5
+Warning: Undefined variable: undef in %s on line %d
 
 Attempt to access various kinds of class constants:
 int(1)

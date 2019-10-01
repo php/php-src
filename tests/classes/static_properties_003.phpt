@@ -34,7 +34,7 @@ Notice: Accessing static property C::$x as non static in %s on line 11
 
 Notice: Accessing static property C::$x as non static in %s on line 12
 
-Notice: Undefined property: C::$x in %s on line 12
+Warning: Undefined property: C::$x in %s on line %d
 
 Notice: Accessing static property C::$x as non static in %s on line 13
 
