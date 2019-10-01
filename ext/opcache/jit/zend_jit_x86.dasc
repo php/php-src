@@ -9100,6 +9100,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			} else {
 			|	cmp byte [r0 + 8], IS_OBJECT
 			|	jne >8
+			|	SAVE_VALID_OPLINE opline
 			|	mov FCARG1a, r0
 			|	mov r0,	EX->run_time_cache
 			|	lea r0, [r0 + opline->extended_value]
@@ -9151,6 +9152,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	}
 	if (has_slow & 2) {
 	|8:
+	|	SAVE_VALID_OPLINE opline
 	|	mov FCARG1a, r0
 	|	mov r0,	EX->run_time_cache
 	|	lea r0, [r0 + opline->extended_value]
