@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC3
+03 Oct 2019, PHP 7.4.0RC3
 
 - Core:
   . Fixed bug #78604 (token_get_all() does not properly tokenize FOO<?php with
