@@ -59,7 +59,7 @@ array(4) {
 
 -- Testing array_fill_keys() function with mixed array --
 
-Notice: Array to string conversion in %sarray_fill_keys_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(7) {
   ["Resource id #%d"]=>
   string(6) "simple"

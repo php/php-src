@@ -7,8 +7,6 @@ Test sprintf() function : usage variations - string formats with array values
  * Source code: ext/standard/formatted_print.c
 */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing sprintf() : string formats with array values ***\n";
 
 // different arrays used to test he function
@@ -47,185 +45,377 @@ foreach($array_values as $array_value) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing sprintf() : string formats with array values ***
 
 -- Iteration 1 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 2 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 3 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 4 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 5 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 6 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 7 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 8 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 9 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 10 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 11 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"
 
 -- Iteration 12 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 string(1) "s"
+
+Warning: Array to string conversion in %s on line %d
 string(6) " Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "Array "
+
+Warning: Array to string conversion in %s on line %d
 string(6) "	Array"
+
+Warning: Array to string conversion in %s on line %d
 string(6) "
 Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(30) "                         Array"
 string(10) "a-zA-Z0-9]"
 string(1) "s"

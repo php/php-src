@@ -90,9 +90,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_combine() : assoc array with diff keys to both $keys and $values argument ***
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(0) {
 }

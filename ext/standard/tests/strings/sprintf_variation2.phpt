@@ -7,8 +7,6 @@ Test sprintf() function : usage variations - with all types of values for arg1 a
  * Source code: ext/standard/formatted_print.c
 */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";
 
 // initialing required variables
@@ -144,23 +142,43 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 11 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 12 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 13 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 14 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 15 --

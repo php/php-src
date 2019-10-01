@@ -103,15 +103,15 @@ string(6) "m1tatm"
 string(6) "tm0atm"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 10 --
 string(6) "0a2atm"

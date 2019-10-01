@@ -110,7 +110,7 @@ unlink($filename);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing file_put_contents() : usage variation ***
 
 --int 0--
@@ -138,8 +138,8 @@ unlink($filename);
 --associative array--
 12
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 8 - Array to string conversion, %s(%d)
+Error: 2 - Array to string conversion, /home/nikic/php-src/ext/standard/tests/file/file_put_contents_variation2.php(101)
+Error: 2 - Array to string conversion, /home/nikic/php-src/ext/standard/tests/file/file_put_contents_variation2.php(101)
 fooArrayArray
 --uppercase NULL--
 

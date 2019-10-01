@@ -173,7 +173,7 @@ array(2) {
 }
 int(6)
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
   string(15) "ArrayArrayArray"
@@ -220,7 +220,7 @@ int(0)
 string(5) "FOUND"
 string(5) "FOUND"
 
-Notice: Undefined variable: strS in %s on line %d
+Warning: Undefined variable: strS in %s on line %d
 string(0) ""
 string(5) "FOUND"
 string(5) "FOUND"

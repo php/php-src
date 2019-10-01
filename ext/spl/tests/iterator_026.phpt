@@ -24,13 +24,13 @@ hasNext: yes
 1=>2
 hasNext: yes
 
-Notice: Array to string conversion in %siterator_026.php on line %d
+Warning: Array to string conversion in %s on line %d
 0=>31
 hasNext: yes
 1=>32
 hasNext: yes
 
-Notice: Array to string conversion in %siterator_026.php on line %d
+Warning: Array to string conversion in %s on line %d
 0=>331
 hasNext: no
 3=>4

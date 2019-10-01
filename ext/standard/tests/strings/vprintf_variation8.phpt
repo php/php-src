@@ -12,8 +12,6 @@ Test vprintf() function : usage variations - string formats with non-string valu
  * the '$format' and '$args' arguments of the function
 */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing vprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
@@ -72,7 +70,7 @@ foreach($args_array as $args) {
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing vprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
@@ -92,6 +90,42 @@ int(172)
 int(132)
 
 -- Iteration 3 --
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 Array Array Array 
    Array s Array Array
          Arra Arra       Array Arra

@@ -155,57 +155,57 @@ string(3) "0.5"
 
 -- Iteration 10 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 11 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 12 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 13 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 14 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 15 --

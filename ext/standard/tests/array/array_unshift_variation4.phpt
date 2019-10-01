@@ -101,9 +101,9 @@ echo "Done";
 --EXPECTF--
 *** Testing array_unshift() : associative array with different keys ***
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 int(1)
 array(1) {

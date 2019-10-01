@@ -51,7 +51,7 @@ Class  does not exist
 Class 1 does not exist
 Class 1 does not exist
 
-Notice: Array to string conversion in %s on line 27
+Warning: Array to string conversion in %s on line %d
 Class Array does not exist
 ReflectionClass::__construct() expects exactly 1 parameter, 2 given
 Class X does not exist
