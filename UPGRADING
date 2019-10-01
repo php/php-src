@@ -690,6 +690,10 @@ PHP 7.4 UPGRADE NOTES
   the INI directive opcache.cache_id. All processes with the same cache ID and
   user share an OPcache instance.
 
+- The OpenSSL default config path has been changed to 
+  "C:\Program Files\Common Files\SSL\openssl.cnf" and
+  "C:\Program Files (x86)\Common Files\SSL\openssl.cnf", repectively.
+
 ========================================
 13. Migration to pkg-config
 ========================================

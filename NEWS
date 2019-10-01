@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #78609 (mb_check_encoding() no longer supports stringable
     objects). (cmb)
 
+- OpenSSL:
+  . Changed the default config path (Windows only). (cmb)
+
 - Standard:
   . Fixed bug #78549 (Stack overflow due to nested serialized input). (Nikita)
 
