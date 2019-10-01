@@ -173,7 +173,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to array --
@@ -818,18 +818,6 @@ array(2) {
   int(0)
   ["y"]=>
   int(0)
-}
-string(5) "array"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-array(0) {
-}
-string(5) "array"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-array(0) {
 }
 string(5) "array"
 Done

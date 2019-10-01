@@ -171,7 +171,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to resource --
@@ -688,16 +688,4 @@ object(point)#3 (2) {
   int(0)
 }
 string(6) "object"
--- Iteration 79 --
-string(4) "NULL"
-2: settype(): Cannot convert to resource type
-bool(false)
-NULL
-string(4) "NULL"
--- Iteration 80 --
-string(4) "NULL"
-2: settype(): Cannot convert to resource type
-bool(false)
-NULL
-string(4) "NULL"
 Done

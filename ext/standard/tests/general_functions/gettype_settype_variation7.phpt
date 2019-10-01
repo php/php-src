@@ -171,7 +171,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to object --
@@ -816,18 +816,6 @@ object(point)#3 (2) {
   int(0)
   ["y"]=>
   int(0)
-}
-string(6) "object"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-object(stdClass)#4 (0) {
-}
-string(6) "object"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-object(stdClass)#4 (0) {
 }
 string(6) "object"
 Done

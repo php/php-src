@@ -565,14 +565,4 @@ string(6) "object"
 bool(true)
 NULL
 string(4) "NULL"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-NULL
-string(4) "NULL"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-NULL
-string(4) "NULL"
 Done

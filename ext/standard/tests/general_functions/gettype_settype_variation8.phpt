@@ -171,7 +171,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing gettype() & settype() functions : usage variations ***
 
 -- Setting type of data to string --
@@ -388,31 +388,31 @@ string(12) "@$%#$%^$%^&^"
 string(6) "string"
 -- Iteration 43 --
 string(5) "array"
-8: Array to string conversion
+2: Array to string conversion
 bool(true)
 string(5) "Array"
 string(6) "string"
 -- Iteration 44 --
 string(5) "array"
-8: Array to string conversion
+2: Array to string conversion
 bool(true)
 string(5) "Array"
 string(6) "string"
 -- Iteration 45 --
 string(5) "array"
-8: Array to string conversion
+2: Array to string conversion
 bool(true)
 string(5) "Array"
 string(6) "string"
 -- Iteration 46 --
 string(5) "array"
-8: Array to string conversion
+2: Array to string conversion
 bool(true)
 string(5) "Array"
 string(6) "string"
 -- Iteration 47 --
 string(5) "array"
-8: Array to string conversion
+2: Array to string conversion
 bool(true)
 string(5) "Array"
 string(6) "string"
@@ -570,15 +570,5 @@ string(6) "string"
 string(6) "object"
 bool(true)
 string(11) "ObjectPoint"
-string(6) "string"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-string(0) ""
-string(6) "string"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-string(0) ""
 string(6) "string"
 Done

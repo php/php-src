@@ -577,16 +577,6 @@ string(6) "object"
 bool(true)
 int(1)
 string(7) "integer"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-int(0)
-string(7) "integer"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-int(0)
-string(7) "integer"
 
 -- Setting type of data to int --
 -- Iteration 1 --
@@ -981,15 +971,5 @@ string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-int(0)
-string(7) "integer"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-int(0)
 string(7) "integer"
 Done

@@ -573,16 +573,6 @@ string(6) "object"
 bool(true)
 float(1)
 string(6) "double"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
 
 -- Setting type of data to double --
 -- Iteration 1 --
@@ -977,15 +967,5 @@ string(6) "object"
 8: Object of class point could not be converted to float
 bool(true)
 float(1)
-string(6) "double"
--- Iteration 79 --
-string(4) "NULL"
-bool(true)
-float(0)
-string(6) "double"
--- Iteration 80 --
-string(4) "NULL"
-bool(true)
-float(0)
 string(6) "double"
 Done
