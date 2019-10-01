@@ -6,7 +6,7 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 
 require_once(__DIR__.'/imap_include.inc');
 
-$in = imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1);
+$in = @imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1);
 if (!$in) {
     die("skip could not connect to mailbox $default_mailbox");
 }
