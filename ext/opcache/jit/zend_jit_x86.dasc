@@ -2879,7 +2879,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 			|	SAVE_VALID_OPLINE opline
 			if (op1_info & MAY_BE_UNDEF) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2
-				|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
@@ -4373,7 +4373,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|.cold_code
 				|1:
 			}
-			|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 			if (Z_REG(var_addr) != ZREG_FP) {
 				|	mov aword T1, Ra(Z_REG(var_addr)) // save
 			}
@@ -6014,7 +6014,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -6029,7 +6029,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline
 		|	mov aword T1, FCARG1a // save
 		|	mov FCARG1d, opline->op2.var
@@ -6048,7 +6048,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -6068,7 +6068,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline
 		|	mov FCARG1d, opline->op2.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -8535,7 +8535,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 			|	SAVE_VALID_OPLINE opline
 			if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
-				|	// zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|1:
@@ -9414,7 +9414,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 				|1:
 			}
 			|.if X64
-				|	mov CARG1, E_NOTICE
+				|	mov CARG1, E_WARNING
 				|	LOAD_ADDR CARG2, "Trying to get property '%s' of non-object"
 				|	LOAD_ADDR CARG3, Z_STRVAL_P(member)
 				|	EXT_CALL zend_error, r0
@@ -9422,7 +9422,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 				|	sub r4, 4
 				|	push Z_STRVAL_P(member)
 				|	push "Trying to get property '%s' of non-object"
-				|	push E_NOTICE
+				|	push E_WARNING
 				|	EXT_CALL zend_error, r0
 				|	add r4, 16
 			|.endif
