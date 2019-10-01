@@ -16,7 +16,7 @@ echo "*** Testing file_put_contents() : usage variation ***\n";
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
 	if (error_reporting() & $err_no) {
 		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+		echo "Error: $err_no - $err_msg\n";
 	}
 }
 set_error_handler('test_error_handler');
@@ -138,8 +138,8 @@ unlink($filename);
 --associative array--
 12
 --nested arrays--
-Error: 2 - Array to string conversion, /home/nikic/php-src/ext/standard/tests/file/file_put_contents_variation2.php(101)
-Error: 2 - Array to string conversion, /home/nikic/php-src/ext/standard/tests/file/file_put_contents_variation2.php(101)
+Error: 2 - Array to string conversion
+Error: 2 - Array to string conversion
 fooArrayArray
 --uppercase NULL--
 
