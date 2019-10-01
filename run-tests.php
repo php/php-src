@@ -2163,7 +2163,7 @@ TEST $file
 
 			if (!strncasecmp('info', $output, 4) && preg_match('/^info\s*(.+)/i', $output, $m)) {
 				$info = " (info: $m[1])";
-			} elseif (!strncasecmp('warn', $output, 4) && preg_match('/^warn\s*(.+)/i', $output, $m)) {
+			} elseif (!strncasecmp('warn', $output, 4) && preg_match('/^warn\s+(.+)/i', $output, $m)) {
 				$warn = true; /* only if there is a reason */
 				$info = " (warn: $m[1])";
 			} elseif (!strncasecmp('xfail', $output, 5)) {
