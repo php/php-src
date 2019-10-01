@@ -72,8 +72,8 @@ jobs:
         timeoutInMinutes: 120
     - template: azure/msan_job.yml
       parameters:
-        configurationName: DEBUG_ZTS_MSAN
-        configurationParameters: '--enable-debug --enable-maintainer-zts'
+        configurationName: RELEASE_ZTS_MSAN
+        configurationParameters: '--disable-debug --enable-maintainer-zts'
         runTestsParameters: --asan
     - template: azure/community_job.yml
       parameters:
