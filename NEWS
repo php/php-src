@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC4
 
-- Core:
-  . Fixed bug #78620 (Out of memory error). (cmb)
-
 - Pcntl:
   . Fixed bug #77335 (PHP is preventing SIGALRM from specifying SA_RESTART).
     (Nikita)
