@@ -4711,7 +4711,7 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-/* {{{ proto string|false setlocale(mixed category, string locale [, string ...])
+/* {{{ proto string|false setlocale(int category, string locale [, string ...])
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
