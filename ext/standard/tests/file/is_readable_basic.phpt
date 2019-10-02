@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_readable_basic_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {

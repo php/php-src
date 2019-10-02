@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
 // Skip if being run by root
-$filename = __DIR__."/is_readable_root_check.tmp";
+$filename = __DIR__."/tempnam_variation4-0_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
