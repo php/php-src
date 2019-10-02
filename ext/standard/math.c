@@ -1300,6 +1300,25 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
+/* {{{ proto float fdiv(float dividend, float divisor)
+   Perform floating-point division of dividend / divisor
+   with IEEE-754 semantics for division by zero. */
+#ifdef __clang__
+__attribute__((no_sanitize("float-divide-by-zero")))
+#endif
+PHP_FUNCTION(fdiv)
+{
+	double dividend, divisor;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(dividend)
+		Z_PARAM_DOUBLE(divisor)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_DOUBLE(dividend / divisor);
+}
+/* }}} */
+
 /* {{{ proto int intdiv(int dividend, int divisor)
    Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)

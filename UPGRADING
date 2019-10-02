@@ -318,6 +318,11 @@ PHP 8.0 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Standard:
+  . Added fdiv() method, which performs a floating-point devision under
+    IEEE 754 semantics. Division by zero is considered well-defined and
+    will return one of Inf, -Inf or NaN.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
