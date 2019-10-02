@@ -1730,10 +1730,15 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	void *ptr;
 
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(new_size == 0 || new_size > heap->limit - heap->real_size)) {
-		if (new_size > 0 && zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
+	if (UNEXPECTED(new_size == 0)) {
+		/* overflow in ZEND_MM_ALIGNED_SIZE_EX */
+		goto memory_limit_exhausted;
+	}
+	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {
+		if (zend_mm_gc(heap) && new_size <= heap->limit - heap->real_size) {
 			/* pass */
-		} else if (new_size == 0 || heap->overflow == 0) {
+		} else if (heap->overflow == 0) {
+			memory_limit_exhausted:
 #if ZEND_DEBUG
 			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
