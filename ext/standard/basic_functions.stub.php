@@ -142,8 +142,7 @@ function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix
 
 function compact($var_name, ...$var_names): array {}
 
-/** @return array|false */
-function array_fill(int $start_key, int $num, $val) {}
+function array_fill(int $start_key, int $num, $val): array {}
 
 function array_fill_keys(array $keys, $val): array {}
 
