@@ -10,7 +10,7 @@ if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 $handle=curl_init('http://127.0.0.1:37349/');
 curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-if (!curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
+if (!@curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
 --FILE--
 <?php
