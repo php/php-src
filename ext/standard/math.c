@@ -1296,21 +1296,22 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
-/* {{{ proto float fdiv(float x, float y)
-   Perform floating-point division of x / y with IEEE-754 semantics for division by zero. */
+/* {{{ proto float fdiv(float dividend, float divisor)
+   Perform floating-point division of dividend / divisor
+   with IEEE-754 semantics for division by zero. */
 #ifdef __clang__
 __attribute__((no_sanitize("float-divide-by-zero")))
 #endif
 PHP_FUNCTION(fdiv)
 {
-	double num1, num2;
+	double dividend, divisor;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_DOUBLE(num1)
-		Z_PARAM_DOUBLE(num2)
+		Z_PARAM_DOUBLE(dividend)
+		Z_PARAM_DOUBLE(divisor)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(num1 / num2);
+	RETURN_DOUBLE(dividend / divisor);
 }
 /* }}} */
 

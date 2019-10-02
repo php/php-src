@@ -1144,8 +1144,8 @@ ZEND_BEGIN_ARG_INFO(arginfo_fmod, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_fdiv, 0)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
+	ZEND_ARG_INFO(0, dividend)
+	ZEND_ARG_INFO(0, divisor)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_intdiv, 0)
