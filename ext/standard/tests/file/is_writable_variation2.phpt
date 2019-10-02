@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only on LINUX');
 }
 // Skip if being run by root
-$filename = __DIR__."/is_readable_root_check.tmp";
+$filename = __DIR__."/is_writable_variation2_root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
