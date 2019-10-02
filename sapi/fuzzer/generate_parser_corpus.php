@@ -12,7 +12,7 @@ $corpusDir = __DIR__ . '/corpus/parser';
 foreach ($it as $file) {
     if (!preg_match('/\.phpt$/', $file)) continue;
     $code = file_get_contents($file);
-    if (!preg_match('/--FILE--(.*)--EXPECT/s', $code, $matches)) continue;
+    if (!preg_match('/--FILE--\R(.*?)\R--([_A-Z]+)--/s', $code, $matches)) continue;
     $code = $matches[1];
 
     $outFile = str_replace($testsDir, '', $file);
