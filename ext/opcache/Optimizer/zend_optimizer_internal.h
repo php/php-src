@@ -93,7 +93,6 @@ int  zend_optimizer_replace_by_const(zend_op_array *op_array,
 zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline);
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
-void zend_optimizer_pass2(zend_op_array *op_array);
 void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);

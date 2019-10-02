@@ -296,8 +296,7 @@ int main() {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	Optimizer/zend_optimizer.c \
-	Optimizer/pass1_5.c \
-	Optimizer/pass2.c \
+	Optimizer/pass1.c \
 	Optimizer/pass3.c \
 	Optimizer/optimize_func_calls.c \
 	Optimizer/block_pass.c \

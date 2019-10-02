@@ -934,12 +934,15 @@ static void zend_optimize(zend_op_array      *op_array,
 		zend_dump_op_array(op_array, ZEND_DUMP_LIVE_RANGES, "before optimizer", NULL);
 	}
 
-	/* pass 1
-	 * - substitute persistent constants (true, false, null, etc)
-	 * - perform compile-time evaluation of constant binary and unary operations
-	 * - optimize series of ADD_STRING and/or ADD_CHAR
+	/* pass 1 (Simple local optimizations)
+	 * - persistent constant substitution (true, false, null, etc)
+	 * - constant casting (ADD expects numbers, CONCAT strings, etc)
+	 * - simlple constant subexpression elimination
+	 * - optimize constant conditional JMPs
 	 * - convert CAST(IS_BOOL,x) into BOOL(x)
-         * - pre-evaluate constant function calls
+	 * - pre-evaluate constant function calls
+	 * - eliminate FETCH $GLOBALS followed by FETCH_DIM/UNSET_DIM/ISSET_ISEMPTY_DIM
+	 * - change $i++ to ++$i where possible
 	 */
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);
@@ -948,21 +951,8 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
-	/* pass 2:
-	 * - convert non-numeric constants to numeric constants in numeric operators
-	 * - optimize constant conditional JMPs
-	 */
-	if (ZEND_OPTIMIZER_PASS_2 & ctx->optimization_level) {
-		zend_optimizer_pass2(op_array);
-		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_2) {
-			zend_dump_op_array(op_array, 0, "after pass 2", NULL);
-		}
-	}
-
-	/* pass 3:
-	 * - optimize $i = $i+expr to $i+=expr
+	/* pass 3: (Jump optimization)
 	 * - optimize series of JMPs
-	 * - change $i++ to ++$i where possible
 	 */
 	if (ZEND_OPTIMIZER_PASS_3 & ctx->optimization_level) {
 		zend_optimizer_pass3(op_array, ctx);
