@@ -688,7 +688,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_str_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, search)
 	ZEND_ARG_INFO(0, replace)
 	ZEND_ARG_INFO(0, subject)
-	ZEND_ARG_TYPE_INFO(1, replace_count, IS_LONG, 0)
+	ZEND_ARG_INFO(1, replace_count)
 ZEND_END_ARG_INFO()
 
 #define arginfo_str_ireplace arginfo_str_replace
@@ -718,7 +718,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_parse_str, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, encoded_string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(1, result, IS_ARRAY, 0)
+	ZEND_ARG_INFO(1, result)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_getcsv, 0, 1, IS_ARRAY, 0)

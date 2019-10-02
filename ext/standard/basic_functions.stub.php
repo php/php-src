@@ -516,17 +516,19 @@ function stripslashes(string $str): string {}
  * @param string|array $search
  * @param string|array $replace
  * @param string|array $subject
+ * @param int $replace_count
  * @return string|array
  */
-function str_replace($search, $replace, $subject, int &$replace_count = UNKNOWN) {}
+function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
 
 /**
  * @param string|array $search
  * @param string|array $replace
  * @param string|array $subject
+ * @param int $replace_count
  * @return string|array
  */
-function str_ireplace($search, $replace, $subject, int &$replace_count = UNKNOWN) {}
+function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
@@ -543,7 +545,8 @@ function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
  */
 function setlocale(int $category, $locales, string ...$rest) {}
 
-function parse_str(string $encoded_string, array &$result): void {}
+/** @param array $result */
+function parse_str(string $encoded_string, &$result): void {}
 
 function str_getcsv(string $string, string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): array {}
 
