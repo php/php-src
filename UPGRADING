@@ -268,6 +268,10 @@ PHP 7.4 UPGRADE NOTES
   . Added mb_str_split() function, which provides the same functionality as
     str_split(), but operating on code points rather than bytes.
     RFC: https://wiki.php.net/rfc/mb_str_split
+  . Added mbstring.regex_retry_limit ini setting defaulting to 1000000. It
+    limits the amount of backtracking that may be performed during one mbregex
+    match and thus protects against exponential backtracking attacks (ReDOS).
+    This setting only takes effect when linking against oniguruma >= 2.8.0.
 
 - OPcache:
   . Support for preloading code has been added.
