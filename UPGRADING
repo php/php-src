@@ -109,6 +109,9 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to read an out-of-bounds string offset.
 
     RFC: https://wiki.php.net/rfc/engine_warnings
+  . Unexpected characters in source files (such as null bytes outside of
+    strings) will now result in a ParseError exception instead of a compile
+    warning.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type

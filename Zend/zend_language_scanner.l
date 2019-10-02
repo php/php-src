@@ -2834,14 +2834,7 @@ nowdoc_scan_done:
 		RETURN_TOKEN(END);
 	}
 
-	if (!SCNG(heredoc_scan_ahead)) {
-		zend_error(E_COMPILE_WARNING, "Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
-	}
-	if (PARSER_MODE()) {
-		goto restart;
-	} else {
-		RETURN_TOKEN(T_BAD_CHARACTER);
-	}
+	RETURN_TOKEN(T_BAD_CHARACTER);
 }
 
 */
