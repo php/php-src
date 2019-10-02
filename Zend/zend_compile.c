@@ -7676,6 +7676,9 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 
 		while (last && last->kind == ZEND_AST_STMT_LIST) {
 			zend_ast_list *list = zend_ast_get_list(last);
+			if (list->children == 0) {
+				break;
+			}
 			last = list->child[list->children-1];
 		}
 		if (last && last->kind == ZEND_AST_HALT_COMPILER) {
