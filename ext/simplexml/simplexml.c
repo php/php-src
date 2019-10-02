@@ -1206,7 +1206,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 		}
 
 		while (node) {
-			if (node->children != NULL || node->prev != NULL || node->next != NULL) {
+			if (node->children != NULL || node->prev != NULL || node->next != NULL || xmlIsBlankNode(node)) {
 				SKIP_TEXT(node);
 			} else {
 				if (node->type == XML_TEXT_NODE) {
