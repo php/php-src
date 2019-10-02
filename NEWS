@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78535 (auto_detect_line_endings value not parsed as bool).
     (bugreportuser)
+  . Fixed bug #78620 (Out of memory error). (cmb)
 
 - Exif :
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
