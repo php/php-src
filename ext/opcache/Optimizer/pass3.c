@@ -52,10 +52,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	int i;
 	ALLOCA_FLAG(use_heap);
 
-	if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
-		return;
-	}
-
 	jmp_hitlist = (zend_op**)do_alloca(sizeof(zend_op*)*op_array->last, use_heap);
 	opline = op_array->opcodes;
 	end =  opline + op_array->last;
