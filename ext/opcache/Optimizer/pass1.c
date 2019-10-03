@@ -69,7 +69,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					goto constant_binary_op;
 				}
 			}
-			goto try_compound_assignment;
+			break;
 
 		case ZEND_MOD:
 		case ZEND_SL:
@@ -95,7 +95,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					goto constant_binary_op;
 				}
 			}
-			goto try_compound_assignment;
+			break;
 
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -112,64 +112,11 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					goto constant_binary_op;
 				}
 			}
-			goto try_compound_assignment;
+			break;
 
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
-			if (opline->op1_type == IS_CONST &&
-				opline->op2_type == IS_CONST) {
-
-				goto constant_binary_op;
-			} else {
-				zend_op *next_opline;
-
-try_compound_assignment:
-				next_opline = opline + 1;;
-				while (next_opline < end && next_opline->opcode == ZEND_NOP) {
-					++next_opline;
-				}
-
-				if (next_opline >= end || next_opline->opcode != ZEND_ASSIGN) {
-					break;
-				}
-
-				/* change $i=expr+$i to $i=$i+expr so that the following optimization
-				 * works on it. Only do this if we are ignoring operator overloading,
-				 * as operand order might be significant otherwise. */
-				if ((ctx->optimization_level & ZEND_OPTIMIZER_IGNORE_OVERLOADING)
-					&& (opline->op2_type & (IS_VAR | IS_CV))
-					&& opline->op2.var == next_opline->op1.var &&
-					(opline->opcode == ZEND_ADD ||
-					 opline->opcode == ZEND_MUL ||
-					 opline->opcode == ZEND_BW_OR ||
-					 opline->opcode == ZEND_BW_AND ||
-					 opline->opcode == ZEND_BW_XOR)) {
-					zend_uchar tmp_type = opline->op1_type;
-					znode_op tmp = opline->op1;
-
-					if (opline->opcode != ZEND_ADD
-							|| (opline->op1_type == IS_CONST
-								&& Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_ARRAY)) {
-						/* protection from array add: $a = array + $a is not commutative! */
-						COPY_NODE(opline->op1, opline->op2);
-						COPY_NODE(opline->op2, tmp);
-					}
-				}
-
-				if (ZEND_IS_BINARY_ASSIGN_OP_OPCODE(opline->opcode)
-				    && (opline->op1_type & (IS_VAR | IS_CV))
-					&& opline->op1.var == next_opline->op1.var
-					&& opline->op1_type == next_opline->op1_type) {
-					opline->extended_value = opline->opcode;
-					opline->opcode = ZEND_ASSIGN_OP;
-					COPY_NODE(opline->result, next_opline->result);
-					MAKE_NOP(next_opline);
-					opline++;
-				}
-			}
-			break;
-
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
