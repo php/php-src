@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
     (eriklundin)
 
+- Standard:
+  . Fixed bug #76859 (stream_get_line skips data if used with data-generating 
+    filter). (kkopachev)
+
 03 Oct 2019, PHP 7.4.0RC3
 
 - Core:
