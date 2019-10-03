@@ -579,6 +579,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								MAKE_NOP(opline);
 								++(*opt_count);
 								break;
+							case ZEND_ISSET_ISEMPTY_CV:
 							case ZEND_ISSET_ISEMPTY_VAR:
 							case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 							case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -587,6 +588,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_TYPE_CHECK:
 							case ZEND_DEFINED:
 							case ZEND_IN_ARRAY:
+							case ZEND_ARRAY_KEY_EXISTS:
 								if (opline->opcode == ZEND_BOOL_NOT) {
 									break;
 								}
