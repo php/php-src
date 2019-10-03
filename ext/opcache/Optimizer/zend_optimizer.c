@@ -939,10 +939,8 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - constant casting (ADD expects numbers, CONCAT strings, etc)
 	 * - constant expression evaluation
 	 * - optimize constant conditional JMPs
-	 * - convert CAST(IS_BOOL,x) into BOOL(x)
 	 * - pre-evaluate constant function calls
 	 * - eliminate FETCH $GLOBALS followed by FETCH_DIM/UNSET_DIM/ISSET_ISEMPTY_DIM
-	 * - change $i++ to ++$i where possible
 	 */
 	if (ZEND_OPTIMIZER_PASS_1 & ctx->optimization_level) {
 		zend_optimizer_pass1(op_array, ctx);

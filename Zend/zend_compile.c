@@ -671,8 +671,21 @@ void zend_do_free(znode *op1) /* {{{ */
 		}
 
 		if (opline->result_type == IS_TMP_VAR && opline->result.var == op1->u.op.var) {
-			if (opline->opcode == ZEND_BOOL || opline->opcode == ZEND_BOOL_NOT) {
-				return;
+			switch (opline->opcode) {
+				case ZEND_BOOL:
+				case ZEND_BOOL_NOT:
+					/* boolean resuls don't have to be freed */
+					return;
+				case ZEND_POST_INC_STATIC_PROP:
+				case ZEND_POST_DEC_STATIC_PROP:
+				case ZEND_POST_INC_OBJ:
+				case ZEND_POST_DEC_OBJ:
+				case ZEND_POST_INC:
+				case ZEND_POST_DEC:
+					/* convert $i++ to ++$i */
+					opline->opcode -= 2;
+					opline->result_type = IS_UNUSED;
+					return;
 			}
 		}
 
@@ -3268,8 +3281,12 @@ int zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /*
 	}
 
 	zend_compile_expr(&arg_node, args->child[0]);
-	opline = zend_emit_op_tmp(result, ZEND_CAST, &arg_node, NULL);
-	opline->extended_value = type;
+	if (type == _IS_BOOL) {
+		opline = zend_emit_op_tmp(result, ZEND_BOOL, &arg_node, NULL);
+	} else {
+		opline = zend_emit_op_tmp(result, ZEND_CAST, &arg_node, NULL);
+		opline->extended_value = type;
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -7295,11 +7312,13 @@ void zend_compile_cast(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
-	opline->extended_value = ast->attr;
-
-	if (ast->attr == IS_NULL) {
+	if (ast->attr == _IS_BOOL) {
+		opline = zend_emit_op_tmp(result, ZEND_BOOL, &expr_node, NULL);
+	} else if (ast->attr == IS_NULL) {
 		zend_error(E_COMPILE_ERROR, "The (unset) cast is no longer supported");
+	} else {
+		opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
+		opline->extended_value = ast->attr;
 	}
 }
 /* }}} */

@@ -24,10 +24,8 @@
  * - constant casting (ADD expects numbers, CONCAT strings, etc)
  * - constant expression evaluation
  * - optimize constant conditional JMPs
- * - convert CAST(IS_BOOL,x) into BOOL(x)
  * - pre-evaluate constant function calls
  * - eliminate FETCH $GLOBALS followed by FETCH_DIM/UNSET_DIM/ISSET_ISEMPTY_DIM
- * - change $i++ to ++$i where possible
  */
 
 #include "php.h"
@@ -248,12 +246,6 @@ constant_binary_op:
 					}
 					break;
 				}
-			}
-
-			if (opline->extended_value == _IS_BOOL) {
-				/* T = CAST(X, IS_BOOL) => T = BOOL(X) */
-				opline->opcode = ZEND_BOOL;
-				opline->extended_value = 0;
 			}
 			break;
 
@@ -702,27 +694,6 @@ constant_binary_op:
 				}
 				SET_UNUSED((opline + 1)->op2);
 				MAKE_NOP(opline);
-			}
-			break;
-
-		case ZEND_POST_INC_STATIC_PROP:
-		case ZEND_POST_DEC_STATIC_PROP:
-		case ZEND_POST_INC_OBJ:
-		case ZEND_POST_DEC_OBJ:
-		case ZEND_POST_INC:
-		case ZEND_POST_DEC: {
-				/* POST_INC, FREE => PRE_INC */
-				zend_op *next_op = opline + 1;
-
-				if (next_op >= end) {
-					break;
-				}
-				if (next_op->opcode == ZEND_FREE &&
-					next_op->op1.var == opline->result.var) {
-					MAKE_NOP(next_op);
-					opline->opcode -= 2;
-					opline->result_type = IS_UNUSED;
-				}
 			}
 			break;
 
