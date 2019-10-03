@@ -22,7 +22,7 @@
 /* pass 1 (Simple local optimizations)
  * - persistent constant substitution (true, false, null, etc)
  * - constant casting (ADD expects numbers, CONCAT strings, etc)
- * - simlple constant subexpression elimination
+ * - constant expression evaluation
  * - optimize constant conditional JMPs
  * - convert CAST(IS_BOOL,x) into BOOL(x)
  * - pre-evaluate constant function calls
