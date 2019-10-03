@@ -688,28 +688,6 @@ constant_binary_op:
 					MAKE_NOP(opline);
 					break;
 				}
-			} else if ((opline + 1)->opcode == ZEND_JMP) {
-				if (ZEND_OP2_JMP_ADDR(opline) == ZEND_OP1_JMP_ADDR(opline + 1)) {
-					/* JMPZ(X, L1), JMP(L1) => NOP, JMP(L1) */
-					if (opline->op1_type == IS_CV) {
-						opline->opcode = ZEND_CHECK_VAR;
-						opline->op2.num = 0;
-					} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-						opline->opcode = ZEND_FREE;
-						opline->op2.num = 0;
-					} else {
-						MAKE_NOP(opline);
-					}
-					break;
-				} else {
-					if (opline->opcode == ZEND_JMPZ) {
-						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, ZEND_OP1_JMP_ADDR(opline + 1));
-					} else {
-						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, ZEND_OP2_JMP_ADDR(opline));
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP1_JMP_ADDR(opline + 1));
-					}
-					opline->opcode = ZEND_JMPZNZ;
-				}
 			}
 			collect_constants = 0;
 			break;

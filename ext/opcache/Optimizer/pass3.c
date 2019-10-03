@@ -85,6 +85,30 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					MAKE_NOP(opline);
 					break;
 				}
+
+				if (opline > op_array->opcodes &&
+				    ((opline-1)->opcode == ZEND_JMPZ ||
+				     (opline-1)->opcode == ZEND_JMPNZ)) {
+				    if (ZEND_OP2_JMP_ADDR(opline-1) == target) {
+						if ((opline-1)->op1_type == IS_CV) {
+							(opline-1)->opcode = ZEND_CHECK_VAR;
+							(opline-1)->op2.num = 0;
+						} else if ((opline-1)->op1_type & (IS_TMP_VAR|IS_VAR)) {
+							(opline-1)->opcode = ZEND_FREE;
+							(opline-1)->op2.num = 0;
+						} else {
+							MAKE_NOP(opline-1);
+						}
+				    } else {
+						if ((opline-1)->opcode == ZEND_JMPZ) {
+							(opline-1)->extended_value = ZEND_OPLINE_TO_OFFSET((opline-1), target);
+						} else {
+							(opline-1)->extended_value = ZEND_OPLINE_TO_OFFSET((opline-1), ZEND_OP2_JMP_ADDR(opline-1));
+							ZEND_SET_OP_JMP_ADDR((opline-1), (opline-1)->op2, target);
+						}
+						(opline-1)->opcode = ZEND_JMPZNZ;
+				    }
+				}
 				break;
 
 			case ZEND_JMP_SET:
@@ -200,7 +224,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						  JMPZ_EX(X,L1+1) */
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-						break;
 					} else if (target->opcode == INV_EX_COND_EX(opline->opcode) &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1)) &&
@@ -210,7 +233,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						  JMPZ_EX(X,L1+1) */
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-						break;
 					} else if (target->opcode == ZEND_BOOL &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1))) {
@@ -219,7 +241,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						opline->result.var = target->result.var;
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-						break;
 					} else {
 						break;
 					}
