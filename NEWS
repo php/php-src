@@ -56,6 +56,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
     (peter279k)
+  . Fixed bug #76859 (stream_get_line skips data if used with data-generating 
+    filter). (kkopachev)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
