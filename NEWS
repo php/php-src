@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #77335 (PHP is preventing SIGALRM from specifying SA_RESTART).
     (Nikita)
 
+- MySQLi:
+  . Fixed bug #76809 (SSL settings aren't respected when persistent connections 
+    are used). (fabiomsouto)
+
 - SimpleXML:
   . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
     (eriklundin)
