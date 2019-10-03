@@ -359,8 +359,6 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 			case PSFS_PASS_ON:
 				/* If any data is consumed, we cannot rely upon the existing read buffer,
 				   as the filtered data must replace the existing data, so invalidate the cache */
-				/* note that changes here should be reflected in
-				   main/streams/streams.c::php_stream_fill_read_buffer */
 				stream->writepos = 0;
 				stream->readpos = 0;
 

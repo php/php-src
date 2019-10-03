@@ -33,6 +33,8 @@ PHP                                                                        NEWS
     (Thomas Calvet)
   . Fixed bug #78612 (strtr leaks memory when integer keys are used and the
     subject string shorter). (Nikita)
+  . Fixed bug #76859 (stream_get_line skips data if used with data-generating 
+    filter). (kkopachev)
 
 26 Sep 2019, PHP 7.3.10
 

@@ -524,10 +524,6 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
 
-		/* Invalidate the existing cache, otherwise reads can fail, see note in
-		   main/streams/filter.c::_php_stream_filter_append */
-		stream->writepos = stream->readpos = 0;
-
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
