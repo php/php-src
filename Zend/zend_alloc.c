@@ -1723,11 +1723,16 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	 * We allocate them with 2MB size granularity, to avoid many
 	 * reallocations when they are extended by small pieces
 	 */
-	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+	size_t alignment = MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE);
 #else
-	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+	size_t alignment = REAL_PAGE_SIZE;
 #endif
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, alignment);
 	void *ptr;
+
+	if (UNEXPECTED(new_size < size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", size, alignment);
+	}
 
 #if ZEND_MM_LIMIT
 	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {
