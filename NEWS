@@ -50,6 +50,10 @@ PHP                                                                        NEWS
     (krakjoe)
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
+- Session:
+  . Fixed bug #78624 (session_gc return value for user defined session 
+    handlers). (bshaffer)
+
 - SimpleXML:
   . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
     (eriklundin)
