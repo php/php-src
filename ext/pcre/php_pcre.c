@@ -783,6 +783,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
 				poptions |= PREG_JIT;
 			}
+		} else if (rc == PCRE2_ERROR_NOMEMORY) {
+			php_error_docref(NULL, E_WARNING,
+				"Allocation of JIT memory failed, PCRE JIT will be disabled. "
+				"This is likely caused by security restrictions. "
+				"Either grant PHP permission to allocate executable memory, or set pcre.jit=0");
+			PCRE_G(jit) = 0;
 		} else {
 			pcre2_get_error_message(rc, error, sizeof(error));
 			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
