@@ -1603,13 +1603,17 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem) /* {{{ */
 {
 	zval zv;
+	int ret;
 
 	if (CG(increment_lineno)) {
 		CG(zend_lineno)++;
 		CG(increment_lineno) = 0;
 	}
 
-	return lex_scan(&zv, elem);
+	ret = lex_scan(&zv, elem);
+	ZEND_ASSERT(!EG(exception) || ret == T_ERROR);
+	return ret;
+
 }
 /* }}} */
 
