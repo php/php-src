@@ -1343,9 +1343,38 @@ next_target:
 						break;
 					}
 				}
-				/* JMPZ(X,L1), JMP(L2) -> JMPZNZ(X,L1,L2) */
+
 				if (target->opcode == ZEND_JMP &&
 					!(target_block->flags & ZEND_BB_PROTECTED)) {
+
+					if (!(target_block->flags & ZEND_BB_TARGET)) {
+						int next = (target_block - blocks) + 1;
+
+						while (next < cfg->blocks_count && !(blocks[next].flags & ZEND_BB_REACHABLE)) {
+							/* find used one */
+							next++;
+						}
+						if (next < cfg->blocks_count &&
+						    block->successors[0] == next) {
+							/* JMPZ(X,L1) JMP(L2) L1: -> JMPNZ(X,L2) NOP*/
+
+							last_op->opcode = INV_COND(last_op->opcode);
+
+							DEL_SOURCE(block, block->successors[1]);
+							block->successors[0] = target_block->successors[0];
+							block->successors[1] = next;
+							ADD_SOURCE(block, block->successors[1]);
+
+							target_block->flags &= ~ZEND_BB_REACHABLE;
+							MAKE_NOP(target);
+
+							blocks[next].flags |= ZEND_BB_FOLLOW;
+
+							break;
+						}
+					}
+
+					/* JMPZ(X,L1), JMP(L2) -> JMPZNZ(X,L1,L2) */
 					DEL_SOURCE(block, block->successors[1]);
 					if (last_op->opcode == ZEND_JMPZ) {
 						block->successors[1] = target_block->successors[0];
