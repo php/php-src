@@ -7781,6 +7781,7 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
 			zend_compile_expr(&value_node, value_ast);
 			if (i == 0) {
+				opnum_init = get_next_op_number();
 				opline = zend_emit_op_tmp(result, ZEND_INIT_ARRAY, NULL, NULL);
 			}
 			opline = zend_emit_op(NULL, ZEND_ADD_ARRAY_UNPACK, &value_node, NULL);
