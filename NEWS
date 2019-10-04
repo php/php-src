@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     fastcgi_finish_request). (Sergei Turchanov)
 
 - MBString:
+  . Fixed bug #78633 (Heap buffer overflow (read) in mb_eregi). (cmb)
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)
   . Fixed bug #78609 (mb_check_encoding() no longer supports stringable

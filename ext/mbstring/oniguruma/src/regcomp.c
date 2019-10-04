@@ -724,8 +724,8 @@ add_compile_string(UChar* s, int mb_len, int str_len,
     COP(reg)->exact_n.s = p;
   }
   else {
+    xmemset(COP(reg)->exact.s, 0, sizeof(COP(reg)->exact.s));
     xmemcpy(COP(reg)->exact.s, s, (size_t )byte_len);
-    COP(reg)->exact.s[byte_len] = '\0';
   }
 
   return 0;

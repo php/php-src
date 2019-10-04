@@ -2900,6 +2900,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
           DATA_ENSURE(0);
           q = lowbuf;
           while (len-- > 0) {
+            if (ps >= endp) goto fail;
             if (*ps != *q) goto fail;
             ps++; q++;
           }
