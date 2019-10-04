@@ -190,14 +190,15 @@ PS_GC_FUNC(user)
 
 	if (Z_TYPE(retval) == IS_LONG) {
 		convert_to_long(&retval);
-		return Z_LVAL(retval);
+		*nrdels = Z_LVAL(retval);
+	} else if (Z_TYPE(retval) == IS_TRUE) {
+		/* This is for older API compatibility */
+		*nrdels = 1;
+	} else {
+		/* Anything else is some kind of error */
+		*nrdels = -1; // Error
 	}
-	/* This is for older API compatibility */
-	if (Z_TYPE(retval) == IS_TRUE) {
-		return 1;
-	}
-	/* Anything else is some kind of error */
-	return -1; // Error
+	return *nrdels;
 }
 
 PS_CREATE_SID_FUNC(user)

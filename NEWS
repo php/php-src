@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #78272 (calling preg_match() before pcntl_fork() will freeze
     child process). (Nikita)
 
+- Session:
+  . Fixed bug #78624 (session_gc return value for user defined session 
+    handlers). (bshaffer)
+
 - Standard:
   . Fixed bug #76342 (file_get_contents waits twice specified timeout).
     (Thomas Calvet)
