@@ -26,6 +26,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h"
+#include "zend_interfaces.h"
 
 #if HAVE_XML
 
@@ -308,15 +309,18 @@ PHP_MINIT_FUNCTION(xml)
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "XmlParser", xml_parser_methods);
-	ce.create_object = xml_parser_create_object;
-	ce.ce_flags |= ZEND_ACC_FINAL;
 	xml_parser_ce = zend_register_internal_class(&ce);
+	xml_parser_ce->create_object = xml_parser_create_object;
+	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL;
+	xml_parser_ce->serialize = zend_class_serialize_deny;
+	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
 	xml_parser_object_handlers.free_obj = xml_parser_free_obj;
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
+	xml_parser_object_handlers.clone_obj = NULL;
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_NO_MEMORY", XML_ERROR_NO_MEMORY, CONST_CS|CONST_PERSISTENT);
