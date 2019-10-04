@@ -2,7 +2,7 @@
 grapheme()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '65.0') >= 0) die('skip for ICU < 65.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '65.0') < 0) die('skip for ICU >= 65.0'); ?>
 --FILE--
 <?php
 
@@ -784,8 +784,8 @@ function check_result($result, $expected) {
 --EXPECT--
 function grapheme_strlen($string) {}
 
-"hindi" in devanagari strlen 3
-"ab" + "hindi" + "cde" strlen 8
+"hindi" in devanagari strlen 2
+"ab" + "hindi" + "cde" strlen 7
 "" strlen 0
 char_a_ring_nfd strlen 1
 char_a_ring_nfd + "bc" strlen 3
