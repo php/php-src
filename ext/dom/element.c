@@ -498,16 +498,17 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 	}
 
 	if (attrp->type == XML_NAMESPACE_DECL) {
+		// attrp is an xmlNodePtr but must be casted to xmlNsPtr in this branch based on type
 		xmlNsPtr curns;
 
-		curns = xmlNewNs(NULL, attrp->name, NULL);
+		curns = xmlNewNs(NULL, ((xmlNsPtr)attrp)->href, NULL);
 		if (attrp->children) {
-			curns->prefix = xmlStrdup((xmlChar *) attrp->children);
+			curns->prefix = xmlStrdup(((xmlNsPtr)attrp)-> prefix);
 		}
 		if (attrp->children) {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) attrp->children, attrp->name);
+			attrp = xmlNewDocNode(nodep->doc, NULL, ((xmlNsPtr)attrp)->prefix, attrp->name);
 		} else {
-			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", attrp->name);
+			attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", ((xmlNsPtr)attrp)->href);
 		}
 		attrp->type = XML_NAMESPACE_DECL;
 		attrp->parent = nodep;
