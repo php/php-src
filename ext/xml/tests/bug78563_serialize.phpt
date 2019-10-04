@@ -1,5 +1,5 @@
 --TEST--
-Bug #78563: parsers should not be clonable
+Bug #78563: parsers should not be serializable
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
