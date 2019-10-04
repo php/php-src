@@ -49,6 +49,12 @@ var_dump($_SESSION);
 $_SESSION['Bar'] = 'Foo';
 session_write_close();
 
+echo "Garbage collection..\n";
+session_id($session_id);
+session_start();
+var_dump(session_gc());
+session_write_close();
+
 echo "Cleanup..\n";
 session_id($session_id);
 session_start();
@@ -99,6 +105,12 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
+Close [%s,PHPSESSID]
+Garbage collection..
+Open [%s,PHPSESSID]
+Read [%s,%s]
+int(0)
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
 Close [%s,PHPSESSID]
 Cleanup..
