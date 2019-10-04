@@ -2,8 +2,7 @@
 locale_get_display_name() icu >= 64.0
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '64.0') < 0) die('skip for ICU >= 64.0'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '65.0') >= 0) die('skip for ICU < 65.0'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '65.0') < 0) die('skip for ICU >= 65.0'); ?>
 --FILE--
 <?php
 
@@ -128,7 +127,7 @@ disp_locale=de :  display_name=Slowenisch #Italien, NEDIS_ROJAZ_1901#
 -----------------
 locale='i-enochian'
 disp_locale=en :  display_name=i-enochian #Private-Use=i-enochian#
-disp_locale=fr :  display_name=i-enochian #Usage privé=i-enochian#
+disp_locale=fr :  display_name=i-enochian #usage privé=i-enochian#
 disp_locale=de :  display_name=i-enochian #Privatnutzung=i-enochian#
 -----------------
 locale='zh-hakka'
@@ -198,7 +197,7 @@ disp_locale=de :  display_name=Japanisch
 -----------------
 locale='i-enochian'
 disp_locale=en :  display_name=i-enochian #Private-Use=i-enochian#
-disp_locale=fr :  display_name=i-enochian #Usage privé=i-enochian#
+disp_locale=fr :  display_name=i-enochian #usage privé=i-enochian#
 disp_locale=de :  display_name=i-enochian #Privatnutzung=i-enochian#
 -----------------
 locale='zh-Hant'
@@ -273,12 +272,12 @@ disp_locale=de :  display_name=Spanisch #Lateinamerika#
 -----------------
 locale='de-CH-x-phonebk'
 disp_locale=en :  display_name=German #Switzerland, Private-Use=phonebk#
-disp_locale=fr :  display_name=allemand #Suisse, Usage privé=phonebk#
+disp_locale=fr :  display_name=allemand #Suisse, usage privé=phonebk#
 disp_locale=de :  display_name=Deutsch #Schweiz, Privatnutzung=phonebk#
 -----------------
 locale='az-Arab-x-AZE-derbend'
 disp_locale=en :  display_name=Azerbaijani #Arabic, Private-Use=aze-derbend#
-disp_locale=fr :  display_name=azéri #arabe, Usage privé=aze-derbend#
+disp_locale=fr :  display_name=azéri #arabe, usage privé=aze-derbend#
 disp_locale=de :  display_name=Aserbaidschanisch #Arabisch, Privatnutzung=aze-derbend#
 -----------------
 locale='zh-min'
@@ -293,12 +292,12 @@ disp_locale=de :  display_name=Chinesisch #MIN, NAN_HANT_CN#
 -----------------
 locale='x-whatever'
 disp_locale=en :  display_name=x-whatever #Private-Use=whatever#
-disp_locale=fr :  display_name=x-whatever #Usage privé=whatever#
+disp_locale=fr :  display_name=x-whatever #usage privé=whatever#
 disp_locale=de :  display_name=x-whatever #Privatnutzung=whatever#
 -----------------
 locale='qaa-Qaaa-QM-x-southern'
 disp_locale=en :  display_name=qaa #Qaaa, QM, Private-Use=southern#
-disp_locale=fr :  display_name=qaa #Qaaa, QM, Usage privé=southern#
+disp_locale=fr :  display_name=qaa #Qaaa, QM, usage privé=southern#
 disp_locale=de :  display_name=qaa #Qaaa, QM, Privatnutzung=southern#
 -----------------
 locale='sr-Latn-QM'
@@ -318,7 +317,7 @@ disp_locale=de :  display_name=Englisch #Vereinigte Staaten, attribute=islamcal#
 -----------------
 locale='zh-CN-a-myExt-x-private'
 disp_locale=en :  display_name=Chinese #China, a=myext, Private-Use=private#
-disp_locale=fr :  display_name=chinois #Chine, a=myext, Usage privé=private#
+disp_locale=fr :  display_name=chinois #Chine, a=myext, usage privé=private#
 disp_locale=de :  display_name=Chinesisch #China, a=myext, Privatnutzung=private#
 -----------------
 locale='en-a-myExt-b-another'
