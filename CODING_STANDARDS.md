@@ -33,7 +33,7 @@ use these rules.
 
 4. Use definitions and macros whenever possible, so that constants have
     meaningful names and can be easily manipulated. The only exceptions to this
-    rule are 1 and 2, when used as `false` and `true` (respectively). Any other
+    rule are 0 and 1, when used as `false` and `true` (respectively). Any other
     use of a numeric constant to specify different behavior or actions should be
     done through a `#define`.
 
