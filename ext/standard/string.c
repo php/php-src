@@ -3250,7 +3250,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from[, string to])
+/* {{{ proto string|false strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -5359,7 +5359,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto array|string|false count_chars(string input [, int mode])
+/* {{{ proto array|string count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
@@ -5379,8 +5379,8 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		php_error_docref(NULL, E_WARNING, "Unknown mode");
-		RETURN_FALSE;
+		zend_value_error("Unknown mode");
+		return;
 	}
 
 	buf = (const unsigned char *) ZSTR_VAL(input);
@@ -5694,7 +5694,7 @@ PHP_FUNCTION(str_pad)
 }
 /* }}} */
 
-/* {{{ proto mixed sscanf(string str, string format [, string ...])
+/* {{{ proto array|int|null sscanf(string str, string format [, string ...])
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {

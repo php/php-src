@@ -404,10 +404,10 @@ function bin2hex(string $data): string {}
 function hex2bin(string $data) {}
 
 /** @return int|false */
-function strspn(string $str, string $mask, int $start = UNKNOWN, int $len = UNKNOWN) {}
+function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
 
 /** @return int|false */
-function strcspn(string $str, string $mask, int $start = UNKNOWN, int $len = UNKNOWN) {}
+function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
 
 #if HAVE_NL_LANGINFO
 /** @return string|false */
@@ -430,14 +430,14 @@ function explode(string $separator, string $str, int $limit = PHP_INT_MAX): arra
  * @param string $glue Optional - defaults to empty string
  * @param array $pieces
  */
-function implode($glue, $pieces): string {}
+function implode($glue, $pieces = UNKNOWN): string {}
 
 /**
  * @param string $str Optional - defaults to previous string
  * @param string $token
  * @return string|false
  */
-function strtok($str, $token) {}
+function strtok(string $str, string $token = UNKNOWN) {}
 
 function strtoupper(string $str): string {}
 
@@ -451,10 +451,10 @@ function dirname(string $path, int $levels = 1): string {}
 function pathinfo(string $path, int $options = UNKNOWN) {}
 
 /** @return string|false */
-function stristr(string $haystack, string $needle, bool $part = false) {}
+function stristr(string $haystack, string $needle, bool $before_needle = false) {}
 
 /** @return string|false */
-function strstr(string $haystack, string $needle, bool $part = false) {}
+function strstr(string $haystack, string $needle, bool $before_needle = false) {}
 
 /** @return int|false */
 function strpos(string $haystack, string $needle, int $offset = 0) {}
@@ -497,12 +497,16 @@ function lcfirst(string $str): string {}
 
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
-/** @param string|array $from */
-function strtr(string $str, $from, string $to = UNKNOWN): string {}
+/**
+ * @param string|array $from
+ * @return string|false
+ */
+function strtr(string $str, $from, string $to = UNKNOWN) {}
 
 function strrev(string $str): string {}
 
-function similar_text(string $str1, string $str2, float &$percent = UNKNOWN): int {}
+/** @param float $percent */
+function similar_text(string $str1, string $str2, &$percent = null): int {}
 
 function addcslashes(string $str, string $charlist): string {}
 
@@ -543,7 +547,7 @@ function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
  * @param string|array $locales
  * @return string|false
  */
-function setlocale(int $category, $locales, string ...$rest) {}
+function setlocale(int $category, $locales, ...$rest) {}
 
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
@@ -552,6 +556,7 @@ function str_getcsv(string $string, string $delimiter = ',', string $enclosure =
 
 function str_repeat(string $input, int $mult): string {}
 
+/** @return array|string */
 function count_chars(string $input, int $mode = 0) {}
 
 function strnatcmp(string $s1, string $s2): int {}
@@ -565,8 +570,8 @@ function substr_count(string $haystack, string $needle, int $offset = 0, int $le
 
 function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
-/** @return array|int */
-function sscanf(string $str, string $format, string &...$vars) {}
+/** @return array|int|null */
+function sscanf(string $str, string $format, &...$vars) {}
 
 function str_rot13(string $str): string {}
 
@@ -586,7 +591,7 @@ function str_split(string $str, int $split_length = 1): array {}
 function strpbrk(string $haystack, string $char_list) {}
 
 /** @return int|false */
-function substr_compare(string $main_str, string $str, int $offset, int $length = UNKNOWN, bool $case_sensitivity = false) {}
+function substr_compare(string $main_str, string $str, int $offset, int $length = UNKNOWN, bool $case_insensitivity = false) {}
 
 function utf8_encode(string $data): string {}
 
