@@ -2054,6 +2054,9 @@ static void zend_compile_memoized_expr(znode *result, zend_ast *expr) /* {{{ */
 		} else if (result->op_type == IS_TMP_VAR) {
 			zend_emit_op_tmp(&memoized_result, ZEND_COPY_TMP, result, NULL);
 		} else {
+			if (result->op_type == IS_CONST) {
+				Z_TRY_ADDREF(result->u.constant);
+			}
 			memoized_result = *result;
 		}
 
@@ -7540,7 +7543,11 @@ void zend_compile_coalesce(znode *result, zend_ast *ast) /* {{{ */
 /* }}} */
 
 static void znode_dtor(zval *zv) {
-	efree(Z_PTR_P(zv));
+	znode *node = Z_PTR_P(zv);
+	if (node->op_type == IS_CONST) {
+		zval_ptr_dtor_nogc(&node->u.constant);
+	}
+	efree(node);
 }
 
 void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
