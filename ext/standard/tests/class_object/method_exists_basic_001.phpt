@@ -50,7 +50,7 @@ foreach ($methods as $method) {
 echo "Done";
 ?>
 --EXPECT--
- ---(Using string class name)---
+---(Using string class name)---
 Does C::inherit_pub exist? bool(true)
 Does C::inherit_prot exist? bool(true)
 Does C::inherit_priv exist? bool(false)
@@ -68,10 +68,10 @@ Does C::non_existent exist? bool(false)
  ---(Using object)---
 Does C::inherit_pub exist? bool(true)
 Does C::inherit_prot exist? bool(true)
-Does C::inherit_priv exist? bool(false)
+Does C::inherit_priv exist? bool(true)
 Does C::inherit_static_pub exist? bool(true)
 Does C::inherit_static_prot exist? bool(true)
-Does C::inherit_static_priv exist? bool(false)
+Does C::inherit_static_priv exist? bool(true)
 Does C::pub exist? bool(true)
 Does C::prot exist? bool(true)
 Does C::priv exist? bool(true)

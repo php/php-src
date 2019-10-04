@@ -1148,7 +1148,11 @@ ZEND_FUNCTION(method_exists)
 	zend_string_release_ex(lcname, 0);
 
 	if (func) {
-		RETURN_BOOL(!(func->common.fn_flags & ZEND_ACC_PRIVATE) || func->common.scope == ce);
+		/* Exclude shadow properties when checking a method on a specific class. Include
+		 * them when checking an object, as method_exists() generally ignores visibility.
+		 * TODO: Should we use EG(scope) for the object case instead? */
+		RETURN_BOOL(Z_TYPE_P(klass) == IS_OBJECT
+			|| !(func->common.fn_flags & ZEND_ACC_PRIVATE) || func->common.scope == ce);
 	}
 
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
