@@ -6,7 +6,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not on Windows');
 }
 // Skip if being run by root
-$filename = __DIR__."/006_root_check.tmp";
+$filename = __FILE__.".root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {

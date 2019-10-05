@@ -8,7 +8,7 @@ if (!extension_loaded('sockets')) {
 if (PHP_OS == 'Darwin') {
     die('skip Not for OSX');
 }
-$filename = __DIR__ . '/006_root_check.tmp';
+$filename = __FILE__ . '.root_check.tmp';
 $fp = fopen($filename, 'w');
 fclose($fp);
 if (fileowner($filename) == 0) {
@@ -28,7 +28,7 @@ socket_close($socket);
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/006_root_check.tmp');
+if (file_exists(__FILE__ . '.root_check.tmp')) unlink(__FILE__ . '.root_check.tmp');
 --EXPECTF--
 Warning: socket_set_option(): unable to set socket option [%d]: Permission denied in %s on line %d
 --CREDITS--

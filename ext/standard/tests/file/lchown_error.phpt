@@ -5,7 +5,7 @@ Test lchown() function : error functionality
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
 if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
 // Skip if being run by root
-$filename = __DIR__."/lchow_error_root_check.tmp";
+$filename = __FILE__.".root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {

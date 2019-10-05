@@ -7,7 +7,7 @@ if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
 }
 
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/symlink_link_linkinfo_is_link6_check_root.tmp";
+$filename = __FILE__.".check_root.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {

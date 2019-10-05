@@ -5,7 +5,7 @@ Test copy() function: usage variations - destination dir access perms
 if(substr(PHP_OS, 0, 3) == 'WIN')
   die("skip do not run on Windows");
 // Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/copy_variation15_root_check.tmp";
+$filename = __FILE__.".root_check.tmp";
 $fp = fopen($filename, 'w');
 fclose($fp);
 if(fileowner($filename) == 0) {
