@@ -9,3 +9,8 @@ function json_decode(string $json, ?bool $assoc = null, int $depth = 512, int $o
 function json_last_error(): int {}
 
 function json_last_error_msg(): string {}
+
+interface JsonSerializable
+{
+    public function jsonSerialize();
+}
