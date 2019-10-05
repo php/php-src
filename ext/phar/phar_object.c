@@ -1388,6 +1388,10 @@ PHP_METHOD(Phar, __destruct)
 	zval *zobj = ZEND_THIS;
 	phar_archive_object *phar_obj = (phar_archive_object*)((char*)Z_OBJ_P(zobj) - Z_OBJ_P(zobj)->handlers->offset);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (phar_obj->archive && phar_obj->archive->is_persistent) {
 		zend_hash_str_del(&PHAR_G(phar_persist_map), (const char *) phar_obj->archive, sizeof(phar_obj->archive));
 	}
@@ -4024,6 +4028,10 @@ PHP_METHOD(Phar, hasMetadata)
 {
 	PHAR_ARCHIVE_OBJECT();
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL(Z_TYPE(phar_obj->archive->metadata) != IS_UNDEF);
 }
 /* }}} */
@@ -4102,6 +4110,10 @@ PHP_METHOD(Phar, delMetadata)
 
 	if (PHAR_G(readonly) && !phar_obj->archive->is_data) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Write operations disabled by the php.ini setting phar.readonly");
+		return;
+	}
+
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
