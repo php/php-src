@@ -5,8 +5,8 @@ Bug #78563: parsers should not be clonable
 --FILE--
 <?php
 
-	$parser = xml_parser_create();
-	clone $parser;
+$parser = xml_parser_create();
+clone $parser;
 
 ?>
 ===DONE===

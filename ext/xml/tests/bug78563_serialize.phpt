@@ -5,8 +5,8 @@ Bug #78563: parsers should not be serializable
 --FILE--
 <?php
 
-	$parser = xml_parser_create();
-	serialize($parser);
+$parser = xml_parser_create();
+serialize($parser);
 
 ?>
 ===DONE===
