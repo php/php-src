@@ -1,42 +1,5 @@
 #!/bin/sh -eu
 
-sudo apt-get update
-sudo apt-get -y install \
-  build-essential \
-  autoconf \
-  bison \
-  re2c \
-  pkg-config \
-  libxml2-dev \
-  libsqlite3-dev \
-  libkrb5-dev \
-  libpng-dev \
-  libwebp-dev \
-  libjpeg-dev \
-  libfreetype6-dev \
-  libc-client-dev \
-  libbz2-dev \
-  libenchant-dev \
-  libgmp-dev \
-  libldap2-dev \
-  libonig-dev \
-  libsystemd-dev \
-  liblmdb-dev \
-  libtokyocabinet-dev \
-  libgdbm-dev \
-  libxpm-dev \
-  libsasl2-dev \
-  libpq-dev \
-  libpspell-dev \
-  libedit-dev \
-  libsnmp-dev \
-  libsodium-dev \
-  libtidy-dev \
-  libxslt1-dev \
-  libzip-dev \
-  libcurl4-openssl-dev \
-  libffi-dev
-
 cd "${0%/*}/../.."
 
 ./buildconf
@@ -59,7 +22,7 @@ cd "${0%/*}/../.."
   --with-curl \
   --enable-dba \
   --with-lmdb  \
-  --with-gdbm \
+  --with-qdbm \
   --with-tcadb \
   --with-enchant \
   --enable-exif \
