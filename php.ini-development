@@ -1692,6 +1692,11 @@ zend.assertions = 1
 ; Default: 100000
 ;mbstring.regex_stack_limit=100000
 
+; This directive specifies maximum retry count for mbstring regular expressions. It is similar
+; to the pcre.backtrack_limit for PCRE.
+; Default: 1000000
+;mbstring.regex_retry_limit=1000000
+
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
 ; a gd image. The warning will then be displayed as notices
