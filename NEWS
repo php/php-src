@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
 
+- DOM:
+  . Add property DOMXPath::$registerNodeNamespaces and constructor argument
+    that allow global flag to configure query() or evaluate() calls.
+
 - GD:
   . Replaced gd resources with objects. (Mark Randall)
   . Removed deprecated image2wbmp(). (cmb)
@@ -30,7 +34,7 @@ PHP                                                                        NEWS
   . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
 
 - MySQLi:
-  . Fixed bug #76809 (SSL settings aren't respected when persistent connections 
+  . Fixed bug #76809 (SSL settings aren't respected when persistent connections
     are used). (fabiomsouto)
 
 - mysqlnd:
@@ -51,11 +55,11 @@ PHP                                                                        NEWS
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
 - Session:
-  . Fixed bug #78624 (session_gc return value for user defined session 
+  . Fixed bug #78624 (session_gc return value for user defined session
     handlers). (bshaffer)
 
 - SimpleXML:
-  . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
+  . Fixed bug #75245 (Don't set content of elements with only whitespaces).
     (eriklundin)
 
 - sodium:
@@ -64,7 +68,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
     (peter279k)
-  . Fixed bug #76859 (stream_get_line skips data if used with data-generating 
+  . Fixed bug #76859 (stream_get_line skips data if used with data-generating
     filter). (kkopachev)
 
 - tidy:
