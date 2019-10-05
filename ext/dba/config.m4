@@ -553,20 +553,15 @@ PHP_DBA_STD_RESULT(dbm)
 
 dnl Bundled modules that should be enabled by default if any other option is
 dnl enabled
-if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$with_cdb_external" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
+if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
   php_dba_enable=yes
 else
   php_dba_enable=no
 fi
 
 PHP_ARG_WITH([cdb],,
-  [AS_HELP_STRING([[--without-cdb]],
-    [DBA: Disable CDB support (bundled)])],
-  [$php_dba_enable],
-  [no])
-PHP_ARG_WITH([cdb_external],,
-  [AS_HELP_STRING([[--with-external-cdb]],
-    [DBA: CDB support (external)])],
+  [AS_HELP_STRING([[--without-cdb[=DIR]]],
+    [DBA: CDB support (bundled)])],
   [$php_dba_enable],
   [no])
 
@@ -583,23 +578,40 @@ PHP_ARG_ENABLE([flatfile],,
   [no])
 
 dnl CDB
-if test "$PHP_CDB_EXTERNAL" != "no"; then
-  PKG_CHECK_MODULES([CDB], [libcdb])
-
-  PHP_EVAL_INCLINE($CDB_CFLAGS)
-  PHP_EVAL_LIBLINE($CDB_LIBS, DBA_SHARED_LIBADD)
-
-    AC_DEFINE(HAVE_DBA, 1, [ ])
-    AC_DEFINE(HAVE_CDB, 1, [ ])
-  AC_DEFINE(DBA_CDB, 1, [ ])
-elif test "$PHP_CDB" = "yes"; then
+if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
         AC_DEFINE(DBA_CDB, 1, [ ])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"
-  PHP_DBA_STD_RESULT
+elif test "$PHP_CDB" != "no"; then
+  PHP_DBA_STD_BEGIN
+  for i in $PHP_CDB /usr/local /usr; do
+    if test -f "$i/include/cdb.h"; then
+      THIS_PREFIX=$i
+      THIS_INCLUDE=$i/include/cdb.h
+      break
+fi
+  done
+
+  if test -n "$THIS_INCLUDE"; then
+    for LIB in cdb c; do
+      PHP_CHECK_LIBRARY($LIB, cdb_read, [
+        AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE(DBA_CDB, 1, [ ])
+        THIS_LIBS=$LIB
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+      if test -n "$THIS_LIBS"; then
+        break
       fi
+    done
+  fi
+
+  PHP_DBA_STD_ASSIGN
+  PHP_DBA_STD_CHECK
+  PHP_DBA_STD_ATTACH
+      fi
+PHP_DBA_STD_RESULT(cdb)
 
 dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then

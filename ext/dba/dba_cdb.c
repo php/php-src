@@ -35,7 +35,9 @@
 # include "libcdb/cdb_make.h"
 # include "libcdb/uint32.h"
 #else
-#include "cdb.h"
+# ifdef CDB_INCLUDE_FILE
+#  include CDB_INCLUDE_FILE
+# endif
 #endif
 
 #define CDB_INFO \
