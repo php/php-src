@@ -68,6 +68,6 @@ cd "${0%/*}/../.."
   --with-pear \
   --enable-werror \
   --enable-phar \
-  --enable-zend-test=shared
+  --enable-zend-test=shared \
   "$@"
 
