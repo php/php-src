@@ -3,6 +3,18 @@ parameters:
 
 steps:
   - script: |
+      if ! grep -r -E '^deb.*xenial-backports.*' /etc/apt/sources.list* > /dev/null; then
+      cat <<EOT > /etc/apt/sources.list.d/xenial-backports.list
+      deb http://archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+      EOT
+      fi
+
+      cat <<EOT > /etc/apt/preferences.d/xenial-backports-lmdb
+      Package: liblmdb-dev liblmdb0 lmdb-doc
+      Pin: release a=xenial-backports
+      Pin-Priority: 500
+      EOT
+
       sudo apt-get update -y | true
       sudo apt install bison \
                        re2c \
@@ -34,5 +46,8 @@ steps:
                        postgresql \
                        postgresql-contrib \
                        llvm \
+                       liblmdb-dev \
+                       libqdbm-dev \
+                       libtokyocabinet-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
