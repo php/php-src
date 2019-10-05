@@ -4,12 +4,12 @@ parameters:
 steps:
   - script: |
       if ! grep -r -E '^deb.*xenial-backports.*' /etc/apt/sources.list* > /dev/null; then
-      cat <<EOT > /etc/apt/sources.list.d/xenial-backports.list
+      cat <<EOT | sudo tee /etc/apt/sources.list.d/xenial-backports.list > /dev/null
       deb http://archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
       EOT
       fi
 
-      cat <<EOT > /etc/apt/preferences.d/xenial-backports-lmdb
+      cat <<EOT | sudo tee /etc/apt/preferences.d/xenial-backports-lmdb > /dev/null
       Package: liblmdb-dev liblmdb0 lmdb-doc
       Pin: release a=xenial-backports
       Pin-Priority: 500
