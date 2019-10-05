@@ -140,10 +140,10 @@ if test "$PHP_QDBM" != "no"; then
   PHP_EVAL_INCLINE($QDBM_CFLAGS)
   PHP_EVAL_LIBLINE($QDBM_LIBS, DBA_SHARED_LIBADD)
 
-    AC_DEFINE(HAVE_DBA, 1, [ ])
-    AC_DEFINE(HAVE_QDBM, 1, [ ])
-        AC_DEFINE(DBA_QDBM, 1, [ ])
-      fi
+  AC_DEFINE(HAVE_DBA, 1, [ ])
+  AC_DEFINE(HAVE_QDBM, 1, [ ])
+  AC_DEFINE(DBA_QDBM, 1, [ ])
+fi
 
 
 dnl GDBM
@@ -215,10 +215,10 @@ if test "$PHP_TCADB" != "no"; then
   PHP_EVAL_INCLINE($TCADB_CFLAGS)
   PHP_EVAL_LIBLINE($TCADB_LIBS, DBA_SHARED_LIBADD)
 
-    AC_DEFINE(HAVE_DBA, 1, [ ])
-    AC_DEFINE(HAVE_TCADB, 1, [ ])
-		AC_DEFINE(DBA_TCADB, 1, [ ])
-	  fi
+  AC_DEFINE(HAVE_DBA, 1, [ ])
+  AC_DEFINE(HAVE_TCADB, 1, [ ])
+  AC_DEFINE(DBA_TCADB, 1, [ ])
+fi
 
 dnl LMDB
 if test "$PHP_LMDB" != "no"; then
@@ -227,9 +227,9 @@ if test "$PHP_LMDB" != "no"; then
   PHP_EVAL_INCLINE($LMDB_CFLAGS)
   PHP_EVAL_LIBLINE($LMDB_LIBS, DBA_SHARED_LIBADD)
 
-    AC_DEFINE(HAVE_DBA, 1, [ ])
-		AC_DEFINE(DBA_LMDB, 1, [ ])
-	  fi
+  AC_DEFINE(HAVE_DBA, 1, [ ])
+  AC_DEFINE(DBA_LMDB, 1, [ ])
+fi
 
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
@@ -581,7 +581,7 @@ dnl CDB
 if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
-        AC_DEFINE(DBA_CDB, 1, [ ])
+  AC_DEFINE(DBA_CDB, 1, [ ])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"
 elif test "$PHP_CDB" != "no"; then
@@ -591,7 +591,7 @@ elif test "$PHP_CDB" != "no"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/cdb.h
       break
-fi
+    fi
   done
 
   if test -n "$THIS_INCLUDE"; then
@@ -610,7 +610,7 @@ fi
   PHP_DBA_STD_ASSIGN
   PHP_DBA_STD_CHECK
   PHP_DBA_STD_ATTACH
-      fi
+fi
 PHP_DBA_STD_RESULT(cdb)
 
 dnl INIFILE
