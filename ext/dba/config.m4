@@ -140,14 +140,9 @@ if test "$PHP_QDBM" != "no"; then
   PHP_EVAL_INCLINE($QDBM_CFLAGS)
   PHP_EVAL_LIBLINE($QDBM_LIBS, DBA_SHARED_LIBADD)
 
-  PHP_CHECK_LIBRARY(qdbm, dpopen,
-  [
     AC_DEFINE(HAVE_DBA, 1, [ ])
     AC_DEFINE(HAVE_QDBM, 1, [ ])
         AC_DEFINE(DBA_QDBM, 1, [ ])
-  ], [ ], [
-    $QDBM_LIBS
-  ])
       fi
 
 
@@ -220,14 +215,9 @@ if test "$PHP_TCADB" != "no"; then
   PHP_EVAL_INCLINE($TCADB_CFLAGS)
   PHP_EVAL_LIBLINE($TCADB_LIBS, DBA_SHARED_LIBADD)
 
-  PHP_CHECK_LIBRARY(tokyocabinet, tcadbopen,
-  [
     AC_DEFINE(HAVE_DBA, 1, [ ])
     AC_DEFINE(HAVE_TCADB, 1, [ ])
 		AC_DEFINE(DBA_TCADB, 1, [ ])
-  ], [ ], [
-    $TCADB_LIBS
-  ])
 	  fi
 
 dnl LMDB
@@ -237,13 +227,8 @@ if test "$PHP_LMDB" != "no"; then
   PHP_EVAL_INCLINE($LMDB_CFLAGS)
   PHP_EVAL_LIBLINE($LMDB_LIBS, DBA_SHARED_LIBADD)
 
-  PHP_CHECK_LIBRARY(lmdb, mdb_env_open,
-  [
     AC_DEFINE(HAVE_DBA, 1, [ ])
 		AC_DEFINE(DBA_LMDB, 1, [ ])
-  ], [ ], [
-    $LMDB_LIBS
-  ])
 	  fi
 
 dnl Berkeley specific (library and version test)
@@ -568,15 +553,20 @@ PHP_DBA_STD_RESULT(dbm)
 
 dnl Bundled modules that should be enabled by default if any other option is
 dnl enabled
-if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
+if test "$PHP_DBA" != "no" || test "$HAVE_DBA" = "1" || test "$with_cdb" = "yes" || test "$with_cdb_external" = "yes" || test "$enable_inifile" = "yes" || test "$enable_flatfile" = "yes"; then
   php_dba_enable=yes
 else
   php_dba_enable=no
 fi
 
 PHP_ARG_WITH([cdb],,
-  [AS_HELP_STRING([[--without-cdb[=DIR]]],
-    [DBA: CDB support (bundled)])],
+  [AS_HELP_STRING([[--without-cdb]],
+    [DBA: Disable CDB support (bundled)])],
+  [$php_dba_enable],
+  [no])
+PHP_ARG_WITH([cdb_external],,
+  [AS_HELP_STRING([[--with-external-cdb]],
+    [DBA: CDB support (external)])],
   [$php_dba_enable],
   [no])
 
@@ -593,27 +583,22 @@ PHP_ARG_ENABLE([flatfile],,
   [no])
 
 dnl CDB
-if test "$PHP_CDB" = "yes"; then
-  AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
-  AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
-  AC_DEFINE(DBA_CDB, 1, [ ])
-  cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
-  THIS_RESULT="builtin"
-  PHP_DBA_STD_RESULT
-elif test "$PHP_CDB" != "no"; then
-  PKG_CHECK_MODULES([CDB], [cdb])
+if test "$PHP_CDB_EXTERNAL" != "no"; then
+  PKG_CHECK_MODULES([CDB], [libcdb])
 
   PHP_EVAL_INCLINE($CDB_CFLAGS)
   PHP_EVAL_LIBLINE($CDB_LIBS, DBA_SHARED_LIBADD)
 
-  PHP_CHECK_LIBRARY(cdb, cdb_read,
-  [
     AC_DEFINE(HAVE_DBA, 1, [ ])
     AC_DEFINE(HAVE_CDB, 1, [ ])
+  AC_DEFINE(DBA_CDB, 1, [ ])
+elif test "$PHP_CDB" = "yes"; then
+  AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
+  AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
         AC_DEFINE(DBA_CDB, 1, [ ])
-  ], [ ], [
-    $CDB_LIBS
-  ])
+  cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
+  THIS_RESULT="builtin"
+  PHP_DBA_STD_RESULT
       fi
 
 dnl INIFILE
