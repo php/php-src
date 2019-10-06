@@ -1142,8 +1142,6 @@ static const func_info_t func_infos[] = {
 	F1("bcpowmod",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("bcpow",									MAY_BE_STRING),
 	F1("bcsqrt",								MAY_BE_NULL | MAY_BE_STRING),
-	F0("bccomp",								MAY_BE_LONG),
-	F0("bcscale",								MAY_BE_LONG),
 
 	/* ext/exif */
 	F1("exif_tagname",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -1177,23 +1175,8 @@ static const func_info_t func_infos[] = {
 	F1("bind_textdomain_codeset",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 
-	/* ext/ctype */
-	F0("ctype_alnum",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_alpha",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_cntrl",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_digit",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_lower",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_graph",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_print",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_punct",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_space",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_upper",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ctype_xdigit",							MAY_BE_FALSE | MAY_BE_TRUE),
-
 	/* ext/fileinfo */
 	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F0("finfo_close",							MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("finfo_set_flags",						MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("finfo_file",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("finfo_buffer",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("mime_content_type",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
