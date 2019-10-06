@@ -63,6 +63,7 @@
 #include "sockaddr_conv.h"
 #include "multicast.h"
 #include "sendrecvmsg.h"
+#include "sockets_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(sockets)
 
@@ -96,215 +97,6 @@ static int le_socket;
 
 static int le_addrinfo;
 #define le_addrinfo_name php_sockets_le_addrinfo_name
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_select, 0, 0, 4)
-	ZEND_ARG_INFO(1, read_fds)
-	ZEND_ARG_INFO(1, write_fds)
-	ZEND_ARG_INFO(1, except_fds)
-	ZEND_ARG_INFO(0, tv_sec)
-	ZEND_ARG_INFO(0, tv_usec)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create_listen, 0, 0, 1)
-	ZEND_ARG_INFO(0, port)
-	ZEND_ARG_INFO(0, backlog)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_accept, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_nonblock, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_block, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_listen, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, backlog)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_write, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, buf)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_read, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_getsockname, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(1, addr)
-	ZEND_ARG_INFO(1, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_getpeername, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(1, addr)
-	ZEND_ARG_INFO(1, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create, 0, 0, 3)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, protocol)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_connect, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, addr)
-	ZEND_ARG_INFO(0, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_strerror, 0, 0, 1)
-	ZEND_ARG_INFO(0, errno)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_bind, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, addr)
-	ZEND_ARG_INFO(0, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recv, 0, 0, 4)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(1, buf)
-	ZEND_ARG_INFO(0, len)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_send, 0, 0, 4)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, buf)
-	ZEND_ARG_INFO(0, len)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recvfrom, 0, 0, 5)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(1, buf)
-	ZEND_ARG_INFO(0, len)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(1, name)
-	ZEND_ARG_INFO(1, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendto, 0, 0, 5)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, buf)
-	ZEND_ARG_INFO(0, len)
-	ZEND_ARG_INFO(0, flags)
-	ZEND_ARG_INFO(0, addr)
-	ZEND_ARG_INFO(0, port)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_get_option, 0, 0, 3)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, level)
-	ZEND_ARG_INFO(0, optname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_set_option, 0, 0, 4)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, level)
-	ZEND_ARG_INFO(0, optname)
-	ZEND_ARG_INFO(0, optval)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_SOCKETPAIR
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_create_pair, 0, 0, 4)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, protocol)
-	ZEND_ARG_INFO(1, fd)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_SHUTDOWN
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_shutdown, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, how)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_last_error, 0, 0, 0)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_clear_error, 0, 0, 0)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_import_stream, 0, 0, 1)
-	ZEND_ARG_INFO(0, stream)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_export_stream, 0, 0, 1)
-	ZEND_ARG_INFO(0, socket)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendmsg, 0, 0, 3)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, msghdr)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recvmsg, 0, 0, 3)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(1, msghdr)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_cmsg_space, 0, 0, 2)
-	ZEND_ARG_INFO(0, level)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_addrinfo_lookup, 0, 0, 1)
-	ZEND_ARG_INFO(0, host)
-	ZEND_ARG_INFO(0, service)
-	ZEND_ARG_INFO(0, hints)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_addrinfo_connect, 0, 0, 1)
-	ZEND_ARG_INFO(0, addr)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_addrinfo_bind, 0, 0, 1)
-	ZEND_ARG_INFO(0, addr)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_addrinfo_explain, 0, 0, 1)
-	ZEND_ARG_INFO(0, addr)
-ZEND_END_ARG_INFO()
-
-#ifdef PHP_WIN32
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, socket)
-	ZEND_ARG_INFO(0, target_pid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_import, 0, 0, 1)
-	ZEND_ARG_INFO(0, info_id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_release, 0, 0, 1)
-	ZEND_ARG_INFO(0, info_id)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
 
 static PHP_GINIT_FUNCTION(sockets);
 static PHP_GSHUTDOWN_FUNCTION(sockets);
@@ -960,15 +752,16 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
-	zval			*r_array, *w_array, *e_array, *sec;
+	zval			*r_array, *w_array, *e_array;
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
 	PHP_SOCKET		max_fd = 0;
 	int				retval, sets = 0;
-	zend_long			usec = 0;
+	zend_long		sec, usec = 0;
+	zend_bool		sec_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!l!|l", &r_array, &w_array, &e_array, &sec, &sec_is_null, &usec) == FAILURE) {
 		return;
 	}
 
@@ -988,15 +781,13 @@ PHP_FUNCTION(socket_select)
 	PHP_SAFE_MAX_FD(max_fd, 0); /* someone needs to make this look more like stream_socket_select */
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
-	if (sec != NULL) {
-		zend_long s = zval_get_long(sec);
-
+	if (sec_is_null != 1) {
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
-			tv.tv_sec = s + (usec / 1000000);
+			tv.tv_sec = sec + (usec / 1000000);
 			tv.tv_usec = usec % 1000000;
 		} else {
-			tv.tv_sec = s;
+			tv.tv_sec = sec;
 			tv.tv_usec = usec;
 		}
 
