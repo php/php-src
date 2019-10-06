@@ -167,6 +167,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	zend_bool internal_encoding_set;
 	zend_bool http_output_set;
 	zend_bool http_input_set;
+#if HAVE_MBREGEX
+    zend_long regex_retry_limit;
+#endif
 ZEND_END_MODULE_GLOBALS(mbstring)
 
 #define MBSTRG(v) ZEND_MODULE_GLOBALS_ACCESSOR(mbstring, v)
