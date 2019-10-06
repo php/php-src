@@ -1151,7 +1151,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-static void mbstring_internal_encoding_changed_hook() {
+static void mbstring_internal_encoding_changed_hook(void) {
 	/* One of the internal_encoding / input_encoding / output_encoding ini settings changed. */
 	if (!MBSTRG(internal_encoding_set)) {
 		const char *encoding = php_get_internal_encoding();
