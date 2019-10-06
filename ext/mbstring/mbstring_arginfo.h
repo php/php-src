@@ -160,14 +160,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_INFO(0, convmap)
+	ZEND_ARG_TYPE_INFO(0, convmap, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, is_hex, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_decode_numericentity, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_INFO(0, convmap)
+	ZEND_ARG_TYPE_INFO(0, convmap, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
