@@ -669,9 +669,8 @@ static const func_info_t func_infos[] = {
 	FN("preg_replace_callback",	                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("preg_filter",				            MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("preg_split",				            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	FN("preg_quote",				            MAY_BE_NULL | MAY_BE_STRING),
+	FN("preg_quote",				            MAY_BE_STRING),
 	F1("preg_grep",				                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	F0("preg_last_error",			            MAY_BE_NULL | MAY_BE_LONG),
 
 	/* ext/mysqli */
 	F1("mysqli_connect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
@@ -778,31 +777,19 @@ static const func_info_t func_infos[] = {
 	F1("curl_init",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("curl_copy_handle",                      MAY_BE_NULL | MAY_BE_RESOURCE),
 	F1("curl_version",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F0("curl_setopt",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("curl_setopt_array",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	FN("curl_exec",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("curl_getinfo",                          MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F1("curl_error",                            MAY_BE_NULL | MAY_BE_STRING),
-	F0("curl_errno",                            MAY_BE_NULL | MAY_BE_LONG),
-	F0("curl_close",                            MAY_BE_NULL),
+	F1("curl_error",                            MAY_BE_STRING),
 	F1("curl_strerror",                         MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_multi_strerror",                   MAY_BE_NULL | MAY_BE_STRING),
-	F0("curl_reset",                            MAY_BE_NULL),
 	F1("curl_escape",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("curl_unescape",                         MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F0("curl_pause",                            MAY_BE_NULL | MAY_BE_LONG),
 	F1("curl_multi_init",                       MAY_BE_RESOURCE),
-	F0("curl_multi_add_handle",                 MAY_BE_NULL | MAY_BE_LONG),
-	F0("curl_multi_remove_handle",              MAY_BE_NULL | MAY_BE_LONG),
-	F0("curl_multi_select",                     MAY_BE_NULL | MAY_BE_LONG),
-	F0("curl_multi_exec",                       MAY_BE_NULL | MAY_BE_LONG),
 	FN("curl_multi_getcontent",                 MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_multi_info_read",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_RESOURCE),
 	F0("curl_multi_close",                      MAY_BE_NULL | MAY_BE_FALSE),
 	F0("curl_multi_setopt",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("curl_share_init",                       MAY_BE_RESOURCE),
-	F0("curl_share_close",                      MAY_BE_NULL),
-	F0("curl_share_setopt",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("curl_file_create",                      MAY_BE_OBJECT),
 
 	/* ext/mbstring */
@@ -866,7 +853,6 @@ static const func_info_t func_infos[] = {
 	/* ext/iconv */
 	F1("iconv",                                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iconv_get_encoding",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
-	F0("iconv_set_encoding",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("iconv_strlen",                          MAY_BE_FALSE | MAY_BE_LONG),
 	F1("iconv_substr",                          MAY_BE_FALSE | MAY_BE_STRING),
 	F0("iconv_strpos",                          MAY_BE_FALSE | MAY_BE_LONG),
@@ -878,7 +864,6 @@ static const func_info_t func_infos[] = {
 	/* ext/json */
 	F1("json_encode",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("json_decode",                           MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F0("json_last_error",                       MAY_BE_LONG),
 	F1("json_last_error_msg",                   MAY_BE_STRING),
 
 	/* ext/xml */
