@@ -1585,6 +1585,10 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 	size_t n, i, len, beg, end;
 	OnigUChar *str;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (MBREX(search_regs) != NULL && Z_TYPE(MBREX(search_str)) == IS_STRING) {
 		array_init(return_value);
 
@@ -1619,6 +1623,10 @@ PHP_FUNCTION(mb_ereg_search_getregs)
    Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETVAL_LONG(MBREX(search_pos));
 }
 /* }}} */
