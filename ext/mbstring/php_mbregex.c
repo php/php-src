@@ -897,7 +897,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &arg_pattern, &arg_pattern_len, &string, &string_len, &array) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (array != NULL) {
@@ -1036,7 +1036,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						&replace, &replace_len,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		} else {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sfs|s",
@@ -1044,7 +1044,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						&arg_replace_fci, &arg_replace_fci_cache,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
-				RETURN_FALSE;
+				return;
 			}
 		}
 
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(mb_split)
 	zend_long count = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (count > 0) {
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(mb_ereg_match)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s",
 		                          &arg_pattern, &arg_pattern_len, &string, &string_len,
 		                          &option_str, &option_str_len)==FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 
 		if (option_str != NULL) {
@@ -1683,7 +1683,7 @@ PHP_FUNCTION(mb_regex_set_options)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s",
 	                          &string, &string_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (string != NULL) {
 		opt = 0;
