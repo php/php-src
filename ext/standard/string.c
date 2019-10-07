@@ -3024,8 +3024,8 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 		} else {
 			len = ZSTR_LEN(str_key);
 			if (UNEXPECTED(len < 1)) {
-				efree(num_bitset);
-				RETURN_FALSE;
+				php_error_docref(NULL, E_WARNING, "Ignoring replacement of empty string");
+				continue;
 			} else if (UNEXPECTED(len > slen)) {
 				/* skip long patterns */
 				continue;
@@ -3499,6 +3499,7 @@ PHP_FUNCTION(strtr)
 				}
 				replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
+					php_error_docref(NULL, E_WARNING, "Ignoring replacement of empty string");
 					RETVAL_STR_COPY(str);
 				} else if (ZSTR_LEN(str_key) == 1) {
 					RETVAL_STR(php_char_to_str_ex(str,
