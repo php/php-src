@@ -320,13 +320,16 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		}
 	}
 
-	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
-	if (filter == NULL) {
+	/* create the object */
+	if (object_init_ex(&obj, fdat->ce) == FAILURE) {
 		return NULL;
 	}
 
-	/* create the object */
-	object_init_ex(&obj, fdat->ce);
+	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);
+	if (filter == NULL) {
+		zval_ptr_dtor(&obj);
+		return NULL;
+	}
 
 	/* filtername */
 	add_property_string(&obj, "filtername", (char*)filtername);
