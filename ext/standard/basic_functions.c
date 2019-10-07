@@ -1806,7 +1806,7 @@ ZEND_END_ARG_INFO()
 #endif
 /* }}} */
 /* {{{ pack.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pack, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pack, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
@@ -2038,7 +2038,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_context_get_options, 0)
 	ZEND_ARG_INFO(0, stream_or_context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_stream_context_set_option, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_set_option, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream_or_context)
 	ZEND_ARG_INFO(0, wrappername)
 	ZEND_ARG_INFO(0, optionname)

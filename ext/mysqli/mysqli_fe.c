@@ -448,7 +448,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_get_charset,							arginfo_mysqli_only_link)
 #endif
 	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_no_options)
-	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_only_link)
+	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_host_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_proto_info,						arginfo_mysqli_only_link)
