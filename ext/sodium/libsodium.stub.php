@@ -188,7 +188,7 @@ function sodium_hex2bin(string $string_1, $string_2 = UNKNOWN): string {}
 #ifdef sodium_base64_VARIANT_ORIGINAL
 function sodium_bin2base64(string $string, int $id): string {}
 
-function sodium_base642bin(string $string_1, int $id, string $string_2 = UNKNWOWN): string {}
+function sodium_base642bin(string $string_1, int $id, string $string_2 = UNKNOWN): string {}
 #endif
 
 function sodium_crypto_scalarmult_base(string $key): string {}
