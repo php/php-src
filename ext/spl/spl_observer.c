@@ -343,20 +343,20 @@ static int spl_object_storage_compare_info(zval *e1, zval *e2) /* {{{ */
 {
 	spl_SplObjectStorageElement *s1 = (spl_SplObjectStorageElement*)Z_PTR_P(e1);
 	spl_SplObjectStorageElement *s2 = (spl_SplObjectStorageElement*)Z_PTR_P(e2);
-	zval result;
 
-	if (compare_function(&result, &s1->inf, &s2->inf) == FAILURE) {
-		return 1;
-	}
-
-	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
+	return zend_compare(&s1->inf, &s2->inf);
 }
 /* }}} */
 
 static int spl_object_storage_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
-	zend_object *zo1 = (zend_object *)Z_OBJ_P(o1);
-	zend_object *zo2 = (zend_object *)Z_OBJ_P(o2);
+	zend_object *zo1;
+	zend_object *zo2;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
+
+	zo1 = (zend_object *)Z_OBJ_P(o1);
+	zo2 = (zend_object *)Z_OBJ_P(o2);
 
 	if (zo1->ce != spl_ce_SplObjectStorage || zo2->ce != spl_ce_SplObjectStorage) {
 		return 1;
@@ -1325,7 +1325,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
-	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
+	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
 	spl_handler_SplObjectStorage.dtor_obj        = zend_objects_destroy_object;

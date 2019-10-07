@@ -2692,7 +2692,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.write_property = dbstmt_prop_write;
 	pdo_dbstmt_object_handlers.unset_property = dbstmt_prop_delete;
 	pdo_dbstmt_object_handlers.get_method = dbstmt_method_get;
-	pdo_dbstmt_object_handlers.compare_objects = dbstmt_compare;
+	pdo_dbstmt_object_handlers.compare = dbstmt_compare;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
@@ -2718,5 +2718,5 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.get_method = row_method_get;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.get_class_name = row_get_classname;
-	pdo_row_object_handlers.compare_objects = row_compare;
+	pdo_row_object_handlers.compare = row_compare;
 }

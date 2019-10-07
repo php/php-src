@@ -740,13 +740,12 @@ static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *
 		res = zend_hash_exists(ht, ZSTR_EMPTY_ALLOC());
 	} else {
 		zend_string *key;
-		zval key_tmp, result_tmp;
+		zval key_tmp;
 
 		res = 0;
 		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
-			compare_function(&result_tmp, op1, &key_tmp);
-			if (Z_LVAL(result_tmp) == 0) {
+			if (zend_compare(op1, &key_tmp) == 0) {
 				res = 1;
 				break;
 			}

@@ -355,9 +355,10 @@ static ZEND_COLD zend_function *zend_closure_get_constructor(zend_object *object
 }
 /* }}} */
 
-static int zend_closure_compare_objects(zval *o1, zval *o2) /* {{{ */
+static int zend_closure_compare(zval *o1, zval *o2) /* {{{ */
 {
-	return (Z_OBJ_P(o1) != Z_OBJ_P(o2));
+	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
+	return Z_OBJ_P(o1) != Z_OBJ_P(o2);
 }
 /* }}} */
 
@@ -639,7 +640,7 @@ void zend_register_closure_ce(void) /* {{{ */
 	closure_handlers.get_property_ptr_ptr = zend_closure_get_property_ptr_ptr;
 	closure_handlers.has_property = zend_closure_has_property;
 	closure_handlers.unset_property = zend_closure_unset_property;
-	closure_handlers.compare_objects = zend_closure_compare_objects;
+	closure_handlers.compare = zend_closure_compare;
 	closure_handlers.clone_obj = zend_closure_clone;
 	closure_handlers.get_debug_info = zend_closure_get_debug_info;
 	closure_handlers.get_closure = zend_closure_get_closure;

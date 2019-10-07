@@ -82,6 +82,11 @@ static int BreakIterator_compare_objects(zval *object1,
 	BreakIterator_object	*bio1,
 							*bio2;
 
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
+	if (Z_TYPE_P(object1) != Z_TYPE_P(object2)) {
+		return 1; /* object and non-object */
+	}
+
 	bio1 = Z_INTL_BREAKITERATOR_P(object1);
 	bio2 = Z_INTL_BREAKITERATOR_P(object2);
 
@@ -318,7 +323,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
 	BreakIterator_handlers.offset = XtOffsetOf(BreakIterator_object, zo);
-	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;
+	BreakIterator_handlers.compare = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;

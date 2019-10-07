@@ -1375,7 +1375,7 @@ void pdo_dbh_init(void)
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
-	pdo_dbh_object_handlers.compare_objects = dbh_compare;
+	pdo_dbh_object_handlers.compare = dbh_compare;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);

@@ -10,6 +10,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   g. zend_free_op type and should_free argument of zend_get_zval_ptr()
   h. zend_value_error()
   i. get_closure() object handler
+  j. compare_objects() and compare() object handlers
 
 2. Build system changes
   a. Abstract
@@ -75,6 +76,10 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   i. get_closure() object handlers now accept an additional zend_bool parameter
      `check_only`. If it is true, the handler is called to check whether the
      object is callable; in this case the handler should not throw an exception.
+
+  j. compare_objects() handler was removed. Extensions should use compare() object
+     handler instead and check if both arguments are objects and have the same
+     compare hanldler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
 
 ========================
 2. Build system changes

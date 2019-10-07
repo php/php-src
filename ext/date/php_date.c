@@ -1769,7 +1769,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
-	date_object_handlers_date.compare_objects = date_object_compare_date;
+	date_object_handlers_date.compare = date_object_compare_date;
 	date_object_handlers_date.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_date.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_date, 1, date_ce_interface);
@@ -1779,7 +1779,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_immutable = zend_register_internal_class_ex(&ce_immutable, NULL);
 	memcpy(&date_object_handlers_immutable, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
-	date_object_handlers_immutable.compare_objects = date_object_compare_date;
+	date_object_handlers_immutable.compare = date_object_compare_date;
 	date_object_handlers_immutable.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_immutable.get_gc = date_object_get_gc;
 	zend_class_implements(date_ce_immutable, 1, date_ce_interface);
@@ -1826,7 +1826,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
-	date_object_handlers_interval.compare_objects = date_interval_compare_objects;
+	date_object_handlers_interval.compare = date_interval_compare_objects;
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -1890,8 +1890,13 @@ static void date_clone_immutable(zval *object, zval *new_object) /* {{{ */
 
 static int date_object_compare_date(zval *d1, zval *d2) /* {{{ */
 {
-	php_date_obj *o1 = Z_PHPDATE_P(d1);
-	php_date_obj *o2 = Z_PHPDATE_P(d2);
+	php_date_obj *o1;
+	php_date_obj *o2;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(d1, d2);
+
+	o1 = Z_PHPDATE_P(d1);
+	o2 = Z_PHPDATE_P(d2);
 
 	if (!o1->time || !o2->time) {
 		php_error_docref(NULL, E_WARNING, "Trying to compare an incomplete DateTime or DateTimeImmutable object");
@@ -3808,6 +3813,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 } /* }}} */
 
 static int date_interval_compare_objects(zval *o1, zval *o2) {
+	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
 	/* There is no well defined way to compare intervals like P1M and P30D, which may compare
 	 * smaller, equal or greater depending on the point in time at which the interval starts. As
 	 * such, we treat DateInterval objects are non-comparable and emit a warning. */

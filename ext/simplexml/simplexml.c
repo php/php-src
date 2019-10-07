@@ -1286,6 +1286,8 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 	php_sxe_object *sxe1;
 	php_sxe_object *sxe2;
 
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
+
 	sxe1 = Z_SXEOBJ_P(object1);
 	sxe2 = Z_SXEOBJ_P(object2);
 
@@ -2648,7 +2650,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.has_dimension = sxe_dimension_exists;
 	sxe_object_handlers.unset_dimension = sxe_dimension_delete;
 	sxe_object_handlers.get_properties = sxe_get_properties;
-	sxe_object_handlers.compare_objects = sxe_objects_compare;
+	sxe_object_handlers.compare = sxe_objects_compare;
 	sxe_object_handlers.cast_object = sxe_object_cast;
 	sxe_object_handlers.count_elements = sxe_count_elements;
 	sxe_object_handlers.get_debug_info = sxe_get_debug_info;

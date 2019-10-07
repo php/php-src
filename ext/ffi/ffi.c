@@ -4737,7 +4737,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.has_dimension        = zend_fake_has_dimension;
 	zend_ffi_handlers.unset_dimension      = zend_fake_unset_dimension;
 	zend_ffi_handlers.get_method           = zend_ffi_get_func;
-	zend_ffi_handlers.compare_objects      = NULL;
+	zend_ffi_handlers.compare              = NULL;
 	zend_ffi_handlers.cast_object          = NULL;
 	zend_ffi_handlers.get_debug_info       = NULL;
 	zend_ffi_handlers.get_closure          = NULL;
@@ -4768,7 +4768,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_cdata_handlers.get_class_name       = zend_ffi_cdata_get_class_name;
 	zend_ffi_cdata_handlers.do_operation         = zend_ffi_cdata_do_operation;
-	zend_ffi_cdata_handlers.compare_objects      = zend_ffi_cdata_compare_objects;
+	zend_ffi_cdata_handlers.compare              = zend_ffi_cdata_compare_objects;
 	zend_ffi_cdata_handlers.cast_object          = zend_ffi_cdata_cast_object;
 	zend_ffi_cdata_handlers.count_elements       = zend_ffi_cdata_count_elements;
 	zend_ffi_cdata_handlers.get_debug_info       = zend_ffi_cdata_get_debug_info;
@@ -4791,7 +4791,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_value_handlers.unset_dimension      = zend_fake_unset_dimension;
 	zend_ffi_cdata_value_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_cdata_value_handlers.get_class_name       = zend_ffi_cdata_get_class_name;
-	zend_ffi_cdata_value_handlers.compare_objects      = zend_ffi_cdata_compare_objects;
+	zend_ffi_cdata_value_handlers.compare              = zend_ffi_cdata_compare_objects;
 	zend_ffi_cdata_value_handlers.cast_object          = zend_ffi_cdata_cast_object;
 	zend_ffi_cdata_value_handlers.count_elements       = NULL;
 	zend_ffi_cdata_value_handlers.get_debug_info       = zend_ffi_cdata_get_debug_info;
@@ -4814,7 +4814,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.unset_dimension      = zend_ffi_free_unset_dimension;
 	zend_ffi_cdata_free_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_cdata_free_handlers.get_class_name       = zend_ffi_cdata_get_class_name;
-	zend_ffi_cdata_free_handlers.compare_objects      = zend_ffi_cdata_compare_objects;
+	zend_ffi_cdata_free_handlers.compare              = zend_ffi_cdata_compare_objects;
 	zend_ffi_cdata_free_handlers.cast_object          = NULL;
 	zend_ffi_cdata_free_handlers.count_elements       = NULL;
 	zend_ffi_cdata_free_handlers.get_debug_info       = zend_ffi_free_get_debug_info;
@@ -4844,7 +4844,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.unset_dimension      = zend_fake_unset_dimension;
 	zend_ffi_ctype_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_ctype_handlers.get_class_name       = zend_ffi_ctype_get_class_name;
-	zend_ffi_ctype_handlers.compare_objects      = zend_ffi_ctype_compare_objects;
+	zend_ffi_ctype_handlers.compare              = zend_ffi_ctype_compare_objects;
 	zend_ffi_ctype_handlers.cast_object          = NULL;
 	zend_ffi_ctype_handlers.count_elements       = NULL;
 	zend_ffi_ctype_handlers.get_debug_info       = zend_ffi_ctype_get_debug_info;

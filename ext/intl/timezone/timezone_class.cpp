@@ -268,6 +268,9 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 {
 	TimeZone_object		*to1,
 						*to2;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
+
 	to1 = Z_INTL_TIMEZONE_P(object1);
 	to2 = Z_INTL_TIMEZONE_P(object2);
 
@@ -512,7 +515,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 		sizeof TimeZone_handlers);
 	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
-	TimeZone_handlers.compare_objects = TimeZone_compare_objects;
+	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;
 	TimeZone_handlers.dtor_obj = TimeZone_objects_dtor;
 	TimeZone_handlers.free_obj = TimeZone_objects_free;

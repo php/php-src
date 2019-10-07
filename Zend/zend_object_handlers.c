@@ -1546,6 +1546,33 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
 
+	if (Z_TYPE_P(o1) != Z_TYPE_P(o2)) {
+		/* Object and non-object */
+		zval casted;
+		if (Z_TYPE_P(o1) == IS_OBJECT) {
+			ZEND_ASSERT(Z_TYPE_P(o2) != IS_OBJECT);
+			if (Z_OBJ_HT_P(o1)->cast_object) {
+				if (Z_OBJ_HT_P(o1)->cast_object(Z_OBJ_P(o1), &casted, ((Z_TYPE_P(o2) == IS_FALSE || Z_TYPE_P(o2) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(o2))) == FAILURE) {
+					return 1;
+				}
+				int ret = zend_compare(&casted, o2);
+				zval_ptr_dtor(&casted);
+				return ret;
+			}
+		} else {
+			ZEND_ASSERT(Z_TYPE_P(o2) == IS_OBJECT);
+			if (Z_OBJ_HT_P(o2)->cast_object) {
+				if (Z_OBJ_HT_P(o2)->cast_object(Z_OBJ_P(o2), &casted, ((Z_TYPE_P(o1) == IS_FALSE || Z_TYPE_P(o1) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(o1))) == FAILURE) {
+					return -1;
+				}
+				int ret = zend_compare(o1, &casted);
+				zval_ptr_dtor(&casted);
+				return ret;
+			}
+		}
+		return 1;
+	}
+
 	zobj1 = Z_OBJ_P(o1);
 	zobj2 = Z_OBJ_P(o2);
 
@@ -1582,15 +1609,12 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
-					zval result;
+					int ret;
 
-					if (compare_function(&result, p1, p2)==FAILURE) {
+					ret = zend_compare(p1, p2);
+					if (ret != 0) {
 						Z_UNPROTECT_RECURSION_P(o1);
-						return 1;
-					}
-					if (Z_LVAL(result) != 0) {
-						Z_UNPROTECT_RECURSION_P(o1);
-						return Z_LVAL(result);
+						return ret;
 					}
 				} else {
 					Z_UNPROTECT_RECURSION_P(o1);
@@ -1850,13 +1874,12 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_method,					/* get_method */
 	zend_std_get_constructor,				/* get_constructor */
 	zend_std_get_class_name,				/* get_class_name */
-	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
 	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
-	NULL,									/* compare */
+	zend_std_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
 };

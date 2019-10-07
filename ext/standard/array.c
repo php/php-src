@@ -363,7 +363,6 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
-	zval result;
 	zval *first;
 	zval *second;
 
@@ -379,12 +378,7 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 	if (UNEXPECTED(Z_TYPE_P(second) == IS_INDIRECT)) {
 		second = Z_INDIRECT_P(second);
 	}
-	if (compare_function(&result, first, second) == FAILURE) {
-		return 0;
-	}
-
-	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
-	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
+	return zend_compare(first, second);
 }
 /* }}} */
 
