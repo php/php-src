@@ -1626,6 +1626,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
    Retrieve an array mapping available certificate locations */
 PHP_FUNCTION(openssl_get_cert_locations)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	array_init(return_value);
 
 	add_assoc_string(return_value, "default_cert_file", (char *) X509_get_default_cert_file());

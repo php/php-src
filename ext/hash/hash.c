@@ -616,6 +616,10 @@ PHP_FUNCTION(hash_hmac_algos)
 	zend_string *str;
 	const php_hash_ops *ops;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
 		if (ops->is_crypto) {

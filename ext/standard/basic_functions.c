@@ -4636,6 +4636,10 @@ PHP_FUNCTION(print_r)
    Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(PG(connection_status) & PHP_CONNECTION_ABORTED);
 }
 /* }}} */
@@ -4644,6 +4648,10 @@ PHP_FUNCTION(connection_aborted)
    Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(PG(connection_status));
 }
 /* }}} */
