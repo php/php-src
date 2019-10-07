@@ -395,3 +395,204 @@ function assert($assertion, $description = null): bool {}
 
 /** @return int|string|bool|null */
 function assert_options(int $what, $value = UNKNOWN) {}
+
+/* string.c */
+
+function bin2hex(string $data): string {}
+
+/** @return string|false */
+function hex2bin(string $data) {}
+
+/** @return int|false */
+function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+
+/** @return int|false */
+function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+
+#if HAVE_NL_LANGINFO
+/** @return string|false */
+function nl_langinfo(int $item) {}
+#endif
+
+function strcoll(string $str1, string $str2): int {}
+
+function trim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+
+function rtrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+
+function ltrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+
+function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut = false): string {}
+
+function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
+
+/**
+ * @param string $glue Optional - defaults to empty string
+ * @param array $pieces
+ */
+function implode($glue, $pieces = UNKNOWN): string {}
+
+/**
+ * @param string $str Optional - defaults to previous string
+ * @param string $token
+ * @return string|false
+ */
+function strtok(string $str, string $token = UNKNOWN) {}
+
+function strtoupper(string $str): string {}
+
+function strtolower(string $str): string {}
+
+function basename(string $path, string $suffix = ""): string {}
+
+function dirname(string $path, int $levels = 1): string {}
+
+/** @return array|string */
+function pathinfo(string $path, int $options = UNKNOWN) {}
+
+/** @return string|false */
+function stristr(string $haystack, string $needle, bool $before_needle = false) {}
+
+/** @return string|false */
+function strstr(string $haystack, string $needle, bool $before_needle = false) {}
+
+/** @return int|false */
+function strpos(string $haystack, string $needle, int $offset = 0) {}
+
+/** @return int|false */
+function stripos(string $haystack, string $needle, int $offset = 0) {}
+
+/** @return int|false */
+function strrpos(string $haystack, string $needle, int $offset = 0) {}
+
+/** @return int|false */
+function strripos(string $haystack, string $needle, int $offset = 0) {}
+
+/** @return string|false */
+function strrchr(string $haystack, string $needle) {}
+
+function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): string {}
+
+/** @return string|false */
+function substr(string $str, int $start, int $length = UNKNOWN) {}
+
+/**
+ * @param mixed $str
+ * @param mixed $replace
+ * @param mixed $start
+ * @param mixed $length
+ * @return string|array|false
+ */
+function substr_replace($str, $replace, $start, $length = UNKNOWN) {}
+
+function quotemeta(string $str): string {}
+
+function ord(string $character): int {}
+
+function chr(int $codepoint): string {}
+
+function ucfirst(string $str): string {}
+
+function lcfirst(string $str): string {}
+
+function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
+
+/**
+ * @param string|array $from
+ * @return string|false
+ */
+function strtr(string $str, $from, string $to = UNKNOWN) {}
+
+function strrev(string $str): string {}
+
+/** @param float $percent */
+function similar_text(string $str1, string $str2, &$percent = null): int {}
+
+function addcslashes(string $str, string $charlist): string {}
+
+function addslashes(string $str): string {}
+
+function stripcslashes(string $str): string {}
+
+function stripslashes(string $str): string {}
+
+/**
+ * @param string|array $search
+ * @param string|array $replace
+ * @param string|array $subject
+ * @param int $replace_count
+ * @return string|array
+ */
+function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
+
+/**
+ * @param string|array $search
+ * @param string|array $replace
+ * @param string|array $subject
+ * @param int $replace_count
+ * @return string|array
+ */
+function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
+
+function hebrev(string $str, int $max_chars_per_line = 0): string {}
+
+function hebrevc(string $str, int $max_chars_per_line = 0): string {}
+
+function nl2br(string $str, bool $is_xhtml = true): string {}
+
+/** @param mixed $allowable_tags */
+function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
+
+/**
+ * @param string|array $locales
+ * @return string|false
+ */
+function setlocale(int $category, $locales, ...$rest) {}
+
+/** @param array $result */
+function parse_str(string $encoded_string, &$result): void {}
+
+function str_getcsv(string $string, string $delimiter = ',', string $enclosure = '"', string $escape = '\\'): array {}
+
+function str_repeat(string $input, int $mult): string {}
+
+/** @return array|string */
+function count_chars(string $input, int $mode = 0) {}
+
+function strnatcmp(string $s1, string $s2): int {}
+
+function localeconv(): array {}
+
+function strnatcasecmp(string $s1, string $s2): int {}
+
+/** @return int|false */
+function substr_count(string $haystack, string $needle, int $offset = 0, int $length = UNKNOWN) {}
+
+function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
+
+/** @return array|int|null */
+function sscanf(string $str, string $format, &...$vars) {}
+
+function str_rot13(string $str): string {}
+
+function str_shuffle(string $str): string {}
+
+/** @return array|int */
+function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN) {}
+
+#ifdef HAVE_STRFMON
+/** @return string|false */
+function money_format(string $format, float $value) {}
+#endif
+
+function str_split(string $str, int $split_length = 1): array {}
+
+/** @return string|false */
+function strpbrk(string $haystack, string $char_list) {}
+
+/** @return int|false */
+function substr_compare(string $main_str, string $str, int $offset, int $length = UNKNOWN, bool $case_insensitivity = false) {}
+
+function utf8_encode(string $data): string {}
+
+function utf8_decode(string $data): string {}

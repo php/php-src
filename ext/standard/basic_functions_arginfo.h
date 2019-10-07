@@ -516,3 +516,292 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, what, IS_LONG, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bin2hex, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hex2bin, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strspn, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mask, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_strcspn arginfo_strspn
+
+#if HAVE_NL_LANGINFO
+ZEND_BEGIN_ARG_INFO_EX(arginfo_nl_langinfo, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, item, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strcoll, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, character_mask, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_rtrim arginfo_trim
+
+#define arginfo_ltrim arginfo_trim
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_wordwrap, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, width, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, break, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, cut, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_explode, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, separator, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, limit, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_implode, 0, 1, IS_STRING, 0)
+	ZEND_ARG_INFO(0, glue)
+	ZEND_ARG_INFO(0, pieces)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strtok, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, token, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_strtoupper arginfo_base64_encode
+
+#define arginfo_strtolower arginfo_base64_encode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_basename, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, suffix, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dirname, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, levels, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pathinfo, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stristr, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, before_needle, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_strstr arginfo_stristr
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strpos, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stripos arginfo_strpos
+
+#define arginfo_strrpos arginfo_strpos
+
+#define arginfo_strripos arginfo_strpos
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strrchr, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chunk_split, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, chunklen, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, ending, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_substr, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_replace, 0, 0, 3)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, replace)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+#define arginfo_quotemeta arginfo_base64_encode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ord, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, character, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chr, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, codepoint, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_ucfirst arginfo_base64_encode
+
+#define arginfo_lcfirst arginfo_base64_encode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ucwords, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, delimiters, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strtr, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_INFO(0, from)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_strrev arginfo_base64_encode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_similar_text, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+	ZEND_ARG_INFO(1, percent)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_addcslashes, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, charlist, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_addslashes arginfo_base64_encode
+
+#define arginfo_stripcslashes arginfo_base64_encode
+
+#define arginfo_stripslashes arginfo_base64_encode
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_str_replace, 0, 0, 3)
+	ZEND_ARG_INFO(0, search)
+	ZEND_ARG_INFO(0, replace)
+	ZEND_ARG_INFO(0, subject)
+	ZEND_ARG_INFO(1, replace_count)
+ZEND_END_ARG_INFO()
+
+#define arginfo_str_ireplace arginfo_str_replace
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hebrev, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, max_chars_per_line, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_hebrevc arginfo_hebrev
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_nl2br, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, is_xhtml, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strip_tags, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_INFO(0, allowable_tags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_setlocale, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, category, IS_LONG, 0)
+	ZEND_ARG_INFO(0, locales)
+	ZEND_ARG_VARIADIC_INFO(0, rest)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_parse_str, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, encoded_string, IS_STRING, 0)
+	ZEND_ARG_INFO(1, result)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_getcsv, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, delimiter, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, enclosure, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, escape, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_repeat, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mult, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_count_chars, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strnatcmp, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, s1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, s2, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_localeconv arginfo_ob_list_handlers
+
+#define arginfo_strnatcasecmp arginfo_strnatcmp
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_count, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_pad, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pad_length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, pad_string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, pad_type, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sscanf, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
+ZEND_END_ARG_INFO()
+
+#define arginfo_str_rot13 arginfo_base64_encode
+
+#define arginfo_str_shuffle arginfo_base64_encode
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_str_word_count, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, charlist, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_STRFMON)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_money_format, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_split, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, split_length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strpbrk, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, char_list, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_compare, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, main_str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, case_insensitivity, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_utf8_encode arginfo_bin2hex
+
+#define arginfo_utf8_decode arginfo_bin2hex

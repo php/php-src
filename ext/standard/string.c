@@ -3250,7 +3250,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from[, string to])
+/* {{{ proto string|false strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -4711,7 +4711,7 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-/* {{{ proto string|false setlocale(mixed category, string locale [, string ...])
+/* {{{ proto string|false setlocale(int category, string locale [, string ...])
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
@@ -5694,7 +5694,7 @@ PHP_FUNCTION(str_pad)
 }
 /* }}} */
 
-/* {{{ proto mixed sscanf(string str, string format [, string ...])
+/* {{{ proto array|int|null sscanf(string str, string format [, string ...])
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
