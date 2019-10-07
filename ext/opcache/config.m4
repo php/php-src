@@ -13,6 +13,9 @@ PHP_ARG_ENABLE([huge-code-pages],
 
 if test "$PHP_OPCACHE" != "no"; then
 
+  dnl Always build as shared extension
+  ext_shared=yes
+
   if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
@@ -141,6 +144,7 @@ int main() {
     msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
+  PHP_CHECK_FUNC_LIB(shm_open, rt)
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
@@ -207,8 +211,13 @@ int main() {
 }
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
+    AC_MSG_RESULT([yes])
+    PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
+  ],[
+    AC_MSG_RESULT([no])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
@@ -250,4 +259,5 @@ int main() {
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
+  PHP_SUBST(OPCACHE_SHARED_LIBADD)
 fi
