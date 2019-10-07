@@ -11,7 +11,7 @@ mb_chr(1, 'UTF-0');
 mb_convert_case('coudenys', MB_CASE_UPPER, 'UTF-0');
 mb_convert_encoding('coudenys', 'UTF-8', 'UTF-0');
 mb_convert_kana('coudenys', 'KV', 'UTF-0');
-mb_decode_numericentity('coudenys', 'KV', 'UTF-0');
+mb_decode_numericentity('coudenys', [], 'UTF-0');
 mb_ord('coudenys', 'UTF-0');
 mb_strcut('coudenys', 0, 4, 'UTF-0');
 mb_strimwidth('coudenys', 0, 4, '', 'UTF-0');

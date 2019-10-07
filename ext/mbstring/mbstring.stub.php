@@ -112,10 +112,10 @@ function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding
 function mb_convert_variables(string $to, $from, &$var, &...$vars) {}
 
 /** @return string|false */
-function mb_encode_numericentity(string $string, $convmap, string $encoding = UNKNOWN, bool $is_hex = false) {}
+function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false) {}
 
 /** @return string|false */
-function mb_decode_numericentity(string $string, $convmap, string $encoding = UNKNOWN) {}
+function mb_decode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN) {}
 
 function mb_send_mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = UNKNOWN): bool {}
 

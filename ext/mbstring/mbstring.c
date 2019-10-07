@@ -3631,18 +3631,18 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	char *str, *encoding = NULL;
 	size_t str_len, encoding_len;
-	zval *zconvmap, *hash_entry;
+	zval *hash_entry;
 	HashTable *target_hash;
 	int i, *convmap, *mapelm, mapsize=0;
 	zend_bool is_hex = 0;
 	mbfl_string string, result, *ret;
 
 	if (type == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|sb", &str, &str_len, &zconvmap, &encoding, &encoding_len, &is_hex) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|sb", &str, &str_len, &target_hash, &encoding, &encoding_len, &is_hex) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|s", &str, &str_len, &zconvmap, &encoding, &encoding_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|s", &str, &str_len, &target_hash, &encoding, &encoding_len) == FAILURE) {
 			return;
 		}
 	}
@@ -3666,23 +3666,18 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	/* conversion map */
-	convmap = NULL;
-	if (Z_TYPE_P(zconvmap) == IS_ARRAY) {
-		target_hash = Z_ARRVAL_P(zconvmap);
-		i = zend_hash_num_elements(target_hash);
-		if (i > 0) {
-			convmap = (int *)safe_emalloc(i, sizeof(int), 0);
-			mapelm = convmap;
-			mapsize = 0;
-			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				*mapelm++ = zval_get_long(hash_entry);
-				mapsize++;
-			} ZEND_HASH_FOREACH_END();
-		}
+	i = zend_hash_num_elements(target_hash);
+	if (i % 4 != 0) {
+		zend_value_error("count($convmap) must be a multiple of 4");
+		return;
 	}
-	if (convmap == NULL) {
-		RETURN_FALSE;
-	}
+	convmap = (int *)safe_emalloc(i, sizeof(int), 0);
+	mapelm = convmap;
+	mapsize = 0;
+	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+		*mapelm++ = zval_get_long(hash_entry);
+		mapsize++;
+	} ZEND_HASH_FOREACH_END();
 	mapsize /= 4;
 
 	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type);
