@@ -397,7 +397,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_constructor_get,
 	saproxy_class_name_get,
 	saproxy_object_cast,
-	saproxy_count_elements
+	saproxy_count_elements,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
 	NULL,									/* get_gc */
