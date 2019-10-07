@@ -79,7 +79,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   j. compare_objects() handler was removed. Extensions should use compare() object
      handler instead and check if both arguments are objects and have the same
-     compare hanldler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
+     compare handler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
 
 ========================
 2. Build system changes
